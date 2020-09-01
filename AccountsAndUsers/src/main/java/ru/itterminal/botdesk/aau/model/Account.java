@@ -29,6 +29,8 @@ public class Account extends BaseEntity {
     @Column(nullable = false)
     private String time_zone;
 
+    // TODO implement  pop3_settings_id and smtp_settings_id
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

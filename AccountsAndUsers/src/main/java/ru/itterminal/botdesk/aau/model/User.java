@@ -63,6 +63,8 @@ public class User extends BaseEntity {
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
+    // TODO add consumer_id
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
