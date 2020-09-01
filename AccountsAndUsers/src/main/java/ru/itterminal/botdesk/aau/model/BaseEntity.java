@@ -1,4 +1,4 @@
-package ru.itterminal.botdesk.model;
+package ru.itterminal.botdesk.aau.model;
 
 import java.util.UUID;
 
