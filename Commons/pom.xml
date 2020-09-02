@@ -7,18 +7,9 @@
         <groupId>ru.it-terminal</groupId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>AccountsAndUsers</artifactId>
+    <artifactId>Commons</artifactId>
 
-    <dependencies>
-        <dependency>
-            <groupId>ru.it-terminal</groupId>
-            <artifactId>Commons</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-    </dependencies>
 
 </project>
