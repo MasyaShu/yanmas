@@ -1,5 +1,6 @@
 package ru.itterminal.botdesk.aau.model;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -98,14 +99,12 @@ public class User extends BaseEntity {
                 Objects.equals(password_reset_token, user.password_reset_token) &&
                 Objects.equals(is_archived, user.is_archived) &&
                 Objects.equals(account, user.account) &&
-                Objects.equals(getId(), user.getId()) &&
-                Objects.equals(getVersion(), user.getVersion()) &&
-                Objects.equals(getDeleted(), user.getDeleted());
+                Objects.equals(roles, user.roles);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(email, first_name, second_name, password, phone, comment, language, time_zone,
-                email_verification_token, email_verification_status, password_reset_token, is_archived, account);
+                email_verification_token, email_verification_status, password_reset_token, is_archived, account, roles);
     }
 }
