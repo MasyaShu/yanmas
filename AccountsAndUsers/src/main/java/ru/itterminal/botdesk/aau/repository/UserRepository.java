@@ -6,5 +6,5 @@ import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.commons.repository.CustomizedParentEntityRepository;
 
 @Repository
-public interface RoleRepository extends CustomizedParentEntityRepository<Role> {
+public interface UserRepository extends CustomizedParentEntityRepository<Role> {
 }
