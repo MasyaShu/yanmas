@@ -99,7 +99,10 @@ public class User extends BaseEntity {
                 Objects.equals(password_reset_token, user.password_reset_token) &&
                 Objects.equals(is_archived, user.is_archived) &&
                 Objects.equals(account, user.account) &&
-                Objects.equals(roles, user.roles);
+                Objects.equals(roles, user.roles) &&
+                Objects.equals(getId(), user.getId()) &&
+                Objects.equals(getVersion(), user.getVersion()) &&
+                Objects.equals(getDeleted(), user.getDeleted());
     }
 
     @Override

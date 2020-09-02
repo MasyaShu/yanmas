@@ -19,8 +19,8 @@ class UserTest {
     User user_2;
     UUID id = UUID.randomUUID();
 
-    Role admin = new Role(id, Roles.ADMIN.toString());
-    Role author = new Role(id, Roles.AUTHOR.toString());
+    Role admin = new Role(Roles.ADMIN.toString());
+    Role author = new Role(Roles.AUTHOR.toString());
 
     @BeforeEach
     private void setUp() {
@@ -95,8 +95,8 @@ class UserTest {
 
     @Test
     void equals_shouldGetTrue_whenRolesDifferntObjectsBotEqualsValues() {
-        Role admin = new Role(id, Roles.ADMIN.toString());
-        Role author = new Role(id, Roles.AUTHOR.toString());
+        Role admin = new Role(Roles.ADMIN.toString());
+        Role author = new Role(Roles.AUTHOR.toString());
         Set<Role> roles = new HashSet<>();
         roles.add(author);
         roles.add(admin);
