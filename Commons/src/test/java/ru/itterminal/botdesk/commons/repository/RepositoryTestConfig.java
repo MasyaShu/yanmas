@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 /**
- * Unit-tests repository config
+ * Unit-tests repository configs
  */
 @SpringBootConfiguration
 @EnableJpaRepositories(basePackages = "ru.itterminal.botdesk.commons.repository",

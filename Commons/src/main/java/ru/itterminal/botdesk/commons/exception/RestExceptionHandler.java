@@ -1,11 +1,20 @@
 package ru.itterminal.botdesk.commons.exception;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import ru.itterminal.botdesk.commons.exception.error.ApiError;
 
 /**
  * Specify how exception should be translated to http response.
@@ -14,28 +23,28 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @ControllerAdvice
 @NoArgsConstructor
-//@AllArgsConstructor
+@AllArgsConstructor
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
 //    public static final String VALIDATION_ERROR_LIST_KEY = "incorrect_fields";
 //    private static final String INPUT_VALIDATION_FAILED = "Input Validation Failed";
-//
-//    @Autowired
-//    private MessageSource messageSource;
-//
+
+    @Autowired
+    private MessageSource messageSource;
+
 //    @ExceptionHandler(InappropriateResourceStateException.class)
 //    public ResponseEntity<?> handleInappropriateResourceStateException(InappropriateResourceStateException ex, HttpServletRequest request) {
 //        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getExceptionCode(), ex).withRequest(request);
 //        log.warn(ex.getMessage());
 //        return new ResponseEntity<>(apiError, null, HttpStatus.BAD_REQUEST);
 //    }
-//
-//    @ExceptionHandler(OptimisticLockingFailureException.class)
-//    public ResponseEntity<?> handleOptimisticLockingFailureException(OptimisticLockingFailureException ex, HttpServletRequest request) {
-//        ApiError apiError = new ApiError(HttpStatus.CONFLICT, "OptimisticLocking", ex).withRequest(request);
-//        log.warn(ex.getMessage());
-//        return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
-//    }
+
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity<?> handleOptimisticLockingFailureException(OptimisticLockingFailureException ex, HttpServletRequest request) {
+        ApiError apiError = new ApiError(HttpStatus.CONFLICT, "OptimisticLocking", ex).withRequest(request);
+        log.warn(ex.getMessage());
+        return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
+    }
 //
 //    @ExceptionHandler(RelatedEntityMarkedAsDeletedException.class)
 //    public ResponseEntity<?> handleLogicalDeletedException(RelatedEntityMarkedAsDeletedException ex, HttpServletRequest request) {
