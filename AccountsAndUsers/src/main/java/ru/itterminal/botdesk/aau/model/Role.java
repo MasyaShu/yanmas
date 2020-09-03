@@ -9,7 +9,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 
@@ -17,7 +19,9 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @Table(name="role")
 @Setter
 @Getter
+@Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class Role extends BaseEntity {
 
     @Column (nullable = false)

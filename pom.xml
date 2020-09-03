@@ -22,6 +22,7 @@
 
 	<properties>
 		<java.version>14</java.version>
+		<modelmapper.version>2.0.0</modelmapper.version>
 	</properties>
 
 	<dependencies>
@@ -44,8 +45,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>javax.validation</groupId>
-			<artifactId>validation-api</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 
 		<!-- Security -->
@@ -90,15 +91,22 @@
 			</exclusions>
 		</dependency>
 
-
-
 		<!-- Tests. -->
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- Modelmapper -->
+		<dependency>
+			<groupId>org.modelmapper</groupId>
+			<artifactId>modelmapper</artifactId>
+			<version>${modelmapper.version}</version>
+		</dependency>
+
 	</dependencies>
+
 
 	<build>
 		<plugins>

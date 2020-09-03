@@ -1,20 +1,28 @@
 package ru.itterminal.botdesk.commons.exception;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.commons.exception.error.ApiError;
+import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 
 /**
  * Specify how exception should be translated to http response.
@@ -26,8 +34,8 @@ import ru.itterminal.botdesk.commons.exception.error.ApiError;
 @AllArgsConstructor
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
-//    public static final String VALIDATION_ERROR_LIST_KEY = "incorrect_fields";
-//    private static final String INPUT_VALIDATION_FAILED = "Input Validation Failed";
+    public static final String VALIDATION_ERROR_LIST_KEY = "incorrect_fields";
+    private static final String INPUT_VALIDATION_FAILED = "Input Validation Failed";
 
     @Autowired
     private MessageSource messageSource;
@@ -93,32 +101,32 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 //        log.warn(ex.getMessage());
 //        return handleExceptionInternal(ex, apiError, headers, status, request);
 //    }
-//
-//    @Override
-//    protected ResponseEntity<Object> handleMethodArgumentNotValid(
-//        MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-//        ApiError apiError = new ApiError(
-//            HttpStatus.BAD_REQUEST,
-//            "Validation Failed", ex)
-//            .withRequest(request)
-//            .withDetail(INPUT_VALIDATION_FAILED);
-//
-//        // create Validation Error
-//        List<FieldError> fieldErrorList = ex.getBindingResult().getFieldErrors();
-//        for (FieldError fieldError : fieldErrorList) {
-//            // create list if it doesn't exists
-//            List<ValidationError> errors = apiError.getErrors().computeIfAbsent(
-//                fieldError.getField(), k -> new ArrayList<>());
-//            // add the error to the list
-//            ValidationError e = new ValidationError();
-//            e.setCode(fieldError.getCode());
-//            e.setMessage(fieldError.getDefaultMessage());
-//            errors.add(e);
-//        }
-//        log.warn(ex.getMessage());
-//        return handleExceptionInternal(ex, apiError, headers, status, request);
-//    }
-//
+
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+        MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        ApiError apiError = new ApiError(
+            HttpStatus.BAD_REQUEST,
+            "Validation Failed", ex)
+            .withRequest(request)
+            .withDetail(INPUT_VALIDATION_FAILED);
+
+        // create Validation Error
+        List<FieldError> fieldErrorList = ex.getBindingResult().getFieldErrors();
+        for (FieldError fieldError : fieldErrorList) {
+            // create list if it doesn't exists
+            List<ValidationError> errors = apiError.getErrors().computeIfAbsent(
+                fieldError.getField(), k -> new ArrayList<>());
+            // add the error to the list
+            ValidationError e = new ValidationError();
+            e.setCode(fieldError.getCode());
+            e.setMessage(fieldError.getDefaultMessage());
+            errors.add(e);
+        }
+        log.warn(ex.getMessage());
+        return handleExceptionInternal(ex, apiError, headers, status, request);
+    }
+
 //    @ExceptionHandler(ConstraintViolationException.class)
 //    public ResponseEntity<ApiError> handleConstraintViolations(ConstraintViolationException ex, WebRequest request) {
 //        ApiError apiError = new ApiError(
