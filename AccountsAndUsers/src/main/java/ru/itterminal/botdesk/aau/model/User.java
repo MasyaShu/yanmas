@@ -32,38 +32,39 @@ public class User extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
-    private String first_name;
+    @Column(name = "first_name")
+    private String firstName;
 
-    @Column
-    private String second_name;
+    @Column(name = "second_name")
+    private String secondName;
 
+    //TODO Must save as encoded
     @Column(nullable = false)
     private String password;
 
     @Column
     private String phone;
 
-    @Column(nullable = false)
+    @Column
     private String comment;
 
-    @Column(nullable = false)
+    @Column
     private String language;
 
-    @Column(nullable = false)
-    private String time_zone;
+    @Column(name = "time_zone")
+    private String timeZone;
 
-    @Column(nullable = false)
-    private String email_verification_token;
+    @Column(name = "email_verification_token")
+    private String emailVerificationToken;
 
-    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private Boolean email_verification_status;
+    @Column(name = "email_verification_status", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean emailVerificationStatus;
 
-    @Column
-    private String password_reset_token;
+    @Column(name = "password_reset_token")
+    private String passwordResetToken;
 
-    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private Boolean is_archived;
+    @Column(name = "is_archived", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean isArchived;
 
     @ManyToOne
     @JoinColumn(name = "account_id", nullable = false)
@@ -87,17 +88,17 @@ public class User extends BaseEntity {
         }
         User user = (User) o;
         return Objects.equals(email, user.email) &&
-                Objects.equals(first_name, user.first_name) &&
-                Objects.equals(second_name, user.second_name) &&
+                Objects.equals(firstName, user.firstName) &&
+                Objects.equals(secondName, user.secondName) &&
                 Objects.equals(password, user.password) &&
                 Objects.equals(phone, user.phone) &&
                 Objects.equals(comment, user.comment) &&
                 Objects.equals(language, user.language) &&
-                Objects.equals(time_zone, user.time_zone) &&
-                Objects.equals(email_verification_token, user.email_verification_token) &&
-                Objects.equals(email_verification_status, user.email_verification_status) &&
-                Objects.equals(password_reset_token, user.password_reset_token) &&
-                Objects.equals(is_archived, user.is_archived) &&
+                Objects.equals(timeZone, user.timeZone) &&
+                Objects.equals(emailVerificationToken, user.emailVerificationToken) &&
+                Objects.equals(emailVerificationStatus, user.emailVerificationStatus) &&
+                Objects.equals(passwordResetToken, user.passwordResetToken) &&
+                Objects.equals(isArchived, user.isArchived) &&
                 Objects.equals(account, user.account) &&
                 Objects.equals(roles, user.roles) &&
                 Objects.equals(getId(), user.getId()) &&
@@ -107,7 +108,7 @@ public class User extends BaseEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(email, first_name, second_name, password, phone, comment, language, time_zone,
-                email_verification_token, email_verification_status, password_reset_token, is_archived, account, roles);
+        return Objects.hash(email, firstName, secondName, password, phone, comment, language, timeZone,
+                emailVerificationToken, emailVerificationStatus, passwordResetToken, isArchived, account, roles);
     }
 }
