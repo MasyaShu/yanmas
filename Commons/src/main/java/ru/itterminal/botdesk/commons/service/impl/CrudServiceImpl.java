@@ -2,6 +2,7 @@ package ru.itterminal.botdesk.commons.service.impl;
 
 import static java.lang.String.format;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -142,5 +143,10 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
     public void physicalDelete(UUID id) {
         //TODO physicalDelete will be done in future
         throw new UnsupportedOperationException("physicalDeleteNotYetImplement");
+    }
+
+    @Override
+    public List<E> findAll() {
+        return (List<E>) repository.findAll();
     }
 }

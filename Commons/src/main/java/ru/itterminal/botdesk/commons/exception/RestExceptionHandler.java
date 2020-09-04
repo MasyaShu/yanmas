@@ -11,11 +11,14 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import lombok.AllArgsConstructor;
@@ -60,14 +63,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 //        log.warn(ex.getMessage());
 //        return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
 //    }
-//
-//    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-//    public ResponseEntity<?> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
-//        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, "Request not readable", ex).withRequest(request);
-//        log.warn(ex.getMessage());
-//        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
-//    }
-//
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<?> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, "Request not readable", ex).withRequest(request);
+        log.warn(ex.getMessage());
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
+
 //    @ExceptionHandler(NotUniqueValueException.class)
 //    public ResponseEntity<?> handleNotUniqueValueException(NotUniqueValueException ex, HttpServletRequest request) {
 //        ApiError apiError = new ApiError(HttpStatus.CONFLICT, ex.getExceptionCode(), ex).withRequest(request);
@@ -93,14 +96,23 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 //        log.warn(ex.getMessage());
 //        return new ResponseEntity<>(apiError, null, HttpStatus.CONFLICT);
 //    }
-//
-//    @Override
-//    protected ResponseEntity<Object> handleHttpMessageNotReadable(
-//        HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-//        ApiError apiError = new ApiError(status, "Message Not Readable", ex).withRequest(request);
-//        log.warn(ex.getMessage());
-//        return handleExceptionInternal(ex, apiError, headers, status, request);
-//    }
+
+
+    @Override
+    protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex,
+            HttpHeaders headers, HttpStatus status, WebRequest request) {
+        ApiError apiError = new ApiError(status, "Unsupported http method", ex).withRequest(request);
+        log.warn(ex.getMessage());
+        return handleExceptionInternal(ex, apiError, headers, HttpStatus.METHOD_NOT_ALLOWED, request);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(
+        HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        ApiError apiError = new ApiError(status, "Message Not Readable", ex).withRequest(request);
+        log.warn(ex.getMessage());
+        return handleExceptionInternal(ex, apiError, headers, status, request);
+    }
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
@@ -136,13 +148,13 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 //        log.warn(ex.getMessage());
 //        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
 //    }
-//
-//    @ExceptionHandler(ResourceNotFoundException.class)
-//    public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException ex, HttpServletRequest request) {
-//        ApiError apiError = new ApiError(HttpStatus.NOT_FOUND, "Resource Not Found", ex).withRequest(request);
-//        return new ResponseEntity<>(apiError, null, HttpStatus.NOT_FOUND);
-//    }
-//
+
+    @ExceptionHandler(EntityNotExistException.class)
+    public ResponseEntity<?> handleEntityNotExistException(EntityNotExistException ex, HttpServletRequest request) {
+        ApiError apiError = new ApiError(HttpStatus.NOT_FOUND, "Resource Not Found", ex).withRequest(request);
+        return new ResponseEntity<>(apiError, null, HttpStatus.NOT_FOUND);
+    }
+
 //    @ExceptionHandler(NotUniqueNameException.class)
 //    public ResponseEntity<?> handleResourceNotUniqueNameException(NotUniqueNameException ex, HttpServletRequest request) {
 //        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, "Already exist", ex).withRequest(request);

@@ -13,6 +13,7 @@ import javax.validation.constraints.Null;
 import lombok.Getter;
 import lombok.Setter;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
+import ru.itterminal.botdesk.commons.model.validator.scenario.Delete;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 import ru.itterminal.botdesk.commons.util.CommonConstants;
 
@@ -26,7 +27,7 @@ public class BaseEntityDto {
 
     @Null(groups = Create.class,
         message = MUST_BE_NULL_FOR_THE_NEW_ENTITY)
-    @NotNull(groups = Update.class)
+    @NotNull(groups = {Update.class, Delete.class})
     private UUID id;
 
     @Null(groups = Create.class,
@@ -37,7 +38,7 @@ public class BaseEntityDto {
     private Integer version;
 
 
-    @NotNull(groups = {Create.class, Update.class})
+    @NotNull(groups = {Create.class, Update.class, Delete.class})
     @AssertFalse(groups = {Create.class},
         message = CommonConstants.DELETED_ASSERT_FALSE)
     private Boolean deleted;

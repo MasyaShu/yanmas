@@ -1,5 +1,6 @@
 package ru.itterminal.botdesk.commons.service;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -51,6 +52,8 @@ public interface  CrudService<E extends BaseEntity> {
     E findById(UUID id);
 
     Page<E> findAll(Pageable pageable);
+
+    List<E> findAll();
 
     Page<E> findAllByFilter(Specification<E> specification, Pageable pageable);
 
