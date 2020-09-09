@@ -38,7 +38,6 @@ public class User extends BaseEntity {
     @Column(name = "second_name")
     private String secondName;
 
-    //TODO Must save as encoded
     @Column(nullable = false)
     private String password;
 
@@ -50,9 +49,6 @@ public class User extends BaseEntity {
 
     @Column
     private String language;
-
-    @Column(name = "time_zone")
-    private String timeZone;
 
     @Column(name = "email_verification_token")
     private String emailVerificationToken;

@@ -1,6 +1,7 @@
 package ru.itterminal.botdesk.commons.exception;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -77,25 +78,25 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 //        log.warn(ex.getMessage());
 //        return new ResponseEntity<>(apiError, null, HttpStatus.CONFLICT);
 //    }
-//
-//    @ExceptionHandler(FormValidationException.class)
-//    public ResponseEntity<Object> handleFormValidationException(FormValidationException ex, HttpServletRequest request) {
-//        ApiError apiError = new ApiError(
-//            HttpStatus.CONFLICT,
-//            ex.getExceptionCode(), ex)
-//            .withRequest(request)
-//            .withDetail(INPUT_VALIDATION_FAILED);
-//        //TODO: check auth-server to avoid this 'if'-block
-//        if (ex.getFieldErrors() == null) {
-//            apiError.setErrors(new HashMap<String, List<ValidationError>>() {{
-//                put(VALIDATION_ERROR_LIST_KEY, ex.getWarnings());
-//            }});
-//        } else {
-//            apiError.setErrors(ex.getFieldErrors());
-//        }
-//        log.warn(ex.getMessage());
-//        return new ResponseEntity<>(apiError, null, HttpStatus.CONFLICT);
-//    }
+
+    @ExceptionHandler(LogicalValidationException.class)
+    public ResponseEntity<Object> handleLogicalValidationException(LogicalValidationException ex, HttpServletRequest request) {
+        ApiError apiError = new ApiError(
+            HttpStatus.CONFLICT,
+            ex.getExceptionCode(), ex)
+            .withRequest(request)
+            .withDetail(INPUT_VALIDATION_FAILED);
+        //TODO: check auth-server to avoid this 'if'-block
+        if (ex.getFieldErrors() == null) {
+            apiError.setErrors(new HashMap<String, List<ValidationError>>() {{
+                put(VALIDATION_ERROR_LIST_KEY, ex.getWarnings());
+            }});
+        } else {
+            apiError.setErrors(ex.getFieldErrors());
+        }
+        log.warn(ex.getMessage());
+        return new ResponseEntity<>(apiError, null, HttpStatus.CONFLICT);
+    }
 
 
     @Override

@@ -72,6 +72,7 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
      * @return entity from database
      */
     @Override
+    @Transactional(readOnly = true)
     public E findById(UUID id) {
         String searchParameter = "id";
         log.trace(format(FIND_INIT_MESSAGE, searchParameter, id));
@@ -93,6 +94,7 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
      * @return page(s) in selected format
      */
     @Override
+    @Transactional(readOnly = true)
     public Page<E> findAllByFilter(Specification<E> specification, Pageable pageable) {
         log.trace(format(ALL_FIND_BY_FILTER_INIT_MESSAGE, pageable.getPageSize()));
         Page<E> page = repository.findAll(specification, pageable);
@@ -108,6 +110,7 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
      * @return page(s) in selected format
      */
     @Override
+    @Transactional(readOnly = true)
     public Page<E> findAll(Pageable pageable) {
         log.trace(format(ALL_FIND_INIT_MESSAGE, pageable.getPageSize()));
         Page<E> page = repository.findAll(pageable);
@@ -146,6 +149,7 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<E> findAll() {
         return (List<E>) repository.findAll();
     }
