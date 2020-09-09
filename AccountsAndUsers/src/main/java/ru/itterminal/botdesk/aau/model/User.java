@@ -66,13 +66,15 @@ public class User extends BaseEntity {
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
+    @ManyToOne
+    @JoinColumn(name = "group_id", nullable = false)
+    private Group group;
+
     @ManyToMany(cascade = {CascadeType.PERSIST}, fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private Set<Role> roles;
-
-    // TODO add consumer_id
 
     @Override
     public boolean equals(Object o) {
@@ -97,6 +99,7 @@ public class User extends BaseEntity {
                 Objects.equals(account, user.account) &&
                 Objects.equals(roles, user.roles) &&
                 Objects.equals(getId(), user.getId()) &&
+                Objects.equals(getOutId(), user.getOutId()) &&
                 Objects.equals(getVersion(), user.getVersion()) &&
                 Objects.equals(getDeleted(), user.getDeleted());
     }
