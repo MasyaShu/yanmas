@@ -90,7 +90,6 @@ public class User extends BaseEntity {
                 Objects.equals(phone, user.phone) &&
                 Objects.equals(comment, user.comment) &&
                 Objects.equals(language, user.language) &&
-                Objects.equals(timeZone, user.timeZone) &&
                 Objects.equals(emailVerificationToken, user.emailVerificationToken) &&
                 Objects.equals(emailVerificationStatus, user.emailVerificationStatus) &&
                 Objects.equals(passwordResetToken, user.passwordResetToken) &&
@@ -104,7 +103,7 @@ public class User extends BaseEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(email, firstName, secondName, password, phone, comment, language, timeZone,
+        return Objects.hash(email, firstName, secondName, password, phone, comment, language,
                 emailVerificationToken, emailVerificationStatus, passwordResetToken, isArchived, account, roles);
     }
 }

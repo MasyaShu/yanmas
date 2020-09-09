@@ -37,7 +37,6 @@ class UserTest {
                 .passwordResetToken(null)
                 .phone("7906558585")
                 .secondName("second_name")
-                .timeZone("time_zone")
                 .roles(new HashSet<>())
                 .build();
         user_1.setId(id);
@@ -59,7 +58,6 @@ class UserTest {
                 .passwordResetToken(null)
                 .phone("7906558585")
                 .secondName("second_name")
-                .timeZone("time_zone")
                 .roles(new HashSet<>())
                 .build();
         user_2.setId(id);

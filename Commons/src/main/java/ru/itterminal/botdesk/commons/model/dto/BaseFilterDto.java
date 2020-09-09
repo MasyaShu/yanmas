@@ -18,13 +18,9 @@ import ru.itterminal.botdesk.commons.model.validator.ValueOfEnum;
 public class BaseFilterDto {
 
     @ValueOfEnum(enumClass = FilterByDeleted.class, message = "must be any of: all, true, false")
-//    @ApiModelProperty(notes = "${description.field.baseFilterDto.deleted}", name = "deleted", required = false,
-//        allowableValues = "all (default), true, false")
     private String deleted = "ALL";
 
     @ValueOfEnum(enumClass = Sort.Direction.class, message = "must be any of: asc, desc")
-//    @ApiModelProperty(notes = "${description.field.baseFilterDto.direction}", name = "direction", required = false,
-//        allowableValues = "asc (default), desc")
     private String direction = "ASC";
 
     /**

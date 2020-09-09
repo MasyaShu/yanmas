@@ -19,6 +19,9 @@ public class BaseEntity {
     @Id
     private UUID id;
 
+    @Column(name = "out_id", nullable = false)
+    private String outId;
+
     @Column(name = "deleted", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean deleted;
 

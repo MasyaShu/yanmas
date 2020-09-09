@@ -32,6 +32,9 @@ import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 @Validated
 @RequestMapping("v1/role")
 public class RoleController extends BaseController {
+
+    // TODO remove all except getAll
+
     RoleServiceImpl service;
 
     @Autowired

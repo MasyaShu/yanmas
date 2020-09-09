@@ -60,6 +60,8 @@ class ParentEntityRepositoryTest {
     private static final int WORK_PAGE = 0;
     private static final int WORK_PAGE_SIZE = 5;
     private static final String SORT_CRITERIA = "name";
+    private static final String OUT_ID_1 = "OUT_ID_1";
+    private static final String OUT_ID_2 = "OUT_ID_2";
     private static final UUID UNIQUE_ID = UUID.fromString("cb9e8816-7bed-4bb6-b3ea-3aa0eee247b6");
     private static final UUID NOT_UNIQUE_ID = UUID.fromString("d592facb-e6ee-4801-8310-9c7708eb6e6c");
     private static final UUID NOT_UNIQUE_ID_MARKED_DELETED = UUID.fromString("cdfa6483-0769-4628-ba32-efd338a716de");
@@ -76,6 +78,7 @@ class ParentEntityRepositoryTest {
             .description(GENERAL_DESCRIPTION)
             .build();
         uniqueGeneralEntity.setId(UNIQUE_ID);
+        uniqueGeneralEntity.setOutId(OUT_ID_1);
         uniqueGeneralEntity.setDeleted(false);
         notUniqueIdGeneralEntity = GeneralEntity.builder()
             .name(UNIQUE_NAME)
@@ -84,6 +87,7 @@ class ParentEntityRepositoryTest {
             .build();
         notUniqueIdGeneralEntity.setId(NOT_UNIQUE_ID);
         notUniqueIdGeneralEntity.setVersion(0);
+        notUniqueIdGeneralEntity.setOutId(OUT_ID_2);
         notUniqueIdGeneralEntity.setDeleted(false);
         notUniqueNameGeneralEntity = GeneralEntity.builder()
             .name(NOT_UNIQUE_NAME)
@@ -111,6 +115,14 @@ class ParentEntityRepositoryTest {
     @Test
     void create_shouldThrowDataIntegrityViolationException_whenIdNotUnique() {
         assertThrows(DataIntegrityViolationException.class, () -> repository.create(notUniqueIdGeneralEntity));
+    }
+
+    @Test
+    void create_shouldThrowDataIntegrityViolationException_whenOutIdMoreThatMax() {
+        notUniqueIdGeneralEntity.setOutId("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+                + "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
+        assertThrows(DataIntegrityViolationException.class, () -> repository.create(notUniqueIdGeneralEntity));
+        notUniqueIdGeneralEntity.setOutId(null);
     }
 
     @Test

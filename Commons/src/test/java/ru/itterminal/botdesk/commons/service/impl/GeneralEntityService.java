@@ -9,8 +9,4 @@ import ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValida
 class GeneralEntityService extends CrudServiceImpl<GeneralEntity, BasicOperationValidatorImpl<GeneralEntity>,
         GeneralEntityRepository> {
 
-    @Override
-    public void physicalDelete(UUID id) {
-        throw new UnsupportedOperationException();
-    }
 }
