@@ -23,6 +23,7 @@ import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.Language;
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
+import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 import ru.itterminal.botdesk.commons.model.validator.ValueOfEnum;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
@@ -33,45 +34,27 @@ import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class UserDto extends BaseEntityDto {
+public class UserFilterDto extends BaseFilterDto {
 
-    @NotNull(groups = {Create.class, Update.class})
     @Pattern(regexp = emailPattern,
-            message = INVALID_EMAIL,
-            groups = {Create.class, Update.class})
+            message = INVALID_EMAIL)
     private String email;
 
-    @Size(max = 20, groups = {Create.class, Update.class})
+    @Size(max = 20)
     private String firstName;
 
-    @Size(max = 30, groups = {Create.class, Update.class})
+    @Size(max = 30)
     private String secondName;
 
-    @NotNull(groups = {Create.class, Update.class})
-    @Pattern(regexp = passwordPattern,
-            message = INVALID_PASSWORD,
-            groups = {Create.class, Update.class})
-    private String password;
-
-    @Size(max = 30, groups = {Create.class, Update.class})
+    @Size(max = 30)
     private String phone;
 
     private String comment;
 
-    @ValueOfEnum(enumClass = Language.class,
-            message = "must be any of: en, ru",
-            groups = {Create.class, Update.class})
-    private String language;
-
-    @NotNull(groups = {Create.class, Update.class})
     private Boolean isArchived;
 
-    @NotNull(groups = {Create.class, Update.class})
     private Account account;
 
-    @NotNull(groups = {Create.class, Update.class})
     private Group group;
 
-    @NotEmpty(groups = {Create.class, Update.class})
-    private Set<Role> roles;
 }
