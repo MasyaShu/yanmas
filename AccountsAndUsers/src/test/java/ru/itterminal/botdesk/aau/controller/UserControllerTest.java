@@ -77,6 +77,33 @@ class UserControllerTest {
     private static String EMAIL_1 = "yaneg.ru@gmial.com";
     private static String PASSWORD_1 = "UserUser123";
 
+    private static String INVALID_EMAIL_1 = "it-terminal_mail.ru"; //absent @
+    private static String INVALID_EMAIL_2 = "it-terminal_@mail.рф"; //characters are not allowed
+    private static String INVALID_EMAIL_3 = "it-terminal_@.ru"; //missing domain name
+    private static String INVALID_EMAIL_4 = "it-terminal_@mail"; //missing domain name
+    private static String INVALID_EMAIL_5 = "it-terminal_@@mail.ru"; //two @
+    private static String INVALID_EMAIL_6 = "@mail.ru"; //missing name
+    private static String INVALID_EMAIL_7 = "it terminal@mail.ru"; //space in name
+    private static String INVALID_EMAIL_8 = "it-terminal@ mail.ru"; //space in domain
+    //private static String INVALID_EMAIL_9 = "it-terminal@1.1"; //domain name are not allowed
+
+    private Set<String> invalidEmail = Set.of(INVALID_EMAIL_1, INVALID_EMAIL_2, INVALID_EMAIL_3, INVALID_EMAIL_4,
+            INVALID_EMAIL_5, INVALID_EMAIL_6, INVALID_EMAIL_7, INVALID_EMAIL_8);
+
+    private static String INVALID_PASSWORD_1 = "Itt12"; //Valid characters, not valid length (5)
+    private static String INVALID_PASSWORD_2 = "itt12"; //not valid characters, not valid length (5)
+    private static String INVALID_PASSWORD_3 = "itt123"; //valid length (6), not valid characters
+    private static String INVALID_PASSWORD_4 = "Itt12Itt12Itt12Itt12Itt12"; //Valid characters, not valid length (25)
+    private static String INVALID_PASSWORD_5 = "IttItt"; //no numbers
+    private static String INVALID_PASSWORD_6 = "ittitt2"; //no upcase letter
+    private static String INVALID_PASSWORD_7 = "ITTITT2"; //no lowercase letter
+    private static String INVALID_PASSWORD_8 = "IttItt 2"; //space
+    private static String INVALID_PASSWORD_9 = "123123"; //numbers
+
+    private Set<String> invalidPassword = Set.of(INVALID_PASSWORD_1, INVALID_PASSWORD_2, INVALID_PASSWORD_3, INVALID_PASSWORD_4,
+            INVALID_PASSWORD_5, INVALID_PASSWORD_6, INVALID_PASSWORD_7, INVALID_PASSWORD_8, INVALID_PASSWORD_9);
+
+
     private User user_1;
     private Account account_1;
     private Group group_1;
@@ -130,7 +157,7 @@ class UserControllerTest {
 
     @Test
     public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
-        userDto.setEmail("olga_medvedkova_mail.ru");
+        userDto.setEmail(EMAIL_1);
         userDto.setDeleted(true);
         userDto.setPassword("");
         userDto.setGroup(null);
@@ -207,5 +234,37 @@ class UserControllerTest {
                 .andExpect(
                         jsonPath("$.errors.version[?(@.message == '%s')]", MUST_BE_NULL_FOR_THE_NEW_ENTITY).exists());
         verify(service, times(0)).create(any());
+    }
+
+    @Test
+    public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidEmailPassed() throws Exception {
+        for (String ie : invalidEmail) {
+            userDto.setEmail(ie);
+            MockHttpServletRequestBuilder request = post(HOST + PORT + API)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(userDto));
+            mockMvc.perform(request)
+                    .andDo(print())
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.email[?(@.message == '%s')]", INVALID_EMAIL).exists());
+            verify(service, times(0)).create(any());
+        }
+    }
+
+    @Test
+    public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidPasswordPassed() throws Exception {
+        for (String ip : invalidPassword) {
+            userDto.setPassword(ip);
+            MockHttpServletRequestBuilder request = post(HOST + PORT + API)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(userDto));
+            mockMvc.perform(request)
+                    .andDo(print())
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.password[?(@.message == '%s')]", INVALID_PASSWORD).exists());
+            verify(service, times(0)).create(any());
+        }
     }
 }
