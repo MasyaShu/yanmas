@@ -1,9 +1,10 @@
 package ru.itterminal.botdesk.aau.model.dto;
 
-import static ru.itterminal.botdesk.commons.service.UserCommons.INVALID_EMAIL;
-import static ru.itterminal.botdesk.commons.service.UserCommons.INVALID_PASSWORD;
-import static ru.itterminal.botdesk.commons.service.UserCommons.emailPattern;
-import static ru.itterminal.botdesk.commons.service.UserCommons.passwordPattern;
+import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_EMAIL;
+import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_PASSWORD;
+import static ru.itterminal.botdesk.aau.util.AAUConstants.MUST_BE_ANY_OF_EN_RU;
+import static ru.itterminal.botdesk.aau.util.AAUConstants.emailPattern;
+import static ru.itterminal.botdesk.aau.util.AAUConstants.passwordPattern;
 
 import java.util.Set;
 
@@ -59,7 +60,7 @@ public class UserDto extends BaseEntityDto {
     private String comment;
 
     @ValueOfEnum(enumClass = Language.class,
-            message = "must be any of: en, ru",
+            message = MUST_BE_ANY_OF_EN_RU,
             groups = {Create.class, Update.class})
     private String language;
 

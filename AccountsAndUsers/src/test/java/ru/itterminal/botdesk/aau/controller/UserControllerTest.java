@@ -1,14 +1,23 @@
 package ru.itterminal.botdesk.aau.controller;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_EMAIL;
+import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_PASSWORD;
+import static ru.itterminal.botdesk.aau.util.AAUConstants.MUST_BE_ANY_OF_EN_RU;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.DELETED_ASSERT_FALSE;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_NOT_BE_EMPTY;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_NOT_BE_NULL;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.SIZE_MUST_BE_BETWEEN;
 
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 
@@ -34,9 +43,7 @@ import ru.itterminal.botdesk.aau.model.Language;
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
-import ru.itterminal.botdesk.aau.model.dto.RoleDto;
 import ru.itterminal.botdesk.aau.model.dto.UserDto;
-import ru.itterminal.botdesk.aau.service.impl.RoleServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -119,5 +126,86 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.id").value(USER_1_ID))
                 .andExpect(jsonPath("$.email").value(EMAIL_1))
                 .andExpect(jsonPath("$.password").doesNotExist());
+    }
+
+    @Test
+    public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
+        userDto.setEmail("olga_medvedkova_mail.ru");
+        userDto.setDeleted(true);
+        userDto.setPassword("");
+        userDto.setGroup(null);
+        userDto.setAccount(null);
+        userDto.setRoles(Collections.emptySet());
+        userDto.setFirstName("123456789012345678901");
+        userDto.setSecondName("1234567890123456789012345678901");
+        userDto.setPhone("1234567890123456789012345678901");
+        userDto.setLanguage("gr");
+        userDto.setIsArchived(null);
+        MockHttpServletRequestBuilder request = post(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDto));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.firstName[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
+                .andExpect(jsonPath("$.errors.secondName[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
+                .andExpect(jsonPath("$.errors.phone[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
+                .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", DELETED_ASSERT_FALSE).exists())
+                .andExpect(jsonPath("$.errors.isArchived[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.roles[?(@.message == '%s')]", MUST_NOT_BE_EMPTY).exists())
+                .andExpect(jsonPath("$.errors.language[?(@.message == '%s')]", MUST_BE_ANY_OF_EN_RU).exists())
+                .andExpect(jsonPath("$.errors.email[?(@.message == '%s')]", INVALID_EMAIL).exists())
+                .andExpect(jsonPath("$.errors.account[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.group[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.password[?(@.message == '%s')]", INVALID_PASSWORD).exists());
+        verify(service, times(0)).create(any());
+    }
+
+    @Test
+    public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenAllPassedDataIsNull() throws Exception {
+        userDto.setEmail(null);
+        userDto.setDeleted(null);
+        userDto.setPassword(null);
+        userDto.setGroup(null);
+        userDto.setAccount(null);
+        userDto.setRoles(null);
+        userDto.setFirstName(null);
+        userDto.setSecondName(null);
+        userDto.setPhone(null);
+        userDto.setLanguage(null);
+        userDto.setIsArchived(null);
+        MockHttpServletRequestBuilder request = post(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDto));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.isArchived[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.roles[?(@.message == '%s')]", MUST_NOT_BE_EMPTY).exists())
+                .andExpect(jsonPath("$.errors.email[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.account[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.group[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.password[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists());
+        verify(service, times(0)).create(any());
+    }
+
+    @Test
+    public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenIdAndVersionNotNull() throws Exception {
+        userDto.setId(UUID.randomUUID());
+        userDto.setVersion(15);
+        MockHttpServletRequestBuilder request = post(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDto));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.id[?(@.message == '%s')]", MUST_BE_NULL_FOR_THE_NEW_ENTITY).exists())
+                .andExpect(
+                        jsonPath("$.errors.version[?(@.message == '%s')]", MUST_BE_NULL_FOR_THE_NEW_ENTITY).exists());
+        verify(service, times(0)).create(any());
     }
 }
