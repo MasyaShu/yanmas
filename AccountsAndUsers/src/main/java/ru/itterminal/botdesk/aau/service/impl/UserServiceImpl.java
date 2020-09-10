@@ -35,6 +35,10 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
     @Override
     public User create(User entity) {
         entity.setPassword(encoder.encode(entity.getPassword()));
+        if (entity.getLanguage()==null) {
+            String ln = entity.getAccount().getLanguage();
+            entity.setLanguage(ln);
+        }
         return super.create(entity);
     }
 

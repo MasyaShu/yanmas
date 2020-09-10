@@ -9,7 +9,7 @@ public class UserCommons {
             + "(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b"
             + "\\x0c\\x0e-\\x7f])+)\\])";
     public final static String INVALID_EMAIL = "Invalid email";
-    public final static String passwordPattern = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\\s).{4,8}$";
+    public final static String passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?!.*\\s)[A-Za-z\\d]{6,20}$";
     public final static String INVALID_PASSWORD = "Password expresion that requires one lower case letter, "
-            + "one upper case letter, one digit, 6-13 length, and no spaces.";
+            + "one upper case letter, one digit, 6-20 length, and no spaces.";
 }
