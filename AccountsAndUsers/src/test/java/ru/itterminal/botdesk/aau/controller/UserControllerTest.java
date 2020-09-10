@@ -157,7 +157,7 @@ class UserControllerTest {
 
     @Test
     public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
-        userDto.setEmail(EMAIL_1);
+        userDto.setEmail(INVALID_EMAIL_1);
         userDto.setDeleted(true);
         userDto.setPassword("");
         userDto.setGroup(null);
