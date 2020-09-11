@@ -85,7 +85,7 @@ class UserControllerTest {
     private static String INVALID_EMAIL_6 = "@mail.ru"; //missing name
     private static String INVALID_EMAIL_7 = "it terminal@mail.ru"; //space in name
     private static String INVALID_EMAIL_8 = "it-terminal@ mail.ru"; //space in domain
-    //private static String INVALID_EMAIL_9 = "it-terminal@1.1"; //domain name are not allowed
+    //private static String INVALID_EMAIL_9 = "it-terminal@mail.1"; //domain name are not allowed
 
     private Set<String> invalidEmail = Set.of(INVALID_EMAIL_1, INVALID_EMAIL_2, INVALID_EMAIL_3, INVALID_EMAIL_4,
             INVALID_EMAIL_5, INVALID_EMAIL_6, INVALID_EMAIL_7, INVALID_EMAIL_8);

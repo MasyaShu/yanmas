@@ -22,48 +22,7 @@ import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
 @Transactional
 public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidator, UserRepository> {
 
-    @Autowired
-    BCryptPasswordEncoder encoder;
-
     public UserUniqueFields findByUniqueFields(User user) {
         return repository.getByEmailAndIdNot(user.getEmail(), user.getId());
     }
-
-    // Scenarios:
-    // 1 - with create account (SuperAdmin)
-    // 2 - add by SuperAdmin or Admin
-    @Override
-    public User create(User entity) {
-        entity.setPassword(encoder.encode(entity.getPassword()));
-        if (entity.getLanguage()==null) {
-            String ln = entity.getAccount().getLanguage();
-            entity.setLanguage(ln);
-        }
-        return super.create(entity);
-    }
-
-    @Override
-    public User update(User entity) {
-        validator.checkBeforeUpdate(entity);
-        log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
-        User entityFromDatabase = repository.findById(entity.getId()).orElseThrow(() -> {
-            String message = format(ENTITY_NOT_EXIST_MESSAGE, entity.getClass().getSimpleName(), entity.getId());
-            log.error(message);
-            return new EntityNotExistException(message);
-        });
-        if (!entity.getPassword().isEmpty()) {
-            entity.setPassword(encoder.encode(entity.getPassword()));
-        } else {
-            entity.setPassword(entityFromDatabase.getPassword());
-        }
-        try {
-            User updatedEntity = repository.update(entity);
-            log.trace(format(UPDATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), updatedEntity));
-            return updatedEntity;
-        }
-        catch (ObjectOptimisticLockingFailureException ex) {
-            throw new OptimisticLockingFailureException(format(VERSION_INVALID_MESSAGE, entity.getId()));
-        }
-    }
-
 }
