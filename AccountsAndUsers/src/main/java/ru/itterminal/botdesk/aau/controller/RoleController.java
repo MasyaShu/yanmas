@@ -115,7 +115,6 @@ public class RoleController extends BaseController {
     @DeleteMapping()
     ResponseEntity<Void> physicalDelete(@Validated(Delete.class) @RequestBody RoleDto request)
             throws HttpRequestMethodNotSupportedException {
-        // TODO Physical delete a bank in database
         throw new HttpRequestMethodNotSupportedException("Physical delete will be implement in the further");
     }
 

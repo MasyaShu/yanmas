@@ -104,7 +104,7 @@ public class UserController extends BaseController {
 //    @DeleteMapping()
 //    ResponseEntity<Void> physicalDelete(@Validated(Delete.class) @RequestBody UserDto request)
 //            throws HttpRequestMethodNotSupportedException {
-//        // TODO Physical delete a bank in database
+//        // TODO Physical delete a user in database
 //        throw new HttpRequestMethodNotSupportedException("Physical delete will be implement in the further");
 //    }
 }
