@@ -11,6 +11,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
@@ -31,22 +32,22 @@ class UserRepositoryTest {
     private static final UUID NOT_EXIST_ID = UUID.fromString("cb9e8816-7bed-4bb6-b3ea-3aa0eee247b6");
 
     @Test
-    public void getByEmailAndIdNot_shouldGetNull_whenEmailNotExistAndIdNotExistInDatabase() {
-        assertNull(repository.getByEmailAndIdNot(NOT_EXIST_EMAIL, NOT_EXIST_ID));
+    public void getByEmailAndIdNot_shouldGetEmptyList_whenEmailNotExistAndIdNotExistInDatabase() {
+        assertTrue(repository.getByEmailAndIdNot(NOT_EXIST_EMAIL, NOT_EXIST_ID).isEmpty());
     }
 
     @Test
-    public void getByEmailAndIdNot_shouldGetNull_whenEmailNotExistAndIdExistInDatabase() {
-        assertNull(repository.getByEmailAndIdNot(NOT_EXIST_EMAIL, EXIST_ID));
+    public void getByEmailAndIdNot_shouldGetEmptyList_whenEmailNotExistAndIdExistInDatabase() {
+        assertTrue(repository.getByEmailAndIdNot(NOT_EXIST_EMAIL, EXIST_ID).isEmpty());
     }
 
     @Test
     public void getByEmailAndIdNot_shouldGetNotNull_whenEmailExistAndIdNotExistInDatabase() {
-        assertTrue(repository.getByEmailAndIdNot(EXIST_EMAIL, NOT_EXIST_ID).getEmail().equals(EXIST_EMAIL));
+        assertTrue(repository.getByEmailAndIdNot(EXIST_EMAIL, NOT_EXIST_ID).get(0).getEmail().equals(EXIST_EMAIL));
     }
 
     @Test
-    public void getByEmailAndIdNot_shouldGetNull_whenEmailExistAndIdExistInDatabase() {
-        assertNull(repository.getByEmailAndIdNot(EXIST_EMAIL, EXIST_ID));
+    public void getByEmailAndIdNot_shouldGetEmptyList_whenEmailExistAndIdExistInDatabase() {
+        assertTrue(repository.getByEmailAndIdNot(EXIST_EMAIL, EXIST_ID).isEmpty());
     }
 }

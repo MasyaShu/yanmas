@@ -39,13 +39,13 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
     public boolean checkUniqueness(User entity) {
         log.trace(CHECK_UNIQUENESS, entity);
         Map<String, List<ValidationError>> errors = new HashMap<>();
-        UserUniqueFields foundUser = service.findByUniqueFields(entity);
-        if (foundUser.getEmail().isEmpty()) {
+        List<UserUniqueFields> foundUser = service.findByUniqueFields(entity);
+        if (foundUser.isEmpty()) {
             log.trace(FIELDS_UNIQUE, entity);
             return true;
         } else {
                 String validatedField;
-                if (entity.getEmail().equalsIgnoreCase(foundUser.getEmail())) {
+                if (entity.getEmail().equalsIgnoreCase(foundUser.get(0).getEmail())) {
                     validatedField = "email";
                     errors.put(validatedField, singletonList(new ValidationError(NOT_UNIQUE_CODE,
                             format(NOT_UNIQUE_MESSAGE, validatedField))));
