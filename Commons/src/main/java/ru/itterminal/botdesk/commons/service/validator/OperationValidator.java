@@ -13,11 +13,11 @@ public interface OperationValidator<E extends BaseEntity> {
 
     String INVALID_ENTITY_MESSAGE = "Expected entity, but received null";
 
-    boolean checkBeforeCreate(E entity);
+    boolean beforeCreate(E entity);
 
     boolean checkUniqueness(E entity);
 
-    boolean checkBeforeUpdate(E entity);
+    boolean beforeUpdate(E entity);
 
     boolean checkLogicalDelete(UUID id);
 

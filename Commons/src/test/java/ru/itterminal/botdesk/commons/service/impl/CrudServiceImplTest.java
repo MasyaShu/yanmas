@@ -90,8 +90,8 @@ class CrudServiceImplTest {
         deletedEntity.setDeleted(true);
         deletedEntity.setId(TEST_ENTITY_ID);
         expectedPage = new PageImpl<>(Collections.singletonList(baseEntity));
-        Mockito.when(validator.checkBeforeCreate(null)).thenThrow(NullEntityException.class);
-        Mockito.when(validator.checkBeforeUpdate(null)).thenThrow(NullEntityException.class);
+        Mockito.when(validator.beforeCreate(null)).thenThrow(NullEntityException.class);
+        Mockito.when(validator.beforeUpdate(null)).thenThrow(NullEntityException.class);
         Mockito.when(validator.checkLogicalDelete(TEST_ENTITY_ID)).thenReturn(true);
     }
 

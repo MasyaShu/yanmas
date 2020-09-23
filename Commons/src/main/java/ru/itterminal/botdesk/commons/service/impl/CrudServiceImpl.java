@@ -52,7 +52,7 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
      */
     @Override
     public E create(E entity) {
-        validator.checkBeforeCreate(entity);
+        validator.beforeCreate(entity);
         log.trace(format(CREATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.toString()));
         UUID id = UUID.randomUUID();
         entity.setId(id);
@@ -126,7 +126,7 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
      */
     @Override
     public E update(E entity) {
-        validator.checkBeforeUpdate(entity);
+        validator.beforeUpdate(entity);
         log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
         E entityFromDatabase = repository.findById(entity.getId()).orElseThrow(() -> {
             String message = format(ENTITY_NOT_EXIST_MESSAGE, entity.getClass().getSimpleName(), entity.getId());

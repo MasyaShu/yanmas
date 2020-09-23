@@ -56,8 +56,8 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
     }
 
     @Override
-    public boolean checkBeforeCreate(User entity) {
-        super.checkBeforeCreate(entity);
+    public boolean beforeCreate(User entity) {
+        super.beforeCreate(entity);
         entity.setPassword(encoder.encode(entity.getPassword()));
         if (entity.getLanguage()==null) {
             String ln = entity.getAccount().getLanguage();
@@ -67,8 +67,8 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
     }
 
     @Override
-    public boolean checkBeforeUpdate(User entity) {
-        super.checkBeforeUpdate(entity);
+    public boolean beforeUpdate(User entity) {
+        super.beforeUpdate(entity);
         log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
         User entityFromDatabase = repository.findById(entity.getId()).orElseThrow(() -> {
             String message = format(ENTITY_NOT_EXIST_MESSAGE, entity.getClass().getSimpleName(), entity.getId());

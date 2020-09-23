@@ -32,7 +32,7 @@ public class BasicOperationValidatorImpl<E extends BaseEntity> implements Operat
 
 
     @Override
-    public boolean checkBeforeCreate(E entity) {
+    public boolean beforeCreate(E entity) {
         log.debug(DEFAULT_CREATE_MESSAGE);
         if (entity == null) {
             log.error(INVALID_ENTITY_MESSAGE);
@@ -47,7 +47,7 @@ public class BasicOperationValidatorImpl<E extends BaseEntity> implements Operat
     }
 
     @Override
-    public boolean checkBeforeUpdate(E entity) {
+    public boolean beforeUpdate(E entity) {
         log.debug(DEFAULT_UPDATE_MESSAGE);
         if (entity == null) {
             log.error(INVALID_ENTITY_MESSAGE);
