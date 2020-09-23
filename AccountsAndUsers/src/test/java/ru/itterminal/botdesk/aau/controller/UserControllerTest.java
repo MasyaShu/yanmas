@@ -3,8 +3,11 @@ package ru.itterminal.botdesk.aau.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -12,6 +15,8 @@ import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_EMAIL;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_PASSWORD;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.MUST_BE_ANY_OF_EN_RU;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.DELETED_ASSERT_FALSE;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.MESSAGE_NOT_READABLE;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_GREATER_THAN_OR_EQUAL_TO_0;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_NOT_BE_EMPTY;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_NOT_BE_NULL;
@@ -45,6 +50,7 @@ import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.dto.UserDto;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
+import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(UserController.class)
@@ -100,9 +106,9 @@ class UserControllerTest {
     private static String INVALID_PASSWORD_8 = "IttItt 2"; //space
     private static String INVALID_PASSWORD_9 = "123123"; //numbers
 
-    private Set<String> invalidPassword = Set.of(INVALID_PASSWORD_1, INVALID_PASSWORD_2, INVALID_PASSWORD_3, INVALID_PASSWORD_4,
-            INVALID_PASSWORD_5, INVALID_PASSWORD_6, INVALID_PASSWORD_7, INVALID_PASSWORD_8, INVALID_PASSWORD_9);
-
+    private Set<String> invalidPassword =
+            Set.of(INVALID_PASSWORD_1, INVALID_PASSWORD_2, INVALID_PASSWORD_3, INVALID_PASSWORD_4,
+                    INVALID_PASSWORD_5, INVALID_PASSWORD_6, INVALID_PASSWORD_7, INVALID_PASSWORD_8, INVALID_PASSWORD_9);
 
     private User user_1;
     private Account account_1;
@@ -267,4 +273,182 @@ class UserControllerTest {
             verify(service, times(0)).create(any());
         }
     }
+
+    @Test
+    public void update_shouldUpdate_whenValidDataPassed() throws Exception {
+        userDto.setId(UUID.fromString(USER_1_ID));
+        userDto.setVersion(1);
+        when(service.update(any())).thenReturn(user_1);
+        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDto));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(USER_1_ID))
+                .andExpect(jsonPath("$.email").value(EMAIL_1))
+                .andExpect(jsonPath("$.password").doesNotExist());
+    }
+
+    @Test
+    public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
+        userDto.setEmail(INVALID_EMAIL_1);
+        userDto.setDeleted(null);
+        userDto.setPassword("");
+        userDto.setGroup(null);
+        userDto.setAccount(null);
+        userDto.setRoles(Collections.emptySet());
+        userDto.setFirstName("123456789012345678901");
+        userDto.setSecondName("1234567890123456789012345678901");
+        userDto.setPhone("1234567890123456789012345678901");
+        userDto.setLanguage("gr");
+        userDto.setIsArchived(null);
+        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDto));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.id[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.version[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.firstName[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
+                .andExpect(jsonPath("$.errors.secondName[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
+                .andExpect(jsonPath("$.errors.phone[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
+                .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.isArchived[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.roles[?(@.message == '%s')]", MUST_NOT_BE_EMPTY).exists())
+                .andExpect(jsonPath("$.errors.language[?(@.message == '%s')]", MUST_BE_ANY_OF_EN_RU).exists())
+                .andExpect(jsonPath("$.errors.email[?(@.message == '%s')]", INVALID_EMAIL).exists())
+                .andExpect(jsonPath("$.errors.account[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.group[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.password[?(@.message == '%s')]", INVALID_PASSWORD).exists());
+        verify(service, times(0)).create(any());
+    }
+
+    @Test
+    public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenAllPassedDataIsNull() throws Exception {
+        userDto.setEmail(null);
+        userDto.setDeleted(null);
+        userDto.setPassword(null);
+        userDto.setGroup(null);
+        userDto.setAccount(null);
+        userDto.setRoles(null);
+        userDto.setFirstName(null);
+        userDto.setSecondName(null);
+        userDto.setPhone(null);
+        userDto.setLanguage(null);
+        userDto.setIsArchived(null);
+        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDto));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.id[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.version[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.isArchived[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.roles[?(@.message == '%s')]", MUST_NOT_BE_EMPTY).exists())
+                .andExpect(jsonPath("$.errors.email[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.account[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.group[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.password[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists());
+        verify(service, times(0)).create(any());
+    }
+
+    @Test
+    public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenVersionIsNegative() throws Exception {
+        userDto.setVersion(-15);
+        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDto));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(
+                        jsonPath("$.errors.version[?(@.message == '%s')]", MUST_BE_GREATER_THAN_OR_EQUAL_TO_0)
+                                .exists());
+        verify(service, times(0)).create(any());
+    }
+
+    @Test
+    public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidIdPassed() throws Exception {
+        userDto.setId(UUID.fromString(USER_1_ID));
+        userDto.setVersion(1);
+        String json = objectMapper.writeValueAsString(userDto);
+        json = json.replace(USER_1_ID, "abracadabra");
+        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(json);
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value(MESSAGE_NOT_READABLE));
+        verify(service, times(0)).create(any());
+    }
+
+    @Test
+    public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidEmailPassed() throws Exception {
+        for (String ie : invalidEmail) {
+            userDto.setEmail(ie);
+            MockHttpServletRequestBuilder request = put(HOST + PORT + API)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(userDto));
+            mockMvc.perform(request)
+                    .andDo(print())
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.email[?(@.message == '%s')]", INVALID_EMAIL).exists());
+            verify(service, times(0)).create(any());
+        }
+    }
+
+    @Test
+    public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidPasswordPassed() throws Exception {
+        for (String ip : invalidPassword) {
+            userDto.setPassword(ip);
+            MockHttpServletRequestBuilder request = put(HOST + PORT + API)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(userDto));
+            mockMvc.perform(request)
+                    .andDo(print())
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.password[?(@.message == '%s')]", INVALID_PASSWORD).exists());
+            verify(service, times(0)).create(any());
+        }
+    }
+
+    @Test
+    public void getById_shouldFindOneUser_whenUserExistInDatabaseByPassedId() throws Exception {
+        when(service.findById(UUID.fromString(USER_1_ID))).thenReturn(user_1);
+        mockMvc.perform(get(HOST + PORT + API + USER_1_ID))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value(EMAIL_1))
+                .andExpect(jsonPath("$.id").value(USER_1_ID));
+    }
+
+    @Test
+    void getById_shouldRespondNotFound_whenPassedIdNotExist() throws Exception {
+        when(service.findById(UUID.fromString(USER_1_ID))).thenThrow(EntityNotExistException.class);
+        mockMvc.perform(get(HOST + PORT + API + USER_1_ID))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+
+    @Test
+    public void getById_shouldGetStatusBadRequest_whenUiidIsInvalid() throws Exception {
+        mockMvc.perform(get(HOST + PORT + API + "Abracadabra"))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+        verifyZeroInteractions(service);
+    }
+
 }

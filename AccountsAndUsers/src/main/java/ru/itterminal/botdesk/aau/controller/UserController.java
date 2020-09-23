@@ -1,10 +1,15 @@
 package ru.itterminal.botdesk.aau.controller;
 
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -16,6 +21,7 @@ import ru.itterminal.botdesk.aau.model.dto.UserDto;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
+import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 
 @Slf4j
 @RestController("UserControllerV1")
@@ -51,37 +57,38 @@ public class UserController extends BaseController {
         return new ResponseEntity<>(returnedUser, HttpStatus.CREATED);
     }
 
-//    /**
-//     * Update a user
-//     *
-//     * @param requestDto contains all parameters of update user
-//     * @return updated user
-//     */
-//    @PutMapping()
-//    public ResponseEntity<UserDto> update(@Validated(Update.class) @RequestBody UserDto requestDto) {
-//        log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, requestDto);
-//        User user = modelMapper.map(requestDto, User.class);
-//        User updatedUser = service.update(user);
-//        UserDto returnedUser = modelMapper.map(updatedUser, UserDto.class);
-//        log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedUser);
-//        return new ResponseEntity<>(returnedUser, HttpStatus.OK);
-//    }
-//
-//    /**
-//     * Get a user by ID
-//     *
-//     * @param id for find user in database
-//     * @return user
-//     */
-//    @GetMapping("/{id}")
-//    public ResponseEntity<UserDto> getById(@PathVariable UUID id) {
-//        log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
-//        User foundUser = service.findById(id);
-//        UserDto returnedUser = modelMapper.map(foundUser, UserDto.class);
-//        log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundUser);
-//        return new ResponseEntity<>(returnedUser, HttpStatus.OK);
-//    }
-//
+    /**
+     * Update a user
+     *
+     * @param requestDto contains all parameters of update user
+     * @return updated user
+     */
+    @PutMapping()
+    public ResponseEntity<UserDto> update(@Validated(Update.class) @RequestBody UserDto requestDto) {
+        log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, requestDto);
+        User user = modelMapper.map(requestDto, User.class);
+        User updatedUser = service.update(user);
+        UserDto returnedUser = modelMapper.map(updatedUser, UserDto.class);
+        returnedUser.setPassword(null);
+        log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedUser);
+        return new ResponseEntity<>(returnedUser, HttpStatus.OK);
+    }
+
+    /**
+     * Get a user by ID
+     *
+     * @param id for find user in database
+     * @return user
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDto> getById(@PathVariable UUID id) {
+        log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
+        User foundUser = service.findById(id);
+        UserDto returnedUser = modelMapper.map(foundUser, UserDto.class);
+        log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundUser);
+        return new ResponseEntity<>(returnedUser, HttpStatus.OK);
+    }
+
 //    /**
 //     * Get list of users
 //     *

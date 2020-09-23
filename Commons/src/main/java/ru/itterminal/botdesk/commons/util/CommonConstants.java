@@ -13,4 +13,5 @@ public class CommonConstants {
     public static final String MUST_BE_ANY_OF_ALL_TRUE_FALSE = "must be any of: all, true, false";
     public static final String MUST_BE_ANY_OF_ASC_DESC = "must be any of: asc, desc";
     public static final String MUST_ACCORDING_UUID_FORMAT = "must according UUID format, like this 0d7858ce-f2bb-4abe-991b-062720625c10";
+    public static final String MESSAGE_NOT_READABLE = "Message Not Readable";
 }
