@@ -76,8 +76,8 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
     public E findById(UUID id) {
         String searchParameter = "id";
         log.trace(format(FIND_INIT_MESSAGE, searchParameter, id));
-        Optional<E> baseEntity = repository.findById(id);
-        if (baseEntity.isPresent()) {
+        if (repository.existsById(id)) {
+            Optional<E> baseEntity = repository.findById(id);
             log.trace(format(FIND_FINISH_MESSAGE, searchParameter, id, baseEntity.get()));
             return baseEntity.get();
         } else {

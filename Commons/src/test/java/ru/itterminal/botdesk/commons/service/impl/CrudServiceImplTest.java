@@ -1,7 +1,6 @@
 package ru.itterminal.botdesk.commons.service.impl;
 
 import static java.lang.String.format;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
@@ -115,6 +114,7 @@ class CrudServiceImplTest {
 
     @Test
     void findById_shouldReturnEntity_whenEntityExist() {
+        Mockito.when(repository.existsById(TEST_ENTITY_ID)).thenReturn(true);
         Mockito.when(repository.findById(TEST_ENTITY_ID)).thenReturn(Optional.of(baseEntity));
         GeneralEntity actualEntity = service.findById(TEST_ENTITY_ID);
         assertEquals(baseEntity, actualEntity);
@@ -128,6 +128,7 @@ class CrudServiceImplTest {
 
     @Test
     void findById_shouldThrowExceptionSameAsRepository_whenRepositoryThrowException() {
+        Mockito.when(repository.existsById(TEST_ENTITY_ID)).thenReturn(true);
         Mockito.when(repository.findById(TEST_ENTITY_ID)).thenThrow(NoSuchElementException.class);
         assertThrows(NoSuchElementException.class, () -> service.findById(TEST_ENTITY_ID));
     }
