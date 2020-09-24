@@ -42,10 +42,10 @@ public class UserDto extends BaseEntityDto {
             groups = {Create.class, Update.class})
     private String email;
 
-    @Size(max = 20, groups = {Create.class, Update.class})
+    @Size(min = 1, max = 20, groups = {Create.class, Update.class})
     private String firstName;
 
-    @Size(max = 30, groups = {Create.class, Update.class})
+    @Size(min = 1, max = 30, groups = {Create.class, Update.class})
     private String secondName;
 
     @NotNull(groups = {Create.class, Update.class})
@@ -54,7 +54,7 @@ public class UserDto extends BaseEntityDto {
             groups = {Create.class, Update.class})
     private String password;
 
-    @Size(max = 30, groups = {Create.class, Update.class})
+    @Size(min = 6, max = 30, groups = {Create.class, Update.class})
     private String phone;
 
     private String comment;
@@ -75,4 +75,5 @@ public class UserDto extends BaseEntityDto {
 
     @NotEmpty(groups = {Create.class, Update.class})
     private Set<Role> roles;
+
 }

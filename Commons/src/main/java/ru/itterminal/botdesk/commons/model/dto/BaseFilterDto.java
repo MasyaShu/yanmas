@@ -39,7 +39,7 @@ public class BaseFilterDto {
                 return valueOf(value.toUpperCase());
             } catch (Exception exception) {
                 throw new IllegalArgumentException(
-                    format("Invalid value '%s' for orders given! Has to be either 'desc' or 'asc' (case insensitive).",
+                    format("Invalid value '%s' for deleted given! Has to be either 'all' or 'true' or 'false'",
                         value), exception);
             }
         }

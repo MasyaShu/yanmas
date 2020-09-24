@@ -13,4 +13,5 @@ public class AAUConstants {
     public final static String passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?!.*\\s)[A-Za-z\\d]{6,20}$";
     public final static String INVALID_PASSWORD = "Password expression consists only from latin that requires one lower case letter, "
             + "one upper case letter, one digit, 6-20 length, and no spaces.";
+    public final static String MUST_BE_ANY_OF_FIRST_NAME_SECOND_NAME = "must be any of: firstName, secondName";
 }

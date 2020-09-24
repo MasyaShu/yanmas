@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolationException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -140,15 +141,15 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, apiError, headers, status, request);
     }
 
-//    @ExceptionHandler(ConstraintViolationException.class)
-//    public ResponseEntity<ApiError> handleConstraintViolations(ConstraintViolationException ex, WebRequest request) {
-//        ApiError apiError = new ApiError(
-//            HttpStatus.BAD_REQUEST,
-//            "Request not readable", ex)
-//            .withRequest(request);
-//        log.warn(ex.getMessage());
-//        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
-//    }
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiError> handleConstraintViolations(ConstraintViolationException ex, WebRequest request) {
+        ApiError apiError = new ApiError(
+            HttpStatus.BAD_REQUEST,
+            "Request not readable", ex)
+            .withRequest(request);
+        log.warn(ex.getMessage());
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
 
     @ExceptionHandler(EntityNotExistException.class)
     public ResponseEntity<?> handleEntityNotExistException(EntityNotExistException ex, HttpServletRequest request) {

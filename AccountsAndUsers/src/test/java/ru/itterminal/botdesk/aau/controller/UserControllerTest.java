@@ -1,10 +1,12 @@
 package ru.itterminal.botdesk.aau.controller;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -14,15 +16,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_EMAIL;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_PASSWORD;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.MUST_BE_ANY_OF_EN_RU;
+import static ru.itterminal.botdesk.aau.util.AAUConstants.MUST_BE_ANY_OF_FIRST_NAME_SECOND_NAME;
+import static ru.itterminal.botdesk.commons.controller.BaseController.PAGE_DEFAULT_VALUE;
+import static ru.itterminal.botdesk.commons.controller.BaseController.SIZE_DEFAULT_VALUE;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.DELETED_ASSERT_FALSE;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.MESSAGE_NOT_READABLE;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_ANY_OF_ALL_TRUE_FALSE;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_ANY_OF_ASC_DESC;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_GREATER_THAN_OR_EQUAL_TO_0;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_NOT_BE_EMPTY;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_NOT_BE_NULL;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.REQUEST_NOT_READABLE;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.SIZE_MUST_BE_BETWEEN;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -34,6 +43,11 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.web.servlet.MockMvc;
@@ -49,11 +63,14 @@ import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.dto.UserDto;
+import ru.itterminal.botdesk.aau.model.dto.UserFilterDto;
+import ru.itterminal.botdesk.aau.model.spec.UserSpec;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
+import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringJUnitConfig(UserController.class)
+@SpringJUnitConfig(value = {UserController.class, UserSpec.class})
 @WebMvcTest
 class UserControllerTest {
 
@@ -78,10 +95,23 @@ class UserControllerTest {
     private static String PORT = ":8081";
     private static String API = "/v1/user/";
     private static String USER_1_ID = "b3805032-02db-4422-9c0e-4ddba1701811";
+    private static String USER_2_ID = "d45e0a6e-cb5b-11ea-87d0-0242ac138003";
     private static String ACCOUNT_1_ID = "d45e0a6e-cb5b-11ea-87d0-0242ac138003";
     private static String GROUP_1_ID = "8f85579e-670c-4c78-88cb-d284bbd473b8";
     private static String EMAIL_1 = "yaneg.ru@gmial.com";
+    private static String EMAIL_2 = "yaneg2.ru@gmial.com";
     private static String PASSWORD_1 = "UserUser123";
+    private static String PASSWORD_2 = "UserUser321";
+    private static String FIRST_NAME = "Ivan";
+    private static String SECOND_NAME = "Ivanov";
+    private static String PHONE = "123456";
+    private static String INVALID_FIRST_NAME = "123456789012345678901";
+    private static String INVALID_SECOND_NAME = "1234567890123456789012345678901";
+    private static String INVALID_PHONE = "1234567890123456789012345678901";
+    private static String INVALID_SORT_BY = "ERROR";
+    private static String INVALID_DELETED = "ERROR";
+    private static String INVALID_LANGUAGE = "ge";
+    private static String INVALID_DIRECTION = "ERROR";
 
     private static String INVALID_EMAIL_1 = "it-terminal_mail.ru"; //absent @
     private static String INVALID_EMAIL_2 = "it-terminal_@mail.рф"; //characters are not allowed
@@ -111,12 +141,14 @@ class UserControllerTest {
                     INVALID_PASSWORD_5, INVALID_PASSWORD_6, INVALID_PASSWORD_7, INVALID_PASSWORD_8, INVALID_PASSWORD_9);
 
     private User user_1;
+    private User user_2;
     private Account account_1;
     private Group group_1;
     private Role roleAdmin = new Role(Roles.ADMIN.toString());
     private Role roleSuperAdmin = new Role(Roles.SUPER_ADMIN.toString());
     private Set<Role> roles_1 = Set.of(roleAdmin, roleSuperAdmin);
     private UserDto userDto;
+    private UserFilterDto userFilterDto;
 
     @BeforeEach
     void setUpBeforeEach() {
@@ -135,6 +167,15 @@ class UserControllerTest {
                 .roles(roles_1)
                 .build();
         user_1.setId(UUID.fromString(USER_1_ID));
+        user_2 = new User().builder()
+                .email(EMAIL_2)
+                .password(PASSWORD_2)
+                .account(account_1)
+                .group(group_1)
+                .isArchived(false)
+                .roles(roles_1)
+                .build();
+        user_2.setId(UUID.fromString(USER_2_ID));
         userDto = new UserDto().builder()
                 .email(EMAIL_1)
                 .password(PASSWORD_1)
@@ -144,6 +185,11 @@ class UserControllerTest {
                 .roles(roles_1)
                 .build();
         userDto.setDeleted(false);
+        userFilterDto = new UserFilterDto();
+        userFilterDto.setEmail(EMAIL_1);
+        userFilterDto.setFirstName(FIRST_NAME);
+        userFilterDto.setSecondName(SECOND_NAME);
+        userFilterDto.setPhone(PHONE);
     }
 
     @Test
@@ -169,10 +215,10 @@ class UserControllerTest {
         userDto.setGroup(null);
         userDto.setAccount(null);
         userDto.setRoles(Collections.emptySet());
-        userDto.setFirstName("123456789012345678901");
-        userDto.setSecondName("1234567890123456789012345678901");
-        userDto.setPhone("1234567890123456789012345678901");
-        userDto.setLanguage("gr");
+        userDto.setFirstName(INVALID_FIRST_NAME);
+        userDto.setSecondName(INVALID_SECOND_NAME);
+        userDto.setPhone(INVALID_PHONE);
+        userDto.setLanguage(INVALID_LANGUAGE);
         userDto.setIsArchived(null);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -451,4 +497,141 @@ class UserControllerTest {
         verifyZeroInteractions(service);
     }
 
+    @Test
+    public void getByFilter_shouldFindTwoUsers_whenUsersExistInDatabaseByPassedFilter() throws Exception {
+        Pageable pageable =
+                PageRequest.of(Integer.parseInt(PAGE_DEFAULT_VALUE), Integer.parseInt(SIZE_DEFAULT_VALUE),
+                        Sort.by("firstName").ascending());
+        Page<User> userPageExpected = new PageImpl<User>(List.of(user_1, user_2), pageable, 2);
+        when(service.findAllByFilter(any(), any())).thenReturn(userPageExpected);
+        MockHttpServletRequestBuilder request = get(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userFilterDto));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value(USER_1_ID))
+                .andExpect(jsonPath("$.content[1].id").value(USER_2_ID))
+                .andExpect(jsonPath("$.content[0].email").value(EMAIL_1))
+                .andExpect(jsonPath("$.content[1].email").value(EMAIL_2))
+                .andExpect(jsonPath("$.content[0].password").doesNotExist())
+                .andExpect(jsonPath("$.content[1].password").doesNotExist())
+                .andExpect(jsonPath("$.content", hasSize(2)));
+    }
+
+    @Test
+    public void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
+        userFilterDto.setEmail(INVALID_EMAIL_1);
+        userFilterDto.setFirstName(INVALID_FIRST_NAME);
+        userFilterDto.setSecondName(INVALID_SECOND_NAME);
+        userFilterDto.setPhone(INVALID_PHONE);
+        userFilterDto.setSortBy(INVALID_SORT_BY);
+        userFilterDto.setDeleted(INVALID_DELETED);
+        userFilterDto.setDirection(INVALID_DIRECTION);
+        MockHttpServletRequestBuilder request = get(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userFilterDto));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.firstName[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
+                .andExpect(jsonPath("$.errors.secondName[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
+                .andExpect(jsonPath("$.errors.email[?(@.message == '%s')]", INVALID_EMAIL).exists())
+                .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_BE_ANY_OF_ALL_TRUE_FALSE).exists())
+                .andExpect(jsonPath("$.errors.direction[?(@.message == '%s')]", MUST_BE_ANY_OF_ASC_DESC).exists())
+                .andExpect(jsonPath("$.errors.sortBy[?(@.message == '%s')]", MUST_BE_ANY_OF_FIRST_NAME_SECOND_NAME).exists());
+        verify(service, times(0)).create(any());
+    }
+
+    @Test
+    public void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidSizeAndPagePassed() throws Exception {
+        MockHttpServletRequestBuilder request = get(HOST + PORT + API + "?page=-1&size=0")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userFilterDto));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value(REQUEST_NOT_READABLE));
+        verify(service, times(0)).create(any());
+    }
+
+    @Test
+    public void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenFilterIsEmpty() throws Exception {
+        userFilterDto.setEmail("");
+        userFilterDto.setFirstName("");
+        userFilterDto.setSecondName("");
+        userFilterDto.setPhone("");
+        userFilterDto.setSortBy("");
+        userFilterDto.setDeleted("");
+        userFilterDto.setDirection("");
+        MockHttpServletRequestBuilder request = get(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userFilterDto));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.firstName[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
+                .andExpect(jsonPath("$.errors.secondName[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
+                .andExpect(jsonPath("$.errors.phone[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
+                .andExpect(jsonPath("$.errors.email[?(@.message == '%s')]", INVALID_EMAIL).exists())
+                .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_BE_ANY_OF_ALL_TRUE_FALSE).exists())
+                .andExpect(jsonPath("$.errors.direction[?(@.message == '%s')]", MUST_BE_ANY_OF_ASC_DESC).exists())
+                .andExpect(jsonPath("$.errors.sortBy[?(@.message == '%s')]", MUST_BE_ANY_OF_FIRST_NAME_SECOND_NAME).exists());
+        verify(service, times(0)).create(any());
+    }
+
+    @Test
+    public void getByFilter_shouldFindTwoBanks_whenFilterIsNew() throws Exception {
+        UserFilterDto userFilterDto = new UserFilterDto();
+        Pageable pageable =
+                PageRequest.of(Integer.parseInt(PAGE_DEFAULT_VALUE), Integer.parseInt(SIZE_DEFAULT_VALUE),
+                        Sort.by("firstName").ascending());
+        Page<User> userPageExpected = new PageImpl<User>(List.of(user_1, user_2), pageable, 2);
+        when(service.findAllByFilter(any(), any())).thenReturn(userPageExpected);
+        MockHttpServletRequestBuilder request = get(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userFilterDto));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value(USER_1_ID))
+                .andExpect(jsonPath("$.content[1].id").value(USER_2_ID))
+                .andExpect(jsonPath("$.content", hasSize(2)));
+        verify(service, times(1)).findAllByFilter(any(), any());
+    }
+
+    @Test
+    public void getByFilter_shouldFindTwoBanks_whenDefaultFieldsInFilterIsNull() throws Exception {
+        userFilterDto.setSortBy(null);
+        userFilterDto.setDeleted(null);
+        userFilterDto.setDirection(null);
+        Pageable pageable =
+                PageRequest.of(Integer.parseInt(PAGE_DEFAULT_VALUE), Integer.parseInt(SIZE_DEFAULT_VALUE),
+                        Sort.by("firstName").ascending());
+        Page<User> userPageExpected = new PageImpl<User>(List.of(user_1, user_2), pageable, 2);
+        when(service.findAllByFilter(any(), any())).thenReturn(userPageExpected);
+        MockHttpServletRequestBuilder request = get(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userFilterDto));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value(USER_1_ID))
+                .andExpect(jsonPath("$.content[1].id").value(USER_2_ID))
+                .andExpect(jsonPath("$.content", hasSize(2)));
+        verify(service, times(1)).findAllByFilter(any(), any());
+    }
+
+    @Test
+    void physicalDelete_shouldThrowUnsupportedOperationException_untilMethodWouldBeImplemented() throws Exception {
+        mockMvc.perform(delete(HOST + PORT + API + USER_1_ID))
+                .andDo(print())
+                .andExpect(status().isMethodNotAllowed());
+    }
 }
