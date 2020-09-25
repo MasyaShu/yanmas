@@ -585,7 +585,7 @@ class UserControllerTest {
     }
 
     @Test
-    public void getByFilter_shouldFindTwoBanks_whenFilterIsNew() throws Exception {
+    public void getByFilter_shouldFindTwoUsers_whenFilterIsNew() throws Exception {
         UserFilterDto userFilterDto = new UserFilterDto();
         Pageable pageable =
                 PageRequest.of(Integer.parseInt(PAGE_DEFAULT_VALUE), Integer.parseInt(SIZE_DEFAULT_VALUE),
@@ -606,7 +606,7 @@ class UserControllerTest {
     }
 
     @Test
-    public void getByFilter_shouldFindTwoBanks_whenDefaultFieldsInFilterIsNull() throws Exception {
+    public void getByFilter_shouldFindTwoUsers_whenDefaultFieldsInFilterIsNull() throws Exception {
         userFilterDto.setSortBy(null);
         userFilterDto.setDeleted(null);
         userFilterDto.setDirection(null);

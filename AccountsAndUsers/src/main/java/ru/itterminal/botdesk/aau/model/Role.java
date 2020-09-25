@@ -24,7 +24,7 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @NoArgsConstructor
 public class Role extends BaseEntity {
 
-    @Column (nullable = false, unique = true)
+    @Column (nullable = false, unique = true, length = 30)
     private String name;
 
     @Override

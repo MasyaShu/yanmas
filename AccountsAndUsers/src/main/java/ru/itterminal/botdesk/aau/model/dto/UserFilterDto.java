@@ -3,6 +3,8 @@ package ru.itterminal.botdesk.aau.model.dto;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_EMAIL;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.emailPattern;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -44,9 +46,9 @@ public class UserFilterDto extends BaseFilterDto {
 
     private Boolean isArchived;
 
-    private UUID groupId;
+    private List<UUID> groups;
 
-    private Set<Role> roles;
+    private List<UUID> roles;
 
     @ValueOfEnum(enumClass = FieldsForSort.class, message = "must be any of: firstName, secondName")
     private String sortBy = "firstName";

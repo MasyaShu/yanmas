@@ -1,5 +1,6 @@
 package ru.itterminal.botdesk.aau.model.spec;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.Group;
+import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.commons.model.spec.GeneralSpec;
 
@@ -97,17 +99,35 @@ public class UserSpec extends GeneralSpec<User> {
         };
     }
 
-    public Specification<User> getUserByGroupSpec(UUID groupId) {
+    public Specification<User> getUserByListOfGroupsSpec(List<UUID> listGroupId) {
         return new Specification<User>() {
             @Override
             public Predicate toPredicate(Root<User> root,
                     CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
                 Join<User, Group> userJoin = root.join("group");
-                Predicate predicate = criteriaBuilder.equal(userJoin.<UUID> get("id"), groupId);
-                return predicate;
+                Predicate returnedPredicate = criteriaBuilder.equal(userJoin.<UUID> get("id"), listGroupId.get(0));
+                for (int i = 1; i < listGroupId.size() ; i++) {
+                    Predicate predicate = criteriaBuilder.equal(userJoin.<UUID> get("id"), listGroupId.get(i));
+                    returnedPredicate = criteriaBuilder.or(returnedPredicate, predicate);
+                }
+                return returnedPredicate;
             }
         };
     }
 
-    //TODO add Specification for Set<Role>
+    public Specification<User> getUserByListOfRolesSpec(List<UUID> listRoleId) {
+        return new Specification<User>() {
+            @Override
+            public Predicate toPredicate(Root<User> root,
+                    CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+                Join<User, Role> userJoin = root.join("roles");
+                Predicate returnedPredicate = criteriaBuilder.equal(userJoin.<UUID> get("id"), listRoleId.get(0));
+                for (int i = 1; i < listRoleId.size() ; i++) {
+                    Predicate predicate = criteriaBuilder.equal(userJoin.<UUID> get("id"), listRoleId.get(i));
+                    returnedPredicate = criteriaBuilder.or(returnedPredicate, predicate);
+                }
+                return returnedPredicate;
+            }
+        };
+    }
 }

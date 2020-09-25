@@ -64,12 +64,14 @@ public class UserController extends BaseController {
      */
     @PostMapping()
     @ResponseStatus(value = HttpStatus.CREATED)
-    public ResponseEntity<UserDtoResponseWithoutPassword> create(@Validated(Create.class) @RequestBody UserDto request) {
+    public ResponseEntity<UserDtoResponseWithoutPassword> create(
+            @Validated(Create.class) @RequestBody UserDto request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
         User user = modelMapper.map(request, User.class);
         User createdUser = service.create(user);
-        UserDtoResponseWithoutPassword returnedUser = modelMapper.map(createdUser, UserDtoResponseWithoutPassword.class);
-//        returnedUser.setPassword(null);
+        UserDtoResponseWithoutPassword returnedUser =
+                modelMapper.map(createdUser, UserDtoResponseWithoutPassword.class);
+        //        returnedUser.setPassword(null);
         log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdUser);
         return new ResponseEntity<>(returnedUser, HttpStatus.CREATED);
     }
@@ -81,12 +83,14 @@ public class UserController extends BaseController {
      * @return updated user
      */
     @PutMapping()
-    public ResponseEntity<UserDtoResponseWithoutPassword> update(@Validated(Update.class) @RequestBody UserDto requestDto) {
+    public ResponseEntity<UserDtoResponseWithoutPassword> update(
+            @Validated(Update.class) @RequestBody UserDto requestDto) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, requestDto);
         User user = modelMapper.map(requestDto, User.class);
         User updatedUser = service.update(user);
-        UserDtoResponseWithoutPassword returnedUser = modelMapper.map(updatedUser, UserDtoResponseWithoutPassword.class);
-//        returnedUser.setPassword(null);
+        UserDtoResponseWithoutPassword returnedUser =
+                modelMapper.map(updatedUser, UserDtoResponseWithoutPassword.class);
+        //        returnedUser.setPassword(null);
         log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedUser);
         return new ResponseEntity<>(returnedUser, HttpStatus.OK);
     }
@@ -109,8 +113,8 @@ public class UserController extends BaseController {
     /**
      * Find users by filter
      *
-     * @param page number starts from 0
-     * @param size count users per page
+     * @param page   number starts from 0
+     * @param size   count users per page
      * @param filter for find users in database. Over all not null fields of filter will be applied logical operator And
      */
     @GetMapping()
@@ -141,7 +145,10 @@ public class UserController extends BaseController {
                 .and(filter.getPhone() == null ? null : spec.getUserByPhoneSpec(filter.getPhone()))
                 .and(filter.getComment() == null ? null : spec.getUserByCommentSpec(filter.getComment()))
                 .and(filter.getIsArchived() == null ? null : spec.getUserByIsArchivedSpec(filter.getIsArchived()))
-                .and(filter.getGroupId() == null ? null : spec.getUserByGroupSpec(filter.getGroupId()))
+                .and(filter.getGroups() == null || filter.getGroups().isEmpty() ? null :
+                        spec.getUserByListOfGroupsSpec(filter.getGroups()))
+                .and(filter.getRoles() == null || filter.getRoles().isEmpty() ? null :
+                        spec.getUserByListOfRolesSpec(filter.getRoles()))
                 .and(spec.getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted.fromString(filter.getDeleted())));
         foundUsers = service.findAllByFilter(userSpecification, pageable);
         returnedUsers = mapPage(foundUsers, UserDtoResponseWithoutPassword.class, pageable);
