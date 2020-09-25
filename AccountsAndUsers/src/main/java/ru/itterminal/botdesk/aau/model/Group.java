@@ -14,14 +14,14 @@ import lombok.Setter;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 
 @Entity
-@Table(name = "group")
+@Table(name = "group_users")
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Group extends BaseEntity {
-    @Column(nullable = false)
+    @Column(nullable = false, length = 128)
     private String name;
 
     @Column

@@ -16,34 +16,34 @@ import java.util.Set;
 @NoArgsConstructor
 public class User extends BaseEntity {
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 128)
     private String email;
 
-    @Column(name = "first_name")
+    @Column(name = "first_name", length = 20)
     private String firstName;
 
-    @Column(name = "second_name")
+    @Column(name = "second_name", length = 30)
     private String secondName;
 
     @Column(nullable = false)
     private String password;
 
-    @Column
+    @Column (length = 30)
     private String phone;
 
     @Column
     private String comment;
 
-    @Column
+    @Column (length = 2)
     private String language;
 
-    @Column(name = "email_verification_token")
+    @Column(name = "email_verification_token", length = 128)
     private String emailVerificationToken;
 
     @Column(name = "email_verification_status", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean emailVerificationStatus;
 
-    @Column(name = "password_reset_token")
+    @Column(name = "password_reset_token", length = 128)
     private String passwordResetToken;
 
     @Column(name = "is_archived", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")

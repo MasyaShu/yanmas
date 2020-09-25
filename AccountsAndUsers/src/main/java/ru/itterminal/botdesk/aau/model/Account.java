@@ -21,14 +21,11 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Account extends BaseEntity {
-    @Column(nullable = false)
+    @Column(nullable = false, length = 128)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 2)
     private String language;
-
-    @Column(nullable = false)
-    private String time_zone;
 
     // TODO implement  pop3_settings_id and smtp_settings_id
 
@@ -43,7 +40,6 @@ public class Account extends BaseEntity {
         Account account = (Account) o;
         return Objects.equals(name, account.name) &&
                 Objects.equals(language, account.language) &&
-                Objects.equals(time_zone, account.time_zone) &&
                 Objects.equals(getId(), account.getId()) &&
                 Objects.equals(getVersion(), account.getVersion()) &&
                 Objects.equals(getDeleted(), account.getDeleted());
@@ -51,6 +47,6 @@ public class Account extends BaseEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, language, time_zone);
+        return Objects.hash(name, language);
     }
 }
