@@ -17,12 +17,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.projection.UserUniqueFields;
-import ru.itterminal.botdesk.aau.repository.UserRepository;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
@@ -34,13 +33,12 @@ class UserOperationValidatorTest {
     private UserServiceImpl service;
 
     @Mock
-    private UserRepository repository;
-
-    @Mock
     private UserUniqueFields userUniqueFields;
 
     @InjectMocks
     private UserOperationValidator validator = new UserOperationValidator();
+
+    BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     private static final String EXIST_EMAIL = "mail@mal.ru";
     private static User user;
@@ -70,6 +68,13 @@ class UserOperationValidatorTest {
                 () -> validator.checkUniqueness(user));
         assertEquals(logicalValidationException.getFieldErrors().get("email").get(0),
                 thrown.getFieldErrors().get("email").get(0));
+    }
+
+    @Test
+    public void encoderPassword() {
+        String encodedPassword = encoder.encode("12345");
+        System.out.println("encodedPassword: " + encodedPassword);
+        assertTrue(encoder.matches("12345", encodedPassword));
     }
 
 }
