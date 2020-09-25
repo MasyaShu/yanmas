@@ -52,34 +52,6 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         }
     }
 
-    @Override
-    public boolean beforeCreate(User entity) {
-        super.beforeCreate(entity);
-        entity.setPassword(encoder.encode(entity.getPassword()));
-        if (entity.getLanguage() == null) {
-            String ln = entity.getAccount().getLanguage();
-            entity.setLanguage(ln);
-        }
-        return true;
-    }
-
-    @Override
-    public boolean beforeUpdate(User entity) {
-        super.beforeUpdate(entity);
-        log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
-        User entityFromDatabase = service.findById(entity.getId());
-        if (entityFromDatabase == null) {
-            String message = format(ENTITY_NOT_EXIST_MESSAGE, entity.getClass().getSimpleName(), entity.getId());
-            log.error(message);
-            throw new EntityNotExistException(message);
-        }
-        if (!entity.getPassword().isEmpty()) {
-            entity.setPassword(encoder.encode(entity.getPassword()));
-        } else {
-            entity.setPassword(entityFromDatabase.getPassword());
-        }
-        return true;
-    }
 
     @Override
     public boolean checkLogicalDelete(UUID id) {
