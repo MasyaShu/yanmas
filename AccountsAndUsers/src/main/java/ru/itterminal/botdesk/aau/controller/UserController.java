@@ -41,6 +41,7 @@ import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 @Slf4j
 @RestController("UserControllerV1")
 @Validated
+// TODO best practice api/v1/user
 @RequestMapping("v1/user")
 public class UserController extends BaseController {
 

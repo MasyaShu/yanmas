@@ -30,6 +30,7 @@ import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 @Slf4j
 @RestController("RoleControllerV1")
 @Validated
+// TODO best practice api/v1/user
 @RequestMapping("v1/role")
 public class RoleController extends BaseController {
 

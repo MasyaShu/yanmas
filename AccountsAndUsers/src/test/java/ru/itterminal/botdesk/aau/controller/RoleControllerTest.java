@@ -50,6 +50,7 @@ class RoleControllerTest {
 
     private static String HOST = "http://localhost";
     private static String PORT = ":8081";
+    // TODO best practice api/v1/user
     private static String API = "/v1/role/";
     private static String ROLE_NAME_1 = "TestNameOfRole_1";
     private static String ROLE_NAME_2 = "TestNameOfRole_2";
