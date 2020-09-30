@@ -26,9 +26,6 @@ public class BotDeskApp {
 
     public static void main(String[] args) {
         ConfigurableApplicationContext applicationContext = SpringApplication.run(BotDeskApp.class, args);
-        for (String s : applicationContext.getBeanDefinitionNames()) {
-            System.out.println(s);
-        }
     }
 
     @Bean

@@ -1,13 +1,13 @@
 -- **************** DROP TABLES -- ****************
 DROP TABLE IF EXISTS user_role;
-DROP TABLE IF EXISTS user;
+DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS account;
 DROP TABLE IF EXISTS group_users;
 DROP TABLE IF EXISTS role;
 -- **************** CREATE TABLES -- ****************
 CREATE TABLE account
 (
-    out_id   uuid,
+    out_id   varchar(128),
     deleted  bool        NOT NULL DEFAULT 'false',
     version  int2        NOT NULL DEFAULT (0),
     id       uuid        NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE account
 );
 CREATE TABLE group_users
 (
-    out_id  uuid,
+    out_id  varchar(128),
     deleted bool         NOT NULL DEFAULT 'false',
     version int2         NOT NULL DEFAULT (0),
     id      uuid         NOT NULL,
@@ -25,9 +25,9 @@ CREATE TABLE group_users
     comment text,
     PRIMARY KEY (id)
 );
-CREATE TABLE user
+CREATE TABLE users
 (
-    out_id                    uuid,
+    out_id                    varchar(128),
     deleted                   bool         NOT NULL DEFAULT 'false',
     version                   int2         NOT NULL DEFAULT (0),
     id                        uuid         NOT NULL,
@@ -50,7 +50,7 @@ CREATE TABLE user
 );
 CREATE TABLE role
 (
-    out_id  uuid,
+    out_id  varchar(128),
     deleted bool        NOT NULL DEFAULT 'false',
     version int2        NOT NULL DEFAULT (0),
     id      uuid        NOT NULL,
@@ -63,7 +63,7 @@ CREATE TABLE user_role
     user_id uuid NOT NULL,
     role_id uuid NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (user_id) REFERENCES user (id),
+    FOREIGN KEY (user_id) REFERENCES users (id),
     FOREIGN KEY (role_id) REFERENCES role (id)
 );
 
@@ -83,7 +83,7 @@ INSERT INTO group_users(out_id, deleted, version, id, name, comment)
 VALUES ('', 'false', '0', '0223e51a-4bb2-44ee-bc8e-1f047a2145e7', 'groupName1', 'comment for group1 of users'),
        ('', 'false', '0', '99f6b488-7687-4451-b8a1-9fbeb2a3efec', 'groupName2', 'comment for group2 of users');
 
-INSERT INTO user(out_id, deleted, version, id, email, first_name, second_name, password, phone, comment, language,
+INSERT INTO users(out_id, deleted, version, id, email, first_name, second_name, password, phone, comment, language,
                  email_verification_token, email_verification_status, password_reset_token, is_archived,
                  account_id, group_id)
 VALUES ('', 'false', '0', 'd592facb-e6ee-4801-8310-9c7708eb6e6c', 'm@m.ru', 'firstName1', 'secondName1',
