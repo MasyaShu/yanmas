@@ -5,6 +5,7 @@
 	<modules>
 		<module>AccountsAndUsers</module>
 		<module>Commons</module>
+		<module>BotDeskApp</module>
 	</modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -13,12 +14,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 
-	<groupId>ru.it-terminal</groupId>
-	<artifactId>botdesk</artifactId>
+	<groupId>ru.it-terminal.botdesk</groupId>
+	<artifactId>multiple_module_project</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>botdesk</name>
-	<description>botdesk</description>
 
 	<properties>
 		<java.version>14</java.version>
@@ -95,7 +94,8 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<scope>test</scope>
+			<!--TODO return test-->
+			<scope>runtime</scope>
 		</dependency>
 
 		<!-- Modelmapper -->
@@ -106,15 +106,5 @@
 		</dependency>
 
 	</dependencies>
-
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
 
 </project>
