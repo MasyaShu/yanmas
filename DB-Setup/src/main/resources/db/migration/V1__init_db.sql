@@ -1,3 +1,4 @@
+-- START MODULE **ACCOUNT AND USERS**
 CREATE TABLE IF NOT EXISTS account
 (
     out_id   varchar(128),
@@ -65,3 +66,4 @@ VALUES ('', 'false', '0', 'ba99ce38-1611-4a81-adc9-3a779d58bbfe', 'SUPER_ADMIN')
        ('', 'false', '0', '933f20bf-9262-47bb-83d2-0ca55bbbd3fd', 'AUTHOR'),
        ('', 'false', '0', 'f7e579e6-0609-467a-91ff-454f42da3d58', 'EXECUTOR'),
        ('', 'false', '0', '586e087f-f5a0-4db8-af57-edead19db706', 'OBSERVER');
+-- FINISH MODULE **ACCOUNT AND USERS**

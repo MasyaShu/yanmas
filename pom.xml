@@ -6,6 +6,7 @@
 		<module>AccountsAndUsers</module>
 		<module>Commons</module>
 		<module>BotDeskApp</module>
+		<module>DB-Setup</module>
 	</modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>

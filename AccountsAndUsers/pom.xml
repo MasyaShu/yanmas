@@ -18,6 +18,11 @@
             <artifactId>Commons</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>ru.it-terminal.botdesk</groupId>
+            <artifactId>DB-Setup</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
 </project>
