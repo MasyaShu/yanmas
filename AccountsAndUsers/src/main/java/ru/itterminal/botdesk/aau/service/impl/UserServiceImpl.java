@@ -3,6 +3,7 @@ package ru.itterminal.botdesk.aau.service.impl;
 import static java.lang.String.format;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -24,8 +25,12 @@ import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
 @Transactional
 public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidator, UserRepository> {
 
-    @Autowired
     BCryptPasswordEncoder encoder;
+
+    @Autowired
+    public UserServiceImpl(BCryptPasswordEncoder encoder) {
+        this.encoder = encoder;
+    }
 
     public List<UserUniqueFields> findByUniqueFields(User user) {
         return repository.getByEmailAndIdNot(user.getEmail(), user.getId());
@@ -64,5 +69,9 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
         catch (ObjectOptimisticLockingFailureException ex) {
             throw new OptimisticLockingFailureException(format(VERSION_INVALID_MESSAGE, entity.getId()));
         }
+    }
+
+    public Optional<User> findByEmail (String email) {
+        return  repository.getByEmail(email);
     }
 }

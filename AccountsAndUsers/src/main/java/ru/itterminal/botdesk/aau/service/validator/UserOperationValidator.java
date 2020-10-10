@@ -26,11 +26,15 @@ import ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValida
 @Slf4j
 @Component
 public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
-    @Autowired
-    UserServiceImpl service;
+    private UserServiceImpl service;
+    private BCryptPasswordEncoder encoder;
 
     @Autowired
-    BCryptPasswordEncoder encoder;
+    public UserOperationValidator(UserServiceImpl service,
+            BCryptPasswordEncoder encoder) {
+        this.service = service;
+        this.encoder = encoder;
+    }
 
     @Override
     public boolean checkUniqueness(User entity) {

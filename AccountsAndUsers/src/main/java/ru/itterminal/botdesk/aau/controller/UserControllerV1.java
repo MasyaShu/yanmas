@@ -41,15 +41,14 @@ import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 @Slf4j
 @RestController("UserControllerV1")
 @Validated
-// TODO best practice api/v1/user
-@RequestMapping("v1/user")
-public class UserController extends BaseController {
+@RequestMapping("api/v1/user")
+public class UserControllerV1 extends BaseController {
 
     UserServiceImpl service;
     UserSpec spec;
 
     @Autowired
-    public UserController(UserServiceImpl service, UserSpec userSpec) {
+    public UserControllerV1(UserServiceImpl service, UserSpec userSpec) {
         this.spec = userSpec;
         this.service = service;
     }

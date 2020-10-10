@@ -67,18 +67,17 @@ import ru.itterminal.botdesk.aau.model.dto.UserFilterDto;
 import ru.itterminal.botdesk.aau.model.spec.UserSpec;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
-import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringJUnitConfig(value = {UserController.class, UserSpec.class})
+@SpringJUnitConfig(value = {UserControllerV1.class, UserSpec.class})
 @WebMvcTest
-class UserControllerTest {
+class UserControllerV1Test {
 
     @MockBean
     private UserServiceImpl service;
 
     @Autowired
-    private UserController controller;
+    private UserControllerV1 controller;
 
     private MockMvc mockMvc;
 
@@ -93,8 +92,7 @@ class UserControllerTest {
     private ObjectMapper objectMapper = new ObjectMapper();
     private static String HOST = "http://localhost";
     private static String PORT = ":8081";
-    // TODO best practice api/v1/user
-    private static String API = "/v1/user/";
+    private static String API = "api/v1/user/";
     private static String USER_1_ID = "b3805032-02db-4422-9c0e-4ddba1701811";
     private static String USER_2_ID = "d45e0a6e-cb5b-11ea-87d0-0242ac138003";
     private static String ACCOUNT_1_ID = "d45e0a6e-cb5b-11ea-87d0-0242ac138003";

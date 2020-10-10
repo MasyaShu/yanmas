@@ -35,10 +35,11 @@ class UserOperationValidatorTest {
     @Mock
     private UserUniqueFields userUniqueFields;
 
-    @InjectMocks
-    private UserOperationValidator validator = new UserOperationValidator();
-
     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+    @InjectMocks
+    private UserOperationValidator validator = new UserOperationValidator(service, encoder);
+
 
     private static final String EXIST_EMAIL = "mail@mal.ru";
     private static User user;

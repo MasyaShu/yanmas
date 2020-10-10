@@ -151,6 +151,12 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(JwtAuthenticationException.class)
+    public ResponseEntity<?> handleJwtAuthenticationException(JwtAuthenticationException ex, HttpServletRequest request) {
+        ApiError apiError = new ApiError(HttpStatus.NOT_FOUND, "Authentication failed", ex).withRequest(request);
+        return new ResponseEntity<>(apiError, null, HttpStatus.FORBIDDEN);
+    }
+
     @ExceptionHandler(EntityNotExistException.class)
     public ResponseEntity<?> handleEntityNotExistException(EntityNotExistException ex, HttpServletRequest request) {
         ApiError apiError = new ApiError(HttpStatus.NOT_FOUND, "Resource Not Found", ex).withRequest(request);

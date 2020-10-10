@@ -42,6 +42,7 @@ public class BaseEntityDto {
     private Integer version;
 
 
+    // TODO Remove NotNull for Create? Only for Update and Delete
     @NotNull(groups = {Create.class, Update.class, Delete.class})
     @AssertFalse(groups = {Create.class},
         message = CommonConstants.DELETED_ASSERT_FALSE)
