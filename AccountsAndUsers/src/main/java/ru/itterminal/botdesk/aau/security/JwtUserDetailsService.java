@@ -23,11 +23,11 @@ public class JwtUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws EntityNotExistException {
-        User user = userServiceImpl.findByEmail(username)
-                .orElseThrow(() -> new EntityNotExistException("User with username: " + username + " not found"));
+    public UserDetails loadUserByUsername(String email) throws EntityNotExistException {
+        User user = userServiceImpl.findByEmail(email)
+                .orElseThrow(() -> new EntityNotExistException("User with username: " + email + " not found"));
         JwtUser jwtUser = JwtUserFactory.create(user);
-        log.info("in loadUserByUsername - user with username: {} successfully loaded", username);
+        log.info("in loadUserByUsername - user with username: {} successfully loaded", email);
         return jwtUser;
     }
 }

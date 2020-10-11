@@ -14,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -64,6 +65,7 @@ public class UserControllerV1 extends BaseController {
      */
     @PostMapping()
     @ResponseStatus(value = HttpStatus.CREATED)
+    @Secured({"SUPER_ADMIN","ADMIN"})
     public ResponseEntity<UserDtoResponseWithoutPassword> create(
             @Validated(Create.class) @RequestBody UserDto request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
@@ -83,6 +85,7 @@ public class UserControllerV1 extends BaseController {
      * @return updated user
      */
     @PutMapping()
+    @Secured({"SUPER_ADMIN","ADMIN"})
     public ResponseEntity<UserDtoResponseWithoutPassword> update(
             @Validated(Update.class) @RequestBody UserDto requestDto) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, requestDto);
@@ -90,7 +93,6 @@ public class UserControllerV1 extends BaseController {
         User updatedUser = service.update(user);
         UserDtoResponseWithoutPassword returnedUser =
                 modelMapper.map(updatedUser, UserDtoResponseWithoutPassword.class);
-        //        returnedUser.setPassword(null);
         log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedUser);
         return new ResponseEntity<>(returnedUser, HttpStatus.OK);
     }
@@ -162,6 +164,7 @@ public class UserControllerV1 extends BaseController {
      * @param request UserDto
      */
     @DeleteMapping()
+    @Secured({"SUPER_ADMIN","ADMIN"})
     ResponseEntity<Void> physicalDelete(@RequestBody UserDto request) {
         throw new UnsupportedOperationException("Physical delete will be implement in the further");
     }

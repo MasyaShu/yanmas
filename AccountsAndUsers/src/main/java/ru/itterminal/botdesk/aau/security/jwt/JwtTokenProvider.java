@@ -1,14 +1,12 @@
 package ru.itterminal.botdesk.aau.security.jwt;
 
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -29,10 +27,14 @@ import ru.itterminal.botdesk.commons.exception.JwtAuthenticationException;
 public class JwtTokenProvider {
 
     @Value("${jwt.token.secret}")
-    private String secret;
+    private String secretToken;
+
+    @Value("${jwt.token.prefix}")
+    private String prefixToken;
+
 
     @Value("${jwt.token.expired}")
-    private long validityInMilliseconds;
+    private long validityInMillisecondsToken;
 
     private UserDetailsService userDetailsService;
 
@@ -46,22 +48,22 @@ public class JwtTokenProvider {
 
     @PostConstruct
     protected void init() {
-        secret = Base64.getEncoder().encodeToString(secret.getBytes());
+        secretToken = Base64.getEncoder().encodeToString(secretToken.getBytes());
     }
 
-    public String createToken(String email, List<Role> roles) {
+    public String createToken(String email, Set<Role> roles) {
 
         Claims claims = Jwts.claims().setSubject(email);
-        claims.put("roles", getRoleNames(roles));
+        claims.put("roles", roles);
 
         Date now = new Date();
-        Date validity = new Date(now.getTime() + validityInMilliseconds);
+        Date validity = new Date(now.getTime() + validityInMillisecondsToken);
 
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(validity)
-                .signWith(SignatureAlgorithm.HS256, secret)
+                .signWith(SignatureAlgorithm.HS256, secretToken)
                 .compact();
     }
 
@@ -71,12 +73,12 @@ public class JwtTokenProvider {
     }
 
     public String getEmail(String token) {
-        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parser().setSigningKey(secretToken).parseClaimsJws(token).getBody().getSubject();
     }
 
     public String resolveToken(HttpServletRequest req) {
         String bearerToken = req.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer_")) {
+        if (bearerToken != null && bearerToken.startsWith(prefixToken)) {
             return bearerToken.substring(7, bearerToken.length());
         }
         return null;
@@ -84,7 +86,7 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String token) {
         try {
-            Jws<Claims> claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
+            Jws<Claims> claims = Jwts.parser().setSigningKey(secretToken).parseClaimsJws(token);
             if (claims.getBody().getExpiration().before(new Date())) {
                 return false;
             }
@@ -92,13 +94,5 @@ public class JwtTokenProvider {
         } catch (JwtException | IllegalArgumentException e) {
             throw new JwtAuthenticationException("JWT token is expired or invalid");
         }
-    }
-
-    private List<String> getRoleNames(List<Role> userRoles) {
-        List<String> result = new ArrayList<>();
-        userRoles.forEach(role -> {
-            result.add(role.getName());
-        });
-        return result;
     }
 }
