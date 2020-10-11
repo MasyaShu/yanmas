@@ -18,7 +18,7 @@ public final class JwtUserFactory {
     public static JwtUser create(User user) {
         return new JwtUser(
                 user.getId(),
-                user.getEmail(),
+                user.getAccount().getId(), user.getEmail(),
                 user.getPassword(),
                 mapToGrantedAuthorities(new ArrayList<>(user.getRoles())),
                 user.getEmailVerificationStatus() && !user.getIsArchived()

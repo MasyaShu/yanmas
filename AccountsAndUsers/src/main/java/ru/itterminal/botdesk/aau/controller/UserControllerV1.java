@@ -1,5 +1,6 @@
 package ru.itterminal.botdesk.aau.controller;
 
+import java.security.Principal;
 import java.util.UUID;
 
 import javax.validation.Valid;
@@ -15,6 +16,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +35,7 @@ import ru.itterminal.botdesk.aau.model.dto.UserDto;
 import ru.itterminal.botdesk.aau.model.dto.UserDtoResponseWithoutPassword;
 import ru.itterminal.botdesk.aau.model.dto.UserFilterDto;
 import ru.itterminal.botdesk.aau.model.spec.UserSpec;
+import ru.itterminal.botdesk.aau.security.jwt.JwtUser;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
@@ -65,7 +68,7 @@ public class UserControllerV1 extends BaseController {
      */
     @PostMapping()
     @ResponseStatus(value = HttpStatus.CREATED)
-    @Secured({"SUPER_ADMIN","ADMIN"})
+    @Secured({"SUPER_ADMIN", "ADMIN"})
     public ResponseEntity<UserDtoResponseWithoutPassword> create(
             @Validated(Create.class) @RequestBody UserDto request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
@@ -85,7 +88,7 @@ public class UserControllerV1 extends BaseController {
      * @return updated user
      */
     @PutMapping()
-    @Secured({"SUPER_ADMIN","ADMIN"})
+    @Secured({"SUPER_ADMIN", "ADMIN"})
     public ResponseEntity<UserDtoResponseWithoutPassword> update(
             @Validated(Update.class) @RequestBody UserDto requestDto) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, requestDto);
@@ -121,6 +124,7 @@ public class UserControllerV1 extends BaseController {
      */
     @GetMapping()
     public ResponseEntity<Page<UserDtoResponseWithoutPassword>> getByFilter(
+            Principal user,
             @Valid @RequestBody UserFilterDto filter,
             @RequestParam(defaultValue = PAGE_DEFAULT_VALUE) @PositiveOrZero int page,
             @RequestParam(defaultValue = SIZE_DEFAULT_VALUE) @Positive int size) {
@@ -139,7 +143,6 @@ public class UserControllerV1 extends BaseController {
                         filter.getSortBy()));
         Page<User> foundUsers;
         Page<UserDtoResponseWithoutPassword> returnedUsers;
-        // TODO add getUserByAccountSpec
         Specification<User> userSpecification = Specification
                 .where(filter.getEmail() == null ? null : spec.getUserByEmailSpec(filter.getEmail()))
                 .and(filter.getFirstName() == null ? null : spec.getUserByFirstNameSpec(filter.getFirstName()))
@@ -151,7 +154,11 @@ public class UserControllerV1 extends BaseController {
                         spec.getUserByListOfGroupsSpec(filter.getGroups()))
                 .and(filter.getRoles() == null || filter.getRoles().isEmpty() ? null :
                         spec.getUserByListOfRolesSpec(filter.getRoles()))
-                .and(spec.getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted.fromString(filter.getDeleted())));
+                .and(spec.getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted.fromString(filter.getDeleted())))
+                .and(user == null ? null :
+                        spec.getUserByAccountSpec(
+                                ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal())
+                                        .getAccountId()));
         foundUsers = service.findAllByFilter(userSpecification, pageable);
         returnedUsers = mapPage(foundUsers, UserDtoResponseWithoutPassword.class, pageable);
         log.debug(FIND_FINISH_MESSAGE, ENTITY_NAME, foundUsers.getTotalElements());
@@ -164,7 +171,7 @@ public class UserControllerV1 extends BaseController {
      * @param request UserDto
      */
     @DeleteMapping()
-    @Secured({"SUPER_ADMIN","ADMIN"})
+    @Secured({"SUPER_ADMIN", "ADMIN"})
     ResponseEntity<Void> physicalDelete(@RequestBody UserDto request) {
         throw new UnsupportedOperationException("Physical delete will be implement in the further");
     }

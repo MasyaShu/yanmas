@@ -14,6 +14,7 @@ import lombok.Setter;
 public class JwtUser implements UserDetails {
 
     private final UUID id;
+    private final UUID accountId;
     private final String username;
     private final String password;
     private final boolean enabled;
@@ -21,12 +22,13 @@ public class JwtUser implements UserDetails {
 
     public JwtUser(
             UUID id,
-            String username,
+            UUID accountId, String username,
             String password,
             Collection<? extends GrantedAuthority> authorities,
             boolean enabled
     ) {
         this.id = id;
+        this.accountId = accountId;
         this.username = username;
         this.password = password;
         this.authorities = authorities;
