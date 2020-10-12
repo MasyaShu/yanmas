@@ -28,15 +28,16 @@ public class JwtUserDetailsService implements UserDetailsService {
         User user = userServiceImpl.findByEmail(email)
                 .orElseThrow(() -> new EntityNotExistException("User with username: " + email + " not found"));
 
-        JwtUser jwtUser = new JwtUser(
-                user.getId(),
-                user.getAccount().getId(),
-                user.getEmail(),
-                user.getPassword(),
-                user.getRoles().stream()
+        JwtUser jwtUser = new JwtUser()
+                .builder()
+                .accountId(user.getAccount().getId())
+                .username(user.getEmail())
+                .password(user.getPassword())
+                .authorities(user.getRoles().stream()
                         .map(role -> new SimpleGrantedAuthority(role.getName()))
-                        .collect(Collectors.toList()),
-                true);
+                        .collect(Collectors.toList()))
+                .enabled(user.getEmailVerificationStatus() && !user.getIsArchived())
+                .build();
 
         log.info("in loadUserByUsername - user with username: {} successfully loaded", email);
         return jwtUser;

@@ -54,6 +54,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.security.web.FilterChainProxy;
@@ -219,6 +220,19 @@ class UserControllerV1Test {
                 .andExpect(jsonPath("$.id").value(USER_1_ID))
                 .andExpect(jsonPath("$.email").value(EMAIL_1))
                 .andExpect(jsonPath("$.password").doesNotExist());
+    }
+
+    @Test
+    @WithAnonymousUser
+    public void create_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
+        MockHttpServletRequestBuilder request = post(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDto));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isForbidden());
+        verify(service, times(0)).create(any());
     }
 
     @Test

@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -61,13 +60,13 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 JwtUser jwtUser = null;
                 switch (role) {
                     case "ADMIN_ACCOUNT_1" :
-                        jwtUser = new JwtUser(
-                                UUID.fromString(USER_1_ID),
-                                UUID.fromString(ACCOUNT_1_ID),
-                                EMAIL_1,
-                                "12345",
-                                List.of(new SimpleGrantedAuthority("ADMIN")),
-                                true);
+                        jwtUser = new JwtUser()
+                                .builder()
+                                .accountId(UUID.fromString(ACCOUNT_1_ID))
+                                .username(EMAIL_1)
+                                .enabled(true)
+                                .authorities(List.of(new SimpleGrantedAuthority("ADMIN")))
+                                .build();
                         break;
                 }
 

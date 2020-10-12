@@ -8,8 +8,4 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @Configuration
 @ComponentScan(basePackages = "ru.itterminal.botdesk")
 public class AccountsAndUsersConfig {
-    @Bean
-    protected BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(12);
-    }
 }

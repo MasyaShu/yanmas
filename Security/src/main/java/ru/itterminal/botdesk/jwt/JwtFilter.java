@@ -8,7 +8,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -19,23 +18,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ru.itterminal.botdesk.commons.exception.error.ApiError;
 
-public class JwtTokenFilter extends GenericFilterBean {
+public class JwtFilter extends GenericFilterBean {
 
-    private JwtTokenProvider jwtTokenProvider;
+    private JwtProvider jwtProvider;
 
-    public JwtTokenFilter(JwtTokenProvider jwtTokenProvider) {
-        this.jwtTokenProvider = jwtTokenProvider;
+    public JwtFilter(JwtProvider jwtProvider) {
+        this.jwtProvider = jwtProvider;
     }
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain)
             throws IOException, ServletException {
 
-        String token = jwtTokenProvider.resolveToken((HttpServletRequest) req);
+        String token = jwtProvider.resolveToken((HttpServletRequest) req);
         if (token != null ) {
             boolean validateToken = false;
             try {
-                validateToken = jwtTokenProvider.validateToken(token);
+                validateToken = jwtProvider.validateToken(token);
             } catch (Exception e) {
                 res.setContentType("application/json");
                 ApiError response = new ApiError(HttpStatus.UNAUTHORIZED ,"Unauthorised", e);
@@ -46,8 +45,7 @@ public class JwtTokenFilter extends GenericFilterBean {
                 return;
             }
             if (validateToken) {
-                Authentication auth = jwtTokenProvider.getAuthentication(token);
-
+                Authentication auth = jwtProvider.getAuthentication(token);
                 if (auth != null) {
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }

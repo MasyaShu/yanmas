@@ -1,8 +1,11 @@
 package ru.itterminal.botdesk.jwt;
 
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -10,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -21,14 +25,13 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
 @Component
-public class JwtTokenProvider {
+public class JwtProvider {
 
     @Value("${jwt.token.secret}")
     private String secretToken;
 
     @Value("${jwt.token.prefix}")
     private String prefixToken;
-
 
     @Value("${jwt.token.expired}")
     private long validityInMillisecondsToken;
@@ -37,7 +40,7 @@ public class JwtTokenProvider {
 
     private BCryptPasswordEncoder passwordEncoder;
 
-    public JwtTokenProvider(UserDetailsService userDetailsService,
+    public JwtProvider(UserDetailsService userDetailsService,
             BCryptPasswordEncoder passwordEncoder) {
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
@@ -48,10 +51,11 @@ public class JwtTokenProvider {
         secretToken = Base64.getEncoder().encodeToString(secretToken.getBytes());
     }
 
-    public String createToken(String email, Set<String> roles) {
+    public String createToken(String email, Set<String> roles, UUID accountId) {
 
         Claims claims = Jwts.claims().setSubject(email);
         claims.put("roles", roles);
+        claims.put("accountId", accountId);
 
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMillisecondsToken);
@@ -65,8 +69,29 @@ public class JwtTokenProvider {
     }
 
     public Authentication getAuthentication(String token) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(getEmail(token));
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        UserDetails userDetails = getUserDetails(token);
+        return new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(),
+                userDetails.getAuthorities());
+    }
+
+    public UserDetails getUserDetails(String token) {
+        Claims claims = Jwts.parser().setSigningKey(secretToken).parseClaimsJws(token).getBody();
+        String email = claims.getSubject();
+        UUID accountId = UUID.fromString((String) claims.get("accountId"));
+        Set<String> roles = ((ArrayList<String>) claims.get("roles")).stream().collect(Collectors.toSet());
+
+        JwtUser jwtUser = new JwtUser()
+                .builder()
+                .accountId(accountId)
+                .username(email)
+                .authorities(roles.stream()
+                        .map(role -> new SimpleGrantedAuthority(role))
+                        .collect(Collectors.toList()))
+                .enabled(true)
+                .build();
+
+        return jwtUser;
+
     }
 
     public String getEmail(String token) {
@@ -88,7 +113,8 @@ public class JwtTokenProvider {
                 return false;
             }
             return true;
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw e;
         }
     }

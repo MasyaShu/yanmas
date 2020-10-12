@@ -6,34 +6,24 @@ import java.util.UUID;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
+@Builder
 public class JwtUser implements UserDetails {
 
-    private final UUID id;
-    private final UUID accountId;
-    private final String username;
-    private final String password;
-    private final boolean enabled;
-    private final Collection<? extends GrantedAuthority> authorities;
-
-    public JwtUser(
-            UUID id,
-            UUID accountId, String username,
-            String password,
-            Collection<? extends GrantedAuthority> authorities,
-            boolean enabled
-    ) {
-        this.id = id;
-        this.accountId = accountId;
-        this.username = username;
-        this.password = password;
-        this.authorities = authorities;
-        this.enabled = enabled;
-    }
+    private  UUID accountId;
+    private  String username;
+    private  String password;
+    private  boolean enabled;
+    private  Collection<? extends GrantedAuthority> authorities;
 
     @Override
     public boolean isAccountNonExpired() {

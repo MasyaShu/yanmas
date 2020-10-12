@@ -2,6 +2,8 @@ package ru.itterminal.botdesk.aau.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.dto.AuthenticationRequestDto;
-import ru.itterminal.botdesk.jwt.JwtTokenProvider;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.JwtAuthenticationException;
+import ru.itterminal.botdesk.jwt.JwtProvider;
 
 @RestController
 @RequestMapping(value = "/api/v1/auth/")
@@ -28,7 +30,7 @@ public class AuthenticationControllerV1 {
 
     private final AuthenticationManager authenticationManager;
 
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtProvider jwtProvider;
 
     private final UserServiceImpl userService;
 
@@ -36,14 +38,14 @@ public class AuthenticationControllerV1 {
     private String prefixToken;
 
     @Autowired
-    public AuthenticationControllerV1(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider,
+    public AuthenticationControllerV1(AuthenticationManager authenticationManager, JwtProvider jwtProvider,
             UserServiceImpl userService) {
         this.authenticationManager = authenticationManager;
-        this.jwtTokenProvider = jwtTokenProvider;
+        this.jwtProvider = jwtProvider;
         this.userService = userService;
     }
 
-    @PostMapping("login")
+    @PostMapping("signin")
     public ResponseEntity login(@RequestBody AuthenticationRequestDto requestDto) {
         try {
             String email = requestDto.getEmail();
@@ -53,16 +55,14 @@ public class AuthenticationControllerV1 {
                     () -> new EntityNotExistException("User with email: " + email + " not found")
             );
 
-            String token = jwtTokenProvider.createToken(email,
-                    user.getRoles().stream()
+            Set<String> roles = user.getRoles().stream()
                     .map(role -> role.getName())
-                    .collect(Collectors.toSet())
-            );
-
+                    .collect(Collectors.toSet());
+            UUID accountId = user.getAccount().getId();
+            String token = jwtProvider.createToken(email, roles, accountId);
             Map<Object, Object> response = new HashMap<>();
             response.put("email", email);
             response.put("token", token);
-
             return ResponseEntity.ok(response);
         }
         catch (AuthenticationException e) {
