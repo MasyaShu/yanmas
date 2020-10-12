@@ -1,16 +1,17 @@
 package ru.itterminal.botdesk.aau.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.stream.Collectors;
+
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.User;
-import ru.itterminal.botdesk.aau.security.jwt.JwtUser;
-import ru.itterminal.botdesk.aau.security.jwt.JwtUserFactory;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
+import ru.itterminal.botdesk.jwt.JwtUser;
 
 @Service
 @Slf4j
@@ -26,7 +27,17 @@ public class JwtUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws EntityNotExistException {
         User user = userServiceImpl.findByEmail(email)
                 .orElseThrow(() -> new EntityNotExistException("User with username: " + email + " not found"));
-        JwtUser jwtUser = JwtUserFactory.create(user);
+
+        JwtUser jwtUser = new JwtUser(
+                user.getId(),
+                user.getAccount().getId(),
+                user.getEmail(),
+                user.getPassword(),
+                user.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName()))
+                        .collect(Collectors.toList()),
+                true);
+
         log.info("in loadUserByUsername - user with username: {} successfully loaded", email);
         return jwtUser;
     }

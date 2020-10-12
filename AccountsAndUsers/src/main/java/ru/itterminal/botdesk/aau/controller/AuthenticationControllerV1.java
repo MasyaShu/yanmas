@@ -2,6 +2,7 @@ package ru.itterminal.botdesk.aau.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.dto.AuthenticationRequestDto;
-import ru.itterminal.botdesk.aau.security.jwt.JwtTokenProvider;
+import ru.itterminal.botdesk.jwt.JwtTokenProvider;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.JwtAuthenticationException;
@@ -52,11 +53,15 @@ public class AuthenticationControllerV1 {
                     () -> new EntityNotExistException("User with email: " + email + " not found")
             );
 
-            String token = jwtTokenProvider.createToken(email, user.getRoles());
+            String token = jwtTokenProvider.createToken(email,
+                    user.getRoles().stream()
+                    .map(role -> role.getName())
+                    .collect(Collectors.toSet())
+            );
 
             Map<Object, Object> response = new HashMap<>();
             response.put("email", email);
-            response.put("token", prefixToken + token);
+            response.put("token", token);
 
             return ResponseEntity.ok(response);
         }

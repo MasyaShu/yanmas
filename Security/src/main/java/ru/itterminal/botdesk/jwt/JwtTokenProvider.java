@@ -1,4 +1,4 @@
-package ru.itterminal.botdesk.aau.security.jwt;
+package ru.itterminal.botdesk.jwt;
 
 import java.util.Base64;
 import java.util.Date;
@@ -17,11 +17,8 @@ import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import ru.itterminal.botdesk.aau.model.Role;
-import ru.itterminal.botdesk.commons.exception.JwtAuthenticationException;
 
 @Component
 public class JwtTokenProvider {
@@ -51,7 +48,7 @@ public class JwtTokenProvider {
         secretToken = Base64.getEncoder().encodeToString(secretToken.getBytes());
     }
 
-    public String createToken(String email, Set<Role> roles) {
+    public String createToken(String email, Set<String> roles) {
 
         Claims claims = Jwts.claims().setSubject(email);
         claims.put("roles", roles);
@@ -91,8 +88,8 @@ public class JwtTokenProvider {
                 return false;
             }
             return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            throw new JwtAuthenticationException("JWT token is expired or invalid");
+        } catch (Exception e) {
+            throw e;
         }
     }
 }

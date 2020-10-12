@@ -29,6 +29,7 @@ import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_NOT_BE_EMP
 import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_NOT_BE_NULL;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.REQUEST_NOT_READABLE;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.SIZE_MUST_BE_BETWEEN;
+import static ru.itterminal.botdesk.config.TestSecurityConfig.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,12 +44,20 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.test.context.support.WithUserDetails;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
+import org.springframework.security.web.FilterChainProxy;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -67,10 +76,14 @@ import ru.itterminal.botdesk.aau.model.dto.UserFilterDto;
 import ru.itterminal.botdesk.aau.model.spec.UserSpec;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
+import ru.itterminal.botdesk.config.TestSecurityConfig;
+import ru.itterminal.botdesk.jwt.JwtUser;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringJUnitConfig(value = {UserControllerV1.class, UserSpec.class})
+@SpringJUnitConfig(value = {UserControllerV1.class, UserSpec.class, FilterChainProxy.class})
+@Import(TestSecurityConfig.class)
 @WebMvcTest
+@ActiveProfiles("Test")
 class UserControllerV1Test {
 
     @MockBean
@@ -79,6 +92,12 @@ class UserControllerV1Test {
     @Autowired
     private UserControllerV1 controller;
 
+    @Autowired
+    FilterChainProxy springSecurityFilterChain;
+
+    @Autowired
+    UserDetailsService userDetailsService;
+
     private MockMvc mockMvc;
 
     @BeforeAll
@@ -86,6 +105,7 @@ class UserControllerV1Test {
         MockitoAnnotations.initMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(WebTestConfig.controllerAdvice())
+                .apply(SecurityMockMvcConfigurers.springSecurity(springSecurityFilterChain))
                 .build();
     }
 
@@ -93,12 +113,6 @@ class UserControllerV1Test {
     private static String HOST = "http://localhost";
     private static String PORT = ":8081";
     private static String API = "api/v1/user/";
-    private static String USER_1_ID = "b3805032-02db-4422-9c0e-4ddba1701811";
-    private static String USER_2_ID = "d45e0a6e-cb5b-11ea-87d0-0242ac138003";
-    private static String ACCOUNT_1_ID = "d45e0a6e-cb5b-11ea-87d0-0242ac138003";
-    private static String GROUP_1_ID = "8f85579e-670c-4c78-88cb-d284bbd473b8";
-    private static String EMAIL_1 = "yaneg.ru@gmial.com";
-    private static String EMAIL_2 = "yaneg2.ru@gmial.com";
     private static String PASSWORD_1 = "UserUser123";
     private static String PASSWORD_2 = "UserUser321";
     private static String FIRST_NAME = "Ivan";
@@ -192,6 +206,7 @@ class UserControllerV1Test {
     }
 
     @Test
+    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
     public void create_shouldCreate_whenValidDataPassed() throws Exception {
         when(service.create(any())).thenReturn(user_1);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
@@ -207,6 +222,7 @@ class UserControllerV1Test {
     }
 
     @Test
+    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
     public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
         userDto.setEmail(INVALID_EMAIL_1);
         userDto.setDeleted(true);
@@ -241,6 +257,7 @@ class UserControllerV1Test {
     }
 
     @Test
+    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
     public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenAllPassedDataIsNull() throws Exception {
         userDto.setEmail(null);
         userDto.setDeleted(null);
@@ -271,6 +288,7 @@ class UserControllerV1Test {
     }
 
     @Test
+    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
     public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenIdAndVersionNotNull() throws Exception {
         userDto.setId(UUID.randomUUID());
         userDto.setVersion(15);
@@ -288,6 +306,7 @@ class UserControllerV1Test {
     }
 
     @Test
+    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
     public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidEmailPassed() throws Exception {
         for (String ie : invalidEmail) {
             userDto.setEmail(ie);
@@ -304,6 +323,7 @@ class UserControllerV1Test {
     }
 
     @Test
+    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
     public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidPasswordPassed() throws Exception {
         for (String ip : invalidPassword) {
             userDto.setPassword(ip);
@@ -320,6 +340,7 @@ class UserControllerV1Test {
     }
 
     @Test
+    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
     public void update_shouldUpdate_whenValidDataPassed() throws Exception {
         userDto.setId(UUID.fromString(USER_1_ID));
         userDto.setVersion(1);
@@ -337,6 +358,7 @@ class UserControllerV1Test {
     }
 
     @Test
+    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
     public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
         userDto.setEmail(INVALID_EMAIL_1);
         userDto.setDeleted(null);
@@ -373,6 +395,7 @@ class UserControllerV1Test {
     }
 
     @Test
+    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
     public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenAllPassedDataIsNull() throws Exception {
         userDto.setEmail(null);
         userDto.setDeleted(null);
@@ -405,6 +428,7 @@ class UserControllerV1Test {
     }
 
     @Test
+    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
     public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenVersionIsNegative() throws Exception {
         userDto.setVersion(-15);
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
@@ -421,6 +445,7 @@ class UserControllerV1Test {
     }
 
     @Test
+    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
     public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidIdPassed() throws Exception {
         userDto.setId(UUID.fromString(USER_1_ID));
         userDto.setVersion(1);
@@ -438,6 +463,7 @@ class UserControllerV1Test {
     }
 
     @Test
+    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
     public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidEmailPassed() throws Exception {
         for (String ie : invalidEmail) {
             userDto.setEmail(ie);
@@ -454,6 +480,7 @@ class UserControllerV1Test {
     }
 
     @Test
+    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
     public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidPasswordPassed() throws Exception {
         for (String ip : invalidPassword) {
             userDto.setPassword(ip);
@@ -470,8 +497,9 @@ class UserControllerV1Test {
     }
 
     @Test
+    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
     public void getById_shouldFindOneUser_whenUserExistInDatabaseByPassedId() throws Exception {
-        when(service.findById(UUID.fromString(USER_1_ID))).thenReturn(user_1);
+        when(service.findByIdAndAccountId(any(), any())).thenReturn(user_1);
         mockMvc.perform(get(HOST + PORT + API + USER_1_ID))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -480,15 +508,16 @@ class UserControllerV1Test {
     }
 
     @Test
+    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
     void getById_shouldRespondNotFound_whenPassedIdNotExist() throws Exception {
-        when(service.findById(UUID.fromString(USER_1_ID))).thenThrow(EntityNotExistException.class);
+        when(service.findByIdAndAccountId(any(), any())).thenThrow(EntityNotExistException.class);
         mockMvc.perform(get(HOST + PORT + API + USER_1_ID))
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }
 
-
     @Test
+    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
     public void getById_shouldGetStatusBadRequest_whenUiidIsInvalid() throws Exception {
         mockMvc.perform(get(HOST + PORT + API + "Abracadabra"))
                 .andDo(print())
@@ -497,6 +526,7 @@ class UserControllerV1Test {
     }
 
     @Test
+    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
     public void getByFilter_shouldFindTwoUsers_whenUsersExistInDatabaseByPassedFilter() throws Exception {
         Pageable pageable =
                 PageRequest.of(Integer.parseInt(PAGE_DEFAULT_VALUE), Integer.parseInt(SIZE_DEFAULT_VALUE),
@@ -520,6 +550,7 @@ class UserControllerV1Test {
     }
 
     @Test
+    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
     public void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
         userFilterDto.setEmail(INVALID_EMAIL_1);
         userFilterDto.setFirstName(INVALID_FIRST_NAME);
@@ -540,12 +571,15 @@ class UserControllerV1Test {
                 .andExpect(jsonPath("$.errors.email[?(@.message == '%s')]", INVALID_EMAIL).exists())
                 .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_BE_ANY_OF_ALL_TRUE_FALSE).exists())
                 .andExpect(jsonPath("$.errors.direction[?(@.message == '%s')]", MUST_BE_ANY_OF_ASC_DESC).exists())
-                .andExpect(jsonPath("$.errors.sortBy[?(@.message == '%s')]", MUST_BE_ANY_OF_FIRST_NAME_SECOND_NAME).exists());
+                .andExpect(jsonPath("$.errors.sortBy[?(@.message == '%s')]", MUST_BE_ANY_OF_FIRST_NAME_SECOND_NAME)
+                        .exists());
         verify(service, times(0)).create(any());
     }
 
     @Test
-    public void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidSizeAndPagePassed() throws Exception {
+    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
+    public void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidSizeAndPagePassed()
+            throws Exception {
         MockHttpServletRequestBuilder request = get(HOST + PORT + API + "?page=-1&size=0")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -558,6 +592,7 @@ class UserControllerV1Test {
     }
 
     @Test
+    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
     public void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenFilterIsEmpty() throws Exception {
         userFilterDto.setEmail("");
         userFilterDto.setFirstName("");
@@ -579,11 +614,13 @@ class UserControllerV1Test {
                 .andExpect(jsonPath("$.errors.email[?(@.message == '%s')]", INVALID_EMAIL).exists())
                 .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_BE_ANY_OF_ALL_TRUE_FALSE).exists())
                 .andExpect(jsonPath("$.errors.direction[?(@.message == '%s')]", MUST_BE_ANY_OF_ASC_DESC).exists())
-                .andExpect(jsonPath("$.errors.sortBy[?(@.message == '%s')]", MUST_BE_ANY_OF_FIRST_NAME_SECOND_NAME).exists());
+                .andExpect(jsonPath("$.errors.sortBy[?(@.message == '%s')]", MUST_BE_ANY_OF_FIRST_NAME_SECOND_NAME)
+                        .exists());
         verify(service, times(0)).create(any());
     }
 
     @Test
+    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
     public void getByFilter_shouldFindTwoUsers_whenFilterIsNew() throws Exception {
         UserFilterDto userFilterDto = new UserFilterDto();
         Pageable pageable =
@@ -605,6 +642,7 @@ class UserControllerV1Test {
     }
 
     @Test
+    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
     public void getByFilter_shouldFindTwoUsers_whenDefaultFieldsInFilterIsNull() throws Exception {
         userFilterDto.setSortBy(null);
         userFilterDto.setDeleted(null);
@@ -628,6 +666,7 @@ class UserControllerV1Test {
     }
 
     @Test
+    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
     void physicalDelete_shouldThrowUnsupportedOperationException_untilMethodWouldBeImplemented() throws Exception {
         mockMvc.perform(delete(HOST + PORT + API + USER_1_ID))
                 .andDo(print())

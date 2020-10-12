@@ -174,15 +174,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 //        final String bodyOfResponse = "User already exist";
 //        return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
 //    }
-//
-//    @ExceptionHandler(Exception.class)
-//    public ResponseEntity<Object> handleInternal(final Exception ex, final WebRequest request) {
-//        logger.error("500 Status Code", ex);
-//
-//        final String bodyOfResponse = "Internal server error";
-//        return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
-//    }
-//
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleInternal(final Exception ex, final WebRequest request) {
+        logger.error("500 Status Code", ex);
+        final String bodyOfResponse = "Internal server error";
+        return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
+    }
+
 //    @ExceptionHandler(value = {DataIntegrityViolationException.class})
 //    public ResponseEntity<Object> handleDataIntegrityViolationException(final DataIntegrityViolationException ex, final WebRequest request) {
 //        logger.error(ex.getMessage());

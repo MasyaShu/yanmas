@@ -14,4 +14,5 @@ import ru.itterminal.botdesk.commons.repository.CustomizedParentEntityRepository
 public interface UserRepository extends CustomizedParentEntityRepository<User> {
     List<UserUniqueFields> getByEmailAndIdNot(String email, UUID id);
     Optional<User> getByEmail(String email);
+    Optional<User> getByIdAndAccount_Id(UUID id, UUID accountId);
 }

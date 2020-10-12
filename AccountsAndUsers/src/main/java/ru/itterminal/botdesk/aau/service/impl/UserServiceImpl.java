@@ -4,6 +4,7 @@ import static java.lang.String.format;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -34,6 +35,12 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
 
     public List<UserUniqueFields> findByUniqueFields(User user) {
         return repository.getByEmailAndIdNot(user.getEmail(), user.getId());
+    }
+
+    public User findByIdAndAccountId (UUID id, UUID accountId) {
+        return repository.getByIdAndAccount_Id(id, accountId).orElseThrow(
+                () -> new EntityNotExistException("not found user by id: "+ id + " and accountId: " + accountId)
+        );
     }
 
     @Override

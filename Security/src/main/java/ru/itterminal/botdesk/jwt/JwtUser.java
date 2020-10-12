@@ -1,4 +1,4 @@
-package ru.itterminal.botdesk.aau.security.jwt;
+package ru.itterminal.botdesk.jwt;
 
 import java.util.Collection;
 import java.util.UUID;
