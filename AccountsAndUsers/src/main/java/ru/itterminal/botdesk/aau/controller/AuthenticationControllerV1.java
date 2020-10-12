@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,6 +24,7 @@ import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.JwtAuthenticationException;
 import ru.itterminal.botdesk.jwt.JwtProvider;
+import ru.itterminal.botdesk.jwt.JwtUser;
 
 @RestController
 @RequestMapping(value = "/api/v1/auth/")
@@ -49,16 +51,13 @@ public class AuthenticationControllerV1 {
     public ResponseEntity login(@RequestBody AuthenticationRequestDto requestDto) {
         try {
             String email = requestDto.getEmail();
-            authenticationManager
+            Authentication authentication = authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(email, requestDto.getPassword()));
-            User user = userService.findByEmail(email).orElseThrow(
-                    () -> new EntityNotExistException("User with email: " + email + " not found")
-            );
-
-            Set<String> roles = user.getRoles().stream()
-                    .map(role -> role.getName())
+            JwtUser jwtUser =  (JwtUser) authentication.getPrincipal();
+            Set<String> roles = jwtUser.getAuthorities().stream()
+                    .map(Object::toString)
                     .collect(Collectors.toSet());
-            UUID accountId = user.getAccount().getId();
+            UUID accountId = jwtUser.getAccountId();
             String token = jwtProvider.createToken(email, roles, accountId);
             Map<Object, Object> response = new HashMap<>();
             response.put("email", email);
