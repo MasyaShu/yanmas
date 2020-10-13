@@ -18,10 +18,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.dto.AuthenticationRequestDto;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
-import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.JwtAuthenticationException;
 import ru.itterminal.botdesk.jwt.JwtProvider;
 import ru.itterminal.botdesk.jwt.JwtUser;
@@ -47,6 +45,7 @@ public class AuthenticationControllerV1 {
         this.userService = userService;
     }
 
+    // TODO add tests
     @PostMapping("signin")
     public ResponseEntity login(@RequestBody AuthenticationRequestDto requestDto) {
         try {

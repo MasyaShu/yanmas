@@ -25,8 +25,6 @@ import ru.itterminal.botdesk.jwt.JwtUser;
 @Profile("Test")
 public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    public static String USER_1_ID = "d592facb-e6ee-4801-8310-9c7708eb6e6c";
-    public static String USER_2_ID = "86840939-c488-448b-a473-cd9e1097dd32";
     public static String ACCOUNT_1_ID = "cdfa6483-0769-4628-ba32-efd338a716de";
     public static String ACCOUNT_2_ID = "bcf98101-2a22-42bf-94cc-c900b50a0b69";
     public static String GROUP_1_ID = "0223e51a-4bb2-44ee-bc8e-1f047a2145e7";
@@ -66,6 +64,24 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                                 .username(EMAIL_1)
                                 .enabled(true)
                                 .authorities(List.of(new SimpleGrantedAuthority("ADMIN")))
+                                .build();
+                        break;
+                    case "ADMIN_ACCOUNT_2" :
+                        jwtUser = new JwtUser()
+                                .builder()
+                                .accountId(UUID.fromString(ACCOUNT_2_ID))
+                                .username(EMAIL_1)
+                                .enabled(true)
+                                .authorities(List.of(new SimpleGrantedAuthority("ADMIN")))
+                                .build();
+                        break;
+                    case "AUTHOR_ACCOUNT_1" :
+                        jwtUser = new JwtUser()
+                                .builder()
+                                .accountId(UUID.fromString(ACCOUNT_1_ID))
+                                .username(EMAIL_1)
+                                .enabled(true)
+                                .authorities(List.of(new SimpleGrantedAuthority("AUTHOR")))
                                 .build();
                         break;
                 }

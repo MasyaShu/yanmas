@@ -4,7 +4,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -29,7 +28,10 @@ import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_NOT_BE_EMP
 import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_NOT_BE_NULL;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.REQUEST_NOT_READABLE;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.SIZE_MUST_BE_BETWEEN;
-import static ru.itterminal.botdesk.config.TestSecurityConfig.*;
+import static ru.itterminal.botdesk.config.TestSecurityConfig.ACCOUNT_1_ID;
+import static ru.itterminal.botdesk.config.TestSecurityConfig.EMAIL_1;
+import static ru.itterminal.botdesk.config.TestSecurityConfig.EMAIL_2;
+import static ru.itterminal.botdesk.config.TestSecurityConfig.GROUP_1_ID;
 
 import java.util.Collections;
 import java.util.List;
@@ -51,8 +53,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithUserDetails;
@@ -78,7 +78,6 @@ import ru.itterminal.botdesk.aau.model.spec.UserSpec;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.config.TestSecurityConfig;
-import ru.itterminal.botdesk.jwt.JwtUser;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {UserControllerV1.class, UserSpec.class, FilterChainProxy.class})
@@ -114,6 +113,8 @@ class UserControllerV1Test {
     private static String HOST = "http://localhost";
     private static String PORT = ":8081";
     private static String API = "api/v1/user/";
+    public static String USER_1_ID = "d592facb-e6ee-4801-8310-9c7708eb6e6c";
+    public static String USER_2_ID = "86840939-c488-448b-a473-cd9e1097dd32";
     private static String PASSWORD_1 = "UserUser123";
     private static String PASSWORD_2 = "UserUser321";
     private static String FIRST_NAME = "Ivan";
@@ -161,7 +162,7 @@ class UserControllerV1Test {
     private Role roleAdmin = new Role(Roles.ADMIN.toString());
     private Role roleSuperAdmin = new Role(Roles.SUPER_ADMIN.toString());
     private Set<Role> roles_1 = Set.of(roleAdmin, roleSuperAdmin);
-    private UserDto userDto;
+    private UserDto userDtoFromAccount_1;
     private UserFilterDto userFilterDto;
 
     @BeforeEach
@@ -190,7 +191,7 @@ class UserControllerV1Test {
                 .roles(roles_1)
                 .build();
         user_2.setId(UUID.fromString(USER_2_ID));
-        userDto = new UserDto().builder()
+        userDtoFromAccount_1 = new UserDto().builder()
                 .email(EMAIL_1)
                 .password(PASSWORD_1)
                 .account(account_1)
@@ -198,7 +199,7 @@ class UserControllerV1Test {
                 .isArchived(false)
                 .roles(roles_1)
                 .build();
-        userDto.setDeleted(false);
+        userDtoFromAccount_1.setDeleted(false);
         userFilterDto = new UserFilterDto();
         userFilterDto.setEmail(EMAIL_1);
         userFilterDto.setFirstName(FIRST_NAME);
@@ -207,13 +208,13 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1")
     public void create_shouldCreate_whenValidDataPassed() throws Exception {
         when(service.create(any())).thenReturn(user_1);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userDto));
+                .content(objectMapper.writeValueAsString(userDtoFromAccount_1));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isCreated())
@@ -228,7 +229,7 @@ class UserControllerV1Test {
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userDto));
+                .content(objectMapper.writeValueAsString(userDtoFromAccount_1));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
@@ -236,23 +237,49 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
-    public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
-        userDto.setEmail(INVALID_EMAIL_1);
-        userDto.setDeleted(true);
-        userDto.setPassword("");
-        userDto.setGroup(null);
-        userDto.setAccount(null);
-        userDto.setRoles(Collections.emptySet());
-        userDto.setFirstName(INVALID_FIRST_NAME);
-        userDto.setSecondName(INVALID_SECOND_NAME);
-        userDto.setPhone(INVALID_PHONE);
-        userDto.setLanguage(INVALID_LANGUAGE);
-        userDto.setIsArchived(null);
+    @WithUserDetails("ADMIN_ACCOUNT_2")
+    public void create_shouldGetStatusForbidden_whenDifferentAccounts() throws Exception {
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userDto));
+                .content(objectMapper.writeValueAsString(userDtoFromAccount_1));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isForbidden());
+        verify(service, times(0)).create(any());
+    }
+
+    @Test
+    @WithUserDetails("AUTHOR_ACCOUNT_1")
+    public void create_shouldGetStatusForbidden_whenNotAllowedRole() throws Exception {
+        MockHttpServletRequestBuilder request = post(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDtoFromAccount_1));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isForbidden());
+        verify(service, times(0)).create(any());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1")
+    public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
+        userDtoFromAccount_1.setEmail(INVALID_EMAIL_1);
+        userDtoFromAccount_1.setDeleted(true);
+        userDtoFromAccount_1.setPassword("");
+        userDtoFromAccount_1.setGroup(null);
+        userDtoFromAccount_1.setAccount(null);
+        userDtoFromAccount_1.setRoles(Collections.emptySet());
+        userDtoFromAccount_1.setFirstName(INVALID_FIRST_NAME);
+        userDtoFromAccount_1.setSecondName(INVALID_SECOND_NAME);
+        userDtoFromAccount_1.setPhone(INVALID_PHONE);
+        userDtoFromAccount_1.setLanguage(INVALID_LANGUAGE);
+        userDtoFromAccount_1.setIsArchived(null);
+        MockHttpServletRequestBuilder request = post(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDtoFromAccount_1));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -271,23 +298,23 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1")
     public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenAllPassedDataIsNull() throws Exception {
-        userDto.setEmail(null);
-        userDto.setDeleted(null);
-        userDto.setPassword(null);
-        userDto.setGroup(null);
-        userDto.setAccount(null);
-        userDto.setRoles(null);
-        userDto.setFirstName(null);
-        userDto.setSecondName(null);
-        userDto.setPhone(null);
-        userDto.setLanguage(null);
-        userDto.setIsArchived(null);
+        userDtoFromAccount_1.setEmail(null);
+        userDtoFromAccount_1.setDeleted(null);
+        userDtoFromAccount_1.setPassword(null);
+        userDtoFromAccount_1.setGroup(null);
+        userDtoFromAccount_1.setAccount(null);
+        userDtoFromAccount_1.setRoles(null);
+        userDtoFromAccount_1.setFirstName(null);
+        userDtoFromAccount_1.setSecondName(null);
+        userDtoFromAccount_1.setPhone(null);
+        userDtoFromAccount_1.setLanguage(null);
+        userDtoFromAccount_1.setIsArchived(null);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userDto));
+                .content(objectMapper.writeValueAsString(userDtoFromAccount_1));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -302,14 +329,14 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1")
     public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenIdAndVersionNotNull() throws Exception {
-        userDto.setId(UUID.randomUUID());
-        userDto.setVersion(15);
+        userDtoFromAccount_1.setId(UUID.randomUUID());
+        userDtoFromAccount_1.setVersion(15);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userDto));
+                .content(objectMapper.writeValueAsString(userDtoFromAccount_1));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -320,14 +347,14 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1")
     public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidEmailPassed() throws Exception {
         for (String ie : invalidEmail) {
-            userDto.setEmail(ie);
+            userDtoFromAccount_1.setEmail(ie);
             MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(userDto));
+                    .content(objectMapper.writeValueAsString(userDtoFromAccount_1));
             mockMvc.perform(request)
                     .andDo(print())
                     .andExpect(status().isBadRequest())
@@ -337,14 +364,14 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1")
     public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidPasswordPassed() throws Exception {
         for (String ip : invalidPassword) {
-            userDto.setPassword(ip);
+            userDtoFromAccount_1.setPassword(ip);
             MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(userDto));
+                    .content(objectMapper.writeValueAsString(userDtoFromAccount_1));
             mockMvc.perform(request)
                     .andDo(print())
                     .andExpect(status().isBadRequest())
@@ -354,15 +381,15 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1")
     public void update_shouldUpdate_whenValidDataPassed() throws Exception {
-        userDto.setId(UUID.fromString(USER_1_ID));
-        userDto.setVersion(1);
+        userDtoFromAccount_1.setId(UUID.fromString(USER_1_ID));
+        userDtoFromAccount_1.setVersion(1);
         when(service.update(any())).thenReturn(user_1);
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userDto));
+                .content(objectMapper.writeValueAsString(userDtoFromAccount_1));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -372,23 +399,66 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
-    public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
-        userDto.setEmail(INVALID_EMAIL_1);
-        userDto.setDeleted(null);
-        userDto.setPassword("");
-        userDto.setGroup(null);
-        userDto.setAccount(null);
-        userDto.setRoles(Collections.emptySet());
-        userDto.setFirstName("123456789012345678901");
-        userDto.setSecondName("1234567890123456789012345678901");
-        userDto.setPhone("1234567890123456789012345678901");
-        userDto.setLanguage("gr");
-        userDto.setIsArchived(null);
+    @WithAnonymousUser
+    public void update_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userDto));
+                .content(objectMapper.writeValueAsString(userDtoFromAccount_1));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isForbidden());
+        verify(service, times(0)).create(any());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_2")
+    public void update_shouldGetStatusForbidden_whenDifferentAccounts() throws Exception {
+        userDtoFromAccount_1.setId(UUID.fromString(USER_1_ID));
+        userDtoFromAccount_1.setVersion(0);
+        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDtoFromAccount_1));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isForbidden());
+        verify(service, times(0)).create(any());
+    }
+
+    @Test
+    @WithUserDetails("AUTHOR_ACCOUNT_1")
+    public void update_shouldGetStatusForbidden_whenNotAllowedRole() throws Exception {
+        userDtoFromAccount_1.setId(UUID.fromString(USER_1_ID));
+        userDtoFromAccount_1.setVersion(0);
+        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDtoFromAccount_1));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isForbidden());
+        verify(service, times(0)).create(any());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1")
+    public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
+        userDtoFromAccount_1.setEmail(INVALID_EMAIL_1);
+        userDtoFromAccount_1.setDeleted(null);
+        userDtoFromAccount_1.setPassword("");
+        userDtoFromAccount_1.setGroup(null);
+        userDtoFromAccount_1.setAccount(null);
+        userDtoFromAccount_1.setRoles(Collections.emptySet());
+        userDtoFromAccount_1.setFirstName("123456789012345678901");
+        userDtoFromAccount_1.setSecondName("1234567890123456789012345678901");
+        userDtoFromAccount_1.setPhone("1234567890123456789012345678901");
+        userDtoFromAccount_1.setLanguage("gr");
+        userDtoFromAccount_1.setIsArchived(null);
+        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDtoFromAccount_1));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -409,23 +479,23 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1")
     public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenAllPassedDataIsNull() throws Exception {
-        userDto.setEmail(null);
-        userDto.setDeleted(null);
-        userDto.setPassword(null);
-        userDto.setGroup(null);
-        userDto.setAccount(null);
-        userDto.setRoles(null);
-        userDto.setFirstName(null);
-        userDto.setSecondName(null);
-        userDto.setPhone(null);
-        userDto.setLanguage(null);
-        userDto.setIsArchived(null);
+        userDtoFromAccount_1.setEmail(null);
+        userDtoFromAccount_1.setDeleted(null);
+        userDtoFromAccount_1.setPassword(null);
+        userDtoFromAccount_1.setGroup(null);
+        userDtoFromAccount_1.setAccount(null);
+        userDtoFromAccount_1.setRoles(null);
+        userDtoFromAccount_1.setFirstName(null);
+        userDtoFromAccount_1.setSecondName(null);
+        userDtoFromAccount_1.setPhone(null);
+        userDtoFromAccount_1.setLanguage(null);
+        userDtoFromAccount_1.setIsArchived(null);
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userDto));
+                .content(objectMapper.writeValueAsString(userDtoFromAccount_1));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -442,13 +512,13 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1")
     public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenVersionIsNegative() throws Exception {
-        userDto.setVersion(-15);
+        userDtoFromAccount_1.setVersion(-15);
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userDto));
+                .content(objectMapper.writeValueAsString(userDtoFromAccount_1));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -459,11 +529,11 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1")
     public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidIdPassed() throws Exception {
-        userDto.setId(UUID.fromString(USER_1_ID));
-        userDto.setVersion(1);
-        String json = objectMapper.writeValueAsString(userDto);
+        userDtoFromAccount_1.setId(UUID.fromString(USER_1_ID));
+        userDtoFromAccount_1.setVersion(1);
+        String json = objectMapper.writeValueAsString(userDtoFromAccount_1);
         json = json.replace(USER_1_ID, "abracadabra");
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -477,14 +547,14 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1")
     public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidEmailPassed() throws Exception {
         for (String ie : invalidEmail) {
-            userDto.setEmail(ie);
+            userDtoFromAccount_1.setEmail(ie);
             MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(userDto));
+                    .content(objectMapper.writeValueAsString(userDtoFromAccount_1));
             mockMvc.perform(request)
                     .andDo(print())
                     .andExpect(status().isBadRequest())
@@ -494,14 +564,14 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1")
     public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidPasswordPassed() throws Exception {
         for (String ip : invalidPassword) {
-            userDto.setPassword(ip);
+            userDtoFromAccount_1.setPassword(ip);
             MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(userDto));
+                    .content(objectMapper.writeValueAsString(userDtoFromAccount_1));
             mockMvc.perform(request)
                     .andDo(print())
                     .andExpect(status().isBadRequest())
@@ -511,7 +581,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1")
     public void getById_shouldFindOneUser_whenUserExistInDatabaseByPassedId() throws Exception {
         when(service.findByIdAndAccountId(any(), any())).thenReturn(user_1);
         mockMvc.perform(get(HOST + PORT + API + USER_1_ID))
@@ -522,7 +592,16 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
+    @WithAnonymousUser
+    public void getById_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
+        when(service.findByIdAndAccountId(any(), any())).thenReturn(user_1);
+        mockMvc.perform(get(HOST + PORT + API + USER_1_ID))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1")
     void getById_shouldRespondNotFound_whenPassedIdNotExist() throws Exception {
         when(service.findByIdAndAccountId(any(), any())).thenThrow(EntityNotExistException.class);
         mockMvc.perform(get(HOST + PORT + API + USER_1_ID))
@@ -531,16 +610,34 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1")
     public void getById_shouldGetStatusBadRequest_whenUiidIsInvalid() throws Exception {
         mockMvc.perform(get(HOST + PORT + API + "Abracadabra"))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
-        verifyZeroInteractions(service);
+        verify(service, times(0)).findById(any());
     }
 
     @Test
-    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
+    @WithAnonymousUser
+    public void getByFilter_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
+        Pageable pageable =
+                PageRequest.of(Integer.parseInt(PAGE_DEFAULT_VALUE), Integer.parseInt(SIZE_DEFAULT_VALUE),
+                        Sort.by("firstName").ascending());
+        Page<User> userPageExpected = new PageImpl<User>(List.of(user_1, user_2), pageable, 2);
+        when(service.findAllByFilter(any(), any())).thenReturn(userPageExpected);
+        MockHttpServletRequestBuilder request = get(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userFilterDto));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isForbidden());
+        verify(service, times(0)).findAllByFilter(any(), any());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1")
     public void getByFilter_shouldFindTwoUsers_whenUsersExistInDatabaseByPassedFilter() throws Exception {
         Pageable pageable =
                 PageRequest.of(Integer.parseInt(PAGE_DEFAULT_VALUE), Integer.parseInt(SIZE_DEFAULT_VALUE),
@@ -564,7 +661,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1")
     public void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
         userFilterDto.setEmail(INVALID_EMAIL_1);
         userFilterDto.setFirstName(INVALID_FIRST_NAME);
@@ -591,7 +688,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1")
     public void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidSizeAndPagePassed()
             throws Exception {
         MockHttpServletRequestBuilder request = get(HOST + PORT + API + "?page=-1&size=0")
@@ -606,7 +703,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1")
     public void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenFilterIsEmpty() throws Exception {
         userFilterDto.setEmail("");
         userFilterDto.setFirstName("");
@@ -634,7 +731,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1")
     public void getByFilter_shouldFindTwoUsers_whenFilterIsNew() throws Exception {
         UserFilterDto userFilterDto = new UserFilterDto();
         Pageable pageable =
@@ -656,7 +753,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1")
     public void getByFilter_shouldFindTwoUsers_whenDefaultFieldsInFilterIsNull() throws Exception {
         userFilterDto.setSortBy(null);
         userFilterDto.setDeleted(null);
@@ -680,10 +777,18 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails(value = "ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1")
     void physicalDelete_shouldThrowUnsupportedOperationException_untilMethodWouldBeImplemented() throws Exception {
         mockMvc.perform(delete(HOST + PORT + API + USER_1_ID))
                 .andDo(print())
                 .andExpect(status().isMethodNotAllowed());
+    }
+
+    @Test
+    @WithAnonymousUser
+    void physicalDelete_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
+        mockMvc.perform(delete(HOST + PORT + API + USER_1_ID))
+                .andDo(print())
+                .andExpect(status().isForbidden());
     }
 }
