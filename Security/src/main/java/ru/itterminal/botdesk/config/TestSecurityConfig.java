@@ -54,9 +54,9 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
     public UserDetailsService UserDetailsTestService() {
         return new  UserDetailsService() {
             @Override
-            public UserDetails loadUserByUsername(String role) throws UsernameNotFoundException {
+            public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
                 JwtUser jwtUser = null;
-                switch (role) {
+                switch (username) {
                     case "ADMIN_ACCOUNT_1" :
                         jwtUser = new JwtUser()
                                 .builder()

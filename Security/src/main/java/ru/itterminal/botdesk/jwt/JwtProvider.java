@@ -94,10 +94,6 @@ public class JwtProvider {
 
     }
 
-    public String getEmail(String token) {
-        return Jwts.parser().setSigningKey(secretToken).parseClaimsJws(token).getBody().getSubject();
-    }
-
     public String resolveToken(HttpServletRequest req) {
         String bearerToken = req.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith(prefixToken)) {
