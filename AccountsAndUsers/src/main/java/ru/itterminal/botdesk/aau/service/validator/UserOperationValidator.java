@@ -73,7 +73,7 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
 
         // Entity from DB           | new  Entity               | result
         // has role Acc_Owner       | has role Acc_Owner        | not allowed (User with role ACCOUNT_OWNER is occupied)
-        // has not role Acc_Owner   | has role Acc_Owner        | all right (for example create a new Account)
+        // has not role Acc_Owner   | has role Acc_Owner        | not possible
         // has role Acc_Owner       | has not role Acc_Owner    | all right
         // has not role Acc_Owner   | has not role Acc_Owner    | not allowed, Account must have user with role ACCOUNT_OWNER
 
