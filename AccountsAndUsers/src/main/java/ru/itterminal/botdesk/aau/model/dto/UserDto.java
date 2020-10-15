@@ -64,6 +64,7 @@ public class UserDto extends BaseEntityDto {
             groups = {Create.class, Update.class})
     private String language;
 
+    // TODO Remove NotNull??
     @NotNull(groups = {Create.class, Update.class})
     private Boolean isArchived;
 

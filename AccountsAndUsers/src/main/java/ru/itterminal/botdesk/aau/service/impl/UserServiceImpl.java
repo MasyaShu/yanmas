@@ -3,6 +3,8 @@ package ru.itterminal.botdesk.aau.service.impl;
 import static java.lang.String.format;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.projection.UserUniqueFields;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
@@ -24,11 +27,11 @@ import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
 @Transactional
 public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidator, UserRepository> {
 
-    @Autowired
     BCryptPasswordEncoder encoder;
 
-    public List<UserUniqueFields> findByUniqueFields(User user) {
-        return repository.getByEmailAndIdNot(user.getEmail(), user.getId());
+    @Autowired
+    public UserServiceImpl(BCryptPasswordEncoder encoder) {
+        this.encoder = encoder;
     }
 
     @Override
@@ -64,5 +67,27 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
         catch (ObjectOptimisticLockingFailureException ex) {
             throw new OptimisticLockingFailureException(format(VERSION_INVALID_MESSAGE, entity.getId()));
         }
+    }
+
+    public Optional<User> findByEmail(String email) {
+        return repository.getByEmail(email);
+    }
+
+    public List<UserUniqueFields> findByUniqueFields(User user) {
+        return repository.getByEmailAndIdNot(user.getEmail(), user.getId());
+    }
+
+    public User findByIdAndAccountId(UUID id, UUID accountId) {
+        return repository.getByIdAndAccount_Id(id, accountId).orElseThrow(
+                () -> new EntityNotExistException("not found user by id: " + id + " and accountId: " + accountId)
+        );
+    }
+
+    public List<User> findAllByRolesAndIdNot(Role role, UUID id) {
+        return repository.findAllByRolesAndIdNot(role, id);
+    }
+
+    public List<User> findAllByRoles(Role role) {
+        return repository.findAllByRoles(role);
     }
 }

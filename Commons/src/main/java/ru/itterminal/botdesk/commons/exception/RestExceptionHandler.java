@@ -14,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -151,6 +152,19 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(JwtAuthenticationException.class)
+    public ResponseEntity<?> handleJwtAuthenticationException(JwtAuthenticationException ex, HttpServletRequest request) {
+        ApiError apiError = new ApiError(HttpStatus.FORBIDDEN, "authentication failed", ex).withRequest(request);
+        return new ResponseEntity<>(apiError, null, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex, HttpServletRequest request) {
+        ApiError apiError = new ApiError(HttpStatus.FORBIDDEN, "access is denied", ex).withRequest(request);
+        return new ResponseEntity<>(apiError, null, HttpStatus.FORBIDDEN);
+    }
+
+
     @ExceptionHandler(EntityNotExistException.class)
     public ResponseEntity<?> handleEntityNotExistException(EntityNotExistException ex, HttpServletRequest request) {
         ApiError apiError = new ApiError(HttpStatus.NOT_FOUND, "Resource Not Found", ex).withRequest(request);
@@ -168,15 +182,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 //        final String bodyOfResponse = "User already exist";
 //        return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
 //    }
-//
-//    @ExceptionHandler(Exception.class)
-//    public ResponseEntity<Object> handleInternal(final Exception ex, final WebRequest request) {
-//        logger.error("500 Status Code", ex);
-//
-//        final String bodyOfResponse = "Internal server error";
-//        return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
-//    }
-//
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleInternal(final Exception ex, final WebRequest request) {
+        logger.error("500 Status Code", ex);
+        final String bodyOfResponse = "Internal server error";
+        return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
+    }
+
 //    @ExceptionHandler(value = {DataIntegrityViolationException.class})
 //    public ResponseEntity<Object> handleDataIntegrityViolationException(final DataIntegrityViolationException ex, final WebRequest request) {
 //        logger.error(ex.getMessage());

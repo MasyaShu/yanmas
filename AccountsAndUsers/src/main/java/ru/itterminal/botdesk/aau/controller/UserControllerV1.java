@@ -1,5 +1,6 @@
 package ru.itterminal.botdesk.aau.controller;
 
+import java.security.Principal;
 import java.util.UUID;
 
 import javax.validation.Valid;
@@ -14,6 +15,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +35,7 @@ import ru.itterminal.botdesk.aau.model.dto.UserDto;
 import ru.itterminal.botdesk.aau.model.dto.UserDtoResponseWithoutPassword;
 import ru.itterminal.botdesk.aau.model.dto.UserFilterDto;
 import ru.itterminal.botdesk.aau.model.spec.UserSpec;
+import ru.itterminal.botdesk.jwt.JwtUser;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
@@ -41,15 +45,14 @@ import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 @Slf4j
 @RestController("UserControllerV1")
 @Validated
-// TODO best practice api/v1/user
-@RequestMapping("v1/user")
-public class UserController extends BaseController {
+@RequestMapping("api/v1/user")
+public class UserControllerV1 extends BaseController {
 
     UserServiceImpl service;
     UserSpec spec;
 
     @Autowired
-    public UserController(UserServiceImpl service, UserSpec userSpec) {
+    public UserControllerV1(UserServiceImpl service, UserSpec userSpec) {
         this.spec = userSpec;
         this.service = service;
     }
@@ -63,8 +66,15 @@ public class UserController extends BaseController {
      *                Not null fields: email, password, account, group, roles
      * @return new created user
      */
+    // TODO ACCOUNT_OWNER can cretae/update user as ADMIN, ACCOUNT_OWNER.... (role hierarchy)
+    // ACCOUNT_OWNER -> ALL
+    // ADMIN -> ALL (exclude ACCOUNT_OWNER)
+    // EXECUTOR -> AUTHOR, OBSERVER
+    // AUTHOR, OBSERVER -> Nothing
     @PostMapping()
     @ResponseStatus(value = HttpStatus.CREATED)
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN') and #request.account.id == authentication.principal"
+            + ".accountId")
     public ResponseEntity<UserDtoResponseWithoutPassword> create(
             @Validated(Create.class) @RequestBody UserDto request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
@@ -72,7 +82,6 @@ public class UserController extends BaseController {
         User createdUser = service.create(user);
         UserDtoResponseWithoutPassword returnedUser =
                 modelMapper.map(createdUser, UserDtoResponseWithoutPassword.class);
-        //        returnedUser.setPassword(null);
         log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdUser);
         return new ResponseEntity<>(returnedUser, HttpStatus.CREATED);
     }
@@ -80,18 +89,18 @@ public class UserController extends BaseController {
     /**
      * Update a user
      *
-     * @param requestDto contains all parameters of update user
+     * @param request contains all parameters of update user
      * @return updated user
      */
     @PutMapping()
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN') and #request.account.id == authentication.principal.accountId")
     public ResponseEntity<UserDtoResponseWithoutPassword> update(
-            @Validated(Update.class) @RequestBody UserDto requestDto) {
-        log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, requestDto);
-        User user = modelMapper.map(requestDto, User.class);
+            @Validated(Update.class) @RequestBody UserDto request) {
+        log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
+        User user = modelMapper.map(request, User.class);
         User updatedUser = service.update(user);
         UserDtoResponseWithoutPassword returnedUser =
                 modelMapper.map(updatedUser, UserDtoResponseWithoutPassword.class);
-        //        returnedUser.setPassword(null);
         log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedUser);
         return new ResponseEntity<>(returnedUser, HttpStatus.OK);
     }
@@ -103,9 +112,10 @@ public class UserController extends BaseController {
      * @return user
      */
     @GetMapping("/{id}")
-    public ResponseEntity<UserDtoResponseWithoutPassword> getById(@PathVariable UUID id) {
+    public ResponseEntity<UserDtoResponseWithoutPassword> getById(Principal user, @PathVariable UUID id) {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
-        User foundUser = service.findById(id);
+        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
+        User foundUser = service.findByIdAndAccountId(id, jwtUser.getAccountId());
         UserDtoResponseWithoutPassword returnedUser = modelMapper.map(foundUser, UserDtoResponseWithoutPassword.class);
         log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundUser);
         return new ResponseEntity<>(returnedUser, HttpStatus.OK);
@@ -120,6 +130,7 @@ public class UserController extends BaseController {
      */
     @GetMapping()
     public ResponseEntity<Page<UserDtoResponseWithoutPassword>> getByFilter(
+            Principal user,
             @Valid @RequestBody UserFilterDto filter,
             @RequestParam(defaultValue = PAGE_DEFAULT_VALUE) @PositiveOrZero int page,
             @RequestParam(defaultValue = SIZE_DEFAULT_VALUE) @Positive int size) {
@@ -138,7 +149,6 @@ public class UserController extends BaseController {
                         filter.getSortBy()));
         Page<User> foundUsers;
         Page<UserDtoResponseWithoutPassword> returnedUsers;
-        // TODO add getUserByAccountSpec
         Specification<User> userSpecification = Specification
                 .where(filter.getEmail() == null ? null : spec.getUserByEmailSpec(filter.getEmail()))
                 .and(filter.getFirstName() == null ? null : spec.getUserByFirstNameSpec(filter.getFirstName()))
@@ -150,7 +160,9 @@ public class UserController extends BaseController {
                         spec.getUserByListOfGroupsSpec(filter.getGroups()))
                 .and(filter.getRoles() == null || filter.getRoles().isEmpty() ? null :
                         spec.getUserByListOfRolesSpec(filter.getRoles()))
-                .and(spec.getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted.fromString(filter.getDeleted())));
+                .and(spec.getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted.fromString(filter.getDeleted())))
+                .and(spec.getUserByAccountSpec(
+                        ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal()).getAccountId()));
         foundUsers = service.findAllByFilter(userSpecification, pageable);
         returnedUsers = mapPage(foundUsers, UserDtoResponseWithoutPassword.class, pageable);
         log.debug(FIND_FINISH_MESSAGE, ENTITY_NAME, foundUsers.getTotalElements());
@@ -163,6 +175,7 @@ public class UserController extends BaseController {
      * @param request UserDto
      */
     @DeleteMapping()
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN') and #request.account.id == authentication.principal.accountId")
     ResponseEntity<Void> physicalDelete(@RequestBody UserDto request) {
         throw new UnsupportedOperationException("Physical delete will be implement in the further");
     }

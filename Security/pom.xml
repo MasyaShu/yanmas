@@ -2,15 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
     <parent>
-        <groupId>ru.it-terminal.botdesk</groupId>
         <artifactId>multiple_module_project</artifactId>
+        <groupId>ru.it-terminal.botdesk</groupId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
+    <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>AccountsAndUsers</artifactId>
+    <artifactId>Security</artifactId>
 
     <dependencies>
         <dependency>
@@ -20,13 +19,13 @@
         </dependency>
         <dependency>
             <groupId>ru.it-terminal.botdesk</groupId>
-            <artifactId>Security</artifactId>
+            <artifactId>DB-Setup</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>ru.it-terminal.botdesk</groupId>
-            <artifactId>DB-Setup</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>0.9.1</version>
         </dependency>
     </dependencies>
 

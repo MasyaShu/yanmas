@@ -30,16 +30,15 @@ import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 @Slf4j
 @RestController("RoleControllerV1")
 @Validated
-// TODO best practice api/v1/user
-@RequestMapping("v1/role")
-public class RoleController extends BaseController {
+@RequestMapping("api/v1/role")
+public class RoleControllerV1 extends BaseController {
 
-    // TODO remove all except getAll
+    // TODO remove all exclude getAll
 
     RoleServiceImpl service;
 
     @Autowired
-    public RoleController(RoleServiceImpl service) {
+    public RoleControllerV1(RoleServiceImpl service) {
         this.service = service;
     }
 

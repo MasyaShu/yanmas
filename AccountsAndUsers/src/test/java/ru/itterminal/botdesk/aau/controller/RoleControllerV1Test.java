@@ -41,17 +41,16 @@ import ru.itterminal.botdesk.aau.service.impl.RoleServiceImpl;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringJUnitConfig(RoleController.class)
+@SpringJUnitConfig(RoleControllerV1.class)
 @WebMvcTest
-class RoleControllerTest {
+class RoleControllerV1Test {
 
     @MockBean
     private RoleServiceImpl service;
 
     private static String HOST = "http://localhost";
     private static String PORT = ":8081";
-    // TODO best practice api/v1/user
-    private static String API = "/v1/role/";
+    private static String API = "api/v1/role/";
     private static String ROLE_NAME_1 = "TestNameOfRole_1";
     private static String ROLE_NAME_2 = "TestNameOfRole_2";
     private static String ROLE_UUID_1 = "d45e0a6e-cb5b-11ea-87d0-0242ac138003";
@@ -62,7 +61,7 @@ class RoleControllerTest {
     private Role role_2;
 
     @Autowired
-    private RoleController controller;
+    private RoleControllerV1 controller;
 
     private MockMvc mockMvc;
 
