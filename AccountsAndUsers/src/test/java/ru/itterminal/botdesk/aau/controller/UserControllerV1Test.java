@@ -160,7 +160,7 @@ class UserControllerV1Test {
     private Account account_1;
     private Group group_1;
     private Role roleAdmin = new Role(Roles.ADMIN.toString());
-    private Role roleSuperAdmin = new Role(Roles.SUPER_ADMIN.toString());
+    private Role roleSuperAdmin = new Role(Roles.ACCOUNT_OWNER.toString());
     private Set<Role> roles_1 = Set.of(roleAdmin, roleSuperAdmin);
     private UserDto userDtoFromAccount_1;
     private UserFilterDto userFilterDto;

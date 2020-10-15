@@ -66,14 +66,14 @@ public class UserControllerV1 extends BaseController {
      *                Not null fields: email, password, account, group, roles
      * @return new created user
      */
-    // TODO SUPER_ADMIN can cretae/update user as ADMIN, SUPER_ADMIN.... (role hierarchy)
-    // SUPER_ADMIN -> ALL
-    // ADMIN -> ALL (exclude SUPER_ADMIN)
+    // TODO ACCOUNT_OWNER can cretae/update user as ADMIN, ACCOUNT_OWNER.... (role hierarchy)
+    // ACCOUNT_OWNER -> ALL
+    // ADMIN -> ALL (exclude ACCOUNT_OWNER)
     // EXECUTOR -> AUTHOR, OBSERVER
     // AUTHOR, OBSERVER -> Nothing
     @PostMapping()
     @ResponseStatus(value = HttpStatus.CREATED)
-    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'ADMIN') and #request.account.id == authentication.principal"
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN') and #request.account.id == authentication.principal"
             + ".accountId")
     public ResponseEntity<UserDtoResponseWithoutPassword> create(
             @Validated(Create.class) @RequestBody UserDto request) {
@@ -92,9 +92,8 @@ public class UserControllerV1 extends BaseController {
      * @param request contains all parameters of update user
      * @return updated user
      */
-    // TODO can't setIsArchived if after this SUPER_ADMIN will not or only one SUPER_ADMIN (ACCOUNT_OWNER)
     @PutMapping()
-    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'ADMIN') and #request.account.id == authentication.principal.accountId")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN') and #request.account.id == authentication.principal.accountId")
     public ResponseEntity<UserDtoResponseWithoutPassword> update(
             @Validated(Update.class) @RequestBody UserDto request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
@@ -176,7 +175,7 @@ public class UserControllerV1 extends BaseController {
      * @param request UserDto
      */
     @DeleteMapping()
-    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'ADMIN') and #request.account.id == authentication.principal.accountId")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN') and #request.account.id == authentication.principal.accountId")
     ResponseEntity<Void> physicalDelete(@RequestBody UserDto request) {
         throw new UnsupportedOperationException("Physical delete will be implement in the further");
     }

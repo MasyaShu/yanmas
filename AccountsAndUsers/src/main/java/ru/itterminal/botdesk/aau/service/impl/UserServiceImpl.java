@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.projection.UserUniqueFields;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
@@ -31,16 +32,6 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
     @Autowired
     public UserServiceImpl(BCryptPasswordEncoder encoder) {
         this.encoder = encoder;
-    }
-
-    public List<UserUniqueFields> findByUniqueFields(User user) {
-        return repository.getByEmailAndIdNot(user.getEmail(), user.getId());
-    }
-
-    public User findByIdAndAccountId (UUID id, UUID accountId) {
-        return repository.getByIdAndAccount_Id(id, accountId).orElseThrow(
-                () -> new EntityNotExistException("not found user by id: "+ id + " and accountId: " + accountId)
-        );
     }
 
     @Override
@@ -78,7 +69,25 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
         }
     }
 
-    public Optional<User> findByEmail (String email) {
-        return  repository.getByEmail(email);
+    public Optional<User> findByEmail(String email) {
+        return repository.getByEmail(email);
+    }
+
+    public List<UserUniqueFields> findByUniqueFields(User user) {
+        return repository.getByEmailAndIdNot(user.getEmail(), user.getId());
+    }
+
+    public User findByIdAndAccountId(UUID id, UUID accountId) {
+        return repository.getByIdAndAccount_Id(id, accountId).orElseThrow(
+                () -> new EntityNotExistException("not found user by id: " + id + " and accountId: " + accountId)
+        );
+    }
+
+    public List<User> findAllByRolesAndIdNot(Role role, UUID id) {
+        return repository.findAllByRolesAndIdNot(role, id);
+    }
+
+    public List<User> findAllByRoles(Role role) {
+        return repository.findAllByRoles(role);
     }
 }

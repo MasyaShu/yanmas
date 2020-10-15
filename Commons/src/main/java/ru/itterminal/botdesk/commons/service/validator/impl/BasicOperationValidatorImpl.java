@@ -19,16 +19,17 @@ import ru.itterminal.botdesk.commons.service.validator.OperationValidator;
 @Component
 public class BasicOperationValidatorImpl<E extends BaseEntity> implements OperationValidator<E> {
 
-    private static final String DEFAULT_CREATE_MESSAGE = "Using default validation for crate method";
-    private static final String DEFAULT_UPDATE_MESSAGE = "Using default validation for update method";
-    private static final String DEFAULT_LOGICAL_DELETE_MESSAGE = "Using default validation for logical delete method";
-    private static final String PHYSICAL_DELETE_MESSAGE = "Using default validation for physical delete method";
-    protected static final String CHECK_UNIQUENESS = "checkUniqueness({})";
-    protected static final String FIELDS_UNIQUE = "Fields are unique: {}";
-    protected static final String FIELDS_NOT_UNIQUE = "Fields not unique: {}";
-    protected static final String NOT_UNIQUE_CODE = "not unique";
-    protected static final String NOT_UNIQUE_MESSAGE = "%s is occupied";
-    protected static final String VALIDATION_FAILED = "Validation failed";
+    public static final String DEFAULT_CREATE_MESSAGE = "Using default validation for crate method";
+    public static final String DEFAULT_UPDATE_MESSAGE = "Using default validation for update method";
+    public static final String DEFAULT_LOGICAL_DELETE_MESSAGE = "Using default validation for logical delete method";
+    public static final String PHYSICAL_DELETE_MESSAGE = "Using default validation for physical delete method";
+    public static final String CHECK_UNIQUENESS = "checkUniqueness({})";
+    public static final String FIELDS_UNIQUE = "Fields are unique: {}";
+    public static final String FIELDS_NOT_UNIQUE = "Fields not unique: {}";
+    public static final String NOT_UNIQUE_CODE = "not unique";
+    public static final String NOT_UNIQUE_MESSAGE = "%s is occupied";
+    public static final String VALIDATION_FAILED = "Validation failed";
+    public static final String FIELDS_ARE_NOT_VALID = "Fields are not valid";
 
 
     @Override
