@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS role
     version int2        NOT NULL DEFAULT (0),
     id      uuid        NOT NULL,
     name    varchar(30) NOT NULL,
+    weight  int         NOT NULL,
     PRIMARY KEY (id)
 );
 CREATE TABLE IF NOT EXISTS users
@@ -53,10 +54,10 @@ CREATE TABLE IF NOT EXISTS users
     FOREIGN KEY (account_id) REFERENCES account (id),
     FOREIGN KEY (own_group_id) REFERENCES group_users (id)
 );
-INSERT INTO role(out_id, deleted, version, id, name)
-VALUES ('', 'false', '0', 'ba99ce38-1611-4a81-adc9-3a779d58bbfe', 'ACCOUNT_OWNER'),
-       ('', 'false', '0', '607f04b1-f5f9-4f20-9c6f-501c32d773c0', 'ADMIN'),
-       ('', 'false', '0', '933f20bf-9262-47bb-83d2-0ca55bbbd3fd', 'AUTHOR'),
-       ('', 'false', '0', 'f7e579e6-0609-467a-91ff-454f42da3d58', 'EXECUTOR'),
-       ('', 'false', '0', '586e087f-f5a0-4db8-af57-edead19db706', 'OBSERVER');
+INSERT INTO role(out_id, deleted, version, id, name, weight)
+VALUES ('', 'false', '0', 'ba99ce38-1611-4a81-adc9-3a779d58bbfe', 'ACCOUNT_OWNER', '3'),
+       ('', 'false', '0', '607f04b1-f5f9-4f20-9c6f-501c32d773c0', 'ADMIN', '2'),
+       ('', 'false', '0', '933f20bf-9262-47bb-83d2-0ca55bbbd3fd', 'AUTHOR', '1'),
+       ('', 'false', '0', 'f7e579e6-0609-467a-91ff-454f42da3d58', 'EXECUTOR', '0'),
+       ('', 'false', '0', '586e087f-f5a0-4db8-af57-edead19db706', 'OBSERVER', '0');
 -- FINISH MODULE **ACCOUNT AND USERS**

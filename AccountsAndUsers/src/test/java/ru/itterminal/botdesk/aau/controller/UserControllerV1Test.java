@@ -12,6 +12,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.itterminal.botdesk.aau.model.Roles.ACCOUNT_OWNER;
+import static ru.itterminal.botdesk.aau.model.Roles.ADMIN;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_EMAIL;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_PASSWORD;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.MUST_BE_ANY_OF_EN_RU;
@@ -158,8 +160,8 @@ class UserControllerV1Test {
     private User user_2;
     private Account account_1;
     private Group group_1;
-    private Role roleAdmin = new Role(Roles.ADMIN.toString());
-    private Role roleSuperAdmin = new Role(Roles.ACCOUNT_OWNER.toString());
+    private Role roleAdmin = new Role(ADMIN.toString(), ADMIN.getWeight());
+    private Role roleSuperAdmin = new Role(ACCOUNT_OWNER.toString(), ACCOUNT_OWNER.getWeight());
     private UserDto userDtoFromAccount_1;
     private UserFilterDto userFilterDto;
 
