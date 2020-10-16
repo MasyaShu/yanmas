@@ -27,9 +27,10 @@ public class BasicOperationValidatorImpl<E extends BaseEntity> implements Operat
     public static final String FIELDS_UNIQUE = "Fields are unique: {}";
     public static final String FIELDS_NOT_UNIQUE = "Fields not unique: {}";
     public static final String NOT_UNIQUE_CODE = "not unique";
+    public static final String LOGIC_CONSTRAINT_CODE = "logic constraint";
     public static final String NOT_UNIQUE_MESSAGE = "%s is occupied";
     public static final String VALIDATION_FAILED = "Validation failed";
-    public static final String FIELDS_ARE_NOT_VALID = "Fields are not valid";
+    public static final String FIELDS_ARE_NOT_VALID = "Fields are not valid: {}";
 
 
     @Override

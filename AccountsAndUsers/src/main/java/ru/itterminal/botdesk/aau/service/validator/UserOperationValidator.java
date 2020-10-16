@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +23,7 @@ import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 import ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl;
+import ru.itterminal.botdesk.jwt.JwtUser;
 
 @Slf4j
 @Component
@@ -35,6 +37,9 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
     protected static final String USER_WITH_ROLE_ACCOUNT_OWNER = "User with role ACCOUNT_OWNER";
     protected static final String ACCOUNT_MUST_HAVE_USER_WITH_ROLE_ACCOUNT_OWNER =
             "Account must have user with role ACCOUNT_OWNER";
+    protected static final String WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_FROM_REQUEST = "Weight of role"
+            + " current user (%s) less than weight of role from request (%s)";
+    protected static final String WEIGHT_OF_ROLE = "Weight of role";
 
     @Autowired
     public UserOperationValidator(UserServiceImpl service,
@@ -59,11 +64,11 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
             }
         }
 
-        // Schema of constraints "Who can create/update users according their roles (Hierarchy of role)
-        // ACCOUNT_OWNER - > ALL
-        // ADMIN -> ADMIN, EXECUTOR, AUTHOR, OBSERVER
-        // EXECUTOR -> EXECUTOR, AUTHOR, OBSERVER
-        // AUTHOR, OBSERVER -> Nothing
+        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (entity.getRole().getWeight() > jwtUser.getWeightRole()) {
+            errors.put(WEIGHT_OF_ROLE, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
+                    format(WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_FROM_REQUEST, jwtUser, entity))));
+        }
 
         if (!errors.isEmpty()) {
             log.error(FIELDS_ARE_NOT_VALID, errors);
@@ -99,6 +104,12 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         if (!oldUserHasRoleAccountOwner && !newUserHasRoleAccountOwner) {
             errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,
                     ACCOUNT_MUST_HAVE_USER_WITH_ROLE_ACCOUNT_OWNER)));
+        }
+
+        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (entity.getRole().getWeight() > jwtUser.getWeightRole()) {
+            errors.put(WEIGHT_OF_ROLE, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
+                    format(WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_FROM_REQUEST, jwtUser, entity))));
         }
 
         if (!errors.isEmpty()) {

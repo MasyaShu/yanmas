@@ -32,6 +32,7 @@ public class JwtUserDetailsService implements UserDetailsService {
         JwtUser jwtUser = new JwtUser()
                 .builder()
                 .accountId(user.getAccount().getId())
+                .weightRole(user.getRole().getWeight())
                 .username(user.getEmail())
                 .password(user.getPassword())
                 .authorities(List.of(new SimpleGrantedAuthority(user.getRole().getName())))

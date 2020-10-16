@@ -1,12 +1,9 @@
 package ru.itterminal.botdesk.jwt;
 
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -52,10 +49,11 @@ public class JwtProvider {
         secretToken = Base64.getEncoder().encodeToString(secretToken.getBytes());
     }
 
-    public String createToken(String email, String role, UUID accountId) {
+    public String createToken(String email, String role, int weightRole, UUID accountId) {
 
         Claims claims = Jwts.claims().setSubject(email);
         claims.put("role", role);
+        claims.put("weightRole", weightRole);
         claims.put("accountId", accountId);
 
         Date now = new Date();
@@ -79,11 +77,13 @@ public class JwtProvider {
         Claims claims = Jwts.parser().setSigningKey(secretToken).parseClaimsJws(token).getBody();
         String email = claims.getSubject();
         UUID accountId = UUID.fromString((String) claims.get("accountId"));
+        int weightRole = (int) claims.get("weightRole");
         String role = (String) claims.get("role");
 
         JwtUser jwtUser = new JwtUser()
                 .builder()
                 .accountId(accountId)
+                .weightRole(weightRole)
                 .username(email)
                 .authorities(List.of(new SimpleGrantedAuthority(role)))
                 .enabled(true)
