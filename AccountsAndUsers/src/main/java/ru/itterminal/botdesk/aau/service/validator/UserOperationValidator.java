@@ -62,7 +62,7 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         // Schema of constraints "Who can create/update users according their roles (Hierarchy of role)
         // ACCOUNT_OWNER - > ALL
         // ADMIN -> ADMIN, EXECUTOR, AUTHOR, OBSERVER
-        // EXECUTOR -> AUTHOR, OBSERVER
+        // EXECUTOR -> EXECUTOR, AUTHOR, OBSERVER
         // AUTHOR, OBSERVER -> Nothing
 
         if (!errors.isEmpty()) {
