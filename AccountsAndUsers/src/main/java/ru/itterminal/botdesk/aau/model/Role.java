@@ -26,6 +26,7 @@ public class Role extends BaseEntity {
 
     @Column (nullable = false, unique = true, length = 30)
     private String name;
+    private int weight;
 
     @Override
     public boolean equals(Object o) {
@@ -38,12 +39,13 @@ public class Role extends BaseEntity {
         Role role = (Role) o;
         return Objects.equals(name, role.name) &&
                 Objects.equals(getId(), role.getId()) &&
+                Objects.equals(getWeight(), role.getWeight()) &&
                 Objects.equals(getVersion(), role.getVersion()) &&
                 Objects.equals(getDeleted(), role.getDeleted());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), name);
+        return Objects.hash(getId(), name, weight);
     }
 }

@@ -3,6 +3,8 @@ package ru.itterminal.botdesk.aau.model;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
+import static ru.itterminal.botdesk.aau.model.Roles.ADMIN;
+import static ru.itterminal.botdesk.aau.model.Roles.AUTHOR;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -19,8 +21,8 @@ class UserTest {
     User user_2;
     UUID id = UUID.randomUUID();
 
-    Role admin = new Role(Roles.ADMIN.toString());
-    Role author = new Role(Roles.AUTHOR.toString());
+    Role admin = new Role(ADMIN.toString(), ADMIN.getWeight());
+    Role author = new Role(AUTHOR.toString(), AUTHOR.getWeight());
 
     @BeforeEach
     private void setUp() {
@@ -89,7 +91,7 @@ class UserTest {
 
     @Test
     void equals_shouldGetTrue_whenRolesDifferntObjectsBotEqualsValues() {
-        Role admin = new Role(Roles.ADMIN.toString());
+        Role admin = new Role(ADMIN.toString(), ADMIN.getWeight());
         user_1.setRole(admin);
         assertEquals(user_1, user_2);
     }
