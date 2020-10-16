@@ -66,14 +66,10 @@ public class UserControllerV1 extends BaseController {
      *                Not null fields: email, password, account, group, roles
      * @return new created user
      */
-    // TODO ACCOUNT_OWNER can cretae/update user as ADMIN, ACCOUNT_OWNER.... (role hierarchy)
-    // ACCOUNT_OWNER -> ALL
-    // ADMIN -> ALL (exclude ACCOUNT_OWNER)
-    // EXECUTOR -> AUTHOR, OBSERVER
-    // AUTHOR, OBSERVER -> Nothing
+
     @PostMapping()
     @ResponseStatus(value = HttpStatus.CREATED)
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN') and #request.account.id == authentication.principal"
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR') and #request.account.id == authentication.principal"
             + ".accountId")
     public ResponseEntity<UserDtoResponseWithoutPassword> create(
             @Validated(Create.class) @RequestBody UserDto request) {
@@ -93,7 +89,7 @@ public class UserControllerV1 extends BaseController {
      * @return updated user
      */
     @PutMapping()
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN') and #request.account.id == authentication.principal.accountId")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR') and #request.account.id == authentication.principal.accountId")
     public ResponseEntity<UserDtoResponseWithoutPassword> update(
             @Validated(Update.class) @RequestBody UserDto request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);

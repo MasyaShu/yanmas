@@ -59,6 +59,12 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
             }
         }
 
+        // Schema of constraints "Who can create/update users according their roles (Hierarchy of role)
+        // ACCOUNT_OWNER - > ALL
+        // ADMIN -> ADMIN, EXECUTOR, AUTHOR, OBSERVER
+        // EXECUTOR -> AUTHOR, OBSERVER
+        // AUTHOR, OBSERVER -> Nothing
+
         if (!errors.isEmpty()) {
             log.error(FIELDS_ARE_NOT_VALID, errors);
             throw new LogicalValidationException(VALIDATION_FAILED, errors);
@@ -71,11 +77,13 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         super.beforeUpdate(entity);
         Map<String, List<ValidationError>> errors = new HashMap<>();
 
+        // Schema of constraints "Only one user must have role Account owner
         // Entity from DB           | new  Entity               | result
         // has role Acc_Owner       | has role Acc_Owner        | not allowed (User with role ACCOUNT_OWNER is occupied)
         // has not role Acc_Owner   | has role Acc_Owner        | not possible
         // has role Acc_Owner       | has not role Acc_Owner    | all right
         // has not role Acc_Owner   | has not role Acc_Owner    | not allowed, Account must have user with role ACCOUNT_OWNER
+
 
         List<User> userFromDatabase = service.findAllByRolesAndIdNot(getAccountOwnerRole(), entity.getId());
         boolean oldUserHasRoleAccountOwner = false;
