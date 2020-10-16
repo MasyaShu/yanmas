@@ -33,7 +33,6 @@ import static ru.itterminal.botdesk.config.TestSecurityConfig.EMAIL_1;
 import static ru.itterminal.botdesk.config.TestSecurityConfig.EMAIL_2;
 import static ru.itterminal.botdesk.config.TestSecurityConfig.GROUP_1_ID;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -161,7 +160,6 @@ class UserControllerV1Test {
     private Group group_1;
     private Role roleAdmin = new Role(Roles.ADMIN.toString());
     private Role roleSuperAdmin = new Role(Roles.ACCOUNT_OWNER.toString());
-    private Set<Role> roles_1 = Set.of(roleAdmin, roleSuperAdmin);
     private UserDto userDtoFromAccount_1;
     private UserFilterDto userFilterDto;
 
@@ -177,18 +175,18 @@ class UserControllerV1Test {
                 .email(EMAIL_1)
                 .password(PASSWORD_1)
                 .account(account_1)
-                .group(group_1)
+                .ownGroup(group_1)
                 .isArchived(false)
-                .roles(roles_1)
+                .role(roleAdmin)
                 .build();
         user_1.setId(UUID.fromString(USER_1_ID));
         user_2 = new User().builder()
                 .email(EMAIL_2)
                 .password(PASSWORD_2)
                 .account(account_1)
-                .group(group_1)
+                .ownGroup(group_1)
                 .isArchived(false)
-                .roles(roles_1)
+                .role(roleSuperAdmin)
                 .build();
         user_2.setId(UUID.fromString(USER_2_ID));
         userDtoFromAccount_1 = new UserDto().builder()
@@ -197,7 +195,7 @@ class UserControllerV1Test {
                 .account(account_1)
                 .group(group_1)
                 .isArchived(false)
-                .roles(roles_1)
+                .role(roleAdmin)
                 .build();
         userDtoFromAccount_1.setDeleted(false);
         userFilterDto = new UserFilterDto();
@@ -270,7 +268,7 @@ class UserControllerV1Test {
         userDtoFromAccount_1.setPassword("");
         userDtoFromAccount_1.setGroup(null);
         userDtoFromAccount_1.setAccount(null);
-        userDtoFromAccount_1.setRoles(Collections.emptySet());
+        userDtoFromAccount_1.setRole(null);
         userDtoFromAccount_1.setFirstName(INVALID_FIRST_NAME);
         userDtoFromAccount_1.setSecondName(INVALID_SECOND_NAME);
         userDtoFromAccount_1.setPhone(INVALID_PHONE);
@@ -288,7 +286,7 @@ class UserControllerV1Test {
                 .andExpect(jsonPath("$.errors.phone[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
                 .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", DELETED_ASSERT_FALSE).exists())
                 .andExpect(jsonPath("$.errors.isArchived[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.roles[?(@.message == '%s')]", MUST_NOT_BE_EMPTY).exists())
+                .andExpect(jsonPath("$.errors.role[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.language[?(@.message == '%s')]", MUST_BE_ANY_OF_EN_RU).exists())
                 .andExpect(jsonPath("$.errors.email[?(@.message == '%s')]", INVALID_EMAIL).exists())
                 .andExpect(jsonPath("$.errors.account[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
@@ -305,7 +303,7 @@ class UserControllerV1Test {
         userDtoFromAccount_1.setPassword(null);
         userDtoFromAccount_1.setGroup(null);
         userDtoFromAccount_1.setAccount(null);
-        userDtoFromAccount_1.setRoles(null);
+        userDtoFromAccount_1.setRole(null);
         userDtoFromAccount_1.setFirstName(null);
         userDtoFromAccount_1.setSecondName(null);
         userDtoFromAccount_1.setPhone(null);
@@ -320,7 +318,7 @@ class UserControllerV1Test {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.isArchived[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.roles[?(@.message == '%s')]", MUST_NOT_BE_EMPTY).exists())
+                .andExpect(jsonPath("$.errors.role[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.email[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.account[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.group[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
@@ -449,7 +447,7 @@ class UserControllerV1Test {
         userDtoFromAccount_1.setPassword("");
         userDtoFromAccount_1.setGroup(null);
         userDtoFromAccount_1.setAccount(null);
-        userDtoFromAccount_1.setRoles(Collections.emptySet());
+        userDtoFromAccount_1.setRole(null);
         userDtoFromAccount_1.setFirstName("123456789012345678901");
         userDtoFromAccount_1.setSecondName("1234567890123456789012345678901");
         userDtoFromAccount_1.setPhone("1234567890123456789012345678901");
@@ -469,7 +467,7 @@ class UserControllerV1Test {
                 .andExpect(jsonPath("$.errors.phone[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
                 .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.isArchived[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.roles[?(@.message == '%s')]", MUST_NOT_BE_EMPTY).exists())
+                .andExpect(jsonPath("$.errors.role[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.language[?(@.message == '%s')]", MUST_BE_ANY_OF_EN_RU).exists())
                 .andExpect(jsonPath("$.errors.email[?(@.message == '%s')]", INVALID_EMAIL).exists())
                 .andExpect(jsonPath("$.errors.account[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
@@ -486,7 +484,7 @@ class UserControllerV1Test {
         userDtoFromAccount_1.setPassword(null);
         userDtoFromAccount_1.setGroup(null);
         userDtoFromAccount_1.setAccount(null);
-        userDtoFromAccount_1.setRoles(null);
+        userDtoFromAccount_1.setRole(null);
         userDtoFromAccount_1.setFirstName(null);
         userDtoFromAccount_1.setSecondName(null);
         userDtoFromAccount_1.setPhone(null);
@@ -503,7 +501,7 @@ class UserControllerV1Test {
                 .andExpect(jsonPath("$.errors.version[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.isArchived[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.roles[?(@.message == '%s')]", MUST_NOT_BE_EMPTY).exists())
+                .andExpect(jsonPath("$.errors.role[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.email[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.account[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.group[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())

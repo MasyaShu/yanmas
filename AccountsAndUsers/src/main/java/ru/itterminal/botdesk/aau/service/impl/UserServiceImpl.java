@@ -83,11 +83,11 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
         );
     }
 
-    public List<User> findAllByRolesAndIdNot(Role role, UUID id) {
-        return repository.findAllByRolesAndIdNot(role, id);
+    public List<User> findAllByRoleAndIdNot(Role role, UUID id) {
+        return repository.findAllByRoleAndIdNot(role, id);
     }
 
-    public List<User> findAllByRoles(Role role) {
-        return repository.findAllByRoles(role);
+    public List<User> findAllByRole(Role role) {
+        return repository.findAllByRole(role);
     }
 }

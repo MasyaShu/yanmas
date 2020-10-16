@@ -193,7 +193,7 @@ class UserRepositoryTest {
     public void getByRolesAndIdNot_shouldGetEmpty_whenAccountOwnerExistAndIdEquals() {
         List<User> foundUsers;
         Role role = roleRepository.getByName(Roles.ACCOUNT_OWNER.toString()).get();
-        foundUsers = userRepository.findAllByRolesAndIdNot(role, EXIST_ID);
+        foundUsers = userRepository.findAllByRoleAndIdNot(role, EXIST_ID);
         assertTrue(foundUsers.isEmpty());
     }
 
@@ -201,7 +201,7 @@ class UserRepositoryTest {
     public void getByRolesAndIdNot_shouldGetOneUser_whenAccountOwnerExistAndIdNotEquals() {
         List<User> foundUsers;
         Role role = roleRepository.getByName(Roles.ACCOUNT_OWNER.toString()).get();
-        foundUsers = userRepository.findAllByRolesAndIdNot(role, UUID.randomUUID());
+        foundUsers = userRepository.findAllByRoleAndIdNot(role, UUID.randomUUID());
         assertTrue(foundUsers.size() == 1);
     }
 
@@ -209,7 +209,7 @@ class UserRepositoryTest {
     public void getByRolesAndIdNot_shouldGetInvalidDataAccessApiUsageException_whenAccountOwnerExistAndIdIsNull() {
         List<User> foundUsers;
         Role role = roleRepository.getByName(Roles.ACCOUNT_OWNER.toString()).get();
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> userRepository.findAllByRolesAndIdNot(role, null));
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> userRepository.findAllByRoleAndIdNot(role, null));
     }
 
 }

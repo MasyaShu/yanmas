@@ -54,14 +54,12 @@ public class User extends BaseEntity {
     private Account account;
 
     @ManyToOne
-    @JoinColumn(name = "group_id", nullable = false)
-    private Group group;
+    @JoinColumn(name = "own_group_id", nullable = false)
+    private Group ownGroup;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST}, fetch = FetchType.EAGER)
-    @JoinTable(name = "user_role",
-            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
-    private Set<Role> roles;
+    @ManyToOne
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
 
     @Override
     public boolean equals(Object o) {
@@ -84,7 +82,7 @@ public class User extends BaseEntity {
                 Objects.equals(passwordResetToken, user.passwordResetToken) &&
                 Objects.equals(isArchived, user.isArchived) &&
                 Objects.equals(account, user.account) &&
-                Objects.equals(roles, user.roles) &&
+                Objects.equals(role, user.role) &&
                 Objects.equals(getId(), user.getId()) &&
                 Objects.equals(getOutId(), user.getOutId()) &&
                 Objects.equals(getVersion(), user.getVersion()) &&
@@ -94,6 +92,6 @@ public class User extends BaseEntity {
     @Override
     public int hashCode() {
         return Objects.hash(email, firstName, secondName, password, phone, comment, language,
-                emailVerificationToken, emailVerificationStatus, passwordResetToken, isArchived, account, roles);
+                emailVerificationToken, emailVerificationStatus, passwordResetToken, isArchived, account, role);
     }
 }

@@ -1,5 +1,6 @@
 package ru.itterminal.botdesk.aau.security;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -33,9 +34,7 @@ public class JwtUserDetailsService implements UserDetailsService {
                 .accountId(user.getAccount().getId())
                 .username(user.getEmail())
                 .password(user.getPassword())
-                .authorities(user.getRoles().stream()
-                        .map(role -> new SimpleGrantedAuthority(role.getName()))
-                        .collect(Collectors.toList()))
+                .authorities(List.of(new SimpleGrantedAuthority(user.getRole().getName())))
                 .enabled(user.getEmailVerificationStatus() && !user.getIsArchived())
                 .build();
 

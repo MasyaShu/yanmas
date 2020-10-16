@@ -19,6 +19,15 @@ CREATE TABLE IF NOT EXISTS group_users
     comment text,
     PRIMARY KEY (id)
 );
+CREATE TABLE IF NOT EXISTS role
+(
+    out_id  varchar(128),
+    deleted bool        NOT NULL DEFAULT 'false',
+    version int2        NOT NULL DEFAULT (0),
+    id      uuid        NOT NULL,
+    name    varchar(30) NOT NULL,
+    PRIMARY KEY (id)
+);
 CREATE TABLE IF NOT EXISTS users
 (
     out_id                    varchar(128),
@@ -37,28 +46,12 @@ CREATE TABLE IF NOT EXISTS users
     password_reset_token      varchar(128),
     is_archived               bool         NOT NULL DEFAULT 'false',
     account_id                uuid         NOT NULL,
-    group_id                  uuid         NOT NULL,
+    role_id                   uuid         NOT NULL,
+    own_group_id              uuid         NOT NULL,
     PRIMARY KEY (id),
+    FOREIGN KEY (role_id) REFERENCES role (id),
     FOREIGN KEY (account_id) REFERENCES account (id),
-    FOREIGN KEY (group_id) REFERENCES group_users (id)
-);
-CREATE TABLE IF NOT EXISTS role
-(
-    out_id  varchar(128),
-    deleted bool        NOT NULL DEFAULT 'false',
-    version int2        NOT NULL DEFAULT (0),
-    id      uuid        NOT NULL,
-    name    varchar(30) NOT NULL,
-    PRIMARY KEY (id)
-);
-CREATE TABLE IF NOT EXISTS user_role
-(
-    id      uuid NOT NULL,
-    user_id uuid NOT NULL,
-    role_id uuid NOT NULL,
-    PRIMARY KEY (id),
-    FOREIGN KEY (user_id) REFERENCES users (id),
-    FOREIGN KEY (role_id) REFERENCES role (id)
+    FOREIGN KEY (own_group_id) REFERENCES group_users (id)
 );
 INSERT INTO role(out_id, deleted, version, id, name)
 VALUES ('', 'false', '0', 'ba99ce38-1611-4a81-adc9-3a779d58bbfe', 'ACCOUNT_OWNER'),

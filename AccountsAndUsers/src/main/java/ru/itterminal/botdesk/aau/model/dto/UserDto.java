@@ -74,7 +74,7 @@ public class UserDto extends BaseEntityDto {
     @NotNull(groups = {Create.class, Update.class})
     private Group group;
 
-    @NotEmpty(groups = {Create.class, Update.class})
-    private Set<Role> roles;
+    @NotNull(groups = {Create.class, Update.class})
+    private Role role;
 
 }

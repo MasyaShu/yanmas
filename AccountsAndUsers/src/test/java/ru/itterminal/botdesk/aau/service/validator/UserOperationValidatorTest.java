@@ -97,8 +97,8 @@ class UserOperationValidatorTest {
 
     @Test
     public void beforeCreate_shouldGetLogicalValidationException_whenUserWithRoleAccountOwnerAlreadyExist() {
-        user.setRoles(Set.of(new Role().builder().name(Roles.ACCOUNT_OWNER.toString()).build()));
-        when(service.findAllByRoles(any())).thenReturn(List.of(oldUser));
+        user.setRole(new Role().builder().name(Roles.ACCOUNT_OWNER.toString()).build());
+        when(service.findAllByRole(any())).thenReturn(List.of(oldUser));
         when(roleRepository.getByName(any()))
                 .thenReturn(Optional.of(new Role().builder().name(Roles.ACCOUNT_OWNER.toString()).build()));
         errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,
@@ -112,9 +112,9 @@ class UserOperationValidatorTest {
 
     @Test
     public void beforeUpdate_shouldGetLogicalValidationException_whenNewAndOldUserWithRoleAccountOwner() {
-        newUser.setRoles(Set.of(new Role().builder().name(Roles.ACCOUNT_OWNER.toString()).build()));
-        oldUser.setRoles(Set.of(new Role().builder().name(Roles.ACCOUNT_OWNER.toString()).build()));
-        when(service.findAllByRolesAndIdNot(any(),any())).thenReturn(List.of(oldUser));
+        newUser.setRole(new Role().builder().name(Roles.ACCOUNT_OWNER.toString()).build());
+        oldUser.setRole(new Role().builder().name(Roles.ACCOUNT_OWNER.toString()).build());
+        when(service.findAllByRoleAndIdNot(any(),any())).thenReturn(List.of(oldUser));
         when(roleRepository.getByName(any()))
                 .thenReturn(Optional.of(new Role().builder().name(Roles.ACCOUNT_OWNER.toString()).build()));
         errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,
@@ -128,8 +128,8 @@ class UserOperationValidatorTest {
 
     @Test
     public void beforeUpdate_shouldGetLogicalValidationException_whenOldAndNewUserWithoutRoleAccountOwner() {
-        newUser.setRoles(Set.of(new Role().builder().name(Roles.AUTHOR.toString()).build()));
-        when(service.findAllByRolesAndIdNot(any(), any())).thenReturn(Collections.emptyList());
+        newUser.setRole(new Role().builder().name(Roles.AUTHOR.toString()).build());
+        when(service.findAllByRoleAndIdNot(any(), any())).thenReturn(Collections.emptyList());
         when(roleRepository.getByName(any()))
                 .thenReturn(Optional.of(new Role().builder().name(Roles.ACCOUNT_OWNER.toString()).build()));
         errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,
