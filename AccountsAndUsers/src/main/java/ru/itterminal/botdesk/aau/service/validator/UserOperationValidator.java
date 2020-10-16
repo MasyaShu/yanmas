@@ -49,8 +49,8 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         super.beforeCreate(entity);
         Map<String, List<ValidationError>> errors = new HashMap<>();
 
-        if (entity.getRoles().contains(getAccountOwnerRole())) {
-            List<User> foundUsers = service.findAllByRoles(getAccountOwnerRole());
+        if (entity.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString())) {
+            List<User> foundUsers = service.findAllByRole(getAccountOwnerRole());
             if (foundUsers.isEmpty()) {
                 log.trace(USER_WITH_ROLE_ACCOUNT_OWNER_IS_UNIQUE, entity);
             } else {
@@ -84,13 +84,12 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         // has role Acc_Owner       | has not role Acc_Owner    | all right
         // has not role Acc_Owner   | has not role Acc_Owner    | not allowed, Account must have user with role ACCOUNT_OWNER
 
-
-        List<User> userFromDatabase = service.findAllByRolesAndIdNot(getAccountOwnerRole(), entity.getId());
+        List<User> userFromDatabase = service.findAllByRoleAndIdNot(getAccountOwnerRole(), entity.getId());
         boolean oldUserHasRoleAccountOwner = false;
         if (!userFromDatabase.isEmpty()) {
-            oldUserHasRoleAccountOwner = userFromDatabase.get(0).getRoles().contains(getAccountOwnerRole());
+            oldUserHasRoleAccountOwner = userFromDatabase.get(0).getRole().getName().equals(Roles.ACCOUNT_OWNER.toString());
         }
-        boolean newUserHasRoleAccountOwner = entity.getRoles().contains(getAccountOwnerRole());
+        boolean newUserHasRoleAccountOwner = entity.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString());
 
         if (oldUserHasRoleAccountOwner && newUserHasRoleAccountOwner) {
             errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,

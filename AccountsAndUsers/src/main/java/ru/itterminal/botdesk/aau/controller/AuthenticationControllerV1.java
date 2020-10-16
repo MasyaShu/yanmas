@@ -53,11 +53,11 @@ public class AuthenticationControllerV1 {
             Authentication authentication = authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(email, requestDto.getPassword()));
             JwtUser jwtUser =  (JwtUser) authentication.getPrincipal();
-            Set<String> roles = jwtUser.getAuthorities().stream()
+            String role = jwtUser.getAuthorities().stream()
                     .map(Object::toString)
-                    .collect(Collectors.toSet());
+                    .findFirst().get();
             UUID accountId = jwtUser.getAccountId();
-            String token = jwtProvider.createToken(email, roles, accountId);
+            String token = jwtProvider.createToken(email, role, accountId);
             Map<Object, Object> response = new HashMap<>();
             response.put("email", email);
             response.put("token", token);

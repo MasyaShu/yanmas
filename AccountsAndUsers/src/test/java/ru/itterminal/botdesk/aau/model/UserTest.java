@@ -37,13 +37,11 @@ class UserTest {
                 .passwordResetToken(null)
                 .phone("7906558585")
                 .secondName("second_name")
-                .roles(new HashSet<>())
+                .role(admin)
                 .build();
         user_1.setId(id);
         user_1.setVersion(0);
         user_1.setDeleted(false);
-        user_1.getRoles().add(admin);
-        user_1.getRoles().add(author);
 
         user_2 = new User().builder()
                 .account(null)
@@ -58,13 +56,11 @@ class UserTest {
                 .passwordResetToken(null)
                 .phone("7906558585")
                 .secondName("second_name")
-                .roles(new HashSet<>())
+                .role(admin)
                 .build();
         user_2.setId(id);
         user_2.setVersion(0);
         user_2.setDeleted(false);
-        user_2.getRoles().add(admin);
-        user_2.getRoles().add(author);
     }
 
     @Test
@@ -87,18 +83,14 @@ class UserTest {
 
     @Test
     void equals_shouldGetFalse_whenRolesNotEquals() {
-        user_1.setRoles(new HashSet<>());
+        user_1.setRole(null);
         assertNotEquals(user_1, user_2);
     }
 
     @Test
     void equals_shouldGetTrue_whenRolesDifferntObjectsBotEqualsValues() {
         Role admin = new Role(Roles.ADMIN.toString());
-        Role author = new Role(Roles.AUTHOR.toString());
-        Set<Role> roles = new HashSet<>();
-        roles.add(author);
-        roles.add(admin);
-        user_1.setRoles(roles);
+        user_1.setRole(admin);
         assertEquals(user_1, user_2);
     }
 }

@@ -104,7 +104,7 @@ public class UserSpec extends GeneralSpec<User> {
             @Override
             public Predicate toPredicate(Root<User> root,
                     CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-                Join<User, Group> userJoin = root.join("group");
+                Join<User, Group> userJoin = root.join("ownGroup");
                 Predicate returnedPredicate = criteriaBuilder.equal(userJoin.<UUID> get("id"), listGroupId.get(0));
                 for (int i = 1; i < listGroupId.size() ; i++) {
                     Predicate predicate = criteriaBuilder.equal(userJoin.<UUID> get("id"), listGroupId.get(i));
@@ -120,7 +120,7 @@ public class UserSpec extends GeneralSpec<User> {
             @Override
             public Predicate toPredicate(Root<User> root,
                     CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-                Join<User, Role> userJoin = root.join("roles");
+                Join<User, Role> userJoin = root.join("role");
                 Predicate returnedPredicate = criteriaBuilder.equal(userJoin.<UUID> get("id"), listRoleId.get(0));
                 for (int i = 1; i < listRoleId.size() ; i++) {
                     Predicate predicate = criteriaBuilder.equal(userJoin.<UUID> get("id"), listRoleId.get(i));

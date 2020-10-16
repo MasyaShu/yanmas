@@ -3,6 +3,7 @@ package ru.itterminal.botdesk.jwt;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -51,10 +52,10 @@ public class JwtProvider {
         secretToken = Base64.getEncoder().encodeToString(secretToken.getBytes());
     }
 
-    public String createToken(String email, Set<String> roles, UUID accountId) {
+    public String createToken(String email, String role, UUID accountId) {
 
         Claims claims = Jwts.claims().setSubject(email);
-        claims.put("roles", roles);
+        claims.put("role", role);
         claims.put("accountId", accountId);
 
         Date now = new Date();
@@ -78,15 +79,13 @@ public class JwtProvider {
         Claims claims = Jwts.parser().setSigningKey(secretToken).parseClaimsJws(token).getBody();
         String email = claims.getSubject();
         UUID accountId = UUID.fromString((String) claims.get("accountId"));
-        Set<String> roles = ((ArrayList<String>) claims.get("roles")).stream().collect(Collectors.toSet());
+        String role = (String) claims.get("role");
 
         JwtUser jwtUser = new JwtUser()
                 .builder()
                 .accountId(accountId)
                 .username(email)
-                .authorities(roles.stream()
-                        .map(role -> new SimpleGrantedAuthority(role))
-                        .collect(Collectors.toList()))
+                .authorities(List.of(new SimpleGrantedAuthority(role)))
                 .enabled(true)
                 .build();
 
