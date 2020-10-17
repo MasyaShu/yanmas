@@ -5,6 +5,7 @@ import static ru.itterminal.botdesk.config.SecurityConfig.AUTH_WHITELIST;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -16,6 +17,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 import ru.itterminal.botdesk.jwt.JwtUser;
@@ -30,7 +32,11 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
     public static String GROUP_1_ID = "0223e51a-4bb2-44ee-bc8e-1f047a2145e7";
     public static String GROUP_2_ID = "99f6b488-7687-4451-b8a1-9fbeb2a3efec";
     public static String EMAIL_1 = "m@m.ru";
+    public static String PASSWORD = "12345";
     public static String EMAIL_2 = "m4@m.ru";
+
+    @Autowired
+    BCryptPasswordEncoder encoder;
 
     protected void configure(HttpSecurity http) throws Exception {
         http

@@ -2,9 +2,7 @@ package ru.itterminal.botdesk.aau.controller;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +32,8 @@ public class AuthenticationControllerV1 {
 
     private final UserServiceImpl userService;
 
+    public static final String INVALID_USERNAME_OR_PASSWORD = "invalid username or password";
+
     @Value("${jwt.token.prefix}")
     private String prefixToken;
 
@@ -45,13 +45,13 @@ public class AuthenticationControllerV1 {
         this.userService = userService;
     }
 
-    // TODO add tests
     @PostMapping("signin")
-    public ResponseEntity login(@RequestBody AuthenticationRequestDto requestDto) {
+    public ResponseEntity signin(@RequestBody AuthenticationRequestDto requestDto) {
         try {
             String email = requestDto.getEmail();
+            String password = requestDto.getPassword();
             Authentication authentication = authenticationManager
-                    .authenticate(new UsernamePasswordAuthenticationToken(email, requestDto.getPassword()));
+                    .authenticate(new UsernamePasswordAuthenticationToken(email, password));
             JwtUser jwtUser =  (JwtUser) authentication.getPrincipal();
             String role = jwtUser.getAuthorities().stream()
                     .map(Object::toString)
@@ -65,7 +65,7 @@ public class AuthenticationControllerV1 {
             return ResponseEntity.ok(response);
         }
         catch (AuthenticationException e) {
-            throw new JwtAuthenticationException("invalid username or password");
+            throw new JwtAuthenticationException(INVALID_USERNAME_OR_PASSWORD);
         }
     }
 }
