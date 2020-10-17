@@ -35,9 +35,6 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
     public static String PASSWORD = "12345";
     public static String EMAIL_2 = "m4@m.ru";
 
-    @Autowired
-    BCryptPasswordEncoder encoder;
-
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .httpBasic().disable()
