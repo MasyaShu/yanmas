@@ -1,10 +1,9 @@
 package ru.itterminal.botdesk.aau.model;
 
 import java.util.Objects;
+import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,25 +26,25 @@ public class Group extends BaseEntity {
     @Column
     private String comment;
 
+    @Column(name = "is_inner", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private String isInner;
+
+    @Column(name = "parent_id")
+    private UUID parentId;
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Group)) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         Group group = (Group) o;
         return Objects.equals(name, group.name) &&
                 Objects.equals(comment, group.comment) &&
-                Objects.equals(getId(), group.getId()) &&
-                Objects.equals(getOutId(), group.getOutId()) &&
-                Objects.equals(getVersion(), group.getVersion()) &&
-                Objects.equals(getDeleted(), group.getDeleted());
+                Objects.equals(isInner, group.isInner) &&
+                Objects.equals(parentId, group.parentId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, comment);
+        return Objects.hash(name, comment, isInner, parentId);
     }
 }
