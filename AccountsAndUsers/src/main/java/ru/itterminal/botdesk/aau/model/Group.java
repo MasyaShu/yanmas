@@ -27,10 +27,17 @@ public class Group extends BaseEntity {
     private String comment;
 
     @Column(name = "is_inner", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private String isInner;
+    private Boolean isInner;
+
+    @Column(name = "is_deprecated", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean isDeprecated;
 
     @Column(name = "parent_id")
     private UUID parentId;
+
+    @ManyToOne
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
 
     @Override
     public boolean equals(Object o) {
@@ -40,11 +47,18 @@ public class Group extends BaseEntity {
         return Objects.equals(name, group.name) &&
                 Objects.equals(comment, group.comment) &&
                 Objects.equals(isInner, group.isInner) &&
-                Objects.equals(parentId, group.parentId);
+                Objects.equals(isDeprecated, group.isInner) &&
+                Objects.equals(parentId, group.parentId) &&
+                Objects.equals(account, group.account) &&
+                Objects.equals(getId(), group.getId()) &&
+                Objects.equals(getOutId(), group.getOutId()) &&
+                Objects.equals(getVersion(), group.getVersion()) &&
+                Objects.equals(getDeleted(), group.getDeleted());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, comment, isInner, parentId);
+        return Objects.hash(name, comment, isInner, isDeprecated, parentId, account,
+                getId(), getOutId(), getVersion(), getDeleted());
     }
 }

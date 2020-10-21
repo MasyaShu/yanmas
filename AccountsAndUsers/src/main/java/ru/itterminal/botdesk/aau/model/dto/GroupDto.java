@@ -1,6 +1,7 @@
 package ru.itterminal.botdesk.aau.model.dto;
 
 import lombok.*;
+import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
@@ -26,6 +27,12 @@ public class GroupDto extends BaseEntityDto {
     private Boolean isInner;
 
     @NotNull(groups = {Create.class, Update.class})
+    private Boolean isDeprecated;
+
+    @NotNull(groups = {Create.class, Update.class})
     private UUID parentId;
+
+    @NotNull(groups = {Create.class, Update.class})
+    private Account account;
 
 }
