@@ -8,7 +8,6 @@ import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -28,9 +27,6 @@ public class GroupDto extends BaseEntityDto {
 
     @NotNull(groups = {Create.class, Update.class})
     private Boolean isDeprecated;
-
-    @NotNull(groups = {Create.class, Update.class})
-    private UUID parentId;
 
     @NotNull(groups = {Create.class, Update.class})
     private Account account;

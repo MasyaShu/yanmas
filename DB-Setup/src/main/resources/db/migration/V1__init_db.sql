@@ -17,6 +17,9 @@ CREATE TABLE IF NOT EXISTS group_users
     id      uuid         NOT NULL,
     name    varchar(128) NOT NULL,
     comment text,
+    is_deprecated bool         NOT NULL DEFAULT 'false',
+    is_inner bool         NOT NULL DEFAULT 'false',
+    account_id  uuid        NOT NULL,
     PRIMARY KEY (id)
 );
 CREATE TABLE IF NOT EXISTS role

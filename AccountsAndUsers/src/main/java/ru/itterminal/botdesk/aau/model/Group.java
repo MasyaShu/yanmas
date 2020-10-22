@@ -1,16 +1,10 @@
 package ru.itterminal.botdesk.aau.model;
 
-import java.util.Objects;
-import java.util.UUID;
+import lombok.*;
+import ru.itterminal.botdesk.commons.model.BaseEntity;
 
 import javax.persistence.*;
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import ru.itterminal.botdesk.commons.model.BaseEntity;
+import java.util.Objects;
 
 @Entity
 @Table(name = "group_users")
@@ -20,6 +14,7 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Group extends BaseEntity {
+
     @Column(nullable = false, length = 128)
     private String name;
 
@@ -31,9 +26,6 @@ public class Group extends BaseEntity {
 
     @Column(name = "is_deprecated", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean isDeprecated;
-
-    @Column(name = "parent_id")
-    private UUID parentId;
 
     @ManyToOne
     @JoinColumn(name = "account_id", nullable = false)
@@ -48,7 +40,6 @@ public class Group extends BaseEntity {
                 Objects.equals(comment, group.comment) &&
                 Objects.equals(isInner, group.isInner) &&
                 Objects.equals(isDeprecated, group.isInner) &&
-                Objects.equals(parentId, group.parentId) &&
                 Objects.equals(account, group.account) &&
                 Objects.equals(getId(), group.getId()) &&
                 Objects.equals(getOutId(), group.getOutId()) &&
@@ -58,7 +49,7 @@ public class Group extends BaseEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, comment, isInner, isDeprecated, parentId, account,
+        return Objects.hash(name, comment, isInner, isDeprecated, account,
                 getId(), getOutId(), getVersion(), getDeleted());
     }
 }
