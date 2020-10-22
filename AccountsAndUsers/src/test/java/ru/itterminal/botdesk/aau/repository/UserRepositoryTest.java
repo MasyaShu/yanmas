@@ -190,6 +190,16 @@ class UserRepositoryTest {
     }
 
     @Test
+    public void getByAll_shouldGetOneEntity_whenFirstNameIsUniqesInDatabase() {
+        Pageable pageable = PageRequest.of(0, 5, Sort.by((Sort.Direction.ASC), "firstName"));
+        Page<User> foundUsers;
+        Specification<User> userSpecification = Specification
+                .where(spec.getUserByFirstNameSpec("firstName1"));
+        foundUsers = userRepository.findAll(userSpecification, pageable);
+        assertTrue(foundUsers.getContent().size() == 1);
+    }
+
+    @Test
     public void getByRolesAndIdNot_shouldGetEmpty_whenAccountOwnerExistAndIdEquals() {
         List<User> foundUsers;
         Role role = roleRepository.getByName(Roles.ACCOUNT_OWNER.toString()).get();

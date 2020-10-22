@@ -37,7 +37,7 @@ public class UserSpec extends GeneralSpec<User> {
             @Override
             public Predicate toPredicate(Root<User> root,
                     CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-                Predicate predicate = criteriaBuilder.like(root.get("first_name"), "%" + firstName + "%");
+                Predicate predicate = criteriaBuilder.like(root.get("firstName"), "%" + firstName + "%");
                 return predicate;
             }
         };
@@ -48,7 +48,7 @@ public class UserSpec extends GeneralSpec<User> {
             @Override
             public Predicate toPredicate(Root<User> root,
                     CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-                Predicate predicate = criteriaBuilder.like(root.get("second_name"), "%" + secondName + "%");
+                Predicate predicate = criteriaBuilder.like(root.get("secondName"), "%" + secondName + "%");
                 return predicate;
             }
         };
@@ -81,7 +81,7 @@ public class UserSpec extends GeneralSpec<User> {
             @Override
             public Predicate toPredicate(Root<User> root,
                     CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-                Predicate predicate = criteriaBuilder.equal(root.get("is_archived"), isArchived);
+                Predicate predicate = criteriaBuilder.equal(root.get("isArchived"), isArchived);
                 return predicate;
             }
         };

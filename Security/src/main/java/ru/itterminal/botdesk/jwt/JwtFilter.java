@@ -16,11 +16,12 @@ import org.springframework.web.filter.GenericFilterBean;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.jsonwebtoken.JwtException;
 import ru.itterminal.botdesk.commons.exception.error.ApiError;
 
 public class JwtFilter extends GenericFilterBean {
-
     private JwtProvider jwtProvider;
+    private static final String INVALID_TOKEN = "invalid token";
 
     public JwtFilter(JwtProvider jwtProvider) {
         this.jwtProvider = jwtProvider;
@@ -45,9 +46,13 @@ public class JwtFilter extends GenericFilterBean {
                 return;
             }
             if (validateToken) {
-                Authentication auth = jwtProvider.getAuthentication(token);
-                if (auth != null) {
-                    SecurityContextHolder.getContext().setAuthentication(auth);
+                try {
+                    Authentication auth = jwtProvider.getAuthentication(token);
+                    if (auth != null) {
+                        SecurityContextHolder.getContext().setAuthentication(auth);
+                    }
+                } catch (Exception e) {
+                    throw new JwtException(e.getMessage());
                 }
             }
         }

@@ -13,8 +13,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
@@ -34,15 +32,7 @@ public class JwtProvider {
     @Value("${jwt.token.expired}")
     private long validityInMillisecondsToken;
 
-    private UserDetailsService userDetailsService;
-
-    private BCryptPasswordEncoder passwordEncoder;
-
-    public JwtProvider(UserDetailsService userDetailsService,
-            BCryptPasswordEncoder passwordEncoder) {
-        this.userDetailsService = userDetailsService;
-        this.passwordEncoder = passwordEncoder;
-    }
+    public static final String INVALID_TOKEN = "invalid token";
 
     @PostConstruct
     protected void init() {
@@ -50,15 +40,12 @@ public class JwtProvider {
     }
 
     public String createToken(String email, String role, int weightRole, UUID accountId) {
-
         Claims claims = Jwts.claims().setSubject(email);
         claims.put("role", role);
         claims.put("weightRole", weightRole);
         claims.put("accountId", accountId);
-
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMillisecondsToken);
-
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
@@ -67,13 +54,31 @@ public class JwtProvider {
                 .compact();
     }
 
-    public Authentication getAuthentication(String token) {
+    public String createToken(UUID userId) {
+        Date now = new Date();
+        Date validity = new Date(now.getTime() + validityInMillisecondsToken);
+        return Jwts.builder()
+                .setSubject(userId.toString())
+                .setIssuedAt(now)
+                .setExpiration(validity)
+                .signWith(SignatureAlgorithm.HS256, secretToken)
+                .compact();
+    }
+
+    public Authentication getAuthentication(String token) throws Exception {
         UserDetails userDetails = getUserDetails(token);
         return new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(),
                 userDetails.getAuthorities());
     }
 
-    public UserDetails getUserDetails(String token) {
+    public UUID getUserId(String token) throws Exception {
+        UUID userId;
+        Claims claims = Jwts.parser().setSigningKey(secretToken).parseClaimsJws(token).getBody();
+        userId = UUID.fromString((String) claims.getSubject());
+        return userId;
+    }
+
+    public UserDetails getUserDetails(String token)  throws Exception {
         Claims claims = Jwts.parser().setSigningKey(secretToken).parseClaimsJws(token).getBody();
         String email = claims.getSubject();
         UUID accountId = UUID.fromString((String) claims.get("accountId"));
@@ -101,16 +106,11 @@ public class JwtProvider {
         return null;
     }
 
-    public boolean validateToken(String token) {
-        try {
-            Jws<Claims> claims = Jwts.parser().setSigningKey(secretToken).parseClaimsJws(token);
-            if (claims.getBody().getExpiration().before(new Date())) {
-                return false;
-            }
-            return true;
+    public boolean validateToken(String token) throws Exception {
+        Jws<Claims> claims = Jwts.parser().setSigningKey(secretToken).parseClaimsJws(token);
+        if (claims.getBody().getExpiration().before(new Date())) {
+            return false;
         }
-        catch (Exception e) {
-            throw e;
-        }
+        return true;
     }
 }

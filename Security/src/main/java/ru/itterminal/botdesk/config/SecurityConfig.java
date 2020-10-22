@@ -34,7 +34,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     public static final String[] AUTH_WHITELIST = {
             "/swagger-ui.html",
-            "/api/v1/auth/signin"
+            "/api/v1/auth/signin",
+            "/api/v1/auth/email-verify"
+
     };
 
     @Bean
