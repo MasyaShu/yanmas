@@ -68,7 +68,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.Group;
-import ru.itterminal.botdesk.aau.model.Language;
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.dto.UserDto;
@@ -165,9 +164,7 @@ class UserControllerV1Test {
 
     @BeforeEach
     void setUpBeforeEach() {
-        account_1 = new Account().builder()
-                .language(Language.RU.toString())
-                .build();
+        account_1 = new Account();
         account_1.setId(UUID.fromString(ACCOUNT_1_ID));
         group_1 = new Group();
         group_1.setId(UUID.fromString(GROUP_1_ID));
@@ -272,7 +269,6 @@ class UserControllerV1Test {
         userDtoFromAccount_1.setFirstName(INVALID_FIRST_NAME);
         userDtoFromAccount_1.setSecondName(INVALID_SECOND_NAME);
         userDtoFromAccount_1.setPhone(INVALID_PHONE);
-        userDtoFromAccount_1.setLanguage(INVALID_LANGUAGE);
         userDtoFromAccount_1.setIsArchived(null);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -307,7 +303,6 @@ class UserControllerV1Test {
         userDtoFromAccount_1.setFirstName(null);
         userDtoFromAccount_1.setSecondName(null);
         userDtoFromAccount_1.setPhone(null);
-        userDtoFromAccount_1.setLanguage(null);
         userDtoFromAccount_1.setIsArchived(null);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -451,7 +446,6 @@ class UserControllerV1Test {
         userDtoFromAccount_1.setFirstName("123456789012345678901");
         userDtoFromAccount_1.setSecondName("1234567890123456789012345678901");
         userDtoFromAccount_1.setPhone("1234567890123456789012345678901");
-        userDtoFromAccount_1.setLanguage("gr");
         userDtoFromAccount_1.setIsArchived(null);
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -488,7 +482,6 @@ class UserControllerV1Test {
         userDtoFromAccount_1.setFirstName(null);
         userDtoFromAccount_1.setSecondName(null);
         userDtoFromAccount_1.setPhone(null);
-        userDtoFromAccount_1.setLanguage(null);
         userDtoFromAccount_1.setIsArchived(null);
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)

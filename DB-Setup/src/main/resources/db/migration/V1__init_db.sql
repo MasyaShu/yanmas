@@ -6,7 +6,6 @@ create TABLE IF NOT EXISTS account
     version  int2        NOT NULL DEFAULT (0),
     id       uuid        NOT NULL,
     name     varchar(20) NOT NULL,
-    language varchar(2),
     PRIMARY KEY (id)
 );
 create TABLE IF NOT EXISTS group_users
@@ -44,7 +43,6 @@ create TABLE IF NOT EXISTS users
     password                  VARCHAR(128) NOT NULL,
     phone                     varchar(30),
     comment                   text,
-    language                  varchar(2),
     email_verification_token  varchar(128),
     email_verification_status bool         NOT NULL DEFAULT 'false',
     password_reset_token      varchar(128),

@@ -31,7 +31,6 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import io.jsonwebtoken.JwtException;
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.Group;
-import ru.itterminal.botdesk.aau.model.Language;
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
@@ -70,9 +69,7 @@ class UserServiceImplTest {
 
     @BeforeEach
     void setUpBeforeEach() {
-        account = new Account().builder()
-                .language(Language.RU.toString())
-                .build();
+        account = new Account();
         account.setId(UUID.fromString(ACCOUNT_1_ID));
         group = new Group();
         group.setId(UUID.fromString(GROUP_1_ID));

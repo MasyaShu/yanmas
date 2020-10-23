@@ -77,10 +77,6 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
         entity.setId(id);
         validator.checkUniqueness(entity);
         entity.setPassword(encoder.encode(entity.getPassword()));
-        if (entity.getLanguage() == null) {
-            String ln = entity.getAccount().getLanguage();
-            entity.setLanguage(ln);
-        }
         if (entity.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString())) {
             String emailVerificationToken = jwtProvider.createToken(entity.getId());
             entity.setEmailVerificationToken(emailVerificationToken);
