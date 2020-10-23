@@ -33,9 +33,6 @@ public class User extends BaseEntity {
     @Column
     private String comment;
 
-    @Column (length = 2)
-    private String language;
-
     @Column(name = "email_verification_token", length = 128)
     private String emailVerificationToken;
 
@@ -75,7 +72,6 @@ public class User extends BaseEntity {
                 Objects.equals(password, user.password) &&
                 Objects.equals(phone, user.phone) &&
                 Objects.equals(comment, user.comment) &&
-                Objects.equals(language, user.language) &&
                 Objects.equals(emailVerificationToken, user.emailVerificationToken) &&
                 Objects.equals(emailVerificationStatus, user.emailVerificationStatus) &&
                 Objects.equals(passwordResetToken, user.passwordResetToken) &&
@@ -90,7 +86,7 @@ public class User extends BaseEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(email, firstName, secondName, password, phone, comment, language,
+        return Objects.hash(email, firstName, secondName, password, phone, comment,
                 emailVerificationToken, emailVerificationStatus, passwordResetToken, isArchived, account, role);
     }
 }

@@ -2,21 +2,23 @@ package ru.itterminal.botdesk.jwt;
 
 import java.util.Base64;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -32,18 +34,35 @@ public class JwtProvider {
     @Value("${jwt.token.expired}")
     private long validityInMillisecondsToken;
 
-    public static final String INVALID_TOKEN = "invalid token";
+    @Autowired
+    private ApplicationContext appContext;
+
+    public static final String CANT_CREATE_TOKEN_BECAUSE = "Can't create token, because ";
+    public static final String CANT_GET_USER_ID_FROM_TOKEN_BECAUSE = "Can't get userId from token, because ";
+    public static final String CANT_GET_EMAIL_FROM_TOKEN_BECAUSE = "Can't get email from token, because ";
+    public static final String EMAIL_IS_NULL = "email is null";
+    public static final String TOKEN_IS_NULL = "token is null";
+    public static final String EMAIL_IS_EMPTY = "email is empty";
+    public static final String TOKEN_IS_EMPTY = "token is empty";
+    public static final String CANT_CREATE_TOKEN_IF_USER_ID_IS_NULL = "Can't create token if userId is null";
 
     @PostConstruct
     protected void init() {
         secretToken = Base64.getEncoder().encodeToString(secretToken.getBytes());
     }
 
-    public String createToken(String email, String role, int weightRole, UUID accountId) {
+    public String createToken(String email) {
+        String causeException = "";
+        if (email == null) {
+            causeException = EMAIL_IS_NULL;
+        }
+        if (email != null && email.isEmpty()) {
+            causeException = EMAIL_IS_EMPTY;
+        }
+        if (!causeException.isEmpty()) {
+            throw new JwtException(CANT_CREATE_TOKEN_BECAUSE + causeException);
+        }
         Claims claims = Jwts.claims().setSubject(email);
-        claims.put("role", role);
-        claims.put("weightRole", weightRole);
-        claims.put("accountId", accountId);
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMillisecondsToken);
         return Jwts.builder()
@@ -55,6 +74,9 @@ public class JwtProvider {
     }
 
     public String createToken(UUID userId) {
+        if (userId == null) {
+            throw new JwtException(CANT_CREATE_TOKEN_IF_USER_ID_IS_NULL);
+        }
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMillisecondsToken);
         return Jwts.builder()
@@ -65,37 +87,44 @@ public class JwtProvider {
                 .compact();
     }
 
-    public Authentication getAuthentication(String token) throws Exception {
-        UserDetails userDetails = getUserDetails(token);
-        return new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(),
-                userDetails.getAuthorities());
-    }
-
     public UUID getUserId(String token) throws Exception {
+        String causeException = "";
+        if (token == null) {
+            causeException = TOKEN_IS_NULL;
+        }
+        if (token != null && token.isEmpty()) {
+            causeException = TOKEN_IS_EMPTY;
+        }
+        if (!causeException.isEmpty()) {
+            throw new JwtException(CANT_GET_USER_ID_FROM_TOKEN_BECAUSE + causeException);
+        }
         UUID userId;
         Claims claims = Jwts.parser().setSigningKey(secretToken).parseClaimsJws(token).getBody();
         userId = UUID.fromString((String) claims.getSubject());
         return userId;
     }
 
-    public UserDetails getUserDetails(String token)  throws Exception {
+    public String getEmail(String token) throws Exception {
+        String causeException = "";
+        if (token == null) {
+            causeException = TOKEN_IS_NULL;
+        }
+        if (token != null && token.isEmpty()) {
+            causeException = TOKEN_IS_EMPTY;
+        }
+        if (!causeException.isEmpty()) {
+            throw new JwtException(CANT_GET_EMAIL_FROM_TOKEN_BECAUSE + causeException);
+        }
         Claims claims = Jwts.parser().setSigningKey(secretToken).parseClaimsJws(token).getBody();
-        String email = claims.getSubject();
-        UUID accountId = UUID.fromString((String) claims.get("accountId"));
-        int weightRole = (int) claims.get("weightRole");
-        String role = (String) claims.get("role");
+        return claims.getSubject();
+    }
 
-        JwtUser jwtUser = new JwtUser()
-                .builder()
-                .accountId(accountId)
-                .weightRole(weightRole)
-                .username(email)
-                .authorities(List.of(new SimpleGrantedAuthority(role)))
-                .enabled(true)
-                .build();
-
-        return jwtUser;
-
+    public Authentication getAuthentication(String token) throws Exception {
+        UserDetailsService userDetailsService =
+                (UserDetailsService) appContext.getBean("jwtUserDetailsService");
+        UserDetails userDetails = userDetailsService.loadUserByUsername(getEmail(token));
+        return new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(),
+                userDetails.getAuthorities());
     }
 
     public String resolveToken(HttpServletRequest req) {

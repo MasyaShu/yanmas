@@ -1,6 +1,7 @@
 package ru.itterminal.botdesk.jwt;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -20,9 +21,11 @@ import lombok.Setter;
 public class JwtUser implements UserDetails {
 
     private  UUID accountId;
+    private  UUID groupId;
     private  int weightRole;
     private  String username;
     private  String password;
+    private  boolean is_inner_group;
     private  boolean enabled;
     private  Collection<? extends GrantedAuthority> authorities;
 
@@ -40,4 +43,24 @@ public class JwtUser implements UserDetails {
     public boolean isCredentialsNonExpired() {
         return true;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof JwtUser)) {
+            return false;
+        }
+        JwtUser jwtUser = (JwtUser) o;
+        return weightRole == jwtUser.weightRole &&
+                enabled == jwtUser.enabled &&
+                is_inner_group == jwtUser.is_inner_group &&
+                Objects.equals(accountId, jwtUser.accountId) &&
+                Objects.equals(groupId, jwtUser.groupId) &&
+                Objects.equals(username, jwtUser.username) &&
+                Objects.equals(password, jwtUser.password) &&
+                Objects.equals(authorities, jwtUser.authorities);
+    }
+
 }

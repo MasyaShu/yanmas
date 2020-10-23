@@ -21,7 +21,6 @@ import lombok.Setter;
 import lombok.ToString;
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.Group;
-import ru.itterminal.botdesk.aau.model.Language;
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
 import ru.itterminal.botdesk.commons.model.validator.ValueOfEnum;
@@ -58,11 +57,6 @@ public class UserDto extends BaseEntityDto {
     private String phone;
 
     private String comment;
-
-    @ValueOfEnum(enumClass = Language.class,
-            message = MUST_BE_ANY_OF_EN_RU,
-            groups = {Create.class, Update.class})
-    private String language;
 
     // TODO Remove NotNull??
     @NotNull(groups = {Create.class, Update.class})

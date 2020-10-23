@@ -24,30 +24,24 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import io.jsonwebtoken.JwtException;
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.Group;
-import ru.itterminal.botdesk.aau.model.Language;
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
 import ru.itterminal.botdesk.aau.service.validator.UserOperationValidator;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.FailedSaveEntityException;
-import ru.itterminal.botdesk.config.TestSecurityConfig;
 import ru.itterminal.botdesk.jwt.JwtProvider;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {JwtProvider.class, UserServiceImpl.class, BCryptPasswordEncoder.class})
-@TestPropertySource(locations = "/application.properties")
-@Import(TestSecurityConfig.class)
-@ActiveProfiles("Test")
+@TestPropertySource(properties = {"jwt.token.secret=ksedtob", "jwt.token.expired=8640000", "jwt.token.prefix=Bearer"})
 class UserServiceImplTest {
 
     @MockBean
@@ -75,9 +69,7 @@ class UserServiceImplTest {
 
     @BeforeEach
     void setUpBeforeEach() {
-        account = new Account().builder()
-                .language(Language.RU.toString())
-                .build();
+        account = new Account();
         account.setId(UUID.fromString(ACCOUNT_1_ID));
         group = new Group();
         group.setId(UUID.fromString(GROUP_1_ID));
