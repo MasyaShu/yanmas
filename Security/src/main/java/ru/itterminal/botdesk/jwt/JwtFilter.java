@@ -21,7 +21,7 @@ import ru.itterminal.botdesk.commons.exception.error.ApiError;
 
 public class JwtFilter extends GenericFilterBean {
     private JwtProvider jwtProvider;
-    private static final String INVALID_TOKEN = "invalid token";
+
 
     public JwtFilter(JwtProvider jwtProvider) {
         this.jwtProvider = jwtProvider;
