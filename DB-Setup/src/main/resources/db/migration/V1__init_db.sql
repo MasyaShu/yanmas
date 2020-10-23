@@ -1,5 +1,5 @@
 -- START MODULE **ACCOUNT AND USERS**
-CREATE TABLE IF NOT EXISTS account
+create TABLE IF NOT EXISTS account
 (
     out_id   varchar(128),
     deleted  bool        NOT NULL DEFAULT 'false',
@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS account
     language varchar(2),
     PRIMARY KEY (id)
 );
-CREATE TABLE IF NOT EXISTS group_users
+create TABLE IF NOT EXISTS group_users
 (
     out_id  varchar(128),
     deleted bool         NOT NULL DEFAULT 'false',
@@ -17,12 +17,12 @@ CREATE TABLE IF NOT EXISTS group_users
     id      uuid         NOT NULL,
     name    varchar(128) NOT NULL,
     comment text,
-    is_deprecated bool         NOT NULL DEFAULT 'false',
-    is_inner bool         NOT NULL DEFAULT 'false',
-    account_id  uuid        NOT NULL,
+    is_deprecated bool  NOT NULL DEFAULT 'false',
+    is_inner bool       NOT NULL DEFAULT 'false',
+    account_id  uuid    NOT NULL,
     PRIMARY KEY (id)
 );
-CREATE TABLE IF NOT EXISTS role
+create TABLE IF NOT EXISTS role
 (
     out_id  varchar(128),
     deleted bool        NOT NULL DEFAULT 'false',
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS role
     weight  int         NOT NULL,
     PRIMARY KEY (id)
 );
-CREATE TABLE IF NOT EXISTS users
+create TABLE IF NOT EXISTS users
 (
     out_id                    varchar(128),
     deleted                   bool         NOT NULL DEFAULT 'false',
@@ -57,8 +57,8 @@ CREATE TABLE IF NOT EXISTS users
     FOREIGN KEY (account_id) REFERENCES account (id),
     FOREIGN KEY (own_group_id) REFERENCES group_users (id)
 );
-INSERT INTO role(out_id, deleted, version, id, name, weight)
-VALUES ('', 'false', '0', 'ba99ce38-1611-4a81-adc9-3a779d58bbfe', 'ACCOUNT_OWNER', '3'),
+insert into role(out_id, deleted, version, id, name, weight)
+values ('', 'false', '0', 'ba99ce38-1611-4a81-adc9-3a779d58bbfe', 'ACCOUNT_OWNER', '3'),
        ('', 'false', '0', '607f04b1-f5f9-4f20-9c6f-501c32d773c0', 'ADMIN', '2'),
        ('', 'false', '0', '933f20bf-9262-47bb-83d2-0ca55bbbd3fd', 'AUTHOR', '1'),
        ('', 'false', '0', 'f7e579e6-0609-467a-91ff-454f42da3d58', 'EXECUTOR', '0'),

@@ -34,6 +34,20 @@ public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> 
     }
 
     @Override
+    public boolean beforeCreate(Group entity) {
+        super.beforeCreate(entity);
+        checkUniqueness(entity);
+        return true;
+    }
+
+    @Override
+    public boolean beforeUpdate(Group entity) {
+        super.beforeCreate(entity);
+        checkUniqueness(entity);
+        return true;
+    }
+
+    @Override
     public boolean checkUniqueness(Group entity) {
         log.trace(CHECK_UNIQUENESS, entity);
         Map<String, List<ValidationError>> errors = new HashMap<>();

@@ -12,7 +12,7 @@ import java.util.UUID;
 @Repository
 public interface GroupRepository extends CustomizedParentEntityRepository<Group> {
 
-    List<GroupUniqueFields> getByNameAndIdNot(String name, UUID id);
+    List<GroupUniqueFields> getByNameAndAccount_IdAndIdNot(String name, UUID accountId, UUID id);
 
     Optional<Group> getByNameAndAccount_Id(String name, UUID accountId);
 
