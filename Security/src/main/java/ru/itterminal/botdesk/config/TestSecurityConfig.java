@@ -30,6 +30,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
     public static String GROUP_1_ID = "0223e51a-4bb2-44ee-bc8e-1f047a2145e7";
     public static String GROUP_2_ID = "99f6b488-7687-4451-b8a1-9fbeb2a3efec";
     public static String EMAIL_1 = "m@m.ru";
+    public static String PASSWORD = "12345";
     public static String EMAIL_2 = "m4@m.ru";
 
     protected void configure(HttpSecurity http) throws Exception {
@@ -61,6 +62,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                         jwtUser = new JwtUser()
                                 .builder()
                                 .accountId(UUID.fromString(ACCOUNT_1_ID))
+                                .weightRole(2)
                                 .username(EMAIL_1)
                                 .enabled(true)
                                 .authorities(List.of(new SimpleGrantedAuthority("ADMIN")))
@@ -70,6 +72,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                         jwtUser = new JwtUser()
                                 .builder()
                                 .accountId(UUID.fromString(ACCOUNT_2_ID))
+                                .weightRole(2)
                                 .username(EMAIL_1)
                                 .enabled(true)
                                 .authorities(List.of(new SimpleGrantedAuthority("ADMIN")))
@@ -79,6 +82,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                         jwtUser = new JwtUser()
                                 .builder()
                                 .accountId(UUID.fromString(ACCOUNT_1_ID))
+                                .weightRole(0)
                                 .username(EMAIL_1)
                                 .enabled(true)
                                 .authorities(List.of(new SimpleGrantedAuthority("AUTHOR")))

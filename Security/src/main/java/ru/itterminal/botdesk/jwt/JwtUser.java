@@ -20,6 +20,7 @@ import lombok.Setter;
 public class JwtUser implements UserDetails {
 
     private  UUID accountId;
+    private  int weightRole;
     private  String username;
     private  String password;
     private  boolean enabled;

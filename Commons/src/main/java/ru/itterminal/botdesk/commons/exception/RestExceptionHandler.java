@@ -24,6 +24,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import io.jsonwebtoken.JwtException;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -74,6 +75,20 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<?> handleJwtException(JwtException ex, HttpServletRequest request) {
+        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, "JWT", ex).withRequest(request);
+        log.warn(ex.getMessage());
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(FailedSaveEntityException.class)
+    public ResponseEntity<?> handleFailedSaveEntityException(FailedSaveEntityException ex, HttpServletRequest request) {
+        ApiError apiError = new ApiError(HttpStatus.CONFLICT, "Save entity", ex).withRequest(request);
+        log.warn(ex.getMessage());
+        return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
+    }
+
 //    @ExceptionHandler(NotUniqueValueException.class)
 //    public ResponseEntity<?> handleNotUniqueValueException(NotUniqueValueException ex, HttpServletRequest request) {
 //        ApiError apiError = new ApiError(HttpStatus.CONFLICT, ex.getExceptionCode(), ex).withRequest(request);
@@ -88,7 +103,6 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
             ex.getExceptionCode(), ex)
             .withRequest(request)
             .withDetail(INPUT_VALIDATION_FAILED);
-        //TODO: check auth-server to avoid this 'if'-block
         if (ex.getFieldErrors() == null) {
             apiError.setErrors(new HashMap<String, List<ValidationError>>() {{
                 put(VALIDATION_ERROR_LIST_KEY, ex.getWarnings());
