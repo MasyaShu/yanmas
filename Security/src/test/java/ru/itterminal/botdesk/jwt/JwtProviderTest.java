@@ -1,12 +1,10 @@
 package ru.itterminal.botdesk.jwt;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.booleanThat;
 import static org.mockito.Mockito.when;
 import static ru.itterminal.botdesk.config.TestSecurityConfig.EMAIL_1;
 import static ru.itterminal.botdesk.jwt.JwtProvider.CANT_CREATE_TOKEN_BECAUSE;
@@ -43,7 +41,7 @@ import io.jsonwebtoken.SignatureException;
 class JwtProviderTest {
 
     @Autowired
-    private JwtProvider jwtProvider = new JwtProvider();
+    private JwtProvider jwtProvider;
 
     @MockBean(name = "jwtUserDetailsService")
     UserDetailsService userDetailsService;
