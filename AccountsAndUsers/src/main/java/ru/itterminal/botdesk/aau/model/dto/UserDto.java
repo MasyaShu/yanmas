@@ -4,8 +4,10 @@ import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_EMAIL;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_PASSWORD;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.emailPattern;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.passwordPattern;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -53,8 +55,9 @@ public class UserDto extends BaseEntityDto {
 
     private String comment;
 
-    // TODO Remove NotNull??
-    @NotNull(groups = {Create.class, Update.class})
+    @Null(groups = Create.class,
+            message = MUST_BE_NULL_FOR_THE_NEW_ENTITY)
+    @NotNull(groups = {Update.class})
     private Boolean isArchived;
 
     @NotNull(groups = {Create.class, Update.class})

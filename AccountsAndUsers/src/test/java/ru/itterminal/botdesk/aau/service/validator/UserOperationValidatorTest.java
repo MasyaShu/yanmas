@@ -40,7 +40,7 @@ import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.projection.UserUniqueFields;
-import ru.itterminal.botdesk.aau.repository.RoleRepository;
+import ru.itterminal.botdesk.aau.service.impl.RoleServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
@@ -59,7 +59,7 @@ class UserOperationValidatorTest {
     private UserUniqueFields userUniqueFields;
 
     @Mock
-    private RoleRepository roleRepository;
+    private RoleServiceImpl roleService;
 
     @Autowired
     UserDetailsService userDetailsService;
@@ -67,7 +67,7 @@ class UserOperationValidatorTest {
     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @InjectMocks
-    private UserOperationValidator validator = new UserOperationValidator(service, encoder, roleRepository);
+    private UserOperationValidator validator = new UserOperationValidator(service, roleService);
 
     private static final String EXIST_EMAIL = "mail@mal.ru";
     private static final String NEW_USER_EMAIL = "mail_new@mal.ru";
@@ -113,15 +113,15 @@ class UserOperationValidatorTest {
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1")
     public void beforeCreate_shouldGetLogicalValidationException_whenUserWithRoleAccountOwnerAlreadyExist() {
-        user.setRole(new Role()
+        user.setRole(Role
                 .builder()
                 .name(Roles.ACCOUNT_OWNER.toString())
                 .weight(3)
                 .build()
         );
         when(service.findAllByRole(any())).thenReturn(List.of(oldUser));
-        when(roleRepository.getByName(any()))
-                .thenReturn(Optional.of(new Role().builder().name(Roles.ACCOUNT_OWNER.toString()).build()));
+        when(roleService.getAccountOwnerRole())
+                .thenReturn(Role.builder().name(Roles.ACCOUNT_OWNER.toString()).build());
         errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,
                 format(NOT_UNIQUE_MESSAGE, USER_WITH_ROLE_ACCOUNT_OWNER))));
         logicalValidationException = new LogicalValidationException(VALIDATION_FAILED, errors);
@@ -134,15 +134,15 @@ class UserOperationValidatorTest {
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1")
     public void beforeCreate_shouldGetLogicalValidationException_whenWeightOfRoleOfCurrentUserLessThanWeightOfRoleCreatedEntity() {
-        user.setRole(new Role()
+        user.setRole(Role
                 .builder()
                 .name(Roles.ACCOUNT_OWNER.toString())
                 .weight(3)
                 .build()
         );
         when(service.findAllByRole(any())).thenReturn(List.of(oldUser));
-        when(roleRepository.getByName(any()))
-                .thenReturn(Optional.of(new Role().builder().name(Roles.ACCOUNT_OWNER.toString()).build()));
+        when(roleService.getAccountOwnerRole())
+                .thenReturn(Role.builder().name(Roles.ACCOUNT_OWNER.toString()).build());
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         errors.put(WEIGHT_OF_ROLE, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
                 format(WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_FROM_REQUEST, jwtUser, user))));
@@ -156,11 +156,11 @@ class UserOperationValidatorTest {
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1")
     public void beforeUpdate_shouldGetLogicalValidationException_whenNewAndOldUserWithRoleAccountOwner() {
-        newUser.setRole(new Role().builder().name(Roles.ACCOUNT_OWNER.toString()).build());
-        oldUser.setRole(new Role().builder().name(Roles.ACCOUNT_OWNER.toString()).build());
+        newUser.setRole(Role.builder().name(Roles.ACCOUNT_OWNER.toString()).build());
+        oldUser.setRole(Role.builder().name(Roles.ACCOUNT_OWNER.toString()).build());
         when(service.findAllByRoleAndIdNot(any(), any())).thenReturn(List.of(oldUser));
-        when(roleRepository.getByName(any()))
-                .thenReturn(Optional.of(new Role().builder().name(Roles.ACCOUNT_OWNER.toString()).build()));
+        when(roleService.getAccountOwnerRole())
+                .thenReturn(new Role().builder().name(Roles.ACCOUNT_OWNER.toString()).build());
         errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,
                 format(NOT_UNIQUE_MESSAGE, USER_WITH_ROLE_ACCOUNT_OWNER))));
         logicalValidationException = new LogicalValidationException(VALIDATION_FAILED, errors);
@@ -175,8 +175,8 @@ class UserOperationValidatorTest {
     public void beforeUpdate_shouldGetLogicalValidationException_whenOldAndNewUserWithoutRoleAccountOwner() {
         newUser.setRole(new Role().builder().name(Roles.AUTHOR.toString()).build());
         when(service.findAllByRoleAndIdNot(any(), any())).thenReturn(Collections.emptyList());
-        when(roleRepository.getByName(any()))
-                .thenReturn(Optional.of(new Role().builder().name(Roles.ACCOUNT_OWNER.toString()).build()));
+        when(roleService.getAccountOwnerRole())
+                .thenReturn(new Role().builder().name(Roles.ACCOUNT_OWNER.toString()).build());
         errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,
                 ACCOUNT_MUST_HAVE_USER_WITH_ROLE_ACCOUNT_OWNER)));
         logicalValidationException = new LogicalValidationException(VALIDATION_FAILED, errors);
@@ -196,8 +196,8 @@ class UserOperationValidatorTest {
                 .build()
         );
         when(service.findAllByRole(any())).thenReturn(List.of(oldUser));
-        when(roleRepository.getByName(any()))
-                .thenReturn(Optional.of(new Role().builder().name(Roles.ACCOUNT_OWNER.toString()).build()));
+        when(roleService.getAccountOwnerRole())
+                .thenReturn(new Role().builder().name(Roles.ACCOUNT_OWNER.toString()).build());
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         errors.put(WEIGHT_OF_ROLE, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
                 format(WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_FROM_REQUEST, jwtUser, user))));
@@ -207,6 +207,7 @@ class UserOperationValidatorTest {
         assertEquals(logicalValidationException.getFieldErrors().get(WEIGHT_OF_ROLE).get(0),
                 thrown.getFieldErrors().get(WEIGHT_OF_ROLE).get(0));
     }
+
     @Test
     public void encoderPassword() {
         String encodedPassword = encoder.encode("12345");
