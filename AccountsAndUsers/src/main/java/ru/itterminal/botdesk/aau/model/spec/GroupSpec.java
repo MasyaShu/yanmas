@@ -67,4 +67,15 @@ public class GroupSpec extends GeneralSpec<Group> {
             }
         };
     }
+
+    public Specification<Group> getGroupByGroupSpec(UUID groupId) {
+        return new Specification<Group>() {
+            @Override
+            public Predicate toPredicate(Root<Group> root,
+                                         CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+                Predicate predicate = criteriaBuilder.equal(root.get("id"), groupId);
+                return predicate;
+            }
+        };
+    }
 }

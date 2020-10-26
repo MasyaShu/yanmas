@@ -41,6 +41,9 @@ public class GroupServiceImpl extends CrudServiceImpl<Group, GroupOperationValid
             "Not found groups by unique fields, id is null";
     public static final String START_FIND_USER_BY_UNIQUE_FIELDS =
             "Start find user by unique fields, name: {} and not id: {} and not account: {}";
+    public static final String NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID = "Not found group by id: %s and accountId: %s";
+    public static final String START_FIND_USER_BY_ID_AND_ACCOUNT_ID = "Start find group by id: {} and accountId: {}";
+
 
     @Override
     public Group create(Group entity) {
@@ -88,5 +91,21 @@ public class GroupServiceImpl extends CrudServiceImpl<Group, GroupOperationValid
         }
         log.trace(START_FIND_USER_BY_UNIQUE_FIELDS, group.getName(), group.getId(), group.getAccount());
         return repository.getByNameAndAccount_IdAndIdNot(group.getName(), group.getAccount().getId(),  group.getId());
+    }
+
+    @Transactional(readOnly = true)
+    public Group findByIdAndAccountId(UUID id, UUID accountId) {
+        if (id == null) {
+            log.error(format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID, id, accountId));
+            throw new EntityNotExistException(format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID, id, accountId));
+        }
+        if (accountId == null) {
+            log.error(format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID, id, accountId));
+            throw new EntityNotExistException(format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID, id, accountId));
+        }
+        log.trace(START_FIND_USER_BY_ID_AND_ACCOUNT_ID, id, accountId);
+        return repository.getByIdAndAccount_Id(id, accountId).orElseThrow(
+                () -> new EntityNotExistException(format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID, id, accountId))
+        );
     }
 }

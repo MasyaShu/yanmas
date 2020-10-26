@@ -15,6 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.dto.GroupDto;
+import ru.itterminal.botdesk.aau.model.dto.GroupFilterDto;
 import ru.itterminal.botdesk.aau.model.spec.GroupSpec;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
@@ -68,50 +69,8 @@ public class GroupControllerV1 extends BaseController {
         return new ResponseEntity<>(returnedGroup, HttpStatus.CREATED);
     }
 
-    /**
-     * Update a user
-     *
-     * @param request contains all parameters of update user
-     * @return updated user
-     */
-    /*@PutMapping()
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR') and #request.account.id == authentication.principal.accountId")
-    public ResponseEntity<GroupDtoResponseWithoutPassword> update(
-            @Validated(Update.class) @RequestBody GroupDto request) {
-        log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
-        Group user = modelMapper.map(request, Group.class);
-        Group updatedGroup = service.update(user);
-        GroupDtoResponseWithoutPassword returnedGroup =
-                modelMapper.map(updatedGroup, GroupDtoResponseWithoutPassword.class);
-        log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedGroup);
-        return new ResponseEntity<>(returnedGroup, HttpStatus.OK);
-    }
-
-    *//**
-     * Get a user by ID
-     *
-     * @param id for find user in database
-     * @return user
-     *//*
-    @GetMapping("/{id}")
-    public ResponseEntity<GroupDtoResponseWithoutPassword> getById(Principal user, @PathVariable UUID id) {
-        log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
-        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
-        Group foundGroup = service.findByIdAndAccountId(id, jwtUser.getAccountId());
-        GroupDtoResponseWithoutPassword returnedGroup = modelMapper.map(foundGroup, GroupDtoResponseWithoutPassword.class);
-        log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundGroup);
-        return new ResponseEntity<>(returnedGroup, HttpStatus.OK);
-    }
-
-    *//**
-     * Find users by filter
-     *
-     * @param page   number starts from 0
-     * @param size   count users per page
-     * @param filter for find users in database. Over all not null fields of filter will be applied logical operator And
-     *//*
     @GetMapping()
-    public ResponseEntity<Page<GroupDtoResponseWithoutPassword>> getByFilter(
+    public ResponseEntity<Page<GroupDto>> getByFilter(
             Principal user,
             @Valid @RequestBody GroupFilterDto filter,
             @RequestParam(defaultValue = PAGE_DEFAULT_VALUE) @PositiveOrZero int page,
@@ -121,7 +80,7 @@ public class GroupControllerV1 extends BaseController {
             filter.setDirection("ASC");
         }
         if (filter.getSortBy() == null) {
-            filter.setSortBy("firstName");
+            filter.setSortBy("name");
         }
         if (filter.getDeleted() == null) {
             filter.setDeleted("all");
@@ -130,35 +89,68 @@ public class GroupControllerV1 extends BaseController {
                 PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(filter.getDirection()),
                         filter.getSortBy()));
         Page<Group> foundGroups;
-        Page<GroupDtoResponseWithoutPassword> returnedGroups;
-        Specification<Group> userSpecification = Specification
-                .where(filter.getEmail() == null ? null : spec.getGroupByEmailSpec(filter.getEmail()))
-                .and(filter.getFirstName() == null ? null : spec.getGroupByFirstNameSpec(filter.getFirstName()))
-                .and(filter.getSecondName() == null ? null : spec.getGroupBySecondNameSpec(filter.getSecondName()))
-                .and(filter.getPhone() == null ? null : spec.getGroupByPhoneSpec(filter.getPhone()))
+        Page<GroupDto> returnedGroups;
+        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
+        Specification<Group> groupSpecification = Specification
+                .where(filter.getName() == null ? null : spec.getGroupByNameSpec(filter.getName()))
                 .and(filter.getComment() == null ? null : spec.getGroupByCommentSpec(filter.getComment()))
-                .and(filter.getIsArchived() == null ? null : spec.getGroupByIsArchivedSpec(filter.getIsArchived()))
-                .and(filter.getGroups() == null || filter.getGroups().isEmpty() ? null :
-                        spec.getGroupByListOfGroupsSpec(filter.getGroups()))
-                .and(filter.getRoles() == null || filter.getRoles().isEmpty() ? null :
-                        spec.getGroupByListOfRolesSpec(filter.getRoles()))
+                .and(filter.getIsDeprecated() == null ? null : spec.getGroupByIsDeprecatedSpec(filter.getIsDeprecated()))
+                .and(filter.getIsInner() == null ? null : spec.getGroupByIsInnerSpec(filter.getIsInner()))
                 .and(spec.getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted.fromString(filter.getDeleted())))
-                .and(spec.getGroupByAccountSpec(
-                        ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal()).getAccountId()));
-        foundGroups = service.findAllByFilter(userSpecification, pageable);
-        returnedGroups = mapPage(foundGroups, GroupDtoResponseWithoutPassword.class, pageable);
+                .and(spec.getGroupByAccountSpec(jwtUser.getAccountId()))
+                .and(jwtUser.getWeightRole() != 0 ? null : spec.getGroupByGroupSpec(jwtUser.getGroupId()));
+
+        foundGroups = service.findAllByFilter(groupSpecification, pageable);
+        returnedGroups = mapPage(foundGroups, GroupDto.class, pageable);
         log.debug(FIND_FINISH_MESSAGE, ENTITY_NAME, foundGroups.getTotalElements());
         return new ResponseEntity<>(returnedGroups, HttpStatus.OK);
     }
 
-    *//**
+
+    /**
+     * Get a user by ID
+     *
+     * @param id for find user in database
+     * @return user
+     */
+    @GetMapping("/{id}")
+    @PreAuthorize("(hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')) or (hasAnyAuthority('OBSERVER', 'AUTHOR') and #id == authentication.principal.groupId)")
+    public ResponseEntity<GroupDto> getById(Principal user, @PathVariable UUID id) {
+        log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
+        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
+        Group foundGroup = service.findByIdAndAccountId(id, jwtUser.getAccountId());
+        GroupDto returnedGroup = modelMapper.map(foundGroup, GroupDto.class);
+        log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundGroup);
+        return new ResponseEntity<>(returnedGroup, HttpStatus.OK);
+    }
+
+    /**
      * Physical delete a user in database
      *
      * @param request GroupDto
-     *//*
+     */
     @DeleteMapping()
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN') and #request.account.id == authentication.principal.accountId")
     ResponseEntity<Void> physicalDelete(@RequestBody GroupDto request) {
         throw new UnsupportedOperationException("Physical delete will be implement in the further");
-    }*/
+    }
+
+    /**
+     * Update a user
+     *
+     * @param request contains all parameters of update user
+     * @return updated user
+     */
+    @PutMapping()
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR') and #request.account.id == authentication.principal.accountId")
+    public ResponseEntity<GroupDto> update(
+            @Validated(Update.class) @RequestBody GroupDto request) {
+        log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
+        Group user = modelMapper.map(request, Group.class);
+        Group updatedGroup = service.update(user);
+        GroupDto returnedGroup =
+                modelMapper.map(updatedGroup, GroupDto.class);
+        log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedGroup);
+        return new ResponseEntity<>(returnedGroup, HttpStatus.OK);
+    }
 }
