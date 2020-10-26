@@ -1,0 +1,164 @@
+package ru.itterminal.botdesk.aau.controller;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import ru.itterminal.botdesk.aau.model.Group;
+import ru.itterminal.botdesk.aau.model.dto.GroupDto;
+import ru.itterminal.botdesk.aau.model.spec.GroupSpec;
+import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
+import ru.itterminal.botdesk.commons.controller.BaseController;
+import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
+import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
+import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
+import ru.itterminal.botdesk.jwt.JwtUser;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
+import java.security.Principal;
+import java.util.UUID;
+
+@Slf4j
+@RestController("GroupControllerV1")
+@Validated
+@RequestMapping("api/v1/group")
+public class GroupControllerV1 extends BaseController {
+
+    GroupServiceImpl service;
+    GroupSpec spec;
+
+    @Autowired
+    public GroupControllerV1(GroupServiceImpl service, GroupSpec userSpec) {
+        this.spec = userSpec;
+        this.service = service;
+    }
+
+    private final String ENTITY_NAME = Group.class.getSimpleName();
+
+    /**
+     * Create a user
+     *
+     * @param request contains parameters for create new user.
+     *                Not null fields: email, password, account, group, roles
+     * @return new created user
+     */
+
+    @PostMapping()
+    @ResponseStatus(value = HttpStatus.CREATED)
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR') and #request.account.id == authentication.principal.accountId")
+    public ResponseEntity<GroupDto> create(
+            @Validated(Create.class) @RequestBody GroupDto request) {
+        log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
+        Group group = modelMapper.map(request, Group.class);
+        Group createdGroup = service.create(group);
+        GroupDto returnedGroup =
+                modelMapper.map(createdGroup, GroupDto.class);
+        log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdGroup);
+        return new ResponseEntity<>(returnedGroup, HttpStatus.CREATED);
+    }
+
+    /**
+     * Update a user
+     *
+     * @param request contains all parameters of update user
+     * @return updated user
+     */
+    /*@PutMapping()
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR') and #request.account.id == authentication.principal.accountId")
+    public ResponseEntity<GroupDtoResponseWithoutPassword> update(
+            @Validated(Update.class) @RequestBody GroupDto request) {
+        log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
+        Group user = modelMapper.map(request, Group.class);
+        Group updatedGroup = service.update(user);
+        GroupDtoResponseWithoutPassword returnedGroup =
+                modelMapper.map(updatedGroup, GroupDtoResponseWithoutPassword.class);
+        log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedGroup);
+        return new ResponseEntity<>(returnedGroup, HttpStatus.OK);
+    }
+
+    *//**
+     * Get a user by ID
+     *
+     * @param id for find user in database
+     * @return user
+     *//*
+    @GetMapping("/{id}")
+    public ResponseEntity<GroupDtoResponseWithoutPassword> getById(Principal user, @PathVariable UUID id) {
+        log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
+        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
+        Group foundGroup = service.findByIdAndAccountId(id, jwtUser.getAccountId());
+        GroupDtoResponseWithoutPassword returnedGroup = modelMapper.map(foundGroup, GroupDtoResponseWithoutPassword.class);
+        log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundGroup);
+        return new ResponseEntity<>(returnedGroup, HttpStatus.OK);
+    }
+
+    *//**
+     * Find users by filter
+     *
+     * @param page   number starts from 0
+     * @param size   count users per page
+     * @param filter for find users in database. Over all not null fields of filter will be applied logical operator And
+     *//*
+    @GetMapping()
+    public ResponseEntity<Page<GroupDtoResponseWithoutPassword>> getByFilter(
+            Principal user,
+            @Valid @RequestBody GroupFilterDto filter,
+            @RequestParam(defaultValue = PAGE_DEFAULT_VALUE) @PositiveOrZero int page,
+            @RequestParam(defaultValue = SIZE_DEFAULT_VALUE) @Positive int size) {
+        log.debug(FIND_INIT_MESSAGE, ENTITY_NAME, page, size, filter);
+        if (filter.getDirection() == null) {
+            filter.setDirection("ASC");
+        }
+        if (filter.getSortBy() == null) {
+            filter.setSortBy("firstName");
+        }
+        if (filter.getDeleted() == null) {
+            filter.setDeleted("all");
+        }
+        Pageable pageable =
+                PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(filter.getDirection()),
+                        filter.getSortBy()));
+        Page<Group> foundGroups;
+        Page<GroupDtoResponseWithoutPassword> returnedGroups;
+        Specification<Group> userSpecification = Specification
+                .where(filter.getEmail() == null ? null : spec.getGroupByEmailSpec(filter.getEmail()))
+                .and(filter.getFirstName() == null ? null : spec.getGroupByFirstNameSpec(filter.getFirstName()))
+                .and(filter.getSecondName() == null ? null : spec.getGroupBySecondNameSpec(filter.getSecondName()))
+                .and(filter.getPhone() == null ? null : spec.getGroupByPhoneSpec(filter.getPhone()))
+                .and(filter.getComment() == null ? null : spec.getGroupByCommentSpec(filter.getComment()))
+                .and(filter.getIsArchived() == null ? null : spec.getGroupByIsArchivedSpec(filter.getIsArchived()))
+                .and(filter.getGroups() == null || filter.getGroups().isEmpty() ? null :
+                        spec.getGroupByListOfGroupsSpec(filter.getGroups()))
+                .and(filter.getRoles() == null || filter.getRoles().isEmpty() ? null :
+                        spec.getGroupByListOfRolesSpec(filter.getRoles()))
+                .and(spec.getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted.fromString(filter.getDeleted())))
+                .and(spec.getGroupByAccountSpec(
+                        ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal()).getAccountId()));
+        foundGroups = service.findAllByFilter(userSpecification, pageable);
+        returnedGroups = mapPage(foundGroups, GroupDtoResponseWithoutPassword.class, pageable);
+        log.debug(FIND_FINISH_MESSAGE, ENTITY_NAME, foundGroups.getTotalElements());
+        return new ResponseEntity<>(returnedGroups, HttpStatus.OK);
+    }
+
+    *//**
+     * Physical delete a user in database
+     *
+     * @param request GroupDto
+     *//*
+    @DeleteMapping()
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN') and #request.account.id == authentication.principal.accountId")
+    ResponseEntity<Void> physicalDelete(@RequestBody GroupDto request) {
+        throw new UnsupportedOperationException("Physical delete will be implement in the further");
+    }*/
+}

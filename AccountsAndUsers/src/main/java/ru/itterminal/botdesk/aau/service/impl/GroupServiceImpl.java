@@ -43,6 +43,12 @@ public class GroupServiceImpl extends CrudServiceImpl<Group, GroupOperationValid
             "Start find user by unique fields, name: {} and not id: {} and not account: {}";
 
     @Override
+    public Group create(Group entity) {
+        entity.setDeleted(false);
+        return super.create(entity);
+    }
+
+    @Override
     public Group update(Group entity) {
         validator.beforeUpdate(entity);
         log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
