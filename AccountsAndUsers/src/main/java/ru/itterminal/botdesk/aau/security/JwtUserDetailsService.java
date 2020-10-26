@@ -38,7 +38,7 @@ public class JwtUserDetailsService implements UserDetailsService {
                 .username(user.getEmail())
                 .password(user.getPassword())
                 .authorities(List.of(new SimpleGrantedAuthority(user.getRole().getName())))
-                .enabled(user.getEmailVerificationStatus() && !user.getIsArchived())
+                .enabled(user.getEmailVerificationStatus() && !user.getIsArchived() && !user.getAccount().getDeleted())
                 .build();
 
         log.info("in loadUserByUsername - user with username: {} successfully loaded", email);

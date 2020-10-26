@@ -1,6 +1,6 @@
 package ru.itterminal.botdesk.config;
 
-import static ru.itterminal.botdesk.config.SecurityConfig.AUTH_WHITELIST;
+import static ru.itterminal.botdesk.config.SecurityConfig.AUTH_WHITELIST_PERMIT_ALL;
 
 import java.util.List;
 import java.util.UUID;
@@ -39,7 +39,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 .cors().and()
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers(AUTH_WHITELIST).permitAll()
+                .antMatchers(AUTH_WHITELIST_PERMIT_ALL).permitAll()
                 .anyRequest().authenticated().and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.headers().frameOptions().disable();

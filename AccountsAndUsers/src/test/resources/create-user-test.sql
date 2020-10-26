@@ -12,7 +12,7 @@ INSERT INTO users(out_id, deleted, version, id, email, first_name, second_name, 
                  account_id, own_group_id, role_id)
 VALUES ('', 'false', '0', 'd592facb-e6ee-4801-8310-9c7708eb6e6c', 'm@m.ru', 'firstName1', 'secondName1',
         '$2a$10$ejjUoWxoPs.4vjQOoBnFquybNHJAxIyKz7QIXL6.BSVyHPow8jmxK', '211-15-15', 'comment comment',
-        '', 'false', '', 'false', 'cdfa6483-0769-4628-ba32-efd338a716de', '0223e51a-4bb2-44ee-bc8e-1f047a2145e7',
+        '', 'true', '', 'false', 'cdfa6483-0769-4628-ba32-efd338a716de', '0223e51a-4bb2-44ee-bc8e-1f047a2145e7',
         'ba99ce38-1611-4a81-adc9-3a779d58bbfe'),
 
        ('', 'false', '0', 'cdfa6483-0769-4628-ba32-efd338a716de', 'm1@m.ru', 'firstName2', 'secondName2',
