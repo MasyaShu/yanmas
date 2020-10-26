@@ -85,6 +85,7 @@ class RoleControllerV1Test {
 
     @Test
     public void create_shouldCreate_whenValidDataPassed() throws Exception {
+        roleDto.setDeleted(null);
         when(service.create(any())).thenReturn(role_1);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -114,7 +115,7 @@ class RoleControllerV1Test {
     @Test
     public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenAllPassedDataIsNull() throws Exception {
         roleDto.setName(null);
-        roleDto.setDeleted(null);
+        roleDto.setDeleted(true);
         roleDto.setId(null);
         roleDto.setVersion(null);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
@@ -125,7 +126,7 @@ class RoleControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors.name[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists());
+                .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_BE_NULL_FOR_THE_NEW_ENTITY).exists());
         verify(service, times(0)).create(any());
     }
 

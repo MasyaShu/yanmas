@@ -4,7 +4,6 @@ import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_NULL_FO
 
 import java.util.UUID;
 
-import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -16,7 +15,6 @@ import lombok.Setter;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Delete;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
-import ru.itterminal.botdesk.commons.util.CommonConstants;
 
 /**
  * BaseEntityDto
@@ -42,10 +40,8 @@ public class BaseEntityDto {
     private Integer version;
 
 
-    // TODO Remove NotNull for Create? Only for Update and Delete
-    @NotNull(groups = {Create.class, Update.class, Delete.class})
-    @AssertFalse(groups = {Create.class},
-        message = CommonConstants.DELETED_ASSERT_FALSE)
+    @Null(groups = Create.class, message = MUST_BE_NULL_FOR_THE_NEW_ENTITY)
+    @NotNull(groups = {Update.class, Delete.class})
     private Boolean deleted;
 
 }

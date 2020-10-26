@@ -16,7 +16,6 @@ import static ru.itterminal.botdesk.aau.model.Roles.ACCOUNT_OWNER;
 import static ru.itterminal.botdesk.aau.model.Roles.ADMIN;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_EMAIL;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_PASSWORD;
-import static ru.itterminal.botdesk.aau.util.AAUConstants.MUST_BE_ANY_OF_EN_RU;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.MUST_BE_ANY_OF_FIRST_NAME_SECOND_NAME;
 import static ru.itterminal.botdesk.commons.controller.BaseController.PAGE_DEFAULT_VALUE;
 import static ru.itterminal.botdesk.commons.controller.BaseController.SIZE_DEFAULT_VALUE;
@@ -25,6 +24,7 @@ import static ru.itterminal.botdesk.commons.util.CommonConstants.MESSAGE_NOT_REA
 import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_ANY_OF_ALL_TRUE_FALSE;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_ANY_OF_ASC_DESC;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_GREATER_THAN_OR_EQUAL_TO_0;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_NULL;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_NOT_BE_NULL;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.REQUEST_NOT_READABLE;
@@ -204,6 +204,7 @@ class UserControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1")
     public void create_shouldCreate_whenValidDataPassed() throws Exception {
+        userDtoFromAccount_1.setDeleted(null);
         when(service.create(any())).thenReturn(user_1);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -233,6 +234,7 @@ class UserControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_2")
     public void create_shouldGetStatusForbidden_whenDifferentAccounts() throws Exception {
+        userDtoFromAccount_1.setDeleted(null);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -246,6 +248,7 @@ class UserControllerV1Test {
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1")
     public void create_shouldGetStatusForbidden_whenNotAllowedRole() throws Exception {
+        userDtoFromAccount_1.setDeleted(null);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -279,7 +282,7 @@ class UserControllerV1Test {
                 .andExpect(jsonPath("$.errors.firstName[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
                 .andExpect(jsonPath("$.errors.secondName[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
                 .andExpect(jsonPath("$.errors.phone[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
-                .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", DELETED_ASSERT_FALSE).exists())
+                .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_BE_NULL_FOR_THE_NEW_ENTITY).exists())
                 .andExpect(jsonPath("$.errors.isArchived[?(@.message == '%s')]", MUST_BE_NULL_FOR_THE_NEW_ENTITY).exists())
                 .andExpect(jsonPath("$.errors.role[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.email[?(@.message == '%s')]", INVALID_EMAIL).exists())
@@ -309,7 +312,6 @@ class UserControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.isArchived[?(@.message == '%s')]", MUST_BE_NULL_FOR_THE_NEW_ENTITY).exists())
                 .andExpect(jsonPath("$.errors.role[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.email[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
@@ -321,7 +323,7 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1")
-    public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenIdAndVersionNotNull() throws Exception {
+    public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenVersionNotNull() throws Exception {
         userDtoFromAccount_1.setId(UUID.randomUUID());
         userDtoFromAccount_1.setVersion(15);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
