@@ -58,7 +58,7 @@ public class AuthenticationControllerV1 {
                     .findFirst().get();
             UUID accountId = jwtUser.getAccountId();
             int weightRole = jwtUser.getWeightRole();
-            String token = jwtProvider.createToken(email, role, weightRole, accountId);
+            String token = jwtProvider.createToken(email);
             Map<Object, Object> response = new HashMap<>();
             response.put("email", email);
             response.put("token", token);
