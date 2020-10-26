@@ -191,7 +191,6 @@ class UserControllerV1Test {
                 .password(PASSWORD_1)
                 .account(account_1)
                 .group(group_1)
-                .isArchived(false)
                 .role(roleAdmin)
                 .build();
         userDtoFromAccount_1.setDeleted(false);
@@ -269,7 +268,7 @@ class UserControllerV1Test {
         userDtoFromAccount_1.setFirstName(INVALID_FIRST_NAME);
         userDtoFromAccount_1.setSecondName(INVALID_SECOND_NAME);
         userDtoFromAccount_1.setPhone(INVALID_PHONE);
-        userDtoFromAccount_1.setIsArchived(null);
+        userDtoFromAccount_1.setIsArchived(false);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -281,7 +280,7 @@ class UserControllerV1Test {
                 .andExpect(jsonPath("$.errors.secondName[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
                 .andExpect(jsonPath("$.errors.phone[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
                 .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", DELETED_ASSERT_FALSE).exists())
-                .andExpect(jsonPath("$.errors.isArchived[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.isArchived[?(@.message == '%s')]", MUST_BE_NULL_FOR_THE_NEW_ENTITY).exists())
                 .andExpect(jsonPath("$.errors.role[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.email[?(@.message == '%s')]", INVALID_EMAIL).exists())
                 .andExpect(jsonPath("$.errors.account[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
@@ -302,7 +301,7 @@ class UserControllerV1Test {
         userDtoFromAccount_1.setFirstName(null);
         userDtoFromAccount_1.setSecondName(null);
         userDtoFromAccount_1.setPhone(null);
-        userDtoFromAccount_1.setIsArchived(null);
+        userDtoFromAccount_1.setIsArchived(false);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -311,7 +310,7 @@ class UserControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.isArchived[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.isArchived[?(@.message == '%s')]", MUST_BE_NULL_FOR_THE_NEW_ENTITY).exists())
                 .andExpect(jsonPath("$.errors.role[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.email[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.account[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
@@ -377,6 +376,7 @@ class UserControllerV1Test {
     public void update_shouldUpdate_whenValidDataPassed() throws Exception {
         userDtoFromAccount_1.setId(UUID.fromString(USER_1_ID));
         userDtoFromAccount_1.setVersion(1);
+        userDtoFromAccount_1.setIsArchived(false);
         when(service.update(any())).thenReturn(user_1);
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -388,6 +388,7 @@ class UserControllerV1Test {
                 .andExpect(jsonPath("$.id").value(USER_1_ID))
                 .andExpect(jsonPath("$.email").value(EMAIL_1))
                 .andExpect(jsonPath("$.password").doesNotExist());
+        verify(service, times(1)).update(any());
     }
 
     @Test
@@ -400,7 +401,7 @@ class UserControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
-        verify(service, times(0)).create(any());
+        verify(service, times(0)).update(any());
     }
 
     @Test
@@ -408,6 +409,7 @@ class UserControllerV1Test {
     public void update_shouldGetStatusForbidden_whenDifferentAccounts() throws Exception {
         userDtoFromAccount_1.setId(UUID.fromString(USER_1_ID));
         userDtoFromAccount_1.setVersion(0);
+        userDtoFromAccount_1.setIsArchived(false);
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -415,7 +417,7 @@ class UserControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
-        verify(service, times(0)).create(any());
+        verify(service, times(0)).update(any());
     }
 
     @Test
@@ -423,6 +425,7 @@ class UserControllerV1Test {
     public void update_shouldGetStatusForbidden_whenNotAllowedRole() throws Exception {
         userDtoFromAccount_1.setId(UUID.fromString(USER_1_ID));
         userDtoFromAccount_1.setVersion(0);
+        userDtoFromAccount_1.setIsArchived(false);
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -430,7 +433,7 @@ class UserControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
-        verify(service, times(0)).create(any());
+        verify(service, times(0)).update(any());
     }
 
     @Test
@@ -465,7 +468,7 @@ class UserControllerV1Test {
                 .andExpect(jsonPath("$.errors.account[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.group[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.password[?(@.message == '%s')]", INVALID_PASSWORD).exists());
-        verify(service, times(0)).create(any());
+        verify(service, times(0)).update(any());
     }
 
     @Test
@@ -497,7 +500,7 @@ class UserControllerV1Test {
                 .andExpect(jsonPath("$.errors.account[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.group[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.password[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists());
-        verify(service, times(0)).create(any());
+        verify(service, times(0)).update(any());
     }
 
     @Test
@@ -514,7 +517,7 @@ class UserControllerV1Test {
                 .andExpect(
                         jsonPath("$.errors.version[?(@.message == '%s')]", MUST_BE_GREATER_THAN_OR_EQUAL_TO_0)
                                 .exists());
-        verify(service, times(0)).create(any());
+        verify(service, times(0)).update(any());
     }
 
     @Test
@@ -532,7 +535,7 @@ class UserControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value(MESSAGE_NOT_READABLE));
-        verify(service, times(0)).create(any());
+        verify(service, times(0)).update(any());
     }
 
     @Test
@@ -548,7 +551,7 @@ class UserControllerV1Test {
                     .andDo(print())
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errors.email[?(@.message == '%s')]", INVALID_EMAIL).exists());
-            verify(service, times(0)).create(any());
+            verify(service, times(0)).update(any());
         }
     }
 
@@ -565,7 +568,7 @@ class UserControllerV1Test {
                     .andDo(print())
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errors.password[?(@.message == '%s')]", INVALID_PASSWORD).exists());
-            verify(service, times(0)).create(any());
+            verify(service, times(0)).update(any());
         }
     }
 

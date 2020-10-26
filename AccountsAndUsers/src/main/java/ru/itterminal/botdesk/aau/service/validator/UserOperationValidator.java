@@ -10,15 +10,13 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.projection.UserUniqueFields;
-import ru.itterminal.botdesk.aau.repository.RoleRepository;
+import ru.itterminal.botdesk.aau.service.impl.RoleServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
@@ -29,9 +27,7 @@ import ru.itterminal.botdesk.jwt.JwtUser;
 @Component
 public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
     private UserServiceImpl service;
-    private BCryptPasswordEncoder encoder;
-    private RoleRepository roleRepository;
-    private Role accountOwnerRole;
+    private RoleServiceImpl roleService;
 
     protected static final String USER_WITH_ROLE_ACCOUNT_OWNER_IS_UNIQUE = "User: {} with role ACCOUNT_OWNER is unique";
     protected static final String USER_WITH_ROLE_ACCOUNT_OWNER = "User with role ACCOUNT_OWNER";
@@ -43,10 +39,9 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
 
     @Autowired
     public UserOperationValidator(UserServiceImpl service,
-            BCryptPasswordEncoder encoder, RoleRepository roleRepository) {
+            RoleServiceImpl roleService) {
         this.service = service;
-        this.encoder = encoder;
-        this.roleRepository = roleRepository;
+        this.roleService = roleService;
     }
 
     @Override
@@ -55,7 +50,7 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         Map<String, List<ValidationError>> errors = new HashMap<>();
 
         if (entity.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString())) {
-            List<User> foundUsers = service.findAllByRole(getAccountOwnerRole());
+            List<User> foundUsers = service.findAllByRole(roleService.getAccountOwnerRole());
             if (foundUsers.isEmpty()) {
                 log.trace(USER_WITH_ROLE_ACCOUNT_OWNER_IS_UNIQUE, entity);
             } else {
@@ -82,14 +77,14 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         super.beforeUpdate(entity);
         Map<String, List<ValidationError>> errors = new HashMap<>();
 
-        // Schema of constraints "Only one user must have role Account owner
+        // Schema of constraints "Only one user must have a role "Account owner"
         // Entity from DB           | new  Entity               | result
         // has role Acc_Owner       | has role Acc_Owner        | not allowed (User with role ACCOUNT_OWNER is occupied)
         // has not role Acc_Owner   | has role Acc_Owner        | not possible
         // has role Acc_Owner       | has not role Acc_Owner    | all right
         // has not role Acc_Owner   | has not role Acc_Owner    | not allowed, Account must have user with role ACCOUNT_OWNER
 
-        List<User> userFromDatabase = service.findAllByRoleAndIdNot(getAccountOwnerRole(), entity.getId());
+        List<User> userFromDatabase = service.findAllByRoleAndIdNot(roleService.getAccountOwnerRole(), entity.getId());
         boolean oldUserHasRoleAccountOwner = false;
         if (!userFromDatabase.isEmpty()) {
             oldUserHasRoleAccountOwner = userFromDatabase.get(0).getRole().getName().equals(Roles.ACCOUNT_OWNER.toString());
@@ -146,10 +141,4 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         return true;
     }
 
-    private Role getAccountOwnerRole() {
-        if (accountOwnerRole == null) {
-            accountOwnerRole = roleRepository.getByName(Roles.ACCOUNT_OWNER.toString()).get();
-        }
-        return accountOwnerRole;
-    }
 }

@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.Role;
-import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.projection.UserUniqueFields;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
@@ -31,13 +30,16 @@ import ru.itterminal.botdesk.jwt.JwtProvider;
 @Transactional
 public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidator, UserRepository> {
 
-    BCryptPasswordEncoder encoder;
-    JwtProvider jwtProvider;
+    private BCryptPasswordEncoder encoder;
+    private JwtProvider jwtProvider;
+    private RoleServiceImpl roleService;
 
     @Autowired
-    public UserServiceImpl(BCryptPasswordEncoder encoder, JwtProvider jwtProvider) {
+    public UserServiceImpl(BCryptPasswordEncoder encoder, JwtProvider jwtProvider,
+             RoleServiceImpl roleService) {
         this.encoder = encoder;
         this.jwtProvider = jwtProvider;
+        this.roleService = roleService;
     }
 
     public static final String START_FIND_USER_BY_ID_AND_ACCOUNT_ID = "Start find user by id: {} and accountId: {}";
@@ -75,9 +77,10 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
         log.trace(format(CREATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.toString()));
         UUID id = UUID.randomUUID();
         entity.setId(id);
+        entity.setIsArchived(false);
         validator.checkUniqueness(entity);
         entity.setPassword(encoder.encode(entity.getPassword()));
-        if (entity.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString())) {
+        if (entity.getRole().equals(roleService.getAccountOwnerRole())) {
             String emailVerificationToken = jwtProvider.createToken(entity.getId());
             entity.setEmailVerificationToken(emailVerificationToken);
         } else {
@@ -97,11 +100,6 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
         validator.checkUniqueness(entity);
         log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
         User entityFromDatabase = super.findById(entity.getId());
-        if (entityFromDatabase == null) {
-            String message = format(ENTITY_NOT_EXIST_MESSAGE, entity.getClass().getSimpleName(), entity.getId());
-            log.error(message);
-            throw new EntityNotExistException(message);
-        }
         if (!entity.getPassword().isEmpty()) {
             entity.setPassword(encoder.encode(entity.getPassword()));
         } else {

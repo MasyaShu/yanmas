@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.validation.constraints.NotEmpty;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -11,9 +13,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import ru.itterminal.botdesk.aau.model.dto.AuthenticationRequestDto;
@@ -33,6 +37,7 @@ public class AuthenticationControllerV1 {
     private final UserServiceImpl userService;
 
     public static final String INVALID_USERNAME_OR_PASSWORD = "invalid username or password";
+    public static final String EMAIL_IS_VERIFIED = "email is verified";
 
     @Value("${jwt.token.prefix}")
     private String prefixToken;
@@ -52,7 +57,7 @@ public class AuthenticationControllerV1 {
             String password = requestDto.getPassword();
             Authentication authentication = authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(email, password));
-            JwtUser jwtUser =  (JwtUser) authentication.getPrincipal();
+            JwtUser jwtUser = (JwtUser) authentication.getPrincipal();
             String role = jwtUser.getAuthorities().stream()
                     .map(Object::toString)
                     .findFirst().get();
@@ -67,5 +72,11 @@ public class AuthenticationControllerV1 {
         catch (AuthenticationException e) {
             throw new JwtAuthenticationException(INVALID_USERNAME_OR_PASSWORD);
         }
+    }
+
+    @GetMapping(path = "/email-verify")
+    public ResponseEntity verifyEmailToken(@RequestParam(value = "token") @NotEmpty String token) {
+        userService.verifyEmailToken(token);
+        return ResponseEntity.ok(EMAIL_IS_VERIFIED);
     }
 }
