@@ -2,13 +2,9 @@ package ru.itterminal.botdesk.aau.model.dto;
 
 import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_EMAIL;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_PASSWORD;
-import static ru.itterminal.botdesk.aau.util.AAUConstants.MUST_BE_ANY_OF_EN_RU;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.emailPattern;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.passwordPattern;
 
-import java.util.Set;
-
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -23,7 +19,6 @@ import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
-import ru.itterminal.botdesk.commons.model.validator.ValueOfEnum;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 
