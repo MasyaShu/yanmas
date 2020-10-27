@@ -60,12 +60,33 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
             public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
                 JwtUser jwtUser = null;
                 switch (username) {
+                    case "OWNER_ACCOUNT_1_IS_INNER_GROUP" :
+                        jwtUser = new JwtUser()
+                                .builder()
+                                .accountId(UUID.fromString(ACCOUNT_1_ID))
+                                .weightRole(3)
+                                .username(EMAIL_1)
+                                .is_inner_group(true)
+                                .enabled(true)
+                                .authorities(List.of(new SimpleGrantedAuthority("ACCOUNT_OWNER")))
+                                .build();
+                        break;
+                    case "OWNER_ACCOUNT_2_IS_INNER_GROUP" :
+                        jwtUser = new JwtUser()
+                                .builder()
+                                .accountId(UUID.fromString(ACCOUNT_2_ID))
+                                .weightRole(3)
+                                .username(EMAIL_1)
+                                .is_inner_group(true)
+                                .enabled(true)
+                                .authorities(List.of(new SimpleGrantedAuthority("ACCOUNT_OWNER")))
+                                .build();
+                        break;
                     case "ADMIN_ACCOUNT_1_IS_INNER_GROUP" :
                         jwtUser = new JwtUser()
                                 .builder()
                                 .accountId(UUID.fromString(ACCOUNT_1_ID))
                                 .weightRole(2)
-                                .is_inner_group(true)
                                 .username(EMAIL_1)
                                 .enabled(true)
                                 .authorities(List.of(new SimpleGrantedAuthority("ADMIN")))

@@ -35,12 +35,12 @@ import ru.itterminal.botdesk.aau.model.dto.UserDto;
 import ru.itterminal.botdesk.aau.model.dto.UserDtoResponseWithoutPassword;
 import ru.itterminal.botdesk.aau.model.dto.UserFilterDto;
 import ru.itterminal.botdesk.aau.model.spec.UserSpec;
-import ru.itterminal.botdesk.jwt.JwtUser;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
+import ru.itterminal.botdesk.jwt.JwtUser;
 
 @Slf4j
 @RestController("UserControllerV1")
@@ -69,8 +69,9 @@ public class UserControllerV1 extends BaseController {
 
     @PostMapping()
     @ResponseStatus(value = HttpStatus.CREATED)
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR') and #request.account.id == authentication.principal"
-            + ".accountId")
+    @PreAuthorize(
+            "hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR') and #request.account.id == authentication.principal"
+                    + ".accountId")
     public ResponseEntity<UserDtoResponseWithoutPassword> create(
             @Validated(Create.class) @RequestBody UserDto request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);

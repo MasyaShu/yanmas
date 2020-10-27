@@ -38,6 +38,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.dto.RoleDto;
 import ru.itterminal.botdesk.aau.service.impl.RoleServiceImpl;
+import ru.itterminal.botdesk.commons.config.WebTestConfig;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

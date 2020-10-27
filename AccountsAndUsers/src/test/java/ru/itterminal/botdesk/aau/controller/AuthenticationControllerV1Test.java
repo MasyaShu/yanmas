@@ -45,6 +45,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.dto.AuthenticationRequestDto;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
+import ru.itterminal.botdesk.commons.config.WebTestConfig;
 import ru.itterminal.botdesk.config.TestSecurityConfig;
 import ru.itterminal.botdesk.jwt.JwtProvider;
 import ru.itterminal.botdesk.jwt.JwtUser;
