@@ -114,7 +114,7 @@ public class GroupControllerV1 extends BaseController {
      * @return user
      */
     @GetMapping("/{id}")
-    @PreAuthorize("(@authorityChecker.is_inner_group(authentication)) or (#id == authentication.principal.groupId and @authorityChecker.is_not_inner_group(authentication))")
+    @PreAuthorize("(@authorityChecker.is_inner_group(authentication)) or (#id == authentication.principal.groupId)")
     public ResponseEntity<GroupDto> getById(Principal user, @PathVariable UUID id) {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
