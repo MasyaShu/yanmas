@@ -1,5 +1,6 @@
 package ru.itterminal.botdesk.config;
 
+import static ru.itterminal.botdesk.config.SecurityConfig.AUTH_WHITELIST_ANONYMOUS;
 import static ru.itterminal.botdesk.config.SecurityConfig.AUTH_WHITELIST_PERMIT_ALL;
 
 import java.util.List;
@@ -40,6 +41,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers(AUTH_WHITELIST_PERMIT_ALL).permitAll()
+                .antMatchers(AUTH_WHITELIST_ANONYMOUS).anonymous()
                 .anyRequest().authenticated().and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.headers().frameOptions().disable();

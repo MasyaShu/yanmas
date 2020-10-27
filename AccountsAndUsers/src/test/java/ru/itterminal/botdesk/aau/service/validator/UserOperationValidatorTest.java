@@ -15,12 +15,13 @@ import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperatio
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_CODE;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_MESSAGE;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
+import static ru.itterminal.botdesk.config.TestSecurityConfig.ACCOUNT_1_ID;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,7 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
@@ -75,19 +77,25 @@ class UserOperationValidatorTest {
     private static User user;
     private static User oldUser;
     private static User newUser;
+    private static Account account;
     private static LogicalValidationException logicalValidationException;
     private static Map<String, List<ValidationError>> errors = new HashMap<>();
 
     @BeforeAll
     static void setUp() {
+        account = new Account();
+        account.setId(UUID.fromString(ACCOUNT_1_ID));
         user = new User().builder()
                 .email(EXIST_EMAIL)
+                .account(account)
                 .build();
         oldUser = new User().builder()
                 .email(OLD_USER_EMAIL)
+                .account(account)
                 .build();
         newUser = new User().builder()
                 .email(NEW_USER_EMAIL)
+                .account(account)
                 .build();
 
     }
@@ -119,7 +127,7 @@ class UserOperationValidatorTest {
                 .weight(3)
                 .build()
         );
-        when(service.findAllByRole(any())).thenReturn(List.of(oldUser));
+        when(service.findAllByRoleAndAccountId(any(), any())).thenReturn(List.of(oldUser));
         when(roleService.getAccountOwnerRole())
                 .thenReturn(Role.builder().name(Roles.ACCOUNT_OWNER.toString()).build());
         errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,

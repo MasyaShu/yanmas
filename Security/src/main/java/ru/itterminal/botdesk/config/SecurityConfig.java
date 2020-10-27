@@ -53,7 +53,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers(AUTH_WHITELIST_PERMIT_ALL).permitAll()
-                .antMatchers("/api/v1/account/create").anonymous()
+                .antMatchers(AUTH_WHITELIST_ANONYMOUS).anonymous()
                 .anyRequest().authenticated().and()
                 .addFilterBefore(new JwtFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
