@@ -1,26 +1,25 @@
 package ru.itterminal.botdesk.commons.service.impl;
 
-import static java.lang.String.format;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 import ru.itterminal.botdesk.commons.repository.CustomizedParentEntityRepository;
 import ru.itterminal.botdesk.commons.service.CrudService;
 import ru.itterminal.botdesk.commons.service.validator.OperationValidator;
+
+import javax.persistence.OptimisticLockException;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static java.lang.String.format;
 
 /**
  * Skeletal implementation of general CRUD operations for each dictionary
@@ -138,7 +137,7 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
             log.trace(format(UPDATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), updatedEntity));
             return updatedEntity;
         }
-        catch (ObjectOptimisticLockingFailureException ex) {
+        catch (OptimisticLockException ex) {
             throw new OptimisticLockingFailureException(format(VERSION_INVALID_MESSAGE, entity.getId()));
         }
     }

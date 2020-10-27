@@ -57,7 +57,7 @@ public class GroupControllerV1 extends BaseController {
 
     @PostMapping()
     @ResponseStatus(value = HttpStatus.CREATED)
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR') and #request.account.id == authentication.principal.accountId")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN') and #request.account.id == authentication.principal.accountId and @authorityChecker.is_inner_group(authentication)")
     public ResponseEntity<GroupDto> create(
             @Validated(Create.class) @RequestBody GroupDto request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
@@ -98,7 +98,7 @@ public class GroupControllerV1 extends BaseController {
                 .and(filter.getIsInner() == null ? null : spec.getGroupByIsInnerSpec(filter.getIsInner()))
                 .and(spec.getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted.fromString(filter.getDeleted())))
                 .and(spec.getGroupByAccountSpec(jwtUser.getAccountId()))
-                .and(jwtUser.getWeightRole() != 0 ? null : spec.getGroupByGroupSpec(jwtUser.getGroupId()));
+                .and(jwtUser.is_inner_group() ? null : spec.getGroupByGroupSpec(jwtUser.getGroupId()));
 
         foundGroups = service.findAllByFilter(groupSpecification, pageable);
         returnedGroups = mapPage(foundGroups, GroupDto.class, pageable);
@@ -114,7 +114,7 @@ public class GroupControllerV1 extends BaseController {
      * @return user
      */
     @GetMapping("/{id}")
-    @PreAuthorize("(hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')) or (hasAnyAuthority('OBSERVER', 'AUTHOR') and #id == authentication.principal.groupId)")
+    @PreAuthorize("(@authorityChecker.is_inner_group(authentication)) or (#id == authentication.principal.groupId and @authorityChecker.is_not_inner_group(authentication))")
     public ResponseEntity<GroupDto> getById(Principal user, @PathVariable UUID id) {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
@@ -142,7 +142,7 @@ public class GroupControllerV1 extends BaseController {
      * @return updated user
      */
     @PutMapping()
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR') and #request.account.id == authentication.principal.accountId")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR') and #request.account.id == authentication.principal.accountId and @authorityChecker.is_inner_group(authentication)")
     public ResponseEntity<GroupDto> update(
             @Validated(Update.class) @RequestBody GroupDto request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
