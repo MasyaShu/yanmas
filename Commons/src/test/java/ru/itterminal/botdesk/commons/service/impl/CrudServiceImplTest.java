@@ -1,16 +1,5 @@
 package ru.itterminal.botdesk.commons.service.impl;
 
-import static java.lang.String.format;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.times;
-
-import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.UUID;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,16 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.NullEntityException;
 import ru.itterminal.botdesk.commons.model.GeneralEntity;
@@ -36,6 +19,18 @@ import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 import ru.itterminal.botdesk.commons.repository.GeneralEntityRepository;
 import ru.itterminal.botdesk.commons.service.CrudService;
 import ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl;
+
+import javax.persistence.OptimisticLockException;
+import java.time.ZonedDateTime;
+import java.util.Collections;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.UUID;
+
+import static java.lang.String.format;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {BasicOperationValidatorImpl.class, GeneralEntityService.class, GeneralEntitySpec.class})
@@ -195,7 +190,7 @@ class CrudServiceImplTest {
     void update_shouldThrowOptimisticLockingFailureException_whenRepoThrowsObjectOptimisticLockingFailureException() {
         testEntity.setId(TEST_ENTITY_ID);
         testEntity.setDeleted(false);
-        Mockito.when(repository.update(testEntity)).thenThrow(ObjectOptimisticLockingFailureException.class);
+        Mockito.when(repository.update(testEntity)).thenThrow(OptimisticLockException.class);
         Mockito.when(repository.findById(testEntity.getId())).thenReturn(Optional.of(testEntity));
         Throwable thrown = assertThrows(OptimisticLockingFailureException.class, () -> service.update(testEntity));
         String expected = format(VERSION_INVALID_MESSAGE, testEntity.getId());
