@@ -23,6 +23,7 @@ import ru.itterminal.botdesk.aau.model.dto.AccountDto;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
+import ru.itterminal.botdesk.commons.model.validator.scenario.Delete;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 import ru.itterminal.botdesk.jwt.JwtUser;
 
@@ -40,11 +41,12 @@ public class AccountControllerV1 extends BaseController {
     }
 
     private final String ENTITY_NAME = Account.class.getSimpleName();
-    private static final String START_GET_ACCOUNT_FROM_AUTHENTICATED_USER = "Start get account from authenticated user: {}";
-    private static final String DONE_GET_ACCOUNT_FROM_AUTHENTICATED_USER = "Done get account from authenticated user: {}";
+    private static final String START_GET_ACCOUNT_FROM_AUTHENTICATED_USER =
+            "Start get account from authenticated user: {}";
+    private static final String DONE_GET_ACCOUNT_FROM_AUTHENTICATED_USER =
+            "Done get account from authenticated user: {}";
 
     @PostMapping("create")
-    @PreAuthorize("not hasAnyAuthority('ACCOUNT_OWNER')")
     public ResponseEntity<AccountDto> create(
             @Validated(Create.class) @RequestBody AccountCreateDto request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
@@ -76,9 +78,9 @@ public class AccountControllerV1 extends BaseController {
         return new ResponseEntity<>(returnedAccount, HttpStatus.OK);
     }
 
-        @DeleteMapping()
-        @PreAuthorize("hasAuthority('ACCOUNT_OWNER') and #request.id == authentication.principal.accountId")
-        ResponseEntity<Void> physicalDelete(@RequestBody AccountDto request) {
-            throw new UnsupportedOperationException("Physical delete will be implement in the further");
-        }
+    @DeleteMapping()
+    @PreAuthorize("hasAuthority('ACCOUNT_OWNER') and #request.id == authentication.principal.accountId")
+    ResponseEntity<Void> physicalDelete(@Validated(Delete.class) @RequestBody AccountDto request) {
+        throw new UnsupportedOperationException("Physical delete will be implement in the further");
+    }
 }

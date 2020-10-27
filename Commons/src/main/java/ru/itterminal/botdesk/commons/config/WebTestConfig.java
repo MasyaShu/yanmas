@@ -1,4 +1,4 @@
-package ru.itterminal.botdesk.aau.controller;
+package ru.itterminal.botdesk.commons.config;
 
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;

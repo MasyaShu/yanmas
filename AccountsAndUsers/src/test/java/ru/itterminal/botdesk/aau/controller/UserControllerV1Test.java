@@ -72,6 +72,7 @@ import ru.itterminal.botdesk.aau.model.dto.UserDto;
 import ru.itterminal.botdesk.aau.model.dto.UserFilterDto;
 import ru.itterminal.botdesk.aau.model.spec.UserSpec;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
+import ru.itterminal.botdesk.commons.config.WebTestConfig;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.config.TestSecurityConfig;
 
@@ -200,7 +201,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     public void create_shouldCreate_whenValidDataPassed() throws Exception {
         userDtoFromAccount_1.setDeleted(null);
         when(service.create(any())).thenReturn(user_1);
@@ -230,7 +231,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_2")
+    @WithUserDetails("ADMIN_ACCOUNT_2_IS_INNER_GROUP")
     public void create_shouldGetStatusForbidden_whenDifferentAccounts() throws Exception {
         userDtoFromAccount_1.setDeleted(null);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
@@ -244,7 +245,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1")
+    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     public void create_shouldGetStatusForbidden_whenNotAllowedRole() throws Exception {
         userDtoFromAccount_1.setDeleted(null);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
@@ -258,7 +259,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
         userDtoFromAccount_1.setEmail(INVALID_EMAIL_1);
         userDtoFromAccount_1.setDeleted(true);
@@ -291,7 +292,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenAllPassedDataIsNull() throws Exception {
         userDtoFromAccount_1.setEmail(null);
         userDtoFromAccount_1.setDeleted(null);
@@ -320,7 +321,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenVersionNotNull() throws Exception {
         userDtoFromAccount_1.setId(UUID.randomUUID());
         userDtoFromAccount_1.setVersion(15);
@@ -338,7 +339,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidEmailPassed() throws Exception {
         for (String ie : invalidEmail) {
             userDtoFromAccount_1.setEmail(ie);
@@ -355,7 +356,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidPasswordPassed() throws Exception {
         for (String ip : invalidPassword) {
             userDtoFromAccount_1.setPassword(ip);
@@ -372,7 +373,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     public void update_shouldUpdate_whenValidDataPassed() throws Exception {
         userDtoFromAccount_1.setId(UUID.fromString(USER_1_ID));
         userDtoFromAccount_1.setVersion(1);
@@ -405,7 +406,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_2")
+    @WithUserDetails("ADMIN_ACCOUNT_2_IS_INNER_GROUP")
     public void update_shouldGetStatusForbidden_whenDifferentAccounts() throws Exception {
         userDtoFromAccount_1.setId(UUID.fromString(USER_1_ID));
         userDtoFromAccount_1.setVersion(0);
@@ -421,7 +422,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1")
+    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     public void update_shouldGetStatusForbidden_whenNotAllowedRole() throws Exception {
         userDtoFromAccount_1.setId(UUID.fromString(USER_1_ID));
         userDtoFromAccount_1.setVersion(0);
@@ -437,7 +438,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
         userDtoFromAccount_1.setEmail(INVALID_EMAIL_1);
         userDtoFromAccount_1.setDeleted(null);
@@ -472,7 +473,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenAllPassedDataIsNull() throws Exception {
         userDtoFromAccount_1.setEmail(null);
         userDtoFromAccount_1.setDeleted(null);
@@ -504,7 +505,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenVersionIsNegative() throws Exception {
         userDtoFromAccount_1.setVersion(-15);
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
@@ -521,7 +522,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidIdPassed() throws Exception {
         userDtoFromAccount_1.setId(UUID.fromString(USER_1_ID));
         userDtoFromAccount_1.setVersion(1);
@@ -539,7 +540,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidEmailPassed() throws Exception {
         for (String ie : invalidEmail) {
             userDtoFromAccount_1.setEmail(ie);
@@ -556,7 +557,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidPasswordPassed() throws Exception {
         for (String ip : invalidPassword) {
             userDtoFromAccount_1.setPassword(ip);
@@ -573,7 +574,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     public void getById_shouldFindOneUser_whenUserExistInDatabaseByPassedId() throws Exception {
         when(service.findByIdAndAccountId(any(), any())).thenReturn(user_1);
         mockMvc.perform(get(HOST + PORT + API + USER_1_ID))
@@ -593,7 +594,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getById_shouldRespondNotFound_whenPassedIdNotExist() throws Exception {
         when(service.findByIdAndAccountId(any(), any())).thenThrow(EntityNotExistException.class);
         mockMvc.perform(get(HOST + PORT + API + USER_1_ID))
@@ -602,7 +603,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     public void getById_shouldGetStatusBadRequest_whenUiidIsInvalid() throws Exception {
         mockMvc.perform(get(HOST + PORT + API + "Abracadabra"))
                 .andDo(print())
@@ -629,7 +630,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     public void getByFilter_shouldFindTwoUsers_whenUsersExistInDatabaseByPassedFilter() throws Exception {
         Pageable pageable =
                 PageRequest.of(Integer.parseInt(PAGE_DEFAULT_VALUE), Integer.parseInt(SIZE_DEFAULT_VALUE),
@@ -653,7 +654,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     public void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
         userFilterDto.setEmail(INVALID_EMAIL_1);
         userFilterDto.setFirstName(INVALID_FIRST_NAME);
@@ -680,7 +681,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     public void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidSizeAndPagePassed()
             throws Exception {
         MockHttpServletRequestBuilder request = get(HOST + PORT + API + "?page=-1&size=0")
@@ -695,7 +696,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     public void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenFilterIsEmpty() throws Exception {
         userFilterDto.setEmail("");
         userFilterDto.setFirstName("");
@@ -723,7 +724,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     public void getByFilter_shouldFindTwoUsers_whenFilterIsNew() throws Exception {
         UserFilterDto userFilterDto = new UserFilterDto();
         Pageable pageable =
@@ -745,7 +746,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     public void getByFilter_shouldFindTwoUsers_whenDefaultFieldsInFilterIsNull() throws Exception {
         userFilterDto.setSortBy(null);
         userFilterDto.setDeleted(null);
@@ -769,7 +770,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void physicalDelete_shouldThrowUnsupportedOperationException_untilMethodWouldBeImplemented() throws Exception {
         mockMvc.perform(delete(HOST + PORT + API + USER_1_ID))
                 .andDo(print())

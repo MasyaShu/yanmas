@@ -119,7 +119,7 @@ class UserOperationValidatorTest {
     }
 
     @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1")
+    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     public void beforeCreate_shouldGetLogicalValidationException_whenUserWithRoleAccountOwnerAlreadyExist() {
         user.setRole(Role
                 .builder()
@@ -140,7 +140,7 @@ class UserOperationValidatorTest {
     }
 
     @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1")
+    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     public void beforeCreate_shouldGetLogicalValidationException_whenWeightOfRoleOfCurrentUserLessThanWeightOfRoleCreatedEntity() {
         user.setRole(Role
                 .builder()
@@ -162,7 +162,7 @@ class UserOperationValidatorTest {
     }
 
     @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1")
+    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     public void beforeUpdate_shouldGetLogicalValidationException_whenNewAndOldUserWithRoleAccountOwner() {
         newUser.setRole(Role.builder().name(Roles.ACCOUNT_OWNER.toString()).build());
         oldUser.setRole(Role.builder().name(Roles.ACCOUNT_OWNER.toString()).build());
@@ -179,7 +179,7 @@ class UserOperationValidatorTest {
     }
 
     @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1")
+    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     public void beforeUpdate_shouldGetLogicalValidationException_whenOldAndNewUserWithoutRoleAccountOwner() {
         newUser.setRole(new Role().builder().name(Roles.AUTHOR.toString()).build());
         when(service.findAllByRoleAndIdNot(any(), any())).thenReturn(Collections.emptyList());
@@ -195,7 +195,7 @@ class UserOperationValidatorTest {
     }
 
     @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1")
+    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     public void beforeUpdate_shouldGetLogicalValidationException_whenWeightOfRoleOfCurrentUserLessThanWeightOfRoleUpdatedEntity() {
         user.setRole(new Role()
                 .builder()

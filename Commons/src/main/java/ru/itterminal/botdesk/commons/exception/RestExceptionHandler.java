@@ -75,6 +75,13 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(UnsupportedOperationException.class)
+    public ResponseEntity<?> handleJwtException(UnsupportedOperationException ex, HttpServletRequest request) {
+        ApiError apiError = new ApiError(HttpStatus.METHOD_NOT_ALLOWED, "Error", ex).withRequest(request);
+        log.warn(ex.getMessage());
+        return new ResponseEntity<>(apiError, HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
     @ExceptionHandler(JwtException.class)
     public ResponseEntity<?> handleJwtException(JwtException ex, HttpServletRequest request) {
         ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, "JWT", ex).withRequest(request);
