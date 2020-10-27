@@ -87,6 +87,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                                 .builder()
                                 .accountId(UUID.fromString(ACCOUNT_1_ID))
                                 .weightRole(2)
+                                .is_inner_group(true)
                                 .username(EMAIL_1)
                                 .enabled(true)
                                 .authorities(List.of(new SimpleGrantedAuthority("ADMIN")))
