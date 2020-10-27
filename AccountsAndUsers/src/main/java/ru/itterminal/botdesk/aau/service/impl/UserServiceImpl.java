@@ -67,6 +67,7 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
     public static final String NOT_FOUND_USERS_BY_ROLE_AND_NOT_ID = "Not found users by role: %s and not id: %s";
     public static final String START_FIND_ALL_USERS_BY_ROLE = "Start find all users by role: {}";
     public static final String NOT_FOUND_USERS_ROLE_IS_NULL = "Not found users, role is null";
+    public static final String NOT_FOUND_USERS_ACCOUNT_ID_IS_NULL = "Not found users, accountId is null";
     public static final String START_VERIFY_EMAIL_TOKEN = "Start verify email token: {}";
     public static final String FAILED_SAVE_USER_AFTER_VERIFY_EMAIL_TOKEN = "Failed save user after verify email token";
     public static final String FAILED_SAVE_USER_AFTER_RESET_PASSWORD = "Failed save user after reset password";
@@ -78,11 +79,13 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
         UUID id = UUID.randomUUID();
         entity.setId(id);
         entity.setIsArchived(false);
+        entity.setDeleted(false);
         validator.checkUniqueness(entity);
         entity.setPassword(encoder.encode(entity.getPassword()));
         if (entity.getRole().equals(roleService.getAccountOwnerRole())) {
             String emailVerificationToken = jwtProvider.createToken(entity.getId());
             entity.setEmailVerificationToken(emailVerificationToken);
+            entity.setEmailVerificationStatus(false);
         } else {
             entity.setEmailVerificationStatus(true);
         }
@@ -185,6 +188,20 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
         }
         log.trace(START_FIND_ALL_USERS_BY_ROLE, role);
         return repository.findAllByRole(role);
+    }
+
+    @Transactional(readOnly = true)
+    public List<User> findAllByRoleAndAccountId(Role role, UUID accountId) {
+        if (role == null) {
+            log.error(NOT_FOUND_USERS_ROLE_IS_NULL);
+            throw new EntityNotExistException(NOT_FOUND_USERS_ROLE_IS_NULL);
+        }
+        if (accountId == null) {
+            log.error(NOT_FOUND_USERS_ACCOUNT_ID_IS_NULL);
+            throw new EntityNotExistException(NOT_FOUND_USERS_ACCOUNT_ID_IS_NULL);
+        }
+        log.trace(START_FIND_ALL_USERS_BY_ROLE, role);
+        return repository.findAllByRoleAndAccount_Id(role, accountId);
     }
 
     public void verifyEmailToken(String token) {

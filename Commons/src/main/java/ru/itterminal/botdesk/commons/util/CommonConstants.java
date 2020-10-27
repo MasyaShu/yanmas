@@ -4,6 +4,7 @@ public class CommonConstants {
     public static final String DELETED_ASSERT_FALSE = "can not create entity marked as deleted";
     public static final String MUST_BE_NULL_FOR_THE_NEW_ENTITY = "field must be null for the new entity";
     public static final String MUST_NOT_BE_NULL = "must not be null";
+    public static final String MUST_BE_NULL = "must be null";
     public static final String MUST_NOT_BE_EMPTY = "must not be empty";
     public static final String MUST_BE_GREATER_THAN_OR_EQUAL_TO_0 = "must be greater than or equal to 0";
     public static final String MUST_BE_GREATER_THAN_0 = "must be greater than 0";

@@ -29,15 +29,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         this.jwtProvider = jwtProvider;
     }
 
-    /**
-     * Whitelist: Login, Swagger UI and other public endpoints of our API
-     */
-    public static final String[] AUTH_WHITELIST = {
+    public static final String[] AUTH_WHITELIST_PERMIT_ALL = {
             "/swagger-ui.html",
+    };
+
+    public static final String[] AUTH_WHITELIST_ANONYMOUS = {
+            "/api/v1/account/create",
             "/api/v1/auth/signin",
             "/api/v1/auth/email-verify"
-
     };
+
 
     @Bean
     @Override
@@ -51,7 +52,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .cors().and()
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers(AUTH_WHITELIST).permitAll()
+                .antMatchers(AUTH_WHITELIST_PERMIT_ALL).permitAll()
+                .antMatchers(AUTH_WHITELIST_ANONYMOUS).anonymous()
                 .anyRequest().authenticated().and()
                 .addFilterBefore(new JwtFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);

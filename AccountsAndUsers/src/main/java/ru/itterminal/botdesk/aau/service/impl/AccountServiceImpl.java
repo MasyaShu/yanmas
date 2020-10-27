@@ -48,16 +48,20 @@ public class AccountServiceImpl extends CrudServiceImpl<Account, AccountOperatio
                 .name(accountDto.getName())
                 .build();
         account.setId(UUID.randomUUID());
+        account.setDeleted(false);
         Account createdAccount = repository.create(account);
         Group groupAccountOwner =  Group.builder()
                 .account(account)
                 .name(accountDto.getNameGroupAccountOwner())
+                .isInner(true)
                 .build();
         groupService.create(groupAccountOwner);
         User user = User.builder()
                 .email(accountDto.getEmailAccountOwner())
                 .password(accountDto.getPasswordAccountOwner())
                 .role(roleService.getAccountOwnerRole())
+                .account(account)
+                .ownGroup(groupAccountOwner)
                 .build();
         userService.create(user);
         log.trace(FINISH_CREATE_NEW_ACCOUNT, accountDto);

@@ -50,7 +50,8 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         Map<String, List<ValidationError>> errors = new HashMap<>();
 
         if (entity.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString())) {
-            List<User> foundUsers = service.findAllByRole(roleService.getAccountOwnerRole());
+            List<User> foundUsers = service.findAllByRoleAndAccountId(roleService.getAccountOwnerRole(),
+                    entity.getAccount().getId());
             if (foundUsers.isEmpty()) {
                 log.trace(USER_WITH_ROLE_ACCOUNT_OWNER_IS_UNIQUE, entity);
             } else {
@@ -59,10 +60,12 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
             }
         }
 
-        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (entity.getRole().getWeight() > jwtUser.getWeightRole()) {
-            errors.put(WEIGHT_OF_ROLE, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
-                    format(WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_FROM_REQUEST, jwtUser, entity))));
+        if (!SecurityContextHolder.getContext().getAuthentication().getName().equals("anonymousUser")) {
+            JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (entity.getRole().getWeight() > jwtUser.getWeightRole()) {
+                errors.put(WEIGHT_OF_ROLE, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
+                        format(WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_FROM_REQUEST, jwtUser, entity))));
+            }
         }
 
         if (!errors.isEmpty()) {
