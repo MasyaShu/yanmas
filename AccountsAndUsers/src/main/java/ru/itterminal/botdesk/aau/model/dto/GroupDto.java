@@ -21,6 +21,7 @@ import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_NULL_FO
 @ToString
 public class GroupDto extends BaseEntityDto {
 
+    @NotNull(groups = {Create.class, Update.class, Delete.class})
     @Size(min = 1, max = 128, groups = {Create.class, Update.class})
     private String name;
 
