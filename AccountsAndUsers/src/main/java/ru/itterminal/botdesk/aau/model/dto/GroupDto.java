@@ -32,8 +32,4 @@ public class GroupDto extends BaseEntityDto {
     @Null(groups = Create.class, message = MUST_BE_NULL_FOR_THE_NEW_ENTITY)
     @NotNull(groups = {Update.class, Delete.class})
     private Boolean isDeprecated;
-
-    @NotNull(groups = {Create.class, Update.class})
-    private Account account;
-
 }

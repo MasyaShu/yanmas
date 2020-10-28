@@ -20,16 +20,17 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import ru.itterminal.botdesk.aau.controller.authorityChecker.GroupAuthorityChecker;
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.dto.GroupDto;
 import ru.itterminal.botdesk.aau.model.dto.UserFilterDto;
 import ru.itterminal.botdesk.aau.model.spec.GroupSpec;
+import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.commons.config.WebTestConfig;
 import ru.itterminal.botdesk.config.TestSecurityConfig;
-import ru.itterminal.botdesk.security.AuthorityChecker;
 
 import java.util.UUID;
 
@@ -44,7 +45,7 @@ import static ru.itterminal.botdesk.aau.model.Roles.ADMIN;
 import static ru.itterminal.botdesk.config.TestSecurityConfig.ACCOUNT_1_ID;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringJUnitConfig(value = {GroupControllerV1.class, GroupSpec.class, FilterChainProxy.class, AuthorityChecker.class})
+@SpringJUnitConfig(value = {GroupControllerV1.class, GroupSpec.class, FilterChainProxy.class, GroupAuthorityChecker.class})
 @Import(TestSecurityConfig.class)
 @WebMvcTest
 @ActiveProfiles("Test")
@@ -52,6 +53,9 @@ class GroupControllerV1Test {
 
     @MockBean
     private GroupServiceImpl service;
+
+    @MockBean
+    private AccountServiceImpl accountService;
 
     @Autowired
     private GroupControllerV1 controller;
@@ -63,7 +67,7 @@ class GroupControllerV1Test {
     UserDetailsService userDetailsService;
 
     @Autowired
-    AuthorityChecker authorityChecker;
+    GroupAuthorityChecker groupAuthorityChecker;
 
     private MockMvc mockMvc;
 
@@ -101,13 +105,11 @@ class GroupControllerV1Test {
         group_1 = new Group().builder()
                 .isInner(true)
                 .isDeprecated(false)
-                .account(account_1)
                 .name("group_1")
                 .build();
         group_1.setId(UUID.fromString(GROUP_1_ID));
         groypDtoFromAccount_1 = new GroupDto().builder()
                 .isInner(true)
-                .account(account_1)
                 .name("group_1")
                 .build();
         groypDtoFromAccount_1.setDeleted(false);
@@ -134,21 +136,6 @@ class GroupControllerV1Test {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(GROUP_1_ID))
                 .andExpect(jsonPath("$.name").value(GROUP_NAME_1));
-    }
-
-    @Test
-    @WithUserDetails("ADMIN_ACCOUNT_2_IS_INNER_GROUP")
-    public void create_shouldGetStatusForbidden_whenDifferentAccounts() throws Exception {
-        groypDtoFromAccount_1.setDeleted(null);
-        groypDtoFromAccount_1.setIsDeprecated(null);
-        MockHttpServletRequestBuilder request = post(HOST + PORT + API)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(groypDtoFromAccount_1));
-        mockMvc.perform(request)
-                .andDo(print())
-                .andExpect(status().isForbidden());
-        verify(service, times(0)).create(any());
     }
 
     @Test

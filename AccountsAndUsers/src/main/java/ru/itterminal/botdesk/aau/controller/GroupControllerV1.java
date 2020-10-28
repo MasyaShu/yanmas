@@ -11,12 +11,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.dto.GroupDto;
 import ru.itterminal.botdesk.aau.model.dto.GroupFilterDto;
 import ru.itterminal.botdesk.aau.model.spec.GroupSpec;
+import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
@@ -36,13 +38,15 @@ import java.util.UUID;
 @RequestMapping("api/v1/group")
 public class GroupControllerV1 extends BaseController {
 
+    AccountServiceImpl accountService;
     GroupServiceImpl service;
     GroupSpec spec;
 
     @Autowired
-    public GroupControllerV1(GroupServiceImpl service, GroupSpec userSpec) {
-        this.spec = userSpec;
+    public GroupControllerV1(GroupServiceImpl service, GroupSpec groupSpec, AccountServiceImpl accountServ) {
+        this.spec = groupSpec;
         this.service = service;
+        this.accountService = accountServ;
     }
 
     private final String ENTITY_NAME = Group.class.getSimpleName();
@@ -57,11 +61,13 @@ public class GroupControllerV1 extends BaseController {
 
     @PostMapping()
     @ResponseStatus(value = HttpStatus.CREATED)
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN') and #request.account.id == authentication.principal.accountId and @authorityChecker.is_inner_group(authentication)")
-    public ResponseEntity<GroupDto> create(
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN') and @groupAuthorityChecker.is_inner_group(authentication)")
+    public ResponseEntity<GroupDto> create(Principal principal,
             @Validated(Create.class) @RequestBody GroupDto request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
         Group group = modelMapper.map(request, Group.class);
+        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
+        group.setAccount(accountService.findById(jwtUser.getAccountId()));
         Group createdGroup = service.create(group);
         GroupDto returnedGroup =
                 modelMapper.map(createdGroup, GroupDto.class);
@@ -114,13 +120,34 @@ public class GroupControllerV1 extends BaseController {
      * @return user
      */
     @GetMapping("/{id}")
-    @PreAuthorize("(@authorityChecker.is_inner_group(authentication)) or (#id == authentication.principal.groupId)")
-    public ResponseEntity<GroupDto> getById(Principal user, @PathVariable UUID id) {
+    @PreAuthorize("@groupAuthorityChecker.is_inner_group(authentication) or #id == authentication.principal.groupId")
+    public ResponseEntity<GroupDto> getById(Principal principal, @PathVariable UUID id) {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
-        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
+        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
         Group foundGroup = service.findByIdAndAccountId(id, jwtUser.getAccountId());
         GroupDto returnedGroup = modelMapper.map(foundGroup, GroupDto.class);
         log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundGroup);
+        return new ResponseEntity<>(returnedGroup, HttpStatus.OK);
+    }
+
+     /**
+     * Update a user
+     *
+     * @param request contains all parameters of update user
+     * @return updated user
+     */
+    @PutMapping()
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR') and @groupAuthorityChecker.is_inner_group(authentication)")
+    public ResponseEntity<GroupDto> update(Principal principal,
+            @Validated(Update.class) @RequestBody GroupDto request) {
+        log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
+        Group group = modelMapper.map(request, Group.class);
+        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
+        group.setAccount(accountService.findById(jwtUser.getAccountId()));
+        Group updatedGroup = service.update(group);
+        GroupDto returnedGroup =
+                modelMapper.map(updatedGroup, GroupDto.class);
+        log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedGroup);
         return new ResponseEntity<>(returnedGroup, HttpStatus.OK);
     }
 
@@ -130,27 +157,8 @@ public class GroupControllerV1 extends BaseController {
      * @param request GroupDto
      */
     @DeleteMapping()
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN') and #request.account.id == authentication.principal.accountId")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN') and @groupAuthorityChecker.is_inner_group(authentication)")
     ResponseEntity<Void> physicalDelete(@RequestBody GroupDto request) {
         throw new UnsupportedOperationException("Physical delete will be implement in the further");
-    }
-
-    /**
-     * Update a user
-     *
-     * @param request contains all parameters of update user
-     * @return updated user
-     */
-    @PutMapping()
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR') and #request.account.id == authentication.principal.accountId and @authorityChecker.is_inner_group(authentication)")
-    public ResponseEntity<GroupDto> update(
-            @Validated(Update.class) @RequestBody GroupDto request) {
-        log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
-        Group user = modelMapper.map(request, Group.class);
-        Group updatedGroup = service.update(user);
-        GroupDto returnedGroup =
-                modelMapper.map(updatedGroup, GroupDto.class);
-        log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedGroup);
-        return new ResponseEntity<>(returnedGroup, HttpStatus.OK);
     }
 }
