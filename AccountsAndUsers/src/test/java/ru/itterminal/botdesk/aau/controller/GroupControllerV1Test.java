@@ -29,7 +29,6 @@ import ru.itterminal.botdesk.aau.model.spec.GroupSpec;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.commons.config.WebTestConfig;
 import ru.itterminal.botdesk.config.TestSecurityConfig;
-import ru.itterminal.botdesk.security.AuthorityChecker;
 
 import java.util.UUID;
 

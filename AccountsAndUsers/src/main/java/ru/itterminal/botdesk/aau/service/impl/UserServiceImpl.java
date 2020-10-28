@@ -108,6 +108,7 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
         } else {
             entity.setPassword(entityFromDatabase.getPassword());
         }
+
         try {
             User updatedEntity = repository.update(entity);
             log.trace(format(UPDATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), updatedEntity));

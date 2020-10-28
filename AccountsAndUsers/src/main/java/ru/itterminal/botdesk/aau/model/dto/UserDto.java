@@ -6,6 +6,8 @@ import static ru.itterminal.botdesk.aau.util.AAUConstants.emailPattern;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.passwordPattern;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY;
 
+import java.util.UUID;
+
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import javax.validation.constraints.Pattern;
@@ -61,12 +63,9 @@ public class UserDto extends BaseEntityDto {
     private Boolean isArchived;
 
     @NotNull(groups = {Create.class, Update.class})
-    private Account account;
+    private UUID groupId;
 
     @NotNull(groups = {Create.class, Update.class})
-    private Group group;
-
-    @NotNull(groups = {Create.class, Update.class})
-    private Role role;
+    private UUID roleId;
 
 }

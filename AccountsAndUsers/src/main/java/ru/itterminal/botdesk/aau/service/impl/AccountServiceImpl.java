@@ -87,12 +87,4 @@ public class AccountServiceImpl extends CrudServiceImpl<Account, AccountOperatio
             throw new OptimisticLockingFailureException(format(VERSION_INVALID_MESSAGE, account.getId()));
         }
     }
-
-    public Account findByAuthenticatedUser(Principal principal) {
-        log.trace(START_FIND_AN_ACCOUNT_BY_AUTHENTICATED_USER, principal);
-        JwtUser jwtUser = (JwtUser) principal;
-        Account foundAccount = findById(jwtUser.getAccountId());
-        log.trace(FINISH_FIND_AN_ACCOUNT_BY_AUTHENTICATED_USER, foundAccount);
-        return foundAccount;
-    }
 }
