@@ -21,6 +21,8 @@ import ru.itterminal.botdesk.commons.model.spec.GeneralSpec;
 @Component
 public class UserSpec extends GeneralSpec<User> {
 
+    // TODO Predicate predicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + name.toLowerCase() + "%");
+
     public Specification<User> getUserByEmailSpec(String email) {
         return new Specification<User>() {
             @Override

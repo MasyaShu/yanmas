@@ -129,7 +129,12 @@ class UserOperationValidatorTest {
         );
         when(service.findAllByRoleAndAccountId(any(), any())).thenReturn(List.of(oldUser));
         when(roleService.getAccountOwnerRole())
-                .thenReturn(Role.builder().name(Roles.ACCOUNT_OWNER.toString()).build());
+                .thenReturn(Role
+                        .builder()
+                        .name(Roles.ACCOUNT_OWNER.toString())
+                        .weight(3)
+                        .build()
+                );
         errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,
                 format(NOT_UNIQUE_MESSAGE, USER_WITH_ROLE_ACCOUNT_OWNER))));
         logicalValidationException = new LogicalValidationException(VALIDATION_FAILED, errors);

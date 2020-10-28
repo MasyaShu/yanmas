@@ -2,6 +2,7 @@ package ru.itterminal.botdesk.aau.service.impl;
 
 import static java.lang.String.format;
 
+import java.security.Principal;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import ru.itterminal.botdesk.aau.model.dto.AccountCreateDto;
 import ru.itterminal.botdesk.aau.repository.AccountRepository;
 import ru.itterminal.botdesk.aau.service.validator.AccountOperationValidator;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
+import ru.itterminal.botdesk.jwt.JwtUser;
 
 @Slf4j
 @Service
@@ -40,6 +42,9 @@ public class AccountServiceImpl extends CrudServiceImpl<Account, AccountOperatio
     private static final String FINISH_CREATE_NEW_ACCOUNT = "Finish create a new account with name {}";
     private static final String START_UPDATE_NEW_ACCOUNT = "Start update an account: {}";
     private static final String FINISH_UPDATE_NEW_ACCOUNT = "Finish update an account: {}";
+    private static final String START_FIND_AN_ACCOUNT_BY_AUTHENTICATED_USER = "Start find an account by authenticated user: {}";
+    private static final String FINISH_FIND_AN_ACCOUNT_BY_AUTHENTICATED_USER = "Finish find an account by "
+            + "authenticated user: {}";
 
     public Account create(AccountCreateDto accountDto) {
         log.trace(START_CREATE_NEW_ACCOUNT, accountDto);
@@ -70,7 +75,7 @@ public class AccountServiceImpl extends CrudServiceImpl<Account, AccountOperatio
 
     @Override
     public Account update (Account account) {
-        log.trace(START_UPDATE_NEW_ACCOUNT, account);
+        log.trace(START_FIND_AN_ACCOUNT_BY_AUTHENTICATED_USER, account);
         validator.beforeUpdate(account);
         Account accountFromDatabase = super.findById(account.getId());
         try {

@@ -71,13 +71,16 @@ import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.dto.UserDto;
 import ru.itterminal.botdesk.aau.model.dto.UserFilterDto;
 import ru.itterminal.botdesk.aau.model.spec.UserSpec;
+import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
+import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
+import ru.itterminal.botdesk.aau.service.impl.RoleServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.config.WebTestConfig;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.config.TestSecurityConfig;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringJUnitConfig(value = {UserControllerV1.class, UserSpec.class, FilterChainProxy.class})
+@SpringJUnitConfig(value = {UserControllerV1.class, UserSpec.class, FilterChainProxy.class, AuthorityChecker.class})
 @Import(TestSecurityConfig.class)
 @WebMvcTest
 @ActiveProfiles("Test")
@@ -85,6 +88,18 @@ class UserControllerV1Test {
 
     @MockBean
     private UserServiceImpl service;
+
+    @MockBean
+    private AccountServiceImpl accountService;
+
+    @MockBean
+    private RoleServiceImpl roleService;
+
+    @MockBean
+    private GroupServiceImpl groupService;
+
+    @Autowired
+    private AuthorityChecker authorityChecker;
 
     @Autowired
     private UserControllerV1 controller;
@@ -112,6 +127,8 @@ class UserControllerV1Test {
     private static String API = "api/v1/user/";
     public static String USER_1_ID = "d592facb-e6ee-4801-8310-9c7708eb6e6c";
     public static String USER_2_ID = "86840939-c488-448b-a473-cd9e1097dd32";
+    public static String ROLE_ADMIN_ID = "d7597321-239f-4e06-84a6-853e71574896";
+    public static String ROLE_ACCOUNT_OWNER_ID = "c4edeb4d-0b1e-4c8f-99f6-9534389408a0";
     private static String PASSWORD_1 = "UserUser123";
     private static String PASSWORD_2 = "UserUser321";
     private static String FIRST_NAME = "Ivan";
@@ -157,15 +174,20 @@ class UserControllerV1Test {
     private Account account_1;
     private Group group_1;
     private Role roleAdmin = new Role(ADMIN.toString(), ADMIN.getWeight());
-    private Role roleSuperAdmin = new Role(ACCOUNT_OWNER.toString(), ACCOUNT_OWNER.getWeight());
+    private Role roleAccountOwner = new Role(ACCOUNT_OWNER.toString(), ACCOUNT_OWNER.getWeight());
     private UserDto userDtoFromAccount_1;
     private UserFilterDto userFilterDto;
 
     @BeforeEach
     void setUpBeforeEach() {
+        roleAdmin.setId(UUID.fromString(ROLE_ADMIN_ID));
+        roleAccountOwner.setId(UUID.fromString(ROLE_ACCOUNT_OWNER_ID));
         account_1 = new Account();
         account_1.setId(UUID.fromString(ACCOUNT_1_ID));
-        group_1 = new Group();
+        group_1 = Group
+                .builder()
+                .isInner(true)
+                .build();
         group_1.setId(UUID.fromString(GROUP_1_ID));
         user_1 = new User().builder()
                 .email(EMAIL_1)
@@ -182,15 +204,14 @@ class UserControllerV1Test {
                 .account(account_1)
                 .ownGroup(group_1)
                 .isArchived(false)
-                .role(roleSuperAdmin)
+                .role(roleAccountOwner)
                 .build();
         user_2.setId(UUID.fromString(USER_2_ID));
         userDtoFromAccount_1 = new UserDto().builder()
                 .email(EMAIL_1)
                 .password(PASSWORD_1)
-                .account(account_1)
-                .group(group_1)
-                .role(roleAdmin)
+                .groupId(group_1.getId())
+                .roleId(roleAdmin.getId())
                 .build();
         userDtoFromAccount_1.setDeleted(false);
         userFilterDto = new UserFilterDto();
@@ -205,6 +226,9 @@ class UserControllerV1Test {
     public void create_shouldCreate_whenValidDataPassed() throws Exception {
         userDtoFromAccount_1.setDeleted(null);
         when(service.create(any())).thenReturn(user_1);
+        when(accountService.findById(any())).thenReturn(account_1);
+        when(roleService.findById(any())).thenReturn(roleAdmin);
+        when(groupService.findById(any())).thenReturn(group_1);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -220,20 +244,6 @@ class UserControllerV1Test {
     @Test
     @WithAnonymousUser
     public void create_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
-        MockHttpServletRequestBuilder request = post(HOST + PORT + API)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userDtoFromAccount_1));
-        mockMvc.perform(request)
-                .andDo(print())
-                .andExpect(status().isForbidden());
-        verify(service, times(0)).create(any());
-    }
-
-    @Test
-    @WithUserDetails("ADMIN_ACCOUNT_2_IS_INNER_GROUP")
-    public void create_shouldGetStatusForbidden_whenDifferentAccounts() throws Exception {
-        userDtoFromAccount_1.setDeleted(null);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -264,9 +274,8 @@ class UserControllerV1Test {
         userDtoFromAccount_1.setEmail(INVALID_EMAIL_1);
         userDtoFromAccount_1.setDeleted(true);
         userDtoFromAccount_1.setPassword("");
-        userDtoFromAccount_1.setGroup(null);
-        userDtoFromAccount_1.setAccount(null);
-        userDtoFromAccount_1.setRole(null);
+        userDtoFromAccount_1.setGroupId(null);
+        userDtoFromAccount_1.setRoleId(null);
         userDtoFromAccount_1.setFirstName(INVALID_FIRST_NAME);
         userDtoFromAccount_1.setSecondName(INVALID_SECOND_NAME);
         userDtoFromAccount_1.setPhone(INVALID_PHONE);
@@ -282,11 +291,11 @@ class UserControllerV1Test {
                 .andExpect(jsonPath("$.errors.secondName[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
                 .andExpect(jsonPath("$.errors.phone[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
                 .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_BE_NULL_FOR_THE_NEW_ENTITY).exists())
-                .andExpect(jsonPath("$.errors.isArchived[?(@.message == '%s')]", MUST_BE_NULL_FOR_THE_NEW_ENTITY).exists())
-                .andExpect(jsonPath("$.errors.role[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(
+                        jsonPath("$.errors.isArchived[?(@.message == '%s')]", MUST_BE_NULL_FOR_THE_NEW_ENTITY).exists())
+                .andExpect(jsonPath("$.errors.roleId[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.email[?(@.message == '%s')]", INVALID_EMAIL).exists())
-                .andExpect(jsonPath("$.errors.account[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.group[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.groupId[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.password[?(@.message == '%s')]", INVALID_PASSWORD).exists());
         verify(service, times(0)).create(any());
     }
@@ -297,9 +306,8 @@ class UserControllerV1Test {
         userDtoFromAccount_1.setEmail(null);
         userDtoFromAccount_1.setDeleted(null);
         userDtoFromAccount_1.setPassword(null);
-        userDtoFromAccount_1.setGroup(null);
-        userDtoFromAccount_1.setAccount(null);
-        userDtoFromAccount_1.setRole(null);
+        userDtoFromAccount_1.setGroupId(null);
+        userDtoFromAccount_1.setRoleId(null);
         userDtoFromAccount_1.setFirstName(null);
         userDtoFromAccount_1.setSecondName(null);
         userDtoFromAccount_1.setPhone(null);
@@ -311,11 +319,11 @@ class UserControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.isArchived[?(@.message == '%s')]", MUST_BE_NULL_FOR_THE_NEW_ENTITY).exists())
-                .andExpect(jsonPath("$.errors.role[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(
+                        jsonPath("$.errors.isArchived[?(@.message == '%s')]", MUST_BE_NULL_FOR_THE_NEW_ENTITY).exists())
+                .andExpect(jsonPath("$.errors.roleId[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.email[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.account[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.group[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.groupId[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.password[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists());
         verify(service, times(0)).create(any());
     }
@@ -406,22 +414,6 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_2_IS_INNER_GROUP")
-    public void update_shouldGetStatusForbidden_whenDifferentAccounts() throws Exception {
-        userDtoFromAccount_1.setId(UUID.fromString(USER_1_ID));
-        userDtoFromAccount_1.setVersion(0);
-        userDtoFromAccount_1.setIsArchived(false);
-        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userDtoFromAccount_1));
-        mockMvc.perform(request)
-                .andDo(print())
-                .andExpect(status().isForbidden());
-        verify(service, times(0)).update(any());
-    }
-
-    @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     public void update_shouldGetStatusForbidden_whenNotAllowedRole() throws Exception {
         userDtoFromAccount_1.setId(UUID.fromString(USER_1_ID));
@@ -443,9 +435,8 @@ class UserControllerV1Test {
         userDtoFromAccount_1.setEmail(INVALID_EMAIL_1);
         userDtoFromAccount_1.setDeleted(null);
         userDtoFromAccount_1.setPassword("");
-        userDtoFromAccount_1.setGroup(null);
-        userDtoFromAccount_1.setAccount(null);
-        userDtoFromAccount_1.setRole(null);
+        userDtoFromAccount_1.setGroupId(null);
+        userDtoFromAccount_1.setRoleId(null);
         userDtoFromAccount_1.setFirstName("123456789012345678901");
         userDtoFromAccount_1.setSecondName("1234567890123456789012345678901");
         userDtoFromAccount_1.setPhone("1234567890123456789012345678901");
@@ -464,10 +455,9 @@ class UserControllerV1Test {
                 .andExpect(jsonPath("$.errors.phone[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
                 .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.isArchived[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.role[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.roleId[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.email[?(@.message == '%s')]", INVALID_EMAIL).exists())
-                .andExpect(jsonPath("$.errors.account[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.group[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.groupId[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.password[?(@.message == '%s')]", INVALID_PASSWORD).exists());
         verify(service, times(0)).update(any());
     }
@@ -478,9 +468,8 @@ class UserControllerV1Test {
         userDtoFromAccount_1.setEmail(null);
         userDtoFromAccount_1.setDeleted(null);
         userDtoFromAccount_1.setPassword(null);
-        userDtoFromAccount_1.setGroup(null);
-        userDtoFromAccount_1.setAccount(null);
-        userDtoFromAccount_1.setRole(null);
+        userDtoFromAccount_1.setGroupId(null);
+        userDtoFromAccount_1.setRoleId(null);
         userDtoFromAccount_1.setFirstName(null);
         userDtoFromAccount_1.setSecondName(null);
         userDtoFromAccount_1.setPhone(null);
@@ -496,10 +485,9 @@ class UserControllerV1Test {
                 .andExpect(jsonPath("$.errors.version[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.isArchived[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.role[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.roleId[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.email[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.account[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.group[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.groupId[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.password[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists());
         verify(service, times(0)).update(any());
     }

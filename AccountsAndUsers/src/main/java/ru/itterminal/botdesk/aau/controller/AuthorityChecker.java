@@ -1,4 +1,4 @@
-package ru.itterminal.botdesk.security;
+package ru.itterminal.botdesk.aau.controller;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;

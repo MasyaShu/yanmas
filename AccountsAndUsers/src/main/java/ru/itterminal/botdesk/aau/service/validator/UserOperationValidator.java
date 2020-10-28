@@ -49,7 +49,7 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         super.beforeCreate(entity);
         Map<String, List<ValidationError>> errors = new HashMap<>();
 
-        if (entity.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString())) {
+        if (entity.getRole().equals(roleService.getAccountOwnerRole())) {
             List<User> foundUsers = service.findAllByRoleAndAccountId(roleService.getAccountOwnerRole(),
                     entity.getAccount().getId());
             if (foundUsers.isEmpty()) {

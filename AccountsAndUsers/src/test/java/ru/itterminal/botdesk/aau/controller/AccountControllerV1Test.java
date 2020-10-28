@@ -5,8 +5,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -17,7 +17,6 @@ import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_NOT_BE_NUL
 import static ru.itterminal.botdesk.commons.util.CommonConstants.SIZE_MUST_BE_BETWEEN;
 import static ru.itterminal.botdesk.config.TestSecurityConfig.ACCOUNT_1_ID;
 import static ru.itterminal.botdesk.config.TestSecurityConfig.ACCOUNT_2_ID;
-import static ru.itterminal.botdesk.config.TestSecurityConfig.EMAIL_1;
 
 import java.util.UUID;
 
