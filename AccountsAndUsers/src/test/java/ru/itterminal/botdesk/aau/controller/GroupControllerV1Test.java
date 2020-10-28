@@ -20,7 +20,6 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import ru.itterminal.botdesk.aau.controller.authorityChecker.GroupAuthorityChecker;
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.Role;
@@ -31,6 +30,7 @@ import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.commons.config.WebTestConfig;
 import ru.itterminal.botdesk.config.TestSecurityConfig;
+import ru.itterminal.botdesk.security.AuthorityChecker;
 
 import java.util.UUID;
 
@@ -45,7 +45,7 @@ import static ru.itterminal.botdesk.aau.model.Roles.ADMIN;
 import static ru.itterminal.botdesk.config.TestSecurityConfig.ACCOUNT_1_ID;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringJUnitConfig(value = {GroupControllerV1.class, GroupSpec.class, FilterChainProxy.class, GroupAuthorityChecker.class})
+@SpringJUnitConfig(value = {GroupControllerV1.class, GroupSpec.class, FilterChainProxy.class, AuthorityChecker.class})
 @Import(TestSecurityConfig.class)
 @WebMvcTest
 @ActiveProfiles("Test")
@@ -67,7 +67,7 @@ class GroupControllerV1Test {
     UserDetailsService userDetailsService;
 
     @Autowired
-    GroupAuthorityChecker groupAuthorityChecker;
+    AuthorityChecker authorityChecker;
 
     private MockMvc mockMvc;
 

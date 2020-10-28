@@ -61,7 +61,7 @@ public class GroupControllerV1 extends BaseController {
 
     @PostMapping()
     @ResponseStatus(value = HttpStatus.CREATED)
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN') and @groupAuthorityChecker.is_inner_group(authentication)")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN') and @authorityChecker.is_inner_group(authentication)")
     public ResponseEntity<GroupDto> create(Principal principal,
             @Validated(Create.class) @RequestBody GroupDto request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
@@ -120,7 +120,7 @@ public class GroupControllerV1 extends BaseController {
      * @return user
      */
     @GetMapping("/{id}")
-    @PreAuthorize("@groupAuthorityChecker.is_inner_group(authentication) or #id == authentication.principal.groupId")
+    @PreAuthorize("@authorityChecker.is_inner_group(authentication) or #id == authentication.principal.groupId")
     public ResponseEntity<GroupDto> getById(Principal principal, @PathVariable UUID id) {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
@@ -137,7 +137,7 @@ public class GroupControllerV1 extends BaseController {
      * @return updated user
      */
     @PutMapping()
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR') and @groupAuthorityChecker.is_inner_group(authentication)")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR') and @authorityChecker.is_inner_group(authentication)")
     public ResponseEntity<GroupDto> update(Principal principal,
             @Validated(Update.class) @RequestBody GroupDto request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
@@ -157,7 +157,7 @@ public class GroupControllerV1 extends BaseController {
      * @param request GroupDto
      */
     @DeleteMapping()
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN') and @groupAuthorityChecker.is_inner_group(authentication)")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN') and @authorityChecker.is_inner_group(authentication)")
     ResponseEntity<Void> physicalDelete(@RequestBody GroupDto request) {
         throw new UnsupportedOperationException("Physical delete will be implement in the further");
     }
