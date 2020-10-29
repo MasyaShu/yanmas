@@ -19,6 +19,7 @@ import ru.itterminal.botdesk.aau.model.dto.GroupFilterDto;
 import ru.itterminal.botdesk.aau.model.spec.GroupSpec;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
+import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
@@ -29,6 +30,9 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.security.Principal;
 import java.util.UUID;
+
+import static java.lang.String.format;
+import static ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl.NOT_FOUND_GROUP_BY_ID_S_AND_ACCOUNT_ID_S;
 
 @Slf4j
 @RestController("GroupControllerV1")
@@ -103,7 +107,7 @@ public class GroupControllerV1 extends BaseController {
                 .and(filter.getIsInner() == null ? null : spec.getGroupByIsInnerSpec(filter.getIsInner()))
                 .and(spec.getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted.fromString(filter.getDeleted())))
                 .and(spec.getGroupByAccountSpec(jwtUser.getAccountId()))
-                .and(jwtUser.is_inner_group() ? null : spec.getGroupByGroupSpec(jwtUser.getGroupId()));
+                .and(jwtUser.isInnerGroup() ? null : spec.getGroupByGroupSpec(jwtUser.getGroupId()));
 
         foundGroups = service.findAllByFilter(groupSpecification, pageable);
         returnedGroups = mapPage(foundGroups, GroupDto.class, pageable);
@@ -115,10 +119,10 @@ public class GroupControllerV1 extends BaseController {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
         Group foundGroup;
-        if (jwtUser.isInnerGroup()) {
+        if (jwtUser.isInnerGroup() || id.equals(jwtUser.getGroupId())) {
              foundGroup = service.findByIdAndAccountId(id, jwtUser.getAccountId());
         } else {
-            foundGroup = service.findByIdAndAccountIdAndOwnGroupId(id, jwtUser.getAccountId(), jwtUser.getGroupId());
+            throw new EntityNotExistException(format(NOT_FOUND_GROUP_BY_ID_S_AND_ACCOUNT_ID_S, id, jwtUser.getAccountId()));
         }
         GroupDto returnedGroup = modelMapper.map(foundGroup, GroupDto.class);
         log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundGroup);

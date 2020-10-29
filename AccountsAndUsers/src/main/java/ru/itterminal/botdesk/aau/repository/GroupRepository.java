@@ -18,6 +18,4 @@ public interface GroupRepository extends CustomizedParentEntityRepository<Group>
 
     Optional<Group> getByIdAndAccount_Id(UUID id, UUID accountId);
 
-    Optional<Group> getByIdAndAccount_IdAAndId(UUID id, UUID accountId, UUID jwtUserGroupId);
-
 }

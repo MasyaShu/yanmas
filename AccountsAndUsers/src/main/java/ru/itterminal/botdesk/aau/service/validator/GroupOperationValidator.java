@@ -24,10 +24,9 @@ import static java.util.Collections.singletonList;
 public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> {
     private GroupServiceImpl service;
 
-    protected static final String INNER_GROUP = "Inner group";
-    protected static final String CREATE_UPDATE_ONLY_HIS_GROUP =
-            "If user is not in inner group, then he can create/update user only in his "
-                    + "group";
+    public static final String INNER_GROUP = "Inner group";
+    public static final String USER_FROM_AN_INNER_GROUP_CANNOT_CREATE_UPDATE_GROUPS =
+            "A user from an inner group cannot create / update groups";
 
     @Autowired
     public GroupOperationValidator(GroupServiceImpl service) {
@@ -37,32 +36,14 @@ public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> 
     @Override
     public boolean beforeCreate(Group entity) {
         super.beforeCreate(entity);
-        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Map<String, List<ValidationError>> errors = new HashMap<>();
-        if (!jwtUser.isInnerGroup()) {
-            errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
-                    CREATE_UPDATE_ONLY_HIS_GROUP)));
-        }
-        if (!errors.isEmpty()) {
-            log.error(FIELDS_ARE_NOT_VALID, errors);
-            throw new LogicalValidationException(VALIDATION_FAILED, errors);
-        }
+        checkIsInnerGroupForCreateUpdate();
         return true;
     }
 
     @Override
     public boolean beforeUpdate(Group entity) {
         super.beforeUpdate(entity);
-        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Map<String, List<ValidationError>> errors = new HashMap<>();
-        if (!jwtUser.isInnerGroup()) {
-            errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
-                    CREATE_UPDATE_ONLY_HIS_GROUP)));
-        }
-        if (!errors.isEmpty()) {
-            log.error(FIELDS_ARE_NOT_VALID, errors);
-            throw new LogicalValidationException(VALIDATION_FAILED, errors);
-        }
+        checkIsInnerGroupForCreateUpdate();
         return true;
     }
 
@@ -85,4 +66,18 @@ public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> 
             throw new LogicalValidationException(VALIDATION_FAILED, errors);
         }
     }
+
+    private void checkIsInnerGroupForCreateUpdate() {
+        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Map<String, List<ValidationError>> errors = new HashMap<>();
+        if (!jwtUser.isInnerGroup()) {
+            errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
+                    USER_FROM_AN_INNER_GROUP_CANNOT_CREATE_UPDATE_GROUPS)));
+        }
+        if (!errors.isEmpty()) {
+            log.error(FIELDS_ARE_NOT_VALID, errors);
+            throw new LogicalValidationException(VALIDATION_FAILED, errors);
+        }
+    }
+
 }

@@ -144,21 +144,6 @@ class GroupControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
-    public void create_shouldGetStatusForbidden_whenGroupUserIsNotInner() throws Exception {
-        groypDtoFromAccount_1.setDeleted(null);
-        groypDtoFromAccount_1.setIsDeprecated(null);
-        MockHttpServletRequestBuilder request = post(HOST + PORT + API)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(groypDtoFromAccount_1));
-        mockMvc.perform(request)
-                .andDo(print())
-                .andExpect(status().isForbidden());
-        verify(service, times(0)).create(any());
-    }
-
-    @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     public void create_shouldGetStatusForbidden_whenRoleUserAuthor() throws Exception {
         groypDtoFromAccount_1.setDeleted(null);
@@ -345,7 +330,7 @@ class GroupControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void getById_shouldFindOneUser_whenUserExistInDatabaseByPassedId() throws Exception {
+    public void getById_shouldFindOneGroup_whenUserExistInDatabaseByPassedId() throws Exception {
         when(service.findByIdAndAccountId(any(), any())).thenReturn(group_1);
         mockMvc.perform(get(HOST + PORT + API + GROUP_1_ID))
                 .andDo(print())
@@ -361,6 +346,24 @@ class GroupControllerV1Test {
         mockMvc.perform(get(HOST + PORT + API + GROUP_1_ID))
                 .andDo(print())
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
+    public void getById_shouldReturnNotFound_whenUserIsNotInInnerGroupAndFindIdForOtherGroup() throws Exception {
+        mockMvc.perform(get(HOST + PORT + API + GROUP_1_ID))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+        verify(service, times(0)).findByIdAndAccountId(any(), any());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
+    public void getById_shouldReturnNotFound_whenUserIsInInnerGroupAndFindIdForOtherGroup() throws Exception {
+        when(service.findByIdAndAccountId(any(), any())).thenReturn(group_1);
+        mockMvc.perform(get(HOST + PORT + API + GROUP_1_ID))
+                .andDo(print())
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -401,7 +404,7 @@ class GroupControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void getByFilter_shouldFindTwoUsers_whenUsersExistInDatabaseByPassedFilter() throws Exception {
+    public void getByFilter_shouldFindTwoGroup_whenUsersExistInDatabaseByPassedFilter() throws Exception {
         Pageable pageable =
                 PageRequest.of(Integer.parseInt(PAGE_DEFAULT_VALUE), Integer.parseInt(SIZE_DEFAULT_VALUE),
                         Sort.by("name").ascending());
@@ -482,7 +485,7 @@ class GroupControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void getByFilter_shouldFindTwoUsers_whenFilterIsNew() throws Exception {
+    public void getByFilter_shouldFindTwoGroups_whenFilterIsNew() throws Exception {
         GroupFilterDto groupFilterDto = new GroupFilterDto();
         Pageable pageable =
                 PageRequest.of(Integer.parseInt(PAGE_DEFAULT_VALUE), Integer.parseInt(SIZE_DEFAULT_VALUE),
@@ -504,7 +507,7 @@ class GroupControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void getByFilter_shouldFindTwoUsers_whenDefaultFieldsInFilterIsNull() throws Exception {
+    public void getByFilter_shouldFindTwoGroups_whenDefaultFieldsInFilterIsNull() throws Exception {
         groupFilterDto.setSortBy(null);
         groupFilterDto.setDeleted(null);
         groupFilterDto.setDirection(null);

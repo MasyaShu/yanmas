@@ -30,14 +30,10 @@ public class GroupServiceImpl extends CrudServiceImpl<Group, GroupOperationValid
             "Not found groups by unique fields, name is null";
     public static final String NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_ID_IS_NULL =
             "Not found groups by unique fields, id is null";
-    public static final String START_FIND_USER_BY_UNIQUE_FIELDS =
+    public static final String START_FIND_GROUP_BY_UNIQUE_FIELDS =
             "Start find user by unique fields, name: {} and not id: {} and not account: {}";
     public static final String NOT_FOUND_GROUP_BY_ID_S_AND_ACCOUNT_ID_S = "Not found group by id: %s and accountId: %s";
     public static final String START_FIND_GROUP_BY_ID_AND_ACCOUNT_ID = "Start find group by id: {} and accountId: {}";
-    public static final String NOT_FOUND_GROUP_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID
-            = "Not found group by id: %s and account id: %s and own group id %s";
-    public static final String START_FIND_GROUP_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID
-            = "Start find group by id: {} and accountId: {} and own group id {}";
 
     @Override
     public Group create(Group entity) {
@@ -100,29 +96,6 @@ public class GroupServiceImpl extends CrudServiceImpl<Group, GroupOperationValid
         log.trace(START_FIND_GROUP_BY_ID_AND_ACCOUNT_ID, id, accountId);
         return repository.getByIdAndAccount_Id(id, accountId).orElseThrow(
                 () -> new EntityNotExistException(format(NOT_FOUND_GROUP_BY_ID_S_AND_ACCOUNT_ID_S, id, accountId))
-        );
-    }
-
-    @Transactional(readOnly = true)
-    public Group findByIdAndAccountIdAndOwnGroupId(UUID id, UUID accountId, UUID ownGroupId) {
-        if (id == null) {
-            log.error(format(NOT_FOUND_GROUP_BY_ID_S_AND_ACCOUNT_ID_S, id, accountId));
-            throw new EntityNotExistException(format(NOT_FOUND_GROUP_BY_ID_S_AND_ACCOUNT_ID_S, id, accountId));
-        }
-        if (accountId == null) {
-            log.error(format(NOT_FOUND_GROUP_BY_ID_S_AND_ACCOUNT_ID_S, id, accountId));
-            throw new EntityNotExistException(format(NOT_FOUND_GROUP_BY_ID_S_AND_ACCOUNT_ID_S, id, accountId));
-        }
-        if (ownGroupId == null) {
-            log.error(format(NOT_FOUND_GROUP_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, ownGroupId));
-            throw new EntityNotExistException(
-                    format(NOT_FOUND_GROUP_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, ownGroupId));
-        }
-        log.trace(START_FIND_GROUP_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, ownGroupId);
-        return repository.getByIdAndAccount_IdAAndId(id, accountId, ownGroupId).orElseThrow(
-                () -> new EntityNotExistException(
-                        format(NOT_FOUND_GROUP_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, ownGroupId)
-                )
         );
     }
 }
