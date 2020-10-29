@@ -150,7 +150,6 @@ class UserControllerV1Test {
     private static String INVALID_EMAIL_6 = "@mail.ru"; //missing name
     private static String INVALID_EMAIL_7 = "it terminal@mail.ru"; //space in name
     private static String INVALID_EMAIL_8 = "it-terminal@ mail.ru"; //space in domain
-    //private static String INVALID_EMAIL_9 = "it-terminal@mail.1"; //domain name are not allowed
 
     private Set<String> invalidEmail = Set.of(INVALID_EMAIL_1, INVALID_EMAIL_2, INVALID_EMAIL_3, INVALID_EMAIL_4,
             INVALID_EMAIL_5, INVALID_EMAIL_6, INVALID_EMAIL_7, INVALID_EMAIL_8);
@@ -563,13 +562,28 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void getById_shouldFindOneUser_whenUserExistInDatabaseByPassedId() throws Exception {
+    public void getById_shouldFindOneUser_whenUserExistInDatabaseByPassedIdAndHeIsInInnerGroup() throws Exception {
         when(service.findByIdAndAccountId(any(), any())).thenReturn(user_1);
         mockMvc.perform(get(HOST + PORT + API + USER_1_ID))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value(EMAIL_1))
                 .andExpect(jsonPath("$.id").value(USER_1_ID));
+        verify(service, times(1)).findByIdAndAccountId(any(), any());
+        verify(service, times(0)).findByIdAndAccountIdAndOwnGroupId(any(), any(), any());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
+    public void getById_shouldFindOneUser_whenUserExistInDatabaseByPassedIdAndHeIsNotInInnerGroup() throws Exception {
+        when(service.findByIdAndAccountIdAndOwnGroupId(any(), any(), any())).thenReturn(user_1);
+        mockMvc.perform(get(HOST + PORT + API + USER_1_ID))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value(EMAIL_1))
+                .andExpect(jsonPath("$.id").value(USER_1_ID));
+        verify(service, times(0)).findByIdAndAccountId(any(), any());
+        verify(service, times(1)).findByIdAndAccountIdAndOwnGroupId(any(), any(), any());
     }
 
     @Test

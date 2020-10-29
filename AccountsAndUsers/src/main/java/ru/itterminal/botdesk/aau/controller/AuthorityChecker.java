@@ -11,12 +11,12 @@ public class AuthorityChecker {
 
     public boolean is_inner_group(Authentication authentication) {
         JwtUser jwtUser = (JwtUser) authentication.getPrincipal();
-        return jwtUser.is_inner_group();
+        return jwtUser.isInnerGroup();
     }
 
     public boolean is_not_inner_group(Authentication authentication) {
         JwtUser jwtUser = (JwtUser) authentication.getPrincipal();
-        return !jwtUser.is_inner_group();
+        return !jwtUser.isInnerGroup();
     }
 
 

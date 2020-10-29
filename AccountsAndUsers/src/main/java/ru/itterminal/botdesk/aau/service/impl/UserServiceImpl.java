@@ -36,20 +36,24 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
 
     @Autowired
     public UserServiceImpl(BCryptPasswordEncoder encoder, JwtProvider jwtProvider,
-             RoleServiceImpl roleService) {
+            RoleServiceImpl roleService) {
         this.encoder = encoder;
         this.jwtProvider = jwtProvider;
         this.roleService = roleService;
     }
 
     public static final String START_FIND_USER_BY_ID_AND_ACCOUNT_ID = "Start find user by id: {} and accountId: {}";
+    public static final String START_FIND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID
+            = "Start find user by id: {} and accountId: {} and own group id {}";
     public static final String START_REQUEST_PASSWORD_RESET_BY_EMAIL = "Start request password reset by email: {}";
     public static final String NOT_FOUND_USER_BY_RESET_PASSWORD_TOKEN = "Not found user by reset password token";
     public static final String NOT_FOUND_USER_BY_EMAIL_VERIFICATION_TOKEN =
             "Not found user by email verification token";
     public static final String START_RESET_PASSWORD_BY_TOKEN_AND_NEW_PASSWORD =
             "Start reset password by token: {} and new password {}";
-    public static final String NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID = "Not found user by id: %s and accountId: %s";
+    public static final String NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID = "Not found user by id: %s and account id: %s";
+    public static final String NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID
+            = "Not found user by id: %s and account id: %s and own group id %s";
     public static final String START_FIND_USER_BY_EMAIL = "Start find user by email: {}";
     public static final String NOT_FOUND_USER_BY_EMAIL_EMAIL_IS_NULL = "Not found user by email, email is null";
     public static final String NOT_FOUND_USER_BY_EMAIL_EMAIL_IS_EMPTY = "Not found user by email, email is empty";
@@ -164,6 +168,29 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
         log.trace(START_FIND_USER_BY_ID_AND_ACCOUNT_ID, id, accountId);
         return repository.getByIdAndAccount_Id(id, accountId).orElseThrow(
                 () -> new EntityNotExistException(format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID, id, accountId))
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public User findByIdAndAccountIdAndOwnGroupId(UUID id, UUID accountId, UUID ownGroupId) {
+        if (id == null) {
+            log.error(format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID, id, accountId));
+            throw new EntityNotExistException(format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID, id, accountId));
+        }
+        if (accountId == null) {
+            log.error(format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID, id, accountId));
+            throw new EntityNotExistException(format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID, id, accountId));
+        }
+        if (ownGroupId == null) {
+            log.error(format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, ownGroupId));
+            throw new EntityNotExistException(
+                    format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, ownGroupId));
+        }
+        log.trace(START_FIND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, ownGroupId);
+        return repository.getByIdAndAccount_IdAndOwnGroup_Id(id, accountId, ownGroupId).orElseThrow(
+                () -> new EntityNotExistException(
+                        format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, ownGroupId)
+                )
         );
     }
 

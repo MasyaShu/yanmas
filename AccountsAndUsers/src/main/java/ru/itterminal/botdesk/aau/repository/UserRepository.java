@@ -19,6 +19,8 @@ public interface UserRepository extends CustomizedParentEntityRepository<User> {
 
     Optional<User> getByIdAndAccount_Id(UUID id, UUID accountId);
 
+    Optional<User> getByIdAndAccount_IdAndOwnGroup_Id(UUID id, UUID accountId, UUID ownGroupId);
+
     List<User> findAllByRoleAndIdNot(Role role, UUID id);
 
     List<User> findAllByRole(Role role);

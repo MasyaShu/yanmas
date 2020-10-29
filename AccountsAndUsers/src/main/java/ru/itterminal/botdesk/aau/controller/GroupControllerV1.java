@@ -98,7 +98,7 @@ public class GroupControllerV1 extends BaseController {
                 .and(filter.getIsInner() == null ? null : spec.getGroupByIsInnerSpec(filter.getIsInner()))
                 .and(spec.getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted.fromString(filter.getDeleted())))
                 .and(spec.getGroupByAccountSpec(jwtUser.getAccountId()))
-                .and(jwtUser.is_inner_group() ? null : spec.getGroupByGroupSpec(jwtUser.getGroupId()));
+                .and(jwtUser.isInnerGroup() ? null : spec.getGroupByGroupSpec(jwtUser.getGroupId()));
 
         foundGroups = service.findAllByFilter(groupSpecification, pageable);
         returnedGroups = mapPage(foundGroups, GroupDto.class, pageable);

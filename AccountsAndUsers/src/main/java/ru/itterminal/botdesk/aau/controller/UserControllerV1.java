@@ -109,7 +109,12 @@ public class UserControllerV1 extends BaseController {
     public ResponseEntity<UserDtoResponseWithoutPassword> getById(Principal user, @PathVariable UUID id) {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
-        User foundUser = userService.findByIdAndAccountId(id, jwtUser.getAccountId());
+        User foundUser;
+        if (jwtUser.isInnerGroup()) {
+            foundUser = userService.findByIdAndAccountId(id, jwtUser.getAccountId());
+        } else {
+            foundUser = userService.findByIdAndAccountIdAndOwnGroupId(id, jwtUser.getAccountId(), jwtUser.getGroupId());
+        }
         UserDtoResponseWithoutPassword returnedUser = modelMapper.map(foundUser, UserDtoResponseWithoutPassword.class);
         log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundUser);
         return new ResponseEntity<>(returnedUser, HttpStatus.OK);

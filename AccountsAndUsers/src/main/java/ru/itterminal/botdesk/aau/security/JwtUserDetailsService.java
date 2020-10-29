@@ -1,7 +1,6 @@
 package ru.itterminal.botdesk.aau.security;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -33,7 +32,7 @@ public class JwtUserDetailsService implements UserDetailsService {
                 .builder()
                 .accountId(user.getAccount().getId())
                 .groupId(user.getOwnGroup().getId())
-                .is_inner_group(user.getOwnGroup().getIsInner())
+                .isInnerGroup(user.getOwnGroup().getIsInner())
                 .weightRole(user.getRole().getWeight())
                 .username(user.getEmail())
                 .password(user.getPassword())

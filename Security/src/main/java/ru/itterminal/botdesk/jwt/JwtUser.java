@@ -25,7 +25,7 @@ public class JwtUser implements UserDetails {
     private  int weightRole;
     private  String username;
     private  String password;
-    private  boolean is_inner_group;
+    private  boolean isInnerGroup;
     private  boolean enabled;
     private  Collection<? extends GrantedAuthority> authorities;
 
@@ -55,7 +55,7 @@ public class JwtUser implements UserDetails {
         JwtUser jwtUser = (JwtUser) o;
         return weightRole == jwtUser.weightRole &&
                 enabled == jwtUser.enabled &&
-                is_inner_group == jwtUser.is_inner_group &&
+                isInnerGroup == jwtUser.isInnerGroup &&
                 Objects.equals(accountId, jwtUser.accountId) &&
                 Objects.equals(groupId, jwtUser.groupId) &&
                 Objects.equals(username, jwtUser.username) &&

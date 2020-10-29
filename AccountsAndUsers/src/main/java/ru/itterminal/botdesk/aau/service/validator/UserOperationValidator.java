@@ -70,7 +70,7 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
                 errors.put(WEIGHT_OF_ROLE, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
                         format(WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_FROM_REQUEST, jwtUser, entity))));
             }
-            if (jwtUser.is_inner_group() == false && entity.getOwnGroup().getId() != jwtUser.getGroupId()) {
+            if (jwtUser.isInnerGroup() == false && entity.getOwnGroup().getId() != jwtUser.getGroupId()) {
                 errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
                         CREATE_UPDATE_ONLY_HIS_GROUP)));
             }
@@ -120,7 +120,7 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
                     format(WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_FROM_REQUEST, jwtUser, entity))));
         }
 
-        if (jwtUser.is_inner_group() == false && entity.getOwnGroup().getId() != jwtUser.getGroupId()) {
+        if (jwtUser.isInnerGroup() == false && entity.getOwnGroup().getId() != jwtUser.getGroupId()) {
             errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
                     CREATE_UPDATE_ONLY_HIS_GROUP)));
         }
