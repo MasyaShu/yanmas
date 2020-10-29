@@ -30,7 +30,7 @@ public class GroupServiceImpl extends CrudServiceImpl<Group, GroupOperationValid
             "Not found groups by unique fields, name is null";
     public static final String NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_ID_IS_NULL =
             "Not found groups by unique fields, id is null";
-    public static final String START_FIND_GROUP_BY_UNIQUE_FIELDS =
+    public static final String START_FIND_USER_BY_UNIQUE_FIELDS =
             "Start find user by unique fields, name: {} and not id: {} and not account: {}";
     public static final String NOT_FOUND_GROUP_BY_ID_S_AND_ACCOUNT_ID_S = "Not found group by id: %s and accountId: %s";
     public static final String START_FIND_GROUP_BY_ID_AND_ACCOUNT_ID = "Start find group by id: {} and accountId: {}";
