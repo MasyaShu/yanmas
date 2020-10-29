@@ -72,14 +72,7 @@ public class UserControllerV1 extends BaseController {
 
     @PostMapping()
     @ResponseStatus(value = HttpStatus.CREATED)
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR') "
-            + "and (@authorityChecker.is_inner_group(authentication))")
-    //            + "and ("
-    //            + "(@authorityChecker.is_not_inner_group(authentication) and #request.group.id == authentication.principal.groupId)"
-    //            + " or "
-    //            + "(@authorityChecker.is_inner_group(authentication))"
-    //            + ")"
-    //            + "")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')")
     public ResponseEntity<UserDtoResponseWithoutPassword> create(Principal principal,
             @Validated(Create.class) @RequestBody UserDto request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
@@ -163,13 +156,8 @@ public class UserControllerV1 extends BaseController {
         return new ResponseEntity<>(returnedUsers, HttpStatus.OK);
     }
 
-    /**
-     * Physical delete a user in database
-     *
-     * @param request UserDto
-     */
     @DeleteMapping()
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN') and #request.account.id == authentication.principal.accountId")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
     ResponseEntity<Void> physicalDelete(@RequestBody UserDto request) {
         throw new UnsupportedOperationException("Physical delete will be implement in the further");
     }

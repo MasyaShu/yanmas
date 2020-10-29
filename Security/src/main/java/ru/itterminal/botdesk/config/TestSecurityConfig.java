@@ -141,11 +141,24 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                         jwtUser = new JwtUser()
                                 .builder()
                                 .accountId(UUID.fromString(ACCOUNT_1_ID))
+                                .groupId(UUID.fromString(GROUP_1_ID))
                                 .weightRole(0)
                                 .is_inner_group(false)
                                 .username(EMAIL_1)
                                 .enabled(true)
                                 .authorities(List.of(new SimpleGrantedAuthority("AUTHOR")))
+                                .build();
+                        break;
+                    case "EXECUTOR_ACCOUNT_1_IS_NOT_INNER_GROUP" :
+                        jwtUser = new JwtUser()
+                                .builder()
+                                .accountId(UUID.fromString(ACCOUNT_1_ID))
+                                .groupId(UUID.fromString(GROUP_1_ID))
+                                .weightRole(1)
+                                .is_inner_group(false)
+                                .username(EMAIL_1)
+                                .enabled(true)
+                                .authorities(List.of(new SimpleGrantedAuthority("EXECUTOR")))
                                 .build();
                         break;
                 }

@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.ACCOUNT_MUST_HAVE_USER_WITH_ROLE_ACCOUNT_OWNER;
+import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.CREATE_UPDATE_ONLY_HIS_GROUP;
+import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.INNER_GROUP;
 import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.USER_WITH_ROLE_ACCOUNT_OWNER;
 import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.WEIGHT_OF_ROLE;
 import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_FROM_REQUEST;
@@ -38,6 +40,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import ru.itterminal.botdesk.aau.model.Account;
+import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
@@ -74,28 +77,36 @@ class UserOperationValidatorTest {
     private static final String EXIST_EMAIL = "mail@mal.ru";
     private static final String NEW_USER_EMAIL = "mail_new@mal.ru";
     private static final String OLD_USER_EMAIL = "mail_old@mal.ru";
+    private static final String ACCOUNT_NAME = "account name";
+    private static String GROUP_ID = "dd06a563-802e-4d32-bd72-0555baa3e7e5";
     private static User user;
     private static User oldUser;
     private static User newUser;
     private static Account account;
+    private static Group group;
     private static LogicalValidationException logicalValidationException;
     private static Map<String, List<ValidationError>> errors = new HashMap<>();
 
     @BeforeAll
     static void setUp() {
-        account = new Account();
+        account = Account.builder().name(ACCOUNT_NAME).build();
         account.setId(UUID.fromString(ACCOUNT_1_ID));
+        group = Group.builder().build();
+        group.setId(UUID.fromString(GROUP_ID));
         user = new User().builder()
                 .email(EXIST_EMAIL)
                 .account(account)
+                .ownGroup(group)
                 .build();
         oldUser = new User().builder()
                 .email(OLD_USER_EMAIL)
                 .account(account)
+                .ownGroup(group)
                 .build();
         newUser = new User().builder()
                 .email(NEW_USER_EMAIL)
                 .account(account)
+                .ownGroup(group)
                 .build();
 
     }
@@ -142,6 +153,32 @@ class UserOperationValidatorTest {
                 () -> validator.beforeCreate(user));
         assertEquals(logicalValidationException.getFieldErrors().get(USER_WITH_ROLE_ACCOUNT_OWNER).get(0),
                 thrown.getFieldErrors().get(USER_WITH_ROLE_ACCOUNT_OWNER).get(0));
+    }
+
+    @Test
+    @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_NOT_INNER_GROUP")
+    public void beforeCreate_shouldGetLogicalValidationException_whenUserIsNotInInnerGroupAndGroupIdsIsDifferent() {
+        user.setRole(Role
+                .builder()
+                .name(Roles.AUTHOR.toString())
+                .weight(0)
+                .build()
+        );
+        when(service.findAllByRoleAndAccountId(any(), any())).thenReturn(List.of(oldUser));
+        when(roleService.getAccountOwnerRole())
+                .thenReturn(Role
+                        .builder()
+                        .name(Roles.ACCOUNT_OWNER.toString())
+                        .weight(3)
+                        .build()
+                );
+        errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
+                CREATE_UPDATE_ONLY_HIS_GROUP)));
+        logicalValidationException = new LogicalValidationException(VALIDATION_FAILED, errors);
+        LogicalValidationException thrown = assertThrows(LogicalValidationException.class,
+                () -> validator.beforeCreate(user));
+        assertEquals(logicalValidationException.getFieldErrors().get(INNER_GROUP).get(0),
+                thrown.getFieldErrors().get(INNER_GROUP).get(0));
     }
 
     @Test
@@ -219,6 +256,32 @@ class UserOperationValidatorTest {
                 () -> validator.beforeUpdate(user));
         assertEquals(logicalValidationException.getFieldErrors().get(WEIGHT_OF_ROLE).get(0),
                 thrown.getFieldErrors().get(WEIGHT_OF_ROLE).get(0));
+    }
+
+    @Test
+    @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_NOT_INNER_GROUP")
+    public void beforeUpdate_shouldGetLogicalValidationException_whenUserIsNotInInnerGroupAndGroupIdsIsDifferent() {
+        user.setRole(Role
+                .builder()
+                .name(Roles.AUTHOR.toString())
+                .weight(0)
+                .build()
+        );
+        when(service.findAllByRoleAndAccountId(any(), any())).thenReturn(List.of(oldUser));
+        when(roleService.getAccountOwnerRole())
+                .thenReturn(Role
+                        .builder()
+                        .name(Roles.ACCOUNT_OWNER.toString())
+                        .weight(3)
+                        .build()
+                );
+        errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
+                CREATE_UPDATE_ONLY_HIS_GROUP)));
+        logicalValidationException = new LogicalValidationException(VALIDATION_FAILED, errors);
+        LogicalValidationException thrown = assertThrows(LogicalValidationException.class,
+                () -> validator.beforeUpdate(user));
+        assertEquals(logicalValidationException.getFieldErrors().get(INNER_GROUP).get(0),
+                thrown.getFieldErrors().get(INNER_GROUP).get(0));
     }
 
     @Test

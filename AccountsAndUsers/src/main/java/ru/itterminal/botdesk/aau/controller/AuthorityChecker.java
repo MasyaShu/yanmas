@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import ru.itterminal.botdesk.jwt.JwtUser;
 
+// TODO delete this Component
 @Component("authorityChecker")
 public class AuthorityChecker {
 

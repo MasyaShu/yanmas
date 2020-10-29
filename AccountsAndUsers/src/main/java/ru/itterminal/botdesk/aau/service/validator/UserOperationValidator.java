@@ -36,6 +36,10 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
     protected static final String WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_FROM_REQUEST = "Weight of role"
             + " current user (%s) less than weight of role from request (%s)";
     protected static final String WEIGHT_OF_ROLE = "Weight of role";
+    protected static final String INNER_GROUP = "Inner group";
+    protected static final String CREATE_UPDATE_ONLY_HIS_GROUP =
+            "If user is not in inner group, then he can create/update user only in his "
+                    + "group";
 
     @Autowired
     public UserOperationValidator(UserServiceImpl service,
@@ -66,6 +70,10 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
                 errors.put(WEIGHT_OF_ROLE, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
                         format(WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_FROM_REQUEST, jwtUser, entity))));
             }
+            if (jwtUser.is_inner_group() == false && entity.getOwnGroup().getId() != jwtUser.getGroupId()) {
+                errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
+                        CREATE_UPDATE_ONLY_HIS_GROUP)));
+            }
         }
 
         if (!errors.isEmpty()) {
@@ -90,7 +98,8 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         List<User> userFromDatabase = service.findAllByRoleAndIdNot(roleService.getAccountOwnerRole(), entity.getId());
         boolean oldUserHasRoleAccountOwner = false;
         if (!userFromDatabase.isEmpty()) {
-            oldUserHasRoleAccountOwner = userFromDatabase.get(0).getRole().getName().equals(Roles.ACCOUNT_OWNER.toString());
+            oldUserHasRoleAccountOwner =
+                    userFromDatabase.get(0).getRole().getName().equals(Roles.ACCOUNT_OWNER.toString());
         }
         boolean newUserHasRoleAccountOwner = entity.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString());
 
@@ -105,10 +114,17 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         }
 
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
         if (entity.getRole().getWeight() > jwtUser.getWeightRole()) {
             errors.put(WEIGHT_OF_ROLE, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
                     format(WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_FROM_REQUEST, jwtUser, entity))));
         }
+
+        if (jwtUser.is_inner_group() == false && entity.getOwnGroup().getId() != jwtUser.getGroupId()) {
+            errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
+                    CREATE_UPDATE_ONLY_HIS_GROUP)));
+        }
+
 
         if (!errors.isEmpty()) {
             log.error(FIELDS_ARE_NOT_VALID, errors);
