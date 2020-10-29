@@ -1,6 +1,7 @@
 package ru.itterminal.botdesk.aau.controller;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.UUID;
 
 import javax.validation.Valid;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.dto.UserDto;
 import ru.itterminal.botdesk.aau.model.dto.UserDtoResponseWithoutPassword;
@@ -127,6 +129,7 @@ public class UserControllerV1 extends BaseController {
             @RequestParam(defaultValue = PAGE_DEFAULT_VALUE) @PositiveOrZero int page,
             @RequestParam(defaultValue = SIZE_DEFAULT_VALUE) @Positive int size) {
         log.debug(FIND_INIT_MESSAGE, ENTITY_NAME, page, size, filter);
+        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
         if (filter.getDirection() == null) {
             filter.setDirection("ASC");
         }
@@ -150,11 +153,12 @@ public class UserControllerV1 extends BaseController {
                 .and(filter.getIsArchived() == null ? null : spec.getUserByIsArchivedSpec(filter.getIsArchived()))
                 .and(filter.getGroups() == null || filter.getGroups().isEmpty() ? null :
                         spec.getUserByListOfGroupsSpec(filter.getGroups()))
+                .and(jwtUser.isInnerGroup() ? null :
+                        spec.getUserByListOfGroupsSpec(List.of(jwtUser.getGroupId())))
                 .and(filter.getRoles() == null || filter.getRoles().isEmpty() ? null :
                         spec.getUserByListOfRolesSpec(filter.getRoles()))
                 .and(spec.getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted.fromString(filter.getDeleted())))
-                .and(spec.getUserByAccountSpec(
-                        ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal()).getAccountId()));
+                .and(spec.getUserByAccountSpec(jwtUser.getAccountId()));
         foundUsers = userService.findAllByFilter(userSpecification, pageable);
         returnedUsers = mapPage(foundUsers, UserDtoResponseWithoutPassword.class, pageable);
         log.debug(FIND_FINISH_MESSAGE, ENTITY_NAME, foundUsers.getTotalElements());
