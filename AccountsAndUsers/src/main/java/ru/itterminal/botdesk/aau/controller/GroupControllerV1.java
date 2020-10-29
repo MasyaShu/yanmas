@@ -114,11 +114,15 @@ public class GroupControllerV1 extends BaseController {
      * @return user
      */
     @GetMapping("/{id}")
-    @PreAuthorize("(@authorityChecker.is_inner_group(authentication)) or (#id == authentication.principal.groupId and @authorityChecker.is_not_inner_group(authentication))")
     public ResponseEntity<GroupDto> getById(Principal user, @PathVariable UUID id) {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
-        Group foundGroup = service.findByIdAndAccountId(id, jwtUser.getAccountId());
+        Group foundGroup;
+        if (jwtUser.isInnerGroup()) {
+             foundGroup = service.findByIdAndAccountId(id, jwtUser.getAccountId());
+        } else {
+            foundGroup = service.findByIdAndAccountIdAndOwnGroupId(id, jwtUser.getAccountId(), jwtUser.getGroupId());
+        }
         GroupDto returnedGroup = modelMapper.map(foundGroup, GroupDto.class);
         log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundGroup);
         return new ResponseEntity<>(returnedGroup, HttpStatus.OK);

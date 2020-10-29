@@ -2,17 +2,15 @@ package ru.itterminal.botdesk.aau.service.validator;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import ru.itterminal.botdesk.aau.model.Group;
-import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.projection.GroupUniqueFields;
-import ru.itterminal.botdesk.aau.model.projection.UserUniqueFields;
-import ru.itterminal.botdesk.aau.repository.RoleRepository;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
-import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 import ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl;
+import ru.itterminal.botdesk.jwt.JwtUser;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,23 +23,46 @@ import static java.util.Collections.singletonList;
 @Component
 public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> {
     private GroupServiceImpl service;
-    private RoleRepository repository;
+
+    protected static final String INNER_GROUP = "Inner group";
+    protected static final String CREATE_UPDATE_ONLY_HIS_GROUP =
+            "If user is not in inner group, then he can create/update user only in his "
+                    + "group";
 
     @Autowired
-    public GroupOperationValidator(GroupServiceImpl service, RoleRepository repository) {
+    public GroupOperationValidator(GroupServiceImpl service) {
         this.service = service;
-        this.repository = repository;
     }
 
     @Override
     public boolean beforeCreate(Group entity) {
         super.beforeCreate(entity);
+        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Map<String, List<ValidationError>> errors = new HashMap<>();
+        if (!jwtUser.isInnerGroup()) {
+            errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
+                    CREATE_UPDATE_ONLY_HIS_GROUP)));
+        }
+        if (!errors.isEmpty()) {
+            log.error(FIELDS_ARE_NOT_VALID, errors);
+            throw new LogicalValidationException(VALIDATION_FAILED, errors);
+        }
         return true;
     }
 
     @Override
     public boolean beforeUpdate(Group entity) {
-        super.beforeCreate(entity);
+        super.beforeUpdate(entity);
+        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Map<String, List<ValidationError>> errors = new HashMap<>();
+        if (!jwtUser.isInnerGroup()) {
+            errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
+                    CREATE_UPDATE_ONLY_HIS_GROUP)));
+        }
+        if (!errors.isEmpty()) {
+            log.error(FIELDS_ARE_NOT_VALID, errors);
+            throw new LogicalValidationException(VALIDATION_FAILED, errors);
+        }
         return true;
     }
 
