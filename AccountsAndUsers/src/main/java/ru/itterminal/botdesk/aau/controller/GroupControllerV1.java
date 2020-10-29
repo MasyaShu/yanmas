@@ -62,7 +62,7 @@ public class GroupControllerV1 extends BaseController {
     }
 
     @PutMapping()
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR') and #request.account.id == authentication.principal.accountId and @authorityChecker.is_inner_group(authentication)")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')")
     public ResponseEntity<GroupDto> update(
             @Validated(Update.class) @RequestBody GroupDto request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);

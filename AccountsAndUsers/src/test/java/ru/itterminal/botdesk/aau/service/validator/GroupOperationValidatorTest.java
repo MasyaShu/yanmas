@@ -44,7 +44,7 @@ class GroupOperationValidatorTest {
     UserDetailsService userDetailsService;
 
     @InjectMocks
-    private GroupOperationValidator validator = new GroupOperationValidator(service, roleRepository);
+    private GroupOperationValidator validator = new GroupOperationValidator(service);
 
 
     private static final String EXIST_NAME = "groupName1";
