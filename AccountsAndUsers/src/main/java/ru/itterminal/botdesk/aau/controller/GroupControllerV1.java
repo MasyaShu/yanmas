@@ -19,6 +19,7 @@ import ru.itterminal.botdesk.aau.model.dto.GroupFilterDto;
 import ru.itterminal.botdesk.aau.model.spec.GroupSpec;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
+import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
@@ -29,6 +30,9 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.security.Principal;
 import java.util.UUID;
+
+import static java.lang.String.format;
+import static ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl.NOT_FOUND_GROUP_BY_ID_S_AND_ACCOUNT_ID_S;
 
 @Slf4j
 @RestController("GroupControllerV1")
@@ -47,17 +51,9 @@ public class GroupControllerV1 extends BaseController {
 
     private final String ENTITY_NAME = Group.class.getSimpleName();
 
-    /**
-     * Create a user
-     *
-     * @param request contains parameters for create new user.
-     *                Not null fields: email, password, account, group, roles
-     * @return new created user
-     */
-
     @PostMapping()
     @ResponseStatus(value = HttpStatus.CREATED)
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN') and #request.account.id == authentication.principal.accountId and @authorityChecker.is_inner_group(authentication)")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
     public ResponseEntity<GroupDto> create(
             @Validated(Create.class) @RequestBody GroupDto request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
@@ -67,6 +63,19 @@ public class GroupControllerV1 extends BaseController {
                 modelMapper.map(createdGroup, GroupDto.class);
         log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdGroup);
         return new ResponseEntity<>(returnedGroup, HttpStatus.CREATED);
+    }
+
+    @PutMapping()
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')")
+    public ResponseEntity<GroupDto> update(
+            @Validated(Update.class) @RequestBody GroupDto request) {
+        log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
+        Group user = modelMapper.map(request, Group.class);
+        Group updatedGroup = service.update(user);
+        GroupDto returnedGroup =
+                modelMapper.map(updatedGroup, GroupDto.class);
+        log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedGroup);
+        return new ResponseEntity<>(returnedGroup, HttpStatus.OK);
     }
 
     @GetMapping()
@@ -105,52 +114,24 @@ public class GroupControllerV1 extends BaseController {
         log.debug(FIND_FINISH_MESSAGE, ENTITY_NAME, foundGroups.getTotalElements());
         return new ResponseEntity<>(returnedGroups, HttpStatus.OK);
     }
-
-
-    /**
-     * Get a user by ID
-     *
-     * @param id for find user in database
-     * @return user
-     */
     @GetMapping("/{id}")
-    @PreAuthorize("(@authorityChecker.is_inner_group(authentication)) or (#id == authentication.principal.groupId and @authorityChecker.is_not_inner_group(authentication))")
     public ResponseEntity<GroupDto> getById(Principal user, @PathVariable UUID id) {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
-        Group foundGroup = service.findByIdAndAccountId(id, jwtUser.getAccountId());
+        Group foundGroup;
+        if (jwtUser.isInnerGroup() || id.equals(jwtUser.getGroupId())) {
+             foundGroup = service.findByIdAndAccountId(id, jwtUser.getAccountId());
+        } else {
+            throw new EntityNotExistException(format(NOT_FOUND_GROUP_BY_ID_S_AND_ACCOUNT_ID_S, id, jwtUser.getAccountId()));
+        }
         GroupDto returnedGroup = modelMapper.map(foundGroup, GroupDto.class);
         log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundGroup);
         return new ResponseEntity<>(returnedGroup, HttpStatus.OK);
     }
 
-    /**
-     * Physical delete a user in database
-     *
-     * @param request GroupDto
-     */
     @DeleteMapping()
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN') and #request.account.id == authentication.principal.accountId")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
     ResponseEntity<Void> physicalDelete(@RequestBody GroupDto request) {
         throw new UnsupportedOperationException("Physical delete will be implement in the further");
-    }
-
-    /**
-     * Update a user
-     *
-     * @param request contains all parameters of update user
-     * @return updated user
-     */
-    @PutMapping()
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR') and #request.account.id == authentication.principal.accountId and @authorityChecker.is_inner_group(authentication)")
-    public ResponseEntity<GroupDto> update(
-            @Validated(Update.class) @RequestBody GroupDto request) {
-        log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
-        Group user = modelMapper.map(request, Group.class);
-        Group updatedGroup = service.update(user);
-        GroupDto returnedGroup =
-                modelMapper.map(updatedGroup, GroupDto.class);
-        log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedGroup);
-        return new ResponseEntity<>(returnedGroup, HttpStatus.OK);
     }
 }

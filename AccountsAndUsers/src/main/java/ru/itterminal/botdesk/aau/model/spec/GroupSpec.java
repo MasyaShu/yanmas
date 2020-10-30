@@ -17,7 +17,7 @@ public class GroupSpec extends GeneralSpec<Group> {
             @Override
             public Predicate toPredicate(Root<Group> root,
                     CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-                Predicate predicate = criteriaBuilder.like(root.get("name"), "%" + name + "%");
+                Predicate predicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + name.toLowerCase() + "%");
                 return predicate;
             }
         };
@@ -28,7 +28,7 @@ public class GroupSpec extends GeneralSpec<Group> {
             @Override
             public Predicate toPredicate(Root<Group> root,
                     CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-                Predicate predicate = criteriaBuilder.like(root.get("comment"), "%" + comment + "%");
+                Predicate predicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("comment")), "%" + comment.toLowerCase() + "%");
                 return predicate;
             }
         };

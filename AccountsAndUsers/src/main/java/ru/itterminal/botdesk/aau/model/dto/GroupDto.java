@@ -21,6 +21,7 @@ import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_NULL_FO
 @ToString
 public class GroupDto extends BaseEntityDto {
 
+    @NotNull(groups = {Create.class, Update.class, Delete.class})
     @Size(min = 1, max = 128, groups = {Create.class, Update.class})
     private String name;
 
@@ -32,8 +33,4 @@ public class GroupDto extends BaseEntityDto {
     @Null(groups = Create.class, message = MUST_BE_NULL_FOR_THE_NEW_ENTITY)
     @NotNull(groups = {Update.class, Delete.class})
     private Boolean isDeprecated;
-
-    @NotNull(groups = {Create.class, Update.class})
-    private Account account;
-
 }
