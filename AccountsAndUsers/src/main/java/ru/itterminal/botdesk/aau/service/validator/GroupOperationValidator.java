@@ -26,7 +26,7 @@ public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> 
 
     public static final String INNER_GROUP = "Inner group";
     public static final String USER_FROM_AN_INNER_GROUP_CANNOT_CREATE_UPDATE_GROUPS =
-            "A user from an not inner group cannot create / update groups";
+            "A user from an inner group cannot create / update groups";
 
     @Autowired
     public GroupOperationValidator(GroupServiceImpl service) {
