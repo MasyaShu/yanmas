@@ -21,14 +21,13 @@ import ru.itterminal.botdesk.commons.model.spec.GeneralSpec;
 @Component
 public class UserSpec extends GeneralSpec<User> {
 
-    // TODO Predicate predicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + name.toLowerCase() + "%");
-
     public Specification<User> getUserByEmailSpec(String email) {
         return new Specification<User>() {
             @Override
             public Predicate toPredicate(Root<User> root,
                     CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-                Predicate predicate = criteriaBuilder.like(root.get("email"), "%" + email + "%");
+                Predicate predicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("email")),
+                        "%" + email.toLowerCase() + "%");
                 return predicate;
             }
         };
@@ -39,7 +38,8 @@ public class UserSpec extends GeneralSpec<User> {
             @Override
             public Predicate toPredicate(Root<User> root,
                     CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-                Predicate predicate = criteriaBuilder.like(root.get("firstName"), "%" + firstName + "%");
+                Predicate predicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")),
+                        "%" + firstName.toLowerCase() + "%");
                 return predicate;
             }
         };
@@ -50,7 +50,8 @@ public class UserSpec extends GeneralSpec<User> {
             @Override
             public Predicate toPredicate(Root<User> root,
                     CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-                Predicate predicate = criteriaBuilder.like(root.get("secondName"), "%" + secondName + "%");
+                Predicate predicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("secondName")),
+                        "%" + secondName.toLowerCase() + "%");
                 return predicate;
             }
         };
@@ -61,7 +62,8 @@ public class UserSpec extends GeneralSpec<User> {
             @Override
             public Predicate toPredicate(Root<User> root,
                     CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-                Predicate predicate = criteriaBuilder.like(root.get("phone"), "%" + phone + "%");
+                Predicate predicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("phone")),
+                        "%" + phone.toLowerCase() + "%");
                 return predicate;
             }
         };
@@ -72,7 +74,8 @@ public class UserSpec extends GeneralSpec<User> {
             @Override
             public Predicate toPredicate(Root<User> root,
                     CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-                Predicate predicate = criteriaBuilder.like(root.get("comment"), "%" + comment + "%");
+                Predicate predicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("comment")),
+                        "%" + comment.toLowerCase() + "%");
                 return predicate;
             }
         };
@@ -108,7 +111,7 @@ public class UserSpec extends GeneralSpec<User> {
                     CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
                 Join<User, Group> userJoin = root.join("ownGroup");
                 Predicate returnedPredicate = criteriaBuilder.equal(userJoin.<UUID> get("id"), listGroupId.get(0));
-                for (int i = 1; i < listGroupId.size() ; i++) {
+                for (int i = 1; i < listGroupId.size(); i++) {
                     Predicate predicate = criteriaBuilder.equal(userJoin.<UUID> get("id"), listGroupId.get(i));
                     returnedPredicate = criteriaBuilder.or(returnedPredicate, predicate);
                 }
@@ -124,7 +127,7 @@ public class UserSpec extends GeneralSpec<User> {
                     CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
                 Join<User, Role> userJoin = root.join("role");
                 Predicate returnedPredicate = criteriaBuilder.equal(userJoin.<UUID> get("id"), listRoleId.get(0));
-                for (int i = 1; i < listRoleId.size() ; i++) {
+                for (int i = 1; i < listRoleId.size(); i++) {
                     Predicate predicate = criteriaBuilder.equal(userJoin.<UUID> get("id"), listRoleId.get(i));
                     returnedPredicate = criteriaBuilder.or(returnedPredicate, predicate);
                 }
