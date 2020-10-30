@@ -13,7 +13,12 @@ import ru.itterminal.botdesk.commons.repository.CustomizedParentEntityRepository
 
 @Repository
 public interface UserRepository extends CustomizedParentEntityRepository<User> {
+
     List<UserUniqueFields> getByEmailAndIdNot(String email, UUID id);
+
+    List<User> findAllByRoleAndIdNot(Role role, UUID id);
+
+    List<User> findAllByRoleAndAccount_Id(Role role, UUID accountId);
 
     Optional<User> getByEmail(String email);
 
@@ -21,9 +26,5 @@ public interface UserRepository extends CustomizedParentEntityRepository<User> {
 
     Optional<User> getByIdAndAccount_IdAndOwnGroup_Id(UUID id, UUID accountId, UUID ownGroupId);
 
-    List<User> findAllByRoleAndIdNot(Role role, UUID id);
-
     List<User> findAllByRole(Role role);
-
-    List<User> findAllByRoleAndAccount_Id(Role role, UUID accountId);
 }
