@@ -131,7 +131,7 @@ class AccountControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void create_shouldGetForbiddenStatus_whenAuthenticatedUser() throws Exception {
+    public void create_shouldGetForbiddenStatus_whenAuthenticatedUserHasNotRoleAccountOwner() throws Exception {
         when(service.create((AccountCreateDto) any())).thenReturn(account);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API + "/create")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -208,23 +208,6 @@ class AccountControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     public void update_shouldGetStatusForbidden_whenAuthenticatedUserHasNotRoleAccountOwner() throws Exception {
-        accountDto.setDeleted(false);
-        accountDto.setVersion(0);
-        when(service.update(any())).thenReturn(account);
-        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(accountDto));
-        mockMvc.perform(request)
-                .andDo(print())
-                .andExpect(status().isForbidden());
-        verify(service, times(0)).update(any());
-    }
-
-    @Test
-    @WithUserDetails("OWNER_ACCOUNT_1_IS_INNER_GROUP")
-    public void update_shouldGetStatusForbidden_whenDifferentAccountId() throws Exception {
-        accountDto.setId(UUID.fromString(ACCOUNT_2_ID));
         accountDto.setDeleted(false);
         accountDto.setVersion(0);
         when(service.update(any())).thenReturn(account);

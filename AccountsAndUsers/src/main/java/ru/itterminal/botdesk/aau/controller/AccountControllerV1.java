@@ -57,11 +57,13 @@ public class AccountControllerV1 extends BaseController {
     }
 
     @PutMapping()
-    @PreAuthorize("hasAuthority('ACCOUNT_OWNER') and #request.id == authentication.principal.accountId")
-    public ResponseEntity<AccountDto> update(
+    @PreAuthorize("hasAuthority('ACCOUNT_OWNER')")
+    public ResponseEntity<AccountDto> update(Principal user,
             @Validated(Update.class) @RequestBody AccountDto request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
+        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
         Account account = modelMapper.map(request, Account.class);
+        account.setId(jwtUser.getAccountId());
         Account updatedAccount = service.update(account);
         AccountDto returnedAccount = modelMapper.map(updatedAccount, AccountDto.class);
         log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedAccount);
