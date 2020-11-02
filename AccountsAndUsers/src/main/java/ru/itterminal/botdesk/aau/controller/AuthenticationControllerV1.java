@@ -51,22 +51,15 @@ public class AuthenticationControllerV1 {
     }
 
     @PostMapping("signin")
-    public ResponseEntity signin(@RequestBody AuthenticationRequestDto requestDto) {
+    public ResponseEntity signIn(@RequestBody AuthenticationRequestDto requestDto) {
         try {
             String email = requestDto.getEmail();
             String password = requestDto.getPassword();
             Authentication authentication = authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(email, password));
-            JwtUser jwtUser = (JwtUser) authentication.getPrincipal();
-            String role = jwtUser.getAuthorities().stream()
-                    .map(Object::toString)
-                    .findFirst().get();
-            UUID accountId = jwtUser.getAccountId();
-            int weightRole = jwtUser.getWeightRole();
-            String token = jwtProvider.createToken(email);
             Map<Object, Object> response = new HashMap<>();
             response.put("email", email);
-            response.put("token", token);
+            response.put("token", jwtProvider.createToken(email));
             return ResponseEntity.ok(response);
         }
         catch (AuthenticationException e) {

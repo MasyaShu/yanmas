@@ -101,12 +101,12 @@ class AuthenticationControllerV1Test {
 
     @BeforeEach
     void setUpBeforeEach() {
-        requestDto = new AuthenticationRequestDto()
+        requestDto = AuthenticationRequestDto
                 .builder()
                 .email(EMAIL_1)
                 .password(PASSWORD)
                 .build();
-        jwtUser = new JwtUser()
+        jwtUser = JwtUser
                 .builder()
                 .username(EMAIL_1)
                 .accountId(UUID.fromString(ACCOUNT_1_ID))
@@ -118,7 +118,7 @@ class AuthenticationControllerV1Test {
 
     @Test
     @WithAnonymousUser
-    public void signin_shouldGetStatusOk_whenEmailAndPasswordValid() throws Exception {
+    public void signIn_shouldGetStatusOk_whenEmailAndPasswordValid() throws Exception {
         when(authenticationManager.authenticate(any())).thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(jwtUser);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API + "signin")
@@ -134,7 +134,7 @@ class AuthenticationControllerV1Test {
 
     @Test
     @WithAnonymousUser
-    public void signin_shouldGetJwtAuthenticationException_whenEmailAndPasswordInvalid() throws Exception {
+    public void signIn_shouldGetJwtAuthenticationException_whenEmailAndPasswordInvalid() throws Exception {
         when(authenticationManager.authenticate(any())).thenThrow(BadCredentialsException.class);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API + "signin")
                 .contentType(MediaType.APPLICATION_JSON)
