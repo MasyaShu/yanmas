@@ -2,7 +2,6 @@ package ru.itterminal.botdesk.aau.service.impl;
 
 import static java.lang.String.format;
 
-import java.security.Principal;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +18,6 @@ import ru.itterminal.botdesk.aau.model.dto.AccountCreateDto;
 import ru.itterminal.botdesk.aau.repository.AccountRepository;
 import ru.itterminal.botdesk.aau.service.validator.AccountOperationValidator;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
-import ru.itterminal.botdesk.jwt.JwtUser;
 
 @Slf4j
 @Service

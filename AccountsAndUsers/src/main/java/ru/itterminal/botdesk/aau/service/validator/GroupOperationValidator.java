@@ -68,11 +68,14 @@ public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> 
     }
 
     private void checkIsInnerGroupForCreateUpdate() {
-        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Map<String, List<ValidationError>> errors = new HashMap<>();
-        if (!jwtUser.isInnerGroup()) {
-            errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
-                    USER_FROM_AN_INNER_GROUP_CANNOT_CREATE_UPDATE_GROUPS)));
+        if (!SecurityContextHolder.getContext().getAuthentication().getName().equals("anonymousUser")) {
+            JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            errors = new HashMap<>();
+            if (!jwtUser.isInnerGroup()) {
+                errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
+                        USER_FROM_AN_INNER_GROUP_CANNOT_CREATE_UPDATE_GROUPS)));
+            }
         }
         if (!errors.isEmpty()) {
             log.error(FIELDS_ARE_NOT_VALID, errors);
