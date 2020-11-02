@@ -34,9 +34,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     };
 
     public static final String[] AUTH_WHITELIST_ANONYMOUS = {
-            "/api/v1/account/create",
+            "/api/v1/create-account",
             "/api/v1/auth/signin",
-            "/api/v1/auth/email-verify"
+            "/api/v1/auth/email-verify",
+            "/api/v1/auth/request-password-reset",
+            "/api/v1/auth/password-reset"
     };
 
 

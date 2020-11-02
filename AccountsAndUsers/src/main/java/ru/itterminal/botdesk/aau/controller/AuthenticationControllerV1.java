@@ -38,6 +38,8 @@ public class AuthenticationControllerV1 {
 
     public static final String INVALID_USERNAME_OR_PASSWORD = "invalid username or password";
     public static final String EMAIL_IS_VERIFIED = "email is verified";
+    public static final String TOKEN_FOR_RESET_PASSWORD_WAS_SENT_TO_EMAIL = "token for reset password was sent to email";
+    public static final String PASSWORD_WAS_RESET_SUCCESSFULLY = "password was reset successfully";
 
     @Value("${jwt.token.prefix}")
     private String prefixToken;
@@ -71,5 +73,18 @@ public class AuthenticationControllerV1 {
     public ResponseEntity verifyEmailToken(@RequestParam(value = "token") @NotEmpty String token) {
         userService.verifyEmailToken(token);
         return ResponseEntity.ok(EMAIL_IS_VERIFIED);
+    }
+
+    @GetMapping(path = "/request-password-reset")
+    public ResponseEntity requestPasswordReset(@RequestParam(value = "email") @NotEmpty String email) {
+        userService.requestPasswordReset(email);
+        return ResponseEntity.ok(TOKEN_FOR_RESET_PASSWORD_WAS_SENT_TO_EMAIL);
+    }
+
+    @GetMapping(path = "/password-reset")
+    public ResponseEntity passwordReset(@RequestParam(value = "token") @NotEmpty String token,
+            @RequestParam(value = "email") @NotEmpty String email) {
+        userService.resetPassword(token, email);
+        return ResponseEntity.ok(PASSWORD_WAS_RESET_SUCCESSFULLY);
     }
 }

@@ -16,7 +16,6 @@ import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_PASSWORD;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_NOT_BE_NULL;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.SIZE_MUST_BE_BETWEEN;
 import static ru.itterminal.botdesk.config.TestSecurityConfig.ACCOUNT_1_ID;
-import static ru.itterminal.botdesk.config.TestSecurityConfig.ACCOUNT_2_ID;
 
 import java.util.UUID;
 
@@ -82,7 +81,7 @@ class AccountControllerV1Test {
     private ObjectMapper objectMapper = new ObjectMapper();
     private static String HOST = "http://localhost";
     private static String PORT = ":8081";
-    private static String API = "api/v1/account/";
+    private static String API = "api/v1/";
     private static UUID USER_ID = UUID.fromString("d414bc22-686c-4004-b009-c3569f7914d5");
     private static String ACCOUNT_NAME = "Name of account";
     private static String EMAIL_OF_ACCOUNT_OWNER = "m@m.ru";
@@ -117,7 +116,7 @@ class AccountControllerV1Test {
     @WithAnonymousUser
     public void create_shouldCreateAccount_whenPassedValidData() throws Exception {
         when(service.create((AccountCreateDto) any())).thenReturn(account);
-        MockHttpServletRequestBuilder request = post(HOST + PORT + API + "/create")
+        MockHttpServletRequestBuilder request = post(HOST + PORT + API + "create-account")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(accountCreateDto));
@@ -133,7 +132,7 @@ class AccountControllerV1Test {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     public void create_shouldGetForbiddenStatus_whenAuthenticatedUserHasNotRoleAccountOwner() throws Exception {
         when(service.create((AccountCreateDto) any())).thenReturn(account);
-        MockHttpServletRequestBuilder request = post(HOST + PORT + API + "/create")
+        MockHttpServletRequestBuilder request = post(HOST + PORT + API + "create-account")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(accountCreateDto));
@@ -151,7 +150,7 @@ class AccountControllerV1Test {
         accountCreateDto.setEmailAccountOwner("12");
         accountCreateDto.setPasswordAccountOwner("123");
         when(service.create((AccountCreateDto) any())).thenReturn(account);
-        MockHttpServletRequestBuilder request = post(HOST + PORT + API + "/create")
+        MockHttpServletRequestBuilder request = post(HOST + PORT + API + "create-account")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(accountCreateDto));
@@ -174,7 +173,7 @@ class AccountControllerV1Test {
         accountCreateDto.setEmailAccountOwner(null);
         accountCreateDto.setPasswordAccountOwner(null);
         when(service.create((AccountCreateDto) any())).thenReturn(account);
-        MockHttpServletRequestBuilder request = post(HOST + PORT + API + "/create")
+        MockHttpServletRequestBuilder request = post(HOST + PORT + API + "create-account")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(accountCreateDto));
@@ -195,7 +194,7 @@ class AccountControllerV1Test {
         accountDto.setDeleted(false);
         accountDto.setVersion(0);
         when(service.update(any())).thenReturn(account);
-        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
+        MockHttpServletRequestBuilder request = put(HOST + PORT + API + "account")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(accountDto));
@@ -211,7 +210,7 @@ class AccountControllerV1Test {
         accountDto.setDeleted(false);
         accountDto.setVersion(0);
         when(service.update(any())).thenReturn(account);
-        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
+        MockHttpServletRequestBuilder request = put(HOST + PORT + API + "account")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(accountDto));
@@ -228,7 +227,7 @@ class AccountControllerV1Test {
         accountDto.setName("");
         accountDto.setVersion(0);
         accountDto.setDeleted(false);
-        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
+        MockHttpServletRequestBuilder request = put(HOST + PORT + API + "account")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(accountDto));
@@ -246,7 +245,7 @@ class AccountControllerV1Test {
         accountDto.setVersion(null);
         accountDto.setDeleted(null);
         accountDto.setId(null);
-        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
+        MockHttpServletRequestBuilder request = put(HOST + PORT + API + "account")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(accountDto));
@@ -264,7 +263,7 @@ class AccountControllerV1Test {
     @WithUserDetails("OWNER_ACCOUNT_1_IS_INNER_GROUP")
     public void get_shouldGetAccount_whenPassedValidData() throws Exception {
         when(service.findById(any())).thenReturn(account);
-        MockHttpServletRequestBuilder request = get(HOST + PORT + API)
+        MockHttpServletRequestBuilder request = get(HOST + PORT + API + "account")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON);
         mockMvc.perform(request)
@@ -278,7 +277,7 @@ class AccountControllerV1Test {
     @Test
     @WithAnonymousUser
     public void get_shouldGetStatusForbidden_whenUserIsNotAuthenticated() throws Exception {
-        MockHttpServletRequestBuilder request = get(HOST + PORT + API)
+        MockHttpServletRequestBuilder request = get(HOST + PORT + API + "account")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON);
         mockMvc.perform(request)
@@ -292,7 +291,7 @@ class AccountControllerV1Test {
     void physicalDelete_shouldThrowUnsupportedOperationException_untilMethodWouldBeImplemented() throws Exception {
         accountDto.setDeleted(false);
         accountDto.setVersion(0);
-        MockHttpServletRequestBuilder request = delete(HOST + PORT + API)
+        MockHttpServletRequestBuilder request = delete(HOST + PORT + API + "account")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(accountDto));
@@ -304,7 +303,7 @@ class AccountControllerV1Test {
     @Test
     @WithAnonymousUser
     void physicalDelete_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
-        mockMvc.perform(delete(HOST + PORT + API ))
+        mockMvc.perform(delete(HOST + PORT + API + "account"))
                 .andDo(print())
                 .andExpect(status().isForbidden());
     }
