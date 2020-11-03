@@ -141,6 +141,7 @@ class GroupControllerV1Test {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(GROUP_1_ID))
                 .andExpect(jsonPath("$.name").value(GROUP_NAME_1));
+        verify(service, times(1)).create(any());
     }
 
     @Test
@@ -330,13 +331,14 @@ class GroupControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void getById_shouldFindOneGroup_whenUserExistInDatabaseByPassedId() throws Exception {
+    public void getById_shouldFindOneGroup_whenGroupExistInDatabaseByPassedId() throws Exception {
         when(service.findByIdAndAccountId(any(), any())).thenReturn(group_1);
         mockMvc.perform(get(HOST + PORT + API + GROUP_1_ID))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value(GROUP_NAME_1))
                 .andExpect(jsonPath("$.id").value(GROUP_1_ID));
+        verify(service, times(1)).findByIdAndAccountId(any(), any());
     }
 
     @Test
@@ -351,10 +353,11 @@ class GroupControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
     public void getById_shouldReturnNotFound_whenUserIsNotInInnerGroupAndFindIdForOtherGroup() throws Exception {
+        when(service.findByIdAndAccountId(any(), any())).thenThrow(EntityNotExistException.class);
         mockMvc.perform(get(HOST + PORT + API + GROUP_1_ID))
                 .andDo(print())
                 .andExpect(status().isNotFound());
-        verify(service, times(0)).findByIdAndAccountId(any(), any());
+        verify(service, times(1)).findByIdAndAccountId(any(), any());
     }
 
     @Test
@@ -363,7 +366,12 @@ class GroupControllerV1Test {
         when(service.findByIdAndAccountId(any(), any())).thenReturn(group_1);
         mockMvc.perform(get(HOST + PORT + API + GROUP_1_ID))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value(GROUP_NAME_1))
+                .andExpect(jsonPath("$.id").value(GROUP_1_ID))
+                .andExpect(jsonPath("$.isInner").value(true))
+                .andExpect(jsonPath("$.isDeprecated").value(false));
+        verify(service, times(1)).findByIdAndAccountId(any(), any());
     }
 
     @Test
@@ -373,11 +381,12 @@ class GroupControllerV1Test {
         mockMvc.perform(get(HOST + PORT + API + GROUP_1_ID))
                 .andDo(print())
                 .andExpect(status().isNotFound());
+        verify(service, times(1)).findByIdAndAccountId(any(), any());
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void getById_shouldGetStatusBadRequest_whenUiidIsInvalid() throws Exception {
+    public void getById_shouldGetStatusBadRequest_whenIdIsInvalid() throws Exception {
         mockMvc.perform(get(HOST + PORT + API + "Abracadabra"))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
@@ -422,6 +431,7 @@ class GroupControllerV1Test {
                 .andExpect(jsonPath("$.content[0].name").value(GROUP_NAME_1))
                 .andExpect(jsonPath("$.content[1].name").value(GROUP_NAME_2))
                 .andExpect(jsonPath("$.content", hasSize(2)));
+        verify(service, times(1)).findAllByFilter(any(), any());
     }
 
     @Test

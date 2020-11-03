@@ -32,7 +32,7 @@ import java.security.Principal;
 import java.util.UUID;
 
 import static java.lang.String.format;
-import static ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl.NOT_FOUND_GROUP_BY_ID_S_AND_ACCOUNT_ID_S;
+import static ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl.NOT_FOUND_GROUP_BY_ID_AND_ACCOUNT_ID;
 
 @Slf4j
 @RestController("GroupControllerV1")
@@ -119,11 +119,7 @@ public class GroupControllerV1 extends BaseController {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
         Group foundGroup;
-        if (jwtUser.isInnerGroup() || id.equals(jwtUser.getGroupId())) {
-             foundGroup = service.findByIdAndAccountId(id, jwtUser.getAccountId());
-        } else {
-            throw new EntityNotExistException(format(NOT_FOUND_GROUP_BY_ID_S_AND_ACCOUNT_ID_S, id, jwtUser.getAccountId()));
-        }
+        foundGroup = service.findByIdAndAccountId(id, jwtUser.getAccountId());
         GroupDto returnedGroup = modelMapper.map(foundGroup, GroupDto.class);
         log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundGroup);
         return new ResponseEntity<>(returnedGroup, HttpStatus.OK);
