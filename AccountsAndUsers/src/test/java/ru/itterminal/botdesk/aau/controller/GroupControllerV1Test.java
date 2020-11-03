@@ -48,7 +48,7 @@ import static ru.itterminal.botdesk.commons.controller.BaseController.SIZE_DEFAU
 import static ru.itterminal.botdesk.commons.util.CommonConstants.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringJUnitConfig(value = {GroupControllerV1.class, GroupSpec.class, FilterChainProxy.class, AuthorityChecker.class})
+@SpringJUnitConfig(value = {GroupControllerV1.class, GroupSpec.class, FilterChainProxy.class})
 @Import(TestSecurityConfig.class)
 @WebMvcTest
 @ActiveProfiles("Test")
@@ -68,9 +68,6 @@ class GroupControllerV1Test {
 
     @Autowired
     UserDetailsService userDetailsService;
-
-    @Autowired
-    AuthorityChecker authorityChecker;
 
     private MockMvc mockMvc;
 
