@@ -80,7 +80,7 @@ import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.config.TestSecurityConfig;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringJUnitConfig(value = {UserControllerV1.class, UserSpec.class, FilterChainProxy.class, AuthorityChecker.class})
+@SpringJUnitConfig(value = {UserControllerV1.class, UserSpec.class, FilterChainProxy.class})
 @Import(TestSecurityConfig.class)
 @WebMvcTest
 @ActiveProfiles("Test")
@@ -97,9 +97,6 @@ class UserControllerV1Test {
 
     @MockBean
     private GroupServiceImpl groupService;
-
-    @Autowired
-    private AuthorityChecker authorityChecker;
 
     @Autowired
     private UserControllerV1 controller;

@@ -31,10 +31,6 @@ import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.commons.exception.error.ApiError;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 
-/**
- * Specify how exception should be translated to http response.
- */
-
 @Slf4j
 @ControllerAdvice
 @NoArgsConstructor
@@ -47,26 +43,12 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @Autowired
     private MessageSource messageSource;
 
-//    @ExceptionHandler(InappropriateResourceStateException.class)
-//    public ResponseEntity<?> handleInappropriateResourceStateException(InappropriateResourceStateException ex, HttpServletRequest request) {
-//        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getExceptionCode(), ex).withRequest(request);
-//        log.warn(ex.getMessage());
-//        return new ResponseEntity<>(apiError, null, HttpStatus.BAD_REQUEST);
-//    }
-
     @ExceptionHandler(OptimisticLockingFailureException.class)
     public ResponseEntity<?> handleOptimisticLockingFailureException(OptimisticLockingFailureException ex, HttpServletRequest request) {
         ApiError apiError = new ApiError(HttpStatus.CONFLICT, "OptimisticLocking", ex).withRequest(request);
         log.warn(ex.getMessage());
         return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
     }
-//
-//    @ExceptionHandler(RelatedEntityMarkedAsDeletedException.class)
-//    public ResponseEntity<?> handleLogicalDeletedException(RelatedEntityMarkedAsDeletedException ex, HttpServletRequest request) {
-//        ApiError apiError = new ApiError(HttpStatus.CONFLICT, "LogicalDeleted", ex).withRequest(request);
-//        log.warn(ex.getMessage());
-//        return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
-//    }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<?> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
@@ -95,13 +77,6 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         log.warn(ex.getMessage());
         return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
     }
-
-//    @ExceptionHandler(NotUniqueValueException.class)
-//    public ResponseEntity<?> handleNotUniqueValueException(NotUniqueValueException ex, HttpServletRequest request) {
-//        ApiError apiError = new ApiError(HttpStatus.CONFLICT, ex.getExceptionCode(), ex).withRequest(request);
-//        log.warn(ex.getMessage());
-//        return new ResponseEntity<>(apiError, null, HttpStatus.CONFLICT);
-//    }
 
     @ExceptionHandler(LogicalValidationException.class)
     public ResponseEntity<Object> handleLogicalValidationException(LogicalValidationException ex, HttpServletRequest request) {
@@ -192,18 +167,6 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(apiError, null, HttpStatus.NOT_FOUND);
     }
 
-//    @ExceptionHandler(NotUniqueNameException.class)
-//    public ResponseEntity<?> handleResourceNotUniqueNameException(NotUniqueNameException ex, HttpServletRequest request) {
-//        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, "Already exist", ex).withRequest(request);
-//        return new ResponseEntity<>(apiError, null, HttpStatus.BAD_REQUEST);
-//    }
-//
-//    @ExceptionHandler(value = {UserAlreadyExistException.class})
-//    protected ResponseEntity<Object> UserAlreadyExist(final RuntimeException ex, final WebRequest request) {
-//        final String bodyOfResponse = "User already exist";
-//        return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
-//    }
-
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleInternal(final Exception ex, final WebRequest request) {
         logger.error("500 Status Code", ex);
@@ -211,32 +174,4 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
 
-//    @ExceptionHandler(value = {DataIntegrityViolationException.class})
-//    public ResponseEntity<Object> handleDataIntegrityViolationException(final DataIntegrityViolationException ex, final WebRequest request) {
-//        logger.error(ex.getMessage());
-//        ApiError apiError = new ApiError(
-//            HttpStatus.CONFLICT,
-//            "Validation failed", ex)
-//            .withRequest(request)
-//            .withDetail(INPUT_VALIDATION_FAILED);
-//        //TODO: Has to be refactored (what would be when 'if' would be false?)
-//        String exMessage = "";
-//        if (ex.getCause().getClass().isAssignableFrom(org.hibernate.exception.ConstraintViolationException.class)) {
-//            exMessage = ex.getCause().getCause().getMessage();
-//            Map<String, List<ValidationError>> errors = new HashMap<>();
-//            log.debug("Trying parse exception message: {}", exMessage);
-//            int beginIndex = exMessage.indexOf('(') + 1;
-//            int endIndex = exMessage.indexOf(')');
-//            String substring = "not defined";
-//            if (!(endIndex <= 2 || beginIndex < endIndex)) {
-//                substring = exMessage.substring(beginIndex, endIndex);
-//            } else {
-//                log.warn("Parsing exception message was failed: {}", exMessage);
-//            }
-//            errors.put(substring, singletonList(new ValidationError("not unique",
-//                substring + " is occupied")));
-//            apiError.setErrors(errors);
-//        }
-//        return new ResponseEntity<>(apiError, null, HttpStatus.CONFLICT);
-//    }
 }
