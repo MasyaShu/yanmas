@@ -46,10 +46,8 @@ public interface  CrudService<E extends BaseEntity> {
     String MISMATCH_DELETE_STATUS_MESSAGE = "Can't set delete parameter = '%s' for entity with id: '%s' and version '%s'";
     String PHYSICAL_DELETE_ERROR_MESSAGE = "Dictionary: '%s'. Can't remove entity '%s' from database. Not all related entities mark for delete.";
 
-    // TODO Optional<E>
     E create(E entity);
 
-    // TODO Optional<E>
     E findById(UUID id);
 
     Page<E> findAll(Pageable pageable);
@@ -58,7 +56,6 @@ public interface  CrudService<E extends BaseEntity> {
 
     Page<E> findAllByFilter(Specification<E> specification, Pageable pageable);
 
-    // TODO Optional<E>
     E update(E entity);
 
     void physicalDelete(UUID id);

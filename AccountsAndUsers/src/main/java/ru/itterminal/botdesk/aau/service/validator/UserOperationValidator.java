@@ -156,7 +156,6 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
     @Override
     public boolean checkLogicalDelete(UUID id) {
         super.checkLogicalDelete(id);
-        // TODO chek last user with role SuperAdmin
         return true;
     }
 

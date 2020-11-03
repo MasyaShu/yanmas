@@ -143,7 +143,6 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
     }
 
     public void physicalDelete(UUID id) {
-        //TODO physicalDelete will be done in future
         throw new UnsupportedOperationException("physicalDeleteNotYetImplement");
     }
 
