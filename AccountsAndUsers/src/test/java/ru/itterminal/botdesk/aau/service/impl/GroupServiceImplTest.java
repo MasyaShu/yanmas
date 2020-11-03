@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -22,9 +24,11 @@ import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.repository.GroupRepository;
 import ru.itterminal.botdesk.aau.service.validator.GroupOperationValidator;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
+import ru.itterminal.botdesk.config.TestSecurityConfig;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {GroupServiceImpl.class})
+@Import(TestSecurityConfig.class)
 @TestPropertySource(locations = "/application.properties")
 @ActiveProfiles("Test")
 class GroupServiceImplTest {
@@ -44,6 +48,7 @@ class GroupServiceImplTest {
     private static final String EXIST_NAME = "groupName1";
     private static final UUID ACCOUNT_1_ID = UUID.fromString("cdfa6483-0769-4628-ba32-efd338a716de");
     private static final UUID GROUP_ID = UUID.fromString("0223e51a-4bb2-44ee-bc8e-1f047a2145e7");
+    private static final UUID GROUP_ID_NOT_JWTUSER = UUID.fromString("4d219da4-bcfe-42bd-b095-ceb7b5f4dfa1");
 
     @BeforeEach
     void setUpBeforeEach() {
@@ -113,5 +118,51 @@ class GroupServiceImplTest {
         verify(repository, times(1)).findById(any());
         verify(repository, times(1)).update(any());
     }
+
+    @Test
+    public void findByIdAndAccountId_shouldGetEntityNotExistException_whenGroupIdIsNull() {
+        assertThrows(EntityNotExistException.class, () -> service.findByIdAndAccountId(null, account.getId()));
+        verify(repository, times(0)).getByIdAndAccount_Id(any(), any());
+    }
+
+    @Test
+    public void findByIdAndAccountId_shouldGetEntityNotExistException_whenAccountIdIsNull() {
+        assertThrows(EntityNotExistException.class, () -> service.findByIdAndAccountId(group.getId(), null));
+        verify(repository, times(0)).getByIdAndAccount_Id(any(), any());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
+    public void findByIdAndAccountId_shouldNotExitError_whenUserNotInnerGroupAndGroupOwnerNotEqualsFindId() {
+        assertThrows(EntityNotExistException.class, () -> service.findByIdAndAccountId(GROUP_ID_NOT_JWTUSER, account.getId()));
+        verify(repository, times(0)).getByIdAndAccount_Id(any(), any());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
+    public void findByIdAndAccountId_shouldNotGetEntityNotExistException_whenUserNotInnerGroupAndGroupOwnerEqualsFindId() {
+        when(repository.getByIdAndAccount_Id(any(), any())).thenReturn(Optional.of(group));
+        service.findByIdAndAccountId(GROUP_ID, account.getId());
+        verify(repository, times(1)).getByIdAndAccount_Id(any(), any());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
+    public void findByIdAndAccountId_shouldNotGetEntityNotExistException_whenUserInnerGroupAndGroupOwnerEqualsFindId() {
+        when(repository.getByIdAndAccount_Id(any(), any())).thenReturn(Optional.of(group));
+        service.findByIdAndAccountId(GROUP_ID, account.getId());
+        verify(repository, times(1)).getByIdAndAccount_Id(any(), any());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
+    public void findByIdAndAccountId_shouldNotGetEntityNotExistException_whenUserInnerGroupAndGroupOwnerNotEqualsFindId() {
+        when(repository.getByIdAndAccount_Id(any(), any())).thenReturn(Optional.of(group));
+        service.findByIdAndAccountId(GROUP_ID_NOT_JWTUSER, account.getId());
+        verify(repository, times(1)).getByIdAndAccount_Id(any(), any());
+    }
+
+
+
 
 }

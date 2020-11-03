@@ -119,6 +119,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                         jwtUser = new JwtUser()
                                 .builder()
                                 .accountId(UUID.fromString(ACCOUNT_1_ID))
+                                .groupId(UUID.fromString(GROUP_1_ID))
                                 .weightRole(2)
                                 .isInnerGroup(false)
                                 .username(EMAIL_1)
