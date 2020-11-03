@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -92,7 +93,7 @@ class GroupOperationValidatorTest {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
-    public void beforeCreate_shouldGetLogicalValidationException_whenUserNotInnerGroup() {
+    public void beforeCreateUpdate_shouldGetLogicalValidationException_whenUserNotInnerGroup() {
         errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
                 USER_FROM_AN_INNER_GROUP_CANNOT_CREATE_UPDATE_GROUPS)));
         logicalValidationException = new LogicalValidationException(VALIDATION_FAILED, errors);
@@ -100,5 +101,12 @@ class GroupOperationValidatorTest {
                 () -> validator.beforeCreate(group));
         assertEquals(logicalValidationException.getFieldErrors().get(INNER_GROUP).get(0),
                 thrown.getFieldErrors().get(INNER_GROUP).get(0));
+    }
+
+    @Test
+    @WithAnonymousUser
+    public void beforeCreateUpdate_shouldGetLogicalValidationException1_whenUserNotInnerGroup() {
+        when(service.create(any())).thenReturn(new Group());
+        assertTrue(validator.beforeCreate(new Group()));
     }
 }

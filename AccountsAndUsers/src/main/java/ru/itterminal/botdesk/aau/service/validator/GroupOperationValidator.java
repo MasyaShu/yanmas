@@ -69,7 +69,7 @@ public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> 
 
     private void checkIsInnerGroupForCreateUpdate() {
         Map<String, List<ValidationError>> errors = new HashMap<>();
-        if (!SecurityContextHolder.getContext().getAuthentication().getName().equals("anonymousUser")) {
+        if (!SecurityContextHolder.getContext().getAuthentication().getName().contains("anonymous")) {
             JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             errors = new HashMap<>();
             if (!jwtUser.isInnerGroup()) {
