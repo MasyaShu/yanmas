@@ -19,7 +19,7 @@ import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.commons.model.spec.GeneralSpec;
 
 @Component
-public class UserSpec extends GeneralSpec<User> {
+public class UserSpec extends GeneralSpec<User, Account> {
 
     public Specification<User> getUserByEmailSpec(String email) {
         return new Specification<User>() {
@@ -87,18 +87,6 @@ public class UserSpec extends GeneralSpec<User> {
             public Predicate toPredicate(Root<User> root,
                     CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
                 Predicate predicate = criteriaBuilder.equal(root.get("isArchived"), isArchived);
-                return predicate;
-            }
-        };
-    }
-
-    public Specification<User> getUserByAccountSpec(UUID accountId) {
-        return new Specification<User>() {
-            @Override
-            public Predicate toPredicate(Root<User> root,
-                    CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-                Join<User, Account> userJoin = root.join("account");
-                Predicate predicate = criteriaBuilder.equal(userJoin.<UUID> get("id"), accountId);
                 return predicate;
             }
         };

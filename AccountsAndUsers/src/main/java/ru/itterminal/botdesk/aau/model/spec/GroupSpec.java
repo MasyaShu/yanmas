@@ -10,7 +10,7 @@ import javax.persistence.criteria.*;
 import java.util.UUID;
 
 @Component
-public class GroupSpec extends GeneralSpec<Group> {
+public class GroupSpec extends GeneralSpec<Group, Account> {
 
     public Specification<Group> getGroupByNameSpec(String name) {
         return new Specification<Group>() {
@@ -56,17 +56,6 @@ public class GroupSpec extends GeneralSpec<Group> {
         };
     }
 
-    public Specification<Group> getGroupByAccountSpec(UUID accountId) {
-        return new Specification<Group>() {
-            @Override
-            public Predicate toPredicate(Root<Group> root,
-                    CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-                Join<Group, Account> groupJoin = root.join("account");
-                Predicate predicate = criteriaBuilder.equal(groupJoin.<UUID> get("id"), accountId);
-                return predicate;
-            }
-        };
-    }
 
     public Specification<Group> getGroupByGroupSpec(UUID groupId) {
         return new Specification<Group>() {

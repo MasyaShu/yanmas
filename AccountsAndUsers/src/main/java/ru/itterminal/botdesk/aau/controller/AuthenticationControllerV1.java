@@ -64,7 +64,7 @@ public class AuthenticationControllerV1 {
             response.put("token", jwtProvider.createToken(email));
             return ResponseEntity.ok(response);
         }
-        catch (AuthenticationException e) {
+        catch (Throwable e) {
             throw new JwtAuthenticationException(INVALID_USERNAME_OR_PASSWORD);
         }
     }

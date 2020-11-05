@@ -2,8 +2,8 @@ package ru.itterminal.botdesk.aau.model.dto;
 
 import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_EMAIL;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_PASSWORD;
-import static ru.itterminal.botdesk.aau.util.AAUConstants.emailPattern;
-import static ru.itterminal.botdesk.aau.util.AAUConstants.passwordPattern;
+import static ru.itterminal.botdesk.aau.util.AAUConstants.EMAIL_PATTERN;
+import static ru.itterminal.botdesk.aau.util.AAUConstants.PASSWORD_PATTERN;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -34,13 +34,13 @@ public class AccountCreateDto extends BaseEntityDto {
     private String nameGroupAccountOwner;
 
     @NotNull(groups = {Create.class})
-    @Pattern(regexp = emailPattern,
+    @Pattern(regexp = EMAIL_PATTERN,
             message = INVALID_EMAIL,
             groups = {Create.class})
     private String emailAccountOwner;
 
     @NotNull(groups = {Create.class})
-    @Pattern(regexp = passwordPattern,
+    @Pattern(regexp = PASSWORD_PATTERN,
             message = INVALID_PASSWORD,
             groups = {Create.class})
     private String passwordAccountOwner;

@@ -155,9 +155,9 @@ class GroupSpecTest {
     }
 
     @Test
-    public void getGroupByAccountSpec_shouldGetTwoGroup_whenAccount1() {
+    public void getEntityByAccountSpec_shouldGetTwoGroup_whenAccount1() {
         Specification<Group> groupSpecification = Specification
-                .where(spec.getGroupByAccountSpec(ACCOUNT_1_ID));
+                .where(spec.getEntityByAccountSpec(ACCOUNT_1_ID));
         foundGroup = groupRepository.findAll(groupSpecification, pageable);
         assertEquals(foundGroup.getContent().get(0).getName(), GROUP_NAME_1);
         assertEquals(foundGroup.getContent().get(1).getName(), GROUP_NAME_3);
@@ -165,19 +165,19 @@ class GroupSpecTest {
     }
 
     @Test
-    public void getGroupByAccountSpec_shouldGetOneGroup_whenAccount2() {
+    public void getEntityByAccountSpec_shouldGetOneGroup_whenAccount2() {
         Specification<Group> groupSpecification = Specification
-                .where(spec.getGroupByAccountSpec(ACCOUNT_2_ID));
+                .where(spec.getEntityByAccountSpec(ACCOUNT_2_ID));
         foundGroup = groupRepository.findAll(groupSpecification, pageable);
         assertEquals(foundGroup.getContent().get(0).getName(), GROUP_NAME_2);
         assertEquals(1, foundGroup.getContent().size());
     }
 
     @Test
-    public void getGroupByAccountSpec_shouldGetThreeGroup_whenAccount1andAccount2() {
+    public void getEntityByAccountSpec_shouldGetThreeGroup_whenAccount1andAccount2() {
         Specification<Group> groupSpecification = Specification
-                .where(spec.getGroupByAccountSpec(ACCOUNT_1_ID))
-                .or(spec.getGroupByAccountSpec(ACCOUNT_2_ID));
+                .where(spec.getEntityByAccountSpec(ACCOUNT_1_ID))
+                .or(spec.getEntityByAccountSpec(ACCOUNT_2_ID));
         foundGroup = groupRepository.findAll(groupSpecification, pageable);
         assertEquals(foundGroup.getContent().get(0).getName(), GROUP_NAME_1);
         assertEquals(foundGroup.getContent().get(1).getName(), GROUP_NAME_2);
@@ -186,9 +186,9 @@ class GroupSpecTest {
     }
 
     @Test
-    public void getGroupByAccountSpec_shouldGetEmptyList_whenAccountIdIsNotExistInDatabase() {
+    public void getEntityByAccountSpec_shouldGetEmptyList_whenAccountIdIsNotExistInDatabase() {
         Specification<Group> groupSpecification = Specification
-                .where(spec.getGroupByAccountSpec(UUID.randomUUID()));
+                .where(spec.getEntityByAccountSpec(UUID.randomUUID()));
         foundGroup = groupRepository.findAll(groupSpecification, pageable);
         assertTrue(foundGroup.isEmpty());
     }

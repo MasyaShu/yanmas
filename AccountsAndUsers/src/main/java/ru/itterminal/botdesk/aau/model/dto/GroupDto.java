@@ -27,7 +27,8 @@ public class GroupDto extends BaseEntityDto {
 
     private String comment;
 
-    @NotNull(groups = {Create.class, Update.class})
+    @NotNull(groups = {Create.class})
+    @Null(groups = {Update.class})
     private Boolean isInner;
 
     @Null(groups = Create.class, message = MUST_BE_NULL_FOR_THE_NEW_ENTITY)

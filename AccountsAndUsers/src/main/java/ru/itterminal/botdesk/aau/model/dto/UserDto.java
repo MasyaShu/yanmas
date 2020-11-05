@@ -2,8 +2,8 @@ package ru.itterminal.botdesk.aau.model.dto;
 
 import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_EMAIL;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_PASSWORD;
-import static ru.itterminal.botdesk.aau.util.AAUConstants.emailPattern;
-import static ru.itterminal.botdesk.aau.util.AAUConstants.passwordPattern;
+import static ru.itterminal.botdesk.aau.util.AAUConstants.EMAIL_PATTERN;
+import static ru.itterminal.botdesk.aau.util.AAUConstants.PASSWORD_PATTERN;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY;
 
 import java.util.UUID;
@@ -32,7 +32,7 @@ import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 public class UserDto extends BaseEntityDto {
 
     @NotNull(groups = {Create.class, Update.class})
-    @Pattern(regexp = emailPattern,
+    @Pattern(regexp = EMAIL_PATTERN,
             message = INVALID_EMAIL,
             groups = {Create.class, Update.class})
     private String email;
@@ -44,7 +44,7 @@ public class UserDto extends BaseEntityDto {
     private String secondName;
 
     @NotNull(groups = {Create.class, Update.class})
-    @Pattern(regexp = passwordPattern,
+    @Pattern(regexp = PASSWORD_PATTERN,
             message = INVALID_PASSWORD,
             groups = {Create.class, Update.class})
     private String password;
