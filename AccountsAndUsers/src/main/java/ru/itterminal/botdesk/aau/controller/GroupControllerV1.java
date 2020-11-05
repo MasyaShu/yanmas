@@ -17,6 +17,7 @@ import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.dto.GroupDto;
 import ru.itterminal.botdesk.aau.model.dto.GroupFilterDto;
 import ru.itterminal.botdesk.aau.model.spec.GroupSpec;
+import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
@@ -42,11 +43,14 @@ public class GroupControllerV1 extends BaseController {
 
     GroupServiceImpl service;
     GroupSpec spec;
+    AccountServiceImpl accountService;
 
     @Autowired
-    public GroupControllerV1(GroupServiceImpl service, GroupSpec userSpec) {
+    public GroupControllerV1(GroupServiceImpl service, GroupSpec userSpec,
+                             AccountServiceImpl accountService) {
         this.spec = userSpec;
         this.service = service;
+        this.accountService = accountService;
     }
 
     private final String ENTITY_NAME = Group.class.getSimpleName();
@@ -54,10 +58,12 @@ public class GroupControllerV1 extends BaseController {
     @PostMapping()
     @ResponseStatus(value = HttpStatus.CREATED)
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
-    public ResponseEntity<GroupDto> create(
+    public ResponseEntity<GroupDto> create(Principal principal,
             @Validated(Create.class) @RequestBody GroupDto request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
         Group group = modelMapper.map(request, Group.class);
+        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
+        group.setAccount(accountService.findById(jwtUser.getAccountId()));
         Group createdGroup = service.create(group);
         GroupDto returnedGroup =
                 modelMapper.map(createdGroup, GroupDto.class);
@@ -70,8 +76,8 @@ public class GroupControllerV1 extends BaseController {
     public ResponseEntity<GroupDto> update(
             @Validated(Update.class) @RequestBody GroupDto request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
-        Group user = modelMapper.map(request, Group.class);
-        Group updatedGroup = service.update(user);
+        Group group = modelMapper.map(request, Group.class);
+        Group updatedGroup = service.update(group);
         GroupDto returnedGroup =
                 modelMapper.map(updatedGroup, GroupDto.class);
         log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedGroup);
