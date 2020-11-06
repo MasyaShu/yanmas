@@ -202,7 +202,7 @@ class GroupControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenNameInvalidDataPassed() throws Exception {
+    public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenPassedNameIsEmpty() throws Exception {
         groypDtoFromAccount_1.setDeleted(null);
         groypDtoFromAccount_1.setIsDeprecated(null);
         groypDtoFromAccount_1.setName("");
@@ -236,7 +236,7 @@ class GroupControllerV1Test {
     public void update_shouldUpdate_whenValidDataPassed() throws Exception {
         groypDtoFromAccount_1.setId(UUID.fromString(GROUP_1_ID));
         groypDtoFromAccount_1.setVersion(1);
-        groypDtoFromAccount_1.setIsInner(true);
+        groypDtoFromAccount_1.setIsInner(null);
         groypDtoFromAccount_1.setName(GROUP_NAME_1);
         groypDtoFromAccount_1.setIsDeprecated(false);
         groypDtoFromAccount_1.setDeleted(false);
@@ -273,6 +273,7 @@ class GroupControllerV1Test {
     public void update_shouldGetStatusForbidden_whenNotAllowedRole() throws Exception {
         groypDtoFromAccount_1.setId(UUID.fromString(GROUP_1_ID));
         groypDtoFromAccount_1.setVersion(0);
+        groypDtoFromAccount_1.setIsInner(null);
         groypDtoFromAccount_1.setIsDeprecated(false);
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -300,8 +301,6 @@ class GroupControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(
-                        jsonPath("$.errors.isInner[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.name[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.isDeprecated[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.id[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
@@ -468,7 +467,7 @@ class GroupControllerV1Test {
                 .andExpect(jsonPath("$.errors.direction[?(@.message == '%s')]", MUST_BE_ANY_OF_ASC_DESC).exists())
                 .andExpect(jsonPath("$.errors.sortBy[?(@.message == '%s')]", MUST_BE_ANY_OF_NAME)
                         .exists());
-        verify(service, times(0)).create(any());
+        verify(service, times(0)).findAllByFilter(any(),any());
     }
 
     @Test
@@ -483,7 +482,7 @@ class GroupControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value(REQUEST_NOT_READABLE));
-        verify(service, times(0)).create(any());
+        verify(service, times(0)).findAllByFilter(any(),any());
     }
 
     @Test
@@ -505,7 +504,7 @@ class GroupControllerV1Test {
                 .andExpect(jsonPath("$.errors.direction[?(@.message == '%s')]", MUST_BE_ANY_OF_ASC_DESC).exists())
                 .andExpect(jsonPath("$.errors.sortBy[?(@.message == '%s')]", MUST_BE_ANY_OF_NAME)
                         .exists());
-        verify(service, times(0)).create(any());
+        verify(service, times(0)).findAllByFilter(any(),any());
     }
 
     @Test

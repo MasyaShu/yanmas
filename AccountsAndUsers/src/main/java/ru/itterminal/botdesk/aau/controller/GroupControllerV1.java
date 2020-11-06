@@ -32,8 +32,6 @@ import javax.validation.constraints.PositiveOrZero;
 import java.security.Principal;
 import java.util.UUID;
 
-import static java.lang.String.format;
-import static ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl.NOT_FOUND_GROUP_BY_ID_AND_ACCOUNT_ID;
 
 @Slf4j
 @RestController("GroupControllerV1")
@@ -112,7 +110,7 @@ public class GroupControllerV1 extends BaseController {
                 .and(filter.getIsDeprecated() == null ? null : spec.getGroupByIsDeprecatedSpec(filter.getIsDeprecated()))
                 .and(filter.getIsInner() == null ? null : spec.getGroupByIsInnerSpec(filter.getIsInner()))
                 .and(spec.getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted.fromString(filter.getDeleted())))
-                .and(spec.getGroupByAccountSpec(jwtUser.getAccountId()))
+                .and(spec.getEntityByAccountSpec(jwtUser.getAccountId()))
                 .and(jwtUser.isInnerGroup() ? null : spec.getGroupByGroupSpec(jwtUser.getGroupId()));
 
         foundGroups = service.findAllByFilter(groupSpecification, pageable);

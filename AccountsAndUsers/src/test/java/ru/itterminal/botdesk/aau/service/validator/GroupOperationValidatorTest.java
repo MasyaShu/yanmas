@@ -93,7 +93,7 @@ class GroupOperationValidatorTest {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
-    public void beforeCreateUpdate_shouldGetLogicalValidationException_whenUserNotInnerGroup() {
+    public void checkIsInnerGroupForCreateUpdate_shouldGetLogicalValidationException_whenUserNotInnerGroup() {
         errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
                 USER_FROM_AN_INNER_GROUP_CANNOT_CREATE_UPDATE_GROUPS)));
         logicalValidationException = new LogicalValidationException(VALIDATION_FAILED, errors);
@@ -105,7 +105,7 @@ class GroupOperationValidatorTest {
 
     @Test
     @WithAnonymousUser
-    public void beforeCreateUpdate_shouldGetLogicalValidationException1_whenUserNotInnerGroup() {
+    public void checkIsInnerGroupForCreateUpdate_shouldGetLogicalValidationException1_whenUserNotInnerGroup() {
         when(service.create(any())).thenReturn(new Group());
         assertTrue(validator.beforeCreate(new Group()));
     }

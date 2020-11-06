@@ -87,6 +87,7 @@ public class User extends BaseEntity {
     @Override
     public int hashCode() {
         return Objects.hash(email, firstName, secondName, password, phone, comment,
-                emailVerificationToken, emailVerificationStatus, passwordResetToken, isArchived, account, role);
+                emailVerificationToken, emailVerificationStatus, passwordResetToken, isArchived, account, role,
+                getId(), getOutId(), getVersion(), getDeleted());
     }
 }

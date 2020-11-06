@@ -136,7 +136,6 @@ class UserControllerV1Test {
     private static String INVALID_PHONE = "1234567890123456789012345678901";
     private static String INVALID_SORT_BY = "ERROR";
     private static String INVALID_DELETED = "ERROR";
-    private static String INVALID_LANGUAGE = "ge";
     private static String INVALID_DIRECTION = "ERROR";
 
     private static String INVALID_EMAIL_1 = "it-terminal_mail.ru"; //absent @
@@ -650,6 +649,7 @@ class UserControllerV1Test {
                 .andExpect(jsonPath("$.content[0].password").doesNotExist())
                 .andExpect(jsonPath("$.content[1].password").doesNotExist())
                 .andExpect(jsonPath("$.content", hasSize(2)));
+        verify(service, times(1)).findAllByFilter(any(), any());
     }
 
     @Test
@@ -676,7 +676,7 @@ class UserControllerV1Test {
                 .andExpect(jsonPath("$.errors.direction[?(@.message == '%s')]", MUST_BE_ANY_OF_ASC_DESC).exists())
                 .andExpect(jsonPath("$.errors.sortBy[?(@.message == '%s')]", MUST_BE_ANY_OF_FIRST_NAME_SECOND_NAME)
                         .exists());
-        verify(service, times(0)).create(any());
+        verify(service, times(0)).findAllByFilter(any(), any());
     }
 
     @Test
@@ -691,7 +691,7 @@ class UserControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value(REQUEST_NOT_READABLE));
-        verify(service, times(0)).create(any());
+        verify(service, times(0)).findAllByFilter(any(), any());
     }
 
     @Test
@@ -719,7 +719,7 @@ class UserControllerV1Test {
                 .andExpect(jsonPath("$.errors.direction[?(@.message == '%s')]", MUST_BE_ANY_OF_ASC_DESC).exists())
                 .andExpect(jsonPath("$.errors.sortBy[?(@.message == '%s')]", MUST_BE_ANY_OF_FIRST_NAME_SECOND_NAME)
                         .exists());
-        verify(service, times(0)).create(any());
+        verify(service, times(0)).findAllByFilter(any(), any());
     }
 
     @Test

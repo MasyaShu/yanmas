@@ -4,13 +4,7 @@ import lombok.*;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 import ru.itterminal.botdesk.commons.model.validator.ValueOfEnum;
 
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-import java.util.List;
-import java.util.UUID;
-
-import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_EMAIL;
-import static ru.itterminal.botdesk.aau.util.AAUConstants.emailPattern;
 
 @Getter
 @Setter

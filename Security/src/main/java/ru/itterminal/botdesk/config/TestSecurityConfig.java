@@ -29,8 +29,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
     public static String ACCOUNT_1_ID = "cdfa6483-0769-4628-ba32-efd338a716de";
     public static String ACCOUNT_2_ID = "bcf98101-2a22-42bf-94cc-c900b50a0b69";
     public static String GROUP_1_ID = "0223e51a-4bb2-44ee-bc8e-1f047a2145e7";
-    public static String GROUP_2_ID = "99f6b488-7687-4451-b8a1-9fbeb2a3efec";
-    public static String EMAIL_1 = "m@m.ru";
+    public static String EMAIL_1 = "Mackenzie.lang@gmail.com";
     public static String PASSWORD = "12345";
     public static String EMAIL_2 = "m4@m.ru";
 

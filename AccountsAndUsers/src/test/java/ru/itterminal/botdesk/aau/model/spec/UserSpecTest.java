@@ -181,34 +181,34 @@ class UserSpecTest {
     }
 
     @Test
-    public void getUserByAccountSpec_shouldGetFourUsers_whenAccount1() {
+    public void getEntityByAccountSpec_shouldGetFourUsers_whenAccount1() {
         Specification<User> userSpecification = Specification
-                .where(spec.getUserByAccountSpec(ACCOUNT_1_ID));
+                .where(spec.getEntityByAccountSpec(ACCOUNT_1_ID));
         foundUsers = userRepository.findAll(userSpecification, pageable);
         assertTrue(foundUsers.getContent().size() == 4);
     }
 
     @Test
-    public void getUserByAccountSpec_shouldGetOneUser_whenAccount2() {
+    public void getEntityByAccountSpec_shouldGetOneUser_whenAccount2() {
         Specification<User> userSpecification = Specification
-                .where(spec.getUserByAccountSpec(ACCOUNT_2_ID));
+                .where(spec.getEntityByAccountSpec(ACCOUNT_2_ID));
         foundUsers = userRepository.findAll(userSpecification, pageable);
         assertTrue(foundUsers.getContent().size() == 1);
     }
 
     @Test
-    public void getUserByAccountSpec_shouldGetFiveUsers_whenAccount1AndAccount2() {
+    public void getEntityByAccountSpec_shouldGetFiveUsers_whenAccount1AndAccount2() {
         Specification<User> userSpecification = Specification
-                .where(spec.getUserByAccountSpec(ACCOUNT_2_ID))
-                .or(spec.getUserByAccountSpec(ACCOUNT_1_ID));
+                .where(spec.getEntityByAccountSpec(ACCOUNT_2_ID))
+                .or(spec.getEntityByAccountSpec(ACCOUNT_1_ID));
         foundUsers = userRepository.findAll(userSpecification, pageable);
         assertTrue(foundUsers.getContent().size() == 5);
     }
 
     @Test
-    public void getUserByAccountSpec_shouldGetEmptyList_whenAccountIdIsNotExistInDatabase() {
+    public void getEntityByAccountSpec_shouldGetEmptyList_whenAccountIdIsNotExistInDatabase() {
         Specification<User> userSpecification = Specification
-                .where(spec.getUserByAccountSpec(UUID.randomUUID()));
+                .where(spec.getEntityByAccountSpec(UUID.randomUUID()));
         foundUsers = userRepository.findAll(userSpecification, pageable);
         assertTrue(foundUsers.isEmpty());
     }

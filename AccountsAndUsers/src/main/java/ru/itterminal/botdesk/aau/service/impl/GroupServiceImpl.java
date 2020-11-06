@@ -1,10 +1,19 @@
 package ru.itterminal.botdesk.aau.service.impl;
 
-import lombok.extern.slf4j.Slf4j;
+import static java.lang.String.format;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID;
+
+import java.util.List;
+import java.util.UUID;
+
+import javax.persistence.OptimisticLockException;
+
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.projection.GroupUniqueFields;
 import ru.itterminal.botdesk.aau.repository.GroupRepository;
@@ -12,12 +21,6 @@ import ru.itterminal.botdesk.aau.service.validator.GroupOperationValidator;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
 import ru.itterminal.botdesk.jwt.JwtUser;
-
-import javax.persistence.OptimisticLockException;
-import java.util.List;
-import java.util.UUID;
-
-import static java.lang.String.format;
 
 @Slf4j
 @Service
@@ -34,8 +37,9 @@ public class GroupServiceImpl extends CrudServiceImpl<Group, GroupOperationValid
             "Not found groups by unique fields, id is null";
     public static final String START_FIND_GROUP_BY_UNIQUE_FIELDS =
             "Start find user by unique fields, name: {} and not id: {} and not account: {}";
-    public static final String NOT_FOUND_GROUP_BY_ID_AND_ACCOUNT_ID = "Not found group by id: %s and accountId: %s";
     public static final String START_FIND_GROUP_BY_ID_AND_ACCOUNT_ID = "Start find group by id: {} and accountId: {}";
+
+    public static final String ENTITY_GROUP_NAME = Group.class.getSimpleName();
 
     @Override
     public Group create(Group entity) {
@@ -87,21 +91,16 @@ public class GroupServiceImpl extends CrudServiceImpl<Group, GroupOperationValid
 
     @Transactional(readOnly = true)
     public Group findByIdAndAccountId(UUID id, UUID accountId) {
-        if (id == null) {
-            log.error(format(NOT_FOUND_GROUP_BY_ID_AND_ACCOUNT_ID, id, accountId));
-            throw new EntityNotExistException(format(NOT_FOUND_GROUP_BY_ID_AND_ACCOUNT_ID, id, accountId));
-        }
-        if (accountId == null) {
-            log.error(format(NOT_FOUND_GROUP_BY_ID_AND_ACCOUNT_ID, id, accountId));
-            throw new EntityNotExistException(format(NOT_FOUND_GROUP_BY_ID_AND_ACCOUNT_ID, id, accountId));
-        }
+        checkEntityIdAndAccountId(ENTITY_GROUP_NAME, id, accountId);
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (!(jwtUser.isInnerGroup() || id.equals(jwtUser.getGroupId()))) {
-            throw new EntityNotExistException(format(NOT_FOUND_GROUP_BY_ID_AND_ACCOUNT_ID, id, jwtUser.getAccountId()));
+            throw new EntityNotExistException(format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, ENTITY_GROUP_NAME, id,
+                    jwtUser.getAccountId()));
         }
         log.trace(START_FIND_GROUP_BY_ID_AND_ACCOUNT_ID, id, accountId);
         return repository.getByIdAndAccount_Id(id, accountId).orElseThrow(
-                () -> new EntityNotExistException(format(NOT_FOUND_GROUP_BY_ID_AND_ACCOUNT_ID, id, accountId))
+                () -> new EntityNotExistException(format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, ENTITY_GROUP_NAME, id,
+                        accountId))
         );
     }
 }

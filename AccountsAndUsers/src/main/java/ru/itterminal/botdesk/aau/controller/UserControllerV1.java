@@ -158,7 +158,7 @@ public class UserControllerV1 extends BaseController {
                 .and(filter.getRoles() == null || filter.getRoles().isEmpty() ? null :
                         spec.getUserByListOfRolesSpec(filter.getRoles()))
                 .and(spec.getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted.fromString(filter.getDeleted())))
-                .and(spec.getUserByAccountSpec(jwtUser.getAccountId()));
+                .and(spec.getEntityByAccountSpec(jwtUser.getAccountId()));
         foundUsers = userService.findAllByFilter(userSpecification, pageable);
         returnedUsers = mapPage(foundUsers, UserDtoResponseWithoutPassword.class, pageable);
         log.debug(FIND_FINISH_MESSAGE, ENTITY_NAME, foundUsers.getTotalElements());

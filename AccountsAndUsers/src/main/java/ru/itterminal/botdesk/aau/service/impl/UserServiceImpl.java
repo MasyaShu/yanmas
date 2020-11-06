@@ -1,6 +1,7 @@
 package ru.itterminal.botdesk.aau.service.impl;
 
 import static java.lang.String.format;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID;
 
 import java.util.List;
 import java.util.Optional;
@@ -51,7 +52,6 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
             "Not found user by email verification token";
     public static final String START_RESET_PASSWORD_BY_TOKEN_AND_NEW_PASSWORD =
             "Start reset password by token: {} and new password {}";
-    public static final String NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID = "Not found user by id: %s and account id: %s";
     public static final String NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID
             = "Not found user by id: %s and account id: %s and own group id %s";
     public static final String START_FIND_USER_BY_EMAIL = "Start find user by email: {}";
@@ -75,6 +75,8 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
     public static final String START_VERIFY_EMAIL_TOKEN = "Start verify email token: {}";
     public static final String FAILED_SAVE_USER_AFTER_VERIFY_EMAIL_TOKEN = "Failed save user after verify email token";
     public static final String FAILED_SAVE_USER_AFTER_RESET_PASSWORD = "Failed save user after reset password";
+
+    public final String ENTITY_USER_NAME = User.class.getSimpleName();
 
     @Override
     public User create(User entity) {
@@ -157,30 +159,17 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
 
     @Transactional(readOnly = true)
     public User findByIdAndAccountId(UUID id, UUID accountId) {
-        if (id == null) {
-            log.error(format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID, id, accountId));
-            throw new EntityNotExistException(format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID, id, accountId));
-        }
-        if (accountId == null) {
-            log.error(format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID, id, accountId));
-            throw new EntityNotExistException(format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID, id, accountId));
-        }
+        checkEntityIdAndAccountId(ENTITY_USER_NAME, id, accountId);
         log.trace(START_FIND_USER_BY_ID_AND_ACCOUNT_ID, id, accountId);
         return repository.getByIdAndAccount_Id(id, accountId).orElseThrow(
-                () -> new EntityNotExistException(format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID, id, accountId))
+                () -> new EntityNotExistException(format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, ENTITY_USER_NAME, id,
+                        accountId))
         );
     }
 
     @Transactional(readOnly = true)
     public User findByIdAndAccountIdAndOwnGroupId(UUID id, UUID accountId, UUID ownGroupId) {
-        if (id == null) {
-            log.error(format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID, id, accountId));
-            throw new EntityNotExistException(format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID, id, accountId));
-        }
-        if (accountId == null) {
-            log.error(format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID, id, accountId));
-            throw new EntityNotExistException(format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID, id, accountId));
-        }
+        checkEntityIdAndAccountId(ENTITY_USER_NAME, id, accountId);
         if (ownGroupId == null) {
             log.error(format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, ownGroupId));
             throw new EntityNotExistException(
@@ -240,7 +229,7 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
                 userId = jwtProvider.getUserId(token);
             }
         }
-        catch (Exception e) {
+        catch (Throwable e) {
             throw new JwtException(e.getMessage());
         }
         User user = super.findById(userId);
@@ -274,7 +263,7 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
                 userId = jwtProvider.getUserId(token);
             }
         }
-        catch (Exception e) {
+        catch (Throwable e) {
             throw new JwtException(e.getMessage());
         }
         User user = super.findById(userId);

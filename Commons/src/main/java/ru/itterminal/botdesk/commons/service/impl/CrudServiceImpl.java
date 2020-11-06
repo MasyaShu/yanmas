@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.lang.String.format;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID;
 
 /**
  * Skeletal implementation of general CRUD operations for each dictionary
@@ -150,5 +151,13 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
     @Transactional(readOnly = true)
     public List<E> findAll() {
         return (List<E>) repository.findAll();
+    }
+
+    public boolean checkEntityIdAndAccountId(String nameEntity, UUID id, UUID accountId) {
+        if (id == null || accountId == null) {
+            log.error(format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, nameEntity, id, accountId));
+            throw new EntityNotExistException(format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, nameEntity, id, accountId));
+        }
+        return true;
     }
 }

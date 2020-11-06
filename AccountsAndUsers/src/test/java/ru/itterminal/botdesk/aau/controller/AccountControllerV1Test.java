@@ -84,7 +84,6 @@ class AccountControllerV1Test {
     private static String API = "api/v1/";
     private static UUID USER_ID = UUID.fromString("d414bc22-686c-4004-b009-c3569f7914d5");
     private static String ACCOUNT_NAME = "Name of account";
-    private static String EMAIL_OF_ACCOUNT_OWNER = "m@m.ru";
     private static String PASSWORD = "UserUser123";
     private static String NAME_GROUP_OF_ACCOUNT_OWNER = "Name of group of account owner";
     private Account account;
@@ -93,6 +92,7 @@ class AccountControllerV1Test {
 
     @BeforeEach
     void setUpBeforeEach() {
+        String EMAIL_OF_ACCOUNT_OWNER = "m@m.ru";
         accountCreateDto = accountCreateDto
                 .builder()
                 .emailAccountOwner(EMAIL_OF_ACCOUNT_OWNER)
