@@ -20,7 +20,6 @@ import ru.itterminal.botdesk.aau.model.spec.GroupSpec;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
-import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
@@ -39,13 +38,12 @@ import java.util.UUID;
 @RequestMapping("api/v1/group")
 public class GroupControllerV1 extends BaseController {
 
-    GroupServiceImpl service;
-    GroupSpec spec;
-    AccountServiceImpl accountService;
+    private GroupServiceImpl service;
+    private GroupSpec spec;
+    private AccountServiceImpl accountService;
 
     @Autowired
-    public GroupControllerV1(GroupServiceImpl service, GroupSpec userSpec,
-                             AccountServiceImpl accountService) {
+    public GroupControllerV1(GroupServiceImpl service, GroupSpec userSpec, AccountServiceImpl accountService) {
         this.spec = userSpec;
         this.service = service;
         this.accountService = accountService;
@@ -56,10 +54,14 @@ public class GroupControllerV1 extends BaseController {
     @PostMapping()
     @ResponseStatus(value = HttpStatus.CREATED)
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
-    public ResponseEntity<GroupDto> create(
+    public ResponseEntity<GroupDto> create(Principal principal,
             @Validated(Create.class) @RequestBody GroupDto request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
         Group group = modelMapper.map(request, Group.class);
+        group.setDeleted(false);
+        group.setIsDeprecated(false);
+        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
+        group.setAccount(accountService.findById(jwtUser.getAccountId()));
         Group createdGroup = service.create(group);
         GroupDto returnedGroup =
                 modelMapper.map(createdGroup, GroupDto.class);
@@ -129,7 +131,7 @@ public class GroupControllerV1 extends BaseController {
 
     @DeleteMapping()
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
-    ResponseEntity<Void> physicalDelete(@RequestBody GroupDto request) {
+    public ResponseEntity<Void> physicalDelete(@RequestBody GroupDto request) {
         throw new UnsupportedOperationException("Physical delete will be implement in the further");
     }
 }

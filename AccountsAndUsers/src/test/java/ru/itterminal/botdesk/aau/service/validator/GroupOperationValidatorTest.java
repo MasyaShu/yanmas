@@ -26,8 +26,7 @@ import java.util.*;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.CREATE_UPDATE_ONLY_HIS_GROUP;
+import static org.mockito.Mockito.when;
 import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.INNER_GROUP;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.LOGIC_CONSTRAINT_CODE;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
@@ -57,8 +56,9 @@ class GroupOperationValidatorTest {
     private static LogicalValidationException logicalValidationException;
     private static Group group;
     private static Map<String, List<ValidationError>> errors = new HashMap<>();
-    public static final String USER_FROM_AN_INNER_GROUP_CANNOT_CREATE_UPDATE_GROUPS =
+    private static final String USER_FROM_AN_INNER_GROUP_CANNOT_CREATE_UPDATE_GROUPS =
             "A user from an inner group cannot create / update groups";
+    private static final String INNER_GROUP = "Inner group";
 
     @BeforeAll
     static void setUp() {

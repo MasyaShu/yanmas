@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.projection.GroupUniqueFields;
-import ru.itterminal.botdesk.aau.repository.AccountRepository;
 import ru.itterminal.botdesk.aau.repository.GroupRepository;
 import ru.itterminal.botdesk.aau.service.validator.GroupOperationValidator;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
@@ -27,35 +26,19 @@ import static ru.itterminal.botdesk.commons.util.CommonConstants.NOT_FOUND_ENTIT
 @Transactional
 public class GroupServiceImpl extends CrudServiceImpl<Group, GroupOperationValidator, GroupRepository> {
 
-    private AccountServiceImpl accountService;
-
-    @Autowired
-    public GroupServiceImpl(AccountServiceImpl accountService) {
-        this.accountService = accountService;
-    }
-
-    public static final String NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_GROUP_IS_NULL =
+   private static final String NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_GROUP_IS_NULL =
             "Not found groups by unique fields, group is null";
-    public static final String NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_ACCOUNT_IS_NULL =
+    private static final String NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_ACCOUNT_IS_NULL =
             "Not found groups by unique fields, account is null";
-    public static final String NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_NAME_IS_NULL =
+    private static final String NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_NAME_IS_NULL =
             "Not found groups by unique fields, name is null";
-    public static final String NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_ID_IS_NULL =
+    private static final String NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_ID_IS_NULL =
             "Not found groups by unique fields, id is null";
-    public static final String START_FIND_GROUP_BY_UNIQUE_FIELDS =
+    private static final String START_FIND_GROUP_BY_UNIQUE_FIELDS =
             "Start find user by unique fields, name: {} and not id: {} and not account: {}";
-    public static final String START_FIND_GROUP_BY_ID_AND_ACCOUNT_ID = "Start find group by id: {} and accountId: {}";
+    private static final String START_FIND_GROUP_BY_ID_AND_ACCOUNT_ID = "Start find group by id: {} and accountId: {}";
 
     public static final String ENTITY_GROUP_NAME = Group.class.getSimpleName();
-
-    @Override
-    public Group create(Group entity) {
-        entity.setDeleted(false);
-        entity.setIsDeprecated(false);
-        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        entity.setAccount(accountService.findById(jwtUser.getAccountId()));
-        return super.create(entity);
-    }
 
     @Override
     public Group update(Group entity) {
