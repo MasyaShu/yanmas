@@ -20,7 +20,7 @@ import io.jsonwebtoken.JwtException;
 import ru.itterminal.botdesk.commons.exception.error.ApiError;
 
 public class JwtFilter extends GenericFilterBean {
-    private JwtProvider jwtProvider;
+    private final JwtProvider jwtProvider;
 
 
     public JwtFilter(JwtProvider jwtProvider) {
@@ -33,7 +33,7 @@ public class JwtFilter extends GenericFilterBean {
 
         String token = jwtProvider.resolveToken((HttpServletRequest) req);
         if (token != null ) {
-            boolean validateToken = false;
+            boolean validateToken;
             try {
                 validateToken = jwtProvider.validateToken(token);
             } catch (Exception e) {

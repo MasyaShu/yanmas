@@ -1,6 +1,7 @@
 package ru.itterminal.botdesk.config;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -29,11 +30,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         this.jwtProvider = jwtProvider;
     }
 
-    public static final String[] AUTH_WHITELIST_PERMIT_ALL = {
+    static final String[] AUTH_WHITELIST_PERMIT_ALL = {
             "/swagger-ui.html",
     };
 
-    public static final String[] AUTH_WHITELIST_ANONYMOUS = {
+    static final String[] AUTH_WHITELIST_ANONYMOUS = {
             "/api/v1/create-account",
             "/api/v1/auth/signin",
             "/api/v1/auth/email-verify",
@@ -41,13 +42,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/v1/auth/password-reset"
     };
 
-
     @Bean
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
 
+    @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .httpBasic().disable()
@@ -70,9 +71,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     public static UrlBasedCorsConfigurationSource getCorsConfiguration() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("*"));
+        configuration.setAllowedOrigins(Collections.singletonList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowedHeaders(Collections.singletonList("*"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

@@ -9,7 +9,6 @@ import java.util.UUID;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,8 +35,7 @@ public class JwtProvider {
     @Value("${jwt.token.expired}")
     private long validityInMillisecondsToken;
 
-    @Autowired
-    private ApplicationContext appContext;
+    private final ApplicationContext appContext;
 
     public static final String CANT_CREATE_TOKEN_BECAUSE = "Can't create token, because ";
     public static final String CANT_GET_USER_ID_FROM_TOKEN_BECAUSE = "Can't get userId from token, because ";
@@ -47,6 +45,11 @@ public class JwtProvider {
     public static final String EMAIL_IS_EMPTY = "email is empty";
     public static final String TOKEN_IS_EMPTY = "token is empty";
     public static final String CANT_CREATE_TOKEN_IF_USER_ID_IS_NULL = "Can't create token if userId is null";
+
+    public JwtProvider(
+            ApplicationContext appContext) {
+        this.appContext = appContext;
+    }
 
     @PostConstruct
     protected void init() {
@@ -85,7 +88,7 @@ public class JwtProvider {
                 CANT_GET_USER_ID_FROM_TOKEN_BECAUSE);
         UUID userId;
         Claims claims = Jwts.parser().setSigningKey(secretToken).parseClaimsJws(token).getBody();
-        userId = UUID.fromString((String) claims.getSubject());
+        userId = UUID.fromString(claims.getSubject());
         return userId;
     }
 
@@ -107,17 +110,14 @@ public class JwtProvider {
     public String resolveToken(HttpServletRequest req) {
         String bearerToken = req.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith(prefixToken)) {
-            return bearerToken.substring(7, bearerToken.length());
+            return bearerToken.substring(7);
         }
         return null;
     }
 
-    public boolean validateToken(String token) throws Exception {
+    public boolean validateToken(String token) {
         Jws<Claims> claims = Jwts.parser().setSigningKey(secretToken).parseClaimsJws(token);
-        if (claims.getBody().getExpiration().before(new Date())) {
-            return false;
-        }
-        return true;
+        return !claims.getBody().getExpiration().before(new Date());
     }
 
 }
