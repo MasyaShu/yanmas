@@ -43,6 +43,9 @@ class GroupServiceImplTest {
     @MockBean
     private GroupOperationValidator validator;
 
+    @MockBean
+    private AccountServiceImpl accountService;
+
     @Autowired
     private GroupServiceImpl service;
 

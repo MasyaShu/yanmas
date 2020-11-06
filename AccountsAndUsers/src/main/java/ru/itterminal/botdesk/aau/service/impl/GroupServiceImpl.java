@@ -1,31 +1,38 @@
 package ru.itterminal.botdesk.aau.service.impl;
 
-import static java.lang.String.format;
-import static ru.itterminal.botdesk.commons.util.CommonConstants.NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID;
-
-import java.util.List;
-import java.util.UUID;
-
-import javax.persistence.OptimisticLockException;
-
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.projection.GroupUniqueFields;
+import ru.itterminal.botdesk.aau.repository.AccountRepository;
 import ru.itterminal.botdesk.aau.repository.GroupRepository;
 import ru.itterminal.botdesk.aau.service.validator.GroupOperationValidator;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
 import ru.itterminal.botdesk.jwt.JwtUser;
 
+import javax.persistence.OptimisticLockException;
+import java.util.List;
+import java.util.UUID;
+
+import static java.lang.String.format;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID;
+
 @Slf4j
 @Service
 @Transactional
 public class GroupServiceImpl extends CrudServiceImpl<Group, GroupOperationValidator, GroupRepository> {
+
+    private AccountServiceImpl accountService;
+
+    @Autowired
+    public GroupServiceImpl(AccountServiceImpl accountService) {
+        this.accountService = accountService;
+    }
 
     public static final String NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_GROUP_IS_NULL =
             "Not found groups by unique fields, group is null";
@@ -45,6 +52,8 @@ public class GroupServiceImpl extends CrudServiceImpl<Group, GroupOperationValid
     public Group create(Group entity) {
         entity.setDeleted(false);
         entity.setIsDeprecated(false);
+        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        entity.setAccount(accountService.findById(jwtUser.getAccountId()));
         return super.create(entity);
     }
 
@@ -59,6 +68,7 @@ public class GroupServiceImpl extends CrudServiceImpl<Group, GroupOperationValid
         });
         try {
             entity.setIsInner(entityFromDatabase.getIsInner());
+            entity.setAccount(entityFromDatabase.getAccount());
             Group updatedEntity = repository.update(entity);
             log.trace(format(UPDATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), updatedEntity));
             return updatedEntity;

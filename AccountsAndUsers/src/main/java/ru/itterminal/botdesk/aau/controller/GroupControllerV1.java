@@ -56,12 +56,10 @@ public class GroupControllerV1 extends BaseController {
     @PostMapping()
     @ResponseStatus(value = HttpStatus.CREATED)
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
-    public ResponseEntity<GroupDto> create(Principal principal,
+    public ResponseEntity<GroupDto> create(
             @Validated(Create.class) @RequestBody GroupDto request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
         Group group = modelMapper.map(request, Group.class);
-        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        group.setAccount(accountService.findById(jwtUser.getAccountId()));
         Group createdGroup = service.create(group);
         GroupDto returnedGroup =
                 modelMapper.map(createdGroup, GroupDto.class);
