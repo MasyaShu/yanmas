@@ -59,10 +59,10 @@ class UserServiceImplTest {
     private UserOperationValidator validator;
 
     @Autowired
-    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    private BCryptPasswordEncoder encoder;
 
     @Autowired
-    private JwtProvider jwtProvider = new JwtProvider();
+    private JwtProvider jwtProvider;
 
     @Autowired
     private UserServiceImpl service;

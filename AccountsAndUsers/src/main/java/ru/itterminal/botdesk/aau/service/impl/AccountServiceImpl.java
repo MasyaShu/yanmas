@@ -58,6 +58,8 @@ public class AccountServiceImpl extends CrudServiceImpl<Account, AccountOperatio
                 .name(accountDto.getNameGroupAccountOwner())
                 .isInner(true)
                 .build();
+        groupAccountOwner.setIsDeprecated(false);
+        groupAccountOwner.setDeleted(false);
         groupService.create(groupAccountOwner);
         User user = User.builder()
                 .email(accountDto.getEmailAccountOwner())

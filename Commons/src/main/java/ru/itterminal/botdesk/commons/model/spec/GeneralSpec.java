@@ -13,6 +13,7 @@ import org.springframework.data.jpa.domain.Specification;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 
+// TODO rename to BaseSpec
 public abstract class GeneralSpec<Entity extends BaseEntity, Account extends BaseEntity> {
 
     public Specification<Entity> getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted deleted) {
@@ -45,4 +46,6 @@ public abstract class GeneralSpec<Entity extends BaseEntity, Account extends Bas
             }
         };
     }
+
+    // TODO add spec for outId
 }

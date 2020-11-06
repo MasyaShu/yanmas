@@ -17,6 +17,7 @@ import ru.itterminal.botdesk.commons.model.validator.ValueOfEnum;
 @Setter
 public class BaseFilterDto {
 
+    // TODO add outId
     @ValueOfEnum(enumClass = FilterByDeleted.class, message = "must be any of: all, true, false")
     private String deleted = "ALL";
 
