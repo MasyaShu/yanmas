@@ -11,7 +11,7 @@ import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
 @Service
 public class RoleServiceImpl extends CrudServiceImpl<Role, RoleOperationValidator, RoleRepository> {
 
-    private static Role accountOwnerRole;
+    private Role accountOwnerRole;
 
     public Role getAccountOwnerRole() {
         if (accountOwnerRole == null) {
@@ -19,5 +19,4 @@ public class RoleServiceImpl extends CrudServiceImpl<Role, RoleOperationValidato
         }
         return accountOwnerRole;
     }
-
 }

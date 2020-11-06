@@ -78,6 +78,7 @@ public class UserControllerV1 extends BaseController {
     public ResponseEntity<UserDtoResponseWithoutPassword> create(Principal principal,
             @Validated(Create.class) @RequestBody UserDto request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
+        // TODO move to service
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
         User user = modelMapper.map(request, User.class);
         user.setAccount(accountService.findById(jwtUser.getAccountId()));
@@ -97,6 +98,8 @@ public class UserControllerV1 extends BaseController {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
         User user = modelMapper.map(request, User.class);
+        // TODO move to service
+        // TODO account from database
         user.setAccount(accountService.findById(jwtUser.getAccountId()));
         user.setRole(roleService.findById(request.getRoleId()));
         user.setOwnGroup(groupService.findById(request.getGroupId()));

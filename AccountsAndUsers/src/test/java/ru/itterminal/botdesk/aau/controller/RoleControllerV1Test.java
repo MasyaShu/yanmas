@@ -24,10 +24,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import ru.itterminal.botdesk.aau.model.Role;
-import ru.itterminal.botdesk.aau.model.dto.RoleDto;
 import ru.itterminal.botdesk.aau.service.impl.RoleServiceImpl;
 import ru.itterminal.botdesk.commons.config.WebTestConfig;
 
@@ -39,15 +36,13 @@ class RoleControllerV1Test {
     @MockBean
     private RoleServiceImpl service;
 
-    private static String HOST = "http://localhost";
-    private static String PORT = ":8081";
-    private static String API = "api/v1/role/";
-    private static String ROLE_NAME_1 = "TestNameOfRole_1";
-    private static String ROLE_NAME_2 = "TestNameOfRole_2";
-    private static String ROLE_UUID_1 = "d45e0a6e-cb5b-11ea-87d0-0242ac138003";
-    private static String ROLE_UUID_2 = "bd61e166-cc30-11ea-87d0-0242ac130003";
-    private ObjectMapper objectMapper = new ObjectMapper();
-    private RoleDto roleDto;
+    private static final String HOST = "http://localhost";
+    private static final String PORT = ":8081";
+    private static final String API = "api/v1/role/";
+    private static final String ROLE_NAME_1 = "TestNameOfRole_1";
+    private static final String ROLE_NAME_2 = "TestNameOfRole_2";
+    private static final String ROLE_UUID_1 = "d45e0a6e-cb5b-11ea-87d0-0242ac138003";
+    private static final String ROLE_UUID_2 = "bd61e166-cc30-11ea-87d0-0242ac130003";
     private Role role_1;
     private Role role_2;
 
@@ -66,17 +61,15 @@ class RoleControllerV1Test {
 
     @BeforeEach
     void setUpBeforeEach() {
-        roleDto = new RoleDto().builder().name(ROLE_NAME_1).build();
-        roleDto.setDeleted(false);
-        role_1 = new Role().builder().name(ROLE_NAME_1).build();
+        role_1 = Role.builder().name(ROLE_NAME_1).build();
         role_1.setId(UUID.fromString(ROLE_UUID_1));
-        role_2 = new Role().builder().name(ROLE_NAME_2).build();
+        role_2 = Role.builder().name(ROLE_NAME_2).build();
         role_2.setId(UUID.fromString(ROLE_UUID_2));
     }
 
 
     @Test
-    public void getAll_shouldGetTwoRoles_whenDataIsExist() throws Exception {
+    void getAll_shouldGetTwoRoles_whenDataIsExist() throws Exception {
         when(service.findAll()).thenReturn(List.of(role_1, role_2));
         mockMvc.perform(get(HOST + PORT + API))
                 .andDo(print())
@@ -89,7 +82,7 @@ class RoleControllerV1Test {
     }
 
     @Test
-    public void getAll_shouldEmptyList_whenDataIsNotExist() throws Exception {
+    void getAll_shouldEmptyList_whenDataIsNotExist() throws Exception {
         when(service.findAll()).thenReturn(Collections.emptyList());
         mockMvc.perform(get(HOST + PORT + API))
                 .andDo(print())
