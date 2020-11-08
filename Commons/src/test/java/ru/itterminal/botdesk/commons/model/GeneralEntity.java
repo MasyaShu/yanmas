@@ -11,12 +11,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.itterminal.botdesk.commons.model.BaseEntity;
 
 /**
  * Example of typical entity on microservice backoffice
  * Use only in unit tests
  */
+@SuppressWarnings("ALL")
 @Entity
 @Table(name = "test_table")
 @Getter

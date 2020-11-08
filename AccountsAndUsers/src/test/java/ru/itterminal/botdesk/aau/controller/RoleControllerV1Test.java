@@ -26,7 +26,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.service.impl.RoleServiceImpl;
-import ru.itterminal.botdesk.commons.config.WebTestConfig;
+import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(RoleControllerV1.class)
@@ -55,7 +55,7 @@ class RoleControllerV1Test {
     void setUpBeforeAll() {
         MockitoAnnotations.initMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
-                .setControllerAdvice(WebTestConfig.controllerAdvice())
+                .setControllerAdvice(new RestExceptionHandler())
                 .build();
     }
 

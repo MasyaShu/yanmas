@@ -1,14 +1,11 @@
 package ru.itterminal.botdesk.commons.exception;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolationException;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,7 +22,6 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import io.jsonwebtoken.JwtException;
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.commons.exception.error.ApiError;
@@ -34,14 +30,9 @@ import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 @Slf4j
 @ControllerAdvice
 @NoArgsConstructor
-@AllArgsConstructor
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
-    public static final String VALIDATION_ERROR_LIST_KEY = "incorrect_fields";
     private static final String INPUT_VALIDATION_FAILED = "Input Validation Failed";
-
-    @Autowired
-    private MessageSource messageSource;
 
     @ExceptionHandler(OptimisticLockingFailureException.class)
     public ResponseEntity<?> handleOptimisticLockingFailureException(OptimisticLockingFailureException ex, HttpServletRequest request) {
@@ -85,11 +76,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
             ex.getExceptionCode(), ex)
             .withRequest(request)
             .withDetail(INPUT_VALIDATION_FAILED);
-        if (ex.getFieldErrors() == null) {
-            apiError.setErrors(new HashMap<String, List<ValidationError>>() {{
-                put(VALIDATION_ERROR_LIST_KEY, ex.getWarnings());
-            }});
-        } else {
+        if (ex.getFieldErrors() != null) {
             apiError.setErrors(ex.getFieldErrors());
         }
         log.warn(ex.getMessage());

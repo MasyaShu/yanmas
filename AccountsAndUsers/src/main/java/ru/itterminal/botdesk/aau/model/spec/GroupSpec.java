@@ -4,12 +4,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.Group;
-import ru.itterminal.botdesk.commons.model.spec.GeneralSpec;
+import ru.itterminal.botdesk.commons.model.spec.BaseSpec;
 
 import java.util.UUID;
 
 @Component
-public class GroupSpec extends GeneralSpec<Group, Account> {
+public class GroupSpec implements BaseSpec<Group, Account> {
 
     public Specification<Group> getGroupByNameSpec(String name) {
         return (Specification<Group>) (root, query, criteriaBuilder) -> criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + name.toLowerCase() + "%");

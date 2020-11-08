@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {BasicOperationValidatorImpl.class, GeneralEntityService.class, GeneralEntitySpec.class})
+@ContextConfiguration(classes = {BasicOperationValidatorImpl.class, GeneralEntityService.class, BaseEntitySpec.class})
 class CrudServiceImplTest {
 
     @MockBean
@@ -46,11 +46,10 @@ class CrudServiceImplTest {
     private GeneralEntityService service;
 
     @Autowired
-    private GeneralEntitySpec spec;
+    private BaseEntitySpec spec;
 
     private GeneralEntity testEntity;
     private GeneralEntity baseEntity;
-    private GeneralEntity deletedEntity;
     private Page<GeneralEntity> expectedPage;
 
     private final Pageable pageable = PageRequest.of(WORK_PAGE, WORK_PAGE_SIZE, Sort.by(SORT_CRITERIA));
@@ -74,15 +73,8 @@ class CrudServiceImplTest {
                 .name(testEntity.getName())
                 .description(testEntity.getDescription())
                 .build();
-        deletedEntity = GeneralEntity.builder()
-                .date(testEntity.getDate())
-                .name(testEntity.getName())
-                .description(testEntity.getDescription())
-                .build();
         baseEntity.setDeleted(false);
         baseEntity.setId(TEST_ENTITY_ID);
-        deletedEntity.setDeleted(true);
-        deletedEntity.setId(TEST_ENTITY_ID);
         expectedPage = new PageImpl<>(Collections.singletonList(baseEntity));
         Mockito.when(validator.beforeCreate(null)).thenThrow(NullEntityException.class);
         Mockito.when(validator.beforeUpdate(null)).thenThrow(NullEntityException.class);
@@ -162,7 +154,7 @@ class CrudServiceImplTest {
     void update_shouldReturnUpdatedEntity_whenEntityExistAndNotMarkedAsDeleted() {
         testEntity.setDeleted(false);
         Mockito.when(repository.update(testEntity)).thenReturn(baseEntity);
-        Mockito.when(repository.findById(testEntity.getId())).thenReturn(Optional.of(baseEntity));
+        Mockito.when(repository.existsById(testEntity.getId())).thenReturn(true);
         GeneralEntity actualEntity = service.update(testEntity);
         assertEquals(baseEntity, actualEntity);
     }
@@ -182,7 +174,7 @@ class CrudServiceImplTest {
     void update_shouldThrowExceptionSameAsRepository_whenRepositoryThrowException() {
         testEntity.setDeleted(false);
         Mockito.when(repository.update(testEntity)).thenThrow(DataIntegrityViolationException.class);
-        Mockito.when(repository.findById(testEntity.getId())).thenReturn(Optional.of(testEntity));
+        Mockito.when(repository.existsById(testEntity.getId())).thenReturn(true);
         assertThrows(DataIntegrityViolationException.class, () -> service.update(testEntity));
     }
 
@@ -191,7 +183,7 @@ class CrudServiceImplTest {
         testEntity.setId(TEST_ENTITY_ID);
         testEntity.setDeleted(false);
         Mockito.when(repository.update(testEntity)).thenThrow(OptimisticLockException.class);
-        Mockito.when(repository.findById(testEntity.getId())).thenReturn(Optional.of(testEntity));
+        Mockito.when(repository.existsById(testEntity.getId())).thenReturn(true);
         Throwable thrown = assertThrows(OptimisticLockingFailureException.class, () -> service.update(testEntity));
         String expected = format(VERSION_INVALID_MESSAGE, testEntity.getId());
         assertEquals(expected, thrown.getMessage());

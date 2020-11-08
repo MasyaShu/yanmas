@@ -21,5 +21,4 @@ public interface OperationValidator<E extends BaseEntity> {
 
     boolean checkLogicalDelete(UUID id);
 
-    boolean checkPhysicalDelete(UUID id);
 }

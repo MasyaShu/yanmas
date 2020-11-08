@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 
+@SuppressWarnings("JpaQlInspection")
 @NoRepositoryBean
 public interface CustomizedParentEntityRepository<T extends BaseEntity> extends ParentEntityRepository<T>,
     JpaSpecificationExecutor<T> {

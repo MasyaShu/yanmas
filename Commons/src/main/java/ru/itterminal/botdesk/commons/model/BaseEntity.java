@@ -32,7 +32,7 @@ public class BaseEntity {
      * @deprecated for manual changes {@link BaseEntity#version}!
      * Only for Dto->Entity mapping.
      *
-     * @param version
+     * @param version of entity in database
      */
     @Deprecated
     public void setVersion(Integer version) {

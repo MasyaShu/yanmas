@@ -38,6 +38,7 @@ import ru.itterminal.botdesk.commons.model.GeneralEntity;
  * Based on h2 database with postgres dialect and typical, but not existent in project, entity
  *
  */
+@SuppressWarnings("deprecation")
 @TestInstance(PER_CLASS)
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
@@ -70,6 +71,7 @@ class ParentEntityRepositoryTest {
     private static final String NOT_UNIQUE_NAME = "not_unique";
     private static final String GENERAL_DESCRIPTION = "general description";
 
+    @SuppressWarnings("unused")
     @BeforeAll
     private void initTestEnvironment() {
         uniqueGeneralEntity = GeneralEntity.builder()

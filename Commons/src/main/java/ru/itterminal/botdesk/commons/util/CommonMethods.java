@@ -1,7 +1,6 @@
 package ru.itterminal.botdesk.commons.util;
 
-import io.jsonwebtoken.JwtException;
-
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class CommonMethods {
     public static void chekStringForNullOrEmpty(String string, String messageForNull,
             String messageForEmpty, Class exceptionClass, String messageException) throws Throwable {
@@ -13,7 +12,10 @@ public class CommonMethods {
             causeException = messageForEmpty;
         }
         if (!causeException.isEmpty()) {
-            throw  (Throwable) exceptionClass.getConstructor(String.class).newInstance(messageException + causeException);
+            throw (Throwable) exceptionClass.getConstructor(String.class).newInstance(messageException + causeException);
         }
+    }
+
+    private CommonMethods() {
     }
 }

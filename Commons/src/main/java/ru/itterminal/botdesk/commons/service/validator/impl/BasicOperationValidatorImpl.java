@@ -22,7 +22,6 @@ public class BasicOperationValidatorImpl<E extends BaseEntity> implements Operat
     public static final String DEFAULT_CREATE_MESSAGE = "Using default validation for crate method";
     public static final String DEFAULT_UPDATE_MESSAGE = "Using default validation for update method";
     public static final String DEFAULT_LOGICAL_DELETE_MESSAGE = "Using default validation for logical delete method";
-    public static final String PHYSICAL_DELETE_MESSAGE = "Using default validation for physical delete method";
     public static final String CHECK_UNIQUENESS = "checkUniqueness({})";
     public static final String FIELDS_UNIQUE = "Fields are unique: {}";
     public static final String FIELDS_NOT_UNIQUE = "Fields not unique: {}";
@@ -68,13 +67,4 @@ public class BasicOperationValidatorImpl<E extends BaseEntity> implements Operat
         return true;
     }
 
-    @Override
-    public boolean checkPhysicalDelete(UUID id) {
-        log.debug(PHYSICAL_DELETE_MESSAGE);
-        if (id == null) {
-            log.error(INVALID_ENTITY_MESSAGE);
-            throw new NullEntityException(INVALID_ENTITY_MESSAGE);
-        }
-        return true;
-    }
 }

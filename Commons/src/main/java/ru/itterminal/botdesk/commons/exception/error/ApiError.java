@@ -13,10 +13,6 @@ import org.springframework.web.context.request.WebRequest;
 
 import lombok.Data;
 
-/**
- * For detailed JSON response of rest controller when validation is failed
- *
- */
 @Data
 public class ApiError {
     private int status;

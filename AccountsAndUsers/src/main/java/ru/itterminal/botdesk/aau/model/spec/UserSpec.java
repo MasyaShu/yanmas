@@ -16,10 +16,10 @@ import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.User;
-import ru.itterminal.botdesk.commons.model.spec.GeneralSpec;
+import ru.itterminal.botdesk.commons.model.spec.BaseSpec;
 
 @Component
-public class UserSpec extends GeneralSpec<User, Account> {
+public class UserSpec implements BaseSpec<User, Account> {
 
     public Specification<User> getUserByEmailSpec(String email) {
         return new Specification<User>() {

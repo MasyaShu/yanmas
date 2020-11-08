@@ -55,7 +55,7 @@ public class ParentEntityRepositoryImpl<T extends BaseEntity>
             log.error(ENTITY_NULL_MESSAGE);
             throw new NullEntityException(ENTITY_NULL_MESSAGE);
         }
-        if (!findById(entity.getId()).isPresent()) {
+        if (findById(entity.getId()).isEmpty()) {
             String message = format(ENTITY_NOT_EXIST_MESSAGE, entity.getClass().getSimpleName(), entity.getId());
             log.error(message);
             throw new EntityNotExistException(message);

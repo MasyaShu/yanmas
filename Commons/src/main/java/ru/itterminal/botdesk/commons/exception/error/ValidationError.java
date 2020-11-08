@@ -7,11 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-/**
- * Indicates incorrect field and associates fail-message to it.
- *
- *  @see ApiError
- */
 @Setter
 @Getter
 @ToString

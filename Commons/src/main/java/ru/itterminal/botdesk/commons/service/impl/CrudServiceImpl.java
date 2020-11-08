@@ -128,11 +128,11 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
     public E update(E entity) {
         validator.beforeUpdate(entity);
         log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
-        E entityFromDatabase = repository.findById(entity.getId()).orElseThrow(() -> {
+        if (!repository.existsById(entity.getId())) {
             String message = format(ENTITY_NOT_EXIST_MESSAGE, entity.getClass().getSimpleName(), entity.getId());
             log.error(message);
-            return new EntityNotExistException(message);
-        });
+            throw new EntityNotExistException(message);
+        }
         try {
             E updatedEntity = repository.update(entity);
             log.trace(format(UPDATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), updatedEntity));
@@ -143,21 +143,16 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
         }
     }
 
-    public void physicalDelete(UUID id) {
-        throw new UnsupportedOperationException("physicalDeleteNotYetImplement");
-    }
-
     @Override
     @Transactional(readOnly = true)
     public List<E> findAll() {
         return (List<E>) repository.findAll();
     }
 
-    public boolean checkEntityIdAndAccountId(String nameEntity, UUID id, UUID accountId) {
+    public void checkEntityIdAndAccountId(String nameEntity, UUID id, UUID accountId) {
         if (id == null || accountId == null) {
             log.error(format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, nameEntity, id, accountId));
             throw new EntityNotExistException(format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, nameEntity, id, accountId));
         }
-        return true;
     }
 }

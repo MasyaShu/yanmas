@@ -8,12 +8,6 @@ import java.util.stream.Stream;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-
-/**
- * Validates annotated with @ValueOfEnum field matches any of given enum.
- *
- */
-
 public class ValueOfEnumValidator implements ConstraintValidator<ValueOfEnum, CharSequence> {
 
     private List<String> acceptedValues;

@@ -1,11 +1,6 @@
 package ru.itterminal.botdesk.commons.exception;
 
 
-/**
- *
- * e.g. if entity don't exist in database
- *
- */
 public class EntityNotExistException extends RuntimeException {
 
     public EntityNotExistException() {
