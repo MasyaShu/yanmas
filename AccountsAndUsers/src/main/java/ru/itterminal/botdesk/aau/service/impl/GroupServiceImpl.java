@@ -52,7 +52,6 @@ public class GroupServiceImpl extends CrudServiceImpl<Group, GroupOperationValid
         });
         try {
             entity.setIsInner(entityFromDatabase.getIsInner());
-            entity.setAccount(entityFromDatabase.getAccount());
             Group updatedEntity = repository.update(entity);
             log.trace(format(UPDATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), updatedEntity));
             return updatedEntity;

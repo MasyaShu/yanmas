@@ -72,10 +72,12 @@ public class GroupControllerV1 extends BaseController {
 
     @PutMapping()
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')")
-    public ResponseEntity<GroupDto> update(
+    public ResponseEntity<GroupDto> update(Principal principal,
             @Validated(Update.class) @RequestBody GroupDto request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
         Group group = modelMapper.map(request, Group.class);
+        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
+        group.setAccount(accountService.findById(jwtUser.getAccountId()));
         Group updatedGroup = service.update(group);
         GroupDto returnedGroup =
                 modelMapper.map(updatedGroup, GroupDto.class);
