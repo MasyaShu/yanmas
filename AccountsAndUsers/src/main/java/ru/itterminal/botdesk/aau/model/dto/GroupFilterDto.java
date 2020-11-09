@@ -26,6 +26,7 @@ public class GroupFilterDto extends BaseFilterDto {
     @ValueOfEnum(enumClass = FieldsForSort.class, message = "must be any of: name")
     private String sortBy = "name";
 
+    @SuppressWarnings("unused")
     public enum FieldsForSort {
         NAME
     }

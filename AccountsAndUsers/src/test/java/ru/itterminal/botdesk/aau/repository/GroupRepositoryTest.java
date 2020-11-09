@@ -1,26 +1,21 @@
 package ru.itterminal.botdesk.aau.repository;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
+
+import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.itterminal.botdesk.aau.model.Group;
+
 import ru.itterminal.botdesk.aau.model.spec.GroupSpec;
-import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
-
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
 @TestInstance(PER_CLASS)
 @ExtendWith(SpringExtension.class)
@@ -36,64 +31,62 @@ class GroupRepositoryTest {
     GroupSpec spec;
 
     private static final String EXIST_NAME = "groupName1";
-    private static final String EXIST_NAME2 = "groupName";
     private static final String NOT_EXIST_NAME = "groupName4";
     private static final UUID EXIST_ID = UUID.fromString("0223e51a-4bb2-44ee-bc8e-1f047a2145e7");
     private static final UUID NOT_EXIST_ID = UUID.fromString("0223e51a-4bb2-44ee-bc8e-1f047a2145e8");
     private static final UUID ACCOUNT_1_ID = UUID.fromString("cdfa6483-0769-4628-ba32-efd338a716de");
-    private static final UUID ACCOUNT_2_ID = UUID.fromString("bcf98101-2a22-42bf-94cc-c900b50a0b69");
     private static final UUID ACCOUNT_ID_NOT_EXIST = UUID.fromString("3ee38c7d-df86-40a7-8805-f75649f15cd1");
-    private static final String COMMENT_1 = "comment for group1 of users";
-    private static final String COMMENT_2 = "comment for";
-    private static final String COMMENT_3 = "blablabla";
 
     @Test
-    public void getByNameAndAccount_IdAndIdNot_shouldGetEmptyList_whenNameNotExistAndIdNotExistInDatabase() {
-        assertTrue(groupRepository.getByNameAndAccount_IdAndIdNot(NOT_EXIST_NAME, ACCOUNT_1_ID, NOT_EXIST_ID).isEmpty());
+    void getByNameAndAccount_IdAndIdNot_shouldGetEmptyList_whenNameNotExistAndIdNotExistInDatabase() {
+        assertTrue(
+                groupRepository.getByNameAndAccount_IdAndIdNot(NOT_EXIST_NAME, ACCOUNT_1_ID, NOT_EXIST_ID).isEmpty());
     }
 
     @Test
-    public void getByNameAndAccount_IdAndIdNott_shouldGetEmptyList_whenNameNotExistAndIdExistInDatabase() {
+    void getByNameAndAccount_IdAndIdNot_shouldGetEmptyList_whenNameNotExistAndIdExistInDatabase() {
         assertTrue(groupRepository.getByNameAndAccount_IdAndIdNot(NOT_EXIST_NAME, ACCOUNT_1_ID, EXIST_ID).isEmpty());
     }
 
     @Test
-    public void getByNameAndAccount_IdAndIdNot_shouldGetNotNull_whenNameExistAndIdNotExistInDatabase() {
-        assertTrue(groupRepository.getByNameAndAccount_IdAndIdNot(EXIST_NAME, ACCOUNT_1_ID, NOT_EXIST_ID).get(0).getName().equals(EXIST_NAME));
+    void getByNameAndAccount_IdAndIdNot_shouldGetNotNull_whenNameExistAndIdNotExistInDatabase() {
+        String name = groupRepository
+                .getByNameAndAccount_IdAndIdNot(EXIST_NAME, ACCOUNT_1_ID, NOT_EXIST_ID).get(0).getName();
+        assertEquals(EXIST_NAME, name);
     }
 
     @Test
-    public void getByNameAndAccount_IdAndIdNot_shouldGetEmptyList_whenNameExistAndIdExistInDatabase() {
-        assertTrue(groupRepository.getByNameAndAccount_IdAndIdNot(EXIST_NAME,ACCOUNT_1_ID, EXIST_ID).isEmpty());
+    void getByNameAndAccount_IdAndIdNot_shouldGetEmptyList_whenNameExistAndIdExistInDatabase() {
+        assertTrue(groupRepository.getByNameAndAccount_IdAndIdNot(EXIST_NAME, ACCOUNT_1_ID, EXIST_ID).isEmpty());
     }
 
     @Test
-    public void getByNameAndAccount_Id_shouldGetEmptyList_whenNameNotExistAndAccountIdExist() {
+    void getByNameAndAccount_Id_shouldGetEmptyList_whenNameNotExistAndAccountIdExist() {
         assertTrue(groupRepository.getByNameAndAccount_Id(NOT_EXIST_NAME, ACCOUNT_1_ID).isEmpty());
     }
 
     @Test
-    public void getByNameAndAccount_Id_shouldGetNotNull_whenNameExistAndAccountIdExist() {
-        assertTrue(groupRepository.getByNameAndAccount_Id(EXIST_NAME, ACCOUNT_1_ID).get().getName().equals(EXIST_NAME));
+    void getByNameAndAccount_Id_shouldGetNotNull_whenNameExistAndAccountIdExist() {
+        assertEquals(EXIST_NAME, groupRepository.getByNameAndAccount_Id(EXIST_NAME, ACCOUNT_1_ID).get().getName());
     }
 
     @Test
-    public void getByNameAndAccount_Id_shouldGetEmptyList_whenNameExistAndAccountIdNotExist() {
+    void getByNameAndAccount_Id_shouldGetEmptyList_whenNameExistAndAccountIdNotExist() {
         assertTrue(groupRepository.getByNameAndAccount_Id(NOT_EXIST_NAME, ACCOUNT_ID_NOT_EXIST).isEmpty());
     }
 
     @Test
-    public void getByIdAndAccount_Id_shouldGetEmptyList_whenGroupIdNotExistAndAccountIdExist() {
+    void getByIdAndAccount_Id_shouldGetEmptyList_whenGroupIdNotExistAndAccountIdExist() {
         assertTrue(groupRepository.getByIdAndAccount_Id(NOT_EXIST_ID, ACCOUNT_1_ID).isEmpty());
     }
 
     @Test
-    public void getByIdAndAccount_Id_shouldGetNotNull_whenGroupIdExistAndAccountIdExist() {
-        assertTrue(groupRepository.getByIdAndAccount_Id(EXIST_ID, ACCOUNT_1_ID).get().getName().equals(EXIST_NAME));
+    void getByIdAndAccount_Id_shouldGetNotNull_whenGroupIdExistAndAccountIdExist() {
+        assertEquals(EXIST_NAME, groupRepository.getByIdAndAccount_Id(EXIST_ID, ACCOUNT_1_ID).get().getName());
     }
 
     @Test
-    public void getByIdAndAccount_Id_shouldGetEmptyList_whenGroupIdExistAndAccountIdNotExist() {
+    void getByIdAndAccount_Id_shouldGetEmptyList_whenGroupIdExistAndAccountIdNotExist() {
         assertTrue(groupRepository.getByIdAndAccount_Id(NOT_EXIST_ID, ACCOUNT_ID_NOT_EXIST).isEmpty());
     }
 }

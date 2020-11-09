@@ -22,6 +22,7 @@ import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
 
+@SuppressWarnings("deprecation")
 @TestInstance(PER_CLASS)
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
@@ -64,56 +65,56 @@ class UserRepositoryTest {
     }
 
     @Test
-    public void getByEmailAndIdNot_shouldGetEmptyList_whenEmailNotExistAndIdNotExistInDatabase() {
+    void getByEmailAndIdNot_shouldGetEmptyList_whenEmailNotExistAndIdNotExistInDatabase() {
         assertTrue(userRepository.getByEmailAndIdNot(EMAIL_NOT_EXIST, ID_NOT_EXIST).isEmpty());
     }
 
     @Test
-    public void getByEmailAndIdNot_shouldGetEmptyList_whenEmailNotExistAndIdExistInDatabase() {
+    void getByEmailAndIdNot_shouldGetEmptyList_whenEmailNotExistAndIdExistInDatabase() {
         assertTrue(userRepository.getByEmailAndIdNot(EMAIL_NOT_EXIST, USER_1_ID_EXIST).isEmpty());
     }
 
     @Test
-    public void getByEmailAndIdNot_shouldGetOneUserUniqueFields_whenEmailExistAndIdNotExistInDatabase() {
-        assertTrue(userRepository.getByEmailAndIdNot(USER_1_EMAIL_EXIST, ID_NOT_EXIST).get(0).getEmail().equals(
-                USER_1_EMAIL_EXIST));
+    void getByEmailAndIdNot_shouldGetOneUserUniqueFields_whenEmailExistAndIdNotExistInDatabase() {
+        assertEquals(USER_1_EMAIL_EXIST,
+                userRepository.getByEmailAndIdNot(USER_1_EMAIL_EXIST, ID_NOT_EXIST).get(0).getEmail());
     }
 
     @Test
-    public void getByEmailAndIdNot_shouldGetEmptyList_whenEmailExistAndIdExistInDatabase() {
+    void getByEmailAndIdNot_shouldGetEmptyList_whenEmailExistAndIdExistInDatabase() {
         assertTrue(userRepository.getByEmailAndIdNot(USER_1_EMAIL_EXIST, USER_1_ID_EXIST).isEmpty());
     }
 
     @Test
-    public void findAllByRoleAndIdNot_shouldGetEmpty_whenAccountOwnerExistAndIdEquals() {
+    void findAllByRoleAndIdNot_shouldGetEmpty_whenAccountOwnerExistAndIdEquals() {
         List<User> foundUsers;
         foundUsers = userRepository.findAllByRoleAndIdNot(roleAccountOwner, USER_1_ID_EXIST);
         assertTrue(foundUsers.isEmpty());
     }
 
     @Test
-    public void findAllByRoleAndIdNot_shouldGetOneUser_whenRoleAccountOwnerExistAndIdNotEquals() {
+    void findAllByRoleAndIdNot_shouldGetOneUser_whenRoleAccountOwnerExistAndIdNotEquals() {
         List<User> foundUsers;
         foundUsers = userRepository.findAllByRoleAndIdNot(roleAccountOwner, UUID.randomUUID());
-        assertTrue(foundUsers.size() == 1);
+        assertEquals(1, foundUsers.size());
     }
 
     @Test
-    public void findAllByRoleAndAccountId_shouldGetOneUser_whenRoleAccountOwnerExistAndIdEquals() {
+    void findAllByRoleAndAccountId_shouldGetOneUser_whenRoleAccountOwnerExistAndIdEquals() {
         List<User> foundUsers;
         foundUsers = userRepository.findAllByRoleAndAccount_Id(roleAccountOwner, USER_1_ACCOUNT_ID_EXIST);
-        assertTrue(foundUsers.get(0).getId().equals(USER_1_ID_EXIST));
+        assertEquals(USER_1_ID_EXIST, foundUsers.get(0).getId());
     }
 
     @Test
-    public void findAllByRoleAndAccountId_shouldGetEmptyList_whenRoleNotExistAndIdEquals() {
+    void findAllByRoleAndAccountId_shouldGetEmptyList_whenRoleNotExistAndIdEquals() {
         List<User> foundUsers;
         foundUsers = userRepository.findAllByRoleAndAccount_Id(roleNotExistInDatabase, USER_1_ACCOUNT_ID_EXIST);
         assertTrue(foundUsers.isEmpty());
     }
 
     @Test
-    public void getByIdAndAccountIdAndOwnGroupId_shouldGetOneUser_whenUserInDatabaseHasAllPassedParameters () {
+    void getByIdAndAccountIdAndOwnGroupId_shouldGetOneUser_whenUserInDatabaseHasAllPassedParameters() {
         User user = userRepository.getByIdAndAccount_IdAndOwnGroup_Id(USER_1_ID_EXIST, USER_1_ACCOUNT_ID_EXIST,
                 USER_1_OWN_GROUP_ID_EXIST).get();
         assertNotNull(user);
@@ -121,6 +122,5 @@ class UserRepositoryTest {
         assertEquals(USER_1_ACCOUNT_ID_EXIST, user.getAccount().getId());
         assertEquals(USER_1_OWN_GROUP_ID_EXIST, user.getOwnGroup().getId());
     }
-
 
 }

@@ -33,7 +33,7 @@ import ru.itterminal.botdesk.jwt.JwtUser;
 @RequestMapping("api/v1/")
 public class AccountControllerV1 extends BaseController {
 
-    AccountServiceImpl service;
+    final AccountServiceImpl service;
 
     @Autowired
     public AccountControllerV1(AccountServiceImpl service) {
@@ -72,7 +72,7 @@ public class AccountControllerV1 extends BaseController {
 
     @GetMapping("account")
     public ResponseEntity<AccountDto> get(Principal user) {
-        log.debug(START_GET_ACCOUNT_FROM_AUTHENTICATED_USER, ENTITY_NAME, user);
+        log.debug(START_GET_ACCOUNT_FROM_AUTHENTICATED_USER, user);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
         Account foundAccount = service.findById(jwtUser.getAccountId());
         AccountDto returnedAccount = modelMapper.map(foundAccount, AccountDto.class);
@@ -82,7 +82,7 @@ public class AccountControllerV1 extends BaseController {
 
     @DeleteMapping("account")
     @PreAuthorize("hasAuthority('ACCOUNT_OWNER') and #request.id == authentication.principal.accountId")
-    ResponseEntity<Void> physicalDelete(@Validated(Delete.class) @RequestBody AccountDto request) {
+    public ResponseEntity<Void> physicalDelete(@Validated(Delete.class) @RequestBody AccountDto request) {
         throw new UnsupportedOperationException("Physical delete will be implement in the further");
     }
 }

@@ -2,6 +2,8 @@ package ru.itterminal.botdesk.commons.model.dto;
 
 import static java.lang.String.format;
 
+import javax.validation.constraints.Size;
+
 import org.springframework.data.domain.Sort;
 
 import lombok.Getter;
@@ -17,7 +19,9 @@ import ru.itterminal.botdesk.commons.model.validator.ValueOfEnum;
 @Setter
 public class BaseFilterDto {
 
-    // TODO add outId
+    @Size(max = 128)
+    private String outId;
+
     @ValueOfEnum(enumClass = FilterByDeleted.class, message = "must be any of: all, true, false")
     private String deleted = "ALL";
 

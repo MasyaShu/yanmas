@@ -78,14 +78,11 @@ class AccountControllerV1Test {
                 .build();
     }
 
-    private ObjectMapper objectMapper = new ObjectMapper();
-    private static String HOST = "http://localhost";
-    private static String PORT = ":8081";
-    private static String API = "api/v1/";
-    private static UUID USER_ID = UUID.fromString("d414bc22-686c-4004-b009-c3569f7914d5");
-    private static String ACCOUNT_NAME = "Name of account";
-    private static String PASSWORD = "UserUser123";
-    private static String NAME_GROUP_OF_ACCOUNT_OWNER = "Name of group of account owner";
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final String HOST = "http://localhost";
+    private static final String PORT = ":8081";
+    private static final String API = "api/v1/";
+    private static final String ACCOUNT_NAME = "Name of account";
     private Account account;
     private AccountDto accountDto;
     private AccountCreateDto accountCreateDto;
@@ -93,7 +90,9 @@ class AccountControllerV1Test {
     @BeforeEach
     void setUpBeforeEach() {
         String EMAIL_OF_ACCOUNT_OWNER = "m@m.ru";
-        accountCreateDto = accountCreateDto
+        String PASSWORD = "UserUser123";
+        String NAME_GROUP_OF_ACCOUNT_OWNER = "Name of group of account owner";
+        accountCreateDto = AccountCreateDto
                 .builder()
                 .emailAccountOwner(EMAIL_OF_ACCOUNT_OWNER)
                 .passwordAccountOwner(PASSWORD)
@@ -114,7 +113,7 @@ class AccountControllerV1Test {
 
     @Test
     @WithAnonymousUser
-    public void create_shouldCreateAccount_whenPassedValidData() throws Exception {
+    void create_shouldCreateAccount_whenPassedValidData() throws Exception {
         when(service.create((AccountCreateDto) any())).thenReturn(account);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API + "create-account")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -130,7 +129,7 @@ class AccountControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void create_shouldGetForbiddenStatus_whenAuthenticatedUserHasNotRoleAccountOwner() throws Exception {
+    void create_shouldGetForbiddenStatus_whenAuthenticatedUserHasNotRoleAccountOwner() throws Exception {
         when(service.create((AccountCreateDto) any())).thenReturn(account);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API + "create-account")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -144,7 +143,7 @@ class AccountControllerV1Test {
 
     @Test
     @WithAnonymousUser
-    public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
+    void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
         accountCreateDto.setName("1");
         accountCreateDto.setNameGroupAccountOwner("");
         accountCreateDto.setEmailAccountOwner("12");
@@ -167,7 +166,7 @@ class AccountControllerV1Test {
 
     @Test
     @WithAnonymousUser
-    public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenAllDataIsNull() throws Exception {
+    void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenAllDataIsNull() throws Exception {
         accountCreateDto.setName(null);
         accountCreateDto.setNameGroupAccountOwner(null);
         accountCreateDto.setEmailAccountOwner(null);
@@ -190,7 +189,7 @@ class AccountControllerV1Test {
 
     @Test
     @WithUserDetails("OWNER_ACCOUNT_1_IS_INNER_GROUP")
-    public void update_shouldUpdateAccount_whenPassedValidData() throws Exception {
+    void update_shouldUpdateAccount_whenPassedValidData() throws Exception {
         accountDto.setDeleted(false);
         accountDto.setVersion(0);
         when(service.update(any())).thenReturn(account);
@@ -206,7 +205,7 @@ class AccountControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void update_shouldGetStatusForbidden_whenAuthenticatedUserHasNotRoleAccountOwner() throws Exception {
+    void update_shouldGetStatusForbidden_whenAuthenticatedUserHasNotRoleAccountOwner() throws Exception {
         accountDto.setDeleted(false);
         accountDto.setVersion(0);
         when(service.update(any())).thenReturn(account);
@@ -222,7 +221,7 @@ class AccountControllerV1Test {
 
     @Test
     @WithUserDetails("OWNER_ACCOUNT_1_IS_INNER_GROUP")
-    public void update_shouldGetStatusBadRequest_whenInvalidDataPassed() throws Exception {
+    void update_shouldGetStatusBadRequest_whenInvalidDataPassed() throws Exception {
         when(service.update(any())).thenReturn(account);
         accountDto.setName("");
         accountDto.setVersion(0);
@@ -240,7 +239,7 @@ class AccountControllerV1Test {
 
     @Test
     @WithUserDetails("OWNER_ACCOUNT_1_IS_INNER_GROUP")
-    public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenAllDataIsNull() throws Exception {
+    void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenAllDataIsNull() throws Exception {
         accountDto.setName(null);
         accountDto.setVersion(null);
         accountDto.setDeleted(null);
@@ -261,7 +260,7 @@ class AccountControllerV1Test {
 
     @Test
     @WithUserDetails("OWNER_ACCOUNT_1_IS_INNER_GROUP")
-    public void get_shouldGetAccount_whenPassedValidData() throws Exception {
+    void get_shouldGetAccount_whenPassedValidData() throws Exception {
         when(service.findById(any())).thenReturn(account);
         MockHttpServletRequestBuilder request = get(HOST + PORT + API + "account")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -276,7 +275,7 @@ class AccountControllerV1Test {
 
     @Test
     @WithAnonymousUser
-    public void get_shouldGetStatusForbidden_whenUserIsNotAuthenticated() throws Exception {
+    void get_shouldGetStatusForbidden_whenUserIsNotAuthenticated() throws Exception {
         MockHttpServletRequestBuilder request = get(HOST + PORT + API + "account")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON);

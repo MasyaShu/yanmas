@@ -68,21 +68,21 @@ class UserServiceImplTest {
     private UserServiceImpl service;
 
     private static final UUID USER_ID = UUID.fromString("41ca3b9a-8e94-42a0-acbd-a2d3756af379");
-    private static String PASSWORD = "12345";
     private User user;
-    private User userFromInDatabase;
+    private User userFromDatabase;
     private Account account;
-    private Group group;
-    private Role roleAdmin = new Role(ADMIN.toString(), ADMIN.getWeight());
-    private Role roleAccountOwner = new Role(ACCOUNT_OWNER.toString(), ACCOUNT_OWNER.getWeight());
+    private final Role roleAdmin = new Role(ADMIN.toString(), ADMIN.getWeight());
+    private final Role roleAccountOwner = new Role(ACCOUNT_OWNER.toString(), ACCOUNT_OWNER.getWeight());
 
     @BeforeEach
     void setUpBeforeEach() {
         account = new Account();
         account.setId(UUID.fromString(ACCOUNT_1_ID));
-        group = new Group();
+        Group group = new Group();
         group.setId(UUID.fromString(GROUP_1_ID));
-        user = new User().builder()
+        String PASSWORD = "12345";
+        user = User
+                .builder()
                 .email(EMAIL_1)
                 .password(PASSWORD)
                 .account(account)
@@ -91,7 +91,8 @@ class UserServiceImplTest {
                 .role(roleAdmin)
                 .build();
         user.setId(USER_ID);
-        userFromInDatabase = new User().builder()
+        userFromDatabase = User
+                .builder()
                 .email(EMAIL_1)
                 .password(PASSWORD)
                 .account(account)
@@ -99,18 +100,18 @@ class UserServiceImplTest {
                 .isArchived(false)
                 .role(roleAdmin)
                 .build();
-        userFromInDatabase.setId(USER_ID);
+        userFromDatabase.setId(USER_ID);
     }
 
     @Test
-    public void create_shouldCreateUser_whenPassedValidDataWithRoleAccountOwner() {
+    void create_shouldCreateUser_whenPassedValidDataWithRoleAccountOwner() {
         when(validator.beforeCreate(any())).thenReturn(true);
         when(validator.checkUniqueness(any())).thenReturn(true);
         when(userRepository.create(any())).thenReturn(user);
         when(roleService.getAccountOwnerRole()).thenReturn(roleAccountOwner);
         user.setRole(roleAccountOwner);
         User createdUser = service.create(user);
-        assertTrue(user.equals(createdUser));
+        assertEquals(createdUser, user);
         verify(validator, times(1)).beforeCreate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(userRepository, times(1)).create(any());
@@ -118,13 +119,13 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void create_shouldCreateUser_whenPassedValidDataWithRoleAdmin() {
+    void create_shouldCreateUser_whenPassedValidDataWithRoleAdmin() {
         when(validator.beforeCreate(any())).thenReturn(true);
         when(validator.checkUniqueness(any())).thenReturn(true);
         when(userRepository.create(any())).thenReturn(user);
         when(roleService.getAccountOwnerRole()).thenReturn(roleAccountOwner);
         User createdUser = service.create(user);
-        assertTrue(user.equals(createdUser));
+        assertEquals(createdUser, user);
         verify(validator, times(1)).beforeCreate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(userRepository, times(1)).create(any());
@@ -132,14 +133,14 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void update_shouldUpdateUser_whenPassedValidData() {
+    void update_shouldUpdateUser_whenPassedValidData() {
         when(validator.beforeUpdate(any())).thenReturn(true);
         when(validator.checkUniqueness(any())).thenReturn(true);
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
         when(userRepository.update(any())).thenReturn(user);
         User createdUser = service.update(user);
-        assertTrue(user.equals(createdUser));
+        assertEquals(createdUser, user);
         verify(validator, times(1)).beforeUpdate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(userRepository, times(1)).existsById(any());
@@ -148,13 +149,13 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void update_shouldGetEntityNotExistException_whenUserIdNotExistInDatabase() {
+    void update_shouldGetEntityNotExistException_whenUserIdNotExistInDatabase() {
         when(validator.beforeUpdate(any())).thenReturn(true);
         when(validator.checkUniqueness(any())).thenReturn(true);
         when(userRepository.existsById(any())).thenReturn(false);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
         when(userRepository.update(any())).thenReturn(user);
-        Throwable throwable = assertThrows(EntityNotExistException.class, ()-> service.update(user));
+        Throwable throwable = assertThrows(EntityNotExistException.class, () -> service.update(user));
         assertEquals(format(FIND_INVALID_MESSAGE, "id", user.getId()), throwable.getMessage());
         verify(validator, times(1)).beforeUpdate(any());
         verify(validator, times(1)).checkUniqueness(any());
@@ -164,14 +165,14 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void update_shouldGetOptimisticLockingFailureException_whenPassedInvalidVersionOfUser() {
+    void update_shouldGetOptimisticLockingFailureException_whenPassedInvalidVersionOfUser() {
         String message = format(VERSION_INVALID_MESSAGE, user.getId());
         when(validator.beforeUpdate(any())).thenReturn(true);
         when(validator.checkUniqueness(any())).thenReturn(true);
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
         when(userRepository.update(any())).thenThrow(new OptimisticLockingFailureException(message));
-        Throwable throwable = assertThrows(OptimisticLockingFailureException.class, ()-> service.update(user));
+        Throwable throwable = assertThrows(OptimisticLockingFailureException.class, () -> service.update(user));
         assertEquals(message, throwable.getMessage());
         verify(validator, times(1)).beforeUpdate(any());
         verify(validator, times(1)).checkUniqueness(any());
@@ -181,69 +182,72 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void findByEmail_shouldGetEntityNotExistException_whenEmailIsNull() {
+    void findByEmail_shouldGetEntityNotExistException_whenEmailIsNull() {
         assertThrows(EntityNotExistException.class, () -> service.findByEmail(null));
         verify(userRepository, times(0)).getByEmail(any());
     }
 
     @Test
-    public void findByEmail_shouldGetEntityNotExistException_whenEmailIsEmpty() {
+    void findByEmail_shouldGetEntityNotExistException_whenEmailIsEmpty() {
         assertThrows(EntityNotExistException.class, () -> service.findByEmail(""));
         verify(userRepository, times(0)).getByEmail(any());
     }
 
     @Test
-    public void findByUniqueFields_shouldGetEntityNotExistException_whenUserIsNull() {
+    void findByUniqueFields_shouldGetEntityNotExistException_whenUserIsNull() {
         assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(null));
         verify(userRepository, times(0)).getByEmailAndIdNot(any(), any());
     }
 
     @Test
-    public void findByUniqueFields_shouldGetEntityNotExistException_whenUserEmailIsNull() {
+    void findByUniqueFields_shouldGetEntityNotExistException_whenUserEmailIsNull() {
         user.setEmail(null);
         assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(user));
         verify(userRepository, times(0)).getByEmailAndIdNot(any(), any());
     }
 
     @Test
-    public void findByUniqueFields_shouldGetEntityNotExistException_whenUserIdIsNull() {
+    void findByUniqueFields_shouldGetEntityNotExistException_whenUserIdIsNull() {
         user.setId(null);
         assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(user));
         verify(userRepository, times(0)).getByEmailAndIdNot(any(), any());
     }
 
     @Test
-    public void findByIdAndAccountId_shouldGetEntityNotExistException_whenUserIdIsNull() {
-        assertThrows(EntityNotExistException.class, () -> service.findByIdAndAccountId(null, account.getId()));
+    void findByIdAndAccountId_shouldGetEntityNotExistException_whenUserIdIsNull() {
+        UUID accountId = account.getId();
+        assertThrows(EntityNotExistException.class, () -> service.findByIdAndAccountId(null, accountId));
         verify(userRepository, times(0)).getByIdAndAccount_Id(any(), any());
     }
 
     @Test
-    public void findByIdAndAccountId_shouldGetEntityNotExistException_whenAccountIdIsNull() {
-        assertThrows(EntityNotExistException.class, () -> service.findByIdAndAccountId(user.getId(), null));
+    void findByIdAndAccountId_shouldGetEntityNotExistException_whenAccountIdIsNull() {
+        UUID userId = user.getId();
+        assertThrows(EntityNotExistException.class, () -> service.findByIdAndAccountId(userId, null));
         verify(userRepository, times(0)).getByIdAndAccount_Id(any(), any());
     }
 
     @Test
-    public void findAllByRoleAndIdNot_shouldGetEntityNotExistException_whenRoleIsNull() {
-        assertThrows(EntityNotExistException.class, () -> service.findAllByRoleAndIdNot(null, user.getId()));
+    void findAllByRoleAndIdNot_shouldGetEntityNotExistException_whenRoleIsNull() {
+        UUID userId = user.getId();
+        assertThrows(EntityNotExistException.class, () -> service.findAllByRoleAndIdNot(null, userId));
         verify(userRepository, times(0)).findAllByRoleAndIdNot(any(), any());
     }
 
     @Test
-    public void findAllByRoleAndIdNot_shouldGetEntityNotExistException_whenUserIdIsNull() {
+    void findAllByRoleAndIdNot_shouldGetEntityNotExistException_whenUserIdIsNull() {
         assertThrows(EntityNotExistException.class, () -> service.findAllByRoleAndIdNot(roleAdmin, null));
         verify(userRepository, times(0)).findAllByRoleAndIdNot(any(), any());
     }
 
     @Test
-    public void findAllByRole_shouldGetEntityNotExistException_whenRoleIsNull() {
+    void findAllByRole_shouldGetEntityNotExistException_whenRoleIsNull() {
         assertThrows(EntityNotExistException.class, () -> service.findAllByRole(null));
         verify(userRepository, times(0)).findAllByRole(any());
     }
 
     @Test
-    public void verifyEmailToken_shouldUpdateEmailVerificationStatus_whenTokenIsValid() {
+    void verifyEmailToken_shouldUpdateEmailVerificationStatus_whenTokenIsValid() {
         String token = jwtProvider.createToken(USER_ID);
         user.setEmailVerificationToken(token);
         when(userRepository.existsById(any())).thenReturn(true);
@@ -258,14 +262,14 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void verifyEmailToken_shouldGetJwtException_whenEmailVerificationTokenInDatabaseIsNull() {
+    void verifyEmailToken_shouldGetJwtException_whenEmailVerificationTokenInDatabaseIsNull() {
         String token = jwtProvider.createToken(USER_ID);
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
         user.setEmailVerificationStatus(true);
         when(userRepository.save(any())).thenReturn(user);
         Throwable throwable = assertThrows(JwtException.class, () -> service.verifyEmailToken(token));
-        assertTrue(throwable.getMessage().equals(NOT_FOUND_USER_BY_EMAIL_VERIFICATION_TOKEN));
+        assertEquals(NOT_FOUND_USER_BY_EMAIL_VERIFICATION_TOKEN, throwable.getMessage());
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(1)).findById(any());
         verify(userRepository, times(0)).save(any());
@@ -273,38 +277,37 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void verifyEmailToken_shouldGetJwtException_whenEmailVerificationTokenInDatabaseIsNotEqualPassedToken() {
+    void verifyEmailToken_shouldGetJwtException_whenEmailVerificationTokenInDatabaseIsNotEqualPassedToken() {
         String token = jwtProvider.createToken(USER_ID);
         String emailVerificationToken = jwtProvider.createToken(UUID.randomUUID());
         user.setEmailVerificationToken(emailVerificationToken);
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
         Throwable throwable = assertThrows(JwtException.class, () -> service.verifyEmailToken(token));
-        assertTrue(throwable.getMessage().equals(NOT_FOUND_USER_BY_EMAIL_VERIFICATION_TOKEN));
+        assertEquals(NOT_FOUND_USER_BY_EMAIL_VERIFICATION_TOKEN, throwable.getMessage());
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(1)).findById(any());
         verify(userRepository, times(0)).save(any());
     }
 
     @Test
-    public void verifyEmailToken_shouldGetFailedSaveEntityException_whenFailedSaveAfterVerifyEmailToken() {
+    void verifyEmailToken_shouldGetFailedSaveEntityException_whenFailedSaveAfterVerifyEmailToken() {
         String token = jwtProvider.createToken(USER_ID);
         user.setEmailVerificationToken(token);
         when(userRepository.existsById(any())).thenReturn(true);
         user.setEmailVerificationStatus(true);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
-        when(userRepository.save(any())).thenReturn(null);
+        when(userRepository.save(any())).thenReturn(User.builder().emailVerificationStatus(false).build());
         Throwable throwable = assertThrows(FailedSaveEntityException.class, () -> service.verifyEmailToken(token));
-        assertTrue(throwable.getMessage().equals(FAILED_SAVE_USER_AFTER_VERIFY_EMAIL_TOKEN));
+        assertEquals(FAILED_SAVE_USER_AFTER_VERIFY_EMAIL_TOKEN, throwable.getMessage());
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(1)).findById(any());
         verify(userRepository, times(1)).save(any());
     }
 
     @Test
-    public void verifyEmailToken_shouldGetJwtException_whenTokenIsNull() {
-        String token = null;
-        Throwable throwable = assertThrows(JwtException.class, () -> service.verifyEmailToken(token));
+    void verifyEmailToken_shouldGetJwtException_whenTokenIsNull() {
+        Throwable throwable = assertThrows(JwtException.class, () -> service.verifyEmailToken(null));
         assertEquals("JWT String argument cannot be null or empty.", throwable.getMessage());
         verify(userRepository, times(0)).existsById(any());
         verify(userRepository, times(0)).findById(any());
@@ -312,7 +315,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void requestPasswordReset_shouldUpdatePasswordResetToken_whenEmailIsValid() {
+    void requestPasswordReset_shouldUpdatePasswordResetToken_whenEmailIsValid() {
         when(userRepository.getByEmail(any())).thenReturn(Optional.of(user));
         service.requestPasswordReset(EMAIL_1);
         verify(userRepository, times(1)).getByEmail(any());
@@ -320,23 +323,23 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void requestPasswordReset_shouldGetEntityNotExistException_whenEmailIsInvalid() {
+    void requestPasswordReset_shouldGetEntityNotExistException_whenEmailIsInvalid() {
         when(userRepository.getByEmail(any())).thenReturn(Optional.empty());
-        assertThrows(EntityNotExistException.class, ()-> service.requestPasswordReset(EMAIL_1));
+        assertThrows(EntityNotExistException.class, () -> service.requestPasswordReset(EMAIL_1));
         verify(userRepository, times(1)).getByEmail(any());
         verify(userRepository, times(0)).save(any());
     }
 
     @Test
-    public void resetPassword_shouldResetPassword_whenPassedDataIsValid() {
+    void resetPassword_shouldResetPassword_whenPassedDataIsValid() {
         String newPassword = "newPassword";
         String token = jwtProvider.createToken(USER_ID);
         user.setPasswordResetToken(token);
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
         user.setEmailVerificationStatus(true);
-        userFromInDatabase.setPassword(encoder.encode(newPassword));
-        when(userRepository.save(any())).thenReturn(userFromInDatabase);
+        userFromDatabase.setPassword(encoder.encode(newPassword));
+        when(userRepository.save(any())).thenReturn(userFromDatabase);
         service.resetPassword(token, newPassword);
         assertTrue(user.getEmailVerificationStatus());
         verify(userRepository, times(1)).existsById(any());
@@ -346,7 +349,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void resetPassword_shouldGetJwtException_whenNotFoundUserByResetPasswordToken() {
+    void resetPassword_shouldGetJwtException_whenNotFoundUserByResetPasswordToken() {
         String newPassword = "newPassword";
         String token = jwtProvider.createToken(USER_ID);
         String tokenFromDatabase = jwtProvider.createToken(UUID.randomUUID());
@@ -354,41 +357,39 @@ class UserServiceImplTest {
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
         Throwable throwable = assertThrows(JwtException.class, () -> service.resetPassword(token, newPassword));
-        assertTrue(throwable.getMessage().equals(NOT_FOUND_USER_BY_RESET_PASSWORD_TOKEN));
+        assertEquals(NOT_FOUND_USER_BY_RESET_PASSWORD_TOKEN, throwable.getMessage());
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(1)).findById(any());
         verify(userRepository, times(0)).save(any());
     }
 
     @Test
-    public void resetPassword_shouldGetJwtException_whenPasswordTokenInDatabaseIsNull() {
+    void resetPassword_shouldGetJwtException_whenPasswordTokenInDatabaseIsNull() {
         String newPassword = "newPassword";
         String token = jwtProvider.createToken(USER_ID);
-        String tokenFromDatabase = null;
-        user.setPasswordResetToken(tokenFromDatabase);
+        user.setPasswordResetToken(null);
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
         Throwable throwable = assertThrows(JwtException.class, () -> service.resetPassword(token, newPassword));
-        assertTrue(throwable.getMessage().equals(NOT_FOUND_USER_BY_RESET_PASSWORD_TOKEN));
+        assertEquals(NOT_FOUND_USER_BY_RESET_PASSWORD_TOKEN, throwable.getMessage());
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(1)).findById(any());
         verify(userRepository, times(0)).save(any());
     }
 
     @Test
-    public void resetPassword_shouldGetFailedSaveEntityException_whenFailedSaveAfterResetPassword() {
+    void resetPassword_shouldGetFailedSaveEntityException_whenFailedSaveAfterResetPassword() {
         String newPassword = "newPassword";
         String token = jwtProvider.createToken(USER_ID);
-        String tokenFromDatabase = token;
-        user.setPasswordResetToken(tokenFromDatabase);
+        user.setPasswordResetToken(token);
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
-        when(userRepository.save(any())).thenReturn(userFromInDatabase);
-        Throwable throwable = assertThrows(FailedSaveEntityException.class, () -> service.resetPassword(token, newPassword));
-        assertTrue(throwable.getMessage().equals(FAILED_SAVE_USER_AFTER_RESET_PASSWORD));
+        when(userRepository.save(any())).thenReturn(userFromDatabase);
+        Throwable throwable =
+                assertThrows(FailedSaveEntityException.class, () -> service.resetPassword(token, newPassword));
+        assertEquals(FAILED_SAVE_USER_AFTER_RESET_PASSWORD, throwable.getMessage());
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(1)).findById(any());
         verify(userRepository, times(1)).save(any());
     }
-
 }

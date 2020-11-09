@@ -24,9 +24,9 @@ import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
 @Transactional
 public class AccountServiceImpl extends CrudServiceImpl<Account, AccountOperationValidator, AccountRepository> {
 
-    private UserServiceImpl userService;
-    private GroupServiceImpl groupService;
-    private RoleServiceImpl roleService;
+    private final UserServiceImpl userService;
+    private final GroupServiceImpl groupService;
+    private final RoleServiceImpl roleService;
 
     @Autowired
     public AccountServiceImpl(UserServiceImpl userService,
@@ -38,11 +38,8 @@ public class AccountServiceImpl extends CrudServiceImpl<Account, AccountOperatio
 
     private static final String START_CREATE_NEW_ACCOUNT = "Start create a new account {}";
     private static final String FINISH_CREATE_NEW_ACCOUNT = "Finish create a new account with name {}";
-    private static final String START_UPDATE_NEW_ACCOUNT = "Start update an account: {}";
+    private static final String START_UPDATE_ACCOUNT = "Start update an account: {}";
     private static final String FINISH_UPDATE_NEW_ACCOUNT = "Finish update an account: {}";
-    private static final String START_FIND_AN_ACCOUNT_BY_AUTHENTICATED_USER = "Start find an account by authenticated user: {}";
-    private static final String FINISH_FIND_AN_ACCOUNT_BY_AUTHENTICATED_USER = "Finish find an account by "
-            + "authenticated user: {}";
 
     public Account create(AccountCreateDto accountDto) {
         log.trace(START_CREATE_NEW_ACCOUNT, accountDto);
@@ -75,9 +72,9 @@ public class AccountServiceImpl extends CrudServiceImpl<Account, AccountOperatio
 
     @Override
     public Account update (Account account) {
-        log.trace(START_FIND_AN_ACCOUNT_BY_AUTHENTICATED_USER, account);
+        log.trace(START_UPDATE_ACCOUNT, account);
         validator.beforeUpdate(account);
-        Account accountFromDatabase = super.findById(account.getId());
+        super.findById(account.getId());
         try {
             Account updatedAccount = repository.update(account);
             log.trace(FINISH_UPDATE_NEW_ACCOUNT, account);

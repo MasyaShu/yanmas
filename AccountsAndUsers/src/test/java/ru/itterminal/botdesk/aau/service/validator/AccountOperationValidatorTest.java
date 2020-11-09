@@ -48,20 +48,18 @@ class AccountOperationValidatorTest {
     private AccountOperationValidator validator;
 
     private User user;
-    private Account account;
-    private Group group;
-    private Role roleAdmin = new Role(ADMIN.toString(), ADMIN.getWeight());
-    private static String PASSWORD = "12345";
-    private static LogicalValidationException logicalValidationException;
-    private static Map<String, List<ValidationError>> errors = new HashMap<>();
+    private final Role roleAdmin = new Role(ADMIN.toString(), ADMIN.getWeight());
+    private static final Map<String, List<ValidationError>> errors = new HashMap<>();
 
     @BeforeEach
     void setUpBeforeEach() {
-        account = new Account();
+        Account account = new Account();
         account.setId(UUID.fromString(ACCOUNT_1_ID));
-        group = new Group();
+        Group group = new Group();
         group.setId(UUID.fromString(GROUP_1_ID));
-        user = new User().builder()
+        String PASSWORD = "12345";
+        user = User
+                .builder()
                 .email(EMAIL_1)
                 .password(PASSWORD)
                 .account(account)
@@ -73,17 +71,18 @@ class AccountOperationValidatorTest {
     }
 
     @Test
-    public void checkUniqueness_shouldGetTrue_whenPassedValidData() {
+    void checkUniqueness_shouldGetTrue_whenPassedValidData() {
         when(userService.findByEmail(any())).thenReturn(Optional.empty());
         assertTrue(validator.checkUniqueness(EMAIL_1));
     }
 
     @Test
-    public void checkUniqueness_shouldGetLogicalValidationException_whenEmailAlreadyExistInDatabase() {
+    void checkUniqueness_shouldGetLogicalValidationException_whenEmailAlreadyExistInDatabase() {
         when(userService.findByEmail(any())).thenReturn(Optional.of(user));
         errors.put(EMAIL_OF_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,
                 format(NOT_UNIQUE_MESSAGE, EMAIL_1))));
-        logicalValidationException = new LogicalValidationException(VALIDATION_FAILED, errors);
+        LogicalValidationException logicalValidationException =
+                new LogicalValidationException(VALIDATION_FAILED, errors);
         LogicalValidationException thrown = assertThrows(LogicalValidationException.class,
                 () -> validator.checkUniqueness(EMAIL_1));
         assertEquals(logicalValidationException.getFieldErrors().get(EMAIL_OF_ACCOUNT_OWNER).get(0),

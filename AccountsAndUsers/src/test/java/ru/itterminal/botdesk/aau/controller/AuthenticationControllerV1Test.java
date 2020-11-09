@@ -15,12 +15,8 @@ import static ru.itterminal.botdesk.aau.controller.AuthenticationControllerV1.EM
 import static ru.itterminal.botdesk.aau.controller.AuthenticationControllerV1.INVALID_USERNAME_OR_PASSWORD;
 import static ru.itterminal.botdesk.aau.controller.AuthenticationControllerV1.PASSWORD_WAS_RESET_SUCCESSFULLY;
 import static ru.itterminal.botdesk.aau.controller.AuthenticationControllerV1.TOKEN_FOR_RESET_PASSWORD_WAS_SENT_TO_EMAIL;
-import static ru.itterminal.botdesk.config.TestSecurityConfig.ACCOUNT_1_ID;
 import static ru.itterminal.botdesk.config.TestSecurityConfig.EMAIL_1;
 import static ru.itterminal.botdesk.config.TestSecurityConfig.PASSWORD;
-
-import java.util.List;
-import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,9 +32,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
@@ -51,13 +45,11 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.dto.AuthenticationRequestDto;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
 import ru.itterminal.botdesk.config.TestSecurityConfig;
 import ru.itterminal.botdesk.jwt.JwtProvider;
-import ru.itterminal.botdesk.jwt.JwtUser;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {AuthenticationControllerV1.class, FilterChainProxy.class})
@@ -72,11 +64,9 @@ class AuthenticationControllerV1Test {
     @MockBean
     private AuthenticationManager authenticationManager;
 
+    @SuppressWarnings("unused")
     @MockBean
-    private JwtProvider jwtProvider;
-
-    @MockBean
-    private BCryptPasswordEncoder encoder;
+    private  JwtProvider jwtProvider;
 
     @Mock
     Authentication authentication;
@@ -101,14 +91,14 @@ class AuthenticationControllerV1Test {
                 .build();
     }
 
-    private ObjectMapper objectMapper = new ObjectMapper();
-    private static String HOST = "http://localhost";
-    private static String PORT = ":8081";
-    private static String API = "api/v1/auth/";
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final String HOST = "http://localhost";
+    private static final String PORT = ":8081";
+    private static final String API = "api/v1/auth/";
+    @SuppressWarnings("SpellCheckingInspection")
     private static final String emailVerificationToken = "eyJhbGciOiJIUzI1NiJ9"
             + ".eyJzdWIiOiJhNGI3NWViYi1jNGIyLTQ1YzAtYWY4My1lZDMyNGQ4ZDM1OWQiLCJpYXQiOjE2MDQyOTc2MjEsImV4cCI6MTYwNDMwNjI2MX0.OdzYy23gowGwr1FRcgmtElveFDtjtJdJ6n3pjqmGH0c";
     private AuthenticationRequestDto requestDto;
-    private JwtUser jwtUser;
 
     @BeforeEach
     void setUpBeforeEach() {
@@ -117,19 +107,11 @@ class AuthenticationControllerV1Test {
                 .email(EMAIL_1)
                 .password(PASSWORD)
                 .build();
-        jwtUser = JwtUser
-                .builder()
-                .username(EMAIL_1)
-                .accountId(UUID.fromString(ACCOUNT_1_ID))
-                .weightRole(3)
-                .authorities(List.of(new SimpleGrantedAuthority(Roles.ACCOUNT_OWNER.toString())))
-                .enabled(true)
-                .build();
     }
 
     @Test
     @WithAnonymousUser
-    public void signIn_shouldGetStatusOk_whenEmailAndPasswordValid() throws Exception {
+    void signIn_shouldGetStatusOk_whenEmailAndPasswordValid() throws Exception {
         when(authenticationManager.authenticate(any())).thenReturn(authentication);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API + "signin")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -145,7 +127,7 @@ class AuthenticationControllerV1Test {
 
     @Test
     @WithAnonymousUser
-    public void signIn_shouldGetJwtAuthenticationException_whenEmailAndPasswordInvalid() throws Exception {
+    void signIn_shouldGetJwtAuthenticationException_whenEmailAndPasswordInvalid() throws Exception {
         when(authenticationManager.authenticate(any())).thenThrow(BadCredentialsException.class);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API + "signin")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -160,7 +142,7 @@ class AuthenticationControllerV1Test {
 
     @Test
     @WithAnonymousUser
-    public void verifyEmailToken_shouldVerifyEmailToken_whenPassedValidToken() throws Exception {
+    void verifyEmailToken_shouldVerifyEmailToken_whenPassedValidToken() throws Exception {
         doNothing().when(userService).verifyEmailToken(emailVerificationToken);
         MockHttpServletRequestBuilder request = get(HOST + PORT + API + "email-verify?token=" + emailVerificationToken);
         mockMvc.perform(request)
@@ -172,7 +154,7 @@ class AuthenticationControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
-    public void verifyEmailToken_shouldGetStatusForbidden_whenUserIsNotAnonymous() throws Exception {
+    void verifyEmailToken_shouldGetStatusForbidden_whenUserIsNotAnonymous() throws Exception {
         doNothing().when(userService).verifyEmailToken(emailVerificationToken);
         MockHttpServletRequestBuilder request = get(HOST + PORT + API + "email-verify?token=" + emailVerificationToken);
         mockMvc.perform(request)
@@ -183,7 +165,7 @@ class AuthenticationControllerV1Test {
 
     @Test
     @WithAnonymousUser
-    public void requestPasswordReset_shouldGetStatusOk_whenPassedValidEmail() throws Exception {
+    void requestPasswordReset_shouldGetStatusOk_whenPassedValidEmail() throws Exception {
         doNothing().when(userService).requestPasswordReset(EMAIL_1);
         MockHttpServletRequestBuilder request =
                 get(HOST + PORT + API + "request-password-reset?email=" + EMAIL_1);
@@ -196,7 +178,7 @@ class AuthenticationControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
-    public void requestPasswordReset_shouldGetStatusForbidden_whenUserIsNotAnonymous() throws Exception {
+    void requestPasswordReset_shouldGetStatusForbidden_whenUserIsNotAnonymous() throws Exception {
         doNothing().when(userService).requestPasswordReset(EMAIL_1);
         MockHttpServletRequestBuilder request = get(HOST + PORT + API + "request-password-reset?email=" + EMAIL_1);
         mockMvc.perform(request)
@@ -207,7 +189,7 @@ class AuthenticationControllerV1Test {
 
     @Test
     @WithAnonymousUser
-    public void passwordReset_shouldGetStatusOk_whenPassedValidTokenAndEmail() throws Exception {
+    void passwordReset_shouldGetStatusOk_whenPassedValidTokenAndEmail() throws Exception {
         doNothing().when(userService).resetPassword(emailVerificationToken, EMAIL_1);
         MockHttpServletRequestBuilder request =
                 get(HOST + PORT + API + "password-reset?token=" + emailVerificationToken + "&email=" + EMAIL_1);
@@ -220,7 +202,7 @@ class AuthenticationControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
-    public void passwordReset_shouldGetStatusForbidden_whenUserIsNotAnonymous() throws Exception {
+    void passwordReset_shouldGetStatusForbidden_whenUserIsNotAnonymous() throws Exception {
         doNothing().when(userService).resetPassword(emailVerificationToken, EMAIL_1);
         MockHttpServletRequestBuilder request =
                 get(HOST + PORT + API + "password-reset?token=" + emailVerificationToken + "&email=" + EMAIL_1);

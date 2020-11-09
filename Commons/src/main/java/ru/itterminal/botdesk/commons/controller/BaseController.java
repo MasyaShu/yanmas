@@ -24,7 +24,7 @@ public abstract class BaseController {
     public static final String FIND_FINISH_MESSAGE = "Done request for find {}, found count: {}";
     public static final String SIZE_DEFAULT_VALUE = "25";
     public static final String PAGE_DEFAULT_VALUE = "0";
-    protected ModelMapper modelMapper = new ModelMapper();
+    protected final ModelMapper modelMapper = new ModelMapper();
 
     public <S, T> Page<T> mapPage(Page<S> source, Class<T> targetClass, Pageable pageable) {
         return new PageImpl<>(source.getContent()

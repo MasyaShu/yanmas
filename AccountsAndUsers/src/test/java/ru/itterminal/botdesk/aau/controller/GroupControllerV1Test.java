@@ -75,6 +75,7 @@ class GroupControllerV1Test {
     @MockBean
     private GroupServiceImpl service;
 
+    @SuppressWarnings("unused")
     @MockBean
     private AccountServiceImpl accountService;
 
@@ -98,59 +99,62 @@ class GroupControllerV1Test {
                 .build();
     }
 
-    private ObjectMapper objectMapper = new ObjectMapper();
-    private static String HOST = "http://localhost";
-    private static String PORT = ":8081";
-    private static String API = "api/v1/group/";
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final String HOST = "http://localhost";
+    private static final String PORT = ":8081";
+    private static final String API = "api/v1/group/";
 
     private Group group_1;
     private Group group_2;
-    private GroupDto groypDtoFromAccount_1;
+    private GroupDto groupDtoFromAccount_1;
     private GroupFilterDto groupFilterDto;
-    private static String GROUP_1_ID = "d592facb-e6ee-4801-8310-9c7708eb6e6c";
-    private static String GROUP_2_ID = "86840939-c488-448b-a473-cd9e1097dd32";
-    private static String GROUP_NAME_1 = "group_1";
-    private static String GROUP_NAME_2 = "group_2";
-    private static String INVALID_DELETED = "ERROR";
-    private static String INVALID_SORT_BY = "ERROR";
-    private static String INVALID_DIRECTION = "ERROR";
-    private static String INVALID_NAME = "";
+    private static final String GROUP_1_ID = "d592facb-e6ee-4801-8310-9c7708eb6e6c";
+    private static final String GROUP_2_ID = "86840939-c488-448b-a473-cd9e1097dd32";
+    private static final String GROUP_NAME_1 = "group_1";
+    private static final String GROUP_NAME_2 = "group_2";
+    private static final String INVALID_DELETED = "ERROR";
+    private static final String INVALID_SORT_BY = "ERROR";
+    private static final String INVALID_DIRECTION = "ERROR";
+    private static final String INVALID_NAME = "";
 
     @BeforeEach
     void setUpBeforeEach() {
-        group_1 = new Group().builder()
+        group_1 = Group
+                .builder()
                 .isInner(true)
                 .isDeprecated(false)
                 .name(GROUP_NAME_1)
                 .build();
         group_1.setId(UUID.fromString(GROUP_1_ID));
-        group_2 = new Group().builder()
+        group_2 = Group
+                .builder()
                 .isInner(true)
                 .isDeprecated(false)
                 .name(GROUP_NAME_2)
                 .build();
         group_2.setId(UUID.fromString(GROUP_2_ID));
 
-        groypDtoFromAccount_1 = new GroupDto().builder()
+        groupDtoFromAccount_1 = GroupDto
+                .builder()
                 .isInner(true)
                 .name("group_1")
                 .build();
-        groypDtoFromAccount_1.setDeleted(false);
-        groypDtoFromAccount_1.setIsDeprecated(false);
+        groupDtoFromAccount_1.setDeleted(false);
+        groupDtoFromAccount_1.setIsDeprecated(false);
         groupFilterDto = new GroupFilterDto();
         groupFilterDto.setName(GROUP_NAME_1);
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void create_shouldCreate_whenValidDataPassed() throws Exception {
-        groypDtoFromAccount_1.setDeleted(null);
-        groypDtoFromAccount_1.setIsDeprecated(null);
+    void create_shouldCreate_whenValidDataPassed() throws Exception {
+        groupDtoFromAccount_1.setDeleted(null);
+        groupDtoFromAccount_1.setIsDeprecated(null);
         when(service.create(any())).thenReturn(group_1);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(groypDtoFromAccount_1));
+                .content(objectMapper.writeValueAsString(groupDtoFromAccount_1));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isCreated())
@@ -161,13 +165,13 @@ class GroupControllerV1Test {
 
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    public void create_shouldGetStatusForbidden_whenRoleUserAuthor() throws Exception {
-        groypDtoFromAccount_1.setDeleted(null);
-        groypDtoFromAccount_1.setIsDeprecated(null);
+    void create_shouldGetStatusForbidden_whenRoleUserAuthor() throws Exception {
+        groupDtoFromAccount_1.setDeleted(null);
+        groupDtoFromAccount_1.setIsDeprecated(null);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(groypDtoFromAccount_1));
+                .content(objectMapper.writeValueAsString(groupDtoFromAccount_1));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
@@ -176,40 +180,42 @@ class GroupControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
-        groypDtoFromAccount_1.setName(null);
-        groypDtoFromAccount_1.setIsInner(null);
-        groypDtoFromAccount_1.setIsDeprecated(false);
-        groypDtoFromAccount_1.setId(UUID.fromString(GROUP_1_ID));
-        groypDtoFromAccount_1.setVersion(1);
-        groypDtoFromAccount_1.setDeleted(false);
+    void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
+        groupDtoFromAccount_1.setName(null);
+        groupDtoFromAccount_1.setIsInner(null);
+        groupDtoFromAccount_1.setIsDeprecated(false);
+        groupDtoFromAccount_1.setId(UUID.fromString(GROUP_1_ID));
+        groupDtoFromAccount_1.setVersion(1);
+        groupDtoFromAccount_1.setDeleted(false);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(groypDtoFromAccount_1));
+                .content(objectMapper.writeValueAsString(groupDtoFromAccount_1));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(
                         jsonPath("$.errors.isInner[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.name[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.isDeprecated[?(@.message == '%s')]", MUST_BE_NULL_FOR_THE_NEW_ENTITY).exists())
+                .andExpect(jsonPath("$.errors.isDeprecated[?(@.message == '%s')]", MUST_BE_NULL_FOR_THE_NEW_ENTITY)
+                        .exists())
                 .andExpect(jsonPath("$.errors.id[?(@.message == '%s')]", MUST_BE_NULL_FOR_THE_NEW_ENTITY).exists())
                 .andExpect(jsonPath("$.errors.version[?(@.message == '%s')]", MUST_BE_NULL_FOR_THE_NEW_ENTITY).exists())
-                .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_BE_NULL_FOR_THE_NEW_ENTITY).exists());
+                .andExpect(
+                        jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_BE_NULL_FOR_THE_NEW_ENTITY).exists());
         verify(service, times(0)).create(any());
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenPassedNameIsEmpty() throws Exception {
-        groypDtoFromAccount_1.setDeleted(null);
-        groypDtoFromAccount_1.setIsDeprecated(null);
-        groypDtoFromAccount_1.setName("");
+    void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenPassedNameIsEmpty() throws Exception {
+        groupDtoFromAccount_1.setDeleted(null);
+        groupDtoFromAccount_1.setIsDeprecated(null);
+        groupDtoFromAccount_1.setName("");
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(groypDtoFromAccount_1));
+                .content(objectMapper.writeValueAsString(groupDtoFromAccount_1));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -220,11 +226,11 @@ class GroupControllerV1Test {
 
     @Test
     @WithAnonymousUser
-    public void create_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
+    void create_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(groypDtoFromAccount_1));
+                .content(objectMapper.writeValueAsString(groupDtoFromAccount_1));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
@@ -233,18 +239,18 @@ class GroupControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void update_shouldUpdate_whenValidDataPassed() throws Exception {
-        groypDtoFromAccount_1.setId(UUID.fromString(GROUP_1_ID));
-        groypDtoFromAccount_1.setVersion(1);
-        groypDtoFromAccount_1.setIsInner(null);
-        groypDtoFromAccount_1.setName(GROUP_NAME_1);
-        groypDtoFromAccount_1.setIsDeprecated(false);
-        groypDtoFromAccount_1.setDeleted(false);
+    void update_shouldUpdate_whenValidDataPassed() throws Exception {
+        groupDtoFromAccount_1.setId(UUID.fromString(GROUP_1_ID));
+        groupDtoFromAccount_1.setVersion(1);
+        groupDtoFromAccount_1.setIsInner(null);
+        groupDtoFromAccount_1.setName(GROUP_NAME_1);
+        groupDtoFromAccount_1.setIsDeprecated(false);
+        groupDtoFromAccount_1.setDeleted(false);
         when(service.update(any())).thenReturn(group_1);
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(groypDtoFromAccount_1));
+                .content(objectMapper.writeValueAsString(groupDtoFromAccount_1));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -257,11 +263,11 @@ class GroupControllerV1Test {
 
     @Test
     @WithAnonymousUser
-    public void update_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
+    void update_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(groypDtoFromAccount_1));
+                .content(objectMapper.writeValueAsString(groupDtoFromAccount_1));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
@@ -270,15 +276,15 @@ class GroupControllerV1Test {
 
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    public void update_shouldGetStatusForbidden_whenNotAllowedRole() throws Exception {
-        groypDtoFromAccount_1.setId(UUID.fromString(GROUP_1_ID));
-        groypDtoFromAccount_1.setVersion(0);
-        groypDtoFromAccount_1.setIsInner(null);
-        groypDtoFromAccount_1.setIsDeprecated(false);
+    void update_shouldGetStatusForbidden_whenNotAllowedRole() throws Exception {
+        groupDtoFromAccount_1.setId(UUID.fromString(GROUP_1_ID));
+        groupDtoFromAccount_1.setVersion(0);
+        groupDtoFromAccount_1.setIsInner(null);
+        groupDtoFromAccount_1.setIsDeprecated(false);
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(groypDtoFromAccount_1));
+                .content(objectMapper.writeValueAsString(groupDtoFromAccount_1));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
@@ -287,17 +293,17 @@ class GroupControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
-        groypDtoFromAccount_1.setName(null);
-        groypDtoFromAccount_1.setIsInner(null);
-        groypDtoFromAccount_1.setIsDeprecated(null);
-        groypDtoFromAccount_1.setId(null);
-        groypDtoFromAccount_1.setVersion(null);
-        groypDtoFromAccount_1.setDeleted(null);
+    void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
+        groupDtoFromAccount_1.setName(null);
+        groupDtoFromAccount_1.setIsInner(null);
+        groupDtoFromAccount_1.setIsDeprecated(null);
+        groupDtoFromAccount_1.setId(null);
+        groupDtoFromAccount_1.setVersion(null);
+        groupDtoFromAccount_1.setDeleted(null);
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(groypDtoFromAccount_1));
+                .content(objectMapper.writeValueAsString(groupDtoFromAccount_1));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -308,14 +314,15 @@ class GroupControllerV1Test {
                 .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists());
         verify(service, times(0)).create(any());
     }
+
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenVersionIsNegative() throws Exception {
-        groypDtoFromAccount_1.setVersion(-15);
+    void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenVersionIsNegative() throws Exception {
+        groupDtoFromAccount_1.setVersion(-15);
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(groypDtoFromAccount_1));
+                .content(objectMapper.writeValueAsString(groupDtoFromAccount_1));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -327,10 +334,10 @@ class GroupControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidIdPassed() throws Exception {
-        groypDtoFromAccount_1.setId(UUID.fromString(GROUP_1_ID));
-        groypDtoFromAccount_1.setVersion(1);
-        String json = objectMapper.writeValueAsString(groypDtoFromAccount_1);
+    void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidIdPassed() throws Exception {
+        groupDtoFromAccount_1.setId(UUID.fromString(GROUP_1_ID));
+        groupDtoFromAccount_1.setVersion(1);
+        String json = objectMapper.writeValueAsString(groupDtoFromAccount_1);
         json = json.replace(GROUP_1_ID, "abracadabra");
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -345,7 +352,7 @@ class GroupControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void getById_shouldFindOneGroup_whenGroupExistInDatabaseByPassedId() throws Exception {
+    void getById_shouldFindOneGroup_whenGroupExistInDatabaseByPassedId() throws Exception {
         when(service.findByIdAndAccountId(any(), any())).thenReturn(group_1);
         mockMvc.perform(get(HOST + PORT + API + GROUP_1_ID))
                 .andDo(print())
@@ -357,7 +364,7 @@ class GroupControllerV1Test {
 
     @Test
     @WithAnonymousUser
-    public void getById_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
+    void getById_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
         when(service.findByIdAndAccountId(any(), any())).thenReturn(group_1);
         mockMvc.perform(get(HOST + PORT + API + GROUP_1_ID))
                 .andDo(print())
@@ -366,7 +373,7 @@ class GroupControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
-    public void getById_shouldReturnNotFound_whenUserIsNotInInnerGroupAndFindIdForOtherGroup() throws Exception {
+    void getById_shouldReturnNotFound_whenUserIsNotInInnerGroupAndFindIdForOtherGroup() throws Exception {
         when(service.findByIdAndAccountId(any(), any())).thenThrow(EntityNotExistException.class);
         mockMvc.perform(get(HOST + PORT + API + GROUP_1_ID))
                 .andDo(print())
@@ -376,7 +383,7 @@ class GroupControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void getById_shouldReturnNotFound_whenUserIsInInnerGroupAndFindIdForOtherGroup() throws Exception {
+    void getById_shouldReturnNotFound_whenUserIsInInnerGroupAndFindIdForOtherGroup() throws Exception {
         when(service.findByIdAndAccountId(any(), any())).thenReturn(group_1);
         mockMvc.perform(get(HOST + PORT + API + GROUP_1_ID))
                 .andDo(print())
@@ -400,7 +407,7 @@ class GroupControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void getById_shouldGetStatusBadRequest_whenIdIsInvalid() throws Exception {
+    void getById_shouldGetStatusBadRequest_whenIdIsInvalid() throws Exception {
         mockMvc.perform(get(HOST + PORT + API + "Abracadabra"))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
@@ -409,11 +416,11 @@ class GroupControllerV1Test {
 
     @Test
     @WithAnonymousUser
-    public void getByFilter_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
+    void getByFilter_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
         Pageable pageable =
                 PageRequest.of(Integer.parseInt(PAGE_DEFAULT_VALUE), Integer.parseInt(SIZE_DEFAULT_VALUE),
                         Sort.by("name").ascending());
-        Page<Group> groupPageExpected = new PageImpl<Group>(List.of(group_1, group_2), pageable, 2);
+        Page<Group> groupPageExpected = new PageImpl<>(List.of(group_1, group_2), pageable, 2);
         when(service.findAllByFilter(any(), any())).thenReturn(groupPageExpected);
         MockHttpServletRequestBuilder request = get(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -427,11 +434,11 @@ class GroupControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void getByFilter_shouldFindTwoGroup_whenUsersExistInDatabaseByPassedFilter() throws Exception {
+    void getByFilter_shouldFindTwoGroup_whenUsersExistInDatabaseByPassedFilter() throws Exception {
         Pageable pageable =
                 PageRequest.of(Integer.parseInt(PAGE_DEFAULT_VALUE), Integer.parseInt(SIZE_DEFAULT_VALUE),
                         Sort.by("name").ascending());
-        Page<Group> groupPageExpected = new PageImpl<Group>(List.of(group_1, group_2), pageable, 2);
+        Page<Group> groupPageExpected = new PageImpl<>(List.of(group_1, group_2), pageable, 2);
         when(service.findAllByFilter(any(), any())).thenReturn(groupPageExpected);
         MockHttpServletRequestBuilder request = get(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -450,7 +457,7 @@ class GroupControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
+    void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
         groupFilterDto.setName(INVALID_NAME);
         groupFilterDto.setSortBy(INVALID_SORT_BY);
         groupFilterDto.setDeleted(INVALID_DELETED);
@@ -467,12 +474,12 @@ class GroupControllerV1Test {
                 .andExpect(jsonPath("$.errors.direction[?(@.message == '%s')]", MUST_BE_ANY_OF_ASC_DESC).exists())
                 .andExpect(jsonPath("$.errors.sortBy[?(@.message == '%s')]", MUST_BE_ANY_OF_NAME)
                         .exists());
-        verify(service, times(0)).findAllByFilter(any(),any());
+        verify(service, times(0)).findAllByFilter(any(), any());
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidSizeAndPagePassed()
+    void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidSizeAndPagePassed()
             throws Exception {
         MockHttpServletRequestBuilder request = get(HOST + PORT + API + "?page=-1&size=0")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -482,12 +489,12 @@ class GroupControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value(REQUEST_NOT_READABLE));
-        verify(service, times(0)).findAllByFilter(any(),any());
+        verify(service, times(0)).findAllByFilter(any(), any());
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenFilterIsEmpty() throws Exception {
+    void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenFilterIsEmpty() throws Exception {
         groupFilterDto.setName("");
         groupFilterDto.setSortBy("");
         groupFilterDto.setDeleted("");
@@ -504,17 +511,17 @@ class GroupControllerV1Test {
                 .andExpect(jsonPath("$.errors.direction[?(@.message == '%s')]", MUST_BE_ANY_OF_ASC_DESC).exists())
                 .andExpect(jsonPath("$.errors.sortBy[?(@.message == '%s')]", MUST_BE_ANY_OF_NAME)
                         .exists());
-        verify(service, times(0)).findAllByFilter(any(),any());
+        verify(service, times(0)).findAllByFilter(any(), any());
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void getByFilter_shouldFindTwoGroups_whenFilterIsNew() throws Exception {
+    void getByFilter_shouldFindTwoGroups_whenFilterIsNew() throws Exception {
         GroupFilterDto groupFilterDto = new GroupFilterDto();
         Pageable pageable =
                 PageRequest.of(Integer.parseInt(PAGE_DEFAULT_VALUE), Integer.parseInt(SIZE_DEFAULT_VALUE),
                         Sort.by("name").ascending());
-        Page<Group> groupPageExpected = new PageImpl<Group>(List.of(group_1, group_2), pageable, 2);
+        Page<Group> groupPageExpected = new PageImpl<>(List.of(group_1, group_2), pageable, 2);
         when(service.findAllByFilter(any(), any())).thenReturn(groupPageExpected);
         MockHttpServletRequestBuilder request = get(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -531,14 +538,14 @@ class GroupControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void getByFilter_shouldFindTwoGroups_whenDefaultFieldsInFilterIsNull() throws Exception {
+    void getByFilter_shouldFindTwoGroups_whenDefaultFieldsInFilterIsNull() throws Exception {
         groupFilterDto.setSortBy(null);
         groupFilterDto.setDeleted(null);
         groupFilterDto.setDirection(null);
         Pageable pageable =
                 PageRequest.of(Integer.parseInt(PAGE_DEFAULT_VALUE), Integer.parseInt(SIZE_DEFAULT_VALUE),
                         Sort.by("firstName").ascending());
-        Page<Group> groupPageExpected = new PageImpl<Group>(List.of(group_1, group_2), pageable, 2);
+        Page<Group> groupPageExpected = new PageImpl<>(List.of(group_1, group_2), pageable, 2);
         when(service.findAllByFilter(any(), any())).thenReturn(groupPageExpected);
         MockHttpServletRequestBuilder request = get(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)

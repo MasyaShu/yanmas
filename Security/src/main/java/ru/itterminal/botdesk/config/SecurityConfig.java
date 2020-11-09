@@ -42,6 +42,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/v1/auth/password-reset"
     };
 
+    @SuppressWarnings("EmptyMethod")
     @Bean
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {

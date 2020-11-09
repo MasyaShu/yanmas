@@ -29,6 +29,7 @@ import static ru.itterminal.botdesk.commons.util.CommonConstants.NOT_FOUND_ENTIT
  * @param <V> extends OperationValidate
  * @param <R> extends CustomizedParentEntityRepository
  */
+@SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
 @Slf4j
 @Service
 @Transactional

@@ -26,15 +26,15 @@ import ru.itterminal.botdesk.jwt.JwtUser;
 @Slf4j
 @Component
 public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
-    private UserServiceImpl service;
-    private RoleServiceImpl roleService;
+    private final UserServiceImpl service;
+    private final RoleServiceImpl roleService;
 
     protected static final String USER_WITH_ROLE_ACCOUNT_OWNER_IS_UNIQUE = "User: {} with role ACCOUNT_OWNER is unique";
     protected static final String USER_WITH_ROLE_ACCOUNT_OWNER = "User with role ACCOUNT_OWNER";
     protected static final String ACCOUNT_MUST_HAVE_USER_WITH_ROLE_ACCOUNT_OWNER =
             "Account must have user with role ACCOUNT_OWNER";
-    protected static final String WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_FROM_REQUEST = "Weight of role"
-            + " current user (%s) less than weight of role from request (%s)";
+    protected static final String WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_FROM_REQUEST =
+            "Weight of role current user (%s) less than weight of role from request (%s)";
     protected static final String WEIGHT_OF_ROLE = "Weight of role";
     protected static final String INNER_GROUP = "Inner group";
     protected static final String CREATE_UPDATE_ONLY_HIS_GROUP =
@@ -64,16 +64,8 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
             }
         }
 
-        if (!SecurityContextHolder.getContext().getAuthentication().getName().equals("anonymousUser")) {
-            JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            if (entity.getRole().getWeight() > jwtUser.getWeightRole()) {
-                errors.put(WEIGHT_OF_ROLE, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
-                        format(WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_FROM_REQUEST, jwtUser, entity))));
-            }
-            if (jwtUser.isInnerGroup() == false && entity.getOwnGroup().getId() != jwtUser.getGroupId()) {
-                errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
-                        CREATE_UPDATE_ONLY_HIS_GROUP)));
-            }
+        if (!SecurityContextHolder.getContext().getAuthentication().getName().contains("anonymous")) {
+            errors.putAll(validateWeightOfRoleAndIsInnerGroup(entity));
         }
 
         if (!errors.isEmpty()) {
@@ -113,18 +105,7 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
                     ACCOUNT_MUST_HAVE_USER_WITH_ROLE_ACCOUNT_OWNER)));
         }
 
-        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        if (entity.getRole().getWeight() > jwtUser.getWeightRole()) {
-            errors.put(WEIGHT_OF_ROLE, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
-                    format(WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_FROM_REQUEST, jwtUser, entity))));
-        }
-
-        if (jwtUser.isInnerGroup() == false && entity.getOwnGroup().getId() != jwtUser.getGroupId()) {
-            errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
-                    CREATE_UPDATE_ONLY_HIS_GROUP)));
-        }
-
+        errors.putAll(validateWeightOfRoleAndIsInnerGroup(entity));
 
         if (!errors.isEmpty()) {
             log.error(FIELDS_ARE_NOT_VALID, errors);
@@ -157,6 +138,20 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
     public boolean checkLogicalDelete(UUID id) {
         super.checkLogicalDelete(id);
         return true;
+    }
+
+    public Map<String, List<ValidationError>> validateWeightOfRoleAndIsInnerGroup (User entity) {
+        Map<String, List<ValidationError>> errors = new HashMap<>();
+        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (entity.getRole().getWeight() > jwtUser.getWeightRole()) {
+            errors.put(WEIGHT_OF_ROLE, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
+                    format(WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_FROM_REQUEST, jwtUser, entity))));
+        }
+        if (!jwtUser.isInnerGroup() && entity.getOwnGroup().getId() != jwtUser.getGroupId()) {
+            errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
+                    CREATE_UPDATE_ONLY_HIS_GROUP)));
+        }
+        return errors;
     }
 
 }

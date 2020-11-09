@@ -2,10 +2,12 @@ package ru.itterminal.botdesk.aau.service.impl;
 
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl.ENTITY_GROUP_NAME;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID;
 
@@ -43,9 +45,6 @@ class GroupServiceImplTest {
     @MockBean
     private GroupOperationValidator validator;
 
-    @MockBean
-    private AccountServiceImpl accountService;
-
     @Autowired
     private GroupServiceImpl service;
 
@@ -61,13 +60,15 @@ class GroupServiceImplTest {
     void setUpBeforeEach() {
         account = new Account();
         account.setId(ACCOUNT_1_ID);
-        group = new Group().builder()
-        .name(EXIST_NAME)
-        .account(account)
-        .isInner(false)
-        .build();
+        group = Group
+                .builder()
+                .name(EXIST_NAME)
+                .account(account)
+                .isInner(false)
+                .build();
         group.setId(GROUP_ID);
-        groupInDataBase = new Group().builder()
+        groupInDataBase = Group
+                .builder()
                 .name(EXIST_NAME)
                 .account(account)
                 .isInner(true)
@@ -76,82 +77,85 @@ class GroupServiceImplTest {
     }
 
     @Test
-    public void findByUniqueFields_shouldGetEntityNotExistException_whenUserIsNull() {
+    void findByUniqueFields_shouldGetEntityNotExistException_whenUserIsNull() {
         assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(null));
         verify(repository, times(0)).getByNameAndAccount_IdAndIdNot(any(), any(), any());
     }
 
     @Test
-    public void findByUniqueFields_shouldGetEntityNotExistException_whenUserNamelIsNull() {
+    void findByUniqueFields_shouldGetEntityNotExistException_whenUserNameIsNull() {
         group.setName(null);
         assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(group));
         verify(repository, times(0)).getByNameAndAccount_IdAndIdNot(any(), any(), any());
     }
 
     @Test
-    public void findByUniqueFields_shouldGetEntityNotExistException_whenUserAccountIsNull() {
+    void findByUniqueFields_shouldGetEntityNotExistException_whenUserAccountIsNull() {
         group.setAccount(null);
         assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(group));
         verify(repository, times(0)).getByNameAndAccount_IdAndIdNot(any(), any(), any());
     }
 
     @Test
-    public void findByUniqueFields_shouldGetEntityNotExistException_whenUserIdIsNull() {
+    void findByUniqueFields_shouldGetEntityNotExistException_whenUserIdIsNull() {
         group.setId(null);
         assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(group));
         verify(repository, times(0)).getByNameAndAccount_IdAndIdNot(any(), any(), any());
     }
 
     @Test
-    public void update_shouldUpdateUser_whenPassedValidData() {
+    void update_shouldUpdateUser_whenPassedValidData() {
         when(validator.beforeUpdate(any())).thenReturn(true);
         when(repository.findById(any())).thenReturn(Optional.of(group));
         when(repository.update(any())).thenReturn(group);
         Group createdGroup = service.update(group);
-        assertTrue(group.equals(createdGroup));
+        assertEquals(createdGroup, group);
         verify(validator, times(1)).beforeUpdate(any());
         verify(repository, times(1)).findById(any());
         verify(repository, times(1)).update(any());
     }
 
     @Test
-    public void update_shouldUpdateUser_whenPassedValidDataAndIsInnerNotDatabase() {
+    void update_shouldUpdateUser_whenPassedValidDataAndIsInnerNotDatabase() {
         when(validator.beforeUpdate(any())).thenReturn(true);
         when(repository.findById(any())).thenReturn(Optional.of(groupInDataBase));
         when(repository.update(any())).thenReturn(group);
         Group createdGroup = service.update(group);
-        assertTrue(groupInDataBase.getIsInner() == createdGroup.getIsInner());
+        assertSame(groupInDataBase.getIsInner(), createdGroup.getIsInner());
         verify(validator, times(1)).beforeUpdate(any());
         verify(repository, times(1)).findById(any());
         verify(repository, times(1)).update(any());
     }
 
     @Test
-    public void findByIdAndAccountId_shouldGetEntityNotExistException_whenGroupIdIsNull() {
-        assertThrows(EntityNotExistException.class, () -> service.findByIdAndAccountId(null, account.getId()));
+    void findByIdAndAccountId_shouldGetEntityNotExistException_whenGroupIdIsNull() {
+        UUID accountId = account.getId();
+        assertThrows(EntityNotExistException.class, () -> service.findByIdAndAccountId(null, accountId));
         verify(repository, times(0)).getByIdAndAccount_Id(any(), any());
     }
 
     @Test
-    public void findByIdAndAccountId_shouldGetEntityNotExistException_whenAccountIdIsNull() {
-        assertThrows(EntityNotExistException.class, () -> service.findByIdAndAccountId(group.getId(), null));
+    void findByIdAndAccountId_shouldGetEntityNotExistException_whenAccountIdIsNull() {
+        UUID groupId = group.getId();
+        assertThrows(EntityNotExistException.class, () -> service.findByIdAndAccountId(groupId, null));
         verify(repository, times(0)).getByIdAndAccount_Id(any(), any());
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
-    public void findByIdAndAccountId_shouldGetEntityNotExistException_whenUserNotInnerGroupAndGroupOwnerNotEqualsFindId() {
+    void findByIdAndAccountId_shouldGetEntityNotExistException_whenUserNotInnerGroupAndGroupOwnerNotEqualsFindId() {
+        UUID accountId = account.getId();
         Throwable throwable = assertThrows(EntityNotExistException.class,
-                () -> service.findByIdAndAccountId(GROUP_ID_NOT_JWTUSER,
-                account.getId()));
-        assertEquals(format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, ENTITY_GROUP_NAME, GROUP_ID_NOT_JWTUSER, account.getId()),
+                () -> service.findByIdAndAccountId(GROUP_ID_NOT_JWTUSER,accountId));
+        assertEquals(
+                format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, ENTITY_GROUP_NAME, GROUP_ID_NOT_JWTUSER, accountId),
                 throwable.getMessage());
         verify(repository, times(0)).getByIdAndAccount_Id(any(), any());
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
-    public void findByIdAndAccountId_shouldGetOneGroup_whenUserNotInnerGroupAndGroupOwnerEqualsFindId() {
+    void findByIdAndAccountId_shouldGetOneGroup_whenUserNotInnerGroupAndGroupOwnerEqualsFindId() {
         when(repository.getByIdAndAccount_Id(any(), any())).thenReturn(Optional.of(group));
         Group foundGroup = service.findByIdAndAccountId(GROUP_ID, account.getId());
         assertEquals(group, foundGroup);
@@ -160,7 +164,7 @@ class GroupServiceImplTest {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void findByIdAndAccountId_shouldNotGetEntityNotExistException_whenUserInnerGroupAndGroupOwnerEqualsFindId() {
+    void findByIdAndAccountId_shouldNotGetEntityNotExistException_whenUserInnerGroupAndGroupOwnerEqualsFindId() {
         when(repository.getByIdAndAccount_Id(any(), any())).thenReturn(Optional.of(group));
         service.findByIdAndAccountId(GROUP_ID, account.getId());
         verify(repository, times(1)).getByIdAndAccount_Id(any(), any());
@@ -168,13 +172,10 @@ class GroupServiceImplTest {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void findByIdAndAccountId_shouldNotGetEntityNotExistException_whenUserInnerGroupAndGroupOwnerNotEqualsFindId() {
+    void findByIdAndAccountId_shouldNotGetEntityNotExistException_whenUserInnerGroupAndGroupOwnerNotEqualsFindId() {
         when(repository.getByIdAndAccount_Id(any(), any())).thenReturn(Optional.of(group));
         service.findByIdAndAccountId(GROUP_ID_NOT_JWTUSER, account.getId());
         verify(repository, times(1)).getByIdAndAccount_Id(any(), any());
     }
-
-
-
 
 }

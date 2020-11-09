@@ -22,7 +22,7 @@ import ru.itterminal.botdesk.commons.controller.BaseController;
 @RequestMapping("api/v1/role")
 public class RoleControllerV1 extends BaseController {
 
-    RoleServiceImpl service;
+    final RoleServiceImpl service;
 
     @Autowired
     public RoleControllerV1(RoleServiceImpl service) {

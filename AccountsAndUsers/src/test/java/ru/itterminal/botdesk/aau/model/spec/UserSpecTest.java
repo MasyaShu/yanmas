@@ -1,5 +1,6 @@
 package ru.itterminal.botdesk.aau.model.spec;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
@@ -41,8 +42,6 @@ class UserSpecTest {
     @Autowired
     UserSpec spec;
 
-    private static Role roleAccountOwner = null;
-    private static Role roleNotExistInDatabase = null;
     private static final String USER_1_EMAIL_EXIST = "m@m.ru";
     private static final String ALL_USERS_PHONE_EXIST = "211-15-15";
     private static final String ALL_USERS_COMMENT_EXIST = "comment comment";
@@ -60,12 +59,13 @@ class UserSpecTest {
     private static final UUID ROLE_ACCOUNT_OWNER_ID = UUID.fromString("ba99ce38-1611-4a81-adc9-3a779d58bbfe");
     private static final UUID ROLE_ADMIN_ID = UUID.fromString("607f04b1-f5f9-4f20-9c6f-501c32d773c0");
     private static final UUID ROLE_AUTHOR_ID = UUID.fromString("933f20bf-9262-47bb-83d2-0ca55bbbd3fd");
-    private Pageable pageable = PageRequest.of(0, 5, Sort.by((Sort.Direction.ASC), "firstName"));
+    private final Pageable pageable = PageRequest.of(0, 5, Sort.by((Sort.Direction.ASC), "firstName"));
     private Page<User> foundUsers;
 
+    @SuppressWarnings("deprecation")
     @BeforeAll
     void setUpBeforeAll() {
-        roleAccountOwner = Role
+        Role roleAccountOwner = Role
                 .builder()
                 .name(Roles.ACCOUNT_OWNER.toString())
                 .weight(3)
@@ -74,7 +74,7 @@ class UserSpecTest {
         roleAccountOwner.setDeleted(false);
         roleAccountOwner.setVersion(0);
 
-        roleNotExistInDatabase = Role
+        Role roleNotExistInDatabase = Role
                 .builder()
                 .name(Roles.ACCOUNT_OWNER.toString())
                 .weight(3)
@@ -85,15 +85,15 @@ class UserSpecTest {
     }
 
     @Test
-    public void getUserByEmailSpec_shouldGetOneUser_whenEmailExistInDatabase() {
+    void getUserByEmailSpec_shouldGetOneUser_whenEmailExistInDatabase() {
         Specification<User> userSpecification = Specification
                 .where(spec.getUserByEmailSpec(USER_1_EMAIL_EXIST.toUpperCase()));
         foundUsers = userRepository.findAll(userSpecification, pageable);
-        assertTrue(foundUsers.getContent().get(0).getEmail().equals(USER_1_EMAIL_EXIST));
+        assertEquals(USER_1_EMAIL_EXIST, foundUsers.getContent().get(0).getEmail());
     }
 
     @Test
-    public void getUserByEmailSpec_shouldGetEmptyList_whenEmailNotExistInDatabase() {
+    void getUserByEmailSpec_shouldGetEmptyList_whenEmailNotExistInDatabase() {
         Specification<User> userSpecification = Specification
                 .where(spec.getUserByEmailSpec(EMAIL_NOT_EXIST.toUpperCase()));
         foundUsers = userRepository.findAll(userSpecification, pageable);
@@ -101,31 +101,31 @@ class UserSpecTest {
     }
 
     @Test
-    public void getUserByFirstNameSpec_shouldGetOneUser_whenUserExistInDatabaseWithPassedFirstName() {
+    void getUserByFirstNameSpec_shouldGetOneUser_whenUserExistInDatabaseWithPassedFirstName() {
         Specification<User> userSpecification = Specification
                 .where(spec.getUserByFirstNameSpec(USER_1_FIRST_NAME_EXIST.toUpperCase()));
         foundUsers = userRepository.findAll(userSpecification, pageable);
-        assertTrue(foundUsers.getContent().get(0).getFirstName().equals(USER_1_FIRST_NAME_EXIST));
+        assertEquals(USER_1_FIRST_NAME_EXIST, foundUsers.getContent().get(0).getFirstName());
     }
 
     @Test
-    public void getUserByFirstNameSpec_shouldGetEmptyList_whenUserNotExistInDatabaseWithPassedSecondName() {
+    void getUserByFirstNameSpec_shouldGetEmptyList_whenUserNotExistInDatabaseWithPassedSecondName() {
         Specification<User> userSpecification = Specification
                 .where(spec.getUserByFirstNameSpec(FIRST_NAME_NOT_EXIST.toUpperCase()));
         foundUsers = userRepository.findAll(userSpecification, pageable);
         assertTrue(foundUsers.getContent().isEmpty());
     }
-    
+
     @Test
-    public void getUserBySecondNameSpec_shouldGetOneUser_whenUserExistInDatabaseWithPassedSecondName() {
+    void getUserBySecondNameSpec_shouldGetOneUser_whenUserExistInDatabaseWithPassedSecondName() {
         Specification<User> userSpecification = Specification
                 .where(spec.getUserBySecondNameSpec(USER_1_SECOND_NAME_EXIST.toUpperCase()));
         foundUsers = userRepository.findAll(userSpecification, pageable);
-        assertTrue(foundUsers.getContent().get(0).getSecondName().equals(USER_1_SECOND_NAME_EXIST));
+        assertEquals(USER_1_SECOND_NAME_EXIST, foundUsers.getContent().get(0).getSecondName());
     }
 
     @Test
-    public void getUserBySecondNameSpec_shouldGetEmptyList_whenUserNotExistInDatabaseWithPassedSecondName() {
+    void getUserBySecondNameSpec_shouldGetEmptyList_whenUserNotExistInDatabaseWithPassedSecondName() {
         Specification<User> userSpecification = Specification
                 .where(spec.getUserBySecondNameSpec(SECOND_NAME_NOT_EXIST.toUpperCase()));
         foundUsers = userRepository.findAll(userSpecification, pageable);
@@ -133,15 +133,15 @@ class UserSpecTest {
     }
 
     @Test
-    public void getUserByPhoneSpec_shouldGetFiveUsers_whenFiveUserExistInDatabaseWithPassedPhone() {
+    void getUserByPhoneSpec_shouldGetFiveUsers_whenFiveUserExistInDatabaseWithPassedPhone() {
         Specification<User> userSpecification = Specification
                 .where(spec.getUserByPhoneSpec(ALL_USERS_PHONE_EXIST.toUpperCase()));
         foundUsers = userRepository.findAll(userSpecification, pageable);
-        assertTrue(foundUsers.getContent().size() == 5);
+        assertEquals(5, foundUsers.getContent().size());
     }
 
     @Test
-    public void getUserByPhoneSpec_shouldGetEmptyList_whenUserNotExistInDatabaseWithPassedPhone() {
+    void getUserByPhoneSpec_shouldGetEmptyList_whenUserNotExistInDatabaseWithPassedPhone() {
         Specification<User> userSpecification = Specification
                 .where(spec.getUserByPhoneSpec(PHONE_NOT_EXIST.toUpperCase()));
         foundUsers = userRepository.findAll(userSpecification, pageable);
@@ -149,15 +149,15 @@ class UserSpecTest {
     }
 
     @Test
-    public void getUserByCommentSpec_shouldGetFiveUsers_whenFiveUserExistInDatabaseWithPassedComment() {
+    void getUserByCommentSpec_shouldGetFiveUsers_whenFiveUserExistInDatabaseWithPassedComment() {
         Specification<User> userSpecification = Specification
                 .where(spec.getUserByCommentSpec(ALL_USERS_COMMENT_EXIST.toUpperCase()));
         foundUsers = userRepository.findAll(userSpecification, pageable);
-        assertTrue(foundUsers.getContent().size() == 5);
+        assertEquals(5, foundUsers.getContent().size());
     }
 
     @Test
-    public void getUserByCommentSpec_shouldGetEmptyList_whenUserNotExistInDatabaseWithPassedComment() {
+    void getUserByCommentSpec_shouldGetEmptyList_whenUserNotExistInDatabaseWithPassedComment() {
         Specification<User> userSpecification = Specification
                 .where(spec.getUserByCommentSpec(COMMENT_NOT_EXIST.toUpperCase()));
         foundUsers = userRepository.findAll(userSpecification, pageable);
@@ -165,15 +165,15 @@ class UserSpecTest {
     }
 
     @Test
-    public void getUserByIsArchivedSpec_shouldGetFiveUsers_whenFiveUserExistInDatabaseWithIsArchivedIsFalse() {
+    void getUserByIsArchivedSpec_shouldGetFiveUsers_whenFiveUserExistInDatabaseWithIsArchivedIsFalse() {
         Specification<User> userSpecification = Specification
                 .where(spec.getUserByIsArchivedSpec(false));
         foundUsers = userRepository.findAll(userSpecification, pageable);
-        assertTrue(foundUsers.getContent().size() == 5);
+        assertEquals(5, foundUsers.getContent().size());
     }
 
     @Test
-    public void getUserByIsArchivedSpec_shouldGetEmptyList_whenUserNotExistInDatabaseWithIsArchivedIsTrue() {
+    void getUserByIsArchivedSpec_shouldGetEmptyList_whenUserNotExistInDatabaseWithIsArchivedIsTrue() {
         Specification<User> userSpecification = Specification
                 .where(spec.getUserByIsArchivedSpec(true));
         foundUsers = userRepository.findAll(userSpecification, pageable);
@@ -181,32 +181,32 @@ class UserSpecTest {
     }
 
     @Test
-    public void getEntityByAccountSpec_shouldGetFourUsers_whenAccount1() {
+    void getEntityByAccountSpec_shouldGetFourUsers_whenAccount1() {
         Specification<User> userSpecification = Specification
                 .where(spec.getEntityByAccountSpec(ACCOUNT_1_ID));
         foundUsers = userRepository.findAll(userSpecification, pageable);
-        assertTrue(foundUsers.getContent().size() == 4);
+        assertEquals(4, foundUsers.getContent().size());
     }
 
     @Test
-    public void getEntityByAccountSpec_shouldGetOneUser_whenAccount2() {
+    void getEntityByAccountSpec_shouldGetOneUser_whenAccount2() {
         Specification<User> userSpecification = Specification
                 .where(spec.getEntityByAccountSpec(ACCOUNT_2_ID));
         foundUsers = userRepository.findAll(userSpecification, pageable);
-        assertTrue(foundUsers.getContent().size() == 1);
+        assertEquals(1, foundUsers.getContent().size());
     }
 
     @Test
-    public void getEntityByAccountSpec_shouldGetFiveUsers_whenAccount1AndAccount2() {
+    void getEntityByAccountSpec_shouldGetFiveUsers_whenAccount1AndAccount2() {
         Specification<User> userSpecification = Specification
                 .where(spec.getEntityByAccountSpec(ACCOUNT_2_ID))
                 .or(spec.getEntityByAccountSpec(ACCOUNT_1_ID));
         foundUsers = userRepository.findAll(userSpecification, pageable);
-        assertTrue(foundUsers.getContent().size() == 5);
+        assertEquals(5, foundUsers.getContent().size());
     }
 
     @Test
-    public void getEntityByAccountSpec_shouldGetEmptyList_whenAccountIdIsNotExistInDatabase() {
+    void getEntityByAccountSpec_shouldGetEmptyList_whenAccountIdIsNotExistInDatabase() {
         Specification<User> userSpecification = Specification
                 .where(spec.getEntityByAccountSpec(UUID.randomUUID()));
         foundUsers = userRepository.findAll(userSpecification, pageable);
@@ -214,31 +214,31 @@ class UserSpecTest {
     }
 
     @Test
-    public void getUserByListOfGroupsSpec_shouldGetFourUsers_whenGroup1() {
+    void getUserByListOfGroupsSpec_shouldGetFourUsers_whenGroup1() {
         Specification<User> userSpecification = Specification
                 .where(spec.getUserByListOfGroupsSpec(List.of(GROUP_1_ID)));
         foundUsers = userRepository.findAll(userSpecification, pageable);
-        assertTrue(foundUsers.getContent().size() == 4);
+        assertEquals(4, foundUsers.getContent().size());
     }
 
     @Test
-    public void getUserByListOfGroupsSpec_shouldGetOneUser_whenGroup2() {
+    void getUserByListOfGroupsSpec_shouldGetOneUser_whenGroup2() {
         Specification<User> userSpecification = Specification
                 .where(spec.getUserByListOfGroupsSpec(List.of(GROUP_2_ID)));
         foundUsers = userRepository.findAll(userSpecification, pageable);
-        assertTrue(foundUsers.getContent().size() == 1);
+        assertEquals(1, foundUsers.getContent().size());
     }
 
     @Test
-    public void getUserByListOfGroupsSpec_shouldGetFiveUsers_whenArrayOfGroup1AndGroup2() {
+    void getUserByListOfGroupsSpec_shouldGetFiveUsers_whenArrayOfGroup1AndGroup2() {
         Specification<User> userSpecification = Specification
                 .where(spec.getUserByListOfGroupsSpec(List.of(GROUP_1_ID, GROUP_2_ID)));
         foundUsers = userRepository.findAll(userSpecification, pageable);
-        assertTrue(foundUsers.getContent().size() == 5);
+        assertEquals(5, foundUsers.getContent().size());
     }
 
     @Test
-    public void getUserByListOfGroupsSpec_shouldGetEmptyList_whenGroupIsNotExistInDatabase() {
+    void getUserByListOfGroupsSpec_shouldGetEmptyList_whenGroupIsNotExistInDatabase() {
         Specification<User> userSpecification = Specification
                 .where(spec.getUserByListOfGroupsSpec(List.of(UUID.randomUUID())));
         foundUsers = userRepository.findAll(userSpecification, pageable);
@@ -246,23 +246,23 @@ class UserSpecTest {
     }
 
     @Test
-    public void getUserByListOfRolesSpec_shouldGetFiveUsers_whenArrayOfRoles() {
+    void getUserByListOfRolesSpec_shouldGetFiveUsers_whenArrayOfRoles() {
         Specification<User> userSpecification = Specification
                 .where(spec.getUserByListOfRolesSpec(List.of(ROLE_ACCOUNT_OWNER_ID, ROLE_AUTHOR_ID)));
         foundUsers = userRepository.findAll(userSpecification, pageable);
-        assertTrue(foundUsers.getContent().size() == 5);
+        assertEquals(5, foundUsers.getContent().size());
     }
 
     @Test
-    public void getUserByListOfRolesSpec_shouldGetOneUser_whenRoleIsAccountOwner() {
+    void getUserByListOfRolesSpec_shouldGetOneUser_whenRoleIsAccountOwner() {
         Specification<User> userSpecification = Specification
                 .where(spec.getUserByListOfRolesSpec(List.of(ROLE_ACCOUNT_OWNER_ID)));
         foundUsers = userRepository.findAll(userSpecification, pageable);
-        assertTrue(foundUsers.getContent().size() == 1);
+        assertEquals(1, foundUsers.getContent().size());
     }
 
     @Test
-    public void getUserByListOfRolesSpec_shouldGetEmpty_whenRoleIsAdmin() {
+    void getUserByListOfRolesSpec_shouldGetEmpty_whenRoleIsAdmin() {
         Specification<User> userSpecification = Specification
                 .where(spec.getUserByListOfRolesSpec(List.of(ROLE_ADMIN_ID)));
         foundUsers = userRepository.findAll(userSpecification, pageable);
@@ -270,7 +270,7 @@ class UserSpecTest {
     }
 
     @Test
-    public void getEntityByDeletedSpec_shouldGetEmptyList_whenDeletedIsTrue() {
+    void getEntityByDeletedSpec_shouldGetEmptyList_whenDeletedIsTrue() {
         Specification<User> userSpecification = Specification
                 .where(spec.getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted.fromString("true")));
         foundUsers = userRepository.findAll(userSpecification, pageable);
@@ -278,15 +278,18 @@ class UserSpecTest {
     }
 
     @Test
-    public void getEntityByDeletedSpec_shouldGetFiveUsers_whenDeletedIsFalse() {
+    void getEntityByDeletedSpec_shouldGetFiveUsers_whenDeletedIsFalse() {
         Specification<User> userSpecification = Specification
                 .where(spec.getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted.fromString("false")));
         foundUsers = userRepository.findAll(userSpecification, pageable);
-        assertTrue(foundUsers.getContent().size() == 5);
+        assertEquals(5, foundUsers.getContent().size());
     }
 
-
-    // TODO add test for ourId Spec
-
-
+    @Test
+    void getEntityByOutIdSpec_shouldGetFiveUsers_whenOutIdIsNull() {
+        Specification<User> userSpecification = Specification
+                .where(spec.getEntityByOutIdSpec(null));
+        foundUsers = userRepository.findAll(userSpecification, pageable);
+        assertEquals(5, foundUsers.getContent().size());
+    }
 }

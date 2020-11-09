@@ -50,6 +50,7 @@ public class UserFilterDto extends BaseFilterDto {
     @ValueOfEnum(enumClass = FieldsForSort.class, message = "must be any of: firstName, secondName")
     private String sortBy = "firstName";
 
+    @SuppressWarnings("unused")
     public enum FieldsForSort {
         FIRSTNAME, SECONDNAME
     }

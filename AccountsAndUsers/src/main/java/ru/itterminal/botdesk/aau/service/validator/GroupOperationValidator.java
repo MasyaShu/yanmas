@@ -22,8 +22,8 @@ import static java.util.Collections.singletonList;
 @Slf4j
 @Component
 public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> {
-    private GroupServiceImpl service;
 
+    private final GroupServiceImpl service;
     private static final String INNER_GROUP = "Inner group";
     private static final String USER_FROM_AN_INNER_GROUP_CANNOT_CREATE_UPDATE_GROUPS =
             "A user from an inner group cannot create / update groups";

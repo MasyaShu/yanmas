@@ -1,5 +1,6 @@
 package ru.itterminal.botdesk.aau.model;
 
+@SuppressWarnings("unused")
 public enum Roles {
     ACCOUNT_OWNER(3),
     ADMIN(2),
@@ -7,7 +8,7 @@ public enum Roles {
     AUTHOR (0),
     OBSERVER (0);
 
-    private int weight;
+    private final int weight;
 
     Roles(int weight) {
         this.weight = weight;

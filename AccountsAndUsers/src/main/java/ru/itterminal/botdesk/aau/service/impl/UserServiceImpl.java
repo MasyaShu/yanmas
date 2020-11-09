@@ -31,9 +31,9 @@ import ru.itterminal.botdesk.jwt.JwtProvider;
 @Transactional
 public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidator, UserRepository> {
 
-    private BCryptPasswordEncoder encoder;
-    private JwtProvider jwtProvider;
-    private RoleServiceImpl roleService;
+    private final BCryptPasswordEncoder encoder;
+    private final JwtProvider jwtProvider;
+    private final RoleServiceImpl roleService;
 
     @Autowired
     public UserServiceImpl(BCryptPasswordEncoder encoder, JwtProvider jwtProvider,
@@ -97,6 +97,7 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
         }
         User createdUser = repository.create(entity);
         log.trace(format(CREATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), createdUser.toString()));
+        //noinspection StatementWithEmptyBody
         if (createdUser.getEmailVerificationToken() != null) {
             // TODO send email: emailVerificationToken
         }
@@ -171,9 +172,9 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
     public User findByIdAndAccountIdAndOwnGroupId(UUID id, UUID accountId, UUID ownGroupId) {
         checkEntityIdAndAccountId(ENTITY_USER_NAME, id, accountId);
         if (ownGroupId == null) {
-            log.error(format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, ownGroupId));
-            throw new EntityNotExistException(
-                    format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, ownGroupId));
+            String message = format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, null);
+            log.error(message);
+            throw new EntityNotExistException(message);
         }
         log.trace(START_FIND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, ownGroupId);
         return repository.getByIdAndAccount_IdAndOwnGroup_Id(id, accountId, ownGroupId).orElseThrow(
@@ -186,12 +187,14 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
     @Transactional(readOnly = true)
     public List<User> findAllByRoleAndIdNot(Role role, UUID id) {
         if (id == null) {
-            log.error(format(NOT_FOUND_USERS_BY_ROLE_AND_NOT_ID, role, id));
-            throw new EntityNotExistException(format(NOT_FOUND_USERS_BY_ROLE_AND_NOT_ID, role, id));
+            String message = format(NOT_FOUND_USERS_BY_ROLE_AND_NOT_ID, role, null);
+            log.error(message);
+            throw new EntityNotExistException(message);
         }
         if (role == null) {
-            log.error(format(NOT_FOUND_USERS_BY_ROLE_AND_NOT_ID, role, id));
-            throw new EntityNotExistException(format(NOT_FOUND_USERS_BY_ROLE_AND_NOT_ID, role, id));
+            String message = format(NOT_FOUND_USERS_BY_ROLE_AND_NOT_ID, null, id);
+            log.error(message);
+            throw new EntityNotExistException(message);
         }
         log.trace(START_FIND_ALL_USERS_BY_ROLE_AND_NOT_ID, role, id);
         return repository.findAllByRoleAndIdNot(role, id);
@@ -239,8 +242,8 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
         user.setEmailVerificationStatus(true);
         user.setEmailVerificationToken(null);
         User savedUser = repository.save(user);
-        if (savedUser == null || savedUser.getEmailVerificationToken() != null
-                || savedUser.getEmailVerificationStatus() != true) {
+        if (savedUser.getEmailVerificationToken() != null
+                || !savedUser.getEmailVerificationStatus()) {
             throw new FailedSaveEntityException(FAILED_SAVE_USER_AFTER_VERIFY_EMAIL_TOKEN);
         }
     }
@@ -274,7 +277,7 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
         user.setPassword(encodedNewPassword);
         user.setPasswordResetToken(null);
         User savedUser = repository.save(user);
-        if (savedUser == null || savedUser.getPassword() == null
+        if (savedUser.getPassword() == null
                 || !encoder.matches(newPassword, savedUser.getPassword())) {
             throw new FailedSaveEntityException(FAILED_SAVE_USER_AFTER_RESET_PASSWORD);
         }

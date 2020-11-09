@@ -9,6 +9,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 
+@SuppressWarnings("unused")
 public interface  CrudService<E extends BaseEntity> {
 
     String CREATE_INIT_MESSAGE = "Dictionary: '%s'. Creating new entity: '%s'";

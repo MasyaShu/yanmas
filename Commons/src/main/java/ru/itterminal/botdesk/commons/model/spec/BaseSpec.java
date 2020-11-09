@@ -32,6 +32,9 @@ public interface BaseSpec<E extends BaseEntity, A extends BaseEntity> {
     }
 
     default Specification<E> getEntityByOutIdSpec(String outId) {
+        if (outId == null) {
+            return (root, query, criteriaBuilder) -> criteriaBuilder.isNull(root.get("outId"));
+        }
         return (root, query, criteriaBuilder) -> criteriaBuilder.like(criteriaBuilder.lower(root.get("outId")),
                 "%" + outId.toLowerCase() + "%");
     }

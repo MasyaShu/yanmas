@@ -31,7 +31,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.dto.UserDto;
 import ru.itterminal.botdesk.aau.model.dto.UserDtoResponseWithoutPassword;
@@ -47,17 +46,18 @@ import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 import ru.itterminal.botdesk.jwt.JwtUser;
 
+@SuppressWarnings("DuplicatedCode")
 @Slf4j
 @RestController("UserControllerV1")
 @Validated
 @RequestMapping("api/v1/user")
 public class UserControllerV1 extends BaseController {
 
-    UserServiceImpl userService;
-    AccountServiceImpl accountService;
-    RoleServiceImpl roleService;
-    GroupServiceImpl groupService;
-    UserSpec spec;
+    final UserServiceImpl userService;
+    final AccountServiceImpl accountService;
+    final RoleServiceImpl roleService;
+    final GroupServiceImpl groupService;
+    final UserSpec spec;
 
     @Autowired
     public UserControllerV1(UserServiceImpl service, UserSpec userSpec,
@@ -78,7 +78,6 @@ public class UserControllerV1 extends BaseController {
     public ResponseEntity<UserDtoResponseWithoutPassword> create(Principal principal,
             @Validated(Create.class) @RequestBody UserDto request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
-        // TODO move to service
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
         User user = modelMapper.map(request, User.class);
         user.setAccount(accountService.findById(jwtUser.getAccountId()));
@@ -98,8 +97,6 @@ public class UserControllerV1 extends BaseController {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
         User user = modelMapper.map(request, User.class);
-        // TODO move to service
-        // TODO account from database
         user.setAccount(accountService.findById(jwtUser.getAccountId()));
         user.setRole(roleService.findById(request.getRoleId()));
         user.setOwnGroup(groupService.findById(request.getGroupId()));
@@ -125,6 +122,7 @@ public class UserControllerV1 extends BaseController {
         return new ResponseEntity<>(returnedUser, HttpStatus.OK);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @GetMapping()
     public ResponseEntity<Page<UserDtoResponseWithoutPassword>> getByFilter(
             Principal user,
@@ -161,7 +159,8 @@ public class UserControllerV1 extends BaseController {
                 .and(filter.getRoles() == null || filter.getRoles().isEmpty() ? null :
                         spec.getUserByListOfRolesSpec(filter.getRoles()))
                 .and(spec.getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted.fromString(filter.getDeleted())))
-                .and(spec.getEntityByAccountSpec(jwtUser.getAccountId()));
+                .and(spec.getEntityByAccountSpec(jwtUser.getAccountId()))
+                .and(filter.getOutId() == null ? null :  spec.getEntityByOutIdSpec(filter.getOutId()));
         foundUsers = userService.findAllByFilter(userSpecification, pageable);
         returnedUsers = mapPage(foundUsers, UserDtoResponseWithoutPassword.class, pageable);
         log.debug(FIND_FINISH_MESSAGE, ENTITY_NAME, foundUsers.getTotalElements());
@@ -170,7 +169,7 @@ public class UserControllerV1 extends BaseController {
 
     @DeleteMapping()
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
-    ResponseEntity<Void> physicalDelete(@RequestBody UserDto request) {
+    public ResponseEntity<Void> physicalDelete() {
         throw new UnsupportedOperationException("Physical delete will be implement in the further");
     }
 }

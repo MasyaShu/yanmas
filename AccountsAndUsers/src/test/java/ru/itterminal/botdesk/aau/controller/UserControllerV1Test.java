@@ -79,6 +79,7 @@ import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
 import ru.itterminal.botdesk.config.TestSecurityConfig;
 
+@SuppressWarnings("ALL")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {UserControllerV1.class, UserSpec.class, FilterChainProxy.class})
 @Import(TestSecurityConfig.class)
@@ -118,49 +119,42 @@ class UserControllerV1Test {
                 .build();
     }
 
-    private ObjectMapper objectMapper = new ObjectMapper();
-    private static String HOST = "http://localhost";
-    private static String PORT = ":8081";
-    private static String API = "api/v1/user/";
-    public static String USER_1_ID = "d592facb-e6ee-4801-8310-9c7708eb6e6c";
-    public static String USER_2_ID = "86840939-c488-448b-a473-cd9e1097dd32";
-    public static String ROLE_ADMIN_ID = "d7597321-239f-4e06-84a6-853e71574896";
-    public static String ROLE_ACCOUNT_OWNER_ID = "c4edeb4d-0b1e-4c8f-99f6-9534389408a0";
-    private static String PASSWORD_1 = "UserUser123";
-    private static String PASSWORD_2 = "UserUser321";
-    private static String FIRST_NAME = "Ivan";
-    private static String SECOND_NAME = "Ivanov";
-    private static String PHONE = "123456";
-    private static String INVALID_FIRST_NAME = "123456789012345678901";
-    private static String INVALID_SECOND_NAME = "1234567890123456789012345678901";
-    private static String INVALID_PHONE = "1234567890123456789012345678901";
-    private static String INVALID_SORT_BY = "ERROR";
-    private static String INVALID_DELETED = "ERROR";
-    private static String INVALID_DIRECTION = "ERROR";
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final String HOST = "http://localhost";
+    private static final String PORT = ":8081";
+    private static final String API = "api/v1/user/";
+    public static final String USER_1_ID = "d592facb-e6ee-4801-8310-9c7708eb6e6c";
+    public static final String USER_2_ID = "86840939-c488-448b-a473-cd9e1097dd32";
+    public static final String ROLE_ADMIN_ID = "d7597321-239f-4e06-84a6-853e71574896";
+    public static final String ROLE_ACCOUNT_OWNER_ID = "c4edeb4d-0b1e-4c8f-99f6-9534389408a0";
+    private static final String INVALID_FIRST_NAME = "123456789012345678901";
+    private static final String INVALID_SECOND_NAME = "1234567890123456789012345678901";
+    private static final String INVALID_PHONE = "1234567890123456789012345678901";
 
-    private static String INVALID_EMAIL_1 = "it-terminal_mail.ru"; //absent @
-    private static String INVALID_EMAIL_2 = "it-terminal_@mail.рф"; //characters are not allowed
-    private static String INVALID_EMAIL_3 = "it-terminal_@.ru"; //missing domain name
-    private static String INVALID_EMAIL_4 = "it-terminal_@mail"; //missing domain name
-    private static String INVALID_EMAIL_5 = "it-terminal_@@mail.ru"; //two @
-    private static String INVALID_EMAIL_6 = "@mail.ru"; //missing name
-    private static String INVALID_EMAIL_7 = "it terminal@mail.ru"; //space in name
-    private static String INVALID_EMAIL_8 = "it-terminal@ mail.ru"; //space in domain
+    private static final String INVALID_EMAIL_1 = "it-terminal_mail.ru"; //absent @
+    private static final String INVALID_EMAIL_2 = "it-terminal_@mail.рф"; //characters are not allowed
+    private static final String INVALID_EMAIL_3 = "it-terminal_@.ru"; //missing domain name
+    private static final String INVALID_EMAIL_4 = "it-terminal_@mail"; //missing domain name
+    private static final String INVALID_EMAIL_5 = "it-terminal_@@mail.ru"; //two @
+    private static final String INVALID_EMAIL_6 = "@mail.ru"; //missing name
+    private static final String INVALID_EMAIL_7 = "it terminal@mail.ru"; //space in name
+    private static final String INVALID_EMAIL_8 = "it-terminal@ mail.ru"; //space in domain
 
-    private Set<String> invalidEmail = Set.of(INVALID_EMAIL_1, INVALID_EMAIL_2, INVALID_EMAIL_3, INVALID_EMAIL_4,
+    private final Set<String> invalidEmail = Set.of(INVALID_EMAIL_1, INVALID_EMAIL_2, INVALID_EMAIL_3, INVALID_EMAIL_4,
             INVALID_EMAIL_5, INVALID_EMAIL_6, INVALID_EMAIL_7, INVALID_EMAIL_8);
 
-    private static String INVALID_PASSWORD_1 = "Itt12"; //Valid characters, not valid length (5)
-    private static String INVALID_PASSWORD_2 = "itt12"; //not valid characters, not valid length (5)
-    private static String INVALID_PASSWORD_3 = "itt123"; //valid length (6), not valid characters
-    private static String INVALID_PASSWORD_4 = "Itt12Itt12Itt12Itt12Itt12"; //Valid characters, not valid length (25)
-    private static String INVALID_PASSWORD_5 = "IttItt"; //no numbers
-    private static String INVALID_PASSWORD_6 = "ittitt2"; //no upcase letter
-    private static String INVALID_PASSWORD_7 = "ITTITT2"; //no lowercase letter
-    private static String INVALID_PASSWORD_8 = "IttItt 2"; //space
-    private static String INVALID_PASSWORD_9 = "123123"; //numbers
+    private static final String INVALID_PASSWORD_1 = "Itt12"; //Valid characters, not valid length (5)
+    private static final String INVALID_PASSWORD_2 = "itt12"; //not valid characters, not valid length (5)
+    private static final String INVALID_PASSWORD_3 = "itt123"; //valid length (6), not valid characters
+    private static final String INVALID_PASSWORD_4 = "Itt12Itt12Itt12Itt12Itt12"; //Valid characters, not valid
+    // length (25)
+    private static final String INVALID_PASSWORD_5 = "IttItt"; //no numbers
+    private static final String INVALID_PASSWORD_6 = "ittitt2"; //no upcase letter
+    private static final String INVALID_PASSWORD_7 = "ITTITT2"; //no lowercase letter
+    private static final String INVALID_PASSWORD_8 = "IttItt 2"; //space
+    private static final String INVALID_PASSWORD_9 = "123123"; //numbers
 
-    private Set<String> invalidPassword =
+    private final Set<String> invalidPassword =
             Set.of(INVALID_PASSWORD_1, INVALID_PASSWORD_2, INVALID_PASSWORD_3, INVALID_PASSWORD_4,
                     INVALID_PASSWORD_5, INVALID_PASSWORD_6, INVALID_PASSWORD_7, INVALID_PASSWORD_8, INVALID_PASSWORD_9);
 
@@ -168,8 +162,8 @@ class UserControllerV1Test {
     private User user_2;
     private Account account_1;
     private Group group_1;
-    private Role roleAdmin = new Role(ADMIN.toString(), ADMIN.getWeight());
-    private Role roleAccountOwner = new Role(ACCOUNT_OWNER.toString(), ACCOUNT_OWNER.getWeight());
+    private final Role roleAdmin = new Role(ADMIN.toString(), ADMIN.getWeight());
+    private final Role roleAccountOwner = new Role(ACCOUNT_OWNER.toString(), ACCOUNT_OWNER.getWeight());
     private UserDto userDtoFromAccount_1;
     private UserFilterDto userFilterDto;
 
@@ -184,7 +178,9 @@ class UserControllerV1Test {
                 .isInner(true)
                 .build();
         group_1.setId(UUID.fromString(GROUP_1_ID));
-        user_1 = new User().builder()
+        String PASSWORD_1 = "UserUser123";
+        user_1 = User
+                .builder()
                 .email(EMAIL_1)
                 .password(PASSWORD_1)
                 .account(account_1)
@@ -193,7 +189,9 @@ class UserControllerV1Test {
                 .role(roleAdmin)
                 .build();
         user_1.setId(UUID.fromString(USER_1_ID));
-        user_2 = new User().builder()
+        String PASSWORD_2 = "UserUser321";
+        user_2 = User
+                .builder()
                 .email(EMAIL_2)
                 .password(PASSWORD_2)
                 .account(account_1)
@@ -202,7 +200,8 @@ class UserControllerV1Test {
                 .role(roleAccountOwner)
                 .build();
         user_2.setId(UUID.fromString(USER_2_ID));
-        userDtoFromAccount_1 = new UserDto().builder()
+        userDtoFromAccount_1 = UserDto
+                .builder()
                 .email(EMAIL_1)
                 .password(PASSWORD_1)
                 .groupId(group_1.getId())
@@ -211,14 +210,17 @@ class UserControllerV1Test {
         userDtoFromAccount_1.setDeleted(false);
         userFilterDto = new UserFilterDto();
         userFilterDto.setEmail(EMAIL_1);
+        String FIRST_NAME = "Ivan";
         userFilterDto.setFirstName(FIRST_NAME);
+        String SECOND_NAME = "Ivanov";
         userFilterDto.setSecondName(SECOND_NAME);
+        String PHONE = "123456";
         userFilterDto.setPhone(PHONE);
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void create_shouldCreate_whenValidDataPassed() throws Exception {
+    void create_shouldCreate_whenValidDataPassed() throws Exception {
         userDtoFromAccount_1.setDeleted(null);
         when(service.create(any())).thenReturn(user_1);
         when(accountService.findById(any())).thenReturn(account_1);
@@ -238,7 +240,7 @@ class UserControllerV1Test {
 
     @Test
     @WithAnonymousUser
-    public void create_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
+    void create_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -251,7 +253,7 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    public void create_shouldGetStatusForbidden_whenNotAllowedRole() throws Exception {
+    void create_shouldGetStatusForbidden_whenNotAllowedRole() throws Exception {
         userDtoFromAccount_1.setDeleted(null);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -265,7 +267,7 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
+    void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
         userDtoFromAccount_1.setEmail(INVALID_EMAIL_1);
         userDtoFromAccount_1.setDeleted(true);
         userDtoFromAccount_1.setPassword("");
@@ -297,7 +299,7 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenAllPassedDataIsNull() throws Exception {
+    void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenAllPassedDataIsNull() throws Exception {
         userDtoFromAccount_1.setEmail(null);
         userDtoFromAccount_1.setDeleted(null);
         userDtoFromAccount_1.setPassword(null);
@@ -325,7 +327,7 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenVersionNotNull() throws Exception {
+    void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenVersionNotNull() throws Exception {
         userDtoFromAccount_1.setId(UUID.randomUUID());
         userDtoFromAccount_1.setVersion(15);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
@@ -343,7 +345,7 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidEmailPassed() throws Exception {
+    void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidEmailPassed() throws Exception {
         for (String ie : invalidEmail) {
             userDtoFromAccount_1.setEmail(ie);
             MockHttpServletRequestBuilder request = post(HOST + PORT + API)
@@ -360,7 +362,7 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidPasswordPassed() throws Exception {
+    void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidPasswordPassed() throws Exception {
         for (String ip : invalidPassword) {
             userDtoFromAccount_1.setPassword(ip);
             MockHttpServletRequestBuilder request = post(HOST + PORT + API)
@@ -377,7 +379,7 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void update_shouldUpdate_whenValidDataPassed() throws Exception {
+    void update_shouldUpdate_whenValidDataPassed() throws Exception {
         userDtoFromAccount_1.setId(UUID.fromString(USER_1_ID));
         userDtoFromAccount_1.setVersion(1);
         userDtoFromAccount_1.setIsArchived(false);
@@ -397,7 +399,7 @@ class UserControllerV1Test {
 
     @Test
     @WithAnonymousUser
-    public void update_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
+    void update_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -410,7 +412,7 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    public void update_shouldGetStatusForbidden_whenNotAllowedRole() throws Exception {
+    void update_shouldGetStatusForbidden_whenNotAllowedRole() throws Exception {
         userDtoFromAccount_1.setId(UUID.fromString(USER_1_ID));
         userDtoFromAccount_1.setVersion(0);
         userDtoFromAccount_1.setIsArchived(false);
@@ -426,7 +428,7 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
+    void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
         userDtoFromAccount_1.setEmail(INVALID_EMAIL_1);
         userDtoFromAccount_1.setDeleted(null);
         userDtoFromAccount_1.setPassword("");
@@ -459,7 +461,7 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenAllPassedDataIsNull() throws Exception {
+    void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenAllPassedDataIsNull() throws Exception {
         userDtoFromAccount_1.setEmail(null);
         userDtoFromAccount_1.setDeleted(null);
         userDtoFromAccount_1.setPassword(null);
@@ -489,7 +491,7 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenVersionIsNegative() throws Exception {
+    void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenVersionIsNegative() throws Exception {
         userDtoFromAccount_1.setVersion(-15);
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -506,7 +508,7 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidIdPassed() throws Exception {
+    void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidIdPassed() throws Exception {
         userDtoFromAccount_1.setId(UUID.fromString(USER_1_ID));
         userDtoFromAccount_1.setVersion(1);
         String json = objectMapper.writeValueAsString(userDtoFromAccount_1);
@@ -524,7 +526,7 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidEmailPassed() throws Exception {
+    void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidEmailPassed() throws Exception {
         for (String ie : invalidEmail) {
             userDtoFromAccount_1.setEmail(ie);
             MockHttpServletRequestBuilder request = put(HOST + PORT + API)
@@ -541,7 +543,7 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidPasswordPassed() throws Exception {
+    void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidPasswordPassed() throws Exception {
         for (String ip : invalidPassword) {
             userDtoFromAccount_1.setPassword(ip);
             MockHttpServletRequestBuilder request = put(HOST + PORT + API)
@@ -558,7 +560,7 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void getById_shouldFindOneUser_whenUserExistInDatabaseByPassedIdAndHeIsInInnerGroup() throws Exception {
+    void getById_shouldFindOneUser_whenUserExistInDatabaseByPassedIdAndHeIsInInnerGroup() throws Exception {
         when(service.findByIdAndAccountId(any(), any())).thenReturn(user_1);
         mockMvc.perform(get(HOST + PORT + API + USER_1_ID))
                 .andDo(print())
@@ -571,7 +573,7 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
-    public void getById_shouldFindOneUser_whenUserExistInDatabaseByPassedIdAndHeIsNotInInnerGroup() throws Exception {
+    void getById_shouldFindOneUser_whenUserExistInDatabaseByPassedIdAndHeIsNotInInnerGroup() throws Exception {
         when(service.findByIdAndAccountIdAndOwnGroupId(any(), any(), any())).thenReturn(user_1);
         mockMvc.perform(get(HOST + PORT + API + USER_1_ID))
                 .andDo(print())
@@ -584,7 +586,7 @@ class UserControllerV1Test {
 
     @Test
     @WithAnonymousUser
-    public void getById_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
+    void getById_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
         when(service.findByIdAndAccountId(any(), any())).thenReturn(user_1);
         mockMvc.perform(get(HOST + PORT + API + USER_1_ID))
                 .andDo(print())
@@ -602,7 +604,7 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void getById_shouldGetStatusBadRequest_whenUiidIsInvalid() throws Exception {
+    void getById_shouldGetStatusBadRequest_whenIdIsInvalid() throws Exception {
         mockMvc.perform(get(HOST + PORT + API + "Abracadabra"))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
@@ -611,11 +613,11 @@ class UserControllerV1Test {
 
     @Test
     @WithAnonymousUser
-    public void getByFilter_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
+    void getByFilter_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
         Pageable pageable =
                 PageRequest.of(Integer.parseInt(PAGE_DEFAULT_VALUE), Integer.parseInt(SIZE_DEFAULT_VALUE),
                         Sort.by("firstName").ascending());
-        Page<User> userPageExpected = new PageImpl<User>(List.of(user_1, user_2), pageable, 2);
+        Page<User> userPageExpected = new PageImpl<>(List.of(user_1, user_2), pageable, 2);
         when(service.findAllByFilter(any(), any())).thenReturn(userPageExpected);
         MockHttpServletRequestBuilder request = get(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -629,11 +631,11 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void getByFilter_shouldFindTwoUsers_whenUsersExistInDatabaseByPassedFilter() throws Exception {
+    void getByFilter_shouldFindTwoUsers_whenUsersExistInDatabaseByPassedFilter() throws Exception {
         Pageable pageable =
                 PageRequest.of(Integer.parseInt(PAGE_DEFAULT_VALUE), Integer.parseInt(SIZE_DEFAULT_VALUE),
                         Sort.by("firstName").ascending());
-        Page<User> userPageExpected = new PageImpl<User>(List.of(user_1, user_2), pageable, 2);
+        Page<User> userPageExpected = new PageImpl<>(List.of(user_1, user_2), pageable, 2);
         when(service.findAllByFilter(any(), any())).thenReturn(userPageExpected);
         MockHttpServletRequestBuilder request = get(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -654,13 +656,16 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
+    void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
         userFilterDto.setEmail(INVALID_EMAIL_1);
         userFilterDto.setFirstName(INVALID_FIRST_NAME);
         userFilterDto.setSecondName(INVALID_SECOND_NAME);
         userFilterDto.setPhone(INVALID_PHONE);
+        String INVALID_SORT_BY = "ERROR";
         userFilterDto.setSortBy(INVALID_SORT_BY);
+        String INVALID_DELETED = "ERROR";
         userFilterDto.setDeleted(INVALID_DELETED);
+        String INVALID_DIRECTION = "ERROR";
         userFilterDto.setDirection(INVALID_DIRECTION);
         MockHttpServletRequestBuilder request = get(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -681,7 +686,7 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidSizeAndPagePassed()
+    void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidSizeAndPagePassed()
             throws Exception {
         MockHttpServletRequestBuilder request = get(HOST + PORT + API + "?page=-1&size=0")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -696,7 +701,7 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenFilterIsEmpty() throws Exception {
+    void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenFilterIsEmpty() throws Exception {
         userFilterDto.setEmail("");
         userFilterDto.setFirstName("");
         userFilterDto.setSecondName("");
@@ -724,12 +729,12 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void getByFilter_shouldFindTwoUsers_whenFilterIsNew() throws Exception {
+    void getByFilter_shouldFindTwoUsers_whenFilterIsNew() throws Exception {
         UserFilterDto userFilterDto = new UserFilterDto();
         Pageable pageable =
                 PageRequest.of(Integer.parseInt(PAGE_DEFAULT_VALUE), Integer.parseInt(SIZE_DEFAULT_VALUE),
                         Sort.by("firstName").ascending());
-        Page<User> userPageExpected = new PageImpl<User>(List.of(user_1, user_2), pageable, 2);
+        Page<User> userPageExpected = new PageImpl<>(List.of(user_1, user_2), pageable, 2);
         when(service.findAllByFilter(any(), any())).thenReturn(userPageExpected);
         MockHttpServletRequestBuilder request = get(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -746,14 +751,14 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    public void getByFilter_shouldFindTwoUsers_whenDefaultFieldsInFilterIsNull() throws Exception {
+    void getByFilter_shouldFindTwoUsers_whenDefaultFieldsInFilterIsNull() throws Exception {
         userFilterDto.setSortBy(null);
         userFilterDto.setDeleted(null);
         userFilterDto.setDirection(null);
         Pageable pageable =
                 PageRequest.of(Integer.parseInt(PAGE_DEFAULT_VALUE), Integer.parseInt(SIZE_DEFAULT_VALUE),
                         Sort.by("firstName").ascending());
-        Page<User> userPageExpected = new PageImpl<User>(List.of(user_1, user_2), pageable, 2);
+        Page<User> userPageExpected = new PageImpl<>(List.of(user_1, user_2), pageable, 2);
         when(service.findAllByFilter(any(), any())).thenReturn(userPageExpected);
         MockHttpServletRequestBuilder request = get(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)

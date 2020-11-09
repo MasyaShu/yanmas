@@ -4,10 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import static ru.itterminal.botdesk.aau.model.Roles.ADMIN;
-import static ru.itterminal.botdesk.aau.model.Roles.AUTHOR;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -19,14 +16,15 @@ class UserTest {
 
     User user_1;
     User user_2;
-    UUID id = UUID.randomUUID();
+    final UUID id = UUID.randomUUID();
 
-    Role admin = new Role(ADMIN.toString(), ADMIN.getWeight());
-    Role author = new Role(AUTHOR.toString(), AUTHOR.getWeight());
+    final Role admin = new Role(ADMIN.toString(), ADMIN.getWeight());
 
+    @SuppressWarnings("deprecation")
     @BeforeEach
-    private void setUp() {
-        user_1 = new User().builder()
+    void setUp() {
+        user_1 = User
+                .builder()
                 .account(null)
                 .comment("comment")
                 .email("email")
@@ -44,7 +42,8 @@ class UserTest {
         user_1.setVersion(0);
         user_1.setDeleted(false);
 
-        user_2 = new User().builder()
+        user_2 = User
+                .builder()
                 .account(null)
                 .comment("comment")
                 .email("email")
@@ -88,7 +87,7 @@ class UserTest {
     }
 
     @Test
-    void equals_shouldGetTrue_whenRolesDifferntObjectsBotEqualsValues() {
+    void equals_shouldGetTrue_whenRolesDifferentObjectsBotEqualsValues() {
         Role admin = new Role(ADMIN.toString(), ADMIN.getWeight());
         user_1.setRole(admin);
         assertEquals(user_1, user_2);

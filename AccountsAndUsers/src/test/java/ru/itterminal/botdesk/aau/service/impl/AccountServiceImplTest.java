@@ -60,7 +60,7 @@ class AccountServiceImplTest {
     private Group group;
     private User user;
     private AccountCreateDto accountDto;
-    private Role ROLE_ACCOUNT_OWNER = Role.builder().name(Roles.ACCOUNT_OWNER.toString()).build();
+    private final Role ROLE_ACCOUNT_OWNER = Role.builder().name(Roles.ACCOUNT_OWNER.toString()).build();
     public static final String ACCOUNT_NAME = "name of test account";
     public static final String EMAIL_ACCOUNT_OWNER = "m@m.ru";
     public static final String PASSWORD_ACCOUNT_OWNER = "12345";
@@ -92,7 +92,7 @@ class AccountServiceImplTest {
     }
 
     @Test
-    public void create_shouldCreateAccount_whenPassedValidData() {
+    void create_shouldCreateAccount_whenPassedValidData() {
         when(validator.checkUniqueness(anyString())).thenReturn(true);
         when(repository.create(any())).thenReturn(account);
         when(groupService.create(any())).thenReturn(group);
@@ -108,7 +108,7 @@ class AccountServiceImplTest {
     }
 
     @Test
-    public void update_shouldUpdateAccount_whenPassedValidData() {
+    void update_shouldUpdateAccount_whenPassedValidData() {
         when(validator.beforeUpdate(any())).thenReturn(true);
         when(repository.existsById(any())).thenReturn(true);
         when(repository.findById(any())).thenReturn(Optional.of(account));
@@ -122,7 +122,7 @@ class AccountServiceImplTest {
     }
 
     @Test
-    public void update_shouldGetEntityNotExistException_whenAccountIdNotExistInDatabase() {
+    void update_shouldGetEntityNotExistException_whenAccountIdNotExistInDatabase() {
         when(validator.beforeUpdate(any())).thenReturn(true);
         when(repository.existsById(any())).thenReturn(false);
         when(repository.findById(any())).thenReturn(Optional.empty());
@@ -136,7 +136,7 @@ class AccountServiceImplTest {
     }
 
     @Test
-    public void update_shouldGetOptimisticLockingFailureException_whenPassedInvalidVersionOfAccount() {
+    void update_shouldGetOptimisticLockingFailureException_whenPassedInvalidVersionOfAccount() {
         String message = format(VERSION_INVALID_MESSAGE, account.getId());
         when(validator.beforeUpdate(any())).thenReturn(true);
         when(repository.existsById(any())).thenReturn(true);

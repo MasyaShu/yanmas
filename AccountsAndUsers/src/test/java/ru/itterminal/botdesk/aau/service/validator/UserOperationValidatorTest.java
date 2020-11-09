@@ -27,17 +27,15 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.Group;
@@ -52,58 +50,56 @@ import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 import ru.itterminal.botdesk.config.TestSecurityConfig;
 import ru.itterminal.botdesk.jwt.JwtUser;
 
-@ExtendWith(SpringExtension.class)
+@SpringJUnitConfig(value = {UserOperationValidator.class})
 @Import(TestSecurityConfig.class)
 @ActiveProfiles("Test")
 class UserOperationValidatorTest {
 
-    @Mock
+    @MockBean
     private UserServiceImpl service;
 
     @Mock
     private UserUniqueFields userUniqueFields;
 
-    @Mock
+    @MockBean
     private RoleServiceImpl roleService;
 
+    final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
     @Autowired
-    UserDetailsService userDetailsService;
-
-    BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-
-    @InjectMocks
-    private UserOperationValidator validator = new UserOperationValidator(service, roleService);
+    private final UserOperationValidator validator = new UserOperationValidator(service, roleService);
 
     private static final String EXIST_EMAIL = "mail@mal.ru";
     private static final String NEW_USER_EMAIL = "mail_new@mal.ru";
     private static final String OLD_USER_EMAIL = "mail_old@mal.ru";
     private static final String ACCOUNT_NAME = "account name";
-    private static String GROUP_ID = "dd06a563-802e-4d32-bd72-0555baa3e7e5";
     private static User user;
     private static User oldUser;
     private static User newUser;
-    private static Account account;
-    private static Group group;
     private static LogicalValidationException logicalValidationException;
-    private static Map<String, List<ValidationError>> errors = new HashMap<>();
+    private static final Map<String, List<ValidationError>> errors = new HashMap<>();
 
     @BeforeAll
     static void setUp() {
-        account = Account.builder().name(ACCOUNT_NAME).build();
+        Account account = Account.builder().name(ACCOUNT_NAME).build();
         account.setId(UUID.fromString(ACCOUNT_1_ID));
-        group = Group.builder().build();
+        Group group = Group.builder().build();
+        String GROUP_ID = "dd06a563-802e-4d32-bd72-0555baa3e7e5";
         group.setId(UUID.fromString(GROUP_ID));
-        user = new User().builder()
+        user = User
+                .builder()
                 .email(EXIST_EMAIL)
                 .account(account)
                 .ownGroup(group)
                 .build();
-        oldUser = new User().builder()
+        oldUser = User
+                .builder()
                 .email(OLD_USER_EMAIL)
                 .account(account)
                 .ownGroup(group)
                 .build();
-        newUser = new User().builder()
+        newUser = User
+                .builder()
                 .email(NEW_USER_EMAIL)
                 .account(account)
                 .ownGroup(group)
@@ -112,13 +108,13 @@ class UserOperationValidatorTest {
     }
 
     @Test
-    public void checkUniqueness_shouldGetTrue_whenPassedDataIsUnique() {
+    void checkUniqueness_shouldGetTrue_whenPassedDataIsUnique() {
         when(service.findByUniqueFields(any())).thenReturn(Collections.emptyList());
         assertTrue(validator.checkUniqueness(new User()));
     }
 
     @Test
-    public void checkUniqueness_shouldGetLogicalValidationException_whenPassedDataNotUnique() {
+    void checkUniqueness_shouldGetLogicalValidationException_whenPassedDataNotUnique() {
         when(service.findByUniqueFields(any())).thenReturn(List.of(userUniqueFields));
         when(userUniqueFields.getEmail()).thenReturn(EXIST_EMAIL);
         errors.put("email", singletonList(new ValidationError("not unique", "email is occupied")));
@@ -131,7 +127,7 @@ class UserOperationValidatorTest {
 
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    public void beforeCreate_shouldGetLogicalValidationException_whenUserWithRoleAccountOwnerAlreadyExist() {
+    void beforeCreate_shouldGetLogicalValidationException_whenUserWithRoleAccountOwnerAlreadyExist() {
         user.setRole(Role
                 .builder()
                 .name(Roles.ACCOUNT_OWNER.toString())
@@ -157,7 +153,7 @@ class UserOperationValidatorTest {
 
     @Test
     @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_NOT_INNER_GROUP")
-    public void beforeCreate_shouldGetLogicalValidationException_whenUserIsNotInInnerGroupAndGroupIdsIsDifferent() {
+    void beforeCreate_shouldGetLogicalValidationException_whenUserIsNotInInnerGroupAndGroupIdsIsDifferent() {
         user.setRole(Role
                 .builder()
                 .name(Roles.AUTHOR.toString())
@@ -183,7 +179,7 @@ class UserOperationValidatorTest {
 
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    public void beforeCreate_shouldGetLogicalValidationException_whenWeightOfRoleOfCurrentUserLessThanWeightOfRoleCreatedEntity() {
+    void beforeCreate_shouldGetLogicalValidationException_whenWeightOfRoleOfCurrentUserLessThanWeightOfRoleCreatedEntity() {
         user.setRole(Role
                 .builder()
                 .name(Roles.ACCOUNT_OWNER.toString())
@@ -205,12 +201,12 @@ class UserOperationValidatorTest {
 
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    public void beforeUpdate_shouldGetLogicalValidationException_whenNewAndOldUserWithRoleAccountOwner() {
+    void beforeUpdate_shouldGetLogicalValidationException_whenNewAndOldUserWithRoleAccountOwner() {
         newUser.setRole(Role.builder().name(Roles.ACCOUNT_OWNER.toString()).build());
         oldUser.setRole(Role.builder().name(Roles.ACCOUNT_OWNER.toString()).build());
         when(service.findAllByRoleAndIdNot(any(), any())).thenReturn(List.of(oldUser));
         when(roleService.getAccountOwnerRole())
-                .thenReturn(new Role().builder().name(Roles.ACCOUNT_OWNER.toString()).build());
+                .thenReturn(Role.builder().name(Roles.ACCOUNT_OWNER.toString()).build());
         errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,
                 format(NOT_UNIQUE_MESSAGE, USER_WITH_ROLE_ACCOUNT_OWNER))));
         logicalValidationException = new LogicalValidationException(VALIDATION_FAILED, errors);
@@ -222,11 +218,11 @@ class UserOperationValidatorTest {
 
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    public void beforeUpdate_shouldGetLogicalValidationException_whenOldAndNewUserWithoutRoleAccountOwner() {
-        newUser.setRole(new Role().builder().name(Roles.AUTHOR.toString()).build());
+    void beforeUpdate_shouldGetLogicalValidationException_whenOldAndNewUserWithoutRoleAccountOwner() {
+        newUser.setRole(Role.builder().name(Roles.AUTHOR.toString()).build());
         when(service.findAllByRoleAndIdNot(any(), any())).thenReturn(Collections.emptyList());
         when(roleService.getAccountOwnerRole())
-                .thenReturn(new Role().builder().name(Roles.ACCOUNT_OWNER.toString()).build());
+                .thenReturn(Role.builder().name(Roles.ACCOUNT_OWNER.toString()).build());
         errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,
                 ACCOUNT_MUST_HAVE_USER_WITH_ROLE_ACCOUNT_OWNER)));
         logicalValidationException = new LogicalValidationException(VALIDATION_FAILED, errors);
@@ -238,16 +234,17 @@ class UserOperationValidatorTest {
 
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    public void beforeUpdate_shouldGetLogicalValidationException_whenWeightOfRoleOfCurrentUserLessThanWeightOfRoleUpdatedEntity() {
-        user.setRole(new Role()
-                .builder()
-                .name(Roles.ACCOUNT_OWNER.toString())
-                .weight(3)
-                .build()
+    void beforeUpdate_shouldGetLogicalValidationException_whenWeightOfRoleOfCurrentUserLessThanWeightOfRoleUpdatedEntity() {
+        user.setRole(
+                Role
+                        .builder()
+                        .name(Roles.ACCOUNT_OWNER.toString())
+                        .weight(3)
+                        .build()
         );
         when(service.findAllByRole(any())).thenReturn(List.of(oldUser));
         when(roleService.getAccountOwnerRole())
-                .thenReturn(new Role().builder().name(Roles.ACCOUNT_OWNER.toString()).build());
+                .thenReturn(Role.builder().name(Roles.ACCOUNT_OWNER.toString()).build());
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         errors.put(WEIGHT_OF_ROLE, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
                 format(WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_FROM_REQUEST, jwtUser, user))));
@@ -260,7 +257,7 @@ class UserOperationValidatorTest {
 
     @Test
     @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_NOT_INNER_GROUP")
-    public void beforeUpdate_shouldGetLogicalValidationException_whenUserIsNotInInnerGroupAndGroupIdsIsDifferent() {
+    void beforeUpdate_shouldGetLogicalValidationException_whenUserIsNotInInnerGroupAndGroupIdsIsDifferent() {
         user.setRole(Role
                 .builder()
                 .name(Roles.AUTHOR.toString())
@@ -285,7 +282,7 @@ class UserOperationValidatorTest {
     }
 
     @Test
-    public void encoderPassword() {
+    void encoderPassword() {
         String encodedPassword = encoder.encode("12345");
         System.out.println("encodedPassword: " + encodedPassword);
         assertTrue(encoder.matches("12345", encodedPassword));

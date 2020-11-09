@@ -32,15 +32,16 @@ import java.security.Principal;
 import java.util.UUID;
 
 
+@SuppressWarnings("ConstantConditions")
 @Slf4j
 @RestController("GroupControllerV1")
 @Validated
 @RequestMapping("api/v1/group")
 public class GroupControllerV1 extends BaseController {
 
-    private GroupServiceImpl service;
-    private GroupSpec spec;
-    private AccountServiceImpl accountService;
+    private final GroupServiceImpl service;
+    private final GroupSpec spec;
+    private final AccountServiceImpl accountService;
 
     @Autowired
     public GroupControllerV1(GroupServiceImpl service, GroupSpec userSpec, AccountServiceImpl accountService) {
@@ -131,7 +132,7 @@ public class GroupControllerV1 extends BaseController {
 
     @DeleteMapping()
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
-    public ResponseEntity<Void> physicalDelete(@RequestBody GroupDto request) {
+    public ResponseEntity<Void> physicalDelete() {
         throw new UnsupportedOperationException("Physical delete will be implement in the further");
     }
 }
