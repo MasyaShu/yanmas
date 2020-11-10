@@ -52,6 +52,7 @@ class UserSpecTest {
     private static final String SECOND_NAME_NOT_EXIST = "secondNameNotExist";
     private static final String USER_1_FIRST_NAME_EXIST = "firstName1";
     private static final String USER_1_SECOND_NAME_EXIST = "secondName1";
+    private static final String USER_3_OUT_ID_EXIST = "outId468431";
     private static final UUID ACCOUNT_1_ID = UUID.fromString("cdfa6483-0769-4628-ba32-efd338a716de");
     private static final UUID ACCOUNT_2_ID = UUID.fromString("bcf98101-2a22-42bf-94cc-c900b50a0b69");
     private static final UUID GROUP_1_ID = UUID.fromString("0223e51a-4bb2-44ee-bc8e-1f047a2145e7");
@@ -109,6 +110,14 @@ class UserSpecTest {
     }
 
     @Test
+    void getUserByFirstNameSpec_shouldTwoUsers_whenFirstNameIsEmpty() {
+        Specification<User> userSpecification = Specification
+                .where(spec.getUserByFirstNameSpec(""));
+        foundUsers = userRepository.findAll(userSpecification, pageable);
+        assertEquals(2, foundUsers.getContent().size());
+    }
+
+    @Test
     void getUserByFirstNameSpec_shouldGetEmptyList_whenUserNotExistInDatabaseWithPassedSecondName() {
         Specification<User> userSpecification = Specification
                 .where(spec.getUserByFirstNameSpec(FIRST_NAME_NOT_EXIST.toUpperCase()));
@@ -125,6 +134,14 @@ class UserSpecTest {
     }
 
     @Test
+    void getUserBySecondNameSpec_shouldTwoUsers_whenSecondNameIsEmpty() {
+        Specification<User> userSpecification = Specification
+                .where(spec.getUserBySecondNameSpec(""));
+        foundUsers = userRepository.findAll(userSpecification, pageable);
+        assertEquals(2, foundUsers.getContent().size());
+    }
+
+    @Test
     void getUserBySecondNameSpec_shouldGetEmptyList_whenUserNotExistInDatabaseWithPassedSecondName() {
         Specification<User> userSpecification = Specification
                 .where(spec.getUserBySecondNameSpec(SECOND_NAME_NOT_EXIST.toUpperCase()));
@@ -137,7 +154,15 @@ class UserSpecTest {
         Specification<User> userSpecification = Specification
                 .where(spec.getUserByPhoneSpec(ALL_USERS_PHONE_EXIST.toUpperCase()));
         foundUsers = userRepository.findAll(userSpecification, pageable);
-        assertEquals(5, foundUsers.getContent().size());
+        assertEquals(3, foundUsers.getContent().size());
+    }
+
+    @Test
+    void getUserByPhoneSpec_shouldGetTwoUsers_whenPhoneIsEmpty() {
+        Specification<User> userSpecification = Specification
+                .where(spec.getUserByPhoneSpec(""));
+        foundUsers = userRepository.findAll(userSpecification, pageable);
+        assertEquals(2, foundUsers.getContent().size());
     }
 
     @Test
@@ -153,7 +178,15 @@ class UserSpecTest {
         Specification<User> userSpecification = Specification
                 .where(spec.getUserByCommentSpec(ALL_USERS_COMMENT_EXIST.toUpperCase()));
         foundUsers = userRepository.findAll(userSpecification, pageable);
-        assertEquals(5, foundUsers.getContent().size());
+        assertEquals(3, foundUsers.getContent().size());
+    }
+
+    @Test
+    void getUserByCommentSpec_shouldGetTwoUsers_whenCommentIsEmpty() {
+        Specification<User> userSpecification = Specification
+                .where(spec.getUserByCommentSpec(""));
+        foundUsers = userRepository.findAll(userSpecification, pageable);
+        assertEquals(2, foundUsers.getContent().size());
     }
 
     @Test
@@ -286,10 +319,18 @@ class UserSpecTest {
     }
 
     @Test
-    void getEntityByOutIdSpec_shouldGetFiveUsers_whenOutIdIsNull() {
+    void getEntityByOutIdSpec_shouldGetFourUsers_whenOutIdIsEmpty() {
         Specification<User> userSpecification = Specification
-                .where(spec.getEntityByOutIdSpec(null));
+                .where(spec.getEntityByOutIdSpec(""));
         foundUsers = userRepository.findAll(userSpecification, pageable);
-        assertEquals(5, foundUsers.getContent().size());
+        assertEquals(4, foundUsers.getContent().size());
+    }
+
+    @Test
+    void getEntityByOutIdSpec_shouldGetOneUsers_whenOutIdIsExist() {
+        Specification<User> userSpecification = Specification
+                .where(spec.getEntityByOutIdSpec(USER_3_OUT_ID_EXIST));
+        foundUsers = userRepository.findAll(userSpecification, pageable);
+        assertEquals(1, foundUsers.getContent().size());
     }
 }

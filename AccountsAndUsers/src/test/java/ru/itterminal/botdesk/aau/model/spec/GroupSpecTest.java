@@ -88,23 +88,29 @@ class GroupSpecTest {
     }
 
     @Test
-    void getGroupByCommentSpec_shouldGetThreeGroup_whenSearchByEntryIntoString() {
+    void getGroupByCommentSpec_shouldGetOneGroup_whenCommentExistForOneUser() {
         String GROUP_COMMENT_ALL = "comment for group";
         Specification<Group> groupSpecification = Specification
                 .where(spec.getGroupByCommentSpec(GROUP_COMMENT_ALL.toUpperCase()));
         foundGroup = groupRepository.findAll(groupSpecification, pageable);
         assertEquals(foundGroup.getContent().get(0).getName(), GROUP_NAME_1);
-        assertEquals(foundGroup.getContent().get(1).getName(), GROUP_NAME_2);
-        assertEquals(foundGroup.getContent().get(2).getName(), GROUP_NAME_3);
-        assertEquals(3, foundGroup.getContent().size());
+        assertEquals(1, foundGroup.getContent().size());
     }
 
     @Test
-    void getGroupByCommentSpec_shouldGetEmptyList_whenSearchByEntryIntoString() {
+    void getGroupByCommentSpec_shouldGetEmptyList_whenCommentNotExistForAllUsers() {
         Specification<Group> groupSpecification = Specification
                 .where(spec.getGroupByCommentSpec(GROUP_NAME_NO_FIND.toUpperCase()));
         foundGroup = groupRepository.findAll(groupSpecification, pageable);
         assertTrue(foundGroup.getContent().isEmpty());
+    }
+
+    @Test
+    void getGroupByCommentSpec_shouldGetTwoGroups_whenCommentNullOrEmptyForTwoUsers() {
+        Specification<Group> groupSpecification = Specification
+                .where(spec.getGroupByCommentSpec(""));
+        foundGroup = groupRepository.findAll(groupSpecification, pageable);
+        assertEquals(2, foundGroup.getContent().size());
     }
 
     @Test
