@@ -44,6 +44,7 @@
           <stringProp name="HTTPSampler.protocol">https</stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
           <stringProp name="HTTPSampler.path"></stringProp>
+          <stringProp name="TestPlan.comments">Comments</stringProp>
           <stringProp name="HTTPSampler.concurrentPool">6</stringProp>
           <stringProp name="HTTPSampler.connect_timeout"></stringProp>
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
@@ -123,7 +124,7 @@
                 <stringProp name="-1004616414">nameAccount</stringProp>
               </collectionProp>
               <collectionProp name="UserParameters.thread_values">
-                <collectionProp name="-692597485">
+                <collectionProp name="1491997509">
                   <stringProp name="-1351513825">${__RandomString(5,abcdefghijk12345,myRandom)}@gmail.com</stringProp>
                   <stringProp name="143861767">${__RandomString(10,12qweMNB)}</stringProp>
                   <stringProp name="-198779342">${__RandomString(10,abcdefghijk12345,myRandom)}</stringProp>
