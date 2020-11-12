@@ -17,6 +17,7 @@ import static ru.itterminal.botdesk.aau.model.Roles.ADMIN;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_EMAIL;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_PASSWORD;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.MUST_BE_ANY_OF_FIRST_NAME_SECOND_NAME;
+import static ru.itterminal.botdesk.commons.controller.BaseController.CHECK_ACCESS;
 import static ru.itterminal.botdesk.commons.controller.BaseController.PAGE_DEFAULT_VALUE;
 import static ru.itterminal.botdesk.commons.controller.BaseController.SIZE_DEFAULT_VALUE;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.MESSAGE_NOT_READABLE;
@@ -788,4 +789,69 @@ class UserControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    @WithAnonymousUser
+    void createCheckAccess_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
+        mockMvc.perform(post(HOST + PORT + API + CHECK_ACCESS))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
+    void createCheckAccess_shouldGetStatusOk_whenUserWithRoleAdmin() throws Exception {
+        mockMvc.perform(post(HOST + PORT + API + CHECK_ACCESS))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithUserDetails("OWNER_ACCOUNT_2_IS_INNER_GROUP")
+    void createCheckAccess_shouldGetStatusOk_whenUserWithRoleAccountOwner() throws Exception {
+        mockMvc.perform(post(HOST + PORT + API + CHECK_ACCESS))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
+    void createCheckAccess_shouldGetStatusForbidden_whenUserWithRoleAuthor() throws Exception {
+        mockMvc.perform(post(HOST + PORT + API + CHECK_ACCESS))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithAnonymousUser
+    void updateCheckAccess_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
+        mockMvc.perform(put(HOST + PORT + API + CHECK_ACCESS))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
+    void updateCheckAccess_shouldGetStatusOk_whenUserWithRoleAdmin() throws Exception {
+        mockMvc.perform(put(HOST + PORT + API + CHECK_ACCESS))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithUserDetails("OWNER_ACCOUNT_2_IS_INNER_GROUP")
+    void updateCheckAccess_shouldGetStatusOk_whenUserWithRoleAccountOwner() throws Exception {
+        mockMvc.perform(put(HOST + PORT + API + CHECK_ACCESS))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
+    void updateCheckAccess_shouldGetStatusForbidden_whenUserWithRoleAuthor() throws Exception {
+        mockMvc.perform(put(HOST + PORT + API + CHECK_ACCESS))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
 }

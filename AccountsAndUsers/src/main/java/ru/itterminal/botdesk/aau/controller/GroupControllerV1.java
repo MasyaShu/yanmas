@@ -1,6 +1,14 @@
 package ru.itterminal.botdesk.aau.controller;
 
-import lombok.extern.slf4j.Slf4j;
+import static java.lang.String.format;
+
+import java.security.Principal;
+import java.util.UUID;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -12,7 +20,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.dto.GroupDto;
 import ru.itterminal.botdesk.aau.model.dto.GroupFilterDto;
@@ -24,12 +42,6 @@ import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 import ru.itterminal.botdesk.jwt.JwtUser;
-
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
-import java.security.Principal;
-import java.util.UUID;
 
 
 @SuppressWarnings("ConstantConditions")
@@ -53,7 +65,6 @@ public class GroupControllerV1 extends BaseController {
     private final String ENTITY_NAME = Group.class.getSimpleName();
 
     @PostMapping()
-    @ResponseStatus(value = HttpStatus.CREATED)
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
     public ResponseEntity<GroupDto> create(Principal principal,
             @Validated(Create.class) @RequestBody GroupDto request) {
@@ -70,6 +81,14 @@ public class GroupControllerV1 extends BaseController {
         return new ResponseEntity<>(returnedGroup, HttpStatus.CREATED);
     }
 
+    @PostMapping("/check-access")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
+    public ResponseEntity<String> createCheckAccess() {
+        String message = format(SUCCESSFUL_CHECK_ACCESS, WORD_CREATE, ENTITY_NAME);
+        log.trace(message);
+        return ResponseEntity.ok(message);
+    }
+
     @PutMapping()
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')")
     public ResponseEntity<GroupDto> update(Principal principal,
@@ -83,6 +102,14 @@ public class GroupControllerV1 extends BaseController {
                 modelMapper.map(updatedGroup, GroupDto.class);
         log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedGroup);
         return new ResponseEntity<>(returnedGroup, HttpStatus.OK);
+    }
+
+    @PutMapping("/check-access")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')")
+    public ResponseEntity<String> updateCheckAccess() {
+        String message = format(SUCCESSFUL_CHECK_ACCESS, WORD_UPDATE, ENTITY_NAME);
+        log.trace(message);
+        return ResponseEntity.ok(message);
     }
 
     @GetMapping()

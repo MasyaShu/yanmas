@@ -1,5 +1,7 @@
 package ru.itterminal.botdesk.aau.controller;
 
+import static java.lang.String.format;
+
 import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
@@ -90,6 +92,14 @@ public class UserControllerV1 extends BaseController {
         return new ResponseEntity<>(returnedUser, HttpStatus.CREATED);
     }
 
+    @PostMapping("/check-access")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')")
+    public ResponseEntity<String> createCheckAccess() {
+        String message = format(SUCCESSFUL_CHECK_ACCESS, WORD_CREATE, ENTITY_NAME);
+        log.trace(message);
+        return ResponseEntity.ok(message);
+    }
+
     @PutMapping()
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')")
     public ResponseEntity<UserDtoResponseWithoutPassword> update( Principal principal,
@@ -105,6 +115,14 @@ public class UserControllerV1 extends BaseController {
                 modelMapper.map(updatedUser, UserDtoResponseWithoutPassword.class);
         log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedUser);
         return new ResponseEntity<>(returnedUser, HttpStatus.OK);
+    }
+
+    @PutMapping("/check-access")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')")
+    public ResponseEntity<String> updateCheckAccess() {
+        String message = format(SUCCESSFUL_CHECK_ACCESS, WORD_UPDATE, ENTITY_NAME);
+        log.trace(message);
+        return ResponseEntity.ok(message);
     }
 
     @GetMapping("/{id}")

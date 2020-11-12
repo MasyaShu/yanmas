@@ -1,5 +1,7 @@
 package ru.itterminal.botdesk.aau.controller;
 
+import static java.lang.String.format;
+
 import java.security.Principal;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +70,14 @@ public class AccountControllerV1 extends BaseController {
         AccountDto returnedAccount = modelMapper.map(updatedAccount, AccountDto.class);
         log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedAccount);
         return new ResponseEntity<>(returnedAccount, HttpStatus.OK);
+    }
+
+    @PutMapping("account/check-access")
+    @PreAuthorize("hasAuthority('ACCOUNT_OWNER')")
+    public ResponseEntity<String> updateCheckAccess() {
+        String message = format(SUCCESSFUL_CHECK_ACCESS, WORD_UPDATE, ENTITY_NAME);
+        log.trace(message);
+        return ResponseEntity.ok(message);
     }
 
     @GetMapping("account")

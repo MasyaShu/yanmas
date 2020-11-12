@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_EMAIL;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_PASSWORD;
+import static ru.itterminal.botdesk.commons.controller.BaseController.CHECK_ACCESS;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_NOT_BE_NULL;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.SIZE_MUST_BE_BETWEEN;
 import static ru.itterminal.botdesk.config.TestSecurityConfig.ACCOUNT_1_ID;
@@ -303,6 +304,38 @@ class AccountControllerV1Test {
     @WithAnonymousUser
     void physicalDelete_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
         mockMvc.perform(delete(HOST + PORT + API + "account"))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithAnonymousUser
+    void updateCheckAccess_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
+        mockMvc.perform(put(HOST + PORT + API + "account/" + CHECK_ACCESS))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
+    void updateCheckAccess_shouldGetStatusForbidden_whenUserWithRoleAdmin() throws Exception {
+        mockMvc.perform(put(HOST + PORT + API + "account/" + CHECK_ACCESS))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails("OWNER_ACCOUNT_2_IS_INNER_GROUP")
+    void updateCheckAccess_shouldGetStatusOk_whenUserWithRoleAccountOwner() throws Exception {
+        mockMvc.perform(put(HOST + PORT + API + "account/"+ CHECK_ACCESS))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
+    void updateCheckAccess_shouldGetStatusForbidden_whenUserWithRoleAuthor() throws Exception {
+        mockMvc.perform(put(HOST + PORT + API + "account/"+ CHECK_ACCESS))
                 .andDo(print())
                 .andExpect(status().isForbidden());
     }
