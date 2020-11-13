@@ -641,4 +641,19 @@ class GroupControllerV1Test {
                 .andExpect(status().isForbidden());
     }
 
+    @Test
+    @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_NOT_INNER_GROUP")
+    void updateCheckAccess_shouldGetStatusForbidden_whenUserWithRoleExecutorNotInnerGroup() throws Exception {
+        mockMvc.perform(put(HOST + PORT + API + CHECK_ACCESS))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_INNER_GROUP")
+    void updateCheckAccess_shouldGetStatusOk_whenUserWithRoleExecutorInnerGroup() throws Exception {
+        mockMvc.perform(put(HOST + PORT + API + CHECK_ACCESS))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
 }
