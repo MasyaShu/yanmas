@@ -115,6 +115,21 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
         } else {
             entity.setPassword(encoder.encode(entity.getPassword()));
         }
+        if (entity.getFirstName() == null ) {
+            entity.setFirstName(entityFromDatabase.getFirstName());
+        }
+        if (entity.getSecondName() == null ) {
+            entity.setSecondName(entityFromDatabase.getSecondName());
+        }
+        if (entity.getPhone() == null ) {
+            entity.setPhone(entityFromDatabase.getPhone());
+        }
+        if (entity.getComment() == null ) {
+            entity.setComment(entityFromDatabase.getComment());
+        }
+        entity.setEmailVerificationStatus(entityFromDatabase.getEmailVerificationStatus());
+        entity.setEmailVerificationToken(entityFromDatabase.getEmailVerificationToken());
+        entity.setPasswordResetToken(entityFromDatabase.getPasswordResetToken());
         try {
             User updatedEntity = repository.update(entity);
             log.trace(format(UPDATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), updatedEntity));

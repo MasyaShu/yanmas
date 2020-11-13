@@ -27,7 +27,7 @@ import ru.itterminal.botdesk.jwt.JwtUser;
 @Transactional
 public class GroupServiceImpl extends CrudServiceImpl<Group, GroupOperationValidator, GroupRepository> {
 
-   private static final String NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_GROUP_IS_NULL =
+    private static final String NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_GROUP_IS_NULL =
             "Not found groups by unique fields, group is null";
     private static final String NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_ACCOUNT_IS_NULL =
             "Not found groups by unique fields, account is null";
@@ -50,6 +50,9 @@ public class GroupServiceImpl extends CrudServiceImpl<Group, GroupOperationValid
             log.error(message);
             return new EntityNotExistException(message);
         });
+        if (entity.getComment() == null) {
+            entity.setComment(entityFromDatabase.getComment());
+        }
         try {
             entity.setIsInner(entityFromDatabase.getIsInner());
             Group updatedEntity = repository.update(entity);
@@ -79,7 +82,7 @@ public class GroupServiceImpl extends CrudServiceImpl<Group, GroupOperationValid
             throw new EntityNotExistException(NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_ACCOUNT_IS_NULL);
         }
         log.trace(START_FIND_GROUP_BY_UNIQUE_FIELDS, group.getName(), group.getId(), group.getAccount());
-        return repository.getByNameAndAccount_IdAndIdNot(group.getName(), group.getAccount().getId(),  group.getId());
+        return repository.getByNameAndAccount_IdAndIdNot(group.getName(), group.getAccount().getId(), group.getId());
     }
 
     @Transactional(readOnly = true)
