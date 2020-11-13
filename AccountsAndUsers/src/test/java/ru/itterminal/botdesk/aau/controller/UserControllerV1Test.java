@@ -485,8 +485,30 @@ class UserControllerV1Test {
                 .andExpect(jsonPath("$.errors.isArchived[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.roleId[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(jsonPath("$.errors.email[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.groupId[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.password[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists());
+                .andExpect(jsonPath("$.errors.groupId[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists());
+        verify(service, times(0)).update(any());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
+    void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenAllPassedDataIsEpmty() throws Exception {
+        userDtoFromAccount_1.setEmail("");
+        userDtoFromAccount_1.setPassword("");
+        userDtoFromAccount_1.setFirstName("");
+        userDtoFromAccount_1.setSecondName("");
+        userDtoFromAccount_1.setPhone("");
+        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDtoFromAccount_1));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.id[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                .andExpect(jsonPath("$.errors.email[?(@.message == '%s')]", INVALID_EMAIL).exists())
+                .andExpect(jsonPath("$.errors.firstName[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
+                .andExpect(jsonPath("$.errors.secondName[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
+                .andExpect(jsonPath("$.errors.phone[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists());
         verify(service, times(0)).update(any());
     }
 

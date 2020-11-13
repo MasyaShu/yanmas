@@ -43,7 +43,7 @@ public class UserDto extends BaseEntityDto {
     @Size(min = 1, max = 30, groups = {Create.class, Update.class})
     private String secondName;
 
-    @NotNull(groups = {Create.class, Update.class})
+    @NotNull(groups = {Create.class})
     @Pattern(regexp = PASSWORD_PATTERN,
             message = INVALID_PASSWORD,
             groups = {Create.class, Update.class})

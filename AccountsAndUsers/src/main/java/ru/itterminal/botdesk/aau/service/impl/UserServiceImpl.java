@@ -110,12 +110,11 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
         validator.checkUniqueness(entity);
         log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
         User entityFromDatabase = super.findById(entity.getId());
-        if (!entity.getPassword().isEmpty()) {
-            entity.setPassword(encoder.encode(entity.getPassword()));
-        } else {
+        if (entity.getPassword() == null || entity.getPassword().isEmpty()) {
             entity.setPassword(entityFromDatabase.getPassword());
+        } else {
+            entity.setPassword(encoder.encode(entity.getPassword()));
         }
-
         try {
             User updatedEntity = repository.update(entity);
             log.trace(format(UPDATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), updatedEntity));
