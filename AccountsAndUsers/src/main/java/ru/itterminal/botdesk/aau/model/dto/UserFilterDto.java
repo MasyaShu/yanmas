@@ -1,8 +1,5 @@
 package ru.itterminal.botdesk.aau.model.dto;
 
-import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_EMAIL;
-import static ru.itterminal.botdesk.aau.util.AAUConstants.EMAIL_PATTERN;
-
 import java.util.List;
 import java.util.UUID;
 
@@ -17,6 +14,7 @@ import lombok.Setter;
 import lombok.ToString;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 import ru.itterminal.botdesk.commons.model.validator.ValueOfEnum;
+import ru.itterminal.botdesk.aau.util.AAUConstants;
 
 @Getter
 @Setter
@@ -26,8 +24,8 @@ import ru.itterminal.botdesk.commons.model.validator.ValueOfEnum;
 @ToString
 public class UserFilterDto extends BaseFilterDto {
 
-    @Pattern(regexp = EMAIL_PATTERN,
-            message = INVALID_EMAIL)
+    @Pattern(regexp = AAUConstants.EMAIL_PATTERN,
+            message = AAUConstants.INVALID_EMAIL)
     private String email;
 
     @Size(min = 1, max = 20)

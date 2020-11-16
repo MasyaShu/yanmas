@@ -9,7 +9,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 import lombok.val;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
-import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto.FilterByDeleted;
+import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 
 public interface BaseSpec<E extends BaseEntity, A extends BaseEntity> {
 
@@ -19,7 +19,7 @@ public interface BaseSpec<E extends BaseEntity, A extends BaseEntity> {
     String ID = "id";
     String EMPTY_STRING = "";
 
-    default Specification<E> getEntityByDeletedSpec(FilterByDeleted deleted) {
+    default Specification<E> getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted deleted) {
         return (root, query, criteriaBuilder) -> {
             Predicate pred;
             val objectPathDeleted = root.get(DELETED);

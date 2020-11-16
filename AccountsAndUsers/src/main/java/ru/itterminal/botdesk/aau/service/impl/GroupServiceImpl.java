@@ -20,7 +20,7 @@ import ru.itterminal.botdesk.aau.repository.GroupRepository;
 import ru.itterminal.botdesk.aau.service.validator.GroupOperationValidator;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
-import ru.itterminal.botdesk.jwt.JwtUser;
+import ru.itterminal.botdesk.security.jwt.JwtUser;
 
 @Slf4j
 @Service

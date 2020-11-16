@@ -1,4 +1,4 @@
-package ru.itterminal.botdesk.config;
+package ru.itterminal.botdesk.security.config;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,8 +16,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import ru.itterminal.botdesk.jwt.JwtFilter;
-import ru.itterminal.botdesk.jwt.JwtProvider;
+import ru.itterminal.botdesk.security.jwt.JwtFilter;
+import ru.itterminal.botdesk.security.jwt.JwtProvider;
 
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 @EnableWebSecurity

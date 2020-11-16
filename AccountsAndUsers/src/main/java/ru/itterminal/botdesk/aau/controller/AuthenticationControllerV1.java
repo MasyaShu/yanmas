@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.itterminal.botdesk.aau.model.dto.AuthenticationRequestDto;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.JwtAuthenticationException;
-import ru.itterminal.botdesk.jwt.JwtProvider;
+import ru.itterminal.botdesk.security.jwt.JwtProvider;
 
 @RestController
 @RequestMapping(value = "/api/v1/auth/")

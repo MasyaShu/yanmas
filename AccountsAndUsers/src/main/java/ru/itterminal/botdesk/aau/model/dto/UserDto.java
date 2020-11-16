@@ -1,9 +1,5 @@
 package ru.itterminal.botdesk.aau.model.dto;
 
-import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_EMAIL;
-import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_PASSWORD;
-import static ru.itterminal.botdesk.aau.util.AAUConstants.EMAIL_PATTERN;
-import static ru.itterminal.botdesk.aau.util.AAUConstants.PASSWORD_PATTERN;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY;
 
 import java.util.UUID;
@@ -22,6 +18,7 @@ import lombok.ToString;
 import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
+import ru.itterminal.botdesk.aau.util.AAUConstants;
 
 @Getter
 @Setter
@@ -32,8 +29,8 @@ import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 public class UserDto extends BaseEntityDto {
 
     @NotNull(groups = {Create.class, Update.class})
-    @Pattern(regexp = EMAIL_PATTERN,
-            message = INVALID_EMAIL,
+    @Pattern(regexp = AAUConstants.EMAIL_PATTERN,
+            message = AAUConstants.INVALID_EMAIL,
             groups = {Create.class, Update.class})
     private String email;
 
@@ -44,8 +41,8 @@ public class UserDto extends BaseEntityDto {
     private String secondName;
 
     @NotNull(groups = {Create.class})
-    @Pattern(regexp = PASSWORD_PATTERN,
-            message = INVALID_PASSWORD,
+    @Pattern(regexp = AAUConstants.PASSWORD_PATTERN,
+            message = AAUConstants.INVALID_PASSWORD,
             groups = {Create.class, Update.class})
     private String password;
 

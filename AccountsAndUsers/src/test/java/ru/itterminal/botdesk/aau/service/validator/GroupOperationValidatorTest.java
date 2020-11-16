@@ -32,7 +32,7 @@ import ru.itterminal.botdesk.aau.model.projection.GroupUniqueFields;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
-import ru.itterminal.botdesk.config.TestSecurityConfig;
+import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 
 @SpringJUnitConfig(value = {GroupOperationValidator.class})
 @Import(TestSecurityConfig.class)

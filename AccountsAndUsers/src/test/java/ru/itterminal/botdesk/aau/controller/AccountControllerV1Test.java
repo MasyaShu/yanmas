@@ -11,12 +11,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_EMAIL;
-import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_PASSWORD;
-import static ru.itterminal.botdesk.commons.controller.BaseController.CHECK_ACCESS;
-import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_NOT_BE_NULL;
-import static ru.itterminal.botdesk.commons.util.CommonConstants.SIZE_MUST_BE_BETWEEN;
-import static ru.itterminal.botdesk.config.TestSecurityConfig.ACCOUNT_1_ID;
 
 import java.util.UUID;
 
@@ -39,6 +33,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,7 +43,10 @@ import ru.itterminal.botdesk.aau.model.dto.AccountCreateDto;
 import ru.itterminal.botdesk.aau.model.dto.AccountDto;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
-import ru.itterminal.botdesk.config.TestSecurityConfig;
+import ru.itterminal.botdesk.security.config.TestSecurityConfig;
+import ru.itterminal.botdesk.aau.util.AAUConstants;
+import ru.itterminal.botdesk.commons.controller.BaseController;
+import ru.itterminal.botdesk.commons.util.CommonConstants;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {AccountControllerV1.class, FilterChainProxy.class})
@@ -104,12 +102,12 @@ class AccountControllerV1Test {
                 .builder()
                 .name(ACCOUNT_NAME)
                 .build();
-        account.setId(UUID.fromString(ACCOUNT_1_ID));
+        account.setId(UUID.fromString(TestSecurityConfig.ACCOUNT_1_ID));
         accountDto = AccountDto
                 .builder()
                 .name(ACCOUNT_NAME)
                 .build();
-        accountDto.setId(UUID.fromString(ACCOUNT_1_ID));
+        accountDto.setId(UUID.fromString(TestSecurityConfig.ACCOUNT_1_ID));
     }
 
     @Test
@@ -123,7 +121,7 @@ class AccountControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(ACCOUNT_1_ID))
+                .andExpect(jsonPath("$.id").value(TestSecurityConfig.ACCOUNT_1_ID))
                 .andExpect(jsonPath("$.name").value(ACCOUNT_NAME));
         verify(service, times(1)).create((AccountCreateDto) any());
     }
@@ -157,11 +155,15 @@ class AccountControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.name[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
-                .andExpect(jsonPath("$.errors.nameGroupAccountOwner[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN)
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.name[?(@.message =~ /%s.*/)]", CommonConstants.SIZE_MUST_BE_BETWEEN).exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.nameGroupAccountOwner[?(@.message =~ /%s.*/)]", CommonConstants.SIZE_MUST_BE_BETWEEN)
                         .exists())
-                .andExpect(jsonPath("$.errors.emailAccountOwner[?(@.message == '%s')]", INVALID_EMAIL).exists())
-                .andExpect(jsonPath("$.errors.passwordAccountOwner[?(@.message == '%s')]", INVALID_PASSWORD).exists());
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.emailAccountOwner[?(@.message == '%s')]", AAUConstants.INVALID_EMAIL).exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.passwordAccountOwner[?(@.message == '%s')]", AAUConstants.INVALID_PASSWORD).exists());
         verify(service, times(0)).create((AccountCreateDto) any());
     }
 
@@ -180,11 +182,15 @@ class AccountControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.name[?(@.message =~ /%s.*/)]", MUST_NOT_BE_NULL).exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.name[?(@.message =~ /%s.*/)]", CommonConstants.MUST_NOT_BE_NULL).exists())
                 .andExpect(
-                        jsonPath("$.errors.nameGroupAccountOwner[?(@.message =~ /%s.*/)]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.emailAccountOwner[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.passwordAccountOwner[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists());
+                        MockMvcResultMatchers
+                                .jsonPath("$.errors.nameGroupAccountOwner[?(@.message =~ /%s.*/)]", CommonConstants.MUST_NOT_BE_NULL).exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.emailAccountOwner[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.passwordAccountOwner[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists());
         verify(service, times(0)).create((AccountCreateDto) any());
     }
 
@@ -234,7 +240,8 @@ class AccountControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.name[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists());
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.name[?(@.message =~ /%s.*/)]", CommonConstants.SIZE_MUST_BE_BETWEEN).exists());
         verify(service, times(0)).update(any());
     }
 
@@ -252,10 +259,14 @@ class AccountControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.id[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.name[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.version[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists());
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.id[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.name[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.version[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.deleted[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists());
         verify(service, times(0)).update(any());
     }
 
@@ -269,7 +280,7 @@ class AccountControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(ACCOUNT_1_ID))
+                .andExpect(jsonPath("$.id").value(TestSecurityConfig.ACCOUNT_1_ID))
                 .andExpect(jsonPath("$.name").value(ACCOUNT_NAME));
         verify(service, times(1)).findById(any());
     }
@@ -311,7 +322,7 @@ class AccountControllerV1Test {
     @Test
     @WithAnonymousUser
     void updateCheckAccess_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + "account/" + CHECK_ACCESS))
+        mockMvc.perform(put(HOST + PORT + API + "account/" + BaseController.CHECK_ACCESS))
                 .andDo(print())
                 .andExpect(status().isForbidden());
     }
@@ -319,7 +330,7 @@ class AccountControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void updateCheckAccess_shouldGetStatusForbidden_whenUserWithRoleAdmin() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + "account/" + CHECK_ACCESS))
+        mockMvc.perform(put(HOST + PORT + API + "account/" + BaseController.CHECK_ACCESS))
                 .andDo(print())
                 .andExpect(status().isForbidden());
     }
@@ -327,7 +338,7 @@ class AccountControllerV1Test {
     @Test
     @WithUserDetails("OWNER_ACCOUNT_2_IS_INNER_GROUP")
     void updateCheckAccess_shouldGetStatusOk_whenUserWithRoleAccountOwner() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + "account/"+ CHECK_ACCESS))
+        mockMvc.perform(put(HOST + PORT + API + "account/"+ BaseController.CHECK_ACCESS))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
@@ -335,7 +346,7 @@ class AccountControllerV1Test {
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     void updateCheckAccess_shouldGetStatusForbidden_whenUserWithRoleAuthor() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + "account/"+ CHECK_ACCESS))
+        mockMvc.perform(put(HOST + PORT + API + "account/"+ BaseController.CHECK_ACCESS))
                 .andDo(print())
                 .andExpect(status().isForbidden());
     }
