@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import ru.itterminal.botdesk.aau.model.dto.AuthenticationRequestDto;
+import ru.itterminal.botdesk.aau.model.dto.ResetPasswordDto;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.JwtAuthenticationException;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
@@ -73,9 +75,8 @@ public class AuthenticationControllerV1 {
     }
 
     @GetMapping(path = "/password-reset")
-    public ResponseEntity<String> passwordReset(@RequestParam(value = "token") @NotEmpty String token,
-            @RequestParam(value = "email") @NotEmpty String email) {
-        userService.resetPassword(token, email);
+    public ResponseEntity<String> passwordReset(@Validated @RequestBody ResetPasswordDto resetPassword) {
+        userService.resetPassword(resetPassword.getToken(), resetPassword.getPassword());
         return ResponseEntity.ok(PASSWORD_WAS_RESET_SUCCESSFULLY);
     }
 }

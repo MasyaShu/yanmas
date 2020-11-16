@@ -30,7 +30,6 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
     public static final String ROLE_ACCOUNT_OWNER = "ACCOUNT_OWNER";
 
     public static final String EMAIL_1 = "Mackenzie.lang@gmail.com";
-    public static final String PASSWORD = "12345";
     public static final String EMAIL_2 = "m4@m.ru";
 
     @Override
