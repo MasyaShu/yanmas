@@ -8,7 +8,8 @@
 		<module>BotDeskApp</module>
 		<module>DB-Setup</module>
         <module>Security</module>
-    </modules>
+		<module>Integration</module>
+	</modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
