@@ -11,5 +11,13 @@
 
     <artifactId>Integration</artifactId>
 
+    <dependencies>
 
+        <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-ses -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-ses</artifactId>
+            <version>1.11.901</version>
+        </dependency>
+    </dependencies>
 </project>
