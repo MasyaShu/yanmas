@@ -12,18 +12,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.itterminal.botdesk.aau.util.AAUConstants.MUST_BE_ANY_OF_NAME;
-import static ru.itterminal.botdesk.commons.controller.BaseController.CHECK_ACCESS;
-import static ru.itterminal.botdesk.commons.controller.BaseController.PAGE_DEFAULT_VALUE;
-import static ru.itterminal.botdesk.commons.controller.BaseController.SIZE_DEFAULT_VALUE;
-import static ru.itterminal.botdesk.commons.util.CommonConstants.MESSAGE_NOT_READABLE;
-import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_ANY_OF_ALL_TRUE_FALSE;
-import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_ANY_OF_ASC_DESC;
-import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_GREATER_THAN_OR_EQUAL_TO_0;
-import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY;
-import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_NOT_BE_NULL;
-import static ru.itterminal.botdesk.commons.util.CommonConstants.REQUEST_NOT_READABLE;
-import static ru.itterminal.botdesk.commons.util.CommonConstants.SIZE_MUST_BE_BETWEEN;
 
 import java.util.List;
 import java.util.UUID;
@@ -52,6 +40,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -64,7 +53,10 @@ import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
-import ru.itterminal.botdesk.config.TestSecurityConfig;
+import ru.itterminal.botdesk.security.config.TestSecurityConfig;
+import ru.itterminal.botdesk.aau.util.AAUConstants;
+import ru.itterminal.botdesk.commons.controller.BaseController;
+import ru.itterminal.botdesk.commons.util.CommonConstants;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {GroupControllerV1.class, GroupSpec.class, FilterChainProxy.class})
@@ -196,14 +188,20 @@ class GroupControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(
-                        jsonPath("$.errors.isInner[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.name[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.isDeprecated[?(@.message == '%s')]", MUST_BE_NULL_FOR_THE_NEW_ENTITY)
+                        MockMvcResultMatchers
+                                .jsonPath("$.errors.isInner[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.name[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.isDeprecated[?(@.message == '%s')]", CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY)
                         .exists())
-                .andExpect(jsonPath("$.errors.id[?(@.message == '%s')]", MUST_BE_NULL_FOR_THE_NEW_ENTITY).exists())
-                .andExpect(jsonPath("$.errors.version[?(@.message == '%s')]", MUST_BE_NULL_FOR_THE_NEW_ENTITY).exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.id[?(@.message == '%s')]", CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY).exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.version[?(@.message == '%s')]", CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY).exists())
                 .andExpect(
-                        jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_BE_NULL_FOR_THE_NEW_ENTITY).exists());
+                        MockMvcResultMatchers
+                                .jsonPath("$.errors.deleted[?(@.message == '%s')]", CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY).exists());
         verify(service, times(0)).create(any());
     }
 
@@ -221,7 +219,8 @@ class GroupControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(
-                        jsonPath("$.errors.name[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists());
+                        MockMvcResultMatchers
+                                .jsonPath("$.errors.name[?(@.message =~ /%s.*/)]", CommonConstants.SIZE_MUST_BE_BETWEEN).exists());
         verify(service, times(0)).create(any());
     }
 
@@ -308,11 +307,16 @@ class GroupControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.name[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.isDeprecated[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.id[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.version[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
-                .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists());
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.name[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.isDeprecated[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.id[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.version[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.deleted[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists());
         verify(service, times(0)).create(any());
     }
 
@@ -328,7 +332,8 @@ class GroupControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(
-                        jsonPath("$.errors.version[?(@.message == '%s')]", MUST_BE_GREATER_THAN_OR_EQUAL_TO_0)
+                        MockMvcResultMatchers
+                                .jsonPath("$.errors.version[?(@.message == '%s')]", CommonConstants.MUST_BE_GREATER_THAN_OR_EQUAL_TO_0)
                                 .exists());
         verify(service, times(0)).update(any());
     }
@@ -347,7 +352,7 @@ class GroupControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.title").value(MESSAGE_NOT_READABLE));
+                .andExpect(jsonPath("$.title").value(CommonConstants.MESSAGE_NOT_READABLE));
         verify(service, times(0)).update(any());
     }
 
@@ -419,7 +424,8 @@ class GroupControllerV1Test {
     @WithAnonymousUser
     void getByFilter_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
         Pageable pageable =
-                PageRequest.of(Integer.parseInt(PAGE_DEFAULT_VALUE), Integer.parseInt(SIZE_DEFAULT_VALUE),
+                PageRequest.of(Integer.parseInt(BaseController.PAGE_DEFAULT_VALUE), Integer.parseInt(
+                        BaseController.SIZE_DEFAULT_VALUE),
                         Sort.by("name").ascending());
         Page<Group> groupPageExpected = new PageImpl<>(List.of(group_1, group_2), pageable, 2);
         when(service.findAllByFilter(any(), any())).thenReturn(groupPageExpected);
@@ -437,7 +443,8 @@ class GroupControllerV1Test {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getByFilter_shouldFindTwoGroup_whenUsersExistInDatabaseByPassedFilter() throws Exception {
         Pageable pageable =
-                PageRequest.of(Integer.parseInt(PAGE_DEFAULT_VALUE), Integer.parseInt(SIZE_DEFAULT_VALUE),
+                PageRequest.of(Integer.parseInt(BaseController.PAGE_DEFAULT_VALUE), Integer.parseInt(
+                        BaseController.SIZE_DEFAULT_VALUE),
                         Sort.by("name").ascending());
         Page<Group> groupPageExpected = new PageImpl<>(List.of(group_1, group_2), pageable, 2);
         when(service.findAllByFilter(any(), any())).thenReturn(groupPageExpected);
@@ -470,10 +477,14 @@ class GroupControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.name[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
-                .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_BE_ANY_OF_ALL_TRUE_FALSE).exists())
-                .andExpect(jsonPath("$.errors.direction[?(@.message == '%s')]", MUST_BE_ANY_OF_ASC_DESC).exists())
-                .andExpect(jsonPath("$.errors.sortBy[?(@.message == '%s')]", MUST_BE_ANY_OF_NAME)
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.name[?(@.message =~ /%s.*/)]", CommonConstants.SIZE_MUST_BE_BETWEEN).exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.deleted[?(@.message == '%s')]", CommonConstants.MUST_BE_ANY_OF_ALL_TRUE_FALSE).exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.direction[?(@.message == '%s')]", CommonConstants.MUST_BE_ANY_OF_ASC_DESC).exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.sortBy[?(@.message == '%s')]", AAUConstants.MUST_BE_ANY_OF_NAME)
                         .exists());
         verify(service, times(0)).findAllByFilter(any(), any());
     }
@@ -489,7 +500,7 @@ class GroupControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.title").value(REQUEST_NOT_READABLE));
+                .andExpect(jsonPath("$.title").value(CommonConstants.REQUEST_NOT_READABLE));
         verify(service, times(0)).findAllByFilter(any(), any());
     }
 
@@ -507,10 +518,14 @@ class GroupControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.name[?(@.message =~ /%s.*/)]", SIZE_MUST_BE_BETWEEN).exists())
-                .andExpect(jsonPath("$.errors.deleted[?(@.message == '%s')]", MUST_BE_ANY_OF_ALL_TRUE_FALSE).exists())
-                .andExpect(jsonPath("$.errors.direction[?(@.message == '%s')]", MUST_BE_ANY_OF_ASC_DESC).exists())
-                .andExpect(jsonPath("$.errors.sortBy[?(@.message == '%s')]", MUST_BE_ANY_OF_NAME)
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.name[?(@.message =~ /%s.*/)]", CommonConstants.SIZE_MUST_BE_BETWEEN).exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.deleted[?(@.message == '%s')]", CommonConstants.MUST_BE_ANY_OF_ALL_TRUE_FALSE).exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.direction[?(@.message == '%s')]", CommonConstants.MUST_BE_ANY_OF_ASC_DESC).exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.sortBy[?(@.message == '%s')]", AAUConstants.MUST_BE_ANY_OF_NAME)
                         .exists());
         verify(service, times(0)).findAllByFilter(any(), any());
     }
@@ -520,7 +535,8 @@ class GroupControllerV1Test {
     void getByFilter_shouldFindTwoGroups_whenFilterIsNew() throws Exception {
         GroupFilterDto groupFilterDto = new GroupFilterDto();
         Pageable pageable =
-                PageRequest.of(Integer.parseInt(PAGE_DEFAULT_VALUE), Integer.parseInt(SIZE_DEFAULT_VALUE),
+                PageRequest.of(Integer.parseInt(BaseController.PAGE_DEFAULT_VALUE), Integer.parseInt(
+                        BaseController.SIZE_DEFAULT_VALUE),
                         Sort.by("name").ascending());
         Page<Group> groupPageExpected = new PageImpl<>(List.of(group_1, group_2), pageable, 2);
         when(service.findAllByFilter(any(), any())).thenReturn(groupPageExpected);
@@ -544,7 +560,8 @@ class GroupControllerV1Test {
         groupFilterDto.setDeleted(null);
         groupFilterDto.setDirection(null);
         Pageable pageable =
-                PageRequest.of(Integer.parseInt(PAGE_DEFAULT_VALUE), Integer.parseInt(SIZE_DEFAULT_VALUE),
+                PageRequest.of(Integer.parseInt(BaseController.PAGE_DEFAULT_VALUE), Integer.parseInt(
+                        BaseController.SIZE_DEFAULT_VALUE),
                         Sort.by("firstName").ascending());
         Page<Group> groupPageExpected = new PageImpl<>(List.of(group_1, group_2), pageable, 2);
         when(service.findAllByFilter(any(), any())).thenReturn(groupPageExpected);
@@ -580,7 +597,7 @@ class GroupControllerV1Test {
     @Test
     @WithAnonymousUser
     void createCheckAccess_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
-        mockMvc.perform(post(HOST + PORT + API + CHECK_ACCESS))
+        mockMvc.perform(post(HOST + PORT + API + BaseController.CHECK_ACCESS))
                 .andDo(print())
                 .andExpect(status().isForbidden());
     }
@@ -588,7 +605,7 @@ class GroupControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void createCheckAccess_shouldGetStatusOk_whenUserWithRoleAdmin() throws Exception {
-        mockMvc.perform(post(HOST + PORT + API + CHECK_ACCESS))
+        mockMvc.perform(post(HOST + PORT + API + BaseController.CHECK_ACCESS))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
@@ -596,7 +613,7 @@ class GroupControllerV1Test {
     @Test
     @WithUserDetails("OWNER_ACCOUNT_2_IS_INNER_GROUP")
     void createCheckAccess_shouldGetStatusOk_whenUserWithRoleAccountOwner() throws Exception {
-        mockMvc.perform(post(HOST + PORT + API + CHECK_ACCESS))
+        mockMvc.perform(post(HOST + PORT + API + BaseController.CHECK_ACCESS))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
@@ -604,7 +621,7 @@ class GroupControllerV1Test {
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     void createCheckAccess_shouldGetStatusForbidden_whenUserWithRoleAuthor() throws Exception {
-        mockMvc.perform(post(HOST + PORT + API + CHECK_ACCESS))
+        mockMvc.perform(post(HOST + PORT + API + BaseController.CHECK_ACCESS))
                 .andDo(print())
                 .andExpect(status().isForbidden());
     }
@@ -612,7 +629,7 @@ class GroupControllerV1Test {
     @Test
     @WithAnonymousUser
     void updateCheckAccess_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + CHECK_ACCESS))
+        mockMvc.perform(put(HOST + PORT + API + BaseController.CHECK_ACCESS))
                 .andDo(print())
                 .andExpect(status().isForbidden());
     }
@@ -620,7 +637,7 @@ class GroupControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void updateCheckAccess_shouldGetStatusOk_whenUserWithRoleAdmin() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + CHECK_ACCESS))
+        mockMvc.perform(put(HOST + PORT + API + BaseController.CHECK_ACCESS))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
@@ -628,7 +645,7 @@ class GroupControllerV1Test {
     @Test
     @WithUserDetails("OWNER_ACCOUNT_2_IS_INNER_GROUP")
     void updateCheckAccess_shouldGetStatusOk_whenUserWithRoleAccountOwner() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + CHECK_ACCESS))
+        mockMvc.perform(put(HOST + PORT + API + BaseController.CHECK_ACCESS))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
@@ -636,7 +653,7 @@ class GroupControllerV1Test {
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     void updateCheckAccess_shouldGetStatusForbidden_whenUserWithRoleAuthor() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + CHECK_ACCESS))
+        mockMvc.perform(put(HOST + PORT + API + BaseController.CHECK_ACCESS))
                 .andDo(print())
                 .andExpect(status().isForbidden());
     }
@@ -644,7 +661,7 @@ class GroupControllerV1Test {
     @Test
     @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_NOT_INNER_GROUP")
     void updateCheckAccess_shouldGetStatusForbidden_whenUserWithRoleExecutorNotInnerGroup() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + CHECK_ACCESS))
+        mockMvc.perform(put(HOST + PORT + API + BaseController.CHECK_ACCESS))
                 .andDo(print())
                 .andExpect(status().isForbidden());
     }
@@ -652,7 +669,7 @@ class GroupControllerV1Test {
     @Test
     @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_INNER_GROUP")
     void updateCheckAccess_shouldGetStatusOk_whenUserWithRoleExecutorInnerGroup() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + CHECK_ACCESS))
+        mockMvc.perform(put(HOST + PORT + API + BaseController.CHECK_ACCESS))
                 .andDo(print())
                 .andExpect(status().isOk());
     }

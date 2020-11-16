@@ -24,7 +24,7 @@ import ru.itterminal.botdesk.aau.service.validator.UserOperationValidator;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.FailedSaveEntityException;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
-import ru.itterminal.botdesk.jwt.JwtProvider;
+import ru.itterminal.botdesk.security.jwt.JwtProvider;
 
 @Slf4j
 @Service

@@ -8,8 +8,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl.ENTITY_GROUP_NAME;
-import static ru.itterminal.botdesk.commons.util.CommonConstants.NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -30,7 +28,8 @@ import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.repository.GroupRepository;
 import ru.itterminal.botdesk.aau.service.validator.GroupOperationValidator;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
-import ru.itterminal.botdesk.config.TestSecurityConfig;
+import ru.itterminal.botdesk.security.config.TestSecurityConfig;
+import ru.itterminal.botdesk.commons.util.CommonConstants;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {GroupServiceImpl.class})
@@ -148,7 +147,7 @@ class GroupServiceImplTest {
         Throwable throwable = assertThrows(EntityNotExistException.class,
                 () -> service.findByIdAndAccountId(GROUP_ID_NOT_JWTUSER,accountId));
         assertEquals(
-                format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, ENTITY_GROUP_NAME, GROUP_ID_NOT_JWTUSER, accountId),
+                String.format(CommonConstants.NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, GroupServiceImpl.ENTITY_GROUP_NAME, GROUP_ID_NOT_JWTUSER, accountId),
                 throwable.getMessage());
         verify(repository, times(0)).getByIdAndAccount_Id(any(), any());
     }

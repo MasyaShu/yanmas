@@ -17,7 +17,6 @@ import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperatio
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_CODE;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_MESSAGE;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
-import static ru.itterminal.botdesk.config.TestSecurityConfig.ACCOUNT_1_ID;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -47,8 +46,8 @@ import ru.itterminal.botdesk.aau.service.impl.RoleServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
-import ru.itterminal.botdesk.config.TestSecurityConfig;
-import ru.itterminal.botdesk.jwt.JwtUser;
+import ru.itterminal.botdesk.security.config.TestSecurityConfig;
+import ru.itterminal.botdesk.security.jwt.JwtUser;
 
 @SpringJUnitConfig(value = {UserOperationValidator.class})
 @Import(TestSecurityConfig.class)
@@ -82,7 +81,7 @@ class UserOperationValidatorTest {
     @BeforeAll
     static void setUp() {
         Account account = Account.builder().name(ACCOUNT_NAME).build();
-        account.setId(UUID.fromString(ACCOUNT_1_ID));
+        account.setId(UUID.fromString(TestSecurityConfig.ACCOUNT_1_ID));
         Group group = Group.builder().build();
         String GROUP_ID = "dd06a563-802e-4d32-bd72-0555baa3e7e5";
         group.setId(UUID.fromString(GROUP_ID));

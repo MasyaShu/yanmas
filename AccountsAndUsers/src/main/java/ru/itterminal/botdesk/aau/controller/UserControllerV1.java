@@ -46,7 +46,7 @@ import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
-import ru.itterminal.botdesk.jwt.JwtUser;
+import ru.itterminal.botdesk.security.jwt.JwtUser;
 
 @SuppressWarnings("DuplicatedCode")
 @Slf4j

@@ -11,14 +11,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.itterminal.botdesk.aau.controller.AuthenticationControllerV1.EMAIL_IS_VERIFIED;
-import static ru.itterminal.botdesk.aau.controller.AuthenticationControllerV1.INVALID_USERNAME_OR_PASSWORD;
-import static ru.itterminal.botdesk.aau.controller.AuthenticationControllerV1.PASSWORD_WAS_RESET_SUCCESSFULLY;
-import static ru.itterminal.botdesk.aau.controller.AuthenticationControllerV1.TOKEN_FOR_RESET_PASSWORD_WAS_SENT_TO_EMAIL;
-import static ru.itterminal.botdesk.config.TestSecurityConfig.EMAIL_1;
-import static ru.itterminal.botdesk.config.TestSecurityConfig.PASSWORD;
+import static ru.itterminal.botdesk.security.config.TestSecurityConfig.EMAIL_1;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -41,15 +35,19 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ru.itterminal.botdesk.aau.model.dto.AuthenticationRequestDto;
+import ru.itterminal.botdesk.aau.model.dto.ResetPasswordDto;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
+import ru.itterminal.botdesk.aau.util.AAUConstants;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
-import ru.itterminal.botdesk.config.TestSecurityConfig;
-import ru.itterminal.botdesk.jwt.JwtProvider;
+import ru.itterminal.botdesk.commons.util.CommonConstants;
+import ru.itterminal.botdesk.security.config.TestSecurityConfig;
+import ru.itterminal.botdesk.security.jwt.JwtProvider;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {AuthenticationControllerV1.class, FilterChainProxy.class})
@@ -66,7 +64,7 @@ class AuthenticationControllerV1Test {
 
     @SuppressWarnings("unused")
     @MockBean
-    private  JwtProvider jwtProvider;
+    private JwtProvider jwtProvider;
 
     @Mock
     Authentication authentication;
@@ -82,7 +80,7 @@ class AuthenticationControllerV1Test {
 
     private MockMvc mockMvc;
 
-    @BeforeAll
+    @BeforeEach
     void setUpBeforeAll() {
         MockitoAnnotations.initMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
@@ -95,17 +93,26 @@ class AuthenticationControllerV1Test {
     private static final String HOST = "http://localhost";
     private static final String PORT = ":8081";
     private static final String API = "api/v1/auth/";
-    @SuppressWarnings("SpellCheckingInspection")
-    private static final String emailVerificationToken = "eyJhbGciOiJIUzI1NiJ9"
-            + ".eyJzdWIiOiJhNGI3NWViYi1jNGIyLTQ1YzAtYWY4My1lZDMyNGQ4ZDM1OWQiLCJpYXQiOjE2MDQyOTc2MjEsImV4cCI6MTYwNDMwNjI2MX0.OdzYy23gowGwr1FRcgmtElveFDtjtJdJ6n3pjqmGH0c";
+    private static final String PASSWORD_RESET = "password-reset";
+    private static final String mockEmailVerificationToken = "eyJhbGciOiJIUzI1NiJ9";
+    private static final String mockResetPasswordToken = "54434654r5423wfnsdfnw34";
+    private static final String VALID_PASSWORD = "pAssword12345";
+    private static final String INVALID_PASSWORD = "12445";
+
     private AuthenticationRequestDto requestDto;
+    private ResetPasswordDto resetPasswordDto;
 
     @BeforeEach
     void setUpBeforeEach() {
         requestDto = AuthenticationRequestDto
                 .builder()
                 .email(EMAIL_1)
-                .password(PASSWORD)
+                .password(VALID_PASSWORD)
+                .build();
+        resetPasswordDto = ResetPasswordDto
+                .builder()
+                .token(mockResetPasswordToken)
+                .password(VALID_PASSWORD)
                 .build();
     }
 
@@ -136,27 +143,29 @@ class AuthenticationControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.detail").value(INVALID_USERNAME_OR_PASSWORD));
+                .andExpect(jsonPath("$.detail").value(AuthenticationControllerV1.INVALID_USERNAME_OR_PASSWORD));
         verify(authenticationManager, times(1)).authenticate(any());
     }
 
     @Test
     @WithAnonymousUser
     void verifyEmailToken_shouldVerifyEmailToken_whenPassedValidToken() throws Exception {
-        doNothing().when(userService).verifyEmailToken(emailVerificationToken);
-        MockHttpServletRequestBuilder request = get(HOST + PORT + API + "email-verify?token=" + emailVerificationToken);
+        doNothing().when(userService).verifyEmailToken(mockEmailVerificationToken);
+        MockHttpServletRequestBuilder request =
+                get(HOST + PORT + API + "email-verify?token=" + mockEmailVerificationToken);
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(EMAIL_IS_VERIFIED));
-        verify(userService, times(1)).verifyEmailToken(emailVerificationToken);
+                .andExpect(jsonPath("$").value(AuthenticationControllerV1.EMAIL_IS_VERIFIED));
+        verify(userService, times(1)).verifyEmailToken(mockEmailVerificationToken);
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
     void verifyEmailToken_shouldGetStatusForbidden_whenUserIsNotAnonymous() throws Exception {
-        doNothing().when(userService).verifyEmailToken(emailVerificationToken);
-        MockHttpServletRequestBuilder request = get(HOST + PORT + API + "email-verify?token=" + emailVerificationToken);
+        doNothing().when(userService).verifyEmailToken(mockEmailVerificationToken);
+        MockHttpServletRequestBuilder request =
+                get(HOST + PORT + API + "email-verify?token=" + mockEmailVerificationToken);
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
@@ -172,7 +181,7 @@ class AuthenticationControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(TOKEN_FOR_RESET_PASSWORD_WAS_SENT_TO_EMAIL));
+                .andExpect(jsonPath("$").value(AuthenticationControllerV1.TOKEN_FOR_RESET_PASSWORD_WAS_SENT_TO_EMAIL));
         verify(userService, times(1)).requestPasswordReset(EMAIL_1);
     }
 
@@ -180,7 +189,8 @@ class AuthenticationControllerV1Test {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
     void requestPasswordReset_shouldGetStatusForbidden_whenUserIsNotAnonymous() throws Exception {
         doNothing().when(userService).requestPasswordReset(EMAIL_1);
-        MockHttpServletRequestBuilder request = get(HOST + PORT + API + "request-password-reset?email=" + EMAIL_1);
+        MockHttpServletRequestBuilder request =
+                get(HOST + PORT + API + "request-password-reset?email=" + EMAIL_1);
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
@@ -189,26 +199,71 @@ class AuthenticationControllerV1Test {
 
     @Test
     @WithAnonymousUser
-    void passwordReset_shouldGetStatusOk_whenPassedValidTokenAndEmail() throws Exception {
-        doNothing().when(userService).resetPassword(emailVerificationToken, EMAIL_1);
+    void passwordReset_shouldGetStatusOk_whenPassedValidTokenAndNewPassword() throws Exception {
+        doNothing().when(userService).resetPassword(mockResetPasswordToken, VALID_PASSWORD);
         MockHttpServletRequestBuilder request =
-                get(HOST + PORT + API + "password-reset?token=" + emailVerificationToken + "&email=" + EMAIL_1);
+                get(HOST + PORT + API + PASSWORD_RESET)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(resetPasswordDto));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(PASSWORD_WAS_RESET_SUCCESSFULLY));
-        verify(userService, times(1)).resetPassword(emailVerificationToken, EMAIL_1);
+                .andExpect(jsonPath("$").value(AuthenticationControllerV1.PASSWORD_WAS_RESET_SUCCESSFULLY));
+        verify(userService, times(1)).resetPassword(mockResetPasswordToken, VALID_PASSWORD);
+    }
+
+    @Test
+    @WithAnonymousUser
+    void passwordReset_shouldGetStatusBadRequestWithErrorsDescriptions_whenPassedInvalidPassword() throws Exception {
+        resetPasswordDto.setPassword(INVALID_PASSWORD);
+        doNothing().when(userService).resetPassword(mockResetPasswordToken, INVALID_PASSWORD);
+        MockHttpServletRequestBuilder request =
+                get(HOST + PORT + API + PASSWORD_RESET)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(resetPasswordDto));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.password[?(@.message == '%s')]", AAUConstants.INVALID_PASSWORD).exists());
+        verify(userService, times(0)).resetPassword(mockResetPasswordToken, INVALID_PASSWORD);
+    }
+
+    @Test
+    @WithAnonymousUser
+    void passwordReset_shouldGetStatusBadRequestWithErrorsDescriptions_whenPassedDataIsNull() throws Exception {
+        resetPasswordDto.setPassword(null);
+        resetPasswordDto.setToken(null);
+        doNothing().when(userService).resetPassword(anyString(), anyString());
+        MockHttpServletRequestBuilder request =
+                get(HOST + PORT + API + PASSWORD_RESET)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(resetPasswordDto));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.token[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.password[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                        .exists());
+        verify(userService, times(0)).resetPassword(anyString(), anyString());
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
     void passwordReset_shouldGetStatusForbidden_whenUserIsNotAnonymous() throws Exception {
-        doNothing().when(userService).resetPassword(emailVerificationToken, EMAIL_1);
-        MockHttpServletRequestBuilder request =
-                get(HOST + PORT + API + "password-reset?token=" + emailVerificationToken + "&email=" + EMAIL_1);
+        doNothing().when(userService).resetPassword(mockResetPasswordToken, INVALID_PASSWORD);
+        MockHttpServletRequestBuilder request = get(HOST + PORT + API + PASSWORD_RESET)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(resetPasswordDto));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
-        verify(userService, times(0)).resetPassword(emailVerificationToken, EMAIL_1);
+        verify(userService, times(0)).resetPassword(mockEmailVerificationToken, EMAIL_1);
     }
 }

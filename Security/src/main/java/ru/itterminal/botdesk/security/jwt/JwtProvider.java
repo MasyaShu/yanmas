@@ -1,4 +1,4 @@
-package ru.itterminal.botdesk.jwt;
+package ru.itterminal.botdesk.security.jwt;
 
 import static ru.itterminal.botdesk.commons.util.CommonMethods.chekStringForNullOrEmpty;
 
