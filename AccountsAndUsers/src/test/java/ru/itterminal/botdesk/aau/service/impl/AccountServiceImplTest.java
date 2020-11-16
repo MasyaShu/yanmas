@@ -8,10 +8,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static ru.itterminal.botdesk.commons.service.CrudService.FIND_INVALID_MESSAGE;
-import static ru.itterminal.botdesk.commons.service.CrudService.VERSION_INVALID_MESSAGE;
-import static ru.itterminal.botdesk.config.TestSecurityConfig.ACCOUNT_1_ID;
-import static ru.itterminal.botdesk.config.TestSecurityConfig.GROUP_1_ID;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -33,6 +29,8 @@ import ru.itterminal.botdesk.aau.model.dto.AccountCreateDto;
 import ru.itterminal.botdesk.aau.repository.AccountRepository;
 import ru.itterminal.botdesk.aau.service.validator.AccountOperationValidator;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
+import ru.itterminal.botdesk.commons.service.CrudService;
+import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {AccountServiceImpl.class})
@@ -73,12 +71,12 @@ class AccountServiceImplTest {
                 .builder()
                 .name(ACCOUNT_NAME)
                 .build();
-        account.setId(UUID.fromString(ACCOUNT_1_ID));
+        account.setId(UUID.fromString(TestSecurityConfig.ACCOUNT_1_ID));
         group = Group
                 .builder()
                 .name(GROUP_NAME_ACCOUNT_OWNER)
                 .build();
-        group.setId(UUID.fromString(GROUP_1_ID));
+        group.setId(UUID.fromString(TestSecurityConfig.GROUP_1_ID));
         user = User
                 .builder()
                 .email(EMAIL_ACCOUNT_OWNER)
@@ -128,7 +126,7 @@ class AccountServiceImplTest {
         when(repository.findById(any())).thenReturn(Optional.empty());
         when(repository.update(any())).thenReturn(account);
         Throwable throwable = assertThrows(EntityNotExistException.class, ()-> service.update(account));
-        assertEquals(format(FIND_INVALID_MESSAGE, "id", account.getId()), throwable.getMessage());
+        assertEquals(String.format(CrudService.FIND_INVALID_MESSAGE, "id", account.getId()), throwable.getMessage());
         verify(validator, times(1)).beforeUpdate(any());
         verify(repository, times(1)).existsById(any());
         verify(repository, times(0)).findById(any());
@@ -137,7 +135,7 @@ class AccountServiceImplTest {
 
     @Test
     void update_shouldGetOptimisticLockingFailureException_whenPassedInvalidVersionOfAccount() {
-        String message = format(VERSION_INVALID_MESSAGE, account.getId());
+        String message = String.format(CrudService.VERSION_INVALID_MESSAGE, account.getId());
         when(validator.beforeUpdate(any())).thenReturn(true);
         when(repository.existsById(any())).thenReturn(true);
         when(repository.findById(any())).thenReturn(Optional.of(account));

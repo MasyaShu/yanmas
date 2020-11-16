@@ -1,4 +1,4 @@
-package ru.itterminal.botdesk.jwt;
+package ru.itterminal.botdesk.security.jwt;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -7,14 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static ru.itterminal.botdesk.config.TestSecurityConfig.EMAIL_1;
-import static ru.itterminal.botdesk.jwt.JwtProvider.CANT_CREATE_TOKEN_BECAUSE;
-import static ru.itterminal.botdesk.jwt.JwtProvider.CANT_CREATE_TOKEN_IF_USER_ID_IS_NULL;
-import static ru.itterminal.botdesk.jwt.JwtProvider.CANT_GET_EMAIL_FROM_TOKEN_BECAUSE;
-import static ru.itterminal.botdesk.jwt.JwtProvider.CANT_GET_USER_ID_FROM_TOKEN_BECAUSE;
-import static ru.itterminal.botdesk.jwt.JwtProvider.EMAIL_IS_EMPTY;
-import static ru.itterminal.botdesk.jwt.JwtProvider.EMAIL_IS_NULL;
-import static ru.itterminal.botdesk.jwt.JwtProvider.TOKEN_IS_NULL;
+import static ru.itterminal.botdesk.security.config.TestSecurityConfig.EMAIL_1;
+import static ru.itterminal.botdesk.security.jwt.JwtProvider.CANT_CREATE_TOKEN_BECAUSE;
+import static ru.itterminal.botdesk.security.jwt.JwtProvider.CANT_CREATE_TOKEN_IF_USER_ID_IS_NULL;
+import static ru.itterminal.botdesk.security.jwt.JwtProvider.CANT_GET_EMAIL_FROM_TOKEN_BECAUSE;
+import static ru.itterminal.botdesk.security.jwt.JwtProvider.CANT_GET_USER_ID_FROM_TOKEN_BECAUSE;
+import static ru.itterminal.botdesk.security.jwt.JwtProvider.EMAIL_IS_EMPTY;
+import static ru.itterminal.botdesk.security.jwt.JwtProvider.EMAIL_IS_NULL;
+import static ru.itterminal.botdesk.security.jwt.JwtProvider.TOKEN_IS_NULL;
 
 import java.util.List;
 import java.util.UUID;

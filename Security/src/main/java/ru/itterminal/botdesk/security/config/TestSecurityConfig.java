@@ -1,7 +1,4 @@
-package ru.itterminal.botdesk.config;
-
-import static ru.itterminal.botdesk.config.SecurityConfig.AUTH_WHITELIST_ANONYMOUS;
-import static ru.itterminal.botdesk.config.SecurityConfig.AUTH_WHITELIST_PERMIT_ALL;
+package ru.itterminal.botdesk.security.config;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,7 +14,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.cors.CorsConfigurationSource;
 
-import ru.itterminal.botdesk.jwt.JwtUser;
+import ru.itterminal.botdesk.security.jwt.JwtUser;
 
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 @EnableWebSecurity
@@ -43,8 +40,8 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 .cors().and()
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers(AUTH_WHITELIST_PERMIT_ALL).permitAll()
-                .antMatchers(AUTH_WHITELIST_ANONYMOUS).anonymous()
+                .antMatchers(SecurityConfig.AUTH_WHITELIST_PERMIT_ALL).permitAll()
+                .antMatchers(SecurityConfig.AUTH_WHITELIST_ANONYMOUS).anonymous()
                 .anyRequest().authenticated().and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.headers().frameOptions().disable();

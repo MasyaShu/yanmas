@@ -8,21 +8,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static ru.itterminal.botdesk.aau.model.Roles.ACCOUNT_OWNER;
-import static ru.itterminal.botdesk.aau.model.Roles.ADMIN;
-import static ru.itterminal.botdesk.aau.service.impl.UserServiceImpl.FAILED_SAVE_USER_AFTER_RESET_PASSWORD;
-import static ru.itterminal.botdesk.aau.service.impl.UserServiceImpl.FAILED_SAVE_USER_AFTER_VERIFY_EMAIL_TOKEN;
-import static ru.itterminal.botdesk.aau.service.impl.UserServiceImpl.NOT_FOUND_USER_BY_EMAIL_VERIFICATION_TOKEN;
-import static ru.itterminal.botdesk.aau.service.impl.UserServiceImpl.NOT_FOUND_USER_BY_RESET_PASSWORD_TOKEN;
-import static ru.itterminal.botdesk.commons.service.CrudService.FIND_INVALID_MESSAGE;
-import static ru.itterminal.botdesk.commons.service.CrudService.VERSION_INVALID_MESSAGE;
-import static ru.itterminal.botdesk.config.TestSecurityConfig.ACCOUNT_1_ID;
-import static ru.itterminal.botdesk.config.TestSecurityConfig.EMAIL_1;
-import static ru.itterminal.botdesk.config.TestSecurityConfig.GROUP_1_ID;
 
 import java.util.Optional;
 import java.util.UUID;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -42,7 +32,10 @@ import ru.itterminal.botdesk.aau.repository.UserRepository;
 import ru.itterminal.botdesk.aau.service.validator.UserOperationValidator;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.FailedSaveEntityException;
-import ru.itterminal.botdesk.jwt.JwtProvider;
+import ru.itterminal.botdesk.security.jwt.JwtProvider;
+import ru.itterminal.botdesk.aau.model.Roles;
+import ru.itterminal.botdesk.commons.service.CrudService;
+import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {JwtProvider.class, UserServiceImpl.class, BCryptPasswordEncoder.class})
@@ -71,19 +64,19 @@ class UserServiceImplTest {
     private User user;
     private User userFromDatabase;
     private Account account;
-    private final Role roleAdmin = new Role(ADMIN.toString(), ADMIN.getWeight());
-    private final Role roleAccountOwner = new Role(ACCOUNT_OWNER.toString(), ACCOUNT_OWNER.getWeight());
+    private final Role roleAdmin = new Role(Roles.ADMIN.toString(), Roles.ADMIN.getWeight());
+    private final Role roleAccountOwner = new Role(Roles.ACCOUNT_OWNER.toString(), Roles.ACCOUNT_OWNER.getWeight());
 
     @BeforeEach
     void setUpBeforeEach() {
         account = new Account();
-        account.setId(UUID.fromString(ACCOUNT_1_ID));
+        account.setId(UUID.fromString(TestSecurityConfig.ACCOUNT_1_ID));
         Group group = new Group();
-        group.setId(UUID.fromString(GROUP_1_ID));
+        group.setId(UUID.fromString(TestSecurityConfig.GROUP_1_ID));
         String PASSWORD = "12345";
         user = User
                 .builder()
-                .email(EMAIL_1)
+                .email(TestSecurityConfig.EMAIL_1)
                 .password(PASSWORD)
                 .account(account)
                 .ownGroup(group)
@@ -93,7 +86,7 @@ class UserServiceImplTest {
         user.setId(USER_ID);
         userFromDatabase = User
                 .builder()
-                .email(EMAIL_1)
+                .email(TestSecurityConfig.EMAIL_1)
                 .password(PASSWORD)
                 .account(account)
                 .ownGroup(group)
@@ -156,7 +149,7 @@ class UserServiceImplTest {
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
         when(userRepository.update(any())).thenReturn(user);
         Throwable throwable = assertThrows(EntityNotExistException.class, () -> service.update(user));
-        assertEquals(format(FIND_INVALID_MESSAGE, "id", user.getId()), throwable.getMessage());
+        assertEquals(String.format(CrudService.FIND_INVALID_MESSAGE, "id", user.getId()), throwable.getMessage());
         verify(validator, times(1)).beforeUpdate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(userRepository, times(1)).existsById(any());
@@ -166,7 +159,7 @@ class UserServiceImplTest {
 
     @Test
     void update_shouldGetOptimisticLockingFailureException_whenPassedInvalidVersionOfUser() {
-        String message = format(VERSION_INVALID_MESSAGE, user.getId());
+        String message = String.format(CrudService.VERSION_INVALID_MESSAGE, user.getId());
         when(validator.beforeUpdate(any())).thenReturn(true);
         when(validator.checkUniqueness(any())).thenReturn(true);
         when(userRepository.existsById(any())).thenReturn(true);
@@ -269,7 +262,7 @@ class UserServiceImplTest {
         user.setEmailVerificationStatus(true);
         when(userRepository.save(any())).thenReturn(user);
         Throwable throwable = assertThrows(JwtException.class, () -> service.verifyEmailToken(token));
-        assertEquals(NOT_FOUND_USER_BY_EMAIL_VERIFICATION_TOKEN, throwable.getMessage());
+        Assertions.assertEquals(UserServiceImpl.NOT_FOUND_USER_BY_EMAIL_VERIFICATION_TOKEN, throwable.getMessage());
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(1)).findById(any());
         verify(userRepository, times(0)).save(any());
@@ -284,7 +277,7 @@ class UserServiceImplTest {
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
         Throwable throwable = assertThrows(JwtException.class, () -> service.verifyEmailToken(token));
-        assertEquals(NOT_FOUND_USER_BY_EMAIL_VERIFICATION_TOKEN, throwable.getMessage());
+        Assertions.assertEquals(UserServiceImpl.NOT_FOUND_USER_BY_EMAIL_VERIFICATION_TOKEN, throwable.getMessage());
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(1)).findById(any());
         verify(userRepository, times(0)).save(any());
@@ -299,7 +292,7 @@ class UserServiceImplTest {
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
         when(userRepository.save(any())).thenReturn(User.builder().emailVerificationStatus(false).build());
         Throwable throwable = assertThrows(FailedSaveEntityException.class, () -> service.verifyEmailToken(token));
-        assertEquals(FAILED_SAVE_USER_AFTER_VERIFY_EMAIL_TOKEN, throwable.getMessage());
+        Assertions.assertEquals(UserServiceImpl.FAILED_SAVE_USER_AFTER_VERIFY_EMAIL_TOKEN, throwable.getMessage());
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(1)).findById(any());
         verify(userRepository, times(1)).save(any());
@@ -317,7 +310,7 @@ class UserServiceImplTest {
     @Test
     void requestPasswordReset_shouldUpdatePasswordResetToken_whenEmailIsValid() {
         when(userRepository.getByEmail(any())).thenReturn(Optional.of(user));
-        service.requestPasswordReset(EMAIL_1);
+        service.requestPasswordReset(TestSecurityConfig.EMAIL_1);
         verify(userRepository, times(1)).getByEmail(any());
         verify(userRepository, times(1)).save(any());
     }
@@ -325,7 +318,7 @@ class UserServiceImplTest {
     @Test
     void requestPasswordReset_shouldGetEntityNotExistException_whenEmailIsInvalid() {
         when(userRepository.getByEmail(any())).thenReturn(Optional.empty());
-        assertThrows(EntityNotExistException.class, () -> service.requestPasswordReset(EMAIL_1));
+        assertThrows(EntityNotExistException.class, () -> service.requestPasswordReset(TestSecurityConfig.EMAIL_1));
         verify(userRepository, times(1)).getByEmail(any());
         verify(userRepository, times(0)).save(any());
     }
@@ -357,7 +350,7 @@ class UserServiceImplTest {
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
         Throwable throwable = assertThrows(JwtException.class, () -> service.resetPassword(token, newPassword));
-        assertEquals(NOT_FOUND_USER_BY_RESET_PASSWORD_TOKEN, throwable.getMessage());
+        Assertions.assertEquals(UserServiceImpl.NOT_FOUND_USER_BY_RESET_PASSWORD_TOKEN, throwable.getMessage());
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(1)).findById(any());
         verify(userRepository, times(0)).save(any());
@@ -371,7 +364,7 @@ class UserServiceImplTest {
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
         Throwable throwable = assertThrows(JwtException.class, () -> service.resetPassword(token, newPassword));
-        assertEquals(NOT_FOUND_USER_BY_RESET_PASSWORD_TOKEN, throwable.getMessage());
+        Assertions.assertEquals(UserServiceImpl.NOT_FOUND_USER_BY_RESET_PASSWORD_TOKEN, throwable.getMessage());
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(1)).findById(any());
         verify(userRepository, times(0)).save(any());
@@ -387,7 +380,7 @@ class UserServiceImplTest {
         when(userRepository.save(any())).thenReturn(userFromDatabase);
         Throwable throwable =
                 assertThrows(FailedSaveEntityException.class, () -> service.resetPassword(token, newPassword));
-        assertEquals(FAILED_SAVE_USER_AFTER_RESET_PASSWORD, throwable.getMessage());
+        Assertions.assertEquals(UserServiceImpl.FAILED_SAVE_USER_AFTER_RESET_PASSWORD, throwable.getMessage());
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(1)).findById(any());
         verify(userRepository, times(1)).save(any());

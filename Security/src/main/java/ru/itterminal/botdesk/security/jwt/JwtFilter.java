@@ -1,4 +1,4 @@
-package ru.itterminal.botdesk.jwt;
+package ru.itterminal.botdesk.security.jwt;
 
 import java.io.IOException;
 import java.io.OutputStream;

@@ -1,4 +1,4 @@
-package ru.itterminal.botdesk.jwt;
+package ru.itterminal.botdesk.security.jwt;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -63,4 +63,8 @@ public class JwtUser implements UserDetails {
                 Objects.equals(authorities, jwtUser.authorities);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(accountId, groupId, weightRole, username, password, isInnerGroup, enabled, authorities);
+    }
 }

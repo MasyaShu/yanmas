@@ -1,10 +1,5 @@
 package ru.itterminal.botdesk.aau.model.dto;
 
-import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_EMAIL;
-import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_PASSWORD;
-import static ru.itterminal.botdesk.aau.util.AAUConstants.EMAIL_PATTERN;
-import static ru.itterminal.botdesk.aau.util.AAUConstants.PASSWORD_PATTERN;
-
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -17,6 +12,7 @@ import lombok.Setter;
 import lombok.ToString;
 import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
+import ru.itterminal.botdesk.aau.util.AAUConstants;
 
 @Getter
 @Setter
@@ -34,14 +30,14 @@ public class AccountCreateDto extends BaseEntityDto {
     private String nameGroupAccountOwner;
 
     @NotNull(groups = {Create.class})
-    @Pattern(regexp = EMAIL_PATTERN,
-            message = INVALID_EMAIL,
+    @Pattern(regexp = AAUConstants.EMAIL_PATTERN,
+            message = AAUConstants.INVALID_EMAIL,
             groups = {Create.class})
     private String emailAccountOwner;
 
     @NotNull(groups = {Create.class})
-    @Pattern(regexp = PASSWORD_PATTERN,
-            message = INVALID_PASSWORD,
+    @Pattern(regexp = AAUConstants.PASSWORD_PATTERN,
+            message = AAUConstants.INVALID_PASSWORD,
             groups = {Create.class})
     private String passwordAccountOwner;
 }

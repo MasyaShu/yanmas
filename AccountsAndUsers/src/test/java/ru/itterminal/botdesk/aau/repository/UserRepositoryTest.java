@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import java.util.List;
 import java.util.UUID;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -76,7 +77,7 @@ class UserRepositoryTest {
 
     @Test
     void getByEmailAndIdNot_shouldGetOneUserUniqueFields_whenEmailExistAndIdNotExistInDatabase() {
-        assertEquals(USER_1_EMAIL_EXIST,
+        Assertions.assertEquals(USER_1_EMAIL_EXIST,
                 userRepository.getByEmailAndIdNot(USER_1_EMAIL_EXIST, ID_NOT_EXIST).get(0).getEmail());
     }
 
@@ -103,7 +104,7 @@ class UserRepositoryTest {
     void findAllByRoleAndAccountId_shouldGetOneUser_whenRoleAccountOwnerExistAndIdEquals() {
         List<User> foundUsers;
         foundUsers = userRepository.findAllByRoleAndAccount_Id(roleAccountOwner, USER_1_ACCOUNT_ID_EXIST);
-        assertEquals(USER_1_ID_EXIST, foundUsers.get(0).getId());
+        Assertions.assertEquals(USER_1_ID_EXIST, foundUsers.get(0).getId());
     }
 
     @Test
@@ -118,9 +119,9 @@ class UserRepositoryTest {
         User user = userRepository.getByIdAndAccount_IdAndOwnGroup_Id(USER_1_ID_EXIST, USER_1_ACCOUNT_ID_EXIST,
                 USER_1_OWN_GROUP_ID_EXIST).get();
         assertNotNull(user);
-        assertEquals(USER_1_ID_EXIST, user.getId());
-        assertEquals(USER_1_ACCOUNT_ID_EXIST, user.getAccount().getId());
-        assertEquals(USER_1_OWN_GROUP_ID_EXIST, user.getOwnGroup().getId());
+        Assertions.assertEquals(USER_1_ID_EXIST, user.getId());
+        Assertions.assertEquals(USER_1_ACCOUNT_ID_EXIST, user.getAccount().getId());
+        Assertions.assertEquals(USER_1_OWN_GROUP_ID_EXIST, user.getOwnGroup().getId());
     }
 
 }

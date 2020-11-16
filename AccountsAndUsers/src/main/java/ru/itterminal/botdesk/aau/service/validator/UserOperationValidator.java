@@ -21,7 +21,7 @@ import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 import ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl;
-import ru.itterminal.botdesk.jwt.JwtUser;
+import ru.itterminal.botdesk.security.jwt.JwtUser;
 
 @Slf4j
 @Component

@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
-import ru.itterminal.botdesk.jwt.JwtUser;
+import ru.itterminal.botdesk.security.jwt.JwtUser;
 
 @Service
 @Slf4j
