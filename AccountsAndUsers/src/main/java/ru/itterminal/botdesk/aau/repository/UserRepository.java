@@ -18,6 +18,8 @@ public interface UserRepository extends CustomizedParentEntityRepository<User> {
 
     List<User> findAllByRoleAndIdNot(Role role, UUID id);
 
+    List<User> findAllByRoleAndAccount_IdAndIdNot(Role role, UUID accountId, UUID id);
+
     List<User> findAllByRoleAndAccount_Id(Role role, UUID accountId);
 
     Optional<User> getByEmail(String email);

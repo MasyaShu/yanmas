@@ -2,10 +2,14 @@ package ru.itterminal.botdesk.aau.service.impl;
 
 import static java.lang.String.format;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID;
+import static ru.itterminal.botdesk.commons.util.CommonMethods.chekObjectForNull;
+import static ru.itterminal.botdesk.commons.util.CommonMethods.chekStringForNullOrEmpty;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import javax.persistence.OptimisticLockException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -60,18 +64,20 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
     public static final String NOT_FOUND_USER_BY_EMAIL = "Not found user by email: %s";
     public static final String START_FIND_USER_BY_UNIQUE_FIELDS =
             "Start find user by unique fields, email: {} and not id: {}";
-    public static final String NOT_FOUND_USERS_BY_UNIQUE_FIELDS_USER_IS_NULL =
-            "Not found users by unique fields, user is null";
-    public static final String NOT_FOUND_USERS_BY_UNIQUE_FIELDS_EMAIL_IS_NULL =
-            "Not found users by unique fields, email is null";
-    public static final String NOT_FOUND_USERS_BY_UNIQUE_FIELDS_ID_IS_NULL =
-            "Not found users by unique fields, id is null";
+    public static final String NOT_FOUND_USERS_BY_UNIQUE_FIELDS =
+            "Not found users by unique fields, %s is null";
+    public static final String NOT_FOUND_USER =
+            "Not found user by email because ";
     public static final String START_FIND_ALL_USERS_BY_ROLE_AND_NOT_ID =
             "Start find all users by role: {} and not id: {}";
-    public static final String NOT_FOUND_USERS_BY_ROLE_AND_NOT_ID = "Not found users by role: %s and not id: %s";
+    public static final String START_FIND_ALL_USERS_BY_ROLE_ACCOUNT_ID_AND_NOT_ID =
+            "Start find all users by role: {}, accountId: {} and not id: {}";
+    public static final String NOT_FOUND_USERS_BY_ROLE_AND_NOT_ID = "Not found users by role: %s and not userId: %s";
+    public static final String NOT_FOUND_USERS_BY_ROLE_AND_ACCOUNT_ID = "Not found users by role: %s and accountId %s";
+    public static final String NOT_FOUND_USERS_BY_ROLE_AND_ACCOUNT_ID_AND_NOT_ID = "Not found users by role: %s and "
+            + "accountId %s and not userId: %s";
     public static final String START_FIND_ALL_USERS_BY_ROLE = "Start find all users by role: {}";
     public static final String NOT_FOUND_USERS_ROLE_IS_NULL = "Not found users, role is null";
-    public static final String NOT_FOUND_USERS_ACCOUNT_ID_IS_NULL = "Not found users, accountId is null";
     public static final String START_VERIFY_EMAIL_TOKEN = "Start verify email token: {}";
     public static final String FAILED_SAVE_USER_AFTER_VERIFY_EMAIL_TOKEN = "Failed save user after verify email token";
     public static final String FAILED_SAVE_USER_AFTER_RESET_PASSWORD = "Failed save user after reset password";
@@ -115,16 +121,16 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
         } else {
             entity.setPassword(encoder.encode(entity.getPassword()));
         }
-        if (entity.getFirstName() == null ) {
+        if (entity.getFirstName() == null) {
             entity.setFirstName(entityFromDatabase.getFirstName());
         }
-        if (entity.getSecondName() == null ) {
+        if (entity.getSecondName() == null) {
             entity.setSecondName(entityFromDatabase.getSecondName());
         }
-        if (entity.getPhone() == null ) {
+        if (entity.getPhone() == null) {
             entity.setPhone(entityFromDatabase.getPhone());
         }
-        if (entity.getComment() == null ) {
+        if (entity.getComment() == null) {
             entity.setComment(entityFromDatabase.getComment());
         }
         entity.setEmailVerificationStatus(entityFromDatabase.getEmailVerificationStatus());
@@ -135,46 +141,39 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
             log.trace(format(UPDATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), updatedEntity));
             return updatedEntity;
         }
-        catch (ObjectOptimisticLockingFailureException ex) {
+        catch (OptimisticLockException | ObjectOptimisticLockingFailureException ex) {
             throw new OptimisticLockingFailureException(format(VERSION_INVALID_MESSAGE, entity.getId()));
         }
     }
 
     @Transactional(readOnly = true)
     public Optional<User> findByEmail(String email) {
-        if (email == null) {
-            log.error(NOT_FOUND_USER_BY_EMAIL_EMAIL_IS_NULL);
-            throw new EntityNotExistException(NOT_FOUND_USER_BY_EMAIL_EMAIL_IS_NULL);
-        }
-        if (email.isEmpty()) {
-            log.error(NOT_FOUND_USER_BY_EMAIL_EMAIL_IS_EMPTY);
-            throw new EntityNotExistException(NOT_FOUND_USER_BY_EMAIL_EMAIL_IS_EMPTY);
-        }
+        chekStringForNullOrEmpty(email, NOT_FOUND_USER_BY_EMAIL_EMAIL_IS_NULL,
+                NOT_FOUND_USER_BY_EMAIL_EMAIL_IS_EMPTY, EntityNotExistException.class, NOT_FOUND_USER);
         log.trace(START_FIND_USER_BY_EMAIL, email);
         return repository.getByEmail(email);
     }
 
     @Transactional(readOnly = true)
     public List<UserUniqueFields> findByUniqueFields(User user) {
-        if (user == null) {
-            log.error(NOT_FOUND_USERS_BY_UNIQUE_FIELDS_USER_IS_NULL);
-            throw new EntityNotExistException(NOT_FOUND_USERS_BY_UNIQUE_FIELDS_USER_IS_NULL);
-        }
-        if (user.getEmail() == null) {
-            log.error(NOT_FOUND_USERS_BY_UNIQUE_FIELDS_EMAIL_IS_NULL);
-            throw new EntityNotExistException(NOT_FOUND_USERS_BY_UNIQUE_FIELDS_EMAIL_IS_NULL);
-        }
-        if (user.getId() == null) {
-            log.error(NOT_FOUND_USERS_BY_UNIQUE_FIELDS_ID_IS_NULL);
-            throw new EntityNotExistException(NOT_FOUND_USERS_BY_UNIQUE_FIELDS_ID_IS_NULL);
-        }
+        chekObjectForNull(user, format(NOT_FOUND_USERS_BY_UNIQUE_FIELDS, "user"),
+                EntityNotExistException.class);
+        chekObjectForNull(user.getEmail(), format(NOT_FOUND_USERS_BY_UNIQUE_FIELDS, "email"),
+                EntityNotExistException.class);
+        chekObjectForNull(user.getId(), format(NOT_FOUND_USERS_BY_UNIQUE_FIELDS, "userId"),
+                EntityNotExistException.class);
         log.trace(START_FIND_USER_BY_UNIQUE_FIELDS, user.getEmail(), user.getId());
         return repository.getByEmailAndIdNot(user.getEmail(), user.getId());
     }
 
     @Transactional(readOnly = true)
     public User findByIdAndAccountId(UUID id, UUID accountId) {
-        checkEntityIdAndAccountId(ENTITY_USER_NAME, id, accountId);
+        chekObjectForNull(id,
+                format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, ENTITY_USER_NAME, id, accountId),
+                EntityNotExistException.class);
+        chekObjectForNull(accountId,
+                format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, ENTITY_USER_NAME, id, accountId),
+                EntityNotExistException.class);
         log.trace(START_FIND_USER_BY_ID_AND_ACCOUNT_ID, id, accountId);
         return repository.getByIdAndAccount_Id(id, accountId).orElseThrow(
                 () -> new EntityNotExistException(format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, ENTITY_USER_NAME, id,
@@ -182,14 +181,17 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
         );
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @Transactional(readOnly = true)
     public User findByIdAndAccountIdAndOwnGroupId(UUID id, UUID accountId, UUID ownGroupId) {
-        checkEntityIdAndAccountId(ENTITY_USER_NAME, id, accountId);
-        if (ownGroupId == null) {
-            String message = format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, null);
-            log.error(message);
-            throw new EntityNotExistException(message);
-        }
+        chekObjectForNull(id, format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, ownGroupId),
+                EntityNotExistException.class);
+        chekObjectForNull(accountId,
+                format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, ownGroupId),
+                EntityNotExistException.class);
+        chekObjectForNull(ownGroupId,
+                format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, ownGroupId),
+                EntityNotExistException.class);
         log.trace(START_FIND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, ownGroupId);
         return repository.getByIdAndAccount_IdAndOwnGroup_Id(id, accountId, ownGroupId).orElseThrow(
                 () -> new EntityNotExistException(
@@ -200,40 +202,40 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
 
     @Transactional(readOnly = true)
     public List<User> findAllByRoleAndIdNot(Role role, UUID id) {
-        if (id == null) {
-            String message = format(NOT_FOUND_USERS_BY_ROLE_AND_NOT_ID, role, null);
-            log.error(message);
-            throw new EntityNotExistException(message);
-        }
-        if (role == null) {
-            String message = format(NOT_FOUND_USERS_BY_ROLE_AND_NOT_ID, null, id);
-            log.error(message);
-            throw new EntityNotExistException(message);
-        }
+        chekObjectForNull(role, format(NOT_FOUND_USERS_BY_ROLE_AND_NOT_ID, role, id),
+                EntityNotExistException.class);
+        chekObjectForNull(id, format(NOT_FOUND_USERS_BY_ROLE_AND_NOT_ID, role, id),
+                EntityNotExistException.class);
         log.trace(START_FIND_ALL_USERS_BY_ROLE_AND_NOT_ID, role, id);
         return repository.findAllByRoleAndIdNot(role, id);
     }
 
+    @SuppressWarnings("DuplicatedCode")
+    @Transactional(readOnly = true)
+    public List<User> findAllByRoleAndAccount_IdAndIdNot(Role role, UUID accountId, UUID id) {
+        chekObjectForNull(role, format(NOT_FOUND_USERS_BY_ROLE_AND_ACCOUNT_ID_AND_NOT_ID, role, accountId, id),
+                EntityNotExistException.class);
+        chekObjectForNull(accountId, format(NOT_FOUND_USERS_BY_ROLE_AND_ACCOUNT_ID_AND_NOT_ID, role, accountId, id),
+                EntityNotExistException.class);
+        chekObjectForNull(id, format(NOT_FOUND_USERS_BY_ROLE_AND_ACCOUNT_ID_AND_NOT_ID, role, accountId, id),
+                EntityNotExistException.class);
+        log.trace(START_FIND_ALL_USERS_BY_ROLE_ACCOUNT_ID_AND_NOT_ID, role, accountId, id);
+        return repository.findAllByRoleAndAccount_IdAndIdNot(role, accountId, id);
+    }
+
     @Transactional(readOnly = true)
     public List<User> findAllByRole(Role role) {
-        if (role == null) {
-            log.error(NOT_FOUND_USERS_ROLE_IS_NULL);
-            throw new EntityNotExistException(NOT_FOUND_USERS_ROLE_IS_NULL);
-        }
+        chekObjectForNull(role, NOT_FOUND_USERS_ROLE_IS_NULL, EntityNotExistException.class);
         log.trace(START_FIND_ALL_USERS_BY_ROLE, role);
         return repository.findAllByRole(role);
     }
 
     @Transactional(readOnly = true)
     public List<User> findAllByRoleAndAccountId(Role role, UUID accountId) {
-        if (role == null) {
-            log.error(NOT_FOUND_USERS_ROLE_IS_NULL);
-            throw new EntityNotExistException(NOT_FOUND_USERS_ROLE_IS_NULL);
-        }
-        if (accountId == null) {
-            log.error(NOT_FOUND_USERS_ACCOUNT_ID_IS_NULL);
-            throw new EntityNotExistException(NOT_FOUND_USERS_ACCOUNT_ID_IS_NULL);
-        }
+        chekObjectForNull(role, format(NOT_FOUND_USERS_BY_ROLE_AND_ACCOUNT_ID, role, accountId),
+                EntityNotExistException.class);
+        chekObjectForNull(accountId, format(NOT_FOUND_USERS_BY_ROLE_AND_ACCOUNT_ID, role, accountId),
+                EntityNotExistException.class);
         log.trace(START_FIND_ALL_USERS_BY_ROLE, role);
         return repository.findAllByRoleAndAccount_Id(role, accountId);
     }
