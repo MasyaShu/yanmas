@@ -1,8 +1,10 @@
 package ru.itterminal.botdesk.botdeskapp;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -18,6 +20,18 @@ import ru.itterminal.botdesk.commons.repository.ParentEntityRepositoryImpl;
 @EnableTransactionManagement
 @EnableJpaRepositories(basePackages = "ru.itterminal.botdesk", repositoryBaseClass = ParentEntityRepositoryImpl.class)
 public class BotDeskApp {
+
+    @Value("${aws.accessKeyId}")
+    private String accessKeyId;
+
+    @Value("${aws.secretKey}")
+    private String secretKey;
+
+    @PostConstruct
+    void setSystemProperty(){
+        System.setProperty("aws.accessKeyId", accessKeyId);
+        System.setProperty("aws.secretKey", secretKey);
+    }
 
     final DataSource dataSource;
 
