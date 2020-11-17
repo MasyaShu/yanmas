@@ -1,6 +1,13 @@
 package ru.itterminal.botdesk.commons.service.impl;
 
-import lombok.extern.slf4j.Slf4j;
+import static java.lang.String.format;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import javax.persistence.OptimisticLockException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
@@ -8,19 +15,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 import ru.itterminal.botdesk.commons.repository.CustomizedParentEntityRepository;
 import ru.itterminal.botdesk.commons.service.CrudService;
 import ru.itterminal.botdesk.commons.service.validator.OperationValidator;
-
-import javax.persistence.OptimisticLockException;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static java.lang.String.format;
-import static ru.itterminal.botdesk.commons.util.CommonConstants.NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID;
 
 /**
  * Skeletal implementation of general CRUD operations for each dictionary
@@ -150,10 +151,4 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
         return (List<E>) repository.findAll();
     }
 
-    public void checkEntityIdAndAccountId(String nameEntity, UUID id, UUID accountId) {
-        if (id == null || accountId == null) {
-            log.error(format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, nameEntity, id, accountId));
-            throw new EntityNotExistException(format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, nameEntity, id, accountId));
-        }
-    }
 }

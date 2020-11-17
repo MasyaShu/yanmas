@@ -1,6 +1,5 @@
 package ru.itterminal.botdesk.aau.service.impl;
 
-import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,15 +26,15 @@ import io.jsonwebtoken.JwtException;
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.Role;
+import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
 import ru.itterminal.botdesk.aau.service.validator.UserOperationValidator;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.FailedSaveEntityException;
-import ru.itterminal.botdesk.security.jwt.JwtProvider;
-import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.commons.service.CrudService;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
+import ru.itterminal.botdesk.security.jwt.JwtProvider;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {JwtProvider.class, UserServiceImpl.class, BCryptPasswordEncoder.class})

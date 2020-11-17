@@ -2,6 +2,7 @@ package ru.itterminal.botdesk.aau.service.impl;
 
 import static java.lang.String.format;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID;
+import static ru.itterminal.botdesk.commons.util.CommonMethods.chekObjectForNull;
 
 import java.util.List;
 import java.util.UUID;
@@ -9,6 +10,7 @@ import java.util.UUID;
 import javax.persistence.OptimisticLockException;
 
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,37 +61,30 @@ public class GroupServiceImpl extends CrudServiceImpl<Group, GroupOperationValid
             log.trace(format(UPDATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), updatedEntity));
             return updatedEntity;
         }
-        catch (OptimisticLockException ex) {
+        catch (OptimisticLockException | ObjectOptimisticLockingFailureException ex) {
             throw new OptimisticLockingFailureException(format(VERSION_INVALID_MESSAGE, entity.getId()));
         }
     }
 
     public List<GroupUniqueFields> findByUniqueFields(Group group) {
-        if (group == null) {
-            log.error(NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_GROUP_IS_NULL);
-            throw new EntityNotExistException(NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_GROUP_IS_NULL);
-        }
-        if (group.getName() == null) {
-            log.error(NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_NAME_IS_NULL);
-            throw new EntityNotExistException(NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_NAME_IS_NULL);
-        }
-        if (group.getId() == null) {
-            log.error(NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_ID_IS_NULL);
-            throw new EntityNotExistException(NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_ID_IS_NULL);
-        }
-        if (group.getAccount() == null) {
-            log.error(NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_ACCOUNT_IS_NULL);
-            throw new EntityNotExistException(NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_ACCOUNT_IS_NULL);
-        }
+        chekObjectForNull(group, NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_GROUP_IS_NULL, EntityNotExistException.class);
+        chekObjectForNull(group.getName(), NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_NAME_IS_NULL,
+                EntityNotExistException.class);
+        chekObjectForNull(group.getId(), NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_ID_IS_NULL, EntityNotExistException.class);
+        chekObjectForNull(group.getAccount(), NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_ACCOUNT_IS_NULL,
+                EntityNotExistException.class);
         log.trace(START_FIND_GROUP_BY_UNIQUE_FIELDS, group.getName(), group.getId(), group.getAccount());
         return repository.getByNameAndAccount_IdAndIdNot(group.getName(), group.getAccount().getId(), group.getId());
     }
 
     @Transactional(readOnly = true)
     public Group findByIdAndAccountId(UUID id, UUID accountId) {
-        checkEntityIdAndAccountId(ENTITY_GROUP_NAME, id, accountId);
+        chekObjectForNull(id, format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, ENTITY_GROUP_NAME, id, accountId),
+                EntityNotExistException.class);
+        chekObjectForNull(accountId, format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, ENTITY_GROUP_NAME, id, accountId),
+                EntityNotExistException.class);
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!(jwtUser.isInnerGroup() || id.equals(jwtUser.getGroupId()))) {
+        if (!jwtUser.isInnerGroup() && !id.equals(jwtUser.getGroupId())) {
             throw new EntityNotExistException(format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, ENTITY_GROUP_NAME, id,
                     jwtUser.getAccountId()));
         }

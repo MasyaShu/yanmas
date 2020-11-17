@@ -35,11 +35,14 @@ class UserRepositoryTest {
     private UserRepository userRepository;
 
     private static Role roleAccountOwner = null;
+    private static Role roleAuthor = null;
     private static Role roleNotExistInDatabase = null;
     private static final String USER_1_EMAIL_EXIST = "m@m.ru";
     private static final UUID USER_1_ID_EXIST = UUID.fromString("d592facb-e6ee-4801-8310-9c7708eb6e6c");
     private static final UUID USER_1_OWN_GROUP_ID_EXIST = UUID.fromString("0223e51a-4bb2-44ee-bc8e-1f047a2145e7");
     private static final UUID USER_1_ACCOUNT_ID_EXIST
+            = UUID.fromString("cdfa6483-0769-4628-ba32-efd338a716de");
+    private static final UUID USER_2_ACCOUNT_ID_EXIST
             = UUID.fromString("cdfa6483-0769-4628-ba32-efd338a716de");
     private static final UUID ID_NOT_EXIST = UUID.fromString("cb9e8816-7bed-4bb6-b3ea-3aa0eee247b6");
     private static final String EMAIL_NOT_EXIST = "n@n.ru";
@@ -54,6 +57,16 @@ class UserRepositoryTest {
         roleAccountOwner.setId(UUID.fromString("ba99ce38-1611-4a81-adc9-3a779d58bbfe"));
         roleAccountOwner.setDeleted(false);
         roleAccountOwner.setVersion(0);
+
+        roleAuthor = Role
+                .builder()
+                .name(Roles.AUTHOR.toString())
+                .weight(1)
+                .build();
+        roleAuthor.setId(UUID.fromString("933f20bf-9262-47bb-83d2-0ca55bbbd3fd"));
+        roleAuthor.setDeleted(false);
+        roleAuthor.setVersion(0);
+
 
         roleNotExistInDatabase = Role
                 .builder()
@@ -122,6 +135,13 @@ class UserRepositoryTest {
         Assertions.assertEquals(USER_1_ID_EXIST, user.getId());
         Assertions.assertEquals(USER_1_ACCOUNT_ID_EXIST, user.getAccount().getId());
         Assertions.assertEquals(USER_1_OWN_GROUP_ID_EXIST, user.getOwnGroup().getId());
+    }
+
+    @Test
+    void findAllByRoleAndAccount_IdAndIdNot_shouldGetThreeUsers_whenDatabaseHasThreeUsersWithPassedParameters() {
+        List<User> userList = userRepository.findAllByRoleAndAccount_IdAndIdNot(
+                roleAuthor, USER_2_ACCOUNT_ID_EXIST, USER_1_ID_EXIST);
+        assertEquals(3, userList.size());
     }
 
 }
