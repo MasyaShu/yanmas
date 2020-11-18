@@ -21,7 +21,8 @@ import ru.itterminal.botdesk.commons.exception.error.ApiError;
 
 public class JwtFilter extends GenericFilterBean {
     private final JwtProvider jwtProvider;
-
+    private static final String REQUEST_IS_REJECTED_BECAUSE_THE_USER_IS_DISABLED =
+            "Request is rejected because the user is disabled";
 
     public JwtFilter(JwtProvider jwtProvider) {
         this.jwtProvider = jwtProvider;
@@ -32,13 +33,14 @@ public class JwtFilter extends GenericFilterBean {
             throws IOException, ServletException {
 
         String token = jwtProvider.resolveToken((HttpServletRequest) req);
-        if (token != null ) {
+        if (token != null) {
             boolean validateToken;
             try {
                 validateToken = jwtProvider.validateToken(token);
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 res.setContentType("application/json");
-                ApiError response = new ApiError(HttpStatus.UNAUTHORIZED ,"Unauthorised", e);
+                ApiError response = new ApiError(HttpStatus.UNAUTHORIZED, "Unauthorised", e);
                 OutputStream out = res.getOutputStream();
                 ObjectMapper mapper = new ObjectMapper();
                 mapper.writeValue(out, response);
@@ -48,11 +50,19 @@ public class JwtFilter extends GenericFilterBean {
             if (validateToken) {
                 try {
                     Authentication auth = jwtProvider.getAuthentication(token);
-                    if (auth != null) {
-                        SecurityContextHolder.getContext().setAuthentication(auth);
+                    if (!((JwtUser) auth.getPrincipal()).isEnabled()) {
+                        throw new JwtException(REQUEST_IS_REJECTED_BECAUSE_THE_USER_IS_DISABLED);
                     }
-                } catch (Throwable e) {
-                    throw new JwtException(e.getMessage());
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                }
+                catch (Throwable e) {
+                    res.setContentType("application/json");
+                    ApiError response = new ApiError(HttpStatus.BAD_REQUEST, "JWT", new JwtException(e.getMessage()));
+                    OutputStream out = res.getOutputStream();
+                    ObjectMapper mapper = new ObjectMapper();
+                    mapper.writeValue(out, response);
+                    out.flush();
+                    return;
                 }
             }
         }
