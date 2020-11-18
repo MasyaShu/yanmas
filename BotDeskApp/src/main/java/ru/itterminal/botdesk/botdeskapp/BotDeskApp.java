@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
+import org.springframework.integration.config.EnableIntegration;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -18,6 +19,7 @@ import ru.itterminal.botdesk.commons.repository.ParentEntityRepositoryImpl;
 
 @SpringBootApplication(scanBasePackages = "ru.itterminal.botdesk")
 @EnableTransactionManagement
+@EnableIntegration
 @EnableJpaRepositories(basePackages = "ru.itterminal.botdesk", repositoryBaseClass = ParentEntityRepositoryImpl.class)
 public class BotDeskApp {
 

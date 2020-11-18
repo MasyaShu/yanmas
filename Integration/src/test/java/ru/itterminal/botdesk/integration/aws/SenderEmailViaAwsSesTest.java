@@ -13,18 +13,20 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import com.amazonaws.services.simpleemail.model.Body;
 import com.amazonaws.services.simpleemail.model.Content;
+import com.amazonaws.services.simpleemail.model.Destination;
 import com.amazonaws.services.simpleemail.model.Message;
+import com.amazonaws.services.simpleemail.model.SendEmailRequest;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringJUnitConfig(value = {AmazonSES.class})
-@TestPropertySource(properties = {"aws.ses.email.noReplay=noreplay@botdesk.app", "aws.ses.region=eu-central-1"})
-class AmazonSESTest {
+@SpringJUnitConfig(value = {SenderEmailViaAwsSes.class})
+@TestPropertySource(properties = {"aws.ses.email.noReplay=noreply@botdesk.app", "aws.ses.region=eu-central-1"})
+class SenderEmailViaAwsSesTest {
 
     @Autowired
-    AmazonSES amazonSES;
+    SenderEmailViaAwsSes amazonSES;
 
-    private static Message message;
-    private static final String testEmail  = "info@it-terminal.ru";
+    private static SendEmailRequest sendEmailRequest;
+    private static final String recipient = "unit-test@botdesk.app";
 
     @BeforeAll
     void setUpBeforeAll() {
@@ -34,16 +36,21 @@ class AmazonSESTest {
 
     @BeforeEach
     void setUpBeforeEach() {
-        message = new Message()
+        Message message = new Message()
                 .withBody(new Body().withHtml(new Content().withCharset("UTF-8").withData("BotDesk. Body of message. "
                         + "Тест сообщения"))
                         .withText(new Content().withCharset("UTF-8").withData(" someTestToken45df4sad45f4af4as5f4sfd")))
-        .withSubject(new Content().withCharset("UTF-8").withData("Test message from UnitTest of BotDesk" + new DateTime().toString()));
+                .withSubject(new Content().withCharset("UTF-8")
+                        .withData("Test message from UnitTest of BotDesk : " + new DateTime().toString()));
+        sendEmailRequest = new SendEmailRequest()
+                .withDestination(new Destination().withToAddresses(recipient))
+                .withMessage(message);
+
     }
 
     @Test
     void sendEmail() {
-        String messageId = amazonSES.sendEmail(message, testEmail);
+        String messageId = amazonSES.sendEmail(sendEmailRequest);
         assertNotNull(messageId);
     }
 

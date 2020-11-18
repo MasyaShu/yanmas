@@ -106,6 +106,7 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
         //noinspection StatementWithEmptyBody
         if (createdUser.getEmailVerificationToken() != null) {
             // TODO send email: emailVerificationToken
+
         }
         return createdUser;
     }
