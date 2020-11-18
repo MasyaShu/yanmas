@@ -146,24 +146,24 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         return true;
     }
 
-    public Map<String, List<ValidationError>> validateWeightOfRoleAndIsInnerGroup(User entity, User userFromDatabase) {
+    public Map<String, List<ValidationError>> validateWeightOfRoleAndIsInnerGroup(User userFromRequest, User userFromDatabase) {
         Map<String, List<ValidationError>> errors = new HashMap<>();
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (entity.getRole().getWeight() > jwtUser.getWeightRole()) {
+        if (userFromRequest.getRole().getWeight() > jwtUser.getWeightRole()) {
             errors.put(WEIGHT_OF_ROLE, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
                     format(WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_FROM_REQUEST, jwtUser.getWeightRole(),
-                            entity.getRole().getWeight()))));
+                            userFromRequest.getRole().getWeight()))));
         }
         if (userFromDatabase != null && userFromDatabase.getRole().getWeight() > jwtUser.getWeightRole()) {
             errors.put(WEIGHT_OF_ROLE_USER_FROM_DATABASE, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
                     format(WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_OF_UPDATING_USER_FROM_DATABASE,
                             jwtUser.getWeightRole(), userFromDatabase.getRole().getWeight()))));
         }
-        if (!jwtUser.isInnerGroup() && entity.getOwnGroup().getId() != jwtUser.getGroupId()) {
+        if (!jwtUser.isInnerGroup() && !userFromRequest.getOwnGroup().getId().equals(jwtUser.getGroupId())) {
             errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
                     CREATE_UPDATE_ONLY_HIS_GROUP)));
         }
-        if (userFromDatabase != null && !jwtUser.isInnerGroup() && userFromDatabase.getOwnGroup().getId() != jwtUser.getGroupId()) {
+        if (userFromDatabase != null && !jwtUser.isInnerGroup() && !userFromDatabase.getOwnGroup().getId().equals(jwtUser.getGroupId())) {
             errors.put(INNER_GROUP_USER_FROM_DATABASE, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
                     CREATE_UPDATE_ONLY_HIS_GROUP)));
         }

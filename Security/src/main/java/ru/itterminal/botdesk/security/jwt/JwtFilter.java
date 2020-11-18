@@ -8,6 +8,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -31,7 +32,6 @@ public class JwtFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain)
             throws IOException, ServletException {
-
         String token = jwtProvider.resolveToken((HttpServletRequest) req);
         if (token != null) {
             boolean validateToken;
@@ -39,9 +39,11 @@ public class JwtFilter extends GenericFilterBean {
                 validateToken = jwtProvider.validateToken(token);
             }
             catch (Exception e) {
-                res.setContentType("application/json");
+                HttpServletResponse httpServletResponse = (HttpServletResponse) res;
+                httpServletResponse.setContentType("application/json");
+                httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
                 ApiError response = new ApiError(HttpStatus.UNAUTHORIZED, "Unauthorised", e);
-                OutputStream out = res.getOutputStream();
+                OutputStream out = httpServletResponse.getOutputStream();
                 ObjectMapper mapper = new ObjectMapper();
                 mapper.writeValue(out, response);
                 out.flush();
@@ -56,9 +58,11 @@ public class JwtFilter extends GenericFilterBean {
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
                 catch (Throwable e) {
+                    HttpServletResponse httpServletResponse = (HttpServletResponse) res;
+                    httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
                     res.setContentType("application/json");
-                    ApiError response = new ApiError(HttpStatus.BAD_REQUEST, "JWT", new JwtException(e.getMessage()));
-                    OutputStream out = res.getOutputStream();
+                    ApiError response = new ApiError(HttpStatus.FORBIDDEN, "JWT", new JwtException(e.getMessage()));
+                    OutputStream out = httpServletResponse.getOutputStream();
                     ObjectMapper mapper = new ObjectMapper();
                     mapper.writeValue(out, response);
                     out.flush();
