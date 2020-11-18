@@ -51,12 +51,18 @@ public class JwtFilter extends GenericFilterBean {
                 try {
                     Authentication auth = jwtProvider.getAuthentication(token);
                     if (!((JwtUser) auth.getPrincipal()).isEnabled()) {
-                        throw new Throwable(REQUEST_IS_REJECTED_BECAUSE_THE_USER_IS_DISABLED);
+                        throw new JwtException(REQUEST_IS_REJECTED_BECAUSE_THE_USER_IS_DISABLED);
                     }
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
                 catch (Throwable e) {
-                    throw new JwtException(e.getMessage());
+                    res.setContentType("application/json");
+                    ApiError response = new ApiError(HttpStatus.BAD_REQUEST, "JWT", new JwtException(e.getMessage()));
+                    OutputStream out = res.getOutputStream();
+                    ObjectMapper mapper = new ObjectMapper();
+                    mapper.writeValue(out, response);
+                    out.flush();
+                    return;
                 }
             }
         }
