@@ -26,12 +26,12 @@
             <version>1.11.901</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/io.github.resilience4j/resilience4j-ratelimiter -->
-        <dependency>
-            <groupId>io.github.resilience4j</groupId>
-            <artifactId>resilience4j-ratelimiter</artifactId>
-            <version>1.6.1</version>
-        </dependency>
+<!--        &lt;!&ndash; https://mvnrepository.com/artifact/io.github.resilience4j/resilience4j-ratelimiter &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>io.github.resilience4j</groupId>-->
+<!--            <artifactId>resilience4j-ratelimiter</artifactId>-->
+<!--            <version>1.6.1</version>-->
+<!--        </dependency>-->
 
     </dependencies>
 </project>

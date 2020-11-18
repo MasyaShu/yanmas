@@ -1,23 +1,19 @@
 package ru.itterminal.botdesk.integration.aws;
 
-import java.time.Duration;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.annotation.Gateway;
 import org.springframework.integration.annotation.MessagingGateway;
+import org.springframework.integration.annotation.Poller;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.QueueChannel;
-import org.springframework.integration.handler.advice.RateLimiterRequestHandlerAdvice;
 import org.springframework.messaging.MessageChannel;
 
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder;
 import com.amazonaws.services.simpleemail.model.SendEmailRequest;
-
-import io.github.resilience4j.ratelimiter.RateLimiterConfig;
 
 @Configuration
 public class SenderEmailViaAwsSes {
@@ -41,16 +37,8 @@ public class SenderEmailViaAwsSes {
         String process(SendEmailRequest email);
     }
 
-    @Bean
-    public RateLimiterRequestHandlerAdvice rateLimiterSendEmail() {
-        return new RateLimiterRequestHandlerAdvice(
-                RateLimiterConfig.custom()
-                        .limitRefreshPeriod(Duration.ofSeconds(1))
-                        .limitForPeriod(14)
-                        .build());
-    }
-
-    @ServiceActivator(inputChannel = "mailSenderViaAwsSesChannel", adviceChain = "rateLimiterSendEmail")
+    @ServiceActivator(inputChannel = "mailSenderViaAwsSesChannel",
+            poller = @Poller(maxMessagesPerPoll = "14", fixedRate = "1000"))
     public String sendEmail(SendEmailRequest email) {
         if (email.getSource() == null) {
             email.setSource(emailNoReplay);
