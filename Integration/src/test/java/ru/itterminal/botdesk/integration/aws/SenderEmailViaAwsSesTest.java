@@ -26,7 +26,7 @@ class SenderEmailViaAwsSesTest {
     SenderEmailViaAwsSes amazonSES;
 
     private static SendEmailRequest sendEmailRequest;
-    private static final String recipient = "unit-test@botdesk.app";
+    private static final String RECIPIENT = "unit-test@botdesk.app";
 
     @BeforeAll
     void setUpBeforeAll() {
@@ -43,7 +43,7 @@ class SenderEmailViaAwsSesTest {
                 .withSubject(new Content().withCharset("UTF-8")
                         .withData("Test message from UnitTest of BotDesk : " + new DateTime().toString()));
         sendEmailRequest = new SendEmailRequest()
-                .withDestination(new Destination().withToAddresses(recipient))
+                .withDestination(new Destination().withToAddresses(RECIPIENT))
                 .withMessage(message);
 
     }
