@@ -22,7 +22,7 @@ import com.amazonaws.services.simpleemail.model.SendEmailResult;
 
 import ru.itterminal.botdesk.integration.config.GeneralConfig;
 
-@SpringBootTest(classes = GeneralConfig.class)
+@SpringBootTest(classes = {GeneralConfig.class, AwsSesConfig.class})
 @TestPropertySource(properties = {"aws.accessKeyId=AKIAUUSU2LYV5JFH7WOV", "aws.secretKey=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",
         "aws.ses.region=eu-central-1", "aws.ses.email.noReplay=noreply@botdesk.app"})
 class SenderEmailViaAwsSesTest {

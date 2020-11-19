@@ -10,9 +10,7 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.messaging.MessageChannel;
 
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder;
 import com.amazonaws.services.simpleemail.model.Body;
 import com.amazonaws.services.simpleemail.model.Content;
 import com.amazonaws.services.simpleemail.model.Destination;
@@ -22,19 +20,8 @@ import com.amazonaws.services.simpleemail.model.SendEmailRequest;
 @Configuration
 public class SenderEmailViaAwsSes {
 
-    @Value("${aws.ses.region}")
-    private String region;
-
     @Value("${aws.ses.email.noReplay}")
     private String emailNoReplay;
-
-    @Bean
-    public AmazonSimpleEmailService getAmazonSimpleEmailService() {
-        return AmazonSimpleEmailServiceClientBuilder
-                .standard()
-                .withRegion(Regions.fromName(region))
-                .build();
-    }
 
     private final AmazonSimpleEmailService amazonSimpleEmailService;
 
