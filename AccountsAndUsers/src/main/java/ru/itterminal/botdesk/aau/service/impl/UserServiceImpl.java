@@ -4,6 +4,7 @@ import static java.lang.String.format;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID;
 import static ru.itterminal.botdesk.commons.util.CommonMethods.chekObjectForNull;
 import static ru.itterminal.botdesk.commons.util.CommonMethods.chekStringForNullOrEmpty;
+import static ru.itterminal.botdesk.integration.aws.SenderEmailViaAwsSes.createEmail;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,11 +13,14 @@ import java.util.UUID;
 import javax.persistence.OptimisticLockException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.amazonaws.services.simpleemail.model.SendEmailRequest;
 
 import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +32,7 @@ import ru.itterminal.botdesk.aau.service.validator.UserOperationValidator;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.FailedSaveEntityException;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
+import ru.itterminal.botdesk.integration.aws.SenderEmailViaAwsSes;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
 
 @Slf4j
@@ -35,16 +40,32 @@ import ru.itterminal.botdesk.security.jwt.JwtProvider;
 @Transactional
 public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidator, UserRepository> {
 
+    @Value("${emailVerificationToken.subject}")
+    private String emailVerificationTokenSubject;
+
+    @Value("${emailVerificationToken.textBody}")
+    private String emailVerificationTokenTextBody;
+
+    @Value("${emailPasswordResetToken.subject}")
+    private String emailPasswordResetTokenSubject;
+
+    @Value("${emailPasswordResetToken.textBody}")
+    private String emailPasswordResetTokenTextBody;
+
     private final BCryptPasswordEncoder encoder;
     private final JwtProvider jwtProvider;
     private final RoleServiceImpl roleService;
+    private final SenderEmailViaAwsSes.MailSenderViaAwsSesMessagingGateway mailSenderViaAwsSesMessagingGateway;
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     public UserServiceImpl(BCryptPasswordEncoder encoder, JwtProvider jwtProvider,
-            RoleServiceImpl roleService) {
+            RoleServiceImpl roleService,
+            SenderEmailViaAwsSes.MailSenderViaAwsSesMessagingGateway mailSenderViaAwsSesMessagingGateway) {
         this.encoder = encoder;
         this.jwtProvider = jwtProvider;
         this.roleService = roleService;
+        this.mailSenderViaAwsSesMessagingGateway = mailSenderViaAwsSesMessagingGateway;
     }
 
     public static final String START_FIND_USER_BY_ID_AND_ACCOUNT_ID = "Start find user by id: {} and accountId: {}";
@@ -81,6 +102,8 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
     public static final String START_VERIFY_EMAIL_TOKEN = "Start verify email token: {}";
     public static final String FAILED_SAVE_USER_AFTER_VERIFY_EMAIL_TOKEN = "Failed save user after verify email token";
     public static final String FAILED_SAVE_USER_AFTER_RESET_PASSWORD = "Failed save user after reset password";
+    public static final String EMAIL_VERIFICATION_TOKEN_WAS_SUCCESSFUL_SENT = "Email with emailVerificationToken was "
+            + "successful sent, messageId from AWS SES {}";
 
     public final String ENTITY_USER_NAME = User.class.getSimpleName();
 
@@ -103,10 +126,16 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
         }
         User createdUser = repository.create(entity);
         log.trace(format(CREATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), createdUser.toString()));
-        //noinspection StatementWithEmptyBody
         if (createdUser.getEmailVerificationToken() != null) {
-            // TODO send email: emailVerificationToken
-
+            SendEmailRequest email = createEmail(createdUser.getEmail(), emailVerificationTokenSubject,
+                    emailVerificationTokenTextBody + " " + createdUser.getEmailVerificationToken());
+            try {
+                String messageId = mailSenderViaAwsSesMessagingGateway.process(email);
+                log.trace(EMAIL_VERIFICATION_TOKEN_WAS_SUCCESSFUL_SENT, messageId);
+            }
+            catch (Exception e) {
+                log.warn(e.getMessage());
+            }
         }
         return createdUser;
     }
@@ -272,7 +301,15 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
         String token = jwtProvider.createToken(user.getId());
         user.setPasswordResetToken(token);
         repository.save(user);
-        // TODO send email: PasswordResetToken
+        SendEmailRequest sendEmail = createEmail(email, emailPasswordResetTokenSubject,
+                emailPasswordResetTokenTextBody + " " + token);
+        try {
+            String messageId = mailSenderViaAwsSesMessagingGateway.process(sendEmail);
+            log.trace(EMAIL_VERIFICATION_TOKEN_WAS_SUCCESSFUL_SENT, messageId);
+        }
+        catch (Exception e) {
+            log.warn(e.getMessage());
+        }
     }
 
     public void resetPassword(String token, String newPassword) {
