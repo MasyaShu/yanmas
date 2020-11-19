@@ -278,7 +278,7 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
                 userId = jwtProvider.getUserId(token);
             }
         }
-        catch (Throwable e) {
+        catch (Exception e) {
             throw new JwtException(e.getMessage());
         }
         User user = super.findById(userId);
@@ -320,7 +320,7 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
                 userId = jwtProvider.getUserId(token);
             }
         }
-        catch (Throwable e) {
+        catch (Exception e) {
             throw new JwtException(e.getMessage());
         }
         User user = super.findById(userId);

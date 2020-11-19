@@ -1,6 +1,5 @@
 package ru.itterminal.botdesk.aau.service.impl;
 
-import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -28,8 +27,8 @@ import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.repository.GroupRepository;
 import ru.itterminal.botdesk.aau.service.validator.GroupOperationValidator;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
-import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 import ru.itterminal.botdesk.commons.util.CommonConstants;
+import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {GroupServiceImpl.class})

@@ -56,7 +56,7 @@ public class JwtProvider {
         secretToken = Base64.getEncoder().encodeToString(secretToken.getBytes());
     }
 
-    public String createToken(String email) throws Throwable {
+    public String createToken(String email) {
         chekStringForNullOrEmpty(email, EMAIL_IS_NULL, EMAIL_IS_EMPTY, JwtException.class, CANT_CREATE_TOKEN_BECAUSE);
         Claims claims = Jwts.claims().setSubject(email);
         Date now = new Date();
@@ -83,7 +83,7 @@ public class JwtProvider {
                 .compact();
     }
 
-    public UUID getUserId(String token) throws Throwable {
+    public UUID getUserId(String token) {
         chekStringForNullOrEmpty(token, TOKEN_IS_NULL, TOKEN_IS_EMPTY, JwtException.class,
                 CANT_GET_USER_ID_FROM_TOKEN_BECAUSE);
         UUID userId;
@@ -92,14 +92,14 @@ public class JwtProvider {
         return userId;
     }
 
-    public String getEmail(String token) throws Throwable {
+    public String getEmail(String token) {
         chekStringForNullOrEmpty(token, TOKEN_IS_NULL, TOKEN_IS_EMPTY, JwtException.class,
                 CANT_GET_EMAIL_FROM_TOKEN_BECAUSE);
         Claims claims = Jwts.parser().setSigningKey(secretToken).parseClaimsJws(token).getBody();
         return claims.getSubject();
     }
 
-    public Authentication getAuthentication(String token) throws Throwable {
+    public Authentication getAuthentication(String token) {
         UserDetailsService userDetailsService =
                 (UserDetailsService) appContext.getBean("jwtUserDetailsService");
         UserDetails userDetails = userDetailsService.loadUserByUsername(getEmail(token));

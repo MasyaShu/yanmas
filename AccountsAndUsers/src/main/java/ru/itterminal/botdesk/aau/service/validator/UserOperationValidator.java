@@ -6,7 +6,6 @@ import static java.util.Collections.singletonList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -138,12 +137,6 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
             log.error(FIELDS_NOT_UNIQUE, errors);
             throw new LogicalValidationException(VALIDATION_FAILED, errors);
         }
-    }
-
-    @Override
-    public boolean checkLogicalDelete(UUID id) {
-        super.checkLogicalDelete(id);
-        return true;
     }
 
     public Map<String, List<ValidationError>> validateWeightOfRoleAndIsInnerGroup(User userFromRequest, User userFromDatabase) {
