@@ -1,7 +1,5 @@
 package ru.itterminal.botdesk.integration.aws.ses;
 
-import static ru.itterminal.botdesk.integration.util.IntegrationConstants.REGION;
-
 import java.util.Properties;
 
 import javax.mail.Session;
@@ -15,10 +13,16 @@ import software.amazon.awssdk.services.ses.SesClient;
 @Configuration
 public class AwsSesConfig {
 
+    private final Region region;
+
+    public AwsSesConfig(Region region) {
+        this.region = region;
+    }
+
     @Bean
     public SesClient getAmazonSesClient() {
         return SesClient.builder()
-                .region(Region.of(REGION))
+                .region(region)
                 .build();
     }
 

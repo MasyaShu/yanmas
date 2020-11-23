@@ -10,11 +10,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.itterminal.botdesk.integration.aws.AwsConfig;
 import ru.itterminal.botdesk.integration.config.IntegrationConfig;
 import software.amazon.awssdk.services.ses.model.SendRawEmailRequest;
 
 @Slf4j
-@SpringBootTest(classes = {IntegrationConfig.class, AwsSesConfig.class,
+@SpringBootTest(classes = {IntegrationConfig.class, AwsConfig.class, AwsSesConfig.class,
         SenderEmailViaAwsSes.class, SendingEmailViaAwsSesFlow.class})
 class SendingEmailViaAwsSesFlowTest {
 

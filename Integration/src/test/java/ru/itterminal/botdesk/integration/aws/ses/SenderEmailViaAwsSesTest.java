@@ -12,10 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.itterminal.botdesk.integration.aws.AwsConfig;
 import software.amazon.awssdk.services.ses.model.SendRawEmailRequest;
 
 @Slf4j
-@SpringBootTest(classes = {AwsSesConfig.class, SenderEmailViaAwsSes.class})
+@SpringBootTest(classes = {AwsConfig.class, AwsSesConfig.class, SenderEmailViaAwsSes.class})
 class SenderEmailViaAwsSesTest {
 
     @Autowired
