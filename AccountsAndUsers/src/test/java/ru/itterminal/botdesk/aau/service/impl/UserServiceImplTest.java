@@ -33,7 +33,8 @@ import ru.itterminal.botdesk.aau.service.validator.UserOperationValidator;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.FailedSaveEntityException;
 import ru.itterminal.botdesk.commons.service.CrudService;
-import ru.itterminal.botdesk.integration.aws.SenderEmailViaAwsSes;
+import ru.itterminal.botdesk.integration.aws.ses.SenderEmailViaAwsSes;
+import ru.itterminal.botdesk.integration.aws.ses.SendingEmailViaAwsSesFlow;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
 
@@ -53,7 +54,12 @@ class UserServiceImplTest {
 
     @SuppressWarnings("unused")
     @MockBean
-    private SenderEmailViaAwsSes.MailSenderViaAwsSesMessagingGateway gateway;
+    private SendingEmailViaAwsSesFlow.MailSenderViaAwsSesMessagingGateway gateway;
+
+    @SuppressWarnings("unused")
+    @MockBean
+    private SenderEmailViaAwsSes senderViaAwsSesMessagingGateway;
+
 
     @Autowired
     private BCryptPasswordEncoder encoder;
