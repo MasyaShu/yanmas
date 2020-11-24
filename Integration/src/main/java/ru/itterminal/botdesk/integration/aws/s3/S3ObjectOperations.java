@@ -6,10 +6,13 @@ import java.util.ArrayList;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.Delete;
 import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
@@ -36,6 +39,23 @@ public class S3ObjectOperations {
             return false;
         }
         return true;
+    }
+
+    public byte[] getObject(String bucketName, String objectName) {
+        byte[] data = {};
+        try {
+            GetObjectRequest objectRequest = GetObjectRequest
+                    .builder()
+                    .key(objectName)
+                    .bucket(bucketName)
+                    .build();
+            ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(objectRequest);
+            data = objectBytes.asByteArray();
+            return data;
+        } catch (S3Exception e) {
+            log.error(e.awsErrorDetails().errorMessage());
+            return data;
+        }
     }
 
     public boolean deleteObject(String bucketName, String objectName) {
