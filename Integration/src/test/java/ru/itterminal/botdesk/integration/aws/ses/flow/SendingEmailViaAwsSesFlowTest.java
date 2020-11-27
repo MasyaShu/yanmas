@@ -1,4 +1,4 @@
-package ru.itterminal.botdesk.integration.aws.ses;
+package ru.itterminal.botdesk.integration.aws.ses.flow;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -11,6 +11,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.integration.aws.AwsConfig;
+import ru.itterminal.botdesk.integration.aws.ses.AwsSesConfig;
+import ru.itterminal.botdesk.integration.aws.ses.SenderEmailViaAwsSes;
 import ru.itterminal.botdesk.integration.config.IntegrationConfig;
 import software.amazon.awssdk.services.ses.model.SendRawEmailRequest;
 

@@ -32,7 +32,7 @@ import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.FailedSaveEntityException;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
 import ru.itterminal.botdesk.integration.aws.ses.SenderEmailViaAwsSes;
-import ru.itterminal.botdesk.integration.aws.ses.SendingEmailViaAwsSesFlow;
+import ru.itterminal.botdesk.integration.aws.ses.flow.SendingEmailViaAwsSesFlow;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
 import software.amazon.awssdk.services.ses.model.SendRawEmailRequest;
 

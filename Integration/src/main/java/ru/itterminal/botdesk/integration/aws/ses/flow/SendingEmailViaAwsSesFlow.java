@@ -1,4 +1,4 @@
-package ru.itterminal.botdesk.integration.aws.ses;
+package ru.itterminal.botdesk.integration.aws.ses.flow;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,6 +9,7 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.messaging.MessageChannel;
 
+import ru.itterminal.botdesk.integration.aws.ses.SenderEmailViaAwsSes;
 import software.amazon.awssdk.services.ses.model.SendRawEmailRequest;
 
 @Configuration
