@@ -1,23 +1,22 @@
 package ru.itterminal.botdesk.integration.aws.ses.flow;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.awaitility.Awaitility.await;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
+import org.awaitility.Durations;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.integration.aws.AwsConfig;
 import ru.itterminal.botdesk.integration.aws.ses.AwsSesConfig;
 import ru.itterminal.botdesk.integration.aws.ses.SenderEmailViaAwsSes;
 import ru.itterminal.botdesk.integration.config.IntegrationConfig;
 import software.amazon.awssdk.services.ses.model.SendRawEmailRequest;
 
-@Slf4j
-@SpringBootTest(classes = {IntegrationConfig.class, AwsConfig.class, AwsSesConfig.class,
+@SpringJUnitConfig(value = {IntegrationConfig.class, AwsConfig.class, AwsSesConfig.class,
         SenderEmailViaAwsSes.class, SendingEmailViaAwsSesFlow.class})
 class SendingEmailViaAwsSesFlowTest {
 
@@ -25,17 +24,15 @@ class SendingEmailViaAwsSesFlowTest {
     @Autowired
     private SendingEmailViaAwsSesFlow.MailSenderViaAwsSesMessagingGateway gateway;
 
-    private static final String SOME_MESSAGE_ID = "fgnsdjgsjgn43454n3r34b5235354";
-
     @MockBean
     SenderEmailViaAwsSes senderEmailViaAwsSes;
 
     @Test
-    void SenderEmailViaAwsSesIntegrationFlow_shouldGetMessageID_whenPassedValidRawMessage() {
-        when(senderEmailViaAwsSes.sendEmail(any())).thenReturn(SOME_MESSAGE_ID);
+    void SenderEmailViaAwsSesIntegrationFlow_shouldCallSendEmailWithAccordingParameter_whenPassedValidRawMessage() {
         SendRawEmailRequest rawEmailRequest = SendRawEmailRequest.builder().build();
-        String messageId = gateway.process(rawEmailRequest);
-        assertEquals(SOME_MESSAGE_ID, messageId);
+        gateway.process(rawEmailRequest);
+        await().pollDelay(Durations.ONE_SECOND).until(() -> true);
+        verify(senderEmailViaAwsSes, times(1)).sendEmail(rawEmailRequest);
     }
 
 }

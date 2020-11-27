@@ -29,13 +29,13 @@ public class SendingEmailViaAwsSesFlow {
     @MessagingGateway
     public interface MailSenderViaAwsSesMessagingGateway {
         @Gateway(requestChannel = "mailSenderViaAwsSesChannel")
-        String process(SendRawEmailRequest email);
+        void process(SendRawEmailRequest email);
     }
 
     @ServiceActivator(inputChannel = "mailSenderViaAwsSesChannel",
             poller = @Poller(maxMessagesPerPoll = "14", fixedRate = "1000"))
-    private String sendEmail(SendRawEmailRequest rawEmailRequest) {
-        return senderEmailViaAwsSes.sendEmail(rawEmailRequest);
+    private void sendEmail(SendRawEmailRequest rawEmailRequest) {
+        senderEmailViaAwsSes.sendEmail(rawEmailRequest);
     }
 
 }

@@ -43,4 +43,25 @@ class SenderEmailViaAwsSesTest {
         assertNotNull(messageId);
     }
 
+    @Test
+    void sendEmail_shouldSendEmail_whenPassedInvalidRecipientEmail() {
+        SendRawEmailRequest email = null;
+        try {
+            email = senderEmailViaAwsSes.createEmail
+                    (
+                            null,
+                            "not-exist@botdesk.app",
+                            "Test message from UnitTest of BotDesk : "
+                                    + Calendar.getInstance().getTime().toString(),
+                            "BotDesk. Тест сообщения",
+                            "BotDesk. Тест сообщения"
+                    );
+        }
+        catch (MessagingException | IOException e) {
+            log.error(e.getMessage());
+        }
+        String messageId = senderEmailViaAwsSes.sendEmail(email);
+        assertNotNull(messageId);
+    }
+
 }

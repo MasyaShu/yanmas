@@ -107,9 +107,9 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
     public static final String FAILED_SAVE_USER_AFTER_VERIFY_EMAIL_TOKEN = "Failed save user after verify email token";
     public static final String FAILED_SAVE_USER_AFTER_RESET_PASSWORD = "Failed save user after reset password";
     public static final String EMAIL_VERIFICATION_TOKEN_WAS_SUCCESSFUL_SENT = "Email with emailVerificationToken was "
-            + "successful sent, messageId from AWS SES {}";
+            + "successful sent";
     public static final String RESET_TOKEN_WAS_SUCCESSFUL_SENT = "Email with token for reset password was "
-            + "successful sent, messageId from AWS SES {}";
+            + "successful sent";
 
     public final String ENTITY_USER_NAME = User.class.getSimpleName();
 
@@ -147,8 +147,8 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
                 log.warn(e.getMessage());
             }
             try {
-                String messageId = mailSenderViaAwsSesMessagingGateway.process(rawEmailRequest);
-                log.trace(EMAIL_VERIFICATION_TOKEN_WAS_SUCCESSFUL_SENT, messageId);
+                mailSenderViaAwsSesMessagingGateway.process(rawEmailRequest);
+                log.trace(EMAIL_VERIFICATION_TOKEN_WAS_SUCCESSFUL_SENT);
             }
             catch (Exception e) {
                 log.warn(e.getMessage());
@@ -353,8 +353,8 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
             log.warn(e.getMessage());
         }
         try {
-            String messageId = mailSenderViaAwsSesMessagingGateway.process(rawEmailRequest);
-            log.trace(RESET_TOKEN_WAS_SUCCESSFUL_SENT, messageId);
+            mailSenderViaAwsSesMessagingGateway.process(rawEmailRequest);
+            log.trace(RESET_TOKEN_WAS_SUCCESSFUL_SENT);
         }
         catch (Exception e) {
             log.warn(e.getMessage());
