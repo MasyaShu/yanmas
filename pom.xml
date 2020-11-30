@@ -9,7 +9,8 @@
 		<module>DB-Setup</module>
         <module>Security</module>
 		<module>Integration</module>
-	</modules>
+        <module>Tickets</module>
+    </modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
