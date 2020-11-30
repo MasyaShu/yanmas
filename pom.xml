@@ -10,7 +10,8 @@
         <module>Security</module>
 		<module>Integration</module>
         <module>Tickets</module>
-    </modules>
+		<module>Files</module>
+	</modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
