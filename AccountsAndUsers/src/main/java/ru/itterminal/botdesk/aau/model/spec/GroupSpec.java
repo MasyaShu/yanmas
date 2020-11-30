@@ -26,6 +26,7 @@ public class GroupSpec implements BaseSpec<Group, Account> {
                 .like(criteriaBuilder.lower(root.get(NAME)), "%" + name.toLowerCase() + "%");
     }
 
+    @SuppressWarnings("DuplicatedCode")
     public Specification<Group> getGroupByCommentSpec(String comment) {
         return (root, query, criteriaBuilder) -> {
             val objectPathComment = root.get(COMMENT);

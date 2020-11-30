@@ -33,6 +33,11 @@ import ru.itterminal.botdesk.aau.service.validator.UserOperationValidator;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.FailedSaveEntityException;
 import ru.itterminal.botdesk.commons.service.CrudService;
+import ru.itterminal.botdesk.integration.aws.s3.flow.CreateAwsS3BucketFlow;
+import ru.itterminal.botdesk.integration.aws.s3.flow.CreateAwsS3BucketFlow.CreateAwsBucketGateway;
+import ru.itterminal.botdesk.integration.aws.ses.SenderEmailViaAwsSes;
+import ru.itterminal.botdesk.integration.aws.ses.flow.SendingEmailViaAwsSesFlow;
+import ru.itterminal.botdesk.integration.aws.ses.flow.SendingEmailViaAwsSesFlow.MailSenderViaAwsSesMessagingGateway;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
 
@@ -49,6 +54,19 @@ class UserServiceImplTest {
 
     @MockBean
     private UserOperationValidator validator;
+
+    @SuppressWarnings("unused")
+    @MockBean
+    private MailSenderViaAwsSesMessagingGateway mailSenderViaAwsSesMessagingGateway;
+
+    @SuppressWarnings("unused")
+    @MockBean
+    private SenderEmailViaAwsSes senderEmailViaAwsSes;
+
+    @SuppressWarnings("unused")
+    @MockBean
+    private CreateAwsBucketGateway createAwsBucketGateway;
+
 
     @Autowired
     private BCryptPasswordEncoder encoder;
@@ -73,12 +91,14 @@ class UserServiceImplTest {
         Group group = new Group();
         group.setId(UUID.fromString(TestSecurityConfig.GROUP_1_ID));
         String PASSWORD = "12345";
+        String SOME_TEST_TOKEN = "asdfjhasjdf734y57823asdfsabdfhsabdf";
         user = User
                 .builder()
                 .email(TestSecurityConfig.EMAIL_1)
                 .password(PASSWORD)
                 .account(account)
                 .ownGroup(group)
+                .emailVerificationToken(SOME_TEST_TOKEN)
                 .isArchived(false)
                 .role(roleAdmin)
                 .build();

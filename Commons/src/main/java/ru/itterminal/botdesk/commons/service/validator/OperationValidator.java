@@ -1,7 +1,5 @@
 package ru.itterminal.botdesk.commons.service.validator;
 
-import java.util.UUID;
-
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 
 public interface OperationValidator<E extends BaseEntity> {
@@ -13,7 +11,5 @@ public interface OperationValidator<E extends BaseEntity> {
     boolean checkUniqueness(E entity);
 
     boolean beforeUpdate(E entity);
-
-    boolean checkLogicalDelete(UUID id);
 
 }

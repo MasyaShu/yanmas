@@ -5,13 +5,16 @@ import static ru.itterminal.botdesk.commons.util.CommonConstants.NOT_FOUND_ENTIT
 import static ru.itterminal.botdesk.commons.util.CommonMethods.chekObjectForNull;
 import static ru.itterminal.botdesk.commons.util.CommonMethods.chekStringForNullOrEmpty;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.mail.MessagingException;
 import javax.persistence.OptimisticLockException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -28,23 +31,49 @@ import ru.itterminal.botdesk.aau.service.validator.UserOperationValidator;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.FailedSaveEntityException;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
+import ru.itterminal.botdesk.integration.aws.s3.flow.CreateAwsS3BucketFlow;
+import ru.itterminal.botdesk.integration.aws.ses.SenderEmailViaAwsSes;
+import ru.itterminal.botdesk.integration.aws.ses.flow.SendingEmailViaAwsSesFlow;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
+import software.amazon.awssdk.services.ses.model.SendRawEmailRequest;
 
 @Slf4j
 @Service
 @Transactional
 public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidator, UserRepository> {
 
+    @Value("${emailVerificationToken.subject}")
+    private String emailVerificationTokenSubject;
+
+    @Value("${emailVerificationToken.textBody}")
+    private String emailVerificationTokenTextBody;
+
+    @Value("${emailPasswordResetToken.subject}")
+    private String emailPasswordResetTokenSubject;
+
+    @Value("${emailPasswordResetToken.textBody}")
+    private String emailPasswordResetTokenTextBody;
+
     private final BCryptPasswordEncoder encoder;
     private final JwtProvider jwtProvider;
     private final RoleServiceImpl roleService;
+    private final SendingEmailViaAwsSesFlow.MailSenderViaAwsSesMessagingGateway mailSenderViaAwsSesMessagingGateway;
+    private final SenderEmailViaAwsSes senderEmailViaAwsSes;
+    private final CreateAwsS3BucketFlow.CreateAwsBucketGateway createAwsBucketGateway;
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     public UserServiceImpl(BCryptPasswordEncoder encoder, JwtProvider jwtProvider,
-            RoleServiceImpl roleService) {
+                           RoleServiceImpl roleService,
+                           SendingEmailViaAwsSesFlow.MailSenderViaAwsSesMessagingGateway mailSenderViaAwsSesMessagingGateway,
+                           SenderEmailViaAwsSes senderEmailViaAwsSes,
+                           CreateAwsS3BucketFlow.CreateAwsBucketGateway createAwsBucketGateway) {
         this.encoder = encoder;
         this.jwtProvider = jwtProvider;
         this.roleService = roleService;
+        this.mailSenderViaAwsSesMessagingGateway = mailSenderViaAwsSesMessagingGateway;
+        this.senderEmailViaAwsSes = senderEmailViaAwsSes;
+        this.createAwsBucketGateway = createAwsBucketGateway;
     }
 
     public static final String START_FIND_USER_BY_ID_AND_ACCOUNT_ID = "Start find user by id: {} and accountId: {}";
@@ -81,6 +110,10 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
     public static final String START_VERIFY_EMAIL_TOKEN = "Start verify email token: {}";
     public static final String FAILED_SAVE_USER_AFTER_VERIFY_EMAIL_TOKEN = "Failed save user after verify email token";
     public static final String FAILED_SAVE_USER_AFTER_RESET_PASSWORD = "Failed save user after reset password";
+    public static final String EMAIL_VERIFICATION_TOKEN_WAS_SUCCESSFUL_SENT = "Email with emailVerificationToken was "
+            + "successful sent";
+    public static final String RESET_TOKEN_WAS_SUCCESSFUL_SENT = "Email with token for reset password was "
+            + "successful sent";
 
     public final String ENTITY_USER_NAME = User.class.getSimpleName();
 
@@ -103,9 +136,27 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
         }
         User createdUser = repository.create(entity);
         log.trace(format(CREATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), createdUser.toString()));
-        //noinspection StatementWithEmptyBody
         if (createdUser.getEmailVerificationToken() != null) {
-            // TODO send email: emailVerificationToken
+            SendRawEmailRequest rawEmailRequest = null;
+            try {
+                rawEmailRequest = senderEmailViaAwsSes.createEmail(
+                        null,
+                        createdUser.getEmail(),
+                        emailVerificationTokenSubject,
+                        emailVerificationTokenTextBody + " " + createdUser.getEmailVerificationToken(),
+                        emailVerificationTokenTextBody + " " + createdUser.getEmailVerificationToken()
+                );
+            }
+            catch (MessagingException | IOException e) {
+                log.warn(e.getMessage());
+            }
+            try {
+                mailSenderViaAwsSesMessagingGateway.process(rawEmailRequest);
+                log.trace(EMAIL_VERIFICATION_TOKEN_WAS_SUCCESSFUL_SENT);
+            }
+            catch (Exception e) {
+                log.warn(e.getMessage());
+            }
         }
         return createdUser;
     }
@@ -149,7 +200,8 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
     @Transactional(readOnly = true)
     public Optional<User> findByEmail(String email) {
         chekStringForNullOrEmpty(email, NOT_FOUND_USER_BY_EMAIL_EMAIL_IS_NULL,
-                NOT_FOUND_USER_BY_EMAIL_EMAIL_IS_EMPTY, EntityNotExistException.class, NOT_FOUND_USER);
+                                 NOT_FOUND_USER_BY_EMAIL_EMAIL_IS_EMPTY, EntityNotExistException.class, NOT_FOUND_USER
+        );
         log.trace(START_FIND_USER_BY_EMAIL, email);
         return repository.getByEmail(email);
     }
@@ -157,27 +209,35 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
     @Transactional(readOnly = true)
     public List<UserUniqueFields> findByUniqueFields(User user) {
         chekObjectForNull(user, format(NOT_FOUND_USERS_BY_UNIQUE_FIELDS, "user"),
-                EntityNotExistException.class);
+                          EntityNotExistException.class
+        );
         chekObjectForNull(user.getEmail(), format(NOT_FOUND_USERS_BY_UNIQUE_FIELDS, "email"),
-                EntityNotExistException.class);
+                          EntityNotExistException.class
+        );
         chekObjectForNull(user.getId(), format(NOT_FOUND_USERS_BY_UNIQUE_FIELDS, "userId"),
-                EntityNotExistException.class);
+                          EntityNotExistException.class
+        );
         log.trace(START_FIND_USER_BY_UNIQUE_FIELDS, user.getEmail(), user.getId());
         return repository.getByEmailAndIdNot(user.getEmail(), user.getId());
     }
 
     @Transactional(readOnly = true)
     public User findByIdAndAccountId(UUID id, UUID accountId) {
-        chekObjectForNull(id,
+        chekObjectForNull(
+                id,
                 format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, ENTITY_USER_NAME, id, accountId),
-                EntityNotExistException.class);
-        chekObjectForNull(accountId,
+                EntityNotExistException.class
+        );
+        chekObjectForNull(
+                accountId,
                 format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, ENTITY_USER_NAME, id, accountId),
-                EntityNotExistException.class);
+                EntityNotExistException.class
+        );
         log.trace(START_FIND_USER_BY_ID_AND_ACCOUNT_ID, id, accountId);
         return repository.getByIdAndAccount_Id(id, accountId).orElseThrow(
                 () -> new EntityNotExistException(format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, ENTITY_USER_NAME, id,
-                        accountId))
+                                                         accountId
+                ))
         );
     }
 
@@ -185,13 +245,18 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
     @Transactional(readOnly = true)
     public User findByIdAndAccountIdAndOwnGroupId(UUID id, UUID accountId, UUID ownGroupId) {
         chekObjectForNull(id, format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, ownGroupId),
-                EntityNotExistException.class);
-        chekObjectForNull(accountId,
+                          EntityNotExistException.class
+        );
+        chekObjectForNull(
+                accountId,
                 format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, ownGroupId),
-                EntityNotExistException.class);
-        chekObjectForNull(ownGroupId,
+                EntityNotExistException.class
+        );
+        chekObjectForNull(
+                ownGroupId,
                 format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, ownGroupId),
-                EntityNotExistException.class);
+                EntityNotExistException.class
+        );
         log.trace(START_FIND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, ownGroupId);
         return repository.getByIdAndAccount_IdAndOwnGroup_Id(id, accountId, ownGroupId).orElseThrow(
                 () -> new EntityNotExistException(
@@ -203,9 +268,11 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
     @Transactional(readOnly = true)
     public List<User> findAllByRoleAndIdNot(Role role, UUID id) {
         chekObjectForNull(role, format(NOT_FOUND_USERS_BY_ROLE_AND_NOT_ID, role, id),
-                EntityNotExistException.class);
+                          EntityNotExistException.class
+        );
         chekObjectForNull(id, format(NOT_FOUND_USERS_BY_ROLE_AND_NOT_ID, role, id),
-                EntityNotExistException.class);
+                          EntityNotExistException.class
+        );
         log.trace(START_FIND_ALL_USERS_BY_ROLE_AND_NOT_ID, role, id);
         return repository.findAllByRoleAndIdNot(role, id);
     }
@@ -214,11 +281,14 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
     @Transactional(readOnly = true)
     public List<User> findAllByRoleAndAccount_IdAndIdNot(Role role, UUID accountId, UUID id) {
         chekObjectForNull(role, format(NOT_FOUND_USERS_BY_ROLE_AND_ACCOUNT_ID_AND_NOT_ID, role, accountId, id),
-                EntityNotExistException.class);
+                          EntityNotExistException.class
+        );
         chekObjectForNull(accountId, format(NOT_FOUND_USERS_BY_ROLE_AND_ACCOUNT_ID_AND_NOT_ID, role, accountId, id),
-                EntityNotExistException.class);
+                          EntityNotExistException.class
+        );
         chekObjectForNull(id, format(NOT_FOUND_USERS_BY_ROLE_AND_ACCOUNT_ID_AND_NOT_ID, role, accountId, id),
-                EntityNotExistException.class);
+                          EntityNotExistException.class
+        );
         log.trace(START_FIND_ALL_USERS_BY_ROLE_ACCOUNT_ID_AND_NOT_ID, role, accountId, id);
         return repository.findAllByRoleAndAccount_IdAndIdNot(role, accountId, id);
     }
@@ -233,9 +303,11 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
     @Transactional(readOnly = true)
     public List<User> findAllByRoleAndAccountId(Role role, UUID accountId) {
         chekObjectForNull(role, format(NOT_FOUND_USERS_BY_ROLE_AND_ACCOUNT_ID, role, accountId),
-                EntityNotExistException.class);
+                          EntityNotExistException.class
+        );
         chekObjectForNull(accountId, format(NOT_FOUND_USERS_BY_ROLE_AND_ACCOUNT_ID, role, accountId),
-                EntityNotExistException.class);
+                          EntityNotExistException.class
+        );
         log.trace(START_FIND_ALL_USERS_BY_ROLE, role);
         return repository.findAllByRoleAndAccount_Id(role, accountId);
     }
@@ -248,7 +320,7 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
                 userId = jwtProvider.getUserId(token);
             }
         }
-        catch (Throwable e) {
+        catch (Exception e) {
             throw new JwtException(e.getMessage());
         }
         User user = super.findById(userId);
@@ -262,6 +334,7 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
                 || !savedUser.getEmailVerificationStatus()) {
             throw new FailedSaveEntityException(FAILED_SAVE_USER_AFTER_VERIFY_EMAIL_TOKEN);
         }
+        createAwsBucketGateway.process(savedUser.getAccount().getId().toString());
     }
 
     public void requestPasswordReset(String email) {
@@ -271,7 +344,26 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
         String token = jwtProvider.createToken(user.getId());
         user.setPasswordResetToken(token);
         repository.save(user);
-        // TODO send email: PasswordResetToken
+        SendRawEmailRequest rawEmailRequest = null;
+        try {
+            rawEmailRequest = senderEmailViaAwsSes.createEmail(
+                    null,
+                    email,
+                    emailPasswordResetTokenSubject,
+                    emailPasswordResetTokenTextBody + " " + token,
+                    emailPasswordResetTokenTextBody + " " + token
+            );
+        }
+        catch (MessagingException | IOException e) {
+            log.warn(e.getMessage());
+        }
+        try {
+            mailSenderViaAwsSesMessagingGateway.process(rawEmailRequest);
+            log.trace(RESET_TOKEN_WAS_SUCCESSFUL_SENT);
+        }
+        catch (Exception e) {
+            log.warn(e.getMessage());
+        }
     }
 
     public void resetPassword(String token, String newPassword) {
@@ -282,7 +374,7 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
                 userId = jwtProvider.getUserId(token);
             }
         }
-        catch (Throwable e) {
+        catch (Exception e) {
             throw new JwtException(e.getMessage());
         }
         User user = super.findById(userId);

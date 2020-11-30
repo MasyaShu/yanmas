@@ -8,6 +8,8 @@
 		<module>BotDeskApp</module>
 		<module>DB-Setup</module>
         <module>Security</module>
+		<module>Integration</module>
+        <module>Tickets</module>
     </modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>

@@ -1,7 +1,5 @@
 package ru.itterminal.botdesk.commons.service.validator.impl;
 
-import java.util.UUID;
-
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +19,6 @@ public class BasicOperationValidatorImpl<E extends BaseEntity> implements Operat
 
     public static final String DEFAULT_CREATE_MESSAGE = "Using default validation for crate method";
     public static final String DEFAULT_UPDATE_MESSAGE = "Using default validation for update method";
-    public static final String DEFAULT_LOGICAL_DELETE_MESSAGE = "Using default validation for logical delete method";
     public static final String CHECK_UNIQUENESS = "checkUniqueness({})";
     public static final String FIELDS_UNIQUE = "Fields are unique: {}";
     public static final String FIELDS_NOT_UNIQUE = "Fields not unique: {}";
@@ -55,16 +52,6 @@ public class BasicOperationValidatorImpl<E extends BaseEntity> implements Operat
             throw new NullEntityException(INVALID_ENTITY_MESSAGE);
         }
         return checkUniqueness(entity);
-    }
-
-    @Override
-    public boolean checkLogicalDelete(UUID id) {
-        log.debug(DEFAULT_LOGICAL_DELETE_MESSAGE);
-        if (id == null) {
-            log.error(INVALID_ENTITY_MESSAGE);
-            throw new NullEntityException(INVALID_ENTITY_MESSAGE);
-        }
-        return true;
     }
 
 }
