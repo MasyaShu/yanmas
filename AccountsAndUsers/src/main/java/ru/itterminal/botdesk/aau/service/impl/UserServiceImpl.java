@@ -31,6 +31,7 @@ import ru.itterminal.botdesk.aau.service.validator.UserOperationValidator;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.FailedSaveEntityException;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
+import ru.itterminal.botdesk.integration.aws.s3.flow.CreateAwsS3BucketFlow;
 import ru.itterminal.botdesk.integration.aws.ses.SenderEmailViaAwsSes;
 import ru.itterminal.botdesk.integration.aws.ses.flow.SendingEmailViaAwsSesFlow;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
@@ -58,18 +59,21 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
     private final RoleServiceImpl roleService;
     private final SendingEmailViaAwsSesFlow.MailSenderViaAwsSesMessagingGateway mailSenderViaAwsSesMessagingGateway;
     private final SenderEmailViaAwsSes senderEmailViaAwsSes;
+    private final CreateAwsS3BucketFlow.CreateAwsBucketGateway createAwsBucketGateway;
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     public UserServiceImpl(BCryptPasswordEncoder encoder, JwtProvider jwtProvider,
                            RoleServiceImpl roleService,
                            SendingEmailViaAwsSesFlow.MailSenderViaAwsSesMessagingGateway mailSenderViaAwsSesMessagingGateway,
-                           SenderEmailViaAwsSes senderEmailViaAwsSes) {
+                           SenderEmailViaAwsSes senderEmailViaAwsSes,
+                           CreateAwsS3BucketFlow.CreateAwsBucketGateway createAwsBucketGateway) {
         this.encoder = encoder;
         this.jwtProvider = jwtProvider;
         this.roleService = roleService;
         this.mailSenderViaAwsSesMessagingGateway = mailSenderViaAwsSesMessagingGateway;
         this.senderEmailViaAwsSes = senderEmailViaAwsSes;
+        this.createAwsBucketGateway = createAwsBucketGateway;
     }
 
     public static final String START_FIND_USER_BY_ID_AND_ACCOUNT_ID = "Start find user by id: {} and accountId: {}";
@@ -330,6 +334,7 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
                 || !savedUser.getEmailVerificationStatus()) {
             throw new FailedSaveEntityException(FAILED_SAVE_USER_AFTER_VERIFY_EMAIL_TOKEN);
         }
+        createAwsBucketGateway.process(savedUser.getAccount().getId().toString());
     }
 
     public void requestPasswordReset(String email) {

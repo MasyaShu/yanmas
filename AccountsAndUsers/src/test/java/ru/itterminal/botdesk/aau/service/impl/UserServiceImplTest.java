@@ -33,8 +33,11 @@ import ru.itterminal.botdesk.aau.service.validator.UserOperationValidator;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.FailedSaveEntityException;
 import ru.itterminal.botdesk.commons.service.CrudService;
+import ru.itterminal.botdesk.integration.aws.s3.flow.CreateAwsS3BucketFlow;
+import ru.itterminal.botdesk.integration.aws.s3.flow.CreateAwsS3BucketFlow.CreateAwsBucketGateway;
 import ru.itterminal.botdesk.integration.aws.ses.SenderEmailViaAwsSes;
 import ru.itterminal.botdesk.integration.aws.ses.flow.SendingEmailViaAwsSesFlow;
+import ru.itterminal.botdesk.integration.aws.ses.flow.SendingEmailViaAwsSesFlow.MailSenderViaAwsSesMessagingGateway;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
 
@@ -54,11 +57,15 @@ class UserServiceImplTest {
 
     @SuppressWarnings("unused")
     @MockBean
-    private SendingEmailViaAwsSesFlow.MailSenderViaAwsSesMessagingGateway gateway;
+    private MailSenderViaAwsSesMessagingGateway mailSenderViaAwsSesMessagingGateway;
 
     @SuppressWarnings("unused")
     @MockBean
-    private SenderEmailViaAwsSes senderViaAwsSesMessagingGateway;
+    private SenderEmailViaAwsSes senderEmailViaAwsSes;
+
+    @SuppressWarnings("unused")
+    @MockBean
+    private CreateAwsBucketGateway createAwsBucketGateway;
 
 
     @Autowired
