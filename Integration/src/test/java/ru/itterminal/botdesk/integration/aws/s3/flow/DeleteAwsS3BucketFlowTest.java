@@ -16,12 +16,12 @@ import ru.itterminal.botdesk.integration.aws.s3.S3BucketOperations;
 import ru.itterminal.botdesk.integration.config.IntegrationConfig;
 
 @SpringJUnitConfig(value = {IntegrationConfig.class, AwsConfig.class, AwsS3Config.class,
-        S3BucketOperations.class, DeleteAwsBucketFlow.class})
-class DeleteAwsBucketFlowTest {
+        S3BucketOperations.class, DeleteAwsS3BucketFlow.class})
+class DeleteAwsS3BucketFlowTest {
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
-    private DeleteAwsBucketFlow.DeleteAwsBucketGateway gateway;
+    private DeleteAwsS3BucketFlow.DeleteAwsBucketGateway gateway;
 
     @MockBean
     S3BucketOperations s3BucketOperations;

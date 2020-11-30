@@ -27,7 +27,7 @@ public class S3ObjectOperations {
         this.s3Client = s3Client;
     }
 
-    public boolean saveObject(String bucketName, String objectName, ByteBuffer byteBuffer) {
+    public boolean putObject(String bucketName, String objectName, ByteBuffer byteBuffer) {
         PutObjectRequest objectRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(objectName)
@@ -73,5 +73,4 @@ public class S3ObjectOperations {
         }
         return true;
     }
-
 }

@@ -45,8 +45,8 @@ class S3BucketAndObjectOperationsTest {
 
     @Test
     @Order(20)
-    void saveObject_shouldSaveObject_whenPassedValidData() {
-        assertTrue(s3ObjectOperations.saveObject(nameBucket, "test.txt", ByteBuffer.wrap(data)));
+    void putObject_shouldPutObject_whenPassedValidData() {
+        assertTrue(s3ObjectOperations.putObject(nameBucket, "test.txt", ByteBuffer.wrap(data)));
     }
 
     @Test

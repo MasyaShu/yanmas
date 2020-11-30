@@ -12,11 +12,11 @@ import org.springframework.messaging.MessageChannel;
 import ru.itterminal.botdesk.integration.aws.s3.S3BucketOperations;
 
 @Configuration
-public class DeleteAwsBucketFlow {
+public class DeleteAwsS3BucketFlow {
 
     private final S3BucketOperations s3BucketOperations;
 
-    public DeleteAwsBucketFlow(S3BucketOperations s3BucketOperations) {
+    public DeleteAwsS3BucketFlow(S3BucketOperations s3BucketOperations) {
         this.s3BucketOperations = s3BucketOperations;
     }
 

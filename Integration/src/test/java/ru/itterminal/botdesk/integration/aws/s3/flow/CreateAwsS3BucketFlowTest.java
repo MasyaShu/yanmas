@@ -16,12 +16,12 @@ import ru.itterminal.botdesk.integration.aws.s3.S3BucketOperations;
 import ru.itterminal.botdesk.integration.config.IntegrationConfig;
 
 @SpringJUnitConfig(value = {IntegrationConfig.class, AwsConfig.class, AwsS3Config.class,
-        S3BucketOperations.class, CreateAwsBucketFlow.class})
-class CreateAwsBucketFlowTest {
+        S3BucketOperations.class, CreateAwsS3BucketFlow.class})
+class CreateAwsS3BucketFlowTest {
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
-    private CreateAwsBucketFlow.CreateAwsBucketGateway gateway;
+    private CreateAwsS3BucketFlow.CreateAwsBucketGateway gateway;
 
     @MockBean
     S3BucketOperations s3BucketOperations;
