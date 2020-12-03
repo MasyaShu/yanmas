@@ -1,6 +1,6 @@
-package ru.itterminal.botdesk.model;
+package ru.itterminal.botdesk.files.model;
 
-import java.time.Instant;
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -33,7 +33,7 @@ public class File extends BaseEntity {
     private Long size;
 
     @Column(name = "created_at", nullable = false)
-    private Instant createdAt;
+    private Long createdAt;
 
     @ManyToOne
     @JoinColumn(name = "account_id", nullable = false)
@@ -41,4 +41,25 @@ public class File extends BaseEntity {
 
     @Column(name = "entity_id", nullable = false)
     private UUID entityId;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof File)) {
+            return false;
+        }
+        File file = (File) o;
+        return Objects.equals(fileName, file.fileName) &&
+                Objects.equals(size, file.size) &&
+                Objects.equals(createdAt, file.createdAt) &&
+                Objects.equals(account, file.account) &&
+                Objects.equals(entityId, file.entityId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(fileName, size, createdAt, account, entityId);
+    }
 }

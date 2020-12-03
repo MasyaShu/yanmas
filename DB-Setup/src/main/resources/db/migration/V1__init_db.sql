@@ -70,7 +70,7 @@ create TABLE IF NOT EXISTS files
     id         uuid         NOT NULL,
     file_name  varchar(256) NOT NULL,
     size       bigint       NOT NULL,
-    created_at timestamp    NOT NULL,
+    created_at bigint       NOT NULL,
     account_id uuid         NOT NULL,
     entity_id  uuid         NOT NULL,
     PRIMARY KEY (id),
