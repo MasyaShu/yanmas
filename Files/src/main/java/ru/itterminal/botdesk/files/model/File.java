@@ -30,10 +30,10 @@ public class File extends BaseEntity {
     private String fileName;
 
     @Column(nullable = false)
-    private Long size;
+    private int size;
 
     @Column(name = "created_at", nullable = false)
-    private Long createdAt;
+    private long createdAt;
 
     @ManyToOne
     @JoinColumn(name = "account_id", nullable = false)

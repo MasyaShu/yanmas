@@ -69,7 +69,7 @@ create TABLE IF NOT EXISTS files
     version    int2         NOT NULL DEFAULT (0),
     id         uuid         NOT NULL,
     file_name  varchar(256) NOT NULL,
-    size       bigint       NOT NULL,
+    size       int          NOT NULL,
     created_at bigint       NOT NULL,
     account_id uuid         NOT NULL,
     entity_id  uuid         NOT NULL,
