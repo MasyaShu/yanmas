@@ -19,11 +19,11 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 
 @Component
 @Slf4j
-public class S3ObjectOperations {
+public class AwsS3ObjectOperations {
 
     private final S3Client s3Client;
 
-    public S3ObjectOperations(S3Client s3Client) {
+    public AwsS3ObjectOperations(S3Client s3Client) {
         this.s3Client = s3Client;
     }
 

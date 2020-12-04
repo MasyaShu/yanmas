@@ -19,14 +19,14 @@ import ru.itterminal.botdesk.integration.aws.AwsConfig;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@SpringBootTest(classes = {AwsConfig.class, AwsS3Config.class, S3BucketOperations.class, S3ObjectOperations.class})
+@SpringBootTest(classes = {AwsConfig.class, AwsS3Config.class, AwsS3BucketOperations.class, AwsS3ObjectOperations.class})
 class S3BucketAndObjectOperationsTest {
 
     @Autowired
-    S3BucketOperations s3BucketOperations;
+    AwsS3BucketOperations awsS3BucketOperations;
 
     @Autowired
-    S3ObjectOperations s3ObjectOperations;
+    AwsS3ObjectOperations awsS3ObjectOperations;
 
     private final String nameBucket = "cdfa6483-0769-4628-ba32-efd338a716de";
     private byte[] data;
@@ -40,31 +40,31 @@ class S3BucketAndObjectOperationsTest {
     @Test
     @Order(10)
     void createBucket_shouldCreateBucket_whenPassedNameBucketIsUnique() {
-        assertTrue(s3BucketOperations.createBucket(nameBucket));
+        assertTrue(awsS3BucketOperations.createBucket(nameBucket));
     }
 
     @Test
     @Order(20)
     void putObject_shouldPutObject_whenPassedValidData() {
-        assertTrue(s3ObjectOperations.putObject(nameBucket, "test.txt", ByteBuffer.wrap(data)));
+        assertTrue(awsS3ObjectOperations.putObject(nameBucket, "test.txt", ByteBuffer.wrap(data)));
     }
 
     @Test
     @Order(30)
     void getObject_shouldGetObject_whenPassedValidParameters() {
-        byte[] dataFromS3 = s3ObjectOperations.getObject(nameBucket, "test.txt");
+        byte[] dataFromS3 = awsS3ObjectOperations.getObject(nameBucket, "test.txt");
         assertArrayEquals(data, dataFromS3);
     }
 
     @Test
     @Order(40)
     void deleteObject_shouldDeleteObject_whenPassedValidData() {
-        assertTrue(s3ObjectOperations.deleteObject(nameBucket, "test.txt"));
+        assertTrue(awsS3ObjectOperations.deleteObject(nameBucket, "test.txt"));
     }
 
     @Test
     @Order(50)
     void deleteBucket_shouldDeleteBucket_whenBucketWithPassedNameExist() {
-        assertTrue(s3BucketOperations.deleteBucket(nameBucket));
+        assertTrue(awsS3BucketOperations.deleteBucket(nameBucket));
     }
 }

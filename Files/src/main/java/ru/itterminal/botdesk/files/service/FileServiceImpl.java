@@ -14,6 +14,7 @@ import ru.itterminal.botdesk.files.model.File;
 import ru.itterminal.botdesk.files.repository.FileRepository;
 import ru.itterminal.botdesk.files.service.validator.FileOperationValidator;
 import ru.itterminal.botdesk.integration.aws.s3.AwsS3Object;
+import ru.itterminal.botdesk.integration.aws.s3.AwsS3ObjectOperations;
 import ru.itterminal.botdesk.integration.aws.s3.flow.PutAwsS3ObjectFlow;
 
 @Slf4j
@@ -24,12 +25,15 @@ public class FileServiceImpl extends CrudServiceImpl<File, FileOperationValidato
     private static final String OTHER_METHOD_CREATE = "For create file must use method create(File entity, byte[] bytes)";
     private static final String METHOD_UPDATE = "For now this method doesn't implement yet";
 
-    private final PutAwsS3ObjectFlow.PutAwsS3ObjectGateway gateway;
+    private final PutAwsS3ObjectFlow.PutAwsS3ObjectGateway putAwsS3ObjectGateway;
+    private final AwsS3ObjectOperations awsS3ObjectOperations;
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
-    public FileServiceImpl(PutAwsS3ObjectFlow.PutAwsS3ObjectGateway gateway) {
-        this.gateway = gateway;
+    public FileServiceImpl(PutAwsS3ObjectFlow.PutAwsS3ObjectGateway putAwsS3ObjectGateway,
+                           AwsS3ObjectOperations awsS3ObjectOperations) {
+        this.putAwsS3ObjectGateway = putAwsS3ObjectGateway;
+        this.awsS3ObjectOperations = awsS3ObjectOperations;
     }
 
     @Override
@@ -50,12 +54,16 @@ public class FileServiceImpl extends CrudServiceImpl<File, FileOperationValidato
                 .objectName(createdFile.getId().toString())
                 .byteBuffer(ByteBuffer.wrap(bytes))
                 .build();
-        gateway.process(awsS3Object);
+        putAwsS3ObjectGateway.process(awsS3Object);
         return createdFile;
     }
 
     @Transactional(readOnly = true)
     public List<File> findAllByEntityIdAndAccountId(UUID entityId, UUID accountId) {
         return repository.findAllByEntityIdAndAccount_Id(entityId, accountId);
+    }
+
+    public byte[] getFileData(String accountId, String fileId) {
+        return awsS3ObjectOperations.getObject(accountId, fileId);
     }
 }
