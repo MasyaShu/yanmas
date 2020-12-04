@@ -1,20 +1,17 @@
 package ru.itterminal.botdesk.files.service.validator;
 
-import static ru.itterminal.botdesk.commons.util.CommonMethods.chekNumberForNullOrZero;
-import static ru.itterminal.botdesk.commons.util.CommonMethods.chekNumberForNullOrMoreThan;
-import static ru.itterminal.botdesk.commons.util.CommonMethods.chekObjectForNull;
-import static ru.itterminal.botdesk.commons.util.CommonMethods.chekStringForNullOrEmpty;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekNumberForNullOrZero;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekNumberForNullOrMoreThan;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekObjectForNull;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekStringForNullOrEmpty;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.throwLogicalValidationExceptionIfErrorsNotEmpty;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
-import ru.itterminal.botdesk.commons.exception.error.ValidationError;
+import lombok.val;
 import ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl;
 import ru.itterminal.botdesk.files.model.File;
 
@@ -45,7 +42,7 @@ public class FileOperationValidator extends BasicOperationValidatorImpl<File> {
     @Override
     public boolean beforeCreate(File entity) {
         super.beforeCreate(entity);
-        Map<String, List<ValidationError>> errors = new HashMap<>();
+        val errors = createMapForLogicalErrors();
         errors.putAll(chekNumberForNullOrMoreThan(
                 entity.getSize(),
                 maxSizeOfFile,
@@ -75,10 +72,7 @@ public class FileOperationValidator extends BasicOperationValidatorImpl<File> {
                 ENTITY_ID,
                 ENTITY_ID_NULL
         ));
-        if (!errors.isEmpty()) {
-            log.error(FIELDS_ARE_NOT_VALID, errors);
-            throw new LogicalValidationException(VALIDATION_FAILED, errors);
-        }
+        throwLogicalValidationExceptionIfErrorsNotEmpty(errors);
         return true;
     }
 }

@@ -1,6 +1,6 @@
 package ru.itterminal.botdesk.security.jwt;
 
-import static ru.itterminal.botdesk.commons.util.CommonMethods.chekStringForNullOrEmpty;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekStringForNullOrEmpty;
 
 import java.util.Base64;
 import java.util.Date;

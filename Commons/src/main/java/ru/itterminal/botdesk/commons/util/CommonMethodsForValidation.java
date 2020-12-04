@@ -1,6 +1,8 @@
 package ru.itterminal.botdesk.commons.util;
 
 import static java.util.Collections.singletonList;
+import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.FIELDS_ARE_NOT_VALID;
+import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
 
 import java.util.HashMap;
 import java.util.List;
@@ -8,13 +10,14 @@ import java.util.Map;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 @Slf4j
-public class CommonMethods {
+public class CommonMethodsForValidation {
 
-    private CommonMethods() {
+    private CommonMethodsForValidation() {
     }
 
     @SneakyThrows
@@ -33,13 +36,9 @@ public class CommonMethods {
         }
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     @SneakyThrows
     public static void chekObjectForNull(Object object, String messageForNull, Class exceptionClass) {
-        try {
-            object.getClass();
-        }
-        catch (NullPointerException nullPointerException) {
+        if (object == null) {
             log.error(messageForNull);
             throw (Throwable) exceptionClass.getConstructor(String.class).newInstance(messageForNull);
         }
@@ -78,7 +77,7 @@ public class CommonMethods {
             errors.put(keyError, singletonList(new ValidationError(keyError, errorMessageForNull)));
         }
         if (number instanceof Long && (Long) number > moreThan) {
-                errors.put(keyError, singletonList(new ValidationError(keyError, errorMessageIfMoreThan)));
+            errors.put(keyError, singletonList(new ValidationError(keyError, errorMessageIfMoreThan)));
         }
         if (number instanceof Integer && (Integer) number > moreThan) {
             errors.put(keyError, singletonList(new ValidationError(keyError, errorMessageIfMoreThan)));
@@ -118,6 +117,25 @@ public class CommonMethods {
             errors.put(keyError, singletonList(new ValidationError(keyError, errorMessageIfZero)));
         }
         return errors;
+    }
+
+    public static Map<String, List<ValidationError>> createMapForLogicalErrors() {
+        return new HashMap<>();
+    }
+
+    public static void throwLogicalValidationExceptionIfErrorsNotEmpty(Map<String, List<ValidationError>> errors) {
+        if (!errors.isEmpty()) {
+            log.error(FIELDS_ARE_NOT_VALID, errors);
+            throw new LogicalValidationException(VALIDATION_FAILED, errors);
+        }
+    }
+
+    public static LogicalValidationException
+    createExpectedLogicalValidationException(String keyError, String errorMessage) {
+        Map<String, List<ValidationError>> errors = new HashMap<>();
+        errors.put(keyError, singletonList(new ValidationError(keyError, errorMessage)));
+        return new LogicalValidationException(VALIDATION_FAILED, errors);
+
     }
 
 }

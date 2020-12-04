@@ -1,14 +1,10 @@
 package ru.itterminal.botdesk.files.service.validator;
 
-import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createExpectedLogicalValidationException;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -18,7 +14,6 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
-import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 import ru.itterminal.botdesk.files.model.File;
 
 @SpringJUnitConfig(value = {FileOperationValidator.class})
@@ -57,9 +52,7 @@ class FileOperationValidatorTest {
 
     @Test
     void beforeCreate_shouldGetLogicalValidationException_whenSizeOfFileMoreThan25Mb() {
-        Map<String, List<ValidationError>> errors = new HashMap<>();
-        errors.put(SIZE_FILE, singletonList(new ValidationError(SIZE_FILE, MAX_SIZE)));
-        LogicalValidationException expectedException = new LogicalValidationException(VALIDATION_FAILED, errors);
+        LogicalValidationException expectedException = createExpectedLogicalValidationException(SIZE_FILE, MAX_SIZE);
         File file = File.builder()
                 .size(27214400)
                 .build();
@@ -75,9 +68,7 @@ class FileOperationValidatorTest {
 
     @Test
     void beforeCreate_shouldGetLogicalValidationException_whenSizeIsNull() {
-        Map<String, List<ValidationError>> errors = new HashMap<>();
-        errors.put(SIZE_FILE, singletonList(new ValidationError(SIZE_FILE, SIZE_NULL)));
-        LogicalValidationException expectedException = new LogicalValidationException(VALIDATION_FAILED, errors);
+        LogicalValidationException expectedException = createExpectedLogicalValidationException(SIZE_FILE, SIZE_NULL);
         File file = File.builder()
                 .size(null)
                 .fileName(FILE_NAME)
@@ -94,9 +85,7 @@ class FileOperationValidatorTest {
 
     @Test
     void beforeCreate_shouldGetLogicalValidationException_whenFilenameIsNull() {
-        Map<String, List<ValidationError>> errors = new HashMap<>();
-        errors.put(FILE_NAME, singletonList(new ValidationError(FILE_NAME, FILE_NAME_NULL)));
-        LogicalValidationException expectedException = new LogicalValidationException(VALIDATION_FAILED, errors);
+        LogicalValidationException expectedException = createExpectedLogicalValidationException(FILE_NAME, FILE_NAME_NULL);
         File file = File.builder()
                 .size(1000)
                 .fileName(null)
@@ -113,9 +102,7 @@ class FileOperationValidatorTest {
 
     @Test
     void beforeCreate_shouldGetLogicalValidationException_whenFilenameIsEmpty() {
-        Map<String, List<ValidationError>> errors = new HashMap<>();
-        errors.put(FILE_NAME, singletonList(new ValidationError(FILE_NAME, FILE_NAME_EMPTY)));
-        LogicalValidationException expectedException = new LogicalValidationException(VALIDATION_FAILED, errors);
+        LogicalValidationException expectedException = createExpectedLogicalValidationException(FILE_NAME, FILE_NAME_EMPTY);
         File file = File.builder()
                 .size(1000)
                 .fileName("")
@@ -132,9 +119,7 @@ class FileOperationValidatorTest {
 
     @Test
     void beforeCreate_shouldGetLogicalValidationException_whenCreatedAtIsNull() {
-        Map<String, List<ValidationError>> errors = new HashMap<>();
-        errors.put(CREATED_AT, singletonList(new ValidationError(CREATED_AT, CREATED_AT_NULL)));
-        LogicalValidationException expectedException = new LogicalValidationException(VALIDATION_FAILED, errors);
+        LogicalValidationException expectedException = createExpectedLogicalValidationException(CREATED_AT, CREATED_AT_NULL);
         File file = File.builder()
                 .size(1000)
                 .fileName(FILE_NAME)
@@ -152,9 +137,7 @@ class FileOperationValidatorTest {
 
     @Test
     void beforeCreate_shouldGetLogicalValidationException_whenCreatedAtIsZero() {
-        Map<String, List<ValidationError>> errors = new HashMap<>();
-        errors.put(CREATED_AT, singletonList(new ValidationError(CREATED_AT, CREATED_AT_ZERO)));
-        LogicalValidationException expectedException = new LogicalValidationException(VALIDATION_FAILED, errors);
+        LogicalValidationException expectedException = createExpectedLogicalValidationException(CREATED_AT, CREATED_AT_ZERO);
         File file = File.builder()
                 .size(1000)
                 .fileName(FILE_NAME)
@@ -172,9 +155,7 @@ class FileOperationValidatorTest {
 
     @Test
     void beforeCreate_shouldGetLogicalValidationException_whenAccountIsNull() {
-        Map<String, List<ValidationError>> errors = new HashMap<>();
-        errors.put(ACCOUNT, singletonList(new ValidationError(ACCOUNT, ACCOUNT_NULL)));
-        LogicalValidationException expectedException = new LogicalValidationException(VALIDATION_FAILED, errors);
+        LogicalValidationException expectedException = createExpectedLogicalValidationException(ACCOUNT, ACCOUNT_NULL);
         File file = File.builder()
                 .size(1000)
                 .fileName(FILE_NAME)
@@ -193,9 +174,7 @@ class FileOperationValidatorTest {
 
     @Test
     void beforeCreate_shouldGetLogicalValidationException_whenEntityIdIsNull() {
-        Map<String, List<ValidationError>> errors = new HashMap<>();
-        errors.put(ENTITY_ID, singletonList(new ValidationError(ENTITY_ID, ENTITY_ID_NULL)));
-        LogicalValidationException expectedException = new LogicalValidationException(VALIDATION_FAILED, errors);
+        LogicalValidationException expectedException = createExpectedLogicalValidationException(ENTITY_ID, ENTITY_ID_NULL);
         File file = File.builder()
                 .size(1000)
                 .fileName(FILE_NAME)
