@@ -48,7 +48,7 @@ public class CommonMethodsForValidation {
     public static Map<String, List<ValidationError>> chekObjectForNull(Object object,
                                                                        String keyError,
                                                                        String errorMessage) {
-        Map<String, List<ValidationError>> errors = new HashMap<>();
+        var errors = createMapForLogicalErrors();
         if (object == null) {
             errors.put(keyError, singletonList(new ValidationError(keyError, errorMessage)));
         }
@@ -58,7 +58,7 @@ public class CommonMethodsForValidation {
     public static Map<String, List<ValidationError>>
     chekStringForNullOrEmpty(String object, String keyError,
                              String errorMessageForNull, String errorMessageForEmpty) {
-        Map<String, List<ValidationError>> errors = new HashMap<>();
+        var errors = createMapForLogicalErrors();
         if (object == null) {
             errors.put(keyError, singletonList(new ValidationError(keyError, errorMessageForNull)));
         }
@@ -72,7 +72,7 @@ public class CommonMethodsForValidation {
     public static Map<String, List<ValidationError>>
     chekNumberForNullOrMoreThan(Object number, Long moreThan, String keyError,
                                 String errorMessageForNull, String errorMessageIfMoreThan) {
-        Map<String, List<ValidationError>> errors = new HashMap<>();
+        var errors = createMapForLogicalErrors();
         if (number == null) {
             errors.put(keyError, singletonList(new ValidationError(keyError, errorMessageForNull)));
         }
@@ -89,7 +89,7 @@ public class CommonMethodsForValidation {
     public static Map<String, List<ValidationError>>
     chekNumberForNullOrLessThan(Object number, Long lessThan, String keyError,
                                 String errorMessageForNull, String errorMessageIfLessThan) {
-        Map<String, List<ValidationError>> errors = new HashMap<>();
+        var errors = createMapForLogicalErrors();
         if (number == null) {
             errors.put(keyError, singletonList(new ValidationError(keyError, errorMessageForNull)));
         }
@@ -106,7 +106,7 @@ public class CommonMethodsForValidation {
     public static Map<String, List<ValidationError>>
     chekNumberForNullOrZero(Object number, String keyError,
                             String errorMessageForNull, String errorMessageIfZero) {
-        Map<String, List<ValidationError>> errors = new HashMap<>();
+        var errors = createMapForLogicalErrors();
         if (number == null) {
             errors.put(keyError, singletonList(new ValidationError(keyError, errorMessageForNull)));
         }

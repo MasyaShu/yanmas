@@ -55,10 +55,10 @@ public class FileServiceImpl extends CrudServiceImpl<File, FileOperationValidato
     }
 
     public File create(File entity, byte[] bytes) {
-        File createdFile = super.create(entity);
         val logicalErrors = createMapForLogicalErrors();
         logicalErrors.putAll(chekObjectForNull(bytes, BYTES_OF_FILE, BYTES_OF_FILE_IS_NULL));
         throwLogicalValidationExceptionIfErrorsNotEmpty(logicalErrors);
+        File createdFile = super.create(entity);
         if (bytes.length != 0) {
             AwsS3Object awsS3Object = AwsS3Object.builder()
                     .bucketName(createdFile.getAccount().getId().toString())
@@ -75,6 +75,7 @@ public class FileServiceImpl extends CrudServiceImpl<File, FileOperationValidato
         return repository.findAllByEntityIdAndAccount_Id(entityId, accountId);
     }
 
+    @Transactional(readOnly = true)
     public byte[] getFileData(String accountId, String fileId) {
         return awsS3ObjectOperations.getObject(accountId, fileId);
     }

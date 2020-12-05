@@ -133,9 +133,9 @@ class FileServiceImplTest {
                 expectedException.getFieldErrors().get(BYTES_OF_FILE).get(0),
                 actualException.getFieldErrors().get(BYTES_OF_FILE).get(0)
         );
-        verify(validator, times(1)).beforeCreate(any());
-        verify(validator, times(1)).checkUniqueness(any());
-        verify(repository, times(1)).create(any());
+        verify(validator, times(0)).beforeCreate(any());
+        verify(validator, times(0)).checkUniqueness(any());
+        verify(repository, times(0)).create(any());
         verify(putAwsS3ObjectGateway, times(0)).process(any());
     }
 
