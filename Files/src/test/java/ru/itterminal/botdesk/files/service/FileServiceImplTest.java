@@ -54,7 +54,12 @@ class FileServiceImplTest {
     private File file;
     private static final String BYTES_OF_FILE = "Bytes of file";
     private static final String BYTES_OF_FILE_IS_NULL = "Bytes of file is null";
-
+    private static final String ACCOUNT_ID = "Account id";
+    private static final String ACCOUNT_ID_IS_NULL = "Account id is null";
+    private static final String ENTITY_ID = "Entity id";
+    private static final String ENTITY_ID_IS_NULL = "Entity id is null";
+    private static final String FILE_ID = "File id";
+    private static final String FILE_ID_IS_NULL = "File id is null";
 
     @BeforeAll
     void setupBeforeAll() {
@@ -108,7 +113,7 @@ class FileServiceImplTest {
     }
 
     @Test
-    void create_shouldGetFileEntityWithoutSaveBytesOfFileInAwsS3_whenFileBytesIsEmpty() {
+    void create_shouldGetFileEntity_whenFileBytesIsEmpty() {
         byte[] emptyFileData = new byte[0];
         when(validator.beforeCreate(any())).thenReturn(true);
         when(repository.create(any())).thenReturn(file);
@@ -117,14 +122,15 @@ class FileServiceImplTest {
         verify(validator, times(1)).beforeCreate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(repository, times(1)).create(any());
-        verify(putAwsS3ObjectGateway, times(0)).process(any());
+        verify(putAwsS3ObjectGateway, times(1)).process(any());
     }
 
     @Test
-    void create_shouldGetFileEntityWithoutSaveBytesOfFileInAwsS3_whenFileBytesIsNull() {
+    void create_shouldGetLogicalValidationException_whenFileBytesIsNull() {
         when(validator.beforeCreate(any())).thenReturn(true);
         when(repository.create(any())).thenReturn(file);
-        LogicalValidationException expectedException = createExpectedLogicalValidationException(BYTES_OF_FILE, BYTES_OF_FILE_IS_NULL);
+        LogicalValidationException expectedException =
+                createExpectedLogicalValidationException(BYTES_OF_FILE, BYTES_OF_FILE_IS_NULL);
         LogicalValidationException actualException = assertThrows(
                 LogicalValidationException.class,
                 () -> service.create(file, null)
@@ -140,7 +146,7 @@ class FileServiceImplTest {
     }
 
     @Test
-    void findAllByEntityIdAndAccountId_shouldGetEmptyList_whenAccordingWithPlannedBehavior () {
+    void findAllByEntityIdAndAccountId_shouldGetEmptyList_whenAccordingWithPlannedBehavior() {
         when(repository.findAllByEntityIdAndAccount_Id(any(), any())).thenReturn(Collections.emptyList());
         List<File> foundedFiles = service.findAllByEntityIdAndAccountId(UUID.randomUUID(), UUID.randomUUID());
         assertTrue(foundedFiles.isEmpty());
@@ -148,10 +154,82 @@ class FileServiceImplTest {
     }
 
     @Test
-    void getFileData_shouldGetBytesOfFile_whenAccordingWithPlannedBehavior () {
+    void findAllByEntityIdAndAccountId_shouldGetLogicalValidationException_whenAccountIdIsNull() {
+        LogicalValidationException expectedException = createExpectedLogicalValidationException(
+                ACCOUNT_ID,
+                ACCOUNT_ID_IS_NULL
+        );
+        UUID entityId = UUID.randomUUID();
+        LogicalValidationException actualException = assertThrows(
+                LogicalValidationException.class,
+                () -> service.findAllByEntityIdAndAccountId(null, entityId)
+        );
+        assertEquals(
+                expectedException.getFieldErrors().get(ACCOUNT_ID).get(0),
+                actualException.getFieldErrors().get(ACCOUNT_ID).get(0)
+        );
+        verify(repository, times(0)).findAllByEntityIdAndAccount_Id(any(), any());
+    }
+
+    @Test
+    void findAllByEntityIdAndAccountId_shouldGetLogicalValidationException_whenEntityIdIsNull() {
+        LogicalValidationException expectedException = createExpectedLogicalValidationException(
+                ENTITY_ID,
+                ENTITY_ID_IS_NULL
+        );
+        UUID accountId = UUID.randomUUID();
+        LogicalValidationException actualException = assertThrows(
+                LogicalValidationException.class,
+                () -> service.findAllByEntityIdAndAccountId( accountId, null)
+        );
+        assertEquals(
+                expectedException.getFieldErrors().get(ENTITY_ID).get(0),
+                actualException.getFieldErrors().get(ENTITY_ID).get(0)
+        );
+        verify(repository, times(0)).findAllByEntityIdAndAccount_Id(any(), any());
+    }
+
+    @Test
+    void getFileData_shouldGetBytesOfFile_whenAccordingWithPlannedBehavior() {
         when(awsS3ObjectOperations.getObject(any(), any())).thenReturn(fileData);
-        byte[] actualBytesOfFile = service.getFileData(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        byte[] actualBytesOfFile = service.getFileData(UUID.randomUUID(), UUID.randomUUID());
         assertEquals(fileData, actualBytesOfFile);
         verify(awsS3ObjectOperations, times(1)).getObject(any(), any());
+    }
+
+    @Test
+    void getFileData_shouldGetLogicalValidationException_whenAccountIdIsNull() {
+        LogicalValidationException expectedException = createExpectedLogicalValidationException(
+                ACCOUNT_ID,
+                ACCOUNT_ID_IS_NULL
+        );
+        UUID fileId = UUID.randomUUID();
+        LogicalValidationException actualException = assertThrows(
+                LogicalValidationException.class,
+                () -> service.getFileData(null, fileId)
+        );
+        assertEquals(
+                expectedException.getFieldErrors().get(ACCOUNT_ID).get(0),
+                actualException.getFieldErrors().get(ACCOUNT_ID).get(0)
+        );
+        verify(awsS3ObjectOperations, times(0)).getObject(any(), any());
+    }
+
+    @Test
+    void getFileData_shouldGetLogicalValidationException_whenFileIdIsNull() {
+        LogicalValidationException expectedException = createExpectedLogicalValidationException(
+                FILE_ID,
+                FILE_ID_IS_NULL
+        );
+        UUID accountId = UUID.randomUUID();
+        LogicalValidationException actualException = assertThrows(
+                LogicalValidationException.class,
+                () -> service.getFileData( accountId, null)
+        );
+        assertEquals(
+                expectedException.getFieldErrors().get(FILE_ID).get(0),
+                actualException.getFieldErrors().get(FILE_ID).get(0)
+        );
+        verify(repository, times(0)).findAllByEntityIdAndAccount_Id(any(), any());
     }
 }

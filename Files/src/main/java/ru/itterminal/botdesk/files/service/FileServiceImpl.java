@@ -32,6 +32,12 @@ public class FileServiceImpl extends CrudServiceImpl<File, FileOperationValidato
     private static final String METHOD_UPDATE = "For now this method doesn't implement yet";
     private static final String BYTES_OF_FILE = "Bytes of file";
     private static final String BYTES_OF_FILE_IS_NULL = "Bytes of file is null";
+    private static final String ACCOUNT_ID = "Account id";
+    private static final String ACCOUNT_ID_IS_NULL = "Account id is null";
+    private static final String ENTITY_ID = "Entity id";
+    private static final String ENTITY_ID_IS_NULL = "Entity id is null";
+    private static final String FILE_ID = "File id";
+    private static final String FILE_ID_IS_NULL = "File id is null";
 
     private final PutAwsS3ObjectFlow.PutAwsS3ObjectGateway putAwsS3ObjectGateway;
     private final AwsS3ObjectOperations awsS3ObjectOperations;
@@ -59,24 +65,30 @@ public class FileServiceImpl extends CrudServiceImpl<File, FileOperationValidato
         logicalErrors.putAll(chekObjectForNull(bytes, BYTES_OF_FILE, BYTES_OF_FILE_IS_NULL));
         throwLogicalValidationExceptionIfErrorsNotEmpty(logicalErrors);
         File createdFile = super.create(entity);
-        if (bytes.length != 0) {
-            AwsS3Object awsS3Object = AwsS3Object.builder()
-                    .bucketName(createdFile.getAccount().getId().toString())
-                    .objectName(createdFile.getId().toString())
-                    .byteBuffer(ByteBuffer.wrap(bytes))
-                    .build();
-            putAwsS3ObjectGateway.process(awsS3Object);
-        }
+        AwsS3Object awsS3Object = AwsS3Object.builder()
+                .bucketName(createdFile.getAccount().getId().toString())
+                .objectName(createdFile.getId().toString())
+                .byteBuffer(ByteBuffer.wrap(bytes))
+                .build();
+        putAwsS3ObjectGateway.process(awsS3Object);
         return createdFile;
     }
 
     @Transactional(readOnly = true)
-    public List<File> findAllByEntityIdAndAccountId(UUID entityId, UUID accountId) {
+    public List<File> findAllByEntityIdAndAccountId(UUID accountId, UUID entityId) {
+        val logicalErrors = createMapForLogicalErrors();
+        logicalErrors.putAll(chekObjectForNull(accountId, ACCOUNT_ID, ACCOUNT_ID_IS_NULL));
+        logicalErrors.putAll(chekObjectForNull(entityId, ENTITY_ID, ENTITY_ID_IS_NULL));
+        throwLogicalValidationExceptionIfErrorsNotEmpty(logicalErrors);
         return repository.findAllByEntityIdAndAccount_Id(entityId, accountId);
     }
 
     @Transactional(readOnly = true)
-    public byte[] getFileData(String accountId, String fileId) {
-        return awsS3ObjectOperations.getObject(accountId, fileId);
+    public byte[] getFileData(UUID accountId, UUID fileId) {
+        val logicalErrors = createMapForLogicalErrors();
+        logicalErrors.putAll(chekObjectForNull(accountId, ACCOUNT_ID, ACCOUNT_ID_IS_NULL));
+        logicalErrors.putAll(chekObjectForNull(fileId, FILE_ID, FILE_ID_IS_NULL));
+        throwLogicalValidationExceptionIfErrorsNotEmpty(logicalErrors);
+        return awsS3ObjectOperations.getObject(accountId.toString(), fileId.toString());
     }
 }
