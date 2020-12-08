@@ -27,6 +27,11 @@
             <artifactId>Integration</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>ru.it-terminal.botdesk</groupId>
+            <artifactId>AccountsAndUsers</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
 

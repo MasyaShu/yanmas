@@ -55,6 +55,18 @@ create TABLE IF NOT EXISTS users
     FOREIGN KEY (account_id) REFERENCES account (id),
     FOREIGN KEY (own_group_id) REFERENCES group_users (id)
 );
+create TABLE IF NOT EXISTS ticket_types
+(
+    out_id  varchar(128),
+    deleted bool         NOT NULL DEFAULT 'false',
+    version int2         NOT NULL DEFAULT (0),
+    id      uuid         NOT NULL,
+    name    varchar(128) NOT NULL,
+    comment text,
+    is_predefined bool  NOT NULL DEFAULT 'false',
+    account_id  uuid    NOT NULL,
+    PRIMARY KEY (id)
+);
 insert into role(out_id, deleted, version, id, name, weight)
 values (null, 'false', '0', 'ba99ce38-1611-4a81-adc9-3a779d58bbfe', 'ACCOUNT_OWNER', '3'),
        (null, 'false', '0', '607f04b1-f5f9-4f20-9c6f-501c32d773c0', 'ADMIN', '2'),
