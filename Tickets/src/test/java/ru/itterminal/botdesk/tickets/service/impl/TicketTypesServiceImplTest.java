@@ -7,8 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import ru.itterminal.botdesk.aau.model.Account;
-import ru.itterminal.botdesk.aau.model.User;
-import ru.itterminal.botdesk.aau.service.validator.UserOperationValidator;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 import ru.itterminal.botdesk.tickets.model.TicketTypes;
@@ -73,6 +71,20 @@ class TicketTypesServiceImplTest {
         ticketTypes.setAccount(null);
         assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(ticketTypes));
         verify(ticketTypesRepository, times(0)).getByNameAndAccount_IdAndIdNot(any(), any(), any());
+    }
+
+    @Test
+    void findByIdAndAccountId_shouldGetEntityNotExistException_whenGroupIdIsNull() {
+        UUID accountId = account.getId();
+        assertThrows(EntityNotExistException.class, () -> service.findByIdAndAccountId(null, accountId));
+        verify(ticketTypesRepository, times(0)).getByIdAndAccount_Id(any(), any());
+    }
+
+    @Test
+    void findByIdAndAccountId_shouldGetEntityNotExistException_whenAccountIdIsNull() {
+        UUID groupId = ticketTypes.getId();
+        assertThrows(EntityNotExistException.class, () -> service.findByIdAndAccountId(groupId, null));
+        verify(ticketTypesRepository, times(0)).getByIdAndAccount_Id(any(), any());
     }
 
 }
