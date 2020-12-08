@@ -24,7 +24,7 @@ public class TicketTypes extends BaseEntity {
     private String comment;
 
     @Column(name = "is_predefined", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private Boolean isDeprecated;
+    private Boolean isPredefined;
 
     @ManyToOne
     @JoinColumn(name = "account_id", nullable = false)
@@ -37,7 +37,7 @@ public class TicketTypes extends BaseEntity {
         TicketTypes ticketTypes = (TicketTypes) o;
         return Objects.equals(name, ticketTypes.name) &&
                 Objects.equals(comment, ticketTypes.comment) &&
-                Objects.equals(isDeprecated, ticketTypes.isDeprecated)&&
+                Objects.equals(isPredefined, ticketTypes.isPredefined)&&
                 Objects.equals(account, ticketTypes.account) &&
                 Objects.equals(getId(), ticketTypes.getId()) &&
                 Objects.equals(getOutId(), ticketTypes.getOutId()) &&
@@ -47,7 +47,7 @@ public class TicketTypes extends BaseEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, comment, isDeprecated, account,
+        return Objects.hash(name, comment, isPredefined, account,
                 getId(), getOutId(), getVersion(), getDeleted());
     }
 }
