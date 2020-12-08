@@ -1,12 +1,10 @@
 package ru.itterminal.botdesk.tickets.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
-import ru.itterminal.botdesk.security.jwt.JwtUser;
 import ru.itterminal.botdesk.tickets.model.TicketTypes;
 import ru.itterminal.botdesk.tickets.model.projection.TicketTypesUniqueFields;
 import ru.itterminal.botdesk.tickets.repository.TicketTypesRepository;
@@ -53,17 +51,13 @@ public class TicketTypesServiceImpl extends CrudServiceImpl<TicketTypes, TicketT
         return repository.getByNameAndAccount_IdAndIdNot(ticketTypes.getName(), ticketTypes.getAccount().getId(), ticketTypes.getId());
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @Transactional(readOnly = true)
     public TicketTypes findByIdAndAccountId(UUID id, UUID accountId) {
         chekObjectForNull(id, format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, ENTITY_TICKET_TYPES_NAME, id, accountId),
                 EntityNotExistException.class);
         chekObjectForNull(accountId, format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, ENTITY_TICKET_TYPES_NAME, id, accountId),
                 EntityNotExistException.class);
-        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!jwtUser.isInnerGroup() && !id.equals(jwtUser.getGroupId())) {
-            throw new EntityNotExistException(format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, ENTITY_TICKET_TYPES_NAME, id,
-                    jwtUser.getAccountId()));
-        }
         log.trace(START_FIND_TICKET_TYPES_BY_ID_AND_ACCOUNT_ID, id, accountId);
         return repository.getByIdAndAccount_Id(id, accountId).orElseThrow(
                 () -> new EntityNotExistException(format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, ENTITY_TICKET_TYPES_NAME, id,
