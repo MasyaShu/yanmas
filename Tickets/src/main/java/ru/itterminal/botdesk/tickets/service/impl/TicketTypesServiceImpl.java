@@ -12,7 +12,8 @@ import ru.itterminal.botdesk.tickets.service.validator.TicketTypesOperationValid
 
 import java.util.List;
 
-import static ru.itterminal.botdesk.commons.util.CommonMethods.chekObjectForNull;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekObjectForNull;
+
 
 @Slf4j
 @Service
@@ -32,6 +33,7 @@ public class TicketTypesServiceImpl extends CrudServiceImpl<TicketTypes, TicketT
 
 
 
+    @SuppressWarnings("DuplicatedCode")
     public List<TicketTypesUniqueFields> findByUniqueFields(TicketTypes ticketTypes) {
         chekObjectForNull(ticketTypes, NOT_FOUND_TICKET_TYPES_BY_UNIQUE_FIELDS_GROUP_IS_NULL, EntityNotExistException.class);
         chekObjectForNull(ticketTypes.getName(), NOT_FOUND_TICKET_TYPES_BY_UNIQUE_FIELDS_NAME_IS_NULL,
