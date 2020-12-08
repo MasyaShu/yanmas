@@ -140,7 +140,6 @@ public class UserControllerV1 extends BaseController {
         return new ResponseEntity<>(returnedUser, HttpStatus.OK);
     }
 
-    @SuppressWarnings("ConstantConditions")
     @GetMapping()
     public ResponseEntity<Page<UserDtoResponseWithoutPassword>> getByFilter(
             Principal user,

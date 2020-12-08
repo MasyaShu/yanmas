@@ -11,6 +11,7 @@
     </parent>
 
     <artifactId>Commons</artifactId>
+
     <dependencies>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>

@@ -21,7 +21,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -49,6 +48,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.Role;
+import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.dto.UserDto;
 import ru.itterminal.botdesk.aau.model.dto.UserFilterDto;
@@ -57,15 +57,13 @@ import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.RoleServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
-import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
-import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
-import ru.itterminal.botdesk.security.config.TestSecurityConfig;
-import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.util.AAUConstants;
 import ru.itterminal.botdesk.commons.controller.BaseController;
+import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
+import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
 import ru.itterminal.botdesk.commons.util.CommonConstants;
+import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 
-@SuppressWarnings("ALL")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {UserControllerV1.class, UserSpec.class, FilterChainProxy.class})
 @Import(TestSecurityConfig.class)
@@ -98,7 +96,6 @@ class UserControllerV1Test {
 
     @BeforeAll
     void setUpBeforeAll() {
-        MockitoAnnotations.initMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new RestExceptionHandler())
                 .apply(SecurityMockMvcConfigurers.springSecurity(springSecurityFilterChain))
@@ -135,7 +132,7 @@ class UserControllerV1Test {
     private static final String INVALID_PASSWORD_4 = "Itt12Itt12Itt12Itt12Itt12"; //Valid characters, not valid
     // length (25)
     private static final String INVALID_PASSWORD_5 = "IttItt"; //no numbers
-    private static final String INVALID_PASSWORD_6 = "ittitt2"; //no upcase letter
+    private static final String INVALID_PASSWORD_6 = "ittitt2"; //no uppercase letter
     private static final String INVALID_PASSWORD_7 = "ITTITT2"; //no lowercase letter
     private static final String INVALID_PASSWORD_8 = "IttItt 2"; //space
     private static final String INVALID_PASSWORD_9 = "123123"; //numbers
@@ -512,7 +509,7 @@ class UserControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenAllPassedDataIsEpmty() throws Exception {
+    void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenAllPassedDataIsEmpty() throws Exception {
         userDtoFromAccount_1.setEmail("");
         userDtoFromAccount_1.setPassword("");
         userDtoFromAccount_1.setFirstName("");

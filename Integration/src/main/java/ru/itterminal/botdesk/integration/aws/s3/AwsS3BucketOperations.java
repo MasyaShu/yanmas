@@ -16,12 +16,12 @@ import software.amazon.awssdk.services.s3.waiters.S3Waiter;
 
 @Component
 @Slf4j
-public class S3BucketOperations {
+public class AwsS3BucketOperations {
 
     private final S3Client s3Client;
     private final Region region;
 
-    public S3BucketOperations(S3Client s3Client, Region region) {
+    public AwsS3BucketOperations(S3Client s3Client, Region region) {
         this.s3Client = s3Client;
         this.region = region;
     }

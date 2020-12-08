@@ -1,24 +1,24 @@
 -- START MODULE **ACCOUNT AND USERS**
 create TABLE IF NOT EXISTS account
 (
-    out_id   varchar(128),
-    deleted  bool        NOT NULL DEFAULT 'false',
-    version  int2        NOT NULL DEFAULT (0),
-    id       uuid        NOT NULL,
-    name     varchar(20) NOT NULL,
+    out_id  varchar(128),
+    deleted bool        NOT NULL DEFAULT 'false',
+    version int2        NOT NULL DEFAULT (0),
+    id      uuid        NOT NULL,
+    name    varchar(20) NOT NULL,
     PRIMARY KEY (id)
 );
 create TABLE IF NOT EXISTS group_users
 (
-    out_id  varchar(128),
-    deleted bool         NOT NULL DEFAULT 'false',
-    version int2         NOT NULL DEFAULT (0),
-    id      uuid         NOT NULL,
-    name    varchar(128) NOT NULL,
-    comment text,
-    is_deprecated bool  NOT NULL DEFAULT 'false',
-    is_inner bool       NOT NULL DEFAULT 'false',
-    account_id  uuid    NOT NULL,
+    out_id        varchar(128),
+    deleted       bool         NOT NULL DEFAULT 'false',
+    version       int2         NOT NULL DEFAULT (0),
+    id            uuid         NOT NULL,
+    name          varchar(128) NOT NULL,
+    comment       text,
+    is_deprecated bool         NOT NULL DEFAULT 'false',
+    is_inner      bool         NOT NULL DEFAULT 'false',
+    account_id    uuid         NOT NULL,
     PRIMARY KEY (id)
 );
 create TABLE IF NOT EXISTS role
@@ -73,4 +73,18 @@ values (null, 'false', '0', 'ba99ce38-1611-4a81-adc9-3a779d58bbfe', 'ACCOUNT_OWN
        (null, 'false', '0', 'f7e579e6-0609-467a-91ff-454f42da3d58', 'EXECUTOR', '1'),
        (null, 'false', '0', '933f20bf-9262-47bb-83d2-0ca55bbbd3fd', 'AUTHOR', '0'),
        (null, 'false', '0', '586e087f-f5a0-4db8-af57-edead19db706', 'OBSERVER', '0');
--- FINISH MODULE **ACCOUNT AND USERS**
+-- START MODULE **FILES**
+create TABLE IF NOT EXISTS files
+(
+    out_id     varchar(128),
+    deleted    bool         NOT NULL DEFAULT 'false',
+    version    int2         NOT NULL DEFAULT (0),
+    id         uuid         NOT NULL,
+    file_name  varchar(256) NOT NULL,
+    size       int          NOT NULL,
+    created_at bigint       NOT NULL,
+    account_id uuid         NOT NULL,
+    entity_id  uuid         NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (account_id) REFERENCES account (id)
+);
