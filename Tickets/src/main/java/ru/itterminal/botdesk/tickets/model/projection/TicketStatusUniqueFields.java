@@ -1,5 +1,5 @@
 package ru.itterminal.botdesk.tickets.model.projection;
 
-public interface TicketTypesUniqueFields {
+public interface TicketStatusUniqueFields {
     String getName();
 }

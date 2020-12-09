@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
 import ru.itterminal.botdesk.tickets.model.TicketType;
-import ru.itterminal.botdesk.tickets.model.projection.TicketTypesUniqueFields;
+import ru.itterminal.botdesk.tickets.model.projection.TicketTypeUniqueFields;
 import ru.itterminal.botdesk.tickets.repository.TicketTypeRepository;
 import ru.itterminal.botdesk.tickets.service.validator.TicketTypeOperationValidator;
 
@@ -39,7 +39,7 @@ public class TicketTypeServiceImpl extends CrudServiceImpl<TicketType, TicketTyp
     private static final String CANT_FIND_BY_UNIQUE = "Can't find by unique fields";
 
     @SuppressWarnings("DuplicatedCode")
-    public List<TicketTypesUniqueFields> findByUniqueFields(TicketType ticketType) {
+    public List<TicketTypeUniqueFields> findByUniqueFields(TicketType ticketType) {
         chekObjectForNull(ticketType, TICKET_TYPE_IS_NULL, EntityNotExistException.class);
         chekStringForNullOrEmpty(ticketType.getName(), NAME_IS_NULL,
                 NAME_IS_EMPTY, EntityNotExistException.class, CANT_FIND_BY_UNIQUE);

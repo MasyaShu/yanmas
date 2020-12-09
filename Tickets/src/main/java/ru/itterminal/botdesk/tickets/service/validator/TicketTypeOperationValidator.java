@@ -7,12 +7,10 @@ import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 import ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl;
 import ru.itterminal.botdesk.tickets.model.TicketType;
-import ru.itterminal.botdesk.tickets.model.projection.TicketTypesUniqueFields;
+import ru.itterminal.botdesk.tickets.model.projection.TicketTypeUniqueFields;
 import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
@@ -33,7 +31,7 @@ public class TicketTypeOperationValidator extends BasicOperationValidatorImpl<Ti
     public boolean checkUniqueness(TicketType entity) {
         log.trace(CHECK_UNIQUENESS, entity);
         var errors = createMapForLogicalErrors();
-        List<TicketTypesUniqueFields> foundTicketTypes = service.findByUniqueFields(entity);
+        List<TicketTypeUniqueFields> foundTicketTypes = service.findByUniqueFields(entity);
         if (foundTicketTypes.isEmpty()) {
             log.trace(FIELDS_UNIQUE, entity);
             return true;

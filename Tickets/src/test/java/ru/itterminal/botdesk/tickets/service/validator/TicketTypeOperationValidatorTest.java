@@ -11,7 +11,7 @@ import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 import ru.itterminal.botdesk.tickets.model.TicketType;
-import ru.itterminal.botdesk.tickets.model.projection.TicketTypesUniqueFields;
+import ru.itterminal.botdesk.tickets.model.projection.TicketTypeUniqueFields;
 import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
 
 import java.util.*;
@@ -29,7 +29,7 @@ class TicketTypeOperationValidatorTest {
     private TicketTypeServiceImpl service;
 
     @Mock
-    private TicketTypesUniqueFields ticketTypesUniqueFields;
+    private TicketTypeUniqueFields ticketTypeUniqueFields;
 
     @Autowired
     private final TicketTypeOperationValidator validator = new TicketTypeOperationValidator(service);
@@ -59,8 +59,8 @@ class TicketTypeOperationValidatorTest {
 
     @Test
     void checkUniqueness_shouldGetLogicalValidationException_whenPassedDataNotUnique() {
-        when(service.findByUniqueFields(any())).thenReturn(List.of(ticketTypesUniqueFields));
-        when(ticketTypesUniqueFields.getName()).thenReturn(EXIST_NAME);
+        when(service.findByUniqueFields(any())).thenReturn(List.of(ticketTypeUniqueFields));
+        when(ticketTypeUniqueFields.getName()).thenReturn(EXIST_NAME);
         errors.put("name", singletonList(new ValidationError("not unique", "name is occupied")));
         logicalValidationException = new LogicalValidationException("Validation failed", errors);
         LogicalValidationException thrown = assertThrows(LogicalValidationException.class,
