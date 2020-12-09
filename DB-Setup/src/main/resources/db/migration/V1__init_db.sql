@@ -76,15 +76,16 @@ values (null, 'false', '0', 'ba99ce38-1611-4a81-adc9-3a779d58bbfe', 'ACCOUNT_OWN
 -- START MODULE **FILES**
 create TABLE IF NOT EXISTS files
 (
-    out_id     varchar(128),
-    deleted    bool         NOT NULL DEFAULT 'false',
-    version    int2         NOT NULL DEFAULT (0),
-    id         uuid         NOT NULL,
-    file_name  varchar(256) NOT NULL,
-    size       int          NOT NULL,
-    created_at bigint       NOT NULL,
-    account_id uuid         NOT NULL,
-    entity_id  uuid         NOT NULL,
+    out_id      varchar(128),
+    deleted     bool         NOT NULL DEFAULT 'false',
+    version     int2         NOT NULL DEFAULT (0),
+    id          uuid         NOT NULL,
+    file_name   varchar(256) NOT NULL,
+    size        int          NOT NULL,
+    created_at  bigint       NOT NULL,
+    account_id  uuid         NOT NULL,
+    entity_id   uuid         NOT NULL,
+    is_uploaded bool         NOT NULL DEFAULT 'false',
     PRIMARY KEY (id),
     FOREIGN KEY (account_id) REFERENCES account (id)
 );
