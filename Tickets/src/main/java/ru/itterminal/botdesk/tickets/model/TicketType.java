@@ -15,7 +15,7 @@ import java.util.Objects;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TicketTypes extends BaseEntity {
+public class TicketType extends BaseEntity {
 
     @Column(nullable = false, length = 128)
     private String name;
@@ -34,15 +34,15 @@ public class TicketTypes extends BaseEntity {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TicketTypes ticketTypes = (TicketTypes) o;
-        return Objects.equals(name, ticketTypes.name) &&
-                Objects.equals(comment, ticketTypes.comment) &&
-                Objects.equals(isPredefined, ticketTypes.isPredefined)&&
-                Objects.equals(account, ticketTypes.account) &&
-                Objects.equals(getId(), ticketTypes.getId()) &&
-                Objects.equals(getOutId(), ticketTypes.getOutId()) &&
-                Objects.equals(getVersion(), ticketTypes.getVersion()) &&
-                Objects.equals(getDeleted(), ticketTypes.getDeleted());
+        TicketType ticketType = (TicketType) o;
+        return Objects.equals(name, ticketType.name) &&
+                Objects.equals(comment, ticketType.comment) &&
+                Objects.equals(isPredefined, ticketType.isPredefined)&&
+                Objects.equals(account, ticketType.account) &&
+                Objects.equals(getId(), ticketType.getId()) &&
+                Objects.equals(getOutId(), ticketType.getOutId()) &&
+                Objects.equals(getVersion(), ticketType.getVersion()) &&
+                Objects.equals(getDeleted(), ticketType.getDeleted());
     }
 
     @Override

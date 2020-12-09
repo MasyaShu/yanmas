@@ -12,7 +12,7 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class TicketTypesFilterDto extends BaseFilterDto {
+public class TicketTypeFilterDto extends BaseFilterDto {
 
     @Size(min = 1, max = 128)
     private String name;

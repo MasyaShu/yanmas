@@ -8,7 +8,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.itterminal.botdesk.tickets.model.spec.TicketTypesSpec;
+import ru.itterminal.botdesk.tickets.model.spec.TicketTypeSpec;
 
 import java.util.UUID;
 
@@ -19,15 +19,15 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 @TestInstance(PER_CLASS)
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
-@ContextConfiguration(classes = {TicketTypesRepositoryTestConfig.class, TicketTypesSpec.class, TicketTypesRepository.class})
+@ContextConfiguration(classes = {TicketTypeRepositoryTestConfig.class, TicketTypeSpec.class, TicketTypeRepository.class})
 @Sql({"/create-user-test.sql"})
-class TicketTypesRepositoryTest {
+class TicketTypeRepositoryTest {
 
     @Autowired
-    private TicketTypesRepository ticketTypesRepository;
+    private TicketTypeRepository ticketTypeRepository;
 
     @Autowired
-    TicketTypesSpec spec;
+    TicketTypeSpec spec;
 
     private static final UUID ACCOUNT_1_ID = UUID.fromString("cdfa6483-0769-4628-ba32-efd338a716de");
     private static final UUID NOT_EXIST_ID = UUID.fromString("0223e51a-4bb2-44ee-bc8e-1f047a2145e8");
@@ -42,54 +42,54 @@ class TicketTypesRepositoryTest {
     @Test
     void getByNameAndAccount_IdAndIdNot_shouldGetEmptyList_whenNameNotExistAndIdNotExistInDatabase() {
         assertTrue(
-                ticketTypesRepository.getByNameAndAccount_IdAndIdNot(NOT_EXIST_NAME, ACCOUNT_1_ID, NOT_EXIST_ID).isEmpty());
+                ticketTypeRepository.getByNameAndAccount_IdAndIdNot(NOT_EXIST_NAME, ACCOUNT_1_ID, NOT_EXIST_ID).isEmpty());
     }
 
     @Test
     void getByNameAndAccount_IdAndIdNot_shouldGetEmptyList_whenNameNotExistAndIdExistInDatabase() {
-        assertTrue(ticketTypesRepository.getByNameAndAccount_IdAndIdNot(NOT_EXIST_NAME, ACCOUNT_1_ID, EXIST_ID).isEmpty());
+        assertTrue(ticketTypeRepository.getByNameAndAccount_IdAndIdNot(NOT_EXIST_NAME, ACCOUNT_1_ID, EXIST_ID).isEmpty());
     }
 
     @Test
     void getByNameAndAccount_IdAndIdNot_shouldGetNotNull_whenNameExistAndIdNotExistInDatabase() {
-        String name = ticketTypesRepository
+        String name = ticketTypeRepository
                 .getByNameAndAccount_IdAndIdNot(EXIST_NAME, ACCOUNT_1_ID, NOT_EXIST_ID).get(0).getName();
         assertEquals(EXIST_NAME, name);
     }
 
     @Test
     void getByNameAndAccount_IdAndIdNot_shouldGetEmptyList_whenNameExistAndIdExistInDatabase() {
-        assertTrue(ticketTypesRepository.getByNameAndAccount_IdAndIdNot(EXIST_NAME, ACCOUNT_1_ID, EXIST_ID).isEmpty());
+        assertTrue(ticketTypeRepository.getByNameAndAccount_IdAndIdNot(EXIST_NAME, ACCOUNT_1_ID, EXIST_ID).isEmpty());
     }
 
     @Test
     void getByNameAndAccount_Id_shouldGetEmptyList_whenNameNotExistAndAccountIdExist() {
-        assertTrue(ticketTypesRepository.getByNameAndAccount_Id(NOT_EXIST_NAME, ACCOUNT_1_ID).isEmpty());
+        assertTrue(ticketTypeRepository.getByNameAndAccount_Id(NOT_EXIST_NAME, ACCOUNT_1_ID).isEmpty());
     }
 
     @Test
     void getByNameAndAccount_Id_shouldGetNotNull_whenNameExistAndAccountIdExist() {
-        assertEquals(EXIST_NAME, ticketTypesRepository.getByNameAndAccount_Id(EXIST_NAME, ACCOUNT_1_ID).get().getName());
+        assertEquals(EXIST_NAME, ticketTypeRepository.getByNameAndAccount_Id(EXIST_NAME, ACCOUNT_1_ID).get().getName());
     }
 
     @Test
     void getByNameAndAccount_Id_shouldGetEmptyList_whenNameExistAndAccountIdNotExist() {
-        assertTrue(ticketTypesRepository.getByNameAndAccount_Id(NOT_EXIST_NAME, ACCOUNT_ID_NOT_EXIST).isEmpty());
+        assertTrue(ticketTypeRepository.getByNameAndAccount_Id(NOT_EXIST_NAME, ACCOUNT_ID_NOT_EXIST).isEmpty());
     }
 
     @Test
     void getByIdAndAccount_Id_shouldGetEmptyList_whenGroupIdNotExistAndAccountIdExist() {
-        assertTrue(ticketTypesRepository.getByIdAndAccount_Id(NOT_EXIST_ID, ACCOUNT_1_ID).isEmpty());
+        assertTrue(ticketTypeRepository.getByIdAndAccount_Id(NOT_EXIST_ID, ACCOUNT_1_ID).isEmpty());
     }
 
     @Test
     void getByIdAndAccount_Id_shouldGetNotNull_whenGroupIdExistAndAccountIdExist() {
-        assertEquals(EXIST_NAME, ticketTypesRepository.getByIdAndAccount_Id(EXIST_ID, ACCOUNT_1_ID).get().getName());
+        assertEquals(EXIST_NAME, ticketTypeRepository.getByIdAndAccount_Id(EXIST_ID, ACCOUNT_1_ID).get().getName());
     }
 
     @Test
     void getByIdAndAccount_Id_shouldGetEmptyList_whenGroupIdExistAndAccountIdNotExist() {
-        assertTrue(ticketTypesRepository.getByIdAndAccount_Id(NOT_EXIST_ID, ACCOUNT_ID_NOT_EXIST).isEmpty());
+        assertTrue(ticketTypeRepository.getByIdAndAccount_Id(NOT_EXIST_ID, ACCOUNT_ID_NOT_EXIST).isEmpty());
     }
 
 }

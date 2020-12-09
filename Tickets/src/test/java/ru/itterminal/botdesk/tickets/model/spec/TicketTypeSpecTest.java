@@ -13,9 +13,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.itterminal.botdesk.tickets.model.TicketTypes;
-import ru.itterminal.botdesk.tickets.repository.TicketTypesRepository;
-import ru.itterminal.botdesk.tickets.repository.TicketTypesRepositoryTestConfig;
+import ru.itterminal.botdesk.tickets.model.TicketType;
+import ru.itterminal.botdesk.tickets.repository.TicketTypeRepository;
+import ru.itterminal.botdesk.tickets.repository.TicketTypeRepositoryTestConfig;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -24,15 +24,15 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 @TestInstance(PER_CLASS)
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
-@ContextConfiguration(classes = {TicketTypesRepositoryTestConfig.class, TicketTypesSpec.class})
+@ContextConfiguration(classes = {TicketTypeRepositoryTestConfig.class, TicketTypeSpec.class})
 @Sql({"/create-user-test.sql"})
-class TicketTypesSpecTest {
+class TicketTypeSpecTest {
 
     @Autowired
-    private TicketTypesRepository ticketTypesRepository;
+    private TicketTypeRepository ticketTypeRepository;
 
     @Autowired
-    TicketTypesSpec spec;
+    TicketTypeSpec spec;
 
     private static final String TICKET_TYPES_1_NAME = "ticketTypes1";
     private static final String TICKET_TYPES_2_NAME = "ticketTypes2";
@@ -43,22 +43,22 @@ class TicketTypesSpecTest {
     private static final String TICKET_TYPES_NOT_EXIST = "NotExist";
     private static final String TICKET_TYPES_COMMENT_ALL = "comment";
 private final Pageable pageable = PageRequest.of(0, 5, Sort.by((Sort.Direction.ASC), "name"));
-    private Page<TicketTypes> foundTicketTypes;
+    private Page<TicketType> foundTicketTypes;
 
 
     @Test
     void getTicketTypesByNameSpec_shouldGetOneTicketTypes_whenNameExistInDatabase() {
-        Specification<TicketTypes> userSpecification = Specification
+        Specification<TicketType> userSpecification = Specification
                 .where(spec.getTicketTypesByNameSpec(TICKET_TYPES_1_NAME.toUpperCase()));
-        foundTicketTypes = ticketTypesRepository.findAll(userSpecification, pageable);
+        foundTicketTypes = ticketTypeRepository.findAll(userSpecification, pageable);
         assertEquals(TICKET_TYPES_1_NAME, foundTicketTypes.getContent().get(0).getName());
     }
 
     @Test
     void getTicketTypesByNameSpec_shouldGetFiveTicketTypes_whenNameExistInDatabase() {
-        Specification<TicketTypes> userSpecification = Specification
+        Specification<TicketType> userSpecification = Specification
                 .where(spec.getTicketTypesByNameSpec(TICKET_TYPES_NAME_ALL.toUpperCase()));
-        foundTicketTypes = ticketTypesRepository.findAll(userSpecification, pageable);
+        foundTicketTypes = ticketTypeRepository.findAll(userSpecification, pageable);
         assertEquals(TICKET_TYPES_1_NAME, foundTicketTypes.getContent().get(0).getName());
         assertEquals(TICKET_TYPES_2_NAME, foundTicketTypes.getContent().get(1).getName());
         assertEquals(TICKET_TYPES_3_NAME, foundTicketTypes.getContent().get(2).getName());
@@ -69,17 +69,17 @@ private final Pageable pageable = PageRequest.of(0, 5, Sort.by((Sort.Direction.A
 
     @Test
     void getTicketTypesByNameSpec_shouldGetEmptyList_whenNameNotExistInDatabase() {
-        Specification<TicketTypes> userSpecification = Specification
+        Specification<TicketType> userSpecification = Specification
                 .where(spec.getTicketTypesByNameSpec(TICKET_TYPES_NOT_EXIST.toUpperCase()));
-        foundTicketTypes = ticketTypesRepository.findAll(userSpecification, pageable);
+        foundTicketTypes = ticketTypeRepository.findAll(userSpecification, pageable);
         assertTrue(foundTicketTypes.getContent().isEmpty());
     }
 
     @Test
     void getTicketTypesByCommentSpec_shouldGetFourTicketTypes_whenCommentExistInDatabase() {
-        Specification<TicketTypes> userSpecification = Specification
+        Specification<TicketType> userSpecification = Specification
                 .where(spec.getTicketTypesByCommentSpec(TICKET_TYPES_COMMENT_ALL.toUpperCase()));
-        foundTicketTypes = ticketTypesRepository.findAll(userSpecification, pageable);
+        foundTicketTypes = ticketTypeRepository.findAll(userSpecification, pageable);
         assertEquals(TICKET_TYPES_1_NAME, foundTicketTypes.getContent().get(0).getName());
         assertEquals(TICKET_TYPES_2_NAME, foundTicketTypes.getContent().get(1).getName());
         assertEquals(TICKET_TYPES_3_NAME, foundTicketTypes.getContent().get(2).getName());
@@ -89,26 +89,26 @@ private final Pageable pageable = PageRequest.of(0, 5, Sort.by((Sort.Direction.A
 
     @Test
     void getTicketTypesByCommentSpec_shouldGetEmptyList_whenCommentNotExistInDatabase() {
-        Specification<TicketTypes> userSpecification = Specification
+        Specification<TicketType> userSpecification = Specification
                 .where(spec.getTicketTypesByCommentSpec(TICKET_TYPES_NOT_EXIST.toUpperCase()));
-        foundTicketTypes = ticketTypesRepository.findAll(userSpecification, pageable);
+        foundTicketTypes = ticketTypeRepository.findAll(userSpecification, pageable);
         assertTrue(foundTicketTypes.getContent().isEmpty());
     }
 
     @Test
     void getUserByCommentSpec_shouldGetOneTicketType_whenCommentIsEmpty() {
-        Specification<TicketTypes> userSpecification = Specification
+        Specification<TicketType> userSpecification = Specification
                 .where(spec.getTicketTypesByCommentSpec(""));
-        foundTicketTypes = ticketTypesRepository.findAll(userSpecification, pageable);
+        foundTicketTypes = ticketTypeRepository.findAll(userSpecification, pageable);
         assertEquals(TICKET_TYPES_5_NAME, foundTicketTypes.getContent().get(0).getName());
         assertEquals(1, foundTicketTypes.getContent().size());
     }
 
     @Test
     void getTicketTypesByIsPredefinedSpec_shouldGetTwoTicketType_whenIsPredefinedTrue() {
-        Specification<TicketTypes> userSpecification = Specification
+        Specification<TicketType> userSpecification = Specification
                 .where(spec.getTicketTypesByIsPredefinedSpec(true));
-        foundTicketTypes = ticketTypesRepository.findAll(userSpecification, pageable);
+        foundTicketTypes = ticketTypeRepository.findAll(userSpecification, pageable);
         assertEquals(TICKET_TYPES_1_NAME, foundTicketTypes.getContent().get(0).getName());
         assertEquals(TICKET_TYPES_3_NAME, foundTicketTypes.getContent().get(1).getName());
         assertEquals(2, foundTicketTypes.getContent().size());
@@ -116,9 +116,9 @@ private final Pageable pageable = PageRequest.of(0, 5, Sort.by((Sort.Direction.A
 
     @Test
     void getTicketTypesByIsPredefinedSpec_shouldGetTreeTicketType_whenIsPredefinedFalse() {
-        Specification<TicketTypes> userSpecification = Specification
+        Specification<TicketType> userSpecification = Specification
                 .where(spec.getTicketTypesByIsPredefinedSpec(false));
-        foundTicketTypes = ticketTypesRepository.findAll(userSpecification, pageable);
+        foundTicketTypes = ticketTypeRepository.findAll(userSpecification, pageable);
         assertEquals(TICKET_TYPES_2_NAME, foundTicketTypes.getContent().get(0).getName());
         assertEquals(TICKET_TYPES_4_NAME, foundTicketTypes.getContent().get(1).getName());
         assertEquals(TICKET_TYPES_5_NAME, foundTicketTypes.getContent().get(2).getName());

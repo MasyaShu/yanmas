@@ -10,9 +10,9 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
-import ru.itterminal.botdesk.tickets.model.TicketTypes;
+import ru.itterminal.botdesk.tickets.model.TicketType;
 import ru.itterminal.botdesk.tickets.model.projection.TicketTypesUniqueFields;
-import ru.itterminal.botdesk.tickets.service.impl.TicketTypesServiceImpl;
+import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
 
 import java.util.*;
 
@@ -21,29 +21,29 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@SpringJUnitConfig(value = {TicketTypesOperationValidator.class})
+@SpringJUnitConfig(value = {TicketTypeOperationValidator.class})
 @ActiveProfiles("Test")
-class TicketTypesOperationValidatorTest {
+class TicketTypeOperationValidatorTest {
 
     @MockBean
-    private TicketTypesServiceImpl service;
+    private TicketTypeServiceImpl service;
 
     @Mock
     private TicketTypesUniqueFields ticketTypesUniqueFields;
 
     @Autowired
-    private final TicketTypesOperationValidator validator = new TicketTypesOperationValidator(service);
+    private final TicketTypeOperationValidator validator = new TicketTypeOperationValidator(service);
 
     private static final String EXIST_NAME = "ticketTypes1";
     private static final Map<String, List<ValidationError>> errors = new HashMap<>();
     private static LogicalValidationException logicalValidationException;
-    private static TicketTypes ticketTypes;
+    private static TicketType ticketType;
 
     @BeforeAll
     static void setUp() {
         Account account1 = new Account();
         account1.setId(UUID.fromString("bcf98101-2a22-42bf-94cc-c900b50a0b69"));
-        ticketTypes = TicketTypes
+        ticketType = TicketType
                 .builder()
                 .name(EXIST_NAME)
                 .account(account1)
@@ -54,7 +54,7 @@ class TicketTypesOperationValidatorTest {
     @Test
     void checkUniqueness_shouldGetTrue_whenPassedDataIsUnique() {
         when(service.findByUniqueFields(any())).thenReturn(Collections.emptyList());
-        assertTrue(validator.checkUniqueness(new TicketTypes()));
+        assertTrue(validator.checkUniqueness(new TicketType()));
     }
 
     @Test
@@ -64,7 +64,7 @@ class TicketTypesOperationValidatorTest {
         errors.put("name", singletonList(new ValidationError("not unique", "name is occupied")));
         logicalValidationException = new LogicalValidationException("Validation failed", errors);
         LogicalValidationException thrown = assertThrows(LogicalValidationException.class,
-                () -> validator.checkUniqueness(ticketTypes));
+                () -> validator.checkUniqueness(ticketType));
         assertEquals(logicalValidationException.getFieldErrors().get("name").get(0),
                 thrown.getFieldErrors().get("name").get(0));
     }

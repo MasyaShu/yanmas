@@ -11,56 +11,56 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
 @TestInstance(PER_CLASS)
-class TicketTypesTest {
+class TicketTypeTest {
 
-    TicketTypes ticketTypes_1;
-    TicketTypes ticketTypes_2;
+    TicketType ticketType_1;
+    TicketType ticketType_2;
     final UUID id = UUID.randomUUID();
 
     @BeforeEach
     void setUp() {
-        ticketTypes_1 = TicketTypes
+        ticketType_1 = TicketType
                 .builder()
                 .account(null)
                 .comment("comment")
                 .name("ticketTypes_1")
                 .build();
-        ticketTypes_1.setId(id);
-        ticketTypes_1.setDeleted(false);
+        ticketType_1.setId(id);
+        ticketType_1.setDeleted(false);
 
-        ticketTypes_2 = TicketTypes
+        ticketType_2 = TicketType
                 .builder()
                 .account(null)
                 .comment("comment")
                 .name("ticketTypes_1")
                 .build();
-        ticketTypes_2.setId(id);
-        ticketTypes_2.setDeleted(false);
+        ticketType_2.setId(id);
+        ticketType_2.setDeleted(false);
     }
 
     @Test
     void equals_shouldGetTrue_whenAllFieldsAreEquals() {
-        assertEquals(ticketTypes_1, ticketTypes_2);
+        assertEquals(ticketType_1, ticketType_2);
     }
 
     @Test
     void equals_shouldGetFalse_whenOneFieldAreNotEquals() {
-        ticketTypes_1.setComment("");
-        assertNotEquals(ticketTypes_1, ticketTypes_2);
+        ticketType_1.setComment("");
+        assertNotEquals(ticketType_1, ticketType_2);
     }
 
     @Test
     void equals_shouldGetTrue_whenBothObjectsIsNew() {
-        TicketTypes ticketTypes_1 = new TicketTypes();
-        TicketTypes ticketTypes_2 = new TicketTypes();
-        assertEquals(ticketTypes_1, ticketTypes_2);
+        TicketType ticketType_1 = new TicketType();
+        TicketType ticketType_2 = new TicketType();
+        assertEquals(ticketType_1, ticketType_2);
     }
 
     @SuppressWarnings("deprecation")
     @Test
     void equals_shouldGetFalse_whenVersionNotEquals() {
-        ticketTypes_1.setVersion(1);
-        assertNotEquals(ticketTypes_1, ticketTypes_2);
+        ticketType_1.setVersion(1);
+        assertNotEquals(ticketType_1, ticketType_2);
     }
 
 

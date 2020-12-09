@@ -9,9 +9,9 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
-import ru.itterminal.botdesk.tickets.model.TicketTypes;
-import ru.itterminal.botdesk.tickets.repository.TicketTypesRepository;
-import ru.itterminal.botdesk.tickets.service.validator.TicketTypesOperationValidator;
+import ru.itterminal.botdesk.tickets.model.TicketType;
+import ru.itterminal.botdesk.tickets.repository.TicketTypeRepository;
+import ru.itterminal.botdesk.tickets.service.validator.TicketTypeOperationValidator;
 
 import java.util.UUID;
 
@@ -21,26 +21,26 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringJUnitConfig(value = {TicketTypesServiceImpl.class})
-class TicketTypesServiceImplTest {
+@SpringJUnitConfig(value = {TicketTypeServiceImpl.class})
+class TicketTypeServiceImplTest {
 
     @MockBean
-    private TicketTypesRepository ticketTypesRepository;
+    private TicketTypeRepository ticketTypeRepository;
 
     @MockBean
-    private TicketTypesOperationValidator validator;
+    private TicketTypeOperationValidator validator;
 
     @Autowired
-    private TicketTypesServiceImpl service;
+    private TicketTypeServiceImpl service;
 
-    private TicketTypes ticketTypes;
+    private TicketType ticketType;
     private Account account;
 
     @BeforeEach
     void setUpBeforeEach() {
         account = new Account();
         account.setId(UUID.fromString(TestSecurityConfig.ACCOUNT_1_ID));
-        ticketTypes = TicketTypes
+        ticketType = TicketType
                 .builder()
                 .account(account)
                 .build();
@@ -49,42 +49,42 @@ class TicketTypesServiceImplTest {
     @Test
     void findByUniqueFields_shouldGetEntityNotExistException_whenUserIsNull() {
         assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(null));
-        verify(ticketTypesRepository, times(0)).getByNameAndAccount_IdAndIdNot(any(), any(), any());
+        verify(ticketTypeRepository, times(0)).getByNameAndAccount_IdAndIdNot(any(), any(), any());
     }
 
     @Test
     void findByUniqueFields_shouldGetEntityNotExistException_whenUserEmailIsNull() {
-        ticketTypes.setName(null);
-        assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(ticketTypes));
-        verify(ticketTypesRepository, times(0)).getByNameAndAccount_IdAndIdNot(any(), any(), any());
+        ticketType.setName(null);
+        assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(ticketType));
+        verify(ticketTypeRepository, times(0)).getByNameAndAccount_IdAndIdNot(any(), any(), any());
     }
 
     @Test
     void findByUniqueFields_shouldGetEntityNotExistException_whenUserIdIsNull() {
-        ticketTypes.setId(null);
-        assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(ticketTypes));
-        verify(ticketTypesRepository, times(0)).getByNameAndAccount_IdAndIdNot(any(), any(), any());
+        ticketType.setId(null);
+        assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(ticketType));
+        verify(ticketTypeRepository, times(0)).getByNameAndAccount_IdAndIdNot(any(), any(), any());
     }
 
     @Test
     void findByUniqueFields_shouldGetEntityNotExistException_whenUserAccountIsNull() {
-        ticketTypes.setAccount(null);
-        assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(ticketTypes));
-        verify(ticketTypesRepository, times(0)).getByNameAndAccount_IdAndIdNot(any(), any(), any());
+        ticketType.setAccount(null);
+        assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(ticketType));
+        verify(ticketTypeRepository, times(0)).getByNameAndAccount_IdAndIdNot(any(), any(), any());
     }
 
     @Test
     void findByIdAndAccountId_shouldGetEntityNotExistException_whenGroupIdIsNull() {
         UUID accountId = account.getId();
         assertThrows(EntityNotExistException.class, () -> service.findByIdAndAccountId(null, accountId));
-        verify(ticketTypesRepository, times(0)).getByIdAndAccount_Id(any(), any());
+        verify(ticketTypeRepository, times(0)).getByIdAndAccount_Id(any(), any());
     }
 
     @Test
     void findByIdAndAccountId_shouldGetEntityNotExistException_whenAccountIdIsNull() {
-        UUID groupId = ticketTypes.getId();
+        UUID groupId = ticketType.getId();
         assertThrows(EntityNotExistException.class, () -> service.findByIdAndAccountId(groupId, null));
-        verify(ticketTypesRepository, times(0)).getByIdAndAccount_Id(any(), any());
+        verify(ticketTypeRepository, times(0)).getByIdAndAccount_Id(any(), any());
     }
 
 }

@@ -19,11 +19,11 @@ import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
-import ru.itterminal.botdesk.tickets.model.TicketTypes;
-import ru.itterminal.botdesk.tickets.model.dto.TicketTypesDto;
-import ru.itterminal.botdesk.tickets.model.dto.TicketTypesFilterDto;
-import ru.itterminal.botdesk.tickets.model.spec.TicketTypesSpec;
-import ru.itterminal.botdesk.tickets.service.impl.TicketTypesServiceImpl;
+import ru.itterminal.botdesk.tickets.model.TicketType;
+import ru.itterminal.botdesk.tickets.model.dto.TicketTypeDto;
+import ru.itterminal.botdesk.tickets.model.dto.TicketTypeFilterDto;
+import ru.itterminal.botdesk.tickets.model.spec.TicketTypeSpec;
+import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -38,34 +38,34 @@ import static java.lang.String.format;
 @RestController("TicketTypesControllerV1")
 @Validated
 @RequestMapping("api/v1/ticketTypes")
-public class TicketTypesControllerV1 extends BaseController {
+public class TicketTypeControllerV1 extends BaseController {
 
-    private final TicketTypesServiceImpl service;
-    private final TicketTypesSpec spec;
+    private final TicketTypeServiceImpl service;
+    private final TicketTypeSpec spec;
     private final AccountServiceImpl accountService;
 
     @Autowired
-    public TicketTypesControllerV1(TicketTypesServiceImpl service, TicketTypesSpec typesSpec, AccountServiceImpl accountService) {
+    public TicketTypeControllerV1(TicketTypeServiceImpl service, TicketTypeSpec typesSpec, AccountServiceImpl accountService) {
         this.spec = typesSpec;
         this.service = service;
         this.accountService = accountService;
     }
 
-    private final String ENTITY_NAME = TicketTypes.class.getSimpleName();
+    private final String ENTITY_NAME = TicketType.class.getSimpleName();
 
     @PostMapping()
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
-    public ResponseEntity<TicketTypesDto> create(Principal principal,
-                                                 @Validated(Create.class) @RequestBody TicketTypesDto request) {
+    public ResponseEntity<TicketTypeDto> create(Principal principal,
+                                                @Validated(Create.class) @RequestBody TicketTypeDto request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
-        TicketTypes ticketTypes = modelMapper.map(request, TicketTypes.class);
-        ticketTypes.setDeleted(false);
+        TicketType ticketType = modelMapper.map(request, TicketType.class);
+        ticketType.setDeleted(false);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        ticketTypes.setAccount(accountService.findById(jwtUser.getAccountId()));
-        TicketTypes createdTicketTypes = service.create(ticketTypes);
-        TicketTypesDto returnedTicketTypes =
-                modelMapper.map(createdTicketTypes, TicketTypesDto.class);
-        log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdTicketTypes);
+        ticketType.setAccount(accountService.findById(jwtUser.getAccountId()));
+        TicketType createdTicketType = service.create(ticketType);
+        TicketTypeDto returnedTicketTypes =
+                modelMapper.map(createdTicketType, TicketTypeDto.class);
+        log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdTicketType);
         return new ResponseEntity<>(returnedTicketTypes, HttpStatus.CREATED);
     }
 
@@ -79,16 +79,16 @@ public class TicketTypesControllerV1 extends BaseController {
 
     @PutMapping()
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
-    public ResponseEntity<TicketTypesDto> update(Principal principal,
-            @Validated(Update.class) @RequestBody TicketTypesDto request) {
+    public ResponseEntity<TicketTypeDto> update(Principal principal,
+                                                @Validated(Update.class) @RequestBody TicketTypeDto request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
-        TicketTypes ticketTypes = modelMapper.map(request, TicketTypes.class);
+        TicketType ticketType = modelMapper.map(request, TicketType.class);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        ticketTypes.setAccount(accountService.findById(jwtUser.getAccountId()));
-        TicketTypes updatedTicketTypes = service.update(ticketTypes);
-        TicketTypesDto returnedTicketTypes =
-                modelMapper.map(updatedTicketTypes, TicketTypesDto.class);
-        log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedTicketTypes);
+        ticketType.setAccount(accountService.findById(jwtUser.getAccountId()));
+        TicketType updatedTicketType = service.update(ticketType);
+        TicketTypeDto returnedTicketTypes =
+                modelMapper.map(updatedTicketType, TicketTypeDto.class);
+        log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedTicketType);
         return new ResponseEntity<>(returnedTicketTypes, HttpStatus.OK);
     }
 
@@ -102,9 +102,9 @@ public class TicketTypesControllerV1 extends BaseController {
 
     @SuppressWarnings("DuplicatedCode")
     @GetMapping()
-    public ResponseEntity<Page<TicketTypesDto>> getByFilter(
+    public ResponseEntity<Page<TicketTypeDto>> getByFilter(
             Principal user,
-            @Valid @RequestBody TicketTypesFilterDto filter,
+            @Valid @RequestBody TicketTypeFilterDto filter,
             @RequestParam(defaultValue = PAGE_DEFAULT_VALUE) @PositiveOrZero int page,
             @RequestParam(defaultValue = SIZE_DEFAULT_VALUE) @Positive int size) {
         log.debug(FIND_INIT_MESSAGE, ENTITY_NAME, page, size, filter);
@@ -120,10 +120,10 @@ public class TicketTypesControllerV1 extends BaseController {
         Pageable pageable =
                 PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(filter.getDirection()),
                         filter.getSortBy()));
-        Page<TicketTypes> foundTicketTypes;
-        Page<TicketTypesDto> returnedTicketTypes;
+        Page<TicketType> foundTicketTypes;
+        Page<TicketTypeDto> returnedTicketTypes;
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
-        Specification<TicketTypes> ticketTypesSpecification = Specification
+        Specification<TicketType> ticketTypesSpecification = Specification
                 .where(filter.getName() == null ? null : spec.getTicketTypesByNameSpec(filter.getName()))
                 .and(filter.getComment() == null ? null : spec.getTicketTypesByCommentSpec(filter.getComment()))
                 .and(spec.getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted.fromString(filter.getDeleted())))
@@ -131,25 +131,18 @@ public class TicketTypesControllerV1 extends BaseController {
                 .and(filter.getOutId() == null ? null :  spec.getEntityByOutIdSpec(filter.getOutId()));
 
         foundTicketTypes = service.findAllByFilter(ticketTypesSpecification, pageable);
-        returnedTicketTypes = mapPage(foundTicketTypes, TicketTypesDto.class, pageable);
+        returnedTicketTypes = mapPage(foundTicketTypes, TicketTypeDto.class, pageable);
         log.debug(FIND_FINISH_MESSAGE, ENTITY_NAME, foundTicketTypes.getTotalElements());
         return new ResponseEntity<>(returnedTicketTypes, HttpStatus.OK);
     }
     @GetMapping("/{id}")
-    public ResponseEntity<TicketTypesDto> getById(Principal user, @PathVariable UUID id) {
+    public ResponseEntity<TicketTypeDto> getById(Principal user, @PathVariable UUID id) {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
-        TicketTypes foundTicketTypes;
-        foundTicketTypes = service.findByIdAndAccountId(id, jwtUser.getAccountId());
-        TicketTypesDto returnedTicketTypes = modelMapper.map(foundTicketTypes, TicketTypesDto.class);
-        log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundTicketTypes);
+        TicketType foundTicketType;
+        foundTicketType = service.findByIdAndAccountId(id, jwtUser.getAccountId());
+        TicketTypeDto returnedTicketTypes = modelMapper.map(foundTicketType, TicketTypeDto.class);
+        log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundTicketType);
         return new ResponseEntity<>(returnedTicketTypes, HttpStatus.OK);
     }
-
-    @DeleteMapping()
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
-    public ResponseEntity<Void> physicalDelete() {
-        throw new UnsupportedOperationException("Physical delete will be implement in the further");
-    }
-
 }

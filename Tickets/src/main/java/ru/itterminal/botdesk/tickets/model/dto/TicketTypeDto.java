@@ -16,15 +16,15 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class TicketTypesDto extends BaseEntityDto {
+public class TicketTypeDto extends BaseEntityDto {
 
-    @NotNull(groups = {Create.class, Update.class, Delete.class})
+    @NotNull(groups = {Create.class, Update.class})
     @Size(min = 1, max = 128, groups = {Create.class, Update.class})
     private String name;
 
     private String comment;
 
-    @Null(groups = {Create.class, Update.class, Delete.class})
+    @Null(groups = {Create.class, Update.class})
     private Boolean isPredefined;
 
 }

@@ -6,9 +6,9 @@ import org.springframework.stereotype.Component;
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 import ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl;
-import ru.itterminal.botdesk.tickets.model.TicketTypes;
+import ru.itterminal.botdesk.tickets.model.TicketType;
 import ru.itterminal.botdesk.tickets.model.projection.TicketTypesUniqueFields;
-import ru.itterminal.botdesk.tickets.service.impl.TicketTypesServiceImpl;
+import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,22 +16,23 @@ import java.util.Map;
 
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
 
 @Slf4j
 @Component
-public class TicketTypesOperationValidator extends BasicOperationValidatorImpl<TicketTypes> {
+public class TicketTypeOperationValidator extends BasicOperationValidatorImpl<TicketType> {
 
-    private final TicketTypesServiceImpl service;
+    private final TicketTypeServiceImpl service;
 
     @Autowired
-    public TicketTypesOperationValidator(TicketTypesServiceImpl service) {
+    public TicketTypeOperationValidator(TicketTypeServiceImpl service) {
         this.service = service;
     }
 
     @Override
-    public boolean checkUniqueness(TicketTypes entity) {
+    public boolean checkUniqueness(TicketType entity) {
         log.trace(CHECK_UNIQUENESS, entity);
-        Map<String, List<ValidationError>> errors = new HashMap<>();
+        var errors = createMapForLogicalErrors();
         List<TicketTypesUniqueFields> foundTicketTypes = service.findByUniqueFields(entity);
         if (foundTicketTypes.isEmpty()) {
             log.trace(FIELDS_UNIQUE, entity);
