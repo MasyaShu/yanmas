@@ -55,11 +55,17 @@ public class File extends BaseEntity {
                 Objects.equals(size, file.size) &&
                 Objects.equals(createdAt, file.createdAt) &&
                 Objects.equals(account, file.account) &&
-                Objects.equals(entityId, file.entityId);
+                Objects.equals(entityId, file.entityId) &&
+                Objects.equals(getId(), file.getId()) &&
+                Objects.equals(getOutId(), file.getOutId()) &&
+                Objects.equals(getVersion(), file.getVersion()) &&
+                Objects.equals(getDeleted(), file.getDeleted());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fileName, size, createdAt, account, entityId);
+        return Objects.hash(fileName, size, createdAt, account, entityId,
+                            getId(), getOutId(), getVersion(), getDeleted()
+        );
     }
 }

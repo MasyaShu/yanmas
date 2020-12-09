@@ -41,7 +41,7 @@ import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
 import ru.itterminal.botdesk.files.model.File;
-import ru.itterminal.botdesk.files.model.FileDto;
+import ru.itterminal.botdesk.files.model.dto.FileDto;
 import ru.itterminal.botdesk.files.service.FileServiceImpl;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 
