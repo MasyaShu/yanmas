@@ -1,4 +1,4 @@
-package ru.itterminal.botdesk.files.model;
+package ru.itterminal.botdesk.files.model.dto;
 
 import java.util.UUID;
 
