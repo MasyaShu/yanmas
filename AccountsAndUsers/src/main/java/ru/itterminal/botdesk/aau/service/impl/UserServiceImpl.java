@@ -164,7 +164,7 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
     @Override
     public User update(User entity) {
         validator.beforeUpdate(entity);
-        validator.checkUniqueness(entity);
+        validator.checkUniqueness(entity); //TODO deleete validator.checkUniqueness
         log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
         User entityFromDatabase = super.findById(entity.getId());
         if (entity.getPassword() == null || entity.getPassword().isEmpty()) {

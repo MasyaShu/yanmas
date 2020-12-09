@@ -25,11 +25,11 @@ public class TicketTypeServiceImpl extends CrudServiceImpl<TicketType, TicketTyp
 
     private static final String TICKET_TYPE_IS_NULL =
             "Not found ticket type by unique fields, ticketType is null";
-    private static final String NOT_FOUND_TICKET_TYPES_BY_UNIQUE_FIELDS_ACCOUNT_IS_NULL =
+    private static final String ACCOUNT_IS_NULL =
             "Not found ticket type by unique fields, account is null";
-    private static final String NOT_FOUND_TICKET_TYPES_BY_UNIQUE_FIELDS_NAME_IS_NULL =
+    private static final String NAME_IS_NULL =
             "Not found ticket type by unique fields, name is null";
-    private static final String NOT_FOUND_TICKET_TYPES_BY_UNIQUE_FIELDS_ID_IS_NULL =
+    private static final String UNIQUE_FIELDS_ID_IS_NULL =
             "Not found ticket type by unique fields, id is null";
     private static final String START_FIND_TICKET_TYPES_BY_UNIQUE_FIELDS =
             "Start find ticket type by unique fields, name: {} and not id: {} and not account: {}";
@@ -41,14 +41,24 @@ public class TicketTypeServiceImpl extends CrudServiceImpl<TicketType, TicketTyp
     @SuppressWarnings("DuplicatedCode")
     public List<TicketTypesUniqueFields> findByUniqueFields(TicketType ticketType) {
         chekObjectForNull(ticketType, TICKET_TYPE_IS_NULL, EntityNotExistException.class);
-        chekStringForNullOrEmpty(ticketType.getName(), NOT_FOUND_TICKET_TYPES_BY_UNIQUE_FIELDS_NAME_IS_NULL,
-                          NAME_IS_EMPTY, EntityNotExistException.class, CANT_FIND_BY_UNIQUE);
-        chekObjectForNull(ticketType.getId(), NOT_FOUND_TICKET_TYPES_BY_UNIQUE_FIELDS_ID_IS_NULL, EntityNotExistException.class);
-        chekObjectForNull(ticketType.getAccount(), NOT_FOUND_TICKET_TYPES_BY_UNIQUE_FIELDS_ACCOUNT_IS_NULL,
-                          EntityNotExistException.class);
+        chekStringForNullOrEmpty(ticketType.getName(), NAME_IS_NULL,
+                NAME_IS_EMPTY, EntityNotExistException.class, CANT_FIND_BY_UNIQUE);
+        chekObjectForNull(ticketType.getId(), UNIQUE_FIELDS_ID_IS_NULL, EntityNotExistException.class);
+        chekObjectForNull(ticketType.getAccount(), ACCOUNT_IS_NULL,
+                EntityNotExistException.class);
         log.trace(START_FIND_TICKET_TYPES_BY_UNIQUE_FIELDS, ticketType.getName(), ticketType.getId(), ticketType.getAccount());
         return repository.getByNameAndAccount_IdAndIdNot(ticketType.getName(), ticketType.getAccount().getId(), ticketType
                 .getId());
+    }
+
+    @Override
+    public TicketType update(TicketType entity) {
+        TicketType entityFromDatabase = super.findById(entity.getId());
+        entity.setIsPredefined(entityFromDatabase.getIsPredefined());
+        if (entity.getComment() == null) {
+            entity.setComment(entityFromDatabase.getComment());
+        }
+        return super.update(entity);
     }
 
     @SuppressWarnings("DuplicatedCode")
