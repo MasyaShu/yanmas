@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 @ContextConfiguration(classes = {TicketTypeRepositoryTestConfig.class, TicketTypeSpec.class, TicketTypeRepository.class})
-@Sql({"/create-user-test.sql"})
+@Sql({"/create-ticket-test.sql"})
 class TicketTypeRepositoryTest {
 
     @Autowired
