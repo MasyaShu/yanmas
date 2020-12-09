@@ -36,7 +36,6 @@ import java.util.UUID;
 import static java.lang.String.format;
 
 
-@SuppressWarnings("ConstantConditions")
 @Slf4j
 @RestController("GroupControllerV1")
 @Validated

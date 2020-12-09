@@ -10,15 +10,15 @@ import org.springframework.integration.channel.QueueChannel;
 import org.springframework.messaging.MessageChannel;
 
 import ru.itterminal.botdesk.integration.aws.s3.AwsS3Object;
-import ru.itterminal.botdesk.integration.aws.s3.S3ObjectOperations;
+import ru.itterminal.botdesk.integration.aws.s3.AwsS3ObjectOperations;
 
 @Configuration
 public class PutAwsS3ObjectFlow {
 
-    private final S3ObjectOperations s3ObjectOperations;
+    private final AwsS3ObjectOperations awsS3ObjectOperations;
 
-    public PutAwsS3ObjectFlow(S3ObjectOperations s3ObjectOperations) {
-        this.s3ObjectOperations = s3ObjectOperations;
+    public PutAwsS3ObjectFlow(AwsS3ObjectOperations awsS3ObjectOperations) {
+        this.awsS3ObjectOperations = awsS3ObjectOperations;
     }
 
     @Bean
@@ -35,7 +35,7 @@ public class PutAwsS3ObjectFlow {
     @ServiceActivator(inputChannel = "putAwsS3ObjectChannel",
             poller = @Poller(maxMessagesPerPoll = "1", fixedRate = "100"))
     private void putAwsS3Object(AwsS3Object awsS3Object) {
-        s3ObjectOperations.putObject(awsS3Object.getBucketName(), awsS3Object.getObjectName(), awsS3Object.getByteBuffer());
+        awsS3ObjectOperations.putObject(awsS3Object.getBucketName(), awsS3Object.getObjectName(), awsS3Object.getByteBuffer());
     }
 
 }

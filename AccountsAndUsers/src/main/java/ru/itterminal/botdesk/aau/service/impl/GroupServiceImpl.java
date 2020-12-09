@@ -2,7 +2,7 @@ package ru.itterminal.botdesk.aau.service.impl;
 
 import static java.lang.String.format;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID;
-import static ru.itterminal.botdesk.commons.util.CommonMethods.chekObjectForNull;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekObjectForNull;
 
 import java.util.List;
 import java.util.UUID;

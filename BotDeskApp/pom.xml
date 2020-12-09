@@ -37,6 +37,13 @@
             <artifactId>Tickets</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>ru.it-terminal.botdesk</groupId>
+            <artifactId>Files</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
     </dependencies>
 
 
