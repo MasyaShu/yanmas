@@ -1,9 +1,8 @@
 package ru.itterminal.botdesk.files.repository;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -24,7 +23,7 @@ import ru.itterminal.botdesk.files.model.File;
 @Sql({"/create-files-test.sql"})
 class FileRepositoryTest {
 
-    private final UUID UUID_ENTITY = UUID.fromString("c2760b6b-33a4-4ee0-bfad-f81128c08754");
+    private final UUID UUID_FILE = UUID.fromString("d286a51a-a834-48ed-a39b-5ae3d0640001");
     private final UUID UUID_ACCOUNT = UUID.fromString("cdfa6483-0769-4628-ba32-efd338a716de");
 
     @Autowired
@@ -32,7 +31,7 @@ class FileRepositoryTest {
 
     @Test
     void findAllByEntityId_shouldFindTwoFiles_whenTwoFilesExistInDatabaseForPassedEntityId() {
-        List<File> fileList = repository.findAllByEntityIdAndAccount_Id(UUID_ENTITY, UUID_ACCOUNT);
-        assertEquals(2, fileList.size());
+        File file = repository.findByAccountIdAndId(UUID_ACCOUNT, UUID_FILE).get();
+        assertNotNull(file);
     }
 }

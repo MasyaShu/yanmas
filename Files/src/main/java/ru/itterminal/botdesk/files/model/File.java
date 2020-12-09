@@ -42,6 +42,9 @@ public class File extends BaseEntity {
     @Column(name = "entity_id", nullable = false)
     private UUID entityId;
 
+    @Column(name = "is_uploaded", nullable = false)
+    private Boolean isUploaded;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

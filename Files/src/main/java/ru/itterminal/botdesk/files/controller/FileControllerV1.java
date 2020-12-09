@@ -2,11 +2,7 @@ package ru.itterminal.botdesk.files.controller;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
-
-import javax.validation.constraints.NotEmpty;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -27,15 +23,13 @@ import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
-import ru.itterminal.botdesk.files.model.File;
-import ru.itterminal.botdesk.files.model.dto.FileDto;
 import ru.itterminal.botdesk.files.service.FileServiceImpl;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
 
 @Slf4j
 @RestController("FileControllerV1")
 @Validated
-@RequestMapping("api/v1/file")
+@RequestMapping("api/v1/file-data")
 public class FileControllerV1 extends BaseController {
 
     private final FileServiceImpl fileService;
@@ -45,52 +39,6 @@ public class FileControllerV1 extends BaseController {
                             AccountServiceImpl accountService) {
         this.fileService = fileService;
         this.accountService = accountService;
-    }
-
-    private final String ENTITY_NAME = File.class.getSimpleName();
-
-    @PostMapping()
-    @ResponseStatus(value = HttpStatus.CREATED)
-    public ResponseEntity<FileDto> create(Principal principal,
-                                          @RequestParam("entityId") UUID entityId,
-                                          @RequestParam("fileName") @NotEmpty String fileName,
-                                          @RequestParam("file") MultipartFile file
-    ) {
-        log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, entityId);
-        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        byte[] bytesOfFile;
-        try {
-            bytesOfFile = file.getBytes();
-        }
-        catch (IOException e) {
-            return null;
-        }
-        File fileEntity = File.builder()
-                .account(accountService.findById(jwtUser.getAccountId()))
-                .size(bytesOfFile.length)
-                .fileName(fileName)
-                .entityId(entityId)
-                .createdAt(System.currentTimeMillis())
-                .build();
-        fileEntity.setDeleted(false);
-        File createdFile = fileService.create(fileEntity, bytesOfFile);
-        FileDto returnedFile = modelMapper.map(createdFile, FileDto.class);
-        log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdFile);
-        return new ResponseEntity<>(returnedFile, HttpStatus.CREATED);
-    }
-
-    @GetMapping("/list")
-    public ResponseEntity<List<FileDto>> getAllByEntityIdAndAccountId(
-            Principal principal,
-            @RequestParam("entityId") UUID entityId
-    ) {
-        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        Account account = accountService.findById(jwtUser.getAccountId());
-        List<File> fileList = fileService.findAllByEntityIdAndAccountId(account.getId(), entityId);
-        List<FileDto> fileDtoList = fileList.stream()
-                .map(file -> modelMapper.map(file, FileDto.class))
-                .collect(Collectors.toList());
-        return new ResponseEntity<>(fileDtoList, HttpStatus.OK);
     }
 
     @GetMapping()
@@ -106,6 +54,26 @@ public class FileControllerV1 extends BaseController {
                 .contentLength(fileData.length)
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource);
+    }
+
+    @PostMapping()
+    @ResponseStatus(value = HttpStatus.CREATED)
+    public ResponseEntity<Boolean> putFileData(Principal principal,
+                                               @RequestParam("fileId") UUID fileId,
+                                               @RequestParam("file") MultipartFile file
+    ) {
+        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
+        Account account = accountService.findById(jwtUser.getAccountId());
+        byte[] bytesOfFile;
+        try {
+            bytesOfFile = file.getBytes();
+        }
+        catch (IOException e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
+        }
+        boolean result = fileService.putFileData(account.getId(), fileId, bytesOfFile);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
 }
