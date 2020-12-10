@@ -82,7 +82,7 @@ create TABLE IF NOT EXISTS ticket_types
 (
     out_id  varchar(128),
     deleted bool         NOT NULL DEFAULT 'false',
-    version int2         NOT NULL DEFAULT (0),
+    version int4         NOT NULL DEFAULT (0),
     id      uuid         NOT NULL,
     name    varchar(128) NOT NULL,
     comment text,
@@ -94,7 +94,7 @@ create TABLE IF NOT EXISTS ticket_statuses
 (
     out_id                 varchar(128),
     deleted                bool         NOT NULL DEFAULT 'false',
-    version                int2         NOT NULL DEFAULT (0),
+    version                int4         NOT NULL DEFAULT (0),
     id                     uuid         NOT NULL,
     name                   varchar(128) NOT NULL,
     comment                text,

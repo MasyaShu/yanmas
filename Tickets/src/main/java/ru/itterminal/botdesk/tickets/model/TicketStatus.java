@@ -24,7 +24,7 @@ public class TicketStatus extends BaseEntity {
     private String comment;
 
     @Column(name = "sort_index", nullable = false)
-    private Short sortIndex; //TODO int or short
+    private Integer sortIndex;
 
     @Column(name = "is_started_predefined", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean isStartedPredefined;

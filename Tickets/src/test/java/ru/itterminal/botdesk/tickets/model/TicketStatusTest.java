@@ -27,7 +27,7 @@ class TicketStatusTest {
                 .isFinishedPredefined(false)
                 .isReopenedPredefined(false)
                 .isStartedPredefined(false)
-                .sortIndex((short) 10)
+                .sortIndex(10)
                 .build();
         ticketStatus_1.setId(id);
         ticketStatus_1.setDeleted(false);
@@ -41,7 +41,7 @@ class TicketStatusTest {
                 .isFinishedPredefined(false)
                 .isReopenedPredefined(false)
                 .isStartedPredefined(false)
-                .sortIndex((short) 10)
+                .sortIndex(10)
                 .build();
         ticketStatus_2.setId(id);
         ticketStatus_2.setDeleted(false);
