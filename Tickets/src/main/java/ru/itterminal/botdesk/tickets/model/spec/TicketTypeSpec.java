@@ -22,6 +22,7 @@ public class TicketTypeSpec implements BaseSpec<TicketType, Account> {
                 .like(criteriaBuilder.lower(root.get(NAME)), "%" + name.toLowerCase() + "%");
     }
 
+    @SuppressWarnings("DuplicatedCode")
     public Specification<TicketType> getTicketTypesByCommentSpec(String comment) {
         return (root, query, criteriaBuilder) -> {
             val objectPathComment = root.get(COMMENT);

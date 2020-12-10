@@ -27,6 +27,7 @@ public class TicketTypeOperationValidator extends BasicOperationValidatorImpl<Ti
         this.service = service;
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @Override
     public boolean checkUniqueness(TicketType entity) {
         log.trace(CHECK_UNIQUENESS, entity);

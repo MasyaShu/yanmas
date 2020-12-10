@@ -23,7 +23,6 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
-import ru.itterminal.botdesk.aau.util.AAUConstants;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
@@ -39,7 +38,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -369,8 +367,8 @@ class TicketStatusControllerV1Test {
                 PageRequest.of(Integer.parseInt(BaseController.PAGE_DEFAULT_VALUE), Integer.parseInt(
                         BaseController.SIZE_DEFAULT_VALUE),
                         Sort.by("name").ascending());
-        Page<TicketStatus> ticketStatussPageExpected = new PageImpl<>(List.of(ticketStatus_1, ticketStatus_2), pageable, 2);
-        when(service.findAllByFilter(any(), any())).thenReturn(ticketStatussPageExpected);
+        Page<TicketStatus> ticketStatusPageExpected = new PageImpl<>(List.of(ticketStatus_1, ticketStatus_2), pageable, 2);
+        when(service.findAllByFilter(any(), any())).thenReturn(ticketStatusPageExpected);
         MockHttpServletRequestBuilder request = get(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -388,8 +386,8 @@ class TicketStatusControllerV1Test {
                 PageRequest.of(Integer.parseInt(BaseController.PAGE_DEFAULT_VALUE), Integer.parseInt(
                         BaseController.SIZE_DEFAULT_VALUE),
                         Sort.by("name").ascending());
-        Page<TicketStatus> ticketStatussPageExpected = new PageImpl<>(List.of(ticketStatus_1, ticketStatus_2), pageable, 2);
-        when(service.findAllByFilter(any(), any())).thenReturn(ticketStatussPageExpected);
+        Page<TicketStatus> ticketStatusPageExpected = new PageImpl<>(List.of(ticketStatus_1, ticketStatus_2), pageable, 2);
+        when(service.findAllByFilter(any(), any())).thenReturn(ticketStatusPageExpected);
         MockHttpServletRequestBuilder request = get(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)

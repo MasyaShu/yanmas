@@ -26,18 +26,12 @@ class TicketTypeRepositoryTest {
     @Autowired
     private TicketTypeRepository ticketTypeRepository;
 
-    @Autowired
-    TicketTypeSpec spec;
-
     private static final UUID ACCOUNT_1_ID = UUID.fromString("cdfa6483-0769-4628-ba32-efd338a716de");
     private static final UUID NOT_EXIST_ID = UUID.fromString("0223e51a-4bb2-44ee-bc8e-1f047a2145e8");
     private static final UUID EXIST_ID = UUID.fromString("7f66b241-f8ec-4912-8f58-a4ceef2dd4c9");
     private static final String NOT_EXIST_NAME = "NotExistName";
     private static final String EXIST_NAME = "ticketTypes1";
     private static final UUID ACCOUNT_ID_NOT_EXIST = UUID.fromString("3ee38c7d-df86-40a7-8805-f75649f15cd1");
-
-
-
 
     @Test
     void getByNameAndAccount_IdAndIdNot_shouldGetEmptyList_whenNameNotExistAndIdNotExistInDatabase() {

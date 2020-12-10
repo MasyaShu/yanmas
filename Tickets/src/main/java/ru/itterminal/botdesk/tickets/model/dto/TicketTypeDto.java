@@ -3,7 +3,6 @@ package ru.itterminal.botdesk.tickets.model.dto;
 import lombok.*;
 import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
-import ru.itterminal.botdesk.commons.model.validator.scenario.Delete;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 
 import javax.validation.constraints.NotNull;
