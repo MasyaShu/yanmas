@@ -80,15 +80,16 @@ create TABLE IF NOT EXISTS files
 -- START MODULE **TICKETS**
 create TABLE IF NOT EXISTS ticket_types
 (
-    out_id  varchar(128),
-    deleted bool         NOT NULL DEFAULT 'false',
-    version int4         NOT NULL DEFAULT (0),
-    id      uuid         NOT NULL,
-    name    varchar(128) NOT NULL,
-    comment text,
-    is_predefined bool  NOT NULL DEFAULT 'false',
-    account_id  uuid    NOT NULL,
-    PRIMARY KEY (id)
+    out_id        varchar(128),
+    deleted       bool         NOT NULL DEFAULT 'false',
+    version       int4         NOT NULL DEFAULT (0),
+    id            uuid         NOT NULL,
+    name          varchar(128) NOT NULL,
+    comment       text,
+    is_predefined bool         NOT NULL DEFAULT 'false',
+    account_id    uuid         NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (account_id) REFERENCES account (id)
 );
 create TABLE IF NOT EXISTS ticket_statuses
 (
@@ -104,5 +105,6 @@ create TABLE IF NOT EXISTS ticket_statuses
     is_reopened_predefined bool         NOT NULL DEFAULT 'false',
     is_canceled_predefined bool         NOT NULL DEFAULT 'false',
     account_id             uuid         NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    FOREIGN KEY (account_id) REFERENCES account (id)
 );
