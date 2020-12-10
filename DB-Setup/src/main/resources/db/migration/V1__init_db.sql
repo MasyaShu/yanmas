@@ -3,7 +3,7 @@ create TABLE IF NOT EXISTS account
 (
     out_id  varchar(128),
     deleted bool        NOT NULL DEFAULT 'false',
-    version int2        NOT NULL DEFAULT (0),
+    version int4        NOT NULL DEFAULT (0),
     id      uuid        NOT NULL,
     name    varchar(20) NOT NULL,
     PRIMARY KEY (id)
@@ -12,7 +12,7 @@ create TABLE IF NOT EXISTS group_users
 (
     out_id        varchar(128),
     deleted       bool         NOT NULL DEFAULT 'false',
-    version       int2         NOT NULL DEFAULT (0),
+    version       int4         NOT NULL DEFAULT (0),
     id            uuid         NOT NULL,
     name          varchar(128) NOT NULL,
     comment       text,
@@ -25,7 +25,7 @@ create TABLE IF NOT EXISTS role
 (
     out_id  varchar(128),
     deleted bool        NOT NULL DEFAULT 'false',
-    version int2        NOT NULL DEFAULT (0),
+    version int4        NOT NULL DEFAULT (0),
     id      uuid        NOT NULL,
     name    varchar(30) NOT NULL,
     weight  int         NOT NULL,
@@ -35,7 +35,7 @@ create TABLE IF NOT EXISTS users
 (
     out_id                    varchar(128),
     deleted                   bool         NOT NULL DEFAULT 'false',
-    version                   int2         NOT NULL DEFAULT (0),
+    version                   int4         NOT NULL DEFAULT (0),
     id                        uuid         NOT NULL,
     email                     varchar(128) NOT NULL UNIQUE,
     first_name                varchar(20),
@@ -66,7 +66,7 @@ create TABLE IF NOT EXISTS files
 (
     out_id      varchar(128),
     deleted     bool         NOT NULL DEFAULT 'false',
-    version     int2         NOT NULL DEFAULT (0),
+    version     int4         NOT NULL DEFAULT (0),
     id          uuid         NOT NULL,
     file_name   varchar(256) NOT NULL,
     size        int          NOT NULL,
@@ -82,7 +82,7 @@ create TABLE IF NOT EXISTS ticket_types
 (
     out_id  varchar(128),
     deleted bool         NOT NULL DEFAULT 'false',
-    version int2         NOT NULL DEFAULT (0),
+    version int4         NOT NULL DEFAULT (0),
     id      uuid         NOT NULL,
     name    varchar(128) NOT NULL,
     comment text,
