@@ -104,6 +104,17 @@ public class CommonMethodsForValidation {
 
     @SuppressWarnings("unused")
     public static Map<String, List<ValidationError>>
+    chekObjectsIsEquals(Object objectOne, Object objecrTwo, String keyError,
+                                String errorMessageIfObjectsIsNotEquals) {
+        var errors = createMapForLogicalErrors();
+        if (!objectOne.equals(objecrTwo) ) {
+            errors.put(keyError, singletonList(new ValidationError(keyError, errorMessageIfObjectsIsNotEquals)));
+        }
+        return errors;
+    }
+
+    @SuppressWarnings("unused")
+    public static Map<String, List<ValidationError>>
     chekNumberForNullOrZero(Object number, String keyError,
                             String errorMessageForNull, String errorMessageIfZero) {
         var errors = createMapForLogicalErrors();
@@ -123,7 +134,7 @@ public class CommonMethodsForValidation {
         return new HashMap<>();
     }
 
-    public static void throwLogicalValidationExceptionIfErrorsNotEmpty(Map<String, List<ValidationError>> errors) {
+    public static void ifErrorsNotEmptyThrowLogicalValidationException(Map<String, List<ValidationError>> errors) {
         if (!errors.isEmpty()) {
             log.error(FIELDS_ARE_NOT_VALID, errors);
             throw new LogicalValidationException(VALIDATION_FAILED, errors);
