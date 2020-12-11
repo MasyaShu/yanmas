@@ -5,7 +5,7 @@ import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chek
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekObjectForNull;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekStringForNullOrEmpty;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.throwLogicalValidationExceptionIfErrorsNotEmpty;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.ifErrorsNotEmptyThrowLogicalValidationException;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -72,7 +72,7 @@ public class FileOperationValidator extends BasicOperationValidatorImpl<File> {
                 ENTITY_ID,
                 ENTITY_ID_NULL
         ));
-        throwLogicalValidationExceptionIfErrorsNotEmpty(errors);
+        ifErrorsNotEmptyThrowLogicalValidationException(errors);
         return true;
     }
 }

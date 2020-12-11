@@ -3,7 +3,7 @@ package ru.itterminal.botdesk.files.service;
 import static java.lang.String.format;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekObjectForNull;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.throwLogicalValidationExceptionIfErrorsNotEmpty;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.ifErrorsNotEmptyThrowLogicalValidationException;
 
 import java.nio.ByteBuffer;
 import java.util.UUID;
@@ -52,7 +52,8 @@ public class FileServiceImpl extends CrudServiceImpl<File, FileOperationValidato
         val logicalErrors = createMapForLogicalErrors();
         logicalErrors.putAll(chekObjectForNull(accountId, ACCOUNT_ID, ACCOUNT_ID_IS_NULL));
         logicalErrors.putAll(chekObjectForNull(fileId, FILE_ID, FILE_ID_IS_NULL));
-        throwLogicalValidationExceptionIfErrorsNotEmpty(logicalErrors);
+        ifErrorsNotEmptyThrowLogicalValidationException(logicalErrors);
+        // TODO if getIsUploaded()==true
         return awsS3ObjectOperations.getObject(accountId.toString(), fileId.toString());
     }
 
@@ -61,7 +62,7 @@ public class FileServiceImpl extends CrudServiceImpl<File, FileOperationValidato
         logicalErrors.putAll(chekObjectForNull(bytes, BYTES_OF_FILE, BYTES_OF_FILE_IS_NULL));
         logicalErrors.putAll(chekObjectForNull(accountId, ACCOUNT_ID, ACCOUNT_ID_IS_NULL));
         logicalErrors.putAll(chekObjectForNull(fileId, FILE_ID, FILE_ID_IS_NULL));
-        throwLogicalValidationExceptionIfErrorsNotEmpty(logicalErrors);
+        ifErrorsNotEmptyThrowLogicalValidationException(logicalErrors);
         File fileFromDatabase = repository.findByAccountIdAndId(accountId, fileId).orElseThrow(() -> {
             String messageException = format(NOT_FOUND_FILE, accountId, fileId);
             log.trace(messageException);

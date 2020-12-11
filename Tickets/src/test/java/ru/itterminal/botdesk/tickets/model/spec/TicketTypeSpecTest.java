@@ -15,7 +15,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.itterminal.botdesk.tickets.model.TicketType;
 import ru.itterminal.botdesk.tickets.repository.TicketTypeRepository;
-import ru.itterminal.botdesk.tickets.repository.TicketTypeRepositoryTestConfig;
+import ru.itterminal.botdesk.tickets.repository.TicketRepositoryTestConfig;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 @TestInstance(PER_CLASS)
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
-@ContextConfiguration(classes = {TicketTypeRepositoryTestConfig.class, TicketTypeSpec.class})
+@ContextConfiguration(classes = {TicketRepositoryTestConfig.class, TicketTypeSpec.class})
 @Sql({"/create-ticket-test.sql"})
 class TicketTypeSpecTest {
 
