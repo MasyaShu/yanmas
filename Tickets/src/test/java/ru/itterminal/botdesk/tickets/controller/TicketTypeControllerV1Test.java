@@ -80,7 +80,7 @@ class TicketTypeControllerV1Test {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String HOST = "http://localhost";
     private static final String PORT = ":8081";
-    private static final String API = "api/v1/ticketTypes/";
+    private static final String API = "api/v1/ticketType/";
 
     private TicketType ticketType_1;
     private TicketType ticketType_2;
