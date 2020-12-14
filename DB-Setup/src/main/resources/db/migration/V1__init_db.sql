@@ -108,3 +108,27 @@ create TABLE IF NOT EXISTS ticket_statuses
     PRIMARY KEY (id),
     FOREIGN KEY (account_id) REFERENCES account (id)
 );
+
+create TABLE IF NOT EXISTS ticket_template
+(
+    out_id                     varchar(128),
+    deleted                    bool    NOT NULL DEFAULT 'false',
+    version                    int4    NOT NULL DEFAULT (0),
+    id                         uuid    NOT NULL,
+    subject                    varchar(256),
+    description                text,
+    date_next_run              bigint,
+    date_start                 bigint,
+    date_end                   bigint,
+    zone_id                    varchar NOT NULL,
+    expression_schedule        varchar NOT NULL,
+    is_only_one_ticket_in_work bool    NOT NULL DEFAULT 'false',
+    is_active                  bool    NOT NULL DEFAULT 'true',
+    account_id                 uuid    NOT NULL,
+    user_id                    uuid    NOT NULL,
+    type_ticket_id             uuid    NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (account_id) REFERENCES account (id),
+    FOREIGN KEY (user_id) REFERENCES account (id),
+    FOREIGN KEY (type_ticket_id) REFERENCES account (id)
+);

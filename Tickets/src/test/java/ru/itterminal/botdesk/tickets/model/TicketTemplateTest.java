@@ -6,40 +6,51 @@ import org.junit.jupiter.api.TestInstance;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
 @TestInstance(PER_CLASS)
-class TicketStatusTest {
-    
-    TicketStatus ticketStatus_1;
-    TicketStatus ticketStatus_2;
+class TicketTemplateTest {
+
+    TicketTemplate ticketStatus_1;
+    TicketTemplate ticketStatus_2;
     final UUID id = UUID.randomUUID();
 
     @BeforeEach
     void setUp() {
-        ticketStatus_1 = TicketStatus
+        ticketStatus_1 = TicketTemplate
                 .builder()
                 .account(null)
-                .name("ticketStatus_1")
-                .isCanceledPredefined(true)
-                .isFinishedPredefined(false)
-                .isReopenedPredefined(false)
-                .isStartedPredefined(false)
-                .sortIndex(10)
+                .subject("TicketTemplate")
+                .description("")
+                .Author(null)
+                .dateEnd(0L)
+                .dateNextRun(0L)
+                .dateStart(0L)
+                .expressionSchedule("1 2 3 4 5 6")
+                .isActive(true)
+                .isOnlyOneTicketInWork(true)
+                .ticketType(null)
+                .zoneId("Europe/Moscow")
                 .build();
         ticketStatus_1.setId(id);
         ticketStatus_1.setDeleted(false);
 
-        ticketStatus_2 = TicketStatus
+        ticketStatus_2 = TicketTemplate
                 .builder()
                 .account(null)
-                .name("ticketStatus_1")
-                .isCanceledPredefined(true)
-                .isFinishedPredefined(false)
-                .isReopenedPredefined(false)
-                .isStartedPredefined(false)
-                .sortIndex(10)
+                .subject("TicketTemplate")
+                .description("")
+                .Author(null)
+                .dateEnd(0L)
+                .dateNextRun(0L)
+                .dateStart(0L)
+                .expressionSchedule("1 2 3 4 5 6")
+                .isActive(true)
+                .isOnlyOneTicketInWork(true)
+                .ticketType(null)
+                .zoneId("Europe/Moscow")
                 .build();
         ticketStatus_2.setId(id);
         ticketStatus_2.setDeleted(false);
@@ -52,14 +63,14 @@ class TicketStatusTest {
 
     @Test
     void equals_shouldGetFalse_whenOneFieldAreNotEquals() {
-        ticketStatus_1.setSortIndex(0);
+        ticketStatus_1.setSubject("");
         assertNotEquals(ticketStatus_1, ticketStatus_2);
     }
 
     @Test
     void equals_shouldGetTrue_whenBothObjectsIsNew() {
-        TicketStatus ticketStatus_1 = new TicketStatus();
-        TicketStatus ticketStatus_2 = new TicketStatus();
+        TicketTemplate ticketStatus_1 = new TicketTemplate();
+        TicketTemplate ticketStatus_2 = new TicketTemplate();
         assertEquals(ticketStatus_1, ticketStatus_2);
     }
 
@@ -69,4 +80,5 @@ class TicketStatusTest {
         ticketStatus_1.setVersion(1);
         assertNotEquals(ticketStatus_1, ticketStatus_2);
     }
+
 }

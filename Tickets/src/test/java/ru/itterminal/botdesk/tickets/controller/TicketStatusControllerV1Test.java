@@ -23,17 +23,16 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
-import ru.itterminal.botdesk.aau.util.AAUConstants;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
 import ru.itterminal.botdesk.commons.util.CommonConstants;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
-import ru.itterminal.botdesk.tickets.model.TicketType;
-import ru.itterminal.botdesk.tickets.model.dto.TicketTypeDto;
-import ru.itterminal.botdesk.tickets.model.dto.TicketTypeFilterDto;
-import ru.itterminal.botdesk.tickets.model.spec.TicketTypeSpec;
-import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
+import ru.itterminal.botdesk.tickets.model.TicketStatus;
+import ru.itterminal.botdesk.tickets.model.dto.TicketStatusDto;
+import ru.itterminal.botdesk.tickets.model.dto.TicketStatusFilterDto;
+import ru.itterminal.botdesk.tickets.model.spec.TicketStatusSpec;
+import ru.itterminal.botdesk.tickets.service.impl.TicketStatusServiceImpl;
 
 import java.util.List;
 import java.util.UUID;
@@ -45,21 +44,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringJUnitConfig(value = {TicketTypeControllerV1.class, TicketTypeSpec.class, FilterChainProxy.class})
+@SpringJUnitConfig(value = {TicketStatusControllerV1.class, TicketStatusSpec.class, FilterChainProxy.class})
 @Import(TestSecurityConfig.class)
 @WebMvcTest
 @ActiveProfiles("Test")
-class TicketTypeControllerV1Test {
+class TicketStatusControllerV1Test {
 
     @MockBean
-    private TicketTypeServiceImpl service;
+    private TicketStatusServiceImpl service;
 
     @MockBean
     private AccountServiceImpl accountService;
 
     @Autowired
-    private TicketTypeControllerV1 controller;
+    private TicketStatusControllerV1 controller;
 
     @Autowired
     FilterChainProxy springSecurityFilterChain;
@@ -80,42 +80,45 @@ class TicketTypeControllerV1Test {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String HOST = "http://localhost";
     private static final String PORT = ":8081";
-    private static final String API = "api/v1/ticketType/";
+    private static final String API = "api/v1/ticketStatus/";
 
-    private TicketType ticketType_1;
-    private TicketType ticketType_2;
-    private TicketTypeDto ticketTypeDto;
-    private TicketTypeFilterDto ticketTypeFilterDto;
+    private TicketStatus ticketStatus_1;
+    private TicketStatus ticketStatus_2;
+    private TicketStatusDto ticketStatusDto;
+    private TicketStatusFilterDto ticketStatusFilterDto;
 
-    private static final String TICKET_TYPES_ID_1 = "f2cebd99-bc22-40fa-a596-695d0a35b316";
-    private static final String TICKET_TYPES_ID_2 = "0bcefd3c-7986-4f5a-8918-7e675d1d3f3a";
-    private static final String TICKET_TYPES_NAME_1 = "ticketTypes1";
-    private static final String TICKET_TYPES_NAME_2 = "ticketTypes2";
+    private static final String TICKET_STATUS_ID_1 = "7f66b241-f8ec-4912-8f58-a4ceef2dd4c9";
+    private static final String TICKET_STATUS_ID_2 = "17b13694-1907-4af9-8f5d-bfa444356e73";
+    private static final String TICKET_STATUS_NAME_1 = "started";
+    private static final String TICKET_STATUS_NAME_2 = "finished";
     private static final String INVALID_DELETED = "ERROR";
     private static final String INVALID_SORT_BY = "ERROR";
     private static final String INVALID_DIRECTION = "ERROR";
     private static final String INVALID_NAME = "";
+    public static final String MUST_BE_ANY_OF_SORT_INDEX = "must be any of: sortIndex";
+
 
     @BeforeEach
     void setUpBeforeEach() {
-        ticketType_1 = TicketType
+        ticketStatus_1 = TicketStatus
                 .builder()
-                .name(TICKET_TYPES_NAME_1)
+                .name(TICKET_STATUS_NAME_1)
                 .build();
-        ticketType_1.setId(UUID.fromString(TICKET_TYPES_ID_1));
+        ticketStatus_1.setId(UUID.fromString(TICKET_STATUS_ID_1));
 
-        ticketType_2 = TicketType
+        ticketStatus_2 = TicketStatus
                 .builder()
-                .name(TICKET_TYPES_NAME_2)
+                .name(TICKET_STATUS_NAME_2)
                 .build();
-        ticketType_2.setId(UUID.fromString(TICKET_TYPES_ID_2));
+        ticketStatus_2.setId(UUID.fromString(TICKET_STATUS_ID_2));
 
-        ticketTypeDto = TicketTypeDto
+        ticketStatusDto = TicketStatusDto
                 .builder()
-                .name(TICKET_TYPES_NAME_1)
+                .name(TICKET_STATUS_NAME_1)
+                .sortIndex(10)
                 .build();
 
-        ticketTypeFilterDto = TicketTypeFilterDto
+        ticketStatusFilterDto = TicketStatusFilterDto
                 .builder()
                 .build();
     }
@@ -123,28 +126,28 @@ class TicketTypeControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void create_shouldCreate_whenValidDataPassed() throws Exception {
-        ticketTypeDto.setDeleted(null);
-        when(service.create(any())).thenReturn(ticketType_1);
+        ticketStatusDto.setDeleted(null);
+        when(service.create(any())).thenReturn(ticketStatus_1);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(ticketTypeDto));
+                .content(objectMapper.writeValueAsString(ticketStatusDto));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(TICKET_TYPES_ID_1))
-                .andExpect(jsonPath("$.name").value(TICKET_TYPES_NAME_1));
+                .andExpect(jsonPath("$.id").value(TICKET_STATUS_ID_1))
+                .andExpect(jsonPath("$.name").value(TICKET_STATUS_NAME_1));
         verify(service, times(1)).create(any());
     }
 
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     void create_shouldGetStatusForbidden_whenRoleUserAuthor() throws Exception {
-        ticketTypeDto.setDeleted(null);
+        ticketStatusDto.setDeleted(null);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(ticketTypeDto));
+                .content(objectMapper.writeValueAsString(ticketStatusDto));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
@@ -154,11 +157,11 @@ class TicketTypeControllerV1Test {
     @Test
     @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_INNER_GROUP")
     void create_shouldGetStatusForbidden_whenRoleUserExecutor() throws Exception {
-        ticketTypeDto.setDeleted(null);
+        ticketStatusDto.setDeleted(null);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(ticketTypeDto));
+                .content(objectMapper.writeValueAsString(ticketStatusDto));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
@@ -168,14 +171,14 @@ class TicketTypeControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
-        ticketTypeDto.setName(null);
-        ticketTypeDto.setId(UUID.fromString(TICKET_TYPES_ID_2));
-        ticketTypeDto.setVersion(1);
-        ticketTypeDto.setDeleted(false);
+        ticketStatusDto.setName(null);
+        ticketStatusDto.setId(UUID.fromString(TICKET_STATUS_ID_2));
+        ticketStatusDto.setVersion(1);
+        ticketStatusDto.setDeleted(false);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(ticketTypeDto));
+                .content(objectMapper.writeValueAsString(ticketStatusDto));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -195,12 +198,12 @@ class TicketTypeControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenPassedNameIsEmpty() throws Exception {
-        ticketTypeDto.setDeleted(null);
-        ticketTypeDto.setName("");
+        ticketStatusDto.setDeleted(null);
+        ticketStatusDto.setName("");
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(ticketTypeDto));
+                .content(objectMapper.writeValueAsString(ticketStatusDto));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -216,7 +219,7 @@ class TicketTypeControllerV1Test {
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(ticketTypeDto));
+                .content(objectMapper.writeValueAsString(ticketStatusDto));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
@@ -226,20 +229,20 @@ class TicketTypeControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void update_shouldUpdate_whenValidDataPassed() throws Exception {
-        ticketTypeDto.setId(UUID.fromString(TICKET_TYPES_ID_1));
-        ticketTypeDto.setVersion(1);
-        ticketTypeDto.setName(TICKET_TYPES_NAME_1);
-        ticketTypeDto.setDeleted(false);
-        when(service.update(any())).thenReturn(ticketType_1);
+        ticketStatusDto.setId(UUID.fromString(TICKET_STATUS_ID_1));
+        ticketStatusDto.setVersion(1);
+        ticketStatusDto.setName(TICKET_STATUS_NAME_1);
+        ticketStatusDto.setDeleted(false);
+        when(service.update(any())).thenReturn(ticketStatus_1);
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(ticketTypeDto));
+                .content(objectMapper.writeValueAsString(ticketStatusDto));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value(TICKET_TYPES_NAME_1))
-                .andExpect(jsonPath("$.id").value(TICKET_TYPES_ID_1));
+                .andExpect(jsonPath("$.name").value(TICKET_STATUS_NAME_1))
+                .andExpect(jsonPath("$.id").value(TICKET_STATUS_ID_1));
         verify(service, times(1)).update(any());
     }
 
@@ -249,7 +252,7 @@ class TicketTypeControllerV1Test {
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(ticketTypeDto));
+                .content(objectMapper.writeValueAsString(ticketStatusDto));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
@@ -259,14 +262,14 @@ class TicketTypeControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
-        ticketTypeDto.setName(null);
-        ticketTypeDto.setId(null);
-        ticketTypeDto.setVersion(null);
-        ticketTypeDto.setDeleted(null);
+        ticketStatusDto.setName(null);
+        ticketStatusDto.setId(null);
+        ticketStatusDto.setVersion(null);
+        ticketStatusDto.setDeleted(null);
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(ticketTypeDto));
+                .content(objectMapper.writeValueAsString(ticketStatusDto));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -284,11 +287,11 @@ class TicketTypeControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenVersionIsNegative() throws Exception {
-        ticketTypeDto.setVersion(-15);
+        ticketStatusDto.setVersion(-15);
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(ticketTypeDto));
+                .content(objectMapper.writeValueAsString(ticketStatusDto));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -302,10 +305,10 @@ class TicketTypeControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidIdPassed() throws Exception {
-        ticketTypeDto.setId(UUID.fromString(TICKET_TYPES_ID_1));
-        ticketTypeDto.setVersion(1);
-        String json = objectMapper.writeValueAsString(ticketTypeDto);
-        json = json.replace(TICKET_TYPES_ID_1, "abracadabra");
+        ticketStatusDto.setId(UUID.fromString(TICKET_STATUS_ID_1));
+        ticketStatusDto.setVersion(1);
+        String json = objectMapper.writeValueAsString(ticketStatusDto);
+        json = json.replace(TICKET_STATUS_ID_1, "abracadabra");
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -320,20 +323,20 @@ class TicketTypeControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getById_shouldFindOneGroup_whenGroupExistInDatabaseByPassedId() throws Exception {
-        when(service.findByIdAndAccountId(any(), any())).thenReturn(ticketType_1);
-        mockMvc.perform(get(HOST + PORT + API + TICKET_TYPES_ID_1))
+        when(service.findByIdAndAccountId(any(), any())).thenReturn(ticketStatus_1);
+        mockMvc.perform(get(HOST + PORT + API + TICKET_STATUS_ID_1))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value(TICKET_TYPES_NAME_1))
-                .andExpect(jsonPath("$.id").value(TICKET_TYPES_ID_1));
+                .andExpect(jsonPath("$.name").value(TICKET_STATUS_NAME_1))
+                .andExpect(jsonPath("$.id").value(TICKET_STATUS_ID_1));
         verify(service, times(1)).findByIdAndAccountId(any(), any());
     }
 
     @Test
     @WithAnonymousUser
     void getById_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
-        when(service.findByIdAndAccountId(any(), any())).thenReturn(ticketType_1);
-        mockMvc.perform(get(HOST + PORT + API + TICKET_TYPES_ID_1))
+        when(service.findByIdAndAccountId(any(), any())).thenReturn(ticketStatus_1);
+        mockMvc.perform(get(HOST + PORT + API + TICKET_STATUS_ID_1))
                 .andDo(print())
                 .andExpect(status().isForbidden());
     }
@@ -342,7 +345,7 @@ class TicketTypeControllerV1Test {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getById_shouldRespondNotFound_whenPassedIdNotExist() throws Exception {
         when(service.findByIdAndAccountId(any(), any())).thenThrow(EntityNotExistException.class);
-        mockMvc.perform(get(HOST + PORT + API + TICKET_TYPES_ID_1))
+        mockMvc.perform(get(HOST + PORT + API + TICKET_STATUS_ID_1))
                 .andDo(print())
                 .andExpect(status().isNotFound());
         verify(service, times(1)).findByIdAndAccountId(any(), any());
@@ -364,12 +367,12 @@ class TicketTypeControllerV1Test {
                 PageRequest.of(Integer.parseInt(BaseController.PAGE_DEFAULT_VALUE), Integer.parseInt(
                         BaseController.SIZE_DEFAULT_VALUE),
                         Sort.by("name").ascending());
-        Page<TicketType> ticketTypesPageExpected = new PageImpl<>(List.of(ticketType_1, ticketType_2), pageable, 2);
-        when(service.findAllByFilter(any(), any())).thenReturn(ticketTypesPageExpected);
+        Page<TicketStatus> ticketStatusPageExpected = new PageImpl<>(List.of(ticketStatus_1, ticketStatus_2), pageable, 2);
+        when(service.findAllByFilter(any(), any())).thenReturn(ticketStatusPageExpected);
         MockHttpServletRequestBuilder request = get(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(ticketTypeFilterDto));
+                .content(objectMapper.writeValueAsString(ticketStatusFilterDto));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
@@ -383,19 +386,19 @@ class TicketTypeControllerV1Test {
                 PageRequest.of(Integer.parseInt(BaseController.PAGE_DEFAULT_VALUE), Integer.parseInt(
                         BaseController.SIZE_DEFAULT_VALUE),
                         Sort.by("name").ascending());
-        Page<TicketType> ticketTypesPageExpected = new PageImpl<>(List.of(ticketType_1, ticketType_2), pageable, 2);
-        when(service.findAllByFilter(any(), any())).thenReturn(ticketTypesPageExpected);
+        Page<TicketStatus> ticketStatusPageExpected = new PageImpl<>(List.of(ticketStatus_1, ticketStatus_2), pageable, 2);
+        when(service.findAllByFilter(any(), any())).thenReturn(ticketStatusPageExpected);
         MockHttpServletRequestBuilder request = get(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(ticketTypeFilterDto));
+                .content(objectMapper.writeValueAsString(ticketStatusFilterDto));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].id").value(TICKET_TYPES_ID_1))
-                .andExpect(jsonPath("$.content[1].id").value(TICKET_TYPES_ID_2))
-                .andExpect(jsonPath("$.content[0].name").value(TICKET_TYPES_NAME_1))
-                .andExpect(jsonPath("$.content[1].name").value(TICKET_TYPES_NAME_2))
+                .andExpect(jsonPath("$.content[0].id").value(TICKET_STATUS_ID_1))
+                .andExpect(jsonPath("$.content[1].id").value(TICKET_STATUS_ID_2))
+                .andExpect(jsonPath("$.content[0].name").value(TICKET_STATUS_NAME_1))
+                .andExpect(jsonPath("$.content[1].name").value(TICKET_STATUS_NAME_2))
                 .andExpect(jsonPath("$.content", hasSize(2)));
         verify(service, times(1)).findAllByFilter(any(), any());
     }
@@ -403,14 +406,14 @@ class TicketTypeControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
-        ticketTypeFilterDto.setName(INVALID_NAME);
-        ticketTypeFilterDto.setSortBy(INVALID_SORT_BY);
-        ticketTypeFilterDto.setDeleted(INVALID_DELETED);
-        ticketTypeFilterDto.setDirection(INVALID_DIRECTION);
+        ticketStatusFilterDto.setName(INVALID_NAME);
+        ticketStatusFilterDto.setSortBy(INVALID_SORT_BY);
+        ticketStatusFilterDto.setDeleted(INVALID_DELETED);
+        ticketStatusFilterDto.setDirection(INVALID_DIRECTION);
         MockHttpServletRequestBuilder request = get(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(ticketTypeFilterDto));
+                .content(objectMapper.writeValueAsString(ticketStatusFilterDto));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -421,7 +424,7 @@ class TicketTypeControllerV1Test {
                 .andExpect(MockMvcResultMatchers
                         .jsonPath("$.errors.direction[?(@.message == '%s')]", CommonConstants.MUST_BE_ANY_OF_ASC_DESC).exists())
                 .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.sortBy[?(@.message == '%s')]", AAUConstants.MUST_BE_ANY_OF_NAME)
+                        .jsonPath("$.errors.sortBy[?(@.message == '%s')]", MUST_BE_ANY_OF_SORT_INDEX)
                         .exists());
         verify(service, times(0)).findAllByFilter(any(), any());
     }
@@ -430,7 +433,7 @@ class TicketTypeControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void physicalDelete_shouldThrowUnsupportedOperationException_untilMethodWouldBeImplemented() throws Exception {
-        mockMvc.perform(delete(HOST + PORT + API + TICKET_TYPES_ID_1))
+        mockMvc.perform(delete(HOST + PORT + API + TICKET_STATUS_ID_1))
                 .andDo(print())
                 .andExpect(status().isMethodNotAllowed());
     }
@@ -438,7 +441,7 @@ class TicketTypeControllerV1Test {
     @Test
     @WithAnonymousUser
     void physicalDelete_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
-        mockMvc.perform(delete(HOST + PORT + API + TICKET_TYPES_ID_1))
+        mockMvc.perform(delete(HOST + PORT + API + TICKET_STATUS_ID_1))
                 .andDo(print())
                 .andExpect(status().isForbidden());
     }
@@ -514,4 +517,5 @@ class TicketTypeControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isForbidden());
     }
+
 }

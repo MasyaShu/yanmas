@@ -20,9 +20,6 @@ public class TicketStatus extends BaseEntity {
     @Column(nullable = false, length = 128)
     private String name;
 
-    @Column
-    private String comment;
-
     @Column(name = "sort_index", nullable = false)
     private Integer sortIndex;
 
@@ -48,7 +45,6 @@ public class TicketStatus extends BaseEntity {
         if (o == null || getClass() != o.getClass()) return false;
         TicketStatus ticketStatus = (TicketStatus) o;
         return Objects.equals(name, ticketStatus.name) &&
-                Objects.equals(comment, ticketStatus.comment) &&
                 Objects.equals(sortIndex, ticketStatus.sortIndex) &&
                 Objects.equals(isStartedPredefined, ticketStatus.isStartedPredefined) &&
                 Objects.equals(isFinishedPredefined, ticketStatus.isFinishedPredefined) &&
@@ -63,7 +59,7 @@ public class TicketStatus extends BaseEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, comment, sortIndex, isStartedPredefined, isFinishedPredefined,
+        return Objects.hash(name, sortIndex, isStartedPredefined, isFinishedPredefined,
                 isReopenedPredefined, isCanceledPredefined, account,
                 getId(), getOutId(), getVersion(), getDeleted());
     }

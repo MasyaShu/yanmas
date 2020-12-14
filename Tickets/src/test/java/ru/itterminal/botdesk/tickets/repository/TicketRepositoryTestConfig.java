@@ -9,5 +9,5 @@ import ru.itterminal.botdesk.commons.repository.ParentEntityRepositoryImpl;
 @EnableJpaRepositories(basePackages = "ru.itterminal.botdesk.tickets.repository",
     repositoryBaseClass = ParentEntityRepositoryImpl.class)
 @EntityScan(basePackages = "ru.itterminal.botdesk")
-public class TicketTypeRepositoryTestConfig {
+public class TicketRepositoryTestConfig {
 }
