@@ -8,11 +8,12 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import ru.itterminal.botdesk.aau.model.Account;
+import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.aau.model.dto.AccountDto;
 
 class TestAccountHelperTest {
 
-    TestAccountHelper accountHelper = new TestAccountHelper();
+    AccountTestHelper accountHelper = new AccountTestHelper();
 
     @Test
     void getRandomValidEntity() {
@@ -48,12 +49,6 @@ class TestAccountHelperTest {
         assertEquals(2, accountList.size());
     }
 
-    @Test
-    void getPredefinedInvalidEntityList() {
-        List<Account> accountList = accountHelper.getPredefinedInvalidEntityList();
-        assertEquals(2, accountList.size());
-
-    }
 
     @Test
     void getRandomValidEntityDto() {

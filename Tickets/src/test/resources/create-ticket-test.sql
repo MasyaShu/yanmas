@@ -24,7 +24,7 @@ VALUES (null, 'false', '0', '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9', 'started', 1
         'cdfa6483-0769-4628-ba32-efd338a716de'),
        (null, 'false', '0', 'dcf29ccb-26c7-4e38-9256-f45918a4c4a6', 'reopened', 20, false, false, true, false,
         'bcf98101-2a22-42bf-94cc-c900b50a0b69'),
-       (null, 'false', '0', 'e251aad2-1a47-46ed-a405-0d8a6468627e', 'canceled', 60, false, false, true, false,
+       (null, 'false', '0', 'e251aad2-1a47-46ed-a405-0d8a6468627e', 'canceled', 60, false, false, false, true,
         'bcf98101-2a22-42bf-94cc-c900b50a0b69'),
        (null, 'false', '0', '6dc9c0de-2143-40ce-ac65-5be97e3019fc', 'inWork', 40, false, false, false, false,
         'bcf98101-2a22-42bf-94cc-c900b50a0b69');
@@ -71,8 +71,8 @@ INSERT INTO ticket_settings(out_id, deleted, version, id, account_id, group_id, 
 VALUES (null, 'false', '0', '9c8183ba-5d13-442f-a741-5b3134a3c140', 'cdfa6483-0769-4628-ba32-efd338a716de',
         '0223e51a-4bb2-44ee-bc8e-1f047a2145e7', 'd592facb-e6ee-4801-8310-9c7708eb6e6c',
         '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9', '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9',
-        'dcf29ccb-26c7-4e38-9256-f45918a4c4a6', '17b13694-1907-4af9-8f5d-bfa444356e73',
-        'e251aad2-1a47-46ed-a405-0d8a6468627e');
+        '17b13694-1907-4af9-8f5d-bfa444356e73', '17b13694-1907-4af9-8f5d-bfa444356e73',
+        '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9');
 
 INSERT INTO ticket_settings_executors (out_id, deleted, version, id, ticket_settings_id, executor_id)
 VALUES (null, 'false', '0', '1bab6fdd-4ef5-4222-a986-b6b2ae9e978d', '9c8183ba-5d13-442f-a741-5b3134a3c140',

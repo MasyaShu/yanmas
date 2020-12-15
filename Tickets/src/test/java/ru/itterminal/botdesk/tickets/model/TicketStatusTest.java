@@ -21,7 +21,6 @@ class TicketStatusTest {
         ticketStatus_1 = TicketStatus
                 .builder()
                 .account(null)
-                .comment("comment")
                 .name("ticketStatus_1")
                 .isCanceledPredefined(true)
                 .isFinishedPredefined(false)
@@ -35,7 +34,6 @@ class TicketStatusTest {
         ticketStatus_2 = TicketStatus
                 .builder()
                 .account(null)
-                .comment("comment")
                 .name("ticketStatus_1")
                 .isCanceledPredefined(true)
                 .isFinishedPredefined(false)
@@ -54,7 +52,6 @@ class TicketStatusTest {
 
     @Test
     void equals_shouldGetFalse_whenOneFieldAreNotEquals() {
-        ticketStatus_1.setComment("");
         assertNotEquals(ticketStatus_1, ticketStatus_2);
     }
 

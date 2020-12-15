@@ -39,7 +39,7 @@ public class Group extends BaseEntity {
         return Objects.equals(name, group.name) &&
                 Objects.equals(comment, group.comment) &&
                 Objects.equals(isInner, group.isInner) &&
-                Objects.equals(isDeprecated, group.isInner) &&
+                Objects.equals(isDeprecated, group.isDeprecated) &&
                 Objects.equals(account, group.account) &&
                 Objects.equals(getId(), group.getId()) &&
                 Objects.equals(getOutId(), group.getOutId()) &&

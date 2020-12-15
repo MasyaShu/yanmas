@@ -25,12 +25,13 @@ import ru.itterminal.botdesk.tickets.service.impl.TicketSettingServiceImpl;
 @Component
 public class TicketSettingOperationValidator extends BasicOperationValidatorImpl<TicketSetting> {
 
-    private static final String ACCOUNTS_ARENT_EQUAL = "TicketSetting.Create/Update accounts aren't equal";
-    private static final String GROUPS_ARENT_EQUAL = "TicketSetting.Create/Update groups aren't equal";
-    private static final String ACCOUNTS_ARENT_EQUAL_MESSAGE =
+    public static final String ACCOUNTS_ARENT_EQUAL = "TicketSetting.Create/Update accounts aren't equal";
+    public static final String GROUPS_ARENT_EQUAL = "TicketSetting.Create/Update groups aren't equal";
+    public static final String ACCOUNTS_ARENT_EQUAL_MESSAGE =
             "TicketSetting.Create/Update accounts aren't equal: %s %s";
-    private static final String GROUPS_ARENT_EQUAL_MESSAGE =
+    public static final String GROUPS_ARENT_EQUAL_MESSAGE =
             "TicketSetting.Create/Update groups aren't equal: %s %s";
+    public static final String TICKET_SETTING_UNIQUE_FIELDS = "Account, Group, Author";
 
     private final TicketSettingServiceImpl service;
 
@@ -59,9 +60,8 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
             log.trace(FIELDS_UNIQUE, entity);
             return true;
         } else {
-            String validatedFields = "account, group, author";
-            errors.put(validatedFields, singletonList(
-                    new ValidationError(NOT_UNIQUE_CODE, format(NOT_UNIQUE_MESSAGE, validatedFields)))
+            errors.put(TICKET_SETTING_UNIQUE_FIELDS, singletonList(
+                    new ValidationError(NOT_UNIQUE_CODE, format(NOT_UNIQUE_MESSAGE, TICKET_SETTING_UNIQUE_FIELDS)))
             );
             log.error(FIELDS_NOT_UNIQUE, errors);
             throw new LogicalValidationException(VALIDATION_FAILED, errors);
@@ -73,68 +73,97 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
         Account account = entity.getAccount();
 
         Account accountOfGroup = entity.getGroup().getAccount();
-        errors.putAll(chekObjectsIsEquals(account, accountOfGroup, ACCOUNTS_ARENT_EQUAL,
-                                          format(ACCOUNTS_ARENT_EQUAL_MESSAGE, account, entity.getGroup())
-                      )
+        chekObjectsIsEquals(account, accountOfGroup, ACCOUNTS_ARENT_EQUAL,
+                            format(ACCOUNTS_ARENT_EQUAL_MESSAGE, account, entity.getGroup()),
+                            errors
         );
 
         Account accountOfAuthor = entity.getAuthor().getAccount();
-        errors.putAll(chekObjectsIsEquals(account, accountOfAuthor, ACCOUNTS_ARENT_EQUAL,
-                                          format(ACCOUNTS_ARENT_EQUAL_MESSAGE, account, entity.getAuthor())
-                      )
+        chekObjectsIsEquals(account, accountOfAuthor, ACCOUNTS_ARENT_EQUAL,
+                            format(ACCOUNTS_ARENT_EQUAL_MESSAGE, account, entity.getAuthor()),
+                            errors
         );
 
         Group groupOfEntity = entity.getGroup();
         Group groupOfAuthor = entity.getAuthor().getOwnGroup();
-        errors.putAll(chekObjectsIsEquals(groupOfEntity, groupOfAuthor, GROUPS_ARENT_EQUAL,
-                                          format(GROUPS_ARENT_EQUAL_MESSAGE, groupOfEntity, groupOfAuthor)
-                      )
+        chekObjectsIsEquals(groupOfEntity, groupOfAuthor, GROUPS_ARENT_EQUAL,
+                            format(GROUPS_ARENT_EQUAL_MESSAGE, groupOfEntity, groupOfAuthor),
+                            errors
         );
 
-        Account accountOfTicketTypeForNew = entity.getTicketTypeForNew().getAccount();
-        errors.putAll(chekObjectsIsEquals(account, accountOfTicketTypeForNew, ACCOUNTS_ARENT_EQUAL,
-                                          format(ACCOUNTS_ARENT_EQUAL_MESSAGE, account, entity.getTicketTypeForNew())
-                      )
-        );
-
-        Account accountOfTicketStatusForNew = entity.getTicketStatusForNew().getAccount();
-        errors.putAll(chekObjectsIsEquals(account, accountOfTicketStatusForNew, ACCOUNTS_ARENT_EQUAL,
-                                          format(ACCOUNTS_ARENT_EQUAL_MESSAGE, account, entity.getTicketStatusForNew())
-                      )
-        );
-
-        Account accountOfTicketStatusForReopen = entity.getTicketStatusForReopen().getAccount();
-        errors.putAll(chekObjectsIsEquals(account, accountOfTicketStatusForReopen, ACCOUNTS_ARENT_EQUAL,
-                                          format(ACCOUNTS_ARENT_EQUAL_MESSAGE, account, entity.getTicketStatusForReopen())
-                      )
-        );
-
-        Account accountOfTicketStatusForClose = entity.getTicketStatusForClose().getAccount();
-        errors.putAll(chekObjectsIsEquals(account, accountOfTicketStatusForClose, ACCOUNTS_ARENT_EQUAL,
-                                          format(ACCOUNTS_ARENT_EQUAL_MESSAGE, account, entity.getTicketStatusForClose())
-                      )
-        );
-
-        Account accountOfTicketStatusForCancel = entity.getTicketStatusForCancel().getAccount();
-        errors.putAll(chekObjectsIsEquals(account, accountOfTicketStatusForCancel, ACCOUNTS_ARENT_EQUAL,
-                                          format(ACCOUNTS_ARENT_EQUAL_MESSAGE, account, entity.getTicketStatusForCancel())
-                      )
-        );
-
-        for (User observer: entity.getObservers()) {
-            Account accountOfObserver = observer.getAccount();
-            errors.putAll(chekObjectsIsEquals(account, accountOfObserver, ACCOUNTS_ARENT_EQUAL,
-                                              format(ACCOUNTS_ARENT_EQUAL_MESSAGE, account, observer)
-                          )
+        if (entity.getTicketTypeForNew() != null) {
+            Account accountOfTicketTypeForNew = entity.getTicketTypeForNew().getAccount();
+            chekObjectsIsEquals(account, accountOfTicketTypeForNew, ACCOUNTS_ARENT_EQUAL,
+                                format(
+                                        ACCOUNTS_ARENT_EQUAL_MESSAGE, account,
+                                        entity.getTicketTypeForNew()
+                                ),
+                                errors
             );
         }
 
-        for (User executor: entity.getExecutors()) {
-            Account accountOfExecutor = executor.getAccount();
-            errors.putAll(chekObjectsIsEquals(account, accountOfExecutor, ACCOUNTS_ARENT_EQUAL,
-                                              format(ACCOUNTS_ARENT_EQUAL_MESSAGE, account, executor)
-                          )
+        if (entity.getTicketStatusForNew() != null) {
+            Account accountOfTicketStatusForNew = entity.getTicketStatusForNew().getAccount();
+            chekObjectsIsEquals(account, accountOfTicketStatusForNew, ACCOUNTS_ARENT_EQUAL,
+                                format(
+                                        ACCOUNTS_ARENT_EQUAL_MESSAGE, account,
+                                        entity.getTicketStatusForNew()
+                                ),
+                                errors
             );
+        }
+
+        if (entity.getTicketStatusForReopen() != null) {
+            Account accountOfTicketStatusForReopen = entity.getTicketStatusForReopen().getAccount();
+            chekObjectsIsEquals(account, accountOfTicketStatusForReopen, ACCOUNTS_ARENT_EQUAL,
+                                format(
+                                        ACCOUNTS_ARENT_EQUAL_MESSAGE, account,
+                                        entity.getTicketStatusForReopen()
+                                ),
+                                errors
+            );
+        }
+
+        if (entity.getTicketStatusForClose() != null) {
+            Account accountOfTicketStatusForClose = entity.getTicketStatusForClose().getAccount();
+            chekObjectsIsEquals(account, accountOfTicketStatusForClose, ACCOUNTS_ARENT_EQUAL,
+                                format(
+                                        ACCOUNTS_ARENT_EQUAL_MESSAGE, account,
+                                        entity.getTicketStatusForClose()
+                                ),
+                                errors
+            );
+        }
+
+        if (entity.getTicketStatusForCancel() != null) {
+            Account accountOfTicketStatusForCancel = entity.getTicketStatusForCancel().getAccount();
+            chekObjectsIsEquals(account, accountOfTicketStatusForCancel, ACCOUNTS_ARENT_EQUAL,
+                                format(
+                                        ACCOUNTS_ARENT_EQUAL_MESSAGE, account,
+                                        entity.getTicketStatusForCancel()
+                                ),
+                                errors
+            );
+        }
+
+        if (entity.getObservers() != null) {
+            for (User observer : entity.getObservers()) {
+                Account accountOfObserver = observer.getAccount();
+                chekObjectsIsEquals(account, accountOfObserver, ACCOUNTS_ARENT_EQUAL,
+                                    format(ACCOUNTS_ARENT_EQUAL_MESSAGE, account, observer),
+                                    errors
+                );
+            }
+        }
+
+        if (entity.getExecutors() != null) {
+            for (User executor : entity.getExecutors()) {
+                Account accountOfExecutor = executor.getAccount();
+                chekObjectsIsEquals(account, accountOfExecutor, ACCOUNTS_ARENT_EQUAL,
+                                    format(ACCOUNTS_ARENT_EQUAL_MESSAGE, account, executor),
+                                    errors
+                );
+            }
         }
 
         ifErrorsNotEmptyThrowLogicalValidationException(errors);

@@ -50,8 +50,8 @@ public class FileServiceImpl extends CrudServiceImpl<File, FileOperationValidato
     @Transactional(readOnly = true)
     public byte[] getFileData(UUID accountId, UUID fileId) {
         val logicalErrors = createMapForLogicalErrors();
-        logicalErrors.putAll(chekObjectForNull(accountId, ACCOUNT_ID, ACCOUNT_ID_IS_NULL));
-        logicalErrors.putAll(chekObjectForNull(fileId, FILE_ID, FILE_ID_IS_NULL));
+        chekObjectForNull(accountId, ACCOUNT_ID, ACCOUNT_ID_IS_NULL, logicalErrors);
+        chekObjectForNull(fileId, FILE_ID, FILE_ID_IS_NULL, logicalErrors);
         ifErrorsNotEmptyThrowLogicalValidationException(logicalErrors);
         // TODO if getIsUploaded()==true
         return awsS3ObjectOperations.getObject(accountId.toString(), fileId.toString());
@@ -59,9 +59,9 @@ public class FileServiceImpl extends CrudServiceImpl<File, FileOperationValidato
 
     public boolean putFileData(UUID accountId, UUID fileId, byte[] bytes) {
         val logicalErrors = createMapForLogicalErrors();
-        logicalErrors.putAll(chekObjectForNull(bytes, BYTES_OF_FILE, BYTES_OF_FILE_IS_NULL));
-        logicalErrors.putAll(chekObjectForNull(accountId, ACCOUNT_ID, ACCOUNT_ID_IS_NULL));
-        logicalErrors.putAll(chekObjectForNull(fileId, FILE_ID, FILE_ID_IS_NULL));
+        chekObjectForNull(bytes, BYTES_OF_FILE, BYTES_OF_FILE_IS_NULL, logicalErrors);
+        chekObjectForNull(accountId, ACCOUNT_ID, ACCOUNT_ID_IS_NULL, logicalErrors);
+        chekObjectForNull(fileId, FILE_ID, FILE_ID_IS_NULL, logicalErrors);
         ifErrorsNotEmptyThrowLogicalValidationException(logicalErrors);
         File fileFromDatabase = repository.findByAccountIdAndId(accountId, fileId).orElseThrow(() -> {
             String messageException = format(NOT_FOUND_FILE, accountId, fileId);

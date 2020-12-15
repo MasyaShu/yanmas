@@ -1,15 +1,14 @@
-package ru.itterminal.botdesk.aau.util;
+package ru.itterminal.botdesk.aau.model.test;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.dto.AccountDto;
-import ru.itterminal.botdesk.commons.model.TestEntityHelper;
+import ru.itterminal.botdesk.commons.model.BaseTestEntityHelperImpl;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 
-public class TestAccountHelper implements TestEntityHelper<Account, AccountDto, BaseFilterDto> {
+public class AccountTestHelper extends BaseTestEntityHelperImpl<Account, AccountDto, BaseFilterDto> {
 
     private static final String INVALID_ACCOUNT_NAME_REGEX = "[A-Za-z0-9]{129}";
 
@@ -32,25 +31,7 @@ public class TestAccountHelper implements TestEntityHelper<Account, AccountDto, 
     }
 
     @Override
-    public List<Account> getRandomValidEntityList(int countEntity) {
-        List<Account> accountList = new ArrayList<>();
-        for (int i = 0; i < countEntity; i++) {
-            accountList.add(getRandomValidEntity());
-        }
-        return accountList;
-    }
-
-    @Override
-    public List<Account> getRandomInvalidEntityList(int countEntity) {
-        List<Account> accountList = new ArrayList<>();
-        for (int i = 0; i < countEntity; i++) {
-            accountList.add(getRandomInvalidEntity());
-        }
-        return accountList;
-    }
-
-    @Override
-    public List<Account> getPredefinedValidEntityList() {
+    public List<Account> setPredefinedValidEntityList() {
         Account account1 = Account.builder()
                 .name("accountName1")
                 .build();
@@ -71,19 +52,6 @@ public class TestAccountHelper implements TestEntityHelper<Account, AccountDto, 
                 false,
                 null
         );
-        return List.of(account1, account2);
-    }
-
-    @Override
-    public List<Account> getPredefinedInvalidEntityList() {
-        Account account1 = Account.builder()
-                .name(fakerRU.regexify(INVALID_ACCOUNT_NAME_REGEX))
-                .build();
-        setRandomValidPropertiesOfBaseEntity(account1);
-        Account account2 = Account.builder()
-                .name(fakerRU.regexify(INVALID_ACCOUNT_NAME_REGEX))
-                .build();
-        setRandomValidPropertiesOfBaseEntity(account2);
         return List.of(account1, account2);
     }
 
