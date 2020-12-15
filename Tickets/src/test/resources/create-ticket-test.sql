@@ -51,8 +51,28 @@ INSERT INTO ticket_statuses(out_id, deleted, version, id, name, sort_index, is_s
 VALUES (null, 'false', '0', '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9', 'started', 10, true, false, false, false, 'cdfa6483-0769-4628-ba32-efd338a716de'),
        (null, 'false', '0', '17b13694-1907-4af9-8f5d-bfa444356e73', 'finished', 50, false, true, false, false, 'cdfa6483-0769-4628-ba32-efd338a716de'),
        (null, 'false', '0', 'dcf29ccb-26c7-4e38-9256-f45918a4c4a6', 'reopened', 20, false, false, true, false, 'bcf98101-2a22-42bf-94cc-c900b50a0b69'),
-       (null, 'false', '0', 'e251aad2-1a47-46ed-a405-0d8a6468627e', 'canceled', 60, false, false, true, false, 'bcf98101-2a22-42bf-94cc-c900b50a0b69'),
+       (null, 'false', '0', 'e251aad2-1a47-46ed-a405-0d8a6468627e', 'canceled', 60, false, false, false, true,
+        'bcf98101-2a22-42bf-94cc-c900b50a0b69'),
        (null, 'false', '0', '6dc9c0de-2143-40ce-ac65-5be97e3019fc', 'inWork', 40, false, false, false, false, 'bcf98101-2a22-42bf-94cc-c900b50a0b69');
+INSERT INTO ticket_settings(out_id, deleted, version, id, account_id, group_id, author_id, ticket_type_id_for_new,
+                            ticket_status_id_for_new, ticket_status_id_for_reopen, ticket_status_id_for_close,
+                            ticket_status_id_for_cancel)
+VALUES (null, 'false', '0', '9c8183ba-5d13-442f-a741-5b3134a3c140', 'cdfa6483-0769-4628-ba32-efd338a716de',
+        '0223e51a-4bb2-44ee-bc8e-1f047a2145e7', 'd592facb-e6ee-4801-8310-9c7708eb6e6c',
+        '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9', '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9',
+        '17b13694-1907-4af9-8f5d-bfa444356e73', '17b13694-1907-4af9-8f5d-bfa444356e73',
+        '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9');
 
+INSERT INTO ticket_settings_executors (out_id, deleted, version, id, ticket_settings_id, executor_id)
+VALUES (null, 'false', '0', '1bab6fdd-4ef5-4222-a986-b6b2ae9e978d', '9c8183ba-5d13-442f-a741-5b3134a3c140',
+        'd592facb-e6ee-4801-8310-9c7708eb6e6c'),
+       (null, 'false', '0', '98137efe-4d0e-40db-ac78-7260861e289e', '9c8183ba-5d13-442f-a741-5b3134a3c140',
+        'cdfa6483-0769-4628-ba32-efd338a716de');
+
+INSERT INTO ticket_settings_observers (out_id, deleted, version, id, ticket_settings_id, observer_id)
+VALUES (null, 'false', '0', '7b61d578-3eef-4a6e-99c9-6fa137f1bc0b', '9c8183ba-5d13-442f-a741-5b3134a3c140',
+        '0223e51a-4bb2-44ee-bc8e-1f047a2145e7'),
+       (null, 'false', '0', '968ee2a2-2af5-474b-b772-8b802aa58c6f', '9c8183ba-5d13-442f-a741-5b3134a3c140',
+        'e14d9ffd-0071-4c0e-99ed-932f007963f0');
 
 
