@@ -4,6 +4,7 @@ import static java.util.Collections.singletonList;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.FIELDS_ARE_NOT_VALID;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,85 +46,70 @@ public class CommonMethodsForValidation {
     }
 
     @SneakyThrows
-    public static Map<String, List<ValidationError>> chekObjectForNull(Object object,
-                                                                       String keyError,
-                                                                       String errorMessage) {
-        var errors = createMapForLogicalErrors();
+    public static void chekObjectForNull(Object object,
+                                         String keyError,
+                                         String errorMessage,
+                                         Map<String, List<ValidationError>> errors) {
         if (object == null) {
-            errors.put(keyError, singletonList(new ValidationError(keyError, errorMessage)));
+            addValidationErrorIntoErrors(keyError, errorMessage, errors);
         }
-        return errors;
     }
 
-    public static Map<String, List<ValidationError>>
+    public static void
     chekStringForNullOrEmpty(String object, String keyError,
-                             String errorMessageForNull, String errorMessageForEmpty) {
-        var errors = createMapForLogicalErrors();
+                             String errorMessageForNull, String errorMessageForEmpty,
+                             Map<String, List<ValidationError>> errors) {
+
         if (object == null) {
-            errors.put(keyError, singletonList(new ValidationError(keyError, errorMessageForNull)));
+            addValidationErrorIntoErrors(keyError, errorMessageForNull, errors);
         }
         if (object != null && object.isEmpty()) {
-            errors.put(keyError, singletonList(new ValidationError(keyError, errorMessageForEmpty)));
+            addValidationErrorIntoErrors(keyError, errorMessageForEmpty, errors);
         }
-        return errors;
     }
 
     @SuppressWarnings("unused")
-    public static Map<String, List<ValidationError>>
+    public static void
     chekNumberForNullOrMoreThan(Object number, Long moreThan, String keyError,
-                                String errorMessageForNull, String errorMessageIfMoreThan) {
-        var errors = createMapForLogicalErrors();
+                                String errorMessageForNull, String errorMessageIfMoreThan,
+                                Map<String, List<ValidationError>> errors) {
         if (number == null) {
-            errors.put(keyError, singletonList(new ValidationError(keyError, errorMessageForNull)));
+            addValidationErrorIntoErrors(keyError, errorMessageForNull, errors);
         }
-        if (number instanceof Long && (Long) number > moreThan) {
-            errors.put(keyError, singletonList(new ValidationError(keyError, errorMessageIfMoreThan)));
+        if ((number instanceof Long && (Long) number > moreThan) ||
+                (number instanceof Integer && (Integer) number > moreThan)) {
+            addValidationErrorIntoErrors(keyError, errorMessageIfMoreThan, errors);
         }
-        if (number instanceof Integer && (Integer) number > moreThan) {
-            errors.put(keyError, singletonList(new ValidationError(keyError, errorMessageIfMoreThan)));
-        }
-        return errors;
     }
 
     @SuppressWarnings("unused")
-    public static Map<String, List<ValidationError>>
-    chekNumberForNullOrLessThan(Object number, Long lessThan, String keyError,
-                                String errorMessageForNull, String errorMessageIfLessThan) {
-        var errors = createMapForLogicalErrors();
-        if (number == null) {
-            errors.put(keyError, singletonList(new ValidationError(keyError, errorMessageForNull)));
+    public static void chekObjectsIsEquals(Object objectOne, Object objectTwo, String keyError,
+                                           String errorMessageIfObjectsIsNotEquals,
+                                           Map<String, List<ValidationError>> errors) {
+        if (!objectOne.equals(objectTwo)) {
+            addValidationErrorIntoErrors(keyError, errorMessageIfObjectsIsNotEquals, errors);
         }
-        if (number instanceof Long && (Long) number < lessThan) {
-            errors.put(keyError, singletonList(new ValidationError(keyError, errorMessageIfLessThan)));
-        }
-        if (number instanceof Integer && (Integer) number < lessThan) {
-            errors.put(keyError, singletonList(new ValidationError(keyError, errorMessageIfLessThan)));
-        }
-        return errors;
     }
 
     @SuppressWarnings("unused")
-    public static Map<String, List<ValidationError>>
+    public static void
     chekNumberForNullOrZero(Object number, String keyError,
-                            String errorMessageForNull, String errorMessageIfZero) {
-        var errors = createMapForLogicalErrors();
+                            String errorMessageForNull, String errorMessageIfZero,
+                            Map<String, List<ValidationError>> errors) {
         if (number == null) {
-            errors.put(keyError, singletonList(new ValidationError(keyError, errorMessageForNull)));
+            addValidationErrorIntoErrors(keyError, errorMessageForNull, errors);
         }
-        if (number instanceof Long && (Long) number == 0) {
-            errors.put(keyError, singletonList(new ValidationError(keyError, errorMessageIfZero)));
+        if ((number instanceof Long && (Long) number == 0) ||
+                (number instanceof Integer && (Integer) number == 0)) {
+            addValidationErrorIntoErrors(keyError, errorMessageIfZero, errors);
         }
-        if (number instanceof Integer && (Integer) number == 0) {
-            errors.put(keyError, singletonList(new ValidationError(keyError, errorMessageIfZero)));
-        }
-        return errors;
     }
 
     public static Map<String, List<ValidationError>> createMapForLogicalErrors() {
         return new HashMap<>();
     }
 
-    public static void throwLogicalValidationExceptionIfErrorsNotEmpty(Map<String, List<ValidationError>> errors) {
+    public static void ifErrorsNotEmptyThrowLogicalValidationException(Map<String, List<ValidationError>> errors) {
         if (!errors.isEmpty()) {
             log.error(FIELDS_ARE_NOT_VALID, errors);
             throw new LogicalValidationException(VALIDATION_FAILED, errors);
@@ -136,6 +122,21 @@ public class CommonMethodsForValidation {
         errors.put(keyError, singletonList(new ValidationError(keyError, errorMessage)));
         return new LogicalValidationException(VALIDATION_FAILED, errors);
 
+    }
+
+    private static void addValidationErrorIntoErrors(String keyError, String errorMessage,
+                                                     Map<String, List<ValidationError>> errors) {
+        var error = new ValidationError(keyError, errorMessage);
+        if (errors.isEmpty() || !errors.containsKey(keyError)) {
+            errors.put(keyError, List.of(error));
+            return;
+        }
+        errors.computeIfPresent(keyError, (key, list) -> {
+                                    List<ValidationError> validationErrors = new ArrayList<>(list);
+                                    validationErrors.add(error);
+                                    return validationErrors;
+                                }
+        );
     }
 
 }

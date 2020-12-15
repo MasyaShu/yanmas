@@ -3,7 +3,7 @@ package ru.itterminal.botdesk.files.service;
 import static java.lang.String.format;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekObjectForNull;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.throwLogicalValidationExceptionIfErrorsNotEmpty;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.ifErrorsNotEmptyThrowLogicalValidationException;
 
 import java.nio.ByteBuffer;
 import java.util.UUID;
@@ -50,18 +50,19 @@ public class FileServiceImpl extends CrudServiceImpl<File, FileOperationValidato
     @Transactional(readOnly = true)
     public byte[] getFileData(UUID accountId, UUID fileId) {
         val logicalErrors = createMapForLogicalErrors();
-        logicalErrors.putAll(chekObjectForNull(accountId, ACCOUNT_ID, ACCOUNT_ID_IS_NULL));
-        logicalErrors.putAll(chekObjectForNull(fileId, FILE_ID, FILE_ID_IS_NULL));
-        throwLogicalValidationExceptionIfErrorsNotEmpty(logicalErrors);
+        chekObjectForNull(accountId, ACCOUNT_ID, ACCOUNT_ID_IS_NULL, logicalErrors);
+        chekObjectForNull(fileId, FILE_ID, FILE_ID_IS_NULL, logicalErrors);
+        ifErrorsNotEmptyThrowLogicalValidationException(logicalErrors);
+        // TODO if getIsUploaded()==true
         return awsS3ObjectOperations.getObject(accountId.toString(), fileId.toString());
     }
 
     public boolean putFileData(UUID accountId, UUID fileId, byte[] bytes) {
         val logicalErrors = createMapForLogicalErrors();
-        logicalErrors.putAll(chekObjectForNull(bytes, BYTES_OF_FILE, BYTES_OF_FILE_IS_NULL));
-        logicalErrors.putAll(chekObjectForNull(accountId, ACCOUNT_ID, ACCOUNT_ID_IS_NULL));
-        logicalErrors.putAll(chekObjectForNull(fileId, FILE_ID, FILE_ID_IS_NULL));
-        throwLogicalValidationExceptionIfErrorsNotEmpty(logicalErrors);
+        chekObjectForNull(bytes, BYTES_OF_FILE, BYTES_OF_FILE_IS_NULL, logicalErrors);
+        chekObjectForNull(accountId, ACCOUNT_ID, ACCOUNT_ID_IS_NULL, logicalErrors);
+        chekObjectForNull(fileId, FILE_ID, FILE_ID_IS_NULL, logicalErrors);
+        ifErrorsNotEmptyThrowLogicalValidationException(logicalErrors);
         File fileFromDatabase = repository.findByAccountIdAndId(accountId, fileId).orElseThrow(() -> {
             String messageException = format(NOT_FOUND_FILE, accountId, fileId);
             log.trace(messageException);

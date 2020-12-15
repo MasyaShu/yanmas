@@ -35,7 +35,7 @@ public class BaseEntityDto {
     @Null(groups = Create.class,
         message = MUST_BE_NULL_FOR_THE_NEW_ENTITY)
     @NotNull(groups = Update.class)
-    @Max(value = 32766, groups = Update.class)
+    @Max(value = 2147483647, groups = Update.class)
     @Min(value = 0, groups = Update.class)
     private Integer version;
 

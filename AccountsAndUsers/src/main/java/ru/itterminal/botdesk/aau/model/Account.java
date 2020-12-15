@@ -21,6 +21,7 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Account extends BaseEntity {
+
     @Column(nullable = false, length = 128)
     private String name;
 
@@ -34,6 +35,7 @@ public class Account extends BaseEntity {
         }
         Account account = (Account) o;
         return Objects.equals(name, account.name) &&
+                Objects.equals(getOutId(), account.getOutId()) &&
                 Objects.equals(getId(), account.getId()) &&
                 Objects.equals(getVersion(), account.getVersion()) &&
                 Objects.equals(getDeleted(), account.getDeleted());

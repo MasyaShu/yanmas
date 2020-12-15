@@ -1,11 +1,11 @@
 package ru.itterminal.botdesk.files.service.validator;
 
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekNumberForNullOrZero;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekNumberForNullOrMoreThan;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekNumberForNullOrZero;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekObjectForNull;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekStringForNullOrEmpty;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.throwLogicalValidationExceptionIfErrorsNotEmpty;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.ifErrorsNotEmptyThrowLogicalValidationException;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -43,36 +43,12 @@ public class FileOperationValidator extends BasicOperationValidatorImpl<File> {
     public boolean beforeCreate(File entity) {
         super.beforeCreate(entity);
         val errors = createMapForLogicalErrors();
-        errors.putAll(chekNumberForNullOrMoreThan(
-                entity.getSize(),
-                maxSizeOfFile,
-                SIZE_FILE,
-                SIZE_NULL,
-                MAX_SIZE
-        ));
-        errors.putAll(chekStringForNullOrEmpty(
-                entity.getFileName(),
-                FILE_NAME,
-                FILE_NAME_NULL,
-                FILE_NAME_EMPTY
-        ));
-        errors.putAll(chekNumberForNullOrZero(
-                entity.getCreatedAt(),
-                CREATED_AT,
-                CREATED_AT_NULL,
-                CREATED_AT_ZERO
-        ));
-        errors.putAll(chekObjectForNull(
-                entity.getAccount(),
-                ACCOUNT,
-                ACCOUNT_NULL
-        ));
-        errors.putAll(chekObjectForNull(
-                entity.getEntityId(),
-                ENTITY_ID,
-                ENTITY_ID_NULL
-        ));
-        throwLogicalValidationExceptionIfErrorsNotEmpty(errors);
+        chekNumberForNullOrMoreThan(entity.getSize(), maxSizeOfFile, SIZE_FILE, SIZE_NULL, MAX_SIZE, errors);
+        chekStringForNullOrEmpty(entity.getFileName(), FILE_NAME, FILE_NAME_NULL, FILE_NAME_EMPTY, errors);
+        chekNumberForNullOrZero(entity.getCreatedAt(), CREATED_AT, CREATED_AT_NULL, CREATED_AT_ZERO, errors);
+        chekObjectForNull(entity.getAccount(), ACCOUNT, ACCOUNT_NULL, errors);
+        chekObjectForNull(entity.getEntityId(), ENTITY_ID, ENTITY_ID_NULL, errors);
+        ifErrorsNotEmptyThrowLogicalValidationException(errors);
         return true;
     }
 }
