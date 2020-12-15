@@ -117,7 +117,6 @@ class TicketSettingOperationValidatorTest {
         TicketSetting ticketSetting = ticketSettingTestHelper.getRandomInvalidEntity();
         LogicalValidationException exception = assertThrows(LogicalValidationException.class,
                      ()-> validator.beforeUpdate(ticketSetting));
-        assertEquals(2, exception.getFieldErrors().size());
         assertEquals(17, exception.getFieldErrors().get(ACCOUNTS_ARENT_EQUAL).size());
         assertEquals(1, exception.getFieldErrors().get(GROUPS_ARENT_EQUAL).size());
         verify(service, times(1)).findByUniqueFields(any());
