@@ -9,10 +9,10 @@ import org.springframework.stereotype.Repository;
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.projection.UserUniqueFields;
-import ru.itterminal.botdesk.commons.repository.CustomizedParentEntityRepository;
+import ru.itterminal.botdesk.commons.repository.EntityRepositoryWithAccount;
 
 @Repository
-public interface UserRepository extends CustomizedParentEntityRepository<User> {
+public interface UserRepository extends EntityRepositoryWithAccount<User> {
 
     List<UserUniqueFields> getByEmailAndIdNot(String email, UUID id);
 

@@ -5,26 +5,23 @@ import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.itterminal.botdesk.aau.model.Account;
-import ru.itterminal.botdesk.commons.model.BaseEntity;
+import lombok.experimental.SuperBuilder;
+import ru.itterminal.botdesk.commons.model.BaseEntityWithAccount;
 
 @Entity
 @Table(name = "files")
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class File extends BaseEntity {
+public class File extends BaseEntityWithAccount {
 
     @Column(name = "file_name", nullable = false, length = 260)
     private String fileName;
@@ -34,10 +31,6 @@ public class File extends BaseEntity {
 
     @Column(name = "created_at", nullable = false)
     private Long createdAt;
-
-    @ManyToOne
-    @JoinColumn(name = "account_id", nullable = false)
-    private Account account;
 
     @Column(name = "entity_id", nullable = false)
     private UUID entityId;
@@ -57,8 +50,8 @@ public class File extends BaseEntity {
         return Objects.equals(fileName, file.fileName) &&
                 Objects.equals(size, file.size) &&
                 Objects.equals(createdAt, file.createdAt) &&
-                Objects.equals(account, file.account) &&
                 Objects.equals(entityId, file.entityId) &&
+                Objects.equals(getAccount(), file.getAccount()) &&
                 Objects.equals(getId(), file.getId()) &&
                 Objects.equals(getOutId(), file.getOutId()) &&
                 Objects.equals(getVersion(), file.getVersion()) &&
@@ -67,8 +60,8 @@ public class File extends BaseEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(fileName, size, createdAt, account, entityId,
-                            getId(), getOutId(), getVersion(), getDeleted()
+        return Objects.hash(fileName, size, createdAt, entityId,
+                            getId(), getOutId(), getVersion(), getDeleted(), getAccount()
         );
     }
 }

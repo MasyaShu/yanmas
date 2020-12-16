@@ -10,11 +10,13 @@ import javax.persistence.Version;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
 @MappedSuperclass
 @NoArgsConstructor
+@SuperBuilder
 public class BaseEntity {
     @Id
     private UUID id;

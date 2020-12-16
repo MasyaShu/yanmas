@@ -13,27 +13,22 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.itterminal.botdesk.aau.model.Account;
+import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.User;
-import ru.itterminal.botdesk.commons.model.BaseEntity;
+import ru.itterminal.botdesk.commons.model.BaseEntityWithAccount;
 
 @Entity
 @Table(name = "ticket_settings")
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TicketSetting extends BaseEntity {
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_id", nullable = false)
-    private Account account;
+public class TicketSetting extends BaseEntityWithAccount {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
@@ -88,7 +83,7 @@ public class TicketSetting extends BaseEntity {
             return false;
         }
         TicketSetting that = (TicketSetting) o;
-        return Objects.equals(account, that.account) &&
+        return Objects.equals(getAccount(), that.getAccount()) &&
                 Objects.equals(author, that.author) &&
                 Objects.equals(group, that.group) &&
                 Objects.equals(observers, that.observers) &&
@@ -107,9 +102,9 @@ public class TicketSetting extends BaseEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(account, author, group, observers, executors, ticketTypeForNew, ticketStatusForNew,
+        return Objects.hash(author, group, observers, executors, ticketTypeForNew, ticketStatusForNew,
                             ticketStatusForReopen, ticketStatusForClose, ticketStatusForCancel,
-                            getId(), getOutId(), getVersion(), getDeleted()
+                            getId(), getOutId(), getVersion(), getDeleted(), getAccount()
         );
     }
 }

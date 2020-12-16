@@ -1,20 +1,25 @@
 package ru.itterminal.botdesk.tickets.model.dto;
 
-import lombok.*;
-import org.springframework.scheduling.annotation.Scheduled;
+import java.util.UUID;
+
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
 import ru.itterminal.botdesk.commons.model.validator.Scheduler;
 import ru.itterminal.botdesk.commons.model.validator.ZoneId;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
-import java.util.UUID;
-
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString

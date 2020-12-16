@@ -5,10 +5,10 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Repository;
 
-import ru.itterminal.botdesk.commons.repository.CustomizedParentEntityRepository;
+import ru.itterminal.botdesk.commons.repository.EntityRepositoryWithAccount;
 import ru.itterminal.botdesk.files.model.File;
 
 @Repository
-public interface FileRepository extends CustomizedParentEntityRepository<File> {
+public interface FileRepository extends EntityRepositoryWithAccount<File> {
     Optional<File> findByAccountIdAndId(UUID accountId, UUID fileId);
 }

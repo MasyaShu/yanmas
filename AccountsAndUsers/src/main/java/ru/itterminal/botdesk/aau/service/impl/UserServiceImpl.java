@@ -1,7 +1,6 @@
 package ru.itterminal.botdesk.aau.service.impl;
 
 import static java.lang.String.format;
-import static ru.itterminal.botdesk.commons.util.CommonConstants.NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekObjectForNull;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekStringForNullOrEmpty;
 
@@ -30,7 +29,7 @@ import ru.itterminal.botdesk.aau.repository.UserRepository;
 import ru.itterminal.botdesk.aau.service.validator.UserOperationValidator;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.FailedSaveEntityException;
-import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
+import ru.itterminal.botdesk.commons.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.botdesk.integration.aws.s3.flow.CreateAwsS3BucketFlow;
 import ru.itterminal.botdesk.integration.aws.ses.SenderEmailViaAwsSes;
 import ru.itterminal.botdesk.integration.aws.ses.flow.SendingEmailViaAwsSesFlow;
@@ -40,7 +39,7 @@ import software.amazon.awssdk.services.ses.model.SendRawEmailRequest;
 @Slf4j
 @Service
 @Transactional
-public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidator, UserRepository> {
+public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperationValidator, UserRepository> {
 
     @Value("${emailVerificationToken.subject}")
     private String emailVerificationTokenSubject;
@@ -76,7 +75,6 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
         this.createAwsBucketGateway = createAwsBucketGateway;
     }
 
-    public static final String START_FIND_USER_BY_ID_AND_ACCOUNT_ID = "Start find user by id: {} and accountId: {}";
     public static final String START_FIND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID
             = "Start find user by id: {} and accountId: {} and own group id {}";
     public static final String START_REQUEST_PASSWORD_RESET_BY_EMAIL = "Start request password reset by email: {}";
@@ -114,8 +112,6 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
             + "successful sent";
     public static final String RESET_TOKEN_WAS_SUCCESSFUL_SENT = "Email with token for reset password was "
             + "successful sent";
-
-    public final String ENTITY_USER_NAME = User.class.getSimpleName();
 
     @Override
     public User create(User entity) {
@@ -164,7 +160,6 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
     @Override
     public User update(User entity) {
         validator.beforeUpdate(entity);
-        validator.checkUniqueness(entity); //TODO deleete validator.checkUniqueness
         log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
         User entityFromDatabase = super.findById(entity.getId());
         if (entity.getPassword() == null || entity.getPassword().isEmpty()) {
@@ -219,26 +214,6 @@ public class UserServiceImpl extends CrudServiceImpl<User, UserOperationValidato
         );
         log.trace(START_FIND_USER_BY_UNIQUE_FIELDS, user.getEmail(), user.getId());
         return repository.getByEmailAndIdNot(user.getEmail(), user.getId());
-    }
-
-    @Transactional(readOnly = true)
-    public User findByIdAndAccountId(UUID id, UUID accountId) {
-        chekObjectForNull(
-                id,
-                format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, ENTITY_USER_NAME, id, accountId),
-                EntityNotExistException.class
-        );
-        chekObjectForNull(
-                accountId,
-                format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, ENTITY_USER_NAME, id, accountId),
-                EntityNotExistException.class
-        );
-        log.trace(START_FIND_USER_BY_ID_AND_ACCOUNT_ID, id, accountId);
-        return repository.getByIdAndAccount_Id(id, accountId).orElseThrow(
-                () -> new EntityNotExistException(format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, ENTITY_USER_NAME, id,
-                                                         accountId
-                ))
-        );
     }
 
     @SuppressWarnings("DuplicatedCode")

@@ -2,7 +2,7 @@ package ru.itterminal.botdesk.tickets.model.spec;
 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
-import ru.itterminal.botdesk.aau.model.Account;
+import ru.itterminal.botdesk.commons.model.Account;
 import ru.itterminal.botdesk.commons.model.spec.BaseSpec;
 import ru.itterminal.botdesk.tickets.model.TicketStatus;
 
