@@ -1,6 +1,7 @@
 package ru.itterminal.botdesk.aau.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -23,7 +24,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import io.jsonwebtoken.JwtException;
-import ru.itterminal.botdesk.aau.model.Account;
+import ru.itterminal.botdesk.commons.model.Account;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.Roles;
@@ -152,7 +153,7 @@ class UserServiceImplTest {
         User createdUser = service.update(user);
         assertEquals(createdUser, user);
         verify(validator, times(1)).beforeUpdate(any());
-        verify(validator, times(1)).checkUniqueness(any());
+        verify(validator, times(0)).checkUniqueness(any());
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(1)).findById(any());
         verify(userRepository, times(1)).update(any());
@@ -168,7 +169,7 @@ class UserServiceImplTest {
         Throwable throwable = assertThrows(EntityNotExistException.class, () -> service.update(user));
         assertEquals(String.format(CrudService.FIND_INVALID_MESSAGE, "id", user.getId()), throwable.getMessage());
         verify(validator, times(1)).beforeUpdate(any());
-        verify(validator, times(1)).checkUniqueness(any());
+        verify(validator, times(0)).checkUniqueness(any());
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(0)).findById(any());
         verify(userRepository, times(0)).update(any());
@@ -185,7 +186,7 @@ class UserServiceImplTest {
         Throwable throwable = assertThrows(OptimisticLockingFailureException.class, () -> service.update(user));
         assertEquals(message, throwable.getMessage());
         verify(validator, times(1)).beforeUpdate(any());
-        verify(validator, times(1)).checkUniqueness(any());
+        verify(validator, times(0)).checkUniqueness(any());
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(1)).findById(any());
         verify(userRepository, times(1)).update(any());
@@ -222,6 +223,14 @@ class UserServiceImplTest {
         assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(user));
         verify(userRepository, times(0)).getByEmailAndIdNot(any(), any());
     }
+
+    @Test
+    void findByIdAndAccountId_shouldGetUser_whenPassedValidData() {
+        when(userRepository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(user));
+        assertNotNull(service.findByIdAndAccountId(UUID.randomUUID(), UUID.randomUUID()));
+        verify(userRepository, times(1)).findByIdAndAccountId(any(), any());
+    }
+
 
     @Test
     void findByIdAndAccountId_shouldGetEntityNotExistException_whenUserIdIsNull() {

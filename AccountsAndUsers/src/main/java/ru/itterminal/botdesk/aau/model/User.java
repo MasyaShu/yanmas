@@ -1,19 +1,28 @@
 package ru.itterminal.botdesk.aau.model;
 
-import lombok.*;
-import ru.itterminal.botdesk.commons.model.BaseEntity;
-
-import javax.persistence.*;
 import java.util.Objects;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+import ru.itterminal.botdesk.commons.model.BaseEntityWithAccount;
 
 @Entity
 @Table(name = "users")
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class User extends BaseEntity {
+public class User extends BaseEntityWithAccount {
 
     @Column(nullable = false, unique = true, length = 128)
     private String email;
@@ -46,10 +55,6 @@ public class User extends BaseEntity {
     private Boolean isArchived;
 
     @ManyToOne
-    @JoinColumn(name = "account_id", nullable = false)
-    private Account account;
-
-    @ManyToOne
     @JoinColumn(name = "own_group_id", nullable = false)
     private Group ownGroup;
 
@@ -76,8 +81,8 @@ public class User extends BaseEntity {
                 Objects.equals(emailVerificationStatus, user.emailVerificationStatus) &&
                 Objects.equals(passwordResetToken, user.passwordResetToken) &&
                 Objects.equals(isArchived, user.isArchived) &&
-                Objects.equals(account, user.account) &&
                 Objects.equals(role, user.role) &&
+                Objects.equals(getAccount(), user.getAccount()) &&
                 Objects.equals(getId(), user.getId()) &&
                 Objects.equals(getOutId(), user.getOutId()) &&
                 Objects.equals(getVersion(), user.getVersion()) &&
@@ -87,7 +92,7 @@ public class User extends BaseEntity {
     @Override
     public int hashCode() {
         return Objects.hash(email, firstName, secondName, password, phone, comment,
-                emailVerificationToken, emailVerificationStatus, passwordResetToken, isArchived, account, role,
-                getId(), getOutId(), getVersion(), getDeleted());
+                emailVerificationToken, emailVerificationStatus, passwordResetToken, isArchived, role,
+                getId(), getOutId(), getVersion(), getDeleted(), getAccount());
     }
 }

@@ -1,6 +1,7 @@
 package ru.itterminal.botdesk.aau.model.dto;
 
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 import ru.itterminal.botdesk.commons.model.validator.ValueOfEnum;
 
@@ -8,7 +9,7 @@ import javax.validation.constraints.Size;
 
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString

@@ -1,16 +1,17 @@
 package ru.itterminal.botdesk.aau.repository;
 
-import org.springframework.stereotype.Repository;
-import ru.itterminal.botdesk.aau.model.Group;
-import ru.itterminal.botdesk.aau.model.projection.GroupUniqueFields;
-import ru.itterminal.botdesk.commons.repository.CustomizedParentEntityRepository;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.stereotype.Repository;
+
+import ru.itterminal.botdesk.aau.model.Group;
+import ru.itterminal.botdesk.aau.model.projection.GroupUniqueFields;
+import ru.itterminal.botdesk.commons.repository.EntityRepositoryWithAccount;
+
 @Repository
-public interface GroupRepository extends CustomizedParentEntityRepository<Group> {
+public interface GroupRepository extends EntityRepositoryWithAccount<Group> {
 
     List<GroupUniqueFields> getByNameAndAccount_IdAndIdNot(String name, UUID accountId, UUID id);
 

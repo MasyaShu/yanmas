@@ -1,4 +1,4 @@
-package ru.itterminal.botdesk.aau.model;
+package ru.itterminal.botdesk.commons.model;
 
 import java.util.Objects;
 
@@ -7,17 +7,16 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.itterminal.botdesk.commons.model.BaseEntity;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "account")
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Account extends BaseEntity {

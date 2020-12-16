@@ -1,21 +1,26 @@
 package ru.itterminal.botdesk.tickets.model;
 
-
-import lombok.*;
-import ru.itterminal.botdesk.aau.model.Account;
-import ru.itterminal.botdesk.commons.model.BaseEntity;
-
-import javax.persistence.*;
 import java.util.Objects;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+import ru.itterminal.botdesk.commons.model.BaseEntityWithAccount;
 
 @Entity
 @Table(name = "ticket_statuses")
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TicketStatus extends BaseEntity {
+public class TicketStatus extends BaseEntityWithAccount {
 
     @Column(nullable = false, length = 128)
     private String name;
@@ -35,14 +40,14 @@ public class TicketStatus extends BaseEntity {
     @Column(name = "is_canceled_predefined", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean isCanceledPredefined;
 
-    @ManyToOne
-    @JoinColumn(name = "account_id", nullable = false)
-    private Account account;
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         TicketStatus ticketStatus = (TicketStatus) o;
         return Objects.equals(name, ticketStatus.name) &&
                 Objects.equals(sortIndex, ticketStatus.sortIndex) &&
@@ -50,7 +55,7 @@ public class TicketStatus extends BaseEntity {
                 Objects.equals(isFinishedPredefined, ticketStatus.isFinishedPredefined) &&
                 Objects.equals(isReopenedPredefined, ticketStatus.isReopenedPredefined) &&
                 Objects.equals(isCanceledPredefined, ticketStatus.isCanceledPredefined) &&
-                Objects.equals(account, ticketStatus.account) &&
+                Objects.equals(getAccount(), ticketStatus.getAccount()) &&
                 Objects.equals(getId(), ticketStatus.getId()) &&
                 Objects.equals(getOutId(), ticketStatus.getOutId()) &&
                 Objects.equals(getVersion(), ticketStatus.getVersion()) &&
@@ -60,7 +65,8 @@ public class TicketStatus extends BaseEntity {
     @Override
     public int hashCode() {
         return Objects.hash(name, sortIndex, isStartedPredefined, isFinishedPredefined,
-                isReopenedPredefined, isCanceledPredefined, account,
-                getId(), getOutId(), getVersion(), getDeleted());
+                            isReopenedPredefined, isCanceledPredefined,
+                            getId(), getOutId(), getVersion(), getDeleted(), getAccount()
+        );
     }
 }

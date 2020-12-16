@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 /**
  * Example of typical entity on microservice backoffice
@@ -21,7 +22,7 @@ import lombok.Setter;
 @Table(name = "test_table")
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 public class GeneralEntity extends BaseEntity {
