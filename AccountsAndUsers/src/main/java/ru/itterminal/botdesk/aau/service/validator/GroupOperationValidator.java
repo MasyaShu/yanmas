@@ -57,7 +57,7 @@ public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> 
             return true;
         } else {
             String validatedField;
-            if (entity.getName().equalsIgnoreCase(foundGroup.get(0).getName())) {
+            if (entity.getName().equalsIgnoreCase(foundGroup.get(0).getName()) && entity.getIsInner().equals(foundGroup.get(0).getIsInner())) {
                 validatedField = "name";
                 errors.put(validatedField, singletonList(new ValidationError(NOT_UNIQUE_CODE,
                         format(NOT_UNIQUE_MESSAGE, validatedField))));

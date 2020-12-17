@@ -34,29 +34,25 @@ public class GroupServiceImpl extends CrudServiceWithAccountImpl<Group, GroupOpe
     private static final String NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_ID_IS_NULL =
             "Not found groups by unique fields, id is null";
     private static final String START_FIND_GROUP_BY_UNIQUE_FIELDS =
-            "Start find user by unique fields, name: {} and not id: {} and not account: {}";
-
-    public static final String ENTITY_GROUP_NAME = Group.class.getSimpleName();
+            "Start find user by unique fields, name: {} and not id: {} and not account: {} and not isInner: {}";
 
     @Override
     public Group update(Group entity) {
-        validator.beforeUpdate(entity);
+
         log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
-        Group entityFromDatabase = repository.findById(entity.getId()).orElseThrow(() -> {
+        Group entityFromDatabase = repository.findByIdAndAccountId(entity.getId(), entity.getAccount().getId()).orElseThrow(() -> {
             String message = format(ENTITY_NOT_EXIST_MESSAGE, entity.getClass().getSimpleName(), entity.getId());
             log.error(message);
             return new EntityNotExistException(message);
         });
-        if (entity.getComment() == null) {
-            entity.setComment(entityFromDatabase.getComment());
-        }
+        entity.setIsInner(entityFromDatabase.getIsInner());
+        entity.generateDisplayName();
+        validator.beforeUpdate(entity);
         try {
-            entity.setIsInner(entityFromDatabase.getIsInner());
             Group updatedEntity = repository.update(entity);
             log.trace(format(UPDATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), updatedEntity));
             return updatedEntity;
-        }
-        catch (OptimisticLockException | ObjectOptimisticLockingFailureException ex) {
+        } catch (OptimisticLockException | ObjectOptimisticLockingFailureException ex) {
             throw new OptimisticLockingFailureException(format(VERSION_INVALID_MESSAGE, entity.getId()));
         }
     }
@@ -64,13 +60,13 @@ public class GroupServiceImpl extends CrudServiceWithAccountImpl<Group, GroupOpe
     public List<GroupUniqueFields> findByUniqueFields(Group group) {
         chekObjectForNull(group, NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_GROUP_IS_NULL, EntityNotExistException.class);
         chekObjectForNull(group.getName(), NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_NAME_IS_NULL,
-                          EntityNotExistException.class
+                EntityNotExistException.class
         );
         chekObjectForNull(group.getId(), NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_ID_IS_NULL, EntityNotExistException.class);
         chekObjectForNull(group.getAccount(), NOT_FOUND_GROUPS_BY_UNIQUE_FIELDS_ACCOUNT_IS_NULL,
-                          EntityNotExistException.class
+                EntityNotExistException.class
         );
-        log.trace(START_FIND_GROUP_BY_UNIQUE_FIELDS, group.getName(), group.getId(), group.getAccount());
-        return repository.getByNameAndAccount_IdAndIdNot(group.getName(), group.getAccount().getId(), group.getId());
+        log.trace(START_FIND_GROUP_BY_UNIQUE_FIELDS, group.getName(), group.getId(), group.getAccount(), group.getIsInner());
+        return repository.getByNameAndIsInnerAndAccount_IdAndIdNot(group.getName(), group.getIsInner(), group.getAccount().getId(), group.getId());
     }
 }
