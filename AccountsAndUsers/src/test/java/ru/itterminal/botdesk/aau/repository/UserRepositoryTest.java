@@ -193,4 +193,16 @@ class UserRepositoryTest {
         assertTrue(userList.isEmpty());
     }
 
+    @Test
+    void findAllByAccountIdAndListId_shouldGetEmptyList_whenListIdIsNull() {
+        List<User> userList = userRepository.findAllByAccountIdAndListId(UUID.randomUUID(), null);
+        assertTrue(userList.isEmpty());
+    }
+
+    @Test
+    void findAllByAccountIdAndListId_shouldGetEmptyList_whenAccountIdIsNull() {
+        List<User> userList = userRepository.findAllByAccountIdAndListId(null, Collections.emptyList());
+        assertTrue(userList.isEmpty());
+    }
+
 }

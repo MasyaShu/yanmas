@@ -30,6 +30,7 @@ import ru.itterminal.botdesk.aau.util.AAUConstants;
 public class UserDto extends BaseEntityDto {
 
     @NotNull(groups = {Create.class, Update.class})
+    // TODO Для валидации email есть аннотация @Email javax.validation.constraints.Email
     @Pattern(regexp = AAUConstants.EMAIL_PATTERN,
             message = AAUConstants.INVALID_EMAIL,
             groups = {Create.class, Update.class})

@@ -37,6 +37,12 @@ class TicketSettingRepositoryTest {
     private static final UUID USER_2_ID = UUID.fromString("cdfa6483-0769-4628-ba32-efd338a716de");
 
     @Test
+    void findAll_shouldFindOneRecordInDatabase_whenInDatabaseOnlyOne() {
+        List<TicketSetting> ticketSettingsList =  repository.findAllByAccountId(ACCOUNT_1_ID);
+        assertFalse(ticketSettingsList.isEmpty());
+    }
+
+    @Test
     void findByUniqueFields_shouldFindOneRecordInDatabase_whenCombinationOfFieldsIsNotUnique() {
         List<TicketSettingUniqueFields> ticketSettingUniqueFields =
                 repository.findByUniqueFields(
