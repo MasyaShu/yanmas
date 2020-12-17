@@ -58,6 +58,7 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
         log.trace(format(CREATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.toString()));
         UUID id = UUID.randomUUID();
         entity.setId(id);
+        entity.generateDisplayName();
         validator.checkUniqueness(entity);
         E createdEntity;
         createdEntity = repository.create(entity);
@@ -136,6 +137,7 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
             throw new EntityNotExistException(message);
         }
         try {
+            entity.generateDisplayName();
             E updatedEntity = repository.update(entity);
             log.trace(format(UPDATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), updatedEntity));
             return updatedEntity;
