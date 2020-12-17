@@ -1,16 +1,18 @@
 -- START MODULE **ACCOUNT AND USERS**
 create TABLE IF NOT EXISTS account
 (
-    out_id  varchar(128),
-    deleted bool        NOT NULL DEFAULT 'false',
-    version int4        NOT NULL DEFAULT (0),
-    id      uuid        NOT NULL,
-    name    varchar(20) NOT NULL,
+    out_id       varchar(128),
+    display_name varchar(256)         DEFAULT (NULL),
+    deleted      bool        NOT NULL DEFAULT 'false',
+    version      int4        NOT NULL DEFAULT (0),
+    id           uuid        NOT NULL,
+    name         varchar(20) NOT NULL,
     PRIMARY KEY (id)
 );
 create TABLE IF NOT EXISTS group_users
 (
     out_id        varchar(128),
+    display_name  varchar(256)          DEFAULT (NULL),
     deleted       bool         NOT NULL DEFAULT 'false',
     version       int4         NOT NULL DEFAULT (0),
     id            uuid         NOT NULL,
@@ -23,17 +25,19 @@ create TABLE IF NOT EXISTS group_users
 );
 create TABLE IF NOT EXISTS role
 (
-    out_id  varchar(128),
-    deleted bool        NOT NULL DEFAULT 'false',
-    version int4        NOT NULL DEFAULT (0),
-    id      uuid        NOT NULL,
-    name    varchar(30) NOT NULL,
-    weight  int         NOT NULL,
+    out_id       varchar(128),
+    display_name varchar(256)         DEFAULT (NULL),
+    deleted      bool        NOT NULL DEFAULT 'false',
+    version      int4        NOT NULL DEFAULT (0),
+    id           uuid        NOT NULL,
+    name         varchar(30) NOT NULL,
+    weight       int         NOT NULL,
     PRIMARY KEY (id)
 );
 create TABLE IF NOT EXISTS users
 (
     out_id                    varchar(128),
+    display_name              varchar(256)          DEFAULT (NULL),
     deleted                   bool         NOT NULL DEFAULT 'false',
     version                   int4         NOT NULL DEFAULT (0),
     id                        uuid         NOT NULL,
@@ -64,16 +68,17 @@ values (null, 'false', '0', 'ba99ce38-1611-4a81-adc9-3a779d58bbfe', 'ACCOUNT_OWN
 -- START MODULE **FILES**
 create TABLE IF NOT EXISTS files
 (
-    out_id      varchar(128),
-    deleted     bool         NOT NULL DEFAULT 'false',
-    version     int4         NOT NULL DEFAULT (0),
-    id          uuid         NOT NULL,
-    file_name   varchar(256) NOT NULL,
-    size        int          NOT NULL,
-    created_at  bigint       NOT NULL,
-    account_id  uuid         NOT NULL,
-    entity_id   uuid         NOT NULL,
-    is_uploaded bool         NOT NULL DEFAULT 'false',
+    out_id       varchar(128),
+    display_name varchar(256)          DEFAULT (NULL),
+    deleted      bool         NOT NULL DEFAULT 'false',
+    version      int4         NOT NULL DEFAULT (0),
+    id           uuid         NOT NULL,
+    file_name    varchar(256) NOT NULL,
+    size         int          NOT NULL,
+    created_at   bigint       NOT NULL,
+    account_id   uuid         NOT NULL,
+    entity_id    uuid         NOT NULL,
+    is_uploaded  bool         NOT NULL DEFAULT 'false',
     PRIMARY KEY (id),
     FOREIGN KEY (account_id) REFERENCES account (id)
 );
@@ -81,6 +86,7 @@ create TABLE IF NOT EXISTS files
 create TABLE IF NOT EXISTS ticket_types
 (
     out_id        varchar(128),
+    display_name  varchar(256)          DEFAULT (NULL),
     deleted       bool         NOT NULL DEFAULT 'false',
     version       int4         NOT NULL DEFAULT (0),
     id            uuid         NOT NULL,
@@ -94,6 +100,7 @@ create TABLE IF NOT EXISTS ticket_types
 create TABLE IF NOT EXISTS ticket_statuses
 (
     out_id                 varchar(128),
+    display_name           varchar(256)          DEFAULT (NULL),
     deleted                bool         NOT NULL DEFAULT 'false',
     version                int4         NOT NULL DEFAULT (0),
     id                     uuid         NOT NULL,
@@ -111,6 +118,7 @@ create TABLE IF NOT EXISTS ticket_statuses
 create TABLE IF NOT EXISTS ticket_template
 (
     out_id                     varchar(128),
+    display_name               varchar(256)     DEFAULT (NULL),
     deleted                    bool    NOT NULL DEFAULT 'false',
     version                    int4    NOT NULL DEFAULT (0),
     id                         uuid    NOT NULL,
@@ -134,6 +142,7 @@ create TABLE IF NOT EXISTS ticket_template
 create TABLE IF NOT EXISTS ticket_settings
 (
     out_id                      varchar(128),
+    display_name                varchar(256)  DEFAULT (NULL),
     deleted                     bool NOT NULL DEFAULT 'false',
     version                     int4 NOT NULL DEFAULT (0),
     id                          uuid NOT NULL,
@@ -159,6 +168,7 @@ CREATE UNIQUE INDEX unique_fields_ticket_settings ON ticket_settings (account_id
 create TABLE IF NOT EXISTS ticket_settings_executors
 (
     out_id             varchar(128),
+    display_name       varchar(256)  DEFAULT (NULL),
     deleted            bool NOT NULL DEFAULT 'false',
     version            int4 NOT NULL DEFAULT (0),
     id                 uuid NOT NULL,
@@ -171,6 +181,7 @@ create TABLE IF NOT EXISTS ticket_settings_executors
 create TABLE IF NOT EXISTS ticket_settings_observers
 (
     out_id             varchar(128),
+    display_name       varchar(256)  DEFAULT (NULL),
     deleted            bool NOT NULL DEFAULT 'false',
     version            int4 NOT NULL DEFAULT (0),
     id                 uuid NOT NULL,

@@ -45,4 +45,9 @@ public class Account extends BaseEntity {
     public int hashCode() {
         return Objects.hash(name);
     }
+
+    @Override
+    public void generateDisplayName() {
+
+    }
 }

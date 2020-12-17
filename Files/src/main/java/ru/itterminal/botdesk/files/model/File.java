@@ -71,4 +71,9 @@ public class File extends BaseEntity {
                             getId(), getOutId(), getVersion(), getDeleted()
         );
     }
+
+    @Override
+    public void generateDisplayName() {
+
+    }
 }

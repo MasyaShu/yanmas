@@ -63,4 +63,9 @@ public class TicketType extends BaseEntity {
                             getId(), getOutId(), getVersion(), getDeleted()
         );
     }
+
+    @Override
+    public void generateDisplayName() {
+
+    }
 }

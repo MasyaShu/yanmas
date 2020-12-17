@@ -99,4 +99,9 @@ public class TicketTemplate extends BaseEntity {
                             getId(), getOutId(), getVersion(), getDeleted()
         );
     }
+
+    @Override
+    public void generateDisplayName() {
+
+    }
 }

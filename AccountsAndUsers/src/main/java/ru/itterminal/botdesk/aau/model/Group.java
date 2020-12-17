@@ -61,4 +61,9 @@ public class Group extends BaseEntity {
         return Objects.hash(name, comment, isInner, isDeprecated, account,
                 getId(), getOutId(), getVersion(), getDeleted());
     }
+
+    @Override
+    public void generateDisplayName() {
+
+    }
 }

@@ -99,4 +99,9 @@ public class User extends BaseEntity {
                 emailVerificationToken, emailVerificationStatus, passwordResetToken, isArchived, role, account,
                 getId(), getOutId(), getVersion(), getDeleted());
     }
+
+    @Override
+    public void generateDisplayName() {
+
+    }
 }
