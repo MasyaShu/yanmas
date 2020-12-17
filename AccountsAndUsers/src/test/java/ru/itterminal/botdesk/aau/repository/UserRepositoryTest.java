@@ -2,9 +2,11 @@ package ru.itterminal.botdesk.aau.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,6 +24,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
+import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 
 @SuppressWarnings("deprecation")
 @TestInstance(PER_CLASS)
@@ -67,7 +70,6 @@ class UserRepositoryTest {
         roleAuthor.setDeleted(false);
         roleAuthor.setVersion(0);
 
-
         roleNotExistInDatabase = Role
                 .builder()
                 .name(Roles.ACCOUNT_OWNER.toString())
@@ -90,8 +92,10 @@ class UserRepositoryTest {
 
     @Test
     void getByEmailAndIdNot_shouldGetOneUserUniqueFields_whenEmailExistAndIdNotExistInDatabase() {
-        Assertions.assertEquals(USER_1_EMAIL_EXIST,
-                userRepository.getByEmailAndIdNot(USER_1_EMAIL_EXIST, ID_NOT_EXIST).get(0).getEmail());
+        Assertions.assertEquals(
+                USER_1_EMAIL_EXIST,
+                userRepository.getByEmailAndIdNot(USER_1_EMAIL_EXIST, ID_NOT_EXIST).get(0).getEmail()
+        );
     }
 
     @Test
@@ -130,7 +134,8 @@ class UserRepositoryTest {
     @Test
     void getByIdAndAccountIdAndOwnGroupId_shouldGetOneUser_whenUserInDatabaseHasAllPassedParameters() {
         User user = userRepository.getByIdAndAccount_IdAndOwnGroup_Id(USER_1_ID_EXIST, USER_1_ACCOUNT_ID_EXIST,
-                USER_1_OWN_GROUP_ID_EXIST).get();
+                                                                      USER_1_OWN_GROUP_ID_EXIST
+        ).get();
         assertNotNull(user);
         Assertions.assertEquals(USER_1_ID_EXIST, user.getId());
         Assertions.assertEquals(USER_1_ACCOUNT_ID_EXIST, user.getAccount().getId());
@@ -142,6 +147,50 @@ class UserRepositoryTest {
         List<User> userList = userRepository.findAllByRoleAndAccount_IdAndIdNot(
                 roleAuthor, USER_2_ACCOUNT_ID_EXIST, USER_1_ID_EXIST);
         assertEquals(3, userList.size());
+    }
+
+    @Test
+    void findAllByAccountId_shouldGetFourUsers_whenThereAreFourUsersWithTheSameAccountId() {
+        List<User> userList = userRepository.findAllByAccountId(USER_1_ACCOUNT_ID_EXIST);
+        assertEquals(4, userList.size());
+    }
+
+    @Test
+    void findAllByAccountId_shouldGetEmptyList_whenThereAreNotTheSameAccountId() {
+        List<User> userList = userRepository.findAllByAccountId(UUID.randomUUID());
+        assertTrue(userList.isEmpty());
+    }
+
+    @Test
+    void findByIdAndAccountId_shouldGetOneUser_whenThereIsOneUserWithTheSameAccountIdAndTheSameId() {
+        User user = userRepository.findByIdAndAccountId(USER_1_ID_EXIST, USER_1_ACCOUNT_ID_EXIST).get();
+        assertNotNull(user);
+    }
+
+    @Test
+    void findByIdAndAccountId_shouldGetNull_whenThereIsNotUsersWithTheSameAccountIdAndTheSameId() {
+        assertTrue(userRepository.findByIdAndAccountId(UUID.randomUUID(), UUID.randomUUID()).isEmpty());
+    }
+
+    @Test
+    void findAllByAccountIdAndListId_shouldGetTwoUsers_whenThereAreFourUsersWithTheSameAccountIdAndInListId() {
+        var userHelper = new UserTestHelper();
+        var predefinedUserList = userHelper.getPredefinedValidEntityList();
+        var userList = userRepository.
+                findAllByAccountIdAndListId(
+                        USER_1_ACCOUNT_ID_EXIST,
+                        List.of(
+                                predefinedUserList.get(0).getId(),
+                                predefinedUserList.get(1).getId()
+                        )
+                );
+        assertEquals(2, userList.size());
+    }
+
+    @Test
+    void findAllByAccountIdAndListId_shouldGetEmptyList_whenThereAreTheSameAccountIdAndEmptyListId() {
+        List<User> userList = userRepository.findAllByAccountIdAndListId(UUID.randomUUID(), Collections.emptyList());
+        assertTrue(userList.isEmpty());
     }
 
 }

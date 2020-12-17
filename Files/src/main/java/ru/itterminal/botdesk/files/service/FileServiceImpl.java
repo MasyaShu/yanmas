@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
-import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
+import ru.itterminal.botdesk.commons.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.botdesk.files.model.File;
 import ru.itterminal.botdesk.files.repository.FileRepository;
 import ru.itterminal.botdesk.files.service.validator.FileOperationValidator;
@@ -24,7 +24,7 @@ import ru.itterminal.botdesk.integration.aws.s3.AwsS3ObjectOperations;
 @Slf4j
 @Service
 @Transactional
-public class FileServiceImpl extends CrudServiceImpl<File, FileOperationValidator, FileRepository> {
+public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperationValidator, FileRepository> {
 
     private static final String METHOD_UPDATE = "For now this method doesn't implement yet";
     private static final String BYTES_OF_FILE = "Bytes of file";

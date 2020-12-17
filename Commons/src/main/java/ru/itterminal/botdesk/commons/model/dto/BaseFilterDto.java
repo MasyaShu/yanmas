@@ -6,8 +6,11 @@ import javax.validation.constraints.Size;
 
 import org.springframework.data.domain.Sort;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.commons.model.validator.ValueOfEnum;
 
 /**
@@ -17,6 +20,9 @@ import ru.itterminal.botdesk.commons.model.validator.ValueOfEnum;
 
 @Getter
 @Setter
+@SuperBuilder
+@AllArgsConstructor
+@NoArgsConstructor
 public class BaseFilterDto {
 
     @Size(max = 128)

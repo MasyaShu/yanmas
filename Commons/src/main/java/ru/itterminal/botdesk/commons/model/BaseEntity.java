@@ -10,12 +10,14 @@ import javax.persistence.Version;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
 @MappedSuperclass
 @NoArgsConstructor
-public class BaseEntity {
+@SuperBuilder
+public abstract class BaseEntity {
     @Id
     private UUID id;
 
@@ -28,6 +30,9 @@ public class BaseEntity {
     @Version
     private Integer version;
 
+    @Column(name = "display_name", nullable = false, length = 256)
+    private String displayName;
+
     /**
      * @deprecated for manual changes {@link BaseEntity#version}!
      * Only for Dto->Entity mapping.
@@ -38,4 +43,6 @@ public class BaseEntity {
     public void setVersion(Integer version) {
         this.version = version;
     }
+
+    public abstract void generateDisplayName();
 }

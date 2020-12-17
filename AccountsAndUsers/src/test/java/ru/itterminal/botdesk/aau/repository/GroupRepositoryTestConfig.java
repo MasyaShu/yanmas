@@ -8,6 +8,6 @@ import ru.itterminal.botdesk.commons.repository.ParentEntityRepositoryImpl;
 @SpringBootConfiguration
 @EnableJpaRepositories(basePackages = "ru.itterminal.botdesk.aau.repository",
     repositoryBaseClass = ParentEntityRepositoryImpl.class)
-@EntityScan(basePackages = "ru.itterminal.botdesk.aau.model")
+@EntityScan(basePackages = "ru.itterminal.botdesk")
 public class GroupRepositoryTestConfig {
 }

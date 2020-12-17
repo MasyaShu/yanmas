@@ -6,11 +6,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @ToString
 public class TicketSettingFilterDto extends BaseFilterDto {

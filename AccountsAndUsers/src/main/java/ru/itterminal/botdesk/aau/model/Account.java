@@ -7,17 +7,17 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 
 @Entity
 @Table(name = "account")
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Account extends BaseEntity {
@@ -44,5 +44,10 @@ public class Account extends BaseEntity {
     @Override
     public int hashCode() {
         return Objects.hash(name);
+    }
+
+    @Override
+    public void generateDisplayName() {
+
     }
 }

@@ -13,25 +13,25 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.itterminal.botdesk.aau.model.Account;
+import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.User;
+import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 
 @Entity
 @Table(name = "ticket_settings")
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 public class TicketSetting extends BaseEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
@@ -111,5 +111,10 @@ public class TicketSetting extends BaseEntity {
                             ticketStatusForReopen, ticketStatusForClose, ticketStatusForCancel,
                             getId(), getOutId(), getVersion(), getDeleted()
         );
+    }
+
+    @Override
+    public void generateDisplayName() {
+
     }
 }

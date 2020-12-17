@@ -1,6 +1,7 @@
 package ru.itterminal.botdesk.aau.model.dto;
 
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Delete;
@@ -14,7 +15,7 @@ import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_NULL_FO
 
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString

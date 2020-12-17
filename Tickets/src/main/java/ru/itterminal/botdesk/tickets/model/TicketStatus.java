@@ -1,21 +1,33 @@
 package ru.itterminal.botdesk.tickets.model;
 
+import java.util.Objects;
 
-import lombok.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
-
-import javax.persistence.*;
-import java.util.Objects;
 
 @Entity
 @Table(name = "ticket_statuses")
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 public class TicketStatus extends BaseEntity {
+
+    @ManyToOne
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
 
     @Column(nullable = false, length = 128)
     private String name;
@@ -35,14 +47,14 @@ public class TicketStatus extends BaseEntity {
     @Column(name = "is_canceled_predefined", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean isCanceledPredefined;
 
-    @ManyToOne
-    @JoinColumn(name = "account_id", nullable = false)
-    private Account account;
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         TicketStatus ticketStatus = (TicketStatus) o;
         return Objects.equals(name, ticketStatus.name) &&
                 Objects.equals(sortIndex, ticketStatus.sortIndex) &&
@@ -59,8 +71,14 @@ public class TicketStatus extends BaseEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, sortIndex, isStartedPredefined, isFinishedPredefined,
-                isReopenedPredefined, isCanceledPredefined, account,
-                getId(), getOutId(), getVersion(), getDeleted());
+        return Objects.hash(account, name, sortIndex, isStartedPredefined, isFinishedPredefined,
+                            isReopenedPredefined, isCanceledPredefined,
+                            getId(), getOutId(), getVersion(), getDeleted()
+        );
+    }
+
+    @Override
+    public void generateDisplayName() {
+
     }
 }

@@ -1,21 +1,34 @@
 package ru.itterminal.botdesk.tickets.model;
 
-import lombok.*;
-import ru.itterminal.botdesk.aau.model.Account;
-import ru.itterminal.botdesk.aau.model.User;
-import ru.itterminal.botdesk.commons.model.BaseEntity;
-
-import javax.persistence.*;
 import java.util.Objects;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+import ru.itterminal.botdesk.aau.model.User;
+import ru.itterminal.botdesk.aau.model.Account;
+import ru.itterminal.botdesk.commons.model.BaseEntity;
 
 @Entity
 @Table(name = "ticket_template")
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 public class TicketTemplate extends BaseEntity {
+
+    @ManyToOne
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
 
     @Column(length = 256)
     private String subject;
@@ -45,10 +58,6 @@ public class TicketTemplate extends BaseEntity {
     private Boolean isActive;
 
     @ManyToOne
-    @JoinColumn(name = "account_id", nullable = false)
-    private Account account;
-
-    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User Author;
 
@@ -58,8 +67,12 @@ public class TicketTemplate extends BaseEntity {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         TicketTemplate ticketTemplate = (TicketTemplate) o;
         return Objects.equals(subject, ticketTemplate.subject) &&
                 Objects.equals(description, ticketTemplate.description) &&
@@ -72,7 +85,7 @@ public class TicketTemplate extends BaseEntity {
                 Objects.equals(isActive, ticketTemplate.isActive) &&
                 Objects.equals(account, ticketTemplate.account) &&
                 Objects.equals(Author, ticketTemplate.Author) &&
-                Objects.equals(ticketType, ticketTemplate.ticketType)&&
+                Objects.equals(ticketType, ticketTemplate.ticketType) &&
                 Objects.equals(getId(), ticketTemplate.getId()) &&
                 Objects.equals(getOutId(), ticketTemplate.getOutId()) &&
                 Objects.equals(getVersion(), ticketTemplate.getVersion()) &&
@@ -81,8 +94,14 @@ public class TicketTemplate extends BaseEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(subject, description, dateNextRun, dateStart, dateEnd, zoneId, expressionSchedule,
-                isOnlyOneTicketInWork, isActive, account, Author, ticketType,
-                getId(), getOutId(), getVersion(), getDeleted());
+        return Objects.hash(account, subject, description, dateNextRun, dateStart, dateEnd, zoneId, expressionSchedule,
+                            isOnlyOneTicketInWork, isActive, Author, ticketType,
+                            getId(), getOutId(), getVersion(), getDeleted()
+        );
+    }
+
+    @Override
+    public void generateDisplayName() {
+
     }
 }

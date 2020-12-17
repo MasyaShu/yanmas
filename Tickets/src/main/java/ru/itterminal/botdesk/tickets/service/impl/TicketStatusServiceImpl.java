@@ -1,27 +1,29 @@
 package ru.itterminal.botdesk.tickets.service.impl;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
-import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
-import ru.itterminal.botdesk.tickets.model.TicketStatus;
-import ru.itterminal.botdesk.tickets.model.projection.TicketStatusUniqueFields;
-import ru.itterminal.botdesk.tickets.repository.TicketStatusRepository;
-import ru.itterminal.botdesk.tickets.service.validator.TicketStatusOperationValidator;
-
-import java.util.List;
-import java.util.UUID;
-
 import static java.lang.String.format;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekObjectForNull;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekStringForNullOrEmpty;
 
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import lombok.extern.slf4j.Slf4j;
+import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
+import ru.itterminal.botdesk.commons.service.impl.CrudServiceWithAccountImpl;
+import ru.itterminal.botdesk.tickets.model.TicketStatus;
+import ru.itterminal.botdesk.tickets.model.projection.TicketStatusUniqueFields;
+import ru.itterminal.botdesk.tickets.repository.TicketStatusRepository;
+import ru.itterminal.botdesk.tickets.service.validator.TicketStatusOperationValidator;
+
 @Slf4j
 @Service
 @Transactional
-public class TicketStatusServiceImpl extends CrudServiceImpl<TicketStatus, TicketStatusOperationValidator, TicketStatusRepository> {
+public class TicketStatusServiceImpl extends
+        CrudServiceWithAccountImpl<TicketStatus, TicketStatusOperationValidator, TicketStatusRepository> {
 
     private static final String TICKET_TYPE_IS_NULL =
             "Not found ticket status by unique fields, ticketStatus is null";
@@ -35,9 +37,6 @@ public class TicketStatusServiceImpl extends CrudServiceImpl<TicketStatus, Ticke
     private static final String START_FIND_TICKET_TYPES_BY_UNIQUE_FIELDS =
             "Start find ticket status by unique fields, name: {} and not id: {} and not account: {}";
     private static final String CANT_FIND_BY_UNIQUE = "Can't find by unique fields";
-    public static final String ENTITY_TICKET_TYPES_NAME = TicketStatus.class.getSimpleName();
-    private static final String START_FIND_TICKET_TYPES_BY_ID_AND_ACCOUNT_ID = "Start find ticket status by id: {} and accountId: {}";
-
 
     @SuppressWarnings("DuplicatedCode")
     public List<TicketStatusUniqueFields> findByUniqueFields(TicketStatus ticketStatus) {
@@ -60,19 +59,5 @@ public class TicketStatusServiceImpl extends CrudServiceImpl<TicketStatus, Ticke
         entity.setIsReopenedPredefined(entityFromDatabase.getIsReopenedPredefined());
         entity.setIsStartedPredefined(entityFromDatabase.getIsStartedPredefined());
         return super.update(entity);
-    }
-
-    @SuppressWarnings("DuplicatedCode")
-    @Transactional(readOnly = true)
-    public TicketStatus findByIdAndAccountId(UUID id, UUID accountId) {
-        chekObjectForNull(id, format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, ENTITY_TICKET_TYPES_NAME, id, accountId),
-                EntityNotExistException.class);
-        chekObjectForNull(accountId, format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, ENTITY_TICKET_TYPES_NAME, id, accountId),
-                EntityNotExistException.class);
-        log.trace(START_FIND_TICKET_TYPES_BY_ID_AND_ACCOUNT_ID, id, accountId);
-        return repository.getByIdAndAccount_Id(id, accountId).orElseThrow(
-                () -> new EntityNotExistException(format(NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID, ENTITY_TICKET_TYPES_NAME, id,
-                        accountId))
-        );
     }
 }

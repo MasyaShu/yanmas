@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
-import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
+import ru.itterminal.botdesk.commons.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.botdesk.tickets.model.TicketSetting;
 import ru.itterminal.botdesk.tickets.model.projection.TicketSettingUniqueFields;
 import ru.itterminal.botdesk.tickets.repository.TicketSettingRepository;
@@ -18,7 +18,7 @@ import ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationVal
 @Slf4j
 @Service
 @Transactional
-public class TicketSettingServiceImpl extends CrudServiceImpl<TicketSetting, TicketSettingOperationValidator,
+public class TicketSettingServiceImpl extends CrudServiceWithAccountImpl<TicketSetting, TicketSettingOperationValidator,
         TicketSettingRepository> {
 
     private static final String WHERE = "TicketSettingServiceImpl.findByUniqueFields: ";

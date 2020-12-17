@@ -11,13 +11,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 
 @Entity
 @Table(name="role")
 @Setter
 @Getter
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Role extends BaseEntity {
@@ -45,5 +46,10 @@ public class Role extends BaseEntity {
     @Override
     public int hashCode() {
         return Objects.hash(getId(), name, weight);
+    }
+
+    @Override
+    public void generateDisplayName() {
+
     }
 }
