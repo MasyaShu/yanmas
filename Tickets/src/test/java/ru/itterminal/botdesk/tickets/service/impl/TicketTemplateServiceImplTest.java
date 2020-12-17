@@ -8,18 +8,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
-import ru.itterminal.botdesk.tickets.model.TicketStatus;
 import ru.itterminal.botdesk.tickets.model.TicketTemplate;
-import ru.itterminal.botdesk.tickets.repository.TicketStatusRepository;
 import ru.itterminal.botdesk.tickets.repository.TicketTemplateRepository;
 import ru.itterminal.botdesk.tickets.service.validator.TicketTemplateOperationValidator;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {TicketTemplateServiceImpl.class})
@@ -35,29 +32,36 @@ class TicketTemplateServiceImplTest {
     private TicketTemplateServiceImpl service;
 
     private TicketTemplate ticketTemplate;
-    private Account account;
 
     @BeforeEach
     void setUpBeforeEach() {
-        account = new Account();
+        Account account = new Account();
         account.setId(UUID.fromString(TestSecurityConfig.ACCOUNT_1_ID));
+        Calendar calendar = new GregorianCalendar();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        long currentTime = calendar.getTimeInMillis();
+        calendar.get(Calendar.DAY_OF_MONTH);
         ticketTemplate = TicketTemplate
                 .builder()
                 .account(account)
-                .expressionSchedule("1 1 1 31 1 1")
-                .dateStart(1639404029000L)
+                .expressionSchedule("0 0 0 14 * *")
+                .dateStart(currentTime + 86400000L)
+                .dateEnd(currentTime + 31556926000L)
                 .zoneId("America/New_York")
                 .build();
     }
 
     @Test
-    void create_shouldErrorNextTime_whenPassedExpressionSchedule() {
+    void setNextExecutionTime_shouldSetDateNextRun_whenPassedExpressionSchedule() {
         when(validator.beforeUpdate(any())).thenReturn(true);
         when(ticketTemplateRepository.existsById(any())).thenReturn(true);
         when(ticketTemplateRepository.findById(any())).thenReturn(Optional.of(ticketTemplate));
         when(ticketTemplateRepository.create(any())).thenReturn(ticketTemplate);
         TicketTemplate createTicketTemplate = service.create(ticketTemplate);
-        assertEquals(createTicketTemplate, ticketTemplate);
+       // var dateNR = new Date(createTicketTemplate.getDateNextRun());
+      //  assertEquals(createTicketTemplate, ticketTemplate);
         //verify(validator, times(1)).beforeUpdate(any());
     }
 
