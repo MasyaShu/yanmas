@@ -4,6 +4,8 @@ import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -11,7 +13,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import ru.itterminal.botdesk.commons.model.BaseEntityWithAccount;
+import ru.itterminal.botdesk.aau.model.Account;
+import ru.itterminal.botdesk.commons.model.BaseEntity;
 
 @Entity
 @Table(name = "ticket_types")
@@ -20,7 +23,11 @@ import ru.itterminal.botdesk.commons.model.BaseEntityWithAccount;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TicketType extends BaseEntityWithAccount {
+public class TicketType extends BaseEntity {
+
+    @ManyToOne
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
 
     @Column(nullable = false, length = 128)
     private String name;
@@ -43,7 +50,7 @@ public class TicketType extends BaseEntityWithAccount {
         return Objects.equals(name, ticketType.name) &&
                 Objects.equals(comment, ticketType.comment) &&
                 Objects.equals(isPredefined, ticketType.isPredefined) &&
-                Objects.equals(getAccount(), ticketType.getAccount()) &&
+                Objects.equals(account, ticketType.account) &&
                 Objects.equals(getId(), ticketType.getId()) &&
                 Objects.equals(getOutId(), ticketType.getOutId()) &&
                 Objects.equals(getVersion(), ticketType.getVersion()) &&
@@ -52,8 +59,13 @@ public class TicketType extends BaseEntityWithAccount {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, comment, isPredefined,
-                            getId(), getOutId(), getVersion(), getDeleted(), getAccount()
+        return Objects.hash(account, name, comment, isPredefined,
+                            getId(), getOutId(), getVersion(), getDeleted()
         );
+    }
+
+    @Override
+    public void generateDisplayName() {
+
     }
 }

@@ -47,4 +47,9 @@ public class GeneralEntity extends BaseEntity {
             ", description='" + description + '\'' +
             '}';
     }
+
+    @Override
+    public void generateDisplayName() {
+
+    }
 }

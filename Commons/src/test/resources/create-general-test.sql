@@ -1,13 +1,14 @@
 DROP TABLE IF EXISTS test_table;
 CREATE TABLE IF NOT EXISTS test_table
 (
-    id          uuid                     NOT NULL,
-    out_id      varchar(128)                      DEFAULT (NULL),
-    name        varchar(128)             NOT NULL,
-    date        timestamp WITH time zone NOT NULL,
-    description varchar(255),
-    deleted     bool                              DEFAULT 'false' NOT NULL,
-    version     int                      NOT NULL DEFAULT (0),
+    id           uuid                     NOT NULL,
+    display_name varchar(256)                      DEFAULT (NULL),
+    out_id       varchar(128)                      DEFAULT (NULL),
+    name         varchar(128)             NOT NULL,
+    date         timestamp WITH time zone NOT NULL,
+    description  varchar(255),
+    deleted      bool                              DEFAULT 'false' NOT NULL,
+    version      int                      NOT NULL DEFAULT (0),
     PRIMARY KEY (id)
 );
 CREATE UNIQUE INDEX test_table_name ON test_table (name);

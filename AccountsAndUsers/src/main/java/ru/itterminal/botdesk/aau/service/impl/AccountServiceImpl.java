@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.itterminal.botdesk.commons.model.Account;
+import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.dto.AccountCreateDto;

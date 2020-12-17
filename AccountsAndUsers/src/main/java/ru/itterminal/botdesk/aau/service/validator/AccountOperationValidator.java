@@ -11,7 +11,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.itterminal.botdesk.commons.model.Account;
+import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;

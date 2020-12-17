@@ -37,7 +37,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ru.itterminal.botdesk.commons.model.Account;
+import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.dto.AccountCreateDto;
 import ru.itterminal.botdesk.aau.model.dto.AccountDto;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;

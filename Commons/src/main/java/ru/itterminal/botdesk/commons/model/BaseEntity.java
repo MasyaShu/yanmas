@@ -17,7 +17,7 @@ import lombok.experimental.SuperBuilder;
 @MappedSuperclass
 @NoArgsConstructor
 @SuperBuilder
-public class BaseEntity {
+public abstract class BaseEntity {
     @Id
     private UUID id;
 
@@ -30,6 +30,9 @@ public class BaseEntity {
     @Version
     private Integer version;
 
+    @Column(name = "display_name", nullable = false, length = 256)
+    private String displayName;
+
     /**
      * @deprecated for manual changes {@link BaseEntity#version}!
      * Only for Dto->Entity mapping.
@@ -40,4 +43,6 @@ public class BaseEntity {
     public void setVersion(Integer version) {
         this.version = version;
     }
+
+    public abstract void generateDisplayName();
 }

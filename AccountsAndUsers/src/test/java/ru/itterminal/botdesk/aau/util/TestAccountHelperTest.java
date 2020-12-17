@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import ru.itterminal.botdesk.commons.model.Account;
+import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.aau.model.dto.AccountDto;
 

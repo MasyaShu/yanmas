@@ -32,11 +32,15 @@ public class BaseEntityDto {
 
     @Null(groups = Create.class,
         message = MUST_BE_NULL_FOR_THE_NEW_ENTITY)
-    @NotNull(groups = {Update.class, Delete.class})
+    @NotNull(groups = {Update.class})
     private UUID id;
 
     @Size(max = 128, groups = {Update.class, Create.class})
     private String outId;
+
+    @Size(max = 256, groups = {Update.class, Create.class})
+    @Null(groups = {Update.class, Create.class})
+    private String displayName;
 
     @Null(groups = Create.class,
         message = MUST_BE_NULL_FOR_THE_NEW_ENTITY)

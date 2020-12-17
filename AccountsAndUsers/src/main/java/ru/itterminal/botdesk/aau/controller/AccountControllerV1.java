@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.itterminal.botdesk.commons.model.Account;
+import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.dto.AccountCreateDto;
 import ru.itterminal.botdesk.aau.model.dto.AccountDto;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;

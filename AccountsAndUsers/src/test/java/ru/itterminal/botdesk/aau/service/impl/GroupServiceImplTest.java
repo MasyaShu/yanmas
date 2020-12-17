@@ -25,7 +25,7 @@ import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.repository.GroupRepository;
 import ru.itterminal.botdesk.aau.service.validator.GroupOperationValidator;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
-import ru.itterminal.botdesk.commons.model.Account;
+import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

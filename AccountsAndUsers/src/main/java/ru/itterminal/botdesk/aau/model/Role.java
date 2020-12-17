@@ -47,4 +47,9 @@ public class Role extends BaseEntity {
     public int hashCode() {
         return Objects.hash(getId(), name, weight);
     }
+
+    @Override
+    public void generateDisplayName() {
+
+    }
 }

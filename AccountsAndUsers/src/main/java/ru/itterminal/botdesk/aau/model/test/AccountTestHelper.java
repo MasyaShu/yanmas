@@ -3,7 +3,7 @@ package ru.itterminal.botdesk.aau.model.test;
 import java.util.List;
 import java.util.UUID;
 
-import ru.itterminal.botdesk.commons.model.Account;
+import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.dto.AccountDto;
 import ru.itterminal.botdesk.commons.model.BaseTestEntityHelperImpl;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
