@@ -1,4 +1,4 @@
-package ru.itterminal.botdesk.commons.model;
+package ru.itterminal.botdesk.aau.model;
 
 import java.util.Objects;
 
@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import ru.itterminal.botdesk.commons.model.BaseEntity;
 
 @Entity
 @Table(name = "account")

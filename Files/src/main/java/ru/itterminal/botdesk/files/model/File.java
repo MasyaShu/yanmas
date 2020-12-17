@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -12,7 +14,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import ru.itterminal.botdesk.commons.model.BaseEntityWithAccount;
+import ru.itterminal.botdesk.aau.model.Account;
+import ru.itterminal.botdesk.commons.model.BaseEntity;
 
 @Entity
 @Table(name = "files")
@@ -21,7 +24,7 @@ import ru.itterminal.botdesk.commons.model.BaseEntityWithAccount;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class File extends BaseEntityWithAccount {
+public class File extends BaseEntity {
 
     @Column(name = "file_name", nullable = false, length = 260)
     private String fileName;
@@ -38,6 +41,10 @@ public class File extends BaseEntityWithAccount {
     @Column(name = "is_uploaded", nullable = false)
     private Boolean isUploaded;
 
+    @ManyToOne
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -51,7 +58,7 @@ public class File extends BaseEntityWithAccount {
                 Objects.equals(size, file.size) &&
                 Objects.equals(createdAt, file.createdAt) &&
                 Objects.equals(entityId, file.entityId) &&
-                Objects.equals(getAccount(), file.getAccount()) &&
+                Objects.equals(account, file.account) &&
                 Objects.equals(getId(), file.getId()) &&
                 Objects.equals(getOutId(), file.getOutId()) &&
                 Objects.equals(getVersion(), file.getVersion()) &&
@@ -60,8 +67,8 @@ public class File extends BaseEntityWithAccount {
 
     @Override
     public int hashCode() {
-        return Objects.hash(fileName, size, createdAt, entityId,
-                            getId(), getOutId(), getVersion(), getDeleted(), getAccount()
+        return Objects.hash(fileName, size, createdAt, entityId, account,
+                            getId(), getOutId(), getVersion(), getDeleted()
         );
     }
 }

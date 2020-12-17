@@ -4,6 +4,8 @@ import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -11,7 +13,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import ru.itterminal.botdesk.commons.model.BaseEntityWithAccount;
+import ru.itterminal.botdesk.aau.model.Account;
+import ru.itterminal.botdesk.commons.model.BaseEntity;
 
 @Entity
 @Table(name = "ticket_statuses")
@@ -20,7 +23,11 @@ import ru.itterminal.botdesk.commons.model.BaseEntityWithAccount;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TicketStatus extends BaseEntityWithAccount {
+public class TicketStatus extends BaseEntity {
+
+    @ManyToOne
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
 
     @Column(nullable = false, length = 128)
     private String name;
@@ -55,7 +62,7 @@ public class TicketStatus extends BaseEntityWithAccount {
                 Objects.equals(isFinishedPredefined, ticketStatus.isFinishedPredefined) &&
                 Objects.equals(isReopenedPredefined, ticketStatus.isReopenedPredefined) &&
                 Objects.equals(isCanceledPredefined, ticketStatus.isCanceledPredefined) &&
-                Objects.equals(getAccount(), ticketStatus.getAccount()) &&
+                Objects.equals(account, ticketStatus.account) &&
                 Objects.equals(getId(), ticketStatus.getId()) &&
                 Objects.equals(getOutId(), ticketStatus.getOutId()) &&
                 Objects.equals(getVersion(), ticketStatus.getVersion()) &&
@@ -64,9 +71,9 @@ public class TicketStatus extends BaseEntityWithAccount {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, sortIndex, isStartedPredefined, isFinishedPredefined,
+        return Objects.hash(account, name, sortIndex, isStartedPredefined, isFinishedPredefined,
                             isReopenedPredefined, isCanceledPredefined,
-                            getId(), getOutId(), getVersion(), getDeleted(), getAccount()
+                            getId(), getOutId(), getVersion(), getDeleted()
         );
     }
 }

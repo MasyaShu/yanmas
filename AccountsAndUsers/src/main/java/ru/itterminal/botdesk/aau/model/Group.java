@@ -4,6 +4,8 @@ import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -11,7 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import ru.itterminal.botdesk.commons.model.BaseEntityWithAccount;
+import ru.itterminal.botdesk.commons.model.BaseEntity;
 
 @Entity
 @Table(name = "group_users")
@@ -20,7 +22,7 @@ import ru.itterminal.botdesk.commons.model.BaseEntityWithAccount;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Group extends BaseEntityWithAccount {
+public class Group extends BaseEntity {
 
     @Column(nullable = false, length = 128)
     private String name;
@@ -34,6 +36,10 @@ public class Group extends BaseEntityWithAccount {
     @Column(name = "is_deprecated", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean isDeprecated;
 
+    @ManyToOne
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -43,7 +49,7 @@ public class Group extends BaseEntityWithAccount {
                 Objects.equals(comment, group.comment) &&
                 Objects.equals(isInner, group.isInner) &&
                 Objects.equals(isDeprecated, group.isDeprecated) &&
-                Objects.equals(getAccount(), group.getAccount()) &&
+                Objects.equals(account, group.account) &&
                 Objects.equals(getId(), group.getId()) &&
                 Objects.equals(getOutId(), group.getOutId()) &&
                 Objects.equals(getVersion(), group.getVersion()) &&
@@ -52,7 +58,7 @@ public class Group extends BaseEntityWithAccount {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, comment, isInner, isDeprecated,
-                getId(), getOutId(), getVersion(), getDeleted(), getAccount());
+        return Objects.hash(name, comment, isInner, isDeprecated, account,
+                getId(), getOutId(), getVersion(), getDeleted());
     }
 }

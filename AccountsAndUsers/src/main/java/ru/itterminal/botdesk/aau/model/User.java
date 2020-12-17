@@ -13,7 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import ru.itterminal.botdesk.commons.model.BaseEntityWithAccount;
+import ru.itterminal.botdesk.commons.model.BaseEntity;
 
 @Entity
 @Table(name = "users")
@@ -22,7 +22,7 @@ import ru.itterminal.botdesk.commons.model.BaseEntityWithAccount;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class User extends BaseEntityWithAccount {
+public class User extends BaseEntity {
 
     @Column(nullable = false, unique = true, length = 128)
     private String email;
@@ -62,6 +62,10 @@ public class User extends BaseEntityWithAccount {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
+    @ManyToOne
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -82,7 +86,7 @@ public class User extends BaseEntityWithAccount {
                 Objects.equals(passwordResetToken, user.passwordResetToken) &&
                 Objects.equals(isArchived, user.isArchived) &&
                 Objects.equals(role, user.role) &&
-                Objects.equals(getAccount(), user.getAccount()) &&
+                Objects.equals(account, user.account) &&
                 Objects.equals(getId(), user.getId()) &&
                 Objects.equals(getOutId(), user.getOutId()) &&
                 Objects.equals(getVersion(), user.getVersion()) &&
@@ -92,7 +96,7 @@ public class User extends BaseEntityWithAccount {
     @Override
     public int hashCode() {
         return Objects.hash(email, firstName, secondName, password, phone, comment,
-                emailVerificationToken, emailVerificationStatus, passwordResetToken, isArchived, role,
-                getId(), getOutId(), getVersion(), getDeleted(), getAccount());
+                emailVerificationToken, emailVerificationStatus, passwordResetToken, isArchived, role, account,
+                getId(), getOutId(), getVersion(), getDeleted());
     }
 }

@@ -19,7 +19,8 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.User;
-import ru.itterminal.botdesk.commons.model.BaseEntityWithAccount;
+import ru.itterminal.botdesk.aau.model.Account;
+import ru.itterminal.botdesk.commons.model.BaseEntity;
 
 @Entity
 @Table(name = "ticket_settings")
@@ -28,7 +29,11 @@ import ru.itterminal.botdesk.commons.model.BaseEntityWithAccount;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TicketSetting extends BaseEntityWithAccount {
+public class TicketSetting extends BaseEntity {
+
+    @ManyToOne
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
@@ -83,7 +88,7 @@ public class TicketSetting extends BaseEntityWithAccount {
             return false;
         }
         TicketSetting that = (TicketSetting) o;
-        return Objects.equals(getAccount(), that.getAccount()) &&
+        return Objects.equals(account, that.account) &&
                 Objects.equals(author, that.author) &&
                 Objects.equals(group, that.group) &&
                 Objects.equals(observers, that.observers) &&
@@ -102,9 +107,9 @@ public class TicketSetting extends BaseEntityWithAccount {
 
     @Override
     public int hashCode() {
-        return Objects.hash(author, group, observers, executors, ticketTypeForNew, ticketStatusForNew,
+        return Objects.hash(account, author, group, observers, executors, ticketTypeForNew, ticketStatusForNew,
                             ticketStatusForReopen, ticketStatusForClose, ticketStatusForCancel,
-                            getId(), getOutId(), getVersion(), getDeleted(), getAccount()
+                            getId(), getOutId(), getVersion(), getDeleted()
         );
     }
 }

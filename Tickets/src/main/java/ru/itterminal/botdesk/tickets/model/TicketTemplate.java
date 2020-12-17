@@ -14,7 +14,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.aau.model.User;
-import ru.itterminal.botdesk.commons.model.BaseEntityWithAccount;
+import ru.itterminal.botdesk.aau.model.Account;
+import ru.itterminal.botdesk.commons.model.BaseEntity;
 
 @Entity
 @Table(name = "ticket_template")
@@ -23,7 +24,11 @@ import ru.itterminal.botdesk.commons.model.BaseEntityWithAccount;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TicketTemplate extends BaseEntityWithAccount {
+public class TicketTemplate extends BaseEntity {
+
+    @ManyToOne
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
 
     @Column(length = 256)
     private String subject;
@@ -78,7 +83,7 @@ public class TicketTemplate extends BaseEntityWithAccount {
                 Objects.equals(expressionSchedule, ticketTemplate.expressionSchedule) &&
                 Objects.equals(isOnlyOneTicketInWork, ticketTemplate.isOnlyOneTicketInWork) &&
                 Objects.equals(isActive, ticketTemplate.isActive) &&
-                Objects.equals(getAccount(), ticketTemplate.getAccount()) &&
+                Objects.equals(account, ticketTemplate.account) &&
                 Objects.equals(Author, ticketTemplate.Author) &&
                 Objects.equals(ticketType, ticketTemplate.ticketType) &&
                 Objects.equals(getId(), ticketTemplate.getId()) &&
@@ -89,9 +94,9 @@ public class TicketTemplate extends BaseEntityWithAccount {
 
     @Override
     public int hashCode() {
-        return Objects.hash(subject, description, dateNextRun, dateStart, dateEnd, zoneId, expressionSchedule,
+        return Objects.hash(account, subject, description, dateNextRun, dateStart, dateEnd, zoneId, expressionSchedule,
                             isOnlyOneTicketInWork, isActive, Author, ticketType,
-                            getId(), getOutId(), getVersion(), getDeleted(), getAccount()
+                            getId(), getOutId(), getVersion(), getDeleted()
         );
     }
 }
