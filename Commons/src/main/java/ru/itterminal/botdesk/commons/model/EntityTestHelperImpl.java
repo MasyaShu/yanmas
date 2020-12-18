@@ -11,8 +11,8 @@ import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 
 @SuppressWarnings("deprecation")
-public abstract class BaseTestEntityHelperImpl<E extends BaseEntity, D extends BaseEntityDto,
-        F extends BaseFilterDto> implements TestEntityHelper<E, D, F> {
+public abstract class EntityTestHelperImpl<E extends BaseEntity, D extends BaseEntityDto,
+        F extends BaseFilterDto> implements EntityTestHelper<E, D, F> {
 
     protected Faker fakerRU = new Faker(new Locale("ru", "RU"));
     protected Faker fakerEN = new Faker(new Locale("en", "US"));
@@ -102,6 +102,7 @@ public abstract class BaseTestEntityHelperImpl<E extends BaseEntity, D extends B
         entity.setVersion(fakerRU.number().numberBetween(0, 100));
         entity.setDeleted(1 == fakerRU.number().numberBetween(0, 2));
         entity.setOutId(UUID.randomUUID().toString());
+        entity.generateDisplayName();
     }
 
     @Override

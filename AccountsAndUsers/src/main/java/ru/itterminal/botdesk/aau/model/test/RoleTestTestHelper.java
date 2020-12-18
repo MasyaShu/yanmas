@@ -7,10 +7,10 @@ import java.util.UUID;
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.dto.RoleDto;
-import ru.itterminal.botdesk.commons.model.BaseTestEntityHelperImpl;
+import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 
-public class RoleTestHelper extends BaseTestEntityHelperImpl<Role, RoleDto, BaseFilterDto> {
+public class RoleTestTestHelper extends EntityTestHelperImpl<Role, RoleDto, BaseFilterDto> {
 
     private final String[] rolesName = new String[] {Roles.ACCOUNT_OWNER.toString(),
             Roles.ADMIN.toString(), Roles.EXECUTOR.toString(), Roles.AUTHOR.toString(),

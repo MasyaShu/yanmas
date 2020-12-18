@@ -6,12 +6,12 @@ import java.util.UUID;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.dto.GroupDto;
 import ru.itterminal.botdesk.aau.model.dto.GroupFilterDto;
-import ru.itterminal.botdesk.commons.model.BaseTestEntityHelperImpl;
+import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
 
-public class GroupTestHelper extends BaseTestEntityHelperImpl<Group, GroupDto, GroupFilterDto> {
+public class GroupTestTestHelper extends EntityTestHelperImpl<Group, GroupDto, GroupFilterDto> {
 
     private static final String INVALID_GROUP_NAME_REGEX = "[A-Za-z0-9]{129}";
-    private final AccountTestHelper accountHelper = new AccountTestHelper();
+    private final AccountTestTestHelper accountHelper = new AccountTestTestHelper();
 
     @Override
     public Group getRandomValidEntity() {

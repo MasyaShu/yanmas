@@ -7,7 +7,7 @@ import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 
 @SuppressWarnings("unused")
-public interface TestEntityHelper<E extends BaseEntity, D extends BaseEntityDto, F extends BaseFilterDto> {
+public interface EntityTestHelper<E extends BaseEntity, D extends BaseEntityDto, F extends BaseFilterDto> {
 
     // Entity
     E getRandomValidEntity();
