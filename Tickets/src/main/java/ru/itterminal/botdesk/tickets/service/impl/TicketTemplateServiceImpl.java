@@ -48,7 +48,7 @@ public class TicketTemplateServiceImpl extends CrudServiceImpl<TicketTemplate, T
         try {
             dateNextRun = cronTrigger.nextExecutionTime(triggerContext);
             assert dateNextRun != null;
-            if (ticketTemplate.getDateEnd() != null && ticketTemplate.getDateEnd() >= dateNextRun.getTime()) {
+            if (ticketTemplate.getDateEnd() == null || ticketTemplate.getDateEnd() <= dateNextRun.getTime()) {
                 ticketTemplate.setDateNextRun(dateNextRun.getTime());
             }
         } catch (IllegalArgumentException ex) {
