@@ -12,7 +12,6 @@ import ru.itterminal.botdesk.tickets.repository.TicketTypeRepository;
 import ru.itterminal.botdesk.tickets.service.validator.TicketTypeOperationValidator;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

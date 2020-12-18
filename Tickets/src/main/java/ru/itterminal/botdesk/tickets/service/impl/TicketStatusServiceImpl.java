@@ -34,6 +34,8 @@ public class TicketStatusServiceImpl extends
             "Start find ticket status by unique fields, name: {} and not id: {} and not account: {}";
     private static final String CANT_FIND_BY_UNIQUE = "Can't find by unique fields";
 
+
+
     @SuppressWarnings("DuplicatedCode")
     public List<TicketStatusUniqueFields> findByUniqueFields(TicketStatus ticketStatus) {
         chekObjectForNull(ticketStatus, TICKET_TYPE_IS_NULL, EntityNotExistException.class);
