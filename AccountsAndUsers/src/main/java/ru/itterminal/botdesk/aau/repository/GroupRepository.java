@@ -1,22 +1,15 @@
 package ru.itterminal.botdesk.aau.repository;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 import org.springframework.stereotype.Repository;
-
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.projection.GroupUniqueFields;
 import ru.itterminal.botdesk.commons.repository.EntityRepositoryWithAccount;
 
+import java.util.List;
+import java.util.UUID;
+
 @Repository
 public interface GroupRepository extends EntityRepositoryWithAccount<Group> {
 
-    List<GroupUniqueFields> getByNameAndAccount_IdAndIdNot(String name, UUID accountId, UUID id);
-
-    Optional<Group> getByNameAndAccount_Id(String name, UUID accountId);
-
-    Optional<Group> getByIdAndAccount_Id(UUID id, UUID accountId);
-
+    List<GroupUniqueFields> getByNameAndIsInnerAndAccount_IdAndIdNot(String name, Boolean isInner, UUID accountId, UUID id);
 }

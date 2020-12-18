@@ -2,11 +2,7 @@ package ru.itterminal.botdesk.tickets.model;
 
 import java.util.Objects;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -57,11 +53,11 @@ public class TicketTemplate extends BaseEntity {
     @Column(name = "is_active", nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
     private Boolean isActive;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User Author;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type_ticket_id", nullable = false)
     private TicketType ticketType;
 
@@ -95,13 +91,13 @@ public class TicketTemplate extends BaseEntity {
     @Override
     public int hashCode() {
         return Objects.hash(account, subject, description, dateNextRun, dateStart, dateEnd, zoneId, expressionSchedule,
-                            isOnlyOneTicketInWork, isActive, Author, ticketType,
-                            getId(), getOutId(), getVersion(), getDeleted()
+                isOnlyOneTicketInWork, isActive, Author, ticketType,
+                getId(), getOutId(), getVersion(), getDeleted()
         );
     }
 
     @Override
     public void generateDisplayName() {
-
+        setDisplayName(subject);
     }
 }

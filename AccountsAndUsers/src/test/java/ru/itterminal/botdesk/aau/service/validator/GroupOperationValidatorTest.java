@@ -65,6 +65,7 @@ class GroupOperationValidatorTest {
                 .builder()
                 .name(EXIST_NAME)
                 .account(account1)
+                .isInner(false)
                 .build();
     }
 

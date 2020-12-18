@@ -1,21 +1,19 @@
 package ru.itterminal.botdesk.aau.model;
 
-import java.util.Objects;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import java.util.Objects;
+
 @Entity
-@Table(name="role")
+@Table(name = "role")
 @Setter
 @Getter
 @SuperBuilder
@@ -23,7 +21,7 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @NoArgsConstructor
 public class Role extends BaseEntity {
 
-    @Column (nullable = false, unique = true, length = 30)
+    @Column(nullable = false, unique = true, length = 30)
     private String name;
     private int weight;
 
@@ -37,8 +35,8 @@ public class Role extends BaseEntity {
         }
         Role role = (Role) o;
         return Objects.equals(name, role.name) &&
+                Objects.equals(weight, role.weight) &&
                 Objects.equals(getId(), role.getId()) &&
-                Objects.equals(getWeight(), role.getWeight()) &&
                 Objects.equals(getVersion(), role.getVersion()) &&
                 Objects.equals(getDeleted(), role.getDeleted());
     }
@@ -50,6 +48,6 @@ public class Role extends BaseEntity {
 
     @Override
     public void generateDisplayName() {
-
+        setDisplayName(name);
     }
 }
