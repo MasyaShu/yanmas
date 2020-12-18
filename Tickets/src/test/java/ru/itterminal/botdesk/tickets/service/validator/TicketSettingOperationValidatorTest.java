@@ -30,7 +30,7 @@ import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 import ru.itterminal.botdesk.tickets.model.TicketSetting;
 import ru.itterminal.botdesk.tickets.model.projection.TicketSettingUniqueFields;
-import ru.itterminal.botdesk.tickets.model.test.TicketSettingTestTestHelper;
+import ru.itterminal.botdesk.tickets.model.test.TicketSettingTestHelper;
 import ru.itterminal.botdesk.tickets.service.impl.TicketSettingServiceImpl;
 
 @SpringJUnitConfig(value = {TicketSettingOperationValidator.class})
@@ -45,7 +45,7 @@ class TicketSettingOperationValidatorTest {
     @Autowired
     private final TicketSettingOperationValidator validator = new TicketSettingOperationValidator(service);
 
-    private final TicketSettingTestTestHelper ticketSettingTestHelper = new TicketSettingTestTestHelper();
+    private final TicketSettingTestHelper ticketSettingTestHelper = new TicketSettingTestHelper();
 
     @Test
     void checkUniqueness_shouldGetTrue_whenTicketSettingIsUnique() {

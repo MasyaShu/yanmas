@@ -8,10 +8,10 @@ import ru.itterminal.botdesk.aau.model.dto.GroupDto;
 import ru.itterminal.botdesk.aau.model.dto.GroupFilterDto;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
 
-public class GroupTestTestHelper extends EntityTestHelperImpl<Group, GroupDto, GroupFilterDto> {
+public class GroupTestHelper extends EntityTestHelperImpl<Group, GroupDto, GroupFilterDto> {
 
     private static final String INVALID_GROUP_NAME_REGEX = "[A-Za-z0-9]{129}";
-    private final AccountTestTestHelper accountHelper = new AccountTestTestHelper();
+    private final AccountTestHelper accountHelper = new AccountTestHelper();
 
     @Override
     public Group getRandomValidEntity() {

@@ -8,7 +8,7 @@ import ru.itterminal.botdesk.aau.model.dto.AccountDto;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 
-public class AccountTestTestHelper extends EntityTestHelperImpl<Account, AccountDto, BaseFilterDto> {
+public class AccountTestHelper extends EntityTestHelperImpl<Account, AccountDto, BaseFilterDto> {
 
     private static final String INVALID_ACCOUNT_NAME_REGEX = "[A-Za-z0-9]{129}";
 

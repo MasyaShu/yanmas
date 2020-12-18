@@ -10,7 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
-import ru.itterminal.botdesk.aau.model.test.UserTestTestHelper;
+import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 
 @TestInstance(PER_CLASS)
 class UserTest {
@@ -19,7 +19,7 @@ class UserTest {
     User user_2;
     private final UUID id = UUID.randomUUID();
     private final Role admin = new Role(Roles.ADMIN.toString(), Roles.ADMIN.getWeight());
-    private final UserTestTestHelper userTestHelper = new UserTestTestHelper();
+    private final UserTestHelper userTestHelper = new UserTestHelper();
 
     @SuppressWarnings("deprecation")
     @BeforeEach
