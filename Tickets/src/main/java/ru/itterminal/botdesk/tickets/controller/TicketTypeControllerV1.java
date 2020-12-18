@@ -111,15 +111,12 @@ public class TicketTypeControllerV1 extends BaseController {
         if (filter.getDirection() == null) {
             filter.setDirection("ASC");
         }
-        if (filter.getSortBy() == null) {
-            filter.setSortBy("name");
-        }
         if (filter.getDeleted() == null) {
             filter.setDeleted("all");
         }
         Pageable pageable =
                 PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(filter.getDirection()),
-                        filter.getSortBy()));
+                        "name"));
         Page<TicketType> foundTicketTypes;
         Page<TicketTypeDto> returnedTicketTypes;
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());

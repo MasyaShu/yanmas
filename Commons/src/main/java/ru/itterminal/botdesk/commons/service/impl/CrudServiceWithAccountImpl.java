@@ -1,19 +1,18 @@
 package ru.itterminal.botdesk.commons.service.impl;
 
-import static java.lang.String.format;
-
-import java.util.List;
-import java.util.UUID;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 import ru.itterminal.botdesk.commons.repository.EntityRepositoryWithAccount;
 import ru.itterminal.botdesk.commons.service.CrudServiceWithAccount;
 import ru.itterminal.botdesk.commons.service.validator.OperationValidator;
+
+import java.util.List;
+import java.util.UUID;
+
+import static java.lang.String.format;
 
 /**
  * Skeletal implementation of general CRUD operations for each dictionary
@@ -49,13 +48,18 @@ public abstract class CrudServiceWithAccountImpl<
     public E findByIdAndAccountId(UUID id, UUID accountId) {
         var searchParameter = "id and accountId";
         log.trace(format(FIND_INIT_MESSAGE_WITH_ACCOUNT, searchParameter, id, accountId));
-        return repository.findByIdAndAccountId(id, accountId).orElseThrow(
-                () -> {
-                    String errorMessage = format(FIND_INVALID_MESSAGE_WITH_ACCOUNT, searchParameter, id, accountId);
-                    log.error(errorMessage);
-                    throw new EntityNotExistException(errorMessage);
-                }
-        );
+        if (repository.existsById(id)) {
+            return repository.findByIdAndAccountId(id, accountId).orElseThrow(
+                    () -> {
+                        String errorMessage = format(FIND_INVALID_MESSAGE_WITH_ACCOUNT, searchParameter, id, accountId);
+                        log.error(errorMessage);
+                        throw new EntityNotExistException(errorMessage);
+                    }
+            );
+        } else {
+            String errorMessage = format(FIND_INVALID_MESSAGE_WITH_ACCOUNT, searchParameter, id, accountId);
+            log.error(errorMessage);
+            throw new EntityNotExistException(errorMessage);
+        }
     }
-
 }

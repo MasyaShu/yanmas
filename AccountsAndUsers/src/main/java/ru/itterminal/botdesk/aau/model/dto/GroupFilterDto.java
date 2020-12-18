@@ -3,7 +3,6 @@ package ru.itterminal.botdesk.aau.model.dto;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
-import ru.itterminal.botdesk.commons.model.validator.ValueOfEnum;
 
 import javax.validation.constraints.Size;
 
@@ -23,13 +22,5 @@ public class GroupFilterDto extends BaseFilterDto {
     private Boolean isDeprecated;
 
     private Boolean isInner;
-
-    @ValueOfEnum(enumClass = FieldsForSort.class, message = "must be any of: name")
-    private String sortBy = "name";
-
-    @SuppressWarnings("unused")
-    public enum FieldsForSort {
-        NAME
-    }
 
 }

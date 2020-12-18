@@ -465,7 +465,6 @@ class GroupControllerV1Test {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
         groupFilterDto.setName(INVALID_NAME);
-        groupFilterDto.setSortBy(INVALID_SORT_BY);
         groupFilterDto.setDeleted(INVALID_DELETED);
         groupFilterDto.setDirection(INVALID_DIRECTION);
         MockHttpServletRequestBuilder request = get(HOST + PORT + API)
@@ -480,10 +479,7 @@ class GroupControllerV1Test {
                 .andExpect(MockMvcResultMatchers
                         .jsonPath("$.errors.deleted[?(@.message == '%s')]", CommonConstants.MUST_BE_ANY_OF_ALL_TRUE_FALSE).exists())
                 .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.direction[?(@.message == '%s')]", CommonConstants.MUST_BE_ANY_OF_ASC_DESC).exists())
-                .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.sortBy[?(@.message == '%s')]", AAUConstants.MUST_BE_ANY_OF_NAME)
-                        .exists());
+                        .jsonPath("$.errors.direction[?(@.message == '%s')]", CommonConstants.MUST_BE_ANY_OF_ASC_DESC).exists());
         verify(service, times(0)).findAllByFilter(any(), any());
     }
 
@@ -506,7 +502,6 @@ class GroupControllerV1Test {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenFilterIsEmpty() throws Exception {
         groupFilterDto.setName("");
-        groupFilterDto.setSortBy("");
         groupFilterDto.setDeleted("");
         groupFilterDto.setDirection("");
         MockHttpServletRequestBuilder request = get(HOST + PORT + API)
@@ -521,10 +516,7 @@ class GroupControllerV1Test {
                 .andExpect(MockMvcResultMatchers
                         .jsonPath("$.errors.deleted[?(@.message == '%s')]", CommonConstants.MUST_BE_ANY_OF_ALL_TRUE_FALSE).exists())
                 .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.direction[?(@.message == '%s')]", CommonConstants.MUST_BE_ANY_OF_ASC_DESC).exists())
-                .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.sortBy[?(@.message == '%s')]", AAUConstants.MUST_BE_ANY_OF_NAME)
-                        .exists());
+                        .jsonPath("$.errors.direction[?(@.message == '%s')]", CommonConstants.MUST_BE_ANY_OF_ASC_DESC).exists());
         verify(service, times(0)).findAllByFilter(any(), any());
     }
 
@@ -554,7 +546,6 @@ class GroupControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getByFilter_shouldFindTwoGroups_whenDefaultFieldsInFilterIsNull() throws Exception {
-        groupFilterDto.setSortBy(null);
         groupFilterDto.setDeleted(null);
         groupFilterDto.setDirection(null);
         Pageable pageable =

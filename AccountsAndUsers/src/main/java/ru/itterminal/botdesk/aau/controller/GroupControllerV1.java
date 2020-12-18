@@ -115,15 +115,12 @@ public class GroupControllerV1 extends BaseController {
         if (filter.getDirection() == null) {
             filter.setDirection("ASC");
         }
-        if (filter.getSortBy() == null) {
-            filter.setSortBy("name");
-        }
         if (filter.getDeleted() == null) {
             filter.setDeleted("all");
         }
         Pageable pageable =
                 PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(filter.getDirection()),
-                        filter.getSortBy()));
+                        "name"));
         Page<Group> foundGroups;
         Page<GroupDto> returnedGroups;
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());

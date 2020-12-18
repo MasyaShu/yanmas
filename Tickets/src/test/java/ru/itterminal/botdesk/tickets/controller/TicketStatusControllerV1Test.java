@@ -407,7 +407,6 @@ class TicketStatusControllerV1Test {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
         ticketStatusFilterDto.setName(INVALID_NAME);
-        ticketStatusFilterDto.setSortBy(INVALID_SORT_BY);
         ticketStatusFilterDto.setDeleted(INVALID_DELETED);
         ticketStatusFilterDto.setDirection(INVALID_DIRECTION);
         MockHttpServletRequestBuilder request = get(HOST + PORT + API)
@@ -422,10 +421,7 @@ class TicketStatusControllerV1Test {
                 .andExpect(MockMvcResultMatchers
                         .jsonPath("$.errors.deleted[?(@.message == '%s')]", CommonConstants.MUST_BE_ANY_OF_ALL_TRUE_FALSE).exists())
                 .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.direction[?(@.message == '%s')]", CommonConstants.MUST_BE_ANY_OF_ASC_DESC).exists())
-                .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.sortBy[?(@.message == '%s')]", MUST_BE_ANY_OF_SORT_INDEX)
-                        .exists());
+                        .jsonPath("$.errors.direction[?(@.message == '%s')]", CommonConstants.MUST_BE_ANY_OF_ASC_DESC).exists());
         verify(service, times(0)).findAllByFilter(any(), any());
     }
 

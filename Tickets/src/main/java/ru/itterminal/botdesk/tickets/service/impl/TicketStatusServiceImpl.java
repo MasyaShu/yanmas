@@ -1,23 +1,20 @@
 package ru.itterminal.botdesk.tickets.service.impl;
 
-import static java.lang.String.format;
-import static ru.itterminal.botdesk.commons.util.CommonConstants.NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID;
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekObjectForNull;
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekStringForNullOrEmpty;
-
-import java.util.List;
-import java.util.UUID;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.botdesk.tickets.model.TicketStatus;
 import ru.itterminal.botdesk.tickets.model.projection.TicketStatusUniqueFields;
 import ru.itterminal.botdesk.tickets.repository.TicketStatusRepository;
 import ru.itterminal.botdesk.tickets.service.validator.TicketStatusOperationValidator;
+
+import java.util.List;
+
+import static java.lang.String.format;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekObjectForNull;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekStringForNullOrEmpty;
 
 @Slf4j
 @Service
@@ -53,7 +50,11 @@ public class TicketStatusServiceImpl extends
 
     @Override
     public TicketStatus update(TicketStatus entity) {
-        TicketStatus entityFromDatabase = super.findById(entity.getId());
+        TicketStatus entityFromDatabase = repository.findByIdAndAccountId(entity.getId(), entity.getAccount().getId()).orElseThrow(() -> {
+            String message = format(ENTITY_NOT_EXIST_MESSAGE, entity.getClass().getSimpleName(), entity.getId());
+            log.error(message);
+            return new EntityNotExistException(message);
+        });
         entity.setIsCanceledPredefined(entityFromDatabase.getIsCanceledPredefined());
         entity.setIsFinishedPredefined(entityFromDatabase.getIsFinishedPredefined());
         entity.setIsReopenedPredefined(entityFromDatabase.getIsReopenedPredefined());

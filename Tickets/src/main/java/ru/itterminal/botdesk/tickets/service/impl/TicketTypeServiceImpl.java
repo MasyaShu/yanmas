@@ -1,5 +1,6 @@
 package ru.itterminal.botdesk.tickets.service.impl;
 
+import static java.lang.String.format;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekObjectForNull;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekStringForNullOrEmpty;
 
@@ -50,11 +51,12 @@ public class TicketTypeServiceImpl extends
 
     @Override
     public TicketType update(TicketType entity) {
-        TicketType entityFromDatabase = super.findById(entity.getId());
+        TicketType entityFromDatabase = repository.findByIdAndAccountId(entity.getId(), entity.getAccount().getId()).orElseThrow(() -> {
+            String message = format(ENTITY_NOT_EXIST_MESSAGE, entity.getClass().getSimpleName(), entity.getId());
+            log.error(message);
+            return new EntityNotExistException(message);
+        });
         entity.setIsPredefined(entityFromDatabase.getIsPredefined());
-        if (entity.getComment() == null) {
-            entity.setComment(entityFromDatabase.getComment());
-        }
         return super.update(entity);
     }
 }
