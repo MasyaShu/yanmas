@@ -465,7 +465,6 @@ class GroupControllerV1Test {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
         groupFilterDto.setName(INVALID_NAME);
-        groupFilterDto.setSortBy(INVALID_SORT_BY);
         groupFilterDto.setDeleted(INVALID_DELETED);
         groupFilterDto.setDirection(INVALID_DIRECTION);
         MockHttpServletRequestBuilder request = get(HOST + PORT + API)
@@ -506,7 +505,6 @@ class GroupControllerV1Test {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenFilterIsEmpty() throws Exception {
         groupFilterDto.setName("");
-        groupFilterDto.setSortBy("");
         groupFilterDto.setDeleted("");
         groupFilterDto.setDirection("");
         MockHttpServletRequestBuilder request = get(HOST + PORT + API)
@@ -554,7 +552,6 @@ class GroupControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getByFilter_shouldFindTwoGroups_whenDefaultFieldsInFilterIsNull() throws Exception {
-        groupFilterDto.setSortBy(null);
         groupFilterDto.setDeleted(null);
         groupFilterDto.setDirection(null);
         Pageable pageable =

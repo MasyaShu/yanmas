@@ -407,7 +407,6 @@ class TicketStatusControllerV1Test {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
         ticketStatusFilterDto.setName(INVALID_NAME);
-        ticketStatusFilterDto.setSortBy(INVALID_SORT_BY);
         ticketStatusFilterDto.setDeleted(INVALID_DELETED);
         ticketStatusFilterDto.setDirection(INVALID_DIRECTION);
         MockHttpServletRequestBuilder request = get(HOST + PORT + API)
