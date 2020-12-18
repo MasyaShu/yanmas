@@ -113,14 +113,27 @@ public class TicketSetting extends BaseEntity {
         );
     }
 
-    @SuppressWarnings("UnusedAssignment")
     @Override
     public void generateDisplayName() {
-        String result = getGroup() != null && getGroup().getDisplayName() != null ? getGroup().getDisplayName() : null;
-        if (result != null && getAuthor().getDisplayName() != null) {
-            result = result + " ";
+
+        String resultGroup = getGroup() != null && getGroup().getDisplayName() != null
+                ? getGroup().getDisplayName()
+                : null;
+        String resultAuthor = getAuthor() != null && getAuthor().getDisplayName() != null
+                ? getAuthor().getDisplayName()
+                : null;
+
+        if (resultGroup != null && resultAuthor != null) {
+            setDisplayName(resultGroup + " " + resultAuthor);
         }
-        result = getAuthor() != null && getAuthor().getDisplayName() != null ? getAuthor().getDisplayName() : null;
-        setDisplayName(result);
+
+        if (resultGroup != null && resultAuthor == null) {
+            setDisplayName(resultGroup);
+        }
+
+        if (resultGroup == null && resultAuthor != null) {
+            setDisplayName(resultAuthor);
+        }
+
     }
 }
