@@ -3,6 +3,7 @@ package ru.itterminal.botdesk.commons.service.impl;
 import static java.lang.String.format;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -49,13 +50,14 @@ public abstract class CrudServiceWithAccountImpl<
     public E findByIdAndAccountId(UUID id, UUID accountId) {
         var searchParameter = "id and accountId";
         log.trace(format(FIND_INIT_MESSAGE_WITH_ACCOUNT, searchParameter, id, accountId));
-        return repository.findByIdAndAccountId(id, accountId).orElseThrow(
-                () -> {
-                    String errorMessage = format(FIND_INVALID_MESSAGE_WITH_ACCOUNT, searchParameter, id, accountId);
-                    log.error(errorMessage);
-                    throw new EntityNotExistException(errorMessage);
-                }
-        );
+        if (repository.existsById(id)) {
+            Optional<E> baseEntity = repository.findByIdAndAccountId(id, accountId);
+            log.trace(format(FIND_FINISH_MESSAGE, searchParameter, id, baseEntity.get()));
+            return baseEntity.get();
+        } else {
+            String errorMessage = format(FIND_INVALID_MESSAGE_WITH_ACCOUNT, searchParameter, id, accountId);
+            log.error(errorMessage);
+            throw new EntityNotExistException(errorMessage);
+        }
     }
-
 }
