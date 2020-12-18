@@ -96,7 +96,7 @@ class UserServiceImplTest {
                 .email(TestSecurityConfig.EMAIL_1)
                 .password(PASSWORD)
                 .account(account)
-                .ownGroup(group)
+                .group(group)
                 .emailVerificationToken(SOME_TEST_TOKEN)
                 .isArchived(false)
                 .role(roleAdmin)
@@ -107,7 +107,7 @@ class UserServiceImplTest {
                 .email(TestSecurityConfig.EMAIL_1)
                 .password(PASSWORD)
                 .account(account)
-                .ownGroup(group)
+                .group(group)
                 .isArchived(false)
                 .role(roleAdmin)
                 .build();

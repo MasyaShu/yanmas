@@ -29,11 +29,8 @@ public class UserFilterDto extends BaseFilterDto {
             message = AAUConstants.INVALID_EMAIL)
     private String email;
 
-    @Size(min = 1, max = 20)
-    private String firstName;
-
-    @Size(min = 1, max = 30)
-    private String secondName;
+    @Size(max = 128)
+    private String name;
 
     @Size(min = 6, max = 30)
     private String phone;
@@ -46,12 +43,12 @@ public class UserFilterDto extends BaseFilterDto {
 
     private List<UUID> roles;
 
-    @ValueOfEnum(enumClass = FieldsForSort.class, message = "must be any of: firstName, secondName")
-    private String sortBy = "firstName";
+    @ValueOfEnum(enumClass = FieldsForSort.class, message = "must be any of: name")
+    private String sortBy = "name";
 
     @SuppressWarnings("unused")
     public enum FieldsForSort {
-        FIRSTNAME, SECONDNAME
+        NAME
     }
 
 }

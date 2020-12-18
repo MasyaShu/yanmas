@@ -19,8 +19,7 @@ import ru.itterminal.botdesk.commons.model.spec.BaseSpec;
 @Component
 public class UserSpec implements BaseSpec<User, Account> {
 
-    private static final String FIRST_NAME = "firstName";
-    private static final String SECOND_NAME = "secondName";
+    private static final String NAME = "name";
     private static final String PHONE = "phone";
     private static final String COMMENT = "comment";
     private static final String EMPTY_STRING = "";
@@ -31,30 +30,16 @@ public class UserSpec implements BaseSpec<User, Account> {
     }
 
     @SuppressWarnings("DuplicatedCode")
-    public Specification<User> getUserByFirstNameSpec(String firstName) {
+    public Specification<User> getUserByNameSpec(String name) {
         return (root, query, criteriaBuilder) -> {
-            val objectPathFirstName = root.get(FIRST_NAME);
-            if (firstName.isEmpty()) {
-                Predicate predicateForNull =  criteriaBuilder.isNull(objectPathFirstName);
-                Predicate predicateForEmpty =  criteriaBuilder.equal(objectPathFirstName, EMPTY_STRING);
+            val objectPathname = root.get(NAME);
+            if (name.isEmpty()) {
+                Predicate predicateForNull =  criteriaBuilder.isNull(objectPathname);
+                Predicate predicateForEmpty =  criteriaBuilder.equal(objectPathname, EMPTY_STRING);
                 return criteriaBuilder.or(predicateForEmpty, predicateForNull);
             }
-            return criteriaBuilder.like(criteriaBuilder.lower(root.get(FIRST_NAME)),
-                    "%" + firstName.toLowerCase() + "%");
-        };
-    }
-
-    @SuppressWarnings("DuplicatedCode")
-    public Specification<User> getUserBySecondNameSpec(String secondName) {
-        return (root, query, criteriaBuilder) -> {
-            val objectPathSecondName = root.get(SECOND_NAME);
-            if (secondName.isEmpty()) {
-                Predicate predicateForNull =  criteriaBuilder.isNull(objectPathSecondName);
-                Predicate predicateForEmpty =  criteriaBuilder.equal(objectPathSecondName, EMPTY_STRING);
-                return criteriaBuilder.or(predicateForEmpty, predicateForNull);
-            }
-            return criteriaBuilder.like(criteriaBuilder.lower(root.get(SECOND_NAME)),
-                    "%" + secondName.toLowerCase() + "%");
+            return criteriaBuilder.like(criteriaBuilder.lower(root.get(NAME)),
+                    "%" + name.toLowerCase() + "%");
         };
     }
 
@@ -93,7 +78,7 @@ public class UserSpec implements BaseSpec<User, Account> {
     @SuppressWarnings("DuplicatedCode")
     public Specification<User> getUserByListOfGroupsSpec(List<UUID> listGroupId) {
         return (root, query, criteriaBuilder) -> {
-            Join<User, Group> userJoin = root.join("ownGroup");
+            Join<User, Group> userJoin = root.join("group");
             Predicate returnedPredicate = criteriaBuilder.equal(userJoin.<UUID> get("id"), listGroupId.get(0));
             for (int i = 1; i < listGroupId.size(); i++) {
                 Predicate predicate = criteriaBuilder.equal(userJoin.<UUID> get("id"), listGroupId.get(i));

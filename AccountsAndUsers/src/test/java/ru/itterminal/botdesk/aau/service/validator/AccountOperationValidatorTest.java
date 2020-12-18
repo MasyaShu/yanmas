@@ -61,7 +61,7 @@ class AccountOperationValidatorTest {
                 .email(TestSecurityConfig.EMAIL_1)
                 .password(PASSWORD)
                 .account(account)
-                .ownGroup(group)
+                .group(group)
                 .isArchived(false)
                 .role(roleAdmin)
                 .build();

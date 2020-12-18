@@ -27,11 +27,8 @@ public class User extends BaseEntity {
     @Column(nullable = false, unique = true, length = 128)
     private String email;
 
-    @Column(name = "first_name", length = 20)
-    private String firstName;
-
-    @Column(name = "second_name", length = 30)
-    private String secondName;
+    @Column(length = 128)
+    private String name;
 
     @Column(nullable = false)
     private String password;
@@ -55,8 +52,8 @@ public class User extends BaseEntity {
     private Boolean isArchived;
 
     @ManyToOne
-    @JoinColumn(name = "own_group_id", nullable = false)
-    private Group ownGroup;
+    @JoinColumn(name = "group_id", nullable = false)
+    private Group group;
 
     @ManyToOne
     @JoinColumn(name = "role_id", nullable = false)
@@ -76,8 +73,7 @@ public class User extends BaseEntity {
         }
         User user = (User) o;
         return Objects.equals(email, user.email) &&
-                Objects.equals(firstName, user.firstName) &&
-                Objects.equals(secondName, user.secondName) &&
+                Objects.equals(name, user.name) &&
                 Objects.equals(password, user.password) &&
                 Objects.equals(phone, user.phone) &&
                 Objects.equals(comment, user.comment) &&
@@ -95,13 +91,17 @@ public class User extends BaseEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(email, firstName, secondName, password, phone, comment,
+        return Objects.hash(email, name, password, phone, comment,
                 emailVerificationToken, emailVerificationStatus, passwordResetToken, isArchived, role, account,
                 getId(), getOutId(), getVersion(), getDeleted());
     }
 
     @Override
     public void generateDisplayName() {
-
+        if (name==null || name.isEmpty()) {
+            setDisplayName(email);
+            return;
+        }
+        setDisplayName(name);
     }
 }

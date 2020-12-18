@@ -42,8 +42,7 @@ create TABLE IF NOT EXISTS users
     version                   int4         NOT NULL DEFAULT (0),
     id                        uuid         NOT NULL,
     email                     varchar(128) NOT NULL UNIQUE,
-    first_name                varchar(20),
-    second_name               varchar(30),
+    name                      varchar(128),
     password                  VARCHAR(128) NOT NULL,
     phone                     varchar(30),
     comment                   text,
@@ -53,11 +52,11 @@ create TABLE IF NOT EXISTS users
     is_archived               bool         NOT NULL DEFAULT 'false',
     account_id                uuid         NOT NULL,
     role_id                   uuid         NOT NULL,
-    own_group_id              uuid         NOT NULL,
+    group_id                  uuid         NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (role_id) REFERENCES role (id),
     FOREIGN KEY (account_id) REFERENCES account (id),
-    FOREIGN KEY (own_group_id) REFERENCES group_users (id)
+    FOREIGN KEY (group_id) REFERENCES group_users (id)
 );
 insert into role(out_id, deleted, version, id, name, weight)
 values (null, 'false', '0', 'ba99ce38-1611-4a81-adc9-3a779d58bbfe', 'ACCOUNT_OWNER', '3'),

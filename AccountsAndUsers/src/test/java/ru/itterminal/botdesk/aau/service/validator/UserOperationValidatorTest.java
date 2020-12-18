@@ -97,27 +97,27 @@ class UserOperationValidatorTest {
                 .builder()
                 .email(EXIST_EMAIL)
                 .account(account)
-                .ownGroup(group)
+                .group(group)
                 .role(Role.builder().weight(2).build())
                 .build();
         oldUser = User
                 .builder()
                 .email(OLD_USER_EMAIL)
                 .account(account)
-                .ownGroup(group)
+                .group(group)
                 .build();
         userFromDatabase = User
                 .builder()
                 .email(OLD_USER_EMAIL)
                 .account(account)
                 .role(Role.builder().weight(3).build())
-                .ownGroup(group)
+                .group(group)
                 .build();
         newUser = User
                 .builder()
                 .email(NEW_USER_EMAIL)
                 .account(account)
-                .ownGroup(group)
+                .group(group)
                 .build();
 
     }

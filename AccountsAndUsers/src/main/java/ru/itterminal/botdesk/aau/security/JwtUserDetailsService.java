@@ -31,8 +31,8 @@ public class JwtUserDetailsService implements UserDetailsService {
         JwtUser jwtUser = JwtUser
                 .builder()
                 .accountId(user.getAccount().getId())
-                .groupId(user.getOwnGroup().getId())
-                .isInnerGroup(user.getOwnGroup().getIsInner())
+                .groupId(user.getGroup().getId())
+                .isInnerGroup(user.getGroup().getIsInner())
                 .weightRole(user.getRole().getWeight())
                 .username(user.getEmail())
                 .password(user.getPassword())

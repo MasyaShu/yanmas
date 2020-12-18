@@ -35,7 +35,7 @@ public class TicketSettingTestHelper extends BaseTestEntityHelperImpl<TicketSett
 
         User author = userTestHelper.getRandomValidEntity();
         author.setAccount(account);
-        author.setOwnGroup(group);
+        author.setGroup(group);
 
         List<User> observers = userTestHelper.getRandomValidEntityList(5);
         for (User user : observers) {

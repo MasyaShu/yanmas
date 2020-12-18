@@ -49,9 +49,7 @@ class UserSpecTest {
     private static final String PHONE_NOT_EXIST = "12345";
     private static final String COMMENT_NOT_EXIST = "comment not exist";
     private static final String FIRST_NAME_NOT_EXIST = "firstNameNotExist";
-    private static final String SECOND_NAME_NOT_EXIST = "secondNameNotExist";
-    private static final String USER_1_FIRST_NAME_EXIST = "firstName1";
-    private static final String USER_1_SECOND_NAME_EXIST = "secondName1";
+    private static final String USER_1_FIRST_NAME_EXIST = "Name1";
     private static final String USER_3_OUT_ID_EXIST = "outId468431";
     private static final UUID ACCOUNT_1_ID = UUID.fromString("cdfa6483-0769-4628-ba32-efd338a716de");
     private static final UUID ACCOUNT_2_ID = UUID.fromString("bcf98101-2a22-42bf-94cc-c900b50a0b69");
@@ -60,7 +58,7 @@ class UserSpecTest {
     private static final UUID ROLE_ACCOUNT_OWNER_ID = UUID.fromString("ba99ce38-1611-4a81-adc9-3a779d58bbfe");
     private static final UUID ROLE_ADMIN_ID = UUID.fromString("607f04b1-f5f9-4f20-9c6f-501c32d773c0");
     private static final UUID ROLE_AUTHOR_ID = UUID.fromString("933f20bf-9262-47bb-83d2-0ca55bbbd3fd");
-    private final Pageable pageable = PageRequest.of(0, 5, Sort.by((Sort.Direction.ASC), "firstName"));
+    private final Pageable pageable = PageRequest.of(0, 5, Sort.by((Sort.Direction.ASC), "name"));
     private Page<User> foundUsers;
 
     @SuppressWarnings("deprecation")
@@ -102,52 +100,29 @@ class UserSpecTest {
     }
 
     @Test
-    void getUserByFirstNameSpec_shouldGetOneUser_whenUserExistInDatabaseWithPassedFirstName() {
+    void getUserByNameSpec_shouldGetOneUser_whenUserExistInDatabaseWithPassedName() {
         Specification<User> userSpecification = Specification
-                .where(spec.getUserByFirstNameSpec(USER_1_FIRST_NAME_EXIST.toUpperCase()));
+                .where(spec.getUserByNameSpec(USER_1_FIRST_NAME_EXIST.toUpperCase()));
         foundUsers = userRepository.findAll(userSpecification, pageable);
-        assertEquals(USER_1_FIRST_NAME_EXIST, foundUsers.getContent().get(0).getFirstName());
+        assertEquals(USER_1_FIRST_NAME_EXIST, foundUsers.getContent().get(0).getName());
     }
 
     @Test
-    void getUserByFirstNameSpec_shouldTwoUsers_whenFirstNameIsEmpty() {
+    void getUserByNameSpec_shouldTwoUsers_whenNameIsEmpty() {
         Specification<User> userSpecification = Specification
-                .where(spec.getUserByFirstNameSpec(""));
+                .where(spec.getUserByNameSpec(""));
         foundUsers = userRepository.findAll(userSpecification, pageable);
         assertEquals(2, foundUsers.getContent().size());
     }
 
     @Test
-    void getUserByFirstNameSpec_shouldGetEmptyList_whenUserNotExistInDatabaseWithPassedSecondName() {
+    void getUserByNameSpec_shouldGetEmptyList_whenUserNotExistInDatabaseWithPassedSecondName() {
         Specification<User> userSpecification = Specification
-                .where(spec.getUserByFirstNameSpec(FIRST_NAME_NOT_EXIST.toUpperCase()));
+                .where(spec.getUserByNameSpec(FIRST_NAME_NOT_EXIST.toUpperCase()));
         foundUsers = userRepository.findAll(userSpecification, pageable);
         assertTrue(foundUsers.getContent().isEmpty());
     }
 
-    @Test
-    void getUserBySecondNameSpec_shouldGetOneUser_whenUserExistInDatabaseWithPassedSecondName() {
-        Specification<User> userSpecification = Specification
-                .where(spec.getUserBySecondNameSpec(USER_1_SECOND_NAME_EXIST.toUpperCase()));
-        foundUsers = userRepository.findAll(userSpecification, pageable);
-        assertEquals(USER_1_SECOND_NAME_EXIST, foundUsers.getContent().get(0).getSecondName());
-    }
-
-    @Test
-    void getUserBySecondNameSpec_shouldTwoUsers_whenSecondNameIsEmpty() {
-        Specification<User> userSpecification = Specification
-                .where(spec.getUserBySecondNameSpec(""));
-        foundUsers = userRepository.findAll(userSpecification, pageable);
-        assertEquals(2, foundUsers.getContent().size());
-    }
-
-    @Test
-    void getUserBySecondNameSpec_shouldGetEmptyList_whenUserNotExistInDatabaseWithPassedSecondName() {
-        Specification<User> userSpecification = Specification
-                .where(spec.getUserBySecondNameSpec(SECOND_NAME_NOT_EXIST.toUpperCase()));
-        foundUsers = userRepository.findAll(userSpecification, pageable);
-        assertTrue(foundUsers.getContent().isEmpty());
-    }
 
     @Test
     void getUserByPhoneSpec_shouldGetFiveUsers_whenFiveUserExistInDatabaseWithPassedPhone() {

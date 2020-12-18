@@ -152,11 +152,11 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
                     format(WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_OF_UPDATING_USER_FROM_DATABASE,
                             jwtUser.getWeightRole(), userFromDatabase.getRole().getWeight()))));
         }
-        if (!jwtUser.isInnerGroup() && !userFromRequest.getOwnGroup().getId().equals(jwtUser.getGroupId())) {
+        if (!jwtUser.isInnerGroup() && !userFromRequest.getGroup().getId().equals(jwtUser.getGroupId())) {
             errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
                     CREATE_UPDATE_ONLY_HIS_GROUP)));
         }
-        if (userFromDatabase != null && !jwtUser.isInnerGroup() && !userFromDatabase.getOwnGroup().getId().equals(jwtUser.getGroupId())) {
+        if (userFromDatabase != null && !jwtUser.isInnerGroup() && !userFromDatabase.getGroup().getId().equals(jwtUser.getGroupId())) {
             errors.put(INNER_GROUP_USER_FROM_DATABASE, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
                     CREATE_UPDATE_ONLY_HIS_GROUP)));
         }

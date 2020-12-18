@@ -63,7 +63,7 @@ public class AccountServiceImpl extends CrudServiceImpl<Account, AccountOperatio
                 .password(accountDto.getPasswordAccountOwner())
                 .role(roleService.getAccountOwnerRole())
                 .account(account)
-                .ownGroup(groupAccountOwner)
+                .group(groupAccountOwner)
                 .build();
         userService.create(user);
         log.trace(FINISH_CREATE_NEW_ACCOUNT, accountDto);

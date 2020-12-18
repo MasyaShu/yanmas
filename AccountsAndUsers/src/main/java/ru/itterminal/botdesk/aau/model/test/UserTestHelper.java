@@ -4,18 +4,17 @@ import java.util.List;
 import java.util.UUID;
 
 import ru.itterminal.botdesk.aau.model.User;
-import ru.itterminal.botdesk.aau.model.dto.UserDto;
+import ru.itterminal.botdesk.aau.model.dto.UserDtoRequest;
 import ru.itterminal.botdesk.aau.model.dto.UserFilterDto;
 import ru.itterminal.botdesk.commons.model.BaseTestEntityHelperImpl;
 
-public class UserTestHelper extends BaseTestEntityHelperImpl<User, UserDto, UserFilterDto> {
+public class UserTestHelper extends BaseTestEntityHelperImpl<User, UserDtoRequest, UserFilterDto> {
 
     RoleTestHelper roleHelper = new RoleTestHelper();
     AccountTestHelper accountHelper = new AccountTestHelper();
     GroupTestHelper groupHelper = new GroupTestHelper();
 
     private static final String INVALID_FIRST_NAME_REGEX = "[A-Za-z0-9]{129}";
-    private static final String INVALID_SECOND_NAME_REGEX = "[A-Za-z0-9]{129}";
     private static final String INVALID_PHONE_REGEX = "[A-Za-z0-9]{129}";
     private static final String PASSWORD = "$2a$10$ejjUoWxoPs.4vjQOoBnFquybNHJAxIyKz7QIXL6.BSVyHPow8jmxK";
     private static final String PHONE = "211-15-15";
@@ -25,15 +24,14 @@ public class UserTestHelper extends BaseTestEntityHelperImpl<User, UserDto, User
     public User getRandomValidEntity() {
         User user = User.builder()
                 .email(fakerEN.bothify("???????##@botdesk.app"))
-                .firstName(fakerRU.name().firstName())
-                .secondName(fakerRU.name().lastName())
+                .name(fakerRU.name().firstName())
                 .password(fakerRU.bothify("????##???##"))
                 .phone(fakerRU.phoneNumber().phoneNumber())
                 .comment(fakerRU.lorem().paragraph())
                 .emailVerificationStatus(fakerRU.bool().bool())
                 .isArchived(fakerRU.bool().bool())
                 .account(accountHelper.getRandomValidEntity())
-                .ownGroup(groupHelper.getRandomValidEntity())
+                .group(groupHelper.getRandomValidEntity())
                 .role(roleHelper.getRandomValidEntity())
                 .build();
         setRandomValidPropertiesOfBaseEntity(user);
@@ -44,15 +42,14 @@ public class UserTestHelper extends BaseTestEntityHelperImpl<User, UserDto, User
     public User getRandomInvalidEntity() {
         User user = User.builder()
                 .email(fakerEN.bothify("####botdesk.app"))
-                .firstName(fakerRU.regexify(INVALID_FIRST_NAME_REGEX))
-                .secondName(fakerRU.regexify(INVALID_SECOND_NAME_REGEX))
+                .name(fakerRU.regexify(INVALID_FIRST_NAME_REGEX))
                 .password(fakerRU.bothify("????##???##"))
                 .phone(fakerRU.regexify(INVALID_PHONE_REGEX))
                 .comment(fakerRU.lorem().paragraph())
                 .emailVerificationStatus(fakerRU.bool().bool())
                 .isArchived(fakerRU.bool().bool())
                 .account(accountHelper.getRandomValidEntity())
-                .ownGroup(groupHelper.getRandomValidEntity())
+                .group(groupHelper.getRandomValidEntity())
                 .role(roleHelper.getRandomValidEntity())
                 .build();
         setRandomValidPropertiesOfBaseEntity(user);
@@ -64,8 +61,7 @@ public class UserTestHelper extends BaseTestEntityHelperImpl<User, UserDto, User
 
         User user1 = User.builder()
                 .email("m@m.ru")
-                .firstName("firstName1")
-                .secondName("secondName1")
+                .name("Name1")
                 .password(PASSWORD)
                 .phone(PHONE)
                 .comment(COMMENT)
@@ -74,7 +70,7 @@ public class UserTestHelper extends BaseTestEntityHelperImpl<User, UserDto, User
                 .passwordResetToken(null)
                 .isArchived(false)
                 .account(accountHelper.getPredefinedValidEntityList().get(0))
-                .ownGroup(groupHelper.getPredefinedValidEntityList().get(0))
+                .group(groupHelper.getPredefinedValidEntityList().get(0))
                 .role(roleHelper.getPredefinedValidEntityList().get(0))
                 .build();
         setPropertiesOfBaseEntity(
@@ -86,8 +82,7 @@ public class UserTestHelper extends BaseTestEntityHelperImpl<User, UserDto, User
         );
         User user2 = User.builder()
                 .email("m1@m.ru")
-                .firstName("firstName2")
-                .secondName("secondName2")
+                .name("Name2")
                 .password(PASSWORD)
                 .phone(PHONE)
                 .comment(COMMENT)
@@ -96,7 +91,7 @@ public class UserTestHelper extends BaseTestEntityHelperImpl<User, UserDto, User
                 .passwordResetToken(null)
                 .isArchived(false)
                 .account(accountHelper.getPredefinedValidEntityList().get(0))
-                .ownGroup(groupHelper.getPredefinedValidEntityList().get(0))
+                .group(groupHelper.getPredefinedValidEntityList().get(0))
                 .role(roleHelper.getPredefinedValidEntityList().get(3))
                 .build();
         setPropertiesOfBaseEntity(
@@ -108,8 +103,7 @@ public class UserTestHelper extends BaseTestEntityHelperImpl<User, UserDto, User
         );
         User user3 = User.builder()
                 .email("m2@m.ru")
-                .firstName(null)
-                .secondName(null)
+                .name(null)
                 .password(PASSWORD)
                 .phone(null)
                 .comment(null)
@@ -118,7 +112,7 @@ public class UserTestHelper extends BaseTestEntityHelperImpl<User, UserDto, User
                 .passwordResetToken(null)
                 .isArchived(false)
                 .account(accountHelper.getPredefinedValidEntityList().get(0))
-                .ownGroup(groupHelper.getPredefinedValidEntityList().get(0))
+                .group(groupHelper.getPredefinedValidEntityList().get(0))
                 .role(roleHelper.getPredefinedValidEntityList().get(3))
                 .build();
         setPropertiesOfBaseEntity(
@@ -130,8 +124,7 @@ public class UserTestHelper extends BaseTestEntityHelperImpl<User, UserDto, User
         );
         User user4 = User.builder()
                 .email("m3@m.ru")
-                .firstName("")
-                .secondName("")
+                .name("")
                 .password(PASSWORD)
                 .phone("")
                 .comment("")
@@ -140,7 +133,7 @@ public class UserTestHelper extends BaseTestEntityHelperImpl<User, UserDto, User
                 .passwordResetToken(null)
                 .isArchived(false)
                 .account(accountHelper.getPredefinedValidEntityList().get(0))
-                .ownGroup(groupHelper.getPredefinedValidEntityList().get(0))
+                .group(groupHelper.getPredefinedValidEntityList().get(0))
                 .role(roleHelper.getPredefinedValidEntityList().get(3))
                 .build();
         setPropertiesOfBaseEntity(
@@ -152,8 +145,7 @@ public class UserTestHelper extends BaseTestEntityHelperImpl<User, UserDto, User
         );
         User user5 = User.builder()
                 .email("m4@m.ru")
-                .firstName("firstName5")
-                .secondName("secondName5")
+                .name("Name5")
                 .password(PASSWORD)
                 .phone(PHONE)
                 .comment(COMMENT)
@@ -162,7 +154,7 @@ public class UserTestHelper extends BaseTestEntityHelperImpl<User, UserDto, User
                 .passwordResetToken(null)
                 .isArchived(false)
                 .account(accountHelper.getPredefinedValidEntityList().get(1))
-                .ownGroup(groupHelper.getPredefinedValidEntityList().get(2))
+                .group(groupHelper.getPredefinedValidEntityList().get(2))
                 .role(roleHelper.getPredefinedValidEntityList().get(3))
                 .build();
         setPropertiesOfBaseEntity(

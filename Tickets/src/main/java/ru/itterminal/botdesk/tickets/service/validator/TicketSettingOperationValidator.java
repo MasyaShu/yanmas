@@ -85,7 +85,7 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
         );
 
         Group groupOfEntity = entity.getGroup();
-        Group groupOfAuthor = entity.getAuthor().getOwnGroup();
+        Group groupOfAuthor = entity.getAuthor().getGroup();
         chekObjectsIsEquals(groupOfEntity, groupOfAuthor, GROUPS_ARENT_EQUAL,
                             format(GROUPS_ARENT_EQUAL_MESSAGE, groupOfEntity, groupOfAuthor),
                             errors

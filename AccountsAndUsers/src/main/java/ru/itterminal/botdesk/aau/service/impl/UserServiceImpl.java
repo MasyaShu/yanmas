@@ -130,6 +130,7 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
         } else {
             entity.setEmailVerificationStatus(true);
         }
+        entity.generateDisplayName();
         User createdUser = repository.create(entity);
         log.trace(format(CREATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), createdUser.toString()));
         if (createdUser.getEmailVerificationToken() != null) {
@@ -167,22 +168,11 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
         } else {
             entity.setPassword(encoder.encode(entity.getPassword()));
         }
-        if (entity.getFirstName() == null) {
-            entity.setFirstName(entityFromDatabase.getFirstName());
-        }
-        if (entity.getSecondName() == null) {
-            entity.setSecondName(entityFromDatabase.getSecondName());
-        }
-        if (entity.getPhone() == null) {
-            entity.setPhone(entityFromDatabase.getPhone());
-        }
-        if (entity.getComment() == null) {
-            entity.setComment(entityFromDatabase.getComment());
-        }
         entity.setEmailVerificationStatus(entityFromDatabase.getEmailVerificationStatus());
         entity.setEmailVerificationToken(entityFromDatabase.getEmailVerificationToken());
         entity.setPasswordResetToken(entityFromDatabase.getPasswordResetToken());
         try {
+            entity.generateDisplayName();
             User updatedEntity = repository.update(entity);
             log.trace(format(UPDATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), updatedEntity));
             return updatedEntity;
@@ -218,24 +208,24 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
 
     @SuppressWarnings("DuplicatedCode")
     @Transactional(readOnly = true)
-    public User findByIdAndAccountIdAndOwnGroupId(UUID id, UUID accountId, UUID ownGroupId) {
-        chekObjectForNull(id, format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, ownGroupId),
+    public User findByIdAndAccountIdAndGroupId(UUID id, UUID accountId, UUID groupId) {
+        chekObjectForNull(id, format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, groupId),
                           EntityNotExistException.class
         );
         chekObjectForNull(
                 accountId,
-                format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, ownGroupId),
+                format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, groupId),
                 EntityNotExistException.class
         );
         chekObjectForNull(
-                ownGroupId,
-                format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, ownGroupId),
+                groupId,
+                format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, groupId),
                 EntityNotExistException.class
         );
-        log.trace(START_FIND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, ownGroupId);
-        return repository.getByIdAndAccount_IdAndOwnGroup_Id(id, accountId, ownGroupId).orElseThrow(
+        log.trace(START_FIND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, groupId);
+        return repository.getByIdAndAccount_IdAndGroup_Id(id, accountId, groupId).orElseThrow(
                 () -> new EntityNotExistException(
-                        format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, ownGroupId)
+                        format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, groupId)
                 )
         );
     }

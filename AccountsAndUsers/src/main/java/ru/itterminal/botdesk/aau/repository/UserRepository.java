@@ -26,7 +26,7 @@ public interface UserRepository extends EntityRepositoryWithAccount<User> {
 
     Optional<User> getByIdAndAccount_Id(UUID id, UUID accountId);
 
-    Optional<User> getByIdAndAccount_IdAndOwnGroup_Id(UUID id, UUID accountId, UUID ownGroupId);
+    Optional<User> getByIdAndAccount_IdAndGroup_Id(UUID id, UUID accountId, UUID groupId);
 
     List<User> findAllByRole(Role role);
 }

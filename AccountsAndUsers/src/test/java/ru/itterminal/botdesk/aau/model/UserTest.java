@@ -10,14 +10,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
+import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
+
 @TestInstance(PER_CLASS)
 class UserTest {
 
     User user_1;
     User user_2;
-    final UUID id = UUID.randomUUID();
-
-    final Role admin = new Role(Roles.ADMIN.toString(), Roles.ADMIN.getWeight());
+    private final UUID id = UUID.randomUUID();
+    private final Role admin = new Role(Roles.ADMIN.toString(), Roles.ADMIN.getWeight());
+    private final UserTestHelper userTestHelper = new UserTestHelper();
 
     @SuppressWarnings("deprecation")
     @BeforeEach
@@ -29,12 +31,11 @@ class UserTest {
                 .email("email")
                 .emailVerificationStatus(true)
                 .emailVerificationToken("email_verification_token")
-                .firstName("first_name")
+                .name("name")
                 .isArchived(true)
                 .password("12345")
                 .passwordResetToken(null)
                 .phone("7906558585")
-                .secondName("second_name")
                 .role(admin)
                 .build();
         user_1.setId(id);
@@ -48,12 +49,11 @@ class UserTest {
                 .email("email")
                 .emailVerificationStatus(true)
                 .emailVerificationToken("email_verification_token")
-                .firstName("first_name")
+                .name("name")
                 .isArchived(true)
                 .password("12345")
                 .passwordResetToken(null)
                 .phone("7906558585")
-                .secondName("second_name")
                 .role(admin)
                 .build();
         user_2.setId(id);
@@ -91,4 +91,23 @@ class UserTest {
         user_1.setRole(admin);
         assertEquals(user_1, user_2);
     }
+
+    @Test
+    void generateDisplayName_shouldGetDisplayNameEqualEmail_whenNameIsNull () {
+        User user = userTestHelper.getPredefinedValidEntityList().get(2);
+        user.generateDisplayName();
+        String expectedDisplayName = user.getEmail();
+        String actualDisplayName = user.getDisplayName();
+        assertEquals(expectedDisplayName, actualDisplayName);
+    }
+
+    @Test
+    void generateDisplayName_shouldGetDisplayNameEqualName_whenNameIsNotNull () {
+        User user = userTestHelper.getPredefinedValidEntityList().get(4);
+        user.generateDisplayName();
+        String expectedDisplayName = user.getName();
+        String actualDisplayName = user.getDisplayName();
+        assertEquals(expectedDisplayName, actualDisplayName);
+    }
+
 }
