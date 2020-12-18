@@ -8,12 +8,12 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import ru.itterminal.botdesk.aau.model.Account;
-import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
+import ru.itterminal.botdesk.aau.model.test.AccountTestTestHelper;
 import ru.itterminal.botdesk.aau.model.dto.AccountDto;
 
 class TestAccountHelperTest {
 
-    AccountTestHelper accountHelper = new AccountTestHelper();
+    AccountTestTestHelper accountHelper = new AccountTestTestHelper();
 
     @Test
     void getRandomValidEntity() {

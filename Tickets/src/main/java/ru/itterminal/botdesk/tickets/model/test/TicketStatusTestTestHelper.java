@@ -3,17 +3,17 @@ package ru.itterminal.botdesk.tickets.model.test;
 import java.util.List;
 import java.util.UUID;
 
-import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
-import ru.itterminal.botdesk.commons.model.BaseTestEntityHelperImpl;
+import ru.itterminal.botdesk.aau.model.test.AccountTestTestHelper;
+import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
 import ru.itterminal.botdesk.tickets.model.TicketStatus;
 import ru.itterminal.botdesk.tickets.model.dto.TicketStatusDto;
 import ru.itterminal.botdesk.tickets.model.dto.TicketStatusFilterDto;
 
-public class TicketStatusTestHelper extends BaseTestEntityHelperImpl<TicketStatus, TicketStatusDto,
+public class TicketStatusTestTestHelper extends EntityTestHelperImpl<TicketStatus, TicketStatusDto,
         TicketStatusFilterDto> {
 
     private static final String INVALID_TICKET_STATUS_NAME_REGEX = "[A-Za-z0-9]{129}";
-    private final AccountTestHelper accountTestHelper = new AccountTestHelper();
+    private final AccountTestTestHelper accountTestHelper = new AccountTestTestHelper();
 
     @Override
     public TicketStatus getRandomValidEntity() {

@@ -20,7 +20,7 @@ import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.tickets.model.TicketSetting;
 import ru.itterminal.botdesk.tickets.model.projection.TicketSettingUniqueFields;
-import ru.itterminal.botdesk.tickets.model.test.TicketSettingTestHelper;
+import ru.itterminal.botdesk.tickets.model.test.TicketSettingTestTestHelper;
 import ru.itterminal.botdesk.tickets.repository.TicketSettingRepository;
 import ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator;
 
@@ -37,7 +37,7 @@ class TicketSettingServiceImplTest {
     @MockBean
     private TicketSettingRepository repository;
 
-    private final TicketSettingTestHelper ticketSettingTestHelper = new TicketSettingTestHelper();
+    private final TicketSettingTestTestHelper ticketSettingTestHelper = new TicketSettingTestTestHelper();
 
     @Test
     void findByUniqueFields_shouldGetEmptyList_whenPassedDataIsUnique() {
