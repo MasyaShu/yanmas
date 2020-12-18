@@ -51,11 +51,7 @@ public class TicketTypeServiceImpl extends
 
     @Override
     public TicketType update(TicketType entity) {
-        TicketType entityFromDatabase = repository.findByIdAndAccountId(entity.getId(), entity.getAccount().getId()).orElseThrow(() -> {
-            String message = format(ENTITY_NOT_EXIST_MESSAGE, entity.getClass().getSimpleName(), entity.getId());
-            log.error(message);
-            return new EntityNotExistException(message);
-        });
+        TicketType entityFromDatabase = findByIdAndAccountId(entity.getId(), entity.getAccount().getId());
         entity.setIsPredefined(entityFromDatabase.getIsPredefined());
         return super.update(entity);
     }

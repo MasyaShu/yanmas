@@ -12,7 +12,6 @@ import ru.itterminal.botdesk.tickets.service.validator.TicketStatusOperationVali
 
 import java.util.List;
 
-import static java.lang.String.format;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekObjectForNull;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekStringForNullOrEmpty;
 
@@ -50,11 +49,7 @@ public class TicketStatusServiceImpl extends
 
     @Override
     public TicketStatus update(TicketStatus entity) {
-        TicketStatus entityFromDatabase = repository.findByIdAndAccountId(entity.getId(), entity.getAccount().getId()).orElseThrow(() -> {
-            String message = format(ENTITY_NOT_EXIST_MESSAGE, entity.getClass().getSimpleName(), entity.getId());
-            log.error(message);
-            return new EntityNotExistException(message);
-        });
+        TicketStatus entityFromDatabase = findByIdAndAccountId(entity.getId(), entity.getAccount().getId());
         entity.setIsCanceledPredefined(entityFromDatabase.getIsCanceledPredefined());
         entity.setIsFinishedPredefined(entityFromDatabase.getIsFinishedPredefined());
         entity.setIsReopenedPredefined(entityFromDatabase.getIsReopenedPredefined());
