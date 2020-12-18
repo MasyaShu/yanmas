@@ -46,14 +46,13 @@ class GroupServiceImplTest {
 
     private Group group;
     private Group groupInDataBase;
-    private Account account;
     private static final String EXIST_NAME = "groupName1";
     private static final UUID ACCOUNT_1_ID = UUID.fromString("cdfa6483-0769-4628-ba32-efd338a716de");
     private static final UUID GROUP_ID = UUID.fromString("0223e51a-4bb2-44ee-bc8e-1f047a2145e7");
 
     @BeforeEach
     void setUpBeforeEach() {
-        account = new Account();
+        Account account = new Account();
         account.setId(ACCOUNT_1_ID);
         group = Group
                 .builder()
@@ -74,65 +73,51 @@ class GroupServiceImplTest {
     @Test
     void findByUniqueFields_shouldGetEntityNotExistException_whenUserIsNull() {
         assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(null));
-        verify(repository, times(0)).getByNameAndAccount_IdAndIdNot(any(), any(), any());
+        verify(repository, times(0)).getByNameAndIsInnerAndAccount_IdAndIdNot(any(), any(), any(), any());
     }
 
     @Test
     void findByUniqueFields_shouldGetEntityNotExistException_whenUserNameIsNull() {
         group.setName(null);
         assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(group));
-        verify(repository, times(0)).getByNameAndAccount_IdAndIdNot(any(), any(), any());
+        verify(repository, times(0)).getByNameAndIsInnerAndAccount_IdAndIdNot(any(), any(), any(), any());
     }
 
     @Test
     void findByUniqueFields_shouldGetEntityNotExistException_whenUserAccountIsNull() {
         group.setAccount(null);
         assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(group));
-        verify(repository, times(0)).getByNameAndAccount_IdAndIdNot(any(), any(), any());
+        verify(repository, times(0)).getByNameAndIsInnerAndAccount_IdAndIdNot(any(), any(), any(), any());
     }
 
     @Test
     void findByUniqueFields_shouldGetEntityNotExistException_whenUserIdIsNull() {
         group.setId(null);
         assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(group));
-        verify(repository, times(0)).getByNameAndAccount_IdAndIdNot(any(), any(), any());
+        verify(repository, times(0)).getByNameAndIsInnerAndAccount_IdAndIdNot(any(), any(), any(), any());
     }
 
     @Test
     void update_shouldUpdateUser_whenPassedValidData() {
         when(validator.beforeUpdate(any())).thenReturn(true);
-        when(repository.findById(any())).thenReturn(Optional.of(group));
+        when(repository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(group));
         when(repository.update(any())).thenReturn(group);
         Group createdGroup = service.update(group);
         assertEquals(createdGroup, group);
         verify(validator, times(1)).beforeUpdate(any());
-        verify(repository, times(1)).findById(any());
+        verify(repository, times(1)).findByIdAndAccountId(any(), any());
         verify(repository, times(1)).update(any());
     }
 
     @Test
     void update_shouldUpdateUser_whenPassedValidDataAndIsInnerNotDatabase() {
         when(validator.beforeUpdate(any())).thenReturn(true);
-        when(repository.findById(any())).thenReturn(Optional.of(groupInDataBase));
+        when(repository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(groupInDataBase));
         when(repository.update(any())).thenReturn(group);
         Group createdGroup = service.update(group);
         assertSame(groupInDataBase.getIsInner(), createdGroup.getIsInner());
         verify(validator, times(1)).beforeUpdate(any());
-        verify(repository, times(1)).findById(any());
+        verify(repository, times(1)).findByIdAndAccountId(any(), any());
         verify(repository, times(1)).update(any());
-    }
-
-    @Test
-    void findByIdAndAccountId_shouldGetEntityNotExistException_whenGroupIdIsNull() {
-        UUID accountId = account.getId();
-        assertThrows(EntityNotExistException.class, () -> service.findByIdAndAccountId(null, accountId));
-        verify(repository, times(0)).getByIdAndAccount_Id(any(), any());
-    }
-
-    @Test
-    void findByIdAndAccountId_shouldGetEntityNotExistException_whenAccountIdIsNull() {
-        UUID groupId = group.getId();
-        assertThrows(EntityNotExistException.class, () -> service.findByIdAndAccountId(groupId, null));
-        verify(repository, times(0)).getByIdAndAccount_Id(any(), any());
     }
 }
