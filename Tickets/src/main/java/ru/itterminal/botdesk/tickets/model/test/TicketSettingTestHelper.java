@@ -74,6 +74,7 @@ public class TicketSettingTestHelper extends BaseTestEntityHelperImpl<TicketSett
                 .ticketStatusForClose(!fakerRU.bool().bool() ? null : ticketStatusForClose)
                 .ticketStatusForCancel(!fakerRU.bool().bool() ? null : ticketStatusForCancel)
                 .build();
+        ticketSetting.generateDisplayName();
         setRandomValidPropertiesOfBaseEntity(ticketSetting);
         return ticketSetting;
     }
@@ -92,6 +93,7 @@ public class TicketSettingTestHelper extends BaseTestEntityHelperImpl<TicketSett
                 .ticketStatusForClose(ticketStatusTestHelper.getRandomValidEntity())
                 .ticketStatusForCancel(ticketStatusTestHelper.getRandomValidEntity())
                 .build();
+        ticketSetting.generateDisplayName();
         setRandomValidPropertiesOfBaseEntity(ticketSetting);
         return ticketSetting;
     }

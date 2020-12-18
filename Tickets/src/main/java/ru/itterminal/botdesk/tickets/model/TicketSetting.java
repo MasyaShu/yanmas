@@ -17,9 +17,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.User;
-import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 
 @Entity
@@ -36,12 +36,12 @@ public class TicketSetting extends BaseEntity {
     private Account account;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id")
-    private User author;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
     private Group group;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id")
+    private User author;
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -115,6 +115,11 @@ public class TicketSetting extends BaseEntity {
 
     @Override
     public void generateDisplayName() {
-
+        String result = getGroup().getDisplayName() != null ? getGroup().getDisplayName() : null;
+        if (result != null && getAuthor().getDisplayName() != null) {
+            result = result + " ";
+        }
+        result = getAuthor() != null ? getAuthor().getDisplayName() : null;
+        setDisplayName(result);
     }
 }

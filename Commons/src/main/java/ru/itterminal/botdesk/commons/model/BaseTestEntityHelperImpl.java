@@ -110,6 +110,7 @@ public abstract class BaseTestEntityHelperImpl<E extends BaseEntity, D extends B
         entity.setVersion(version);
         entity.setDeleted(deleted);
         entity.setOutId(outId);
+        entity.generateDisplayName();
     }
 
     // BaseEntityDto
