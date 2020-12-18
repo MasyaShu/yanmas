@@ -1,7 +1,6 @@
 package ru.itterminal.botdesk.tickets.model.dto;
 
 import java.util.List;
-import java.util.UUID;
 
 import javax.validation.constraints.NotNull;
 
@@ -19,25 +18,25 @@ import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 @SuperBuilder
 @AllArgsConstructor
 @ToString
-public class TicketSettingDto extends BaseEntityDto {
+public class TicketSettingDtoResponse extends BaseEntityDto {
 
     @NotNull(groups = {Create.class, Update.class})
-    private UUID authorId;
+    private BaseEntityDto authorId;
 
     @NotNull(groups = {Create.class, Update.class})
-    private UUID groupId;
+    private BaseEntityDto groupId;
 
-    List<UUID> observersId;
+    List<BaseEntityDto> observersId;
 
-    List<UUID> executorsId;
+    List<BaseEntityDto> executorsId;
 
-    private UUID ticketTypeIdForNew;
+    private BaseEntityDto ticketTypeIdForNew;
 
-    private UUID ticketStatusIdForNew;
+    private BaseEntityDto ticketStatusIdForNew;
 
-    private UUID ticketStatusIdForReopen;
+    private BaseEntityDto ticketStatusIdForReopen;
 
-    private UUID ticketStatusIdForClose;
+    private BaseEntityDto ticketStatusIdForClose;
 
-    private UUID ticketStatusIdForCancel;
+    private BaseEntityDto ticketStatusIdForCancel;
 }

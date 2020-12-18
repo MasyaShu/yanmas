@@ -6,25 +6,15 @@ import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.AllArgsConstructor;
@@ -38,8 +28,7 @@ import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
 import ru.itterminal.botdesk.tickets.model.TicketSetting;
-import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDto;
-import ru.itterminal.botdesk.tickets.model.dto.TicketSettingFilterDto;
+import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoRequest;
 import ru.itterminal.botdesk.tickets.service.impl.TicketSettingServiceImpl;
 import ru.itterminal.botdesk.tickets.service.impl.TicketStatusServiceImpl;
 import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
@@ -62,8 +51,8 @@ public class TicketSettingControllerV1 extends BaseController {
 
     @PostMapping()
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
-    public ResponseEntity<TicketSettingDto> create(Principal principal,
-                                                   @Validated(Create.class) @RequestBody TicketSettingDto request) {
+    public ResponseEntity<TicketSettingDtoRequest> create(Principal principal,
+                                                          @Validated(Create.class) @RequestBody TicketSettingDtoRequest request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
         TicketSetting ticketSetting = modelMapper.map(request, TicketSetting.class);
 
@@ -98,10 +87,8 @@ public class TicketSettingControllerV1 extends BaseController {
                 ticketStatusService.findByIdAndAccountId(request.getTicketStatusIdForCancel(), accountId)
         );
 
-        ticketSetting.setDeleted(false);
-
         TicketSetting createdTicketSetting = ticketSettingService.create(ticketSetting);
-        TicketSettingDto returnedTicketSetting = modelMapper.map(createdTicketSetting, TicketSettingDto.class);
+        TicketSettingDtoRequest returnedTicketSetting = modelMapper.map(createdTicketSetting, TicketSettingDtoRequest.class);
         log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdTicketSetting);
         return new ResponseEntity<>(returnedTicketSetting, HttpStatus.CREATED);
     }
@@ -116,8 +103,8 @@ public class TicketSettingControllerV1 extends BaseController {
 
     @PutMapping()
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
-    public ResponseEntity<TicketSettingDto> update(Principal principal,
-                                                  @Validated(Update.class) @RequestBody TicketSettingDto request) {
+    public ResponseEntity<TicketSettingDtoRequest> update(Principal principal,
+                                                          @Validated(Update.class) @RequestBody TicketSettingDtoRequest request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
         TicketSetting ticketSetting = modelMapper.map(request, TicketSetting.class);
 
@@ -153,7 +140,7 @@ public class TicketSettingControllerV1 extends BaseController {
         );
 
         TicketSetting updatedTicketSetting = ticketSettingService.update(ticketSetting);
-        TicketSettingDto returnedTicketSetting = modelMapper.map(updatedTicketSetting, TicketSettingDto.class);
+        TicketSettingDtoRequest returnedTicketSetting = modelMapper.map(updatedTicketSetting, TicketSettingDtoRequest.class);
         log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedTicketSetting);
         return new ResponseEntity<>(returnedTicketSetting, HttpStatus.OK);
     }

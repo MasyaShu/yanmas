@@ -14,10 +14,10 @@ import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
 import ru.itterminal.botdesk.tickets.model.TicketSetting;
 import ru.itterminal.botdesk.tickets.model.TicketStatus;
 import ru.itterminal.botdesk.tickets.model.TicketType;
-import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDto;
+import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoRequest;
 import ru.itterminal.botdesk.tickets.model.dto.TicketSettingFilterDto;
 
-public class TicketSettingTestHelper extends EntityTestHelperImpl<TicketSetting, TicketSettingDto,
+public class TicketSettingTestHelper extends EntityTestHelperImpl<TicketSetting, TicketSettingDtoRequest,
         TicketSettingFilterDto> {
 
     private final AccountTestHelper accountTestHelper = new AccountTestHelper();
