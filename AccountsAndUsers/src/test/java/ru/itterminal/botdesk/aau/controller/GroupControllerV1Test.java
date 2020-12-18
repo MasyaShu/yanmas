@@ -479,10 +479,7 @@ class GroupControllerV1Test {
                 .andExpect(MockMvcResultMatchers
                         .jsonPath("$.errors.deleted[?(@.message == '%s')]", CommonConstants.MUST_BE_ANY_OF_ALL_TRUE_FALSE).exists())
                 .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.direction[?(@.message == '%s')]", CommonConstants.MUST_BE_ANY_OF_ASC_DESC).exists())
-                .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.sortBy[?(@.message == '%s')]", AAUConstants.MUST_BE_ANY_OF_NAME)
-                        .exists());
+                        .jsonPath("$.errors.direction[?(@.message == '%s')]", CommonConstants.MUST_BE_ANY_OF_ASC_DESC).exists());
         verify(service, times(0)).findAllByFilter(any(), any());
     }
 
@@ -519,10 +516,7 @@ class GroupControllerV1Test {
                 .andExpect(MockMvcResultMatchers
                         .jsonPath("$.errors.deleted[?(@.message == '%s')]", CommonConstants.MUST_BE_ANY_OF_ALL_TRUE_FALSE).exists())
                 .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.direction[?(@.message == '%s')]", CommonConstants.MUST_BE_ANY_OF_ASC_DESC).exists())
-                .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.sortBy[?(@.message == '%s')]", AAUConstants.MUST_BE_ANY_OF_NAME)
-                        .exists());
+                        .jsonPath("$.errors.direction[?(@.message == '%s')]", CommonConstants.MUST_BE_ANY_OF_ASC_DESC).exists());
         verify(service, times(0)).findAllByFilter(any(), any());
     }
 

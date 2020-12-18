@@ -226,6 +226,7 @@ class UserServiceImplTest {
 
     @Test
     void findByIdAndAccountId_shouldGetUser_whenPassedValidData() {
+        when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(user));
         assertNotNull(service.findByIdAndAccountId(UUID.randomUUID(), UUID.randomUUID()));
         verify(userRepository, times(1)).findByIdAndAccountId(any(), any());
