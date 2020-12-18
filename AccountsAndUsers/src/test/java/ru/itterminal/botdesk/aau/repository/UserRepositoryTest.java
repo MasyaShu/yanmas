@@ -24,7 +24,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
-import ru.itterminal.botdesk.aau.model.test.UserTestTestHelper;
+import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 
 @SuppressWarnings("deprecation")
 @TestInstance(PER_CLASS)
@@ -174,7 +174,7 @@ class UserRepositoryTest {
 
     @Test
     void findAllByAccountIdAndListId_shouldGetTwoUsers_whenThereAreFourUsersWithTheSameAccountIdAndInListId() {
-        var userHelper = new UserTestTestHelper();
+        var userHelper = new UserTestHelper();
         var predefinedUserList = userHelper.getPredefinedValidEntityList();
         var userList = userRepository.
                 findAllByAccountIdAndListId(

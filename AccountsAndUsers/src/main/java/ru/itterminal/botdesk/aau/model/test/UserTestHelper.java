@@ -8,11 +8,11 @@ import ru.itterminal.botdesk.aau.model.dto.UserDtoRequest;
 import ru.itterminal.botdesk.aau.model.dto.UserFilterDto;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
 
-public class UserTestTestHelper extends EntityTestHelperImpl<User, UserDtoRequest, UserFilterDto> {
+public class UserTestHelper extends EntityTestHelperImpl<User, UserDtoRequest, UserFilterDto> {
 
-    RoleTestTestHelper roleHelper = new RoleTestTestHelper();
-    AccountTestTestHelper accountHelper = new AccountTestTestHelper();
-    GroupTestTestHelper groupHelper = new GroupTestTestHelper();
+    RoleTestHelper roleHelper = new RoleTestHelper();
+    AccountTestHelper accountHelper = new AccountTestHelper();
+    GroupTestHelper groupHelper = new GroupTestHelper();
 
     private static final String INVALID_FIRST_NAME_REGEX = "[A-Za-z0-9]{129}";
     private static final String INVALID_PHONE_REGEX = "[A-Za-z0-9]{129}";

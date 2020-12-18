@@ -7,9 +7,9 @@ import java.util.UUID;
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.User;
-import ru.itterminal.botdesk.aau.model.test.AccountTestTestHelper;
-import ru.itterminal.botdesk.aau.model.test.GroupTestTestHelper;
-import ru.itterminal.botdesk.aau.model.test.UserTestTestHelper;
+import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
+import ru.itterminal.botdesk.aau.model.test.GroupTestHelper;
+import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
 import ru.itterminal.botdesk.tickets.model.TicketSetting;
 import ru.itterminal.botdesk.tickets.model.TicketStatus;
@@ -17,14 +17,14 @@ import ru.itterminal.botdesk.tickets.model.TicketType;
 import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDto;
 import ru.itterminal.botdesk.tickets.model.dto.TicketSettingFilterDto;
 
-public class TicketSettingTestTestHelper extends EntityTestHelperImpl<TicketSetting, TicketSettingDto,
+public class TicketSettingTestHelper extends EntityTestHelperImpl<TicketSetting, TicketSettingDto,
         TicketSettingFilterDto> {
 
-    private final AccountTestTestHelper accountTestHelper = new AccountTestTestHelper();
-    private final UserTestTestHelper userTestHelper = new UserTestTestHelper();
-    private final GroupTestTestHelper groupTestHelper = new GroupTestTestHelper();
-    private final TicketTypeTestTestHelper ticketTypeTestHelper = new TicketTypeTestTestHelper();
-    private final TicketStatusTestTestHelper ticketStatusTestHelper = new TicketStatusTestTestHelper();
+    private final AccountTestHelper accountTestHelper = new AccountTestHelper();
+    private final UserTestHelper userTestHelper = new UserTestHelper();
+    private final GroupTestHelper groupTestHelper = new GroupTestHelper();
+    private final TicketTypeTestHelper ticketTypeTestHelper = new TicketTypeTestHelper();
+    private final TicketStatusTestHelper ticketStatusTestHelper = new TicketStatusTestHelper();
 
     @Override
     public TicketSetting getRandomValidEntity() {
