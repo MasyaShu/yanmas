@@ -48,6 +48,6 @@ public class Account extends BaseEntity {
 
     @Override
     public void generateDisplayName() {
-
+        setDisplayName(name);
     }
 }

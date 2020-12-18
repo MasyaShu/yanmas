@@ -1,6 +1,7 @@
 package ru.itterminal.botdesk.tickets.controller;
 
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ import ru.itterminal.botdesk.tickets.model.TicketStatus;
 import ru.itterminal.botdesk.tickets.model.TicketTemplate;
 import ru.itterminal.botdesk.tickets.model.dto.TicketStatusDto;
 import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateDto;
+import ru.itterminal.botdesk.tickets.service.impl.TicketTemplateServiceImpl;
 
 import java.security.Principal;
 
@@ -30,10 +32,12 @@ import java.security.Principal;
 public class TicketTemplateControllerV1 extends BaseController {
 
     private final AccountServiceImpl accountService;
+    private final TicketTemplateServiceImpl templateService;
 
     @Autowired
-    public TicketTemplateControllerV1(AccountServiceImpl accountService) {
+    public TicketTemplateControllerV1(AccountServiceImpl accountService, TicketTemplateServiceImpl templateService) {
         this.accountService = accountService;
+        this.templateService = templateService;
     }
 
     private final String ENTITY_NAME = TicketTemplate.class.getSimpleName();
@@ -48,9 +52,9 @@ public class TicketTemplateControllerV1 extends BaseController {
         ticketTemplate.setDeleted(false);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
         ticketTemplate.setAccount(accountService.findById(jwtUser.getAccountId()));
-        //TicketStatus createdTicketStatus = service.create(ticketType);
+        TicketTemplate createdTicketTemplate = templateService.create(ticketTemplate);
         TicketTemplateDto returnedTicketTemplate =
-                modelMapper.map(request, TicketTemplateDto.class);
+                modelMapper.map(createdTicketTemplate, TicketTemplateDto.class);
         log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, request);
         return new ResponseEntity<>(returnedTicketTemplate, HttpStatus.CREATED);
     }
