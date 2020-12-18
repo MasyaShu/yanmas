@@ -25,4 +25,20 @@ class TicketSettingTest {
         assertEquals(ticketSetting.getGroup().getDisplayName(), ticketSetting.getDisplayName());
     }
 
+    @Test
+    void generateDisplayName_shouldAuthorDisplayName_whenGroupIsNull() {
+        TicketSetting ticketSetting = helper.getPredefinedValidEntityList().get(0);
+        ticketSetting.setGroup(null);
+        ticketSetting.generateDisplayName();
+        assertEquals(ticketSetting.getAuthor().getDisplayName(), ticketSetting.getDisplayName());
+    }
+
+    @Test
+    void generateDisplayName_shouldGroupAndAuthorDisplayName_whenDataIsNotNull() {
+        TicketSetting ticketSetting = helper.getPredefinedValidEntityList().get(0);
+        ticketSetting.generateDisplayName();
+        assertEquals(ticketSetting.getGroup().getDisplayName() + " " + ticketSetting.getAuthor().getDisplayName(),
+                     ticketSetting.getDisplayName());
+    }
+
 }
