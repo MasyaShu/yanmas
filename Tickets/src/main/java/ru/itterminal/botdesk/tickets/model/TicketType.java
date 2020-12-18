@@ -60,12 +60,12 @@ public class TicketType extends BaseEntity {
     @Override
     public int hashCode() {
         return Objects.hash(account, name, comment, isPredefined,
-                            getId(), getOutId(), getVersion(), getDeleted()
+                getId(), getOutId(), getVersion(), getDeleted()
         );
     }
 
     @Override
     public void generateDisplayName() {
-
+        setDisplayName(name);
     }
 }

@@ -72,13 +72,13 @@ public class TicketStatus extends BaseEntity {
     @Override
     public int hashCode() {
         return Objects.hash(account, name, sortIndex, isStartedPredefined, isFinishedPredefined,
-                            isReopenedPredefined, isCanceledPredefined,
-                            getId(), getOutId(), getVersion(), getDeleted()
+                isReopenedPredefined, isCanceledPredefined,
+                getId(), getOutId(), getVersion(), getDeleted()
         );
     }
 
     @Override
     public void generateDisplayName() {
-
+        setDisplayName(name);
     }
 }
