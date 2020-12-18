@@ -120,7 +120,6 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
         UUID id = UUID.randomUUID();
         entity.setId(id);
         entity.setIsArchived(false);
-        entity.setDeleted(false);
         validator.checkUniqueness(entity);
         entity.setPassword(encoder.encode(entity.getPassword()));
         if (entity.getRole().equals(roleService.getAccountOwnerRole())) {

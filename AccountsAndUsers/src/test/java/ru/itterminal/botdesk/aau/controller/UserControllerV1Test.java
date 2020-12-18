@@ -831,8 +831,6 @@ class UserControllerV1Test {
         userFilterDto.setEmail(INVALID_EMAIL_1);
         userFilterDto.setName(INVALID_NAME);
         userFilterDto.setPhone(INVALID_PHONE);
-        String INVALID_SORT_BY = "ERROR";
-        userFilterDto.setSortBy(INVALID_SORT_BY);
         String INVALID_DELETED = "ERROR";
         userFilterDto.setDeleted(INVALID_DELETED);
         String INVALID_DIRECTION = "ERROR";
@@ -861,13 +859,7 @@ class UserControllerV1Test {
                                    .jsonPath(
                                            "$.errors.direction[?(@.message == '%s')]",
                                            CommonConstants.MUST_BE_ANY_OF_ASC_DESC
-                                   ).exists())
-                .andExpect(MockMvcResultMatchers
-                                   .jsonPath(
-                                           "$.errors.sortBy[?(@.message == '%s')]",
-                                           AAUConstants.MUST_BE_ANY_OF_NAME
-                                   )
-                                   .exists());
+                                   ).exists());
         verify(service, times(0)).findAllByFilter(any(), any());
     }
 
@@ -892,7 +884,6 @@ class UserControllerV1Test {
         userFilterDto.setEmail("");
         userFilterDto.setName("");
         userFilterDto.setPhone("");
-        userFilterDto.setSortBy("");
         userFilterDto.setDeleted("");
         userFilterDto.setDirection("");
         MockHttpServletRequestBuilder request = get(HOST + PORT + API)
@@ -919,13 +910,7 @@ class UserControllerV1Test {
                                    .jsonPath(
                                            "$.errors.direction[?(@.message == '%s')]",
                                            CommonConstants.MUST_BE_ANY_OF_ASC_DESC
-                                   ).exists())
-                .andExpect(MockMvcResultMatchers
-                                   .jsonPath(
-                                           "$.errors.sortBy[?(@.message == '%s')]",
-                                           AAUConstants.MUST_BE_ANY_OF_NAME
-                                   )
-                                   .exists());
+                                   ).exists());
         verify(service, times(0)).findAllByFilter(any(), any());
     }
 
@@ -956,7 +941,6 @@ class UserControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getByFilter_shouldFindTwoUsers_whenDefaultFieldsInFilterIsNull() throws Exception {
-        userFilterDto.setSortBy(null);
         userFilterDto.setDeleted(null);
         userFilterDto.setDirection(null);
         Pageable pageable =
