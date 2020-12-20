@@ -5,13 +5,13 @@ import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 import ru.itterminal.botdesk.tickets.model.TicketTemplate;
-import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateDto;
+import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateDtoRequest;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplate, TicketTemplateDto,
+public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplate, TicketTemplateDtoRequest,
         BaseFilterDto> {
 
     private final AccountTestHelper accountTestHelper = new AccountTestHelper();

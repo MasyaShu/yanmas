@@ -10,7 +10,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.security.web.FilterChainProxy;
@@ -19,25 +18,19 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
-import ru.itterminal.botdesk.tickets.model.TicketType;
-import ru.itterminal.botdesk.tickets.model.dto.TicketStatusDto;
-import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateDto;
+import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateDtoRequest;
+import ru.itterminal.botdesk.tickets.model.test.TicketTemplateTestHelper;
 import ru.itterminal.botdesk.tickets.service.impl.TicketTemplateServiceImpl;
 
-import java.time.ZoneId;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -51,17 +44,17 @@ class TicketTemplateControllerV1Test {
     @MockBean
     private AccountServiceImpl accountService;
 
+    @MockBean
+    TicketTemplateServiceImpl templateService;
+
     @Autowired
     private TicketTemplateControllerV1 controller;
 
     @Autowired
     FilterChainProxy springSecurityFilterChain;
 
-    @Autowired
-    UserDetailsService userDetailsService;
+    private final TicketTemplateTestHelper ticketTemplateTestHelper = new TicketTemplateTestHelper();
 
-    @Autowired
-    TicketTemplateServiceImpl templateService;
 
     private MockMvc mockMvc;
 
@@ -77,33 +70,34 @@ class TicketTemplateControllerV1Test {
     private static final String HOST = "http://localhost";
     private static final String PORT = ":8081";
     private static final String API = "api/v1/ticketTemplate/";
-    private TicketTemplateDto ticketTemplateDto;
+    private TicketTemplateDtoRequest ticketTemplateDtoRequest;
 
 
     @BeforeEach
     void setUpBeforeEach() {
-        ticketTemplateDto = TicketTemplateDto
+        ticketTemplateDtoRequest = TicketTemplateDtoRequest
                 .builder()
                 .subject("111")
                 .zoneId("Etc/GMT+2")
                 .expressionSchedule("1 1 1 28 2 1")
-                .Author(new User())
-                .ticketType(new TicketType())
                 .isActive(true)
+                .ticketTypeId(UUID.fromString("7f66b241-f8ec-4912-8f58-a4ceef2dd4c9"))
+                .authorId(UUID.fromString("cdfa6483-0769-4628-ba32-efd338a716de"))
                 .isOnlyOneTicketInWork(true)
                 .build();
     }
 
-    /*@Test
+    @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void create_shouldCreate_whenValidDataPassed() throws Exception {
-        ticketTemplateDto.setDeleted(null);
+        ticketTemplateDtoRequest.setDeleted(null);
+        when(templateService.create(any())).thenReturn(ticketTemplateTestHelper.getRandomValidEntity());
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(ticketTemplateDto));
+                .content(objectMapper.writeValueAsString(ticketTemplateDtoRequest));
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isCreated());
-    }*/
+    }
 }
