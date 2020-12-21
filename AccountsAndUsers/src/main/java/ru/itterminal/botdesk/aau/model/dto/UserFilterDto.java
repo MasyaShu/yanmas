@@ -42,13 +42,4 @@ public class UserFilterDto extends BaseFilterDto {
     private List<UUID> groups;
 
     private List<UUID> roles;
-
-    @ValueOfEnum(enumClass = FieldsForSort.class, message = "must be any of: name")
-    private String sortBy = "name";
-
-    @SuppressWarnings("unused")
-    public enum FieldsForSort {
-        NAME
-    }
-
 }

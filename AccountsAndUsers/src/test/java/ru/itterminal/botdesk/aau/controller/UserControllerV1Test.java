@@ -73,6 +73,7 @@ class UserControllerV1Test {
 
     public static final String ROLE_ACCOUNT_OWNER_DISPLAY_NAME = "role account owner display name";
     public static final String ROLE_ACCOUNT_OWNER_OUT_ID = "role account owner outId";
+
     @MockBean
     private UserServiceImpl service;
 
@@ -212,8 +213,8 @@ class UserControllerV1Test {
                 .builder()
                 .email(TestSecurityConfig.EMAIL_1)
                 .password(PASSWORD_1)
-                .groupId(group_1.getId())
-                .roleId(roleAdmin.getId())
+                .group(group_1.getId())
+                .role(roleAdmin.getId())
                 .build();
         userDtoRequestFromAccount_1.setDeleted(false);
         userFilterDto = new UserFilterDto();
@@ -290,8 +291,8 @@ class UserControllerV1Test {
         userDtoRequestFromAccount_1.setEmail(INVALID_EMAIL_1);
         userDtoRequestFromAccount_1.setDeleted(true);
         userDtoRequestFromAccount_1.setPassword("");
-        userDtoRequestFromAccount_1.setGroupId(null);
-        userDtoRequestFromAccount_1.setRoleId(null);
+        userDtoRequestFromAccount_1.setGroup(null);
+        userDtoRequestFromAccount_1.setRole(null);
         userDtoRequestFromAccount_1.setName(INVALID_NAME);
         userDtoRequestFromAccount_1.setPhone(INVALID_PHONE);
         userDtoRequestFromAccount_1.setIsArchived(false);
@@ -324,13 +325,13 @@ class UserControllerV1Test {
                                         CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY
                                 ).exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath("$.errors.roleId[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                                   .jsonPath("$.errors.role[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
                                    .exists())
                 .andExpect(MockMvcResultMatchers
                                    .jsonPath("$.errors.email[?(@.message == '%s')]", AAUConstants.INVALID_EMAIL)
                                    .exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath("$.errors.groupId[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                                   .jsonPath("$.errors.group[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
                                    .exists())
                 .andExpect(MockMvcResultMatchers
                                    .jsonPath("$.errors.password[?(@.message == '%s')]", AAUConstants.INVALID_PASSWORD)
@@ -344,8 +345,8 @@ class UserControllerV1Test {
         userDtoRequestFromAccount_1.setEmail(null);
         userDtoRequestFromAccount_1.setDeleted(null);
         userDtoRequestFromAccount_1.setPassword(null);
-        userDtoRequestFromAccount_1.setGroupId(null);
-        userDtoRequestFromAccount_1.setRoleId(null);
+        userDtoRequestFromAccount_1.setGroup(null);
+        userDtoRequestFromAccount_1.setRole(null);
         userDtoRequestFromAccount_1.setName(null);
         userDtoRequestFromAccount_1.setPhone(null);
         userDtoRequestFromAccount_1.setIsArchived(false);
@@ -363,13 +364,13 @@ class UserControllerV1Test {
                                         CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY
                                 ).exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath("$.errors.roleId[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                                   .jsonPath("$.errors.role[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
                                    .exists())
                 .andExpect(MockMvcResultMatchers
                                    .jsonPath("$.errors.email[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
                                    .exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath("$.errors.groupId[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                                   .jsonPath("$.errors.group[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
                                    .exists())
                 .andExpect(MockMvcResultMatchers
                                    .jsonPath(
@@ -508,8 +509,8 @@ class UserControllerV1Test {
         userDtoRequestFromAccount_1.setEmail(INVALID_EMAIL_1);
         userDtoRequestFromAccount_1.setDeleted(null);
         userDtoRequestFromAccount_1.setPassword("");
-        userDtoRequestFromAccount_1.setGroupId(null);
-        userDtoRequestFromAccount_1.setRoleId(null);
+        userDtoRequestFromAccount_1.setGroup(null);
+        userDtoRequestFromAccount_1.setRole(null);
         userDtoRequestFromAccount_1.setName(INVALID_NAME);
         userDtoRequestFromAccount_1.setPhone("1234567890123456789012345678901");
         userDtoRequestFromAccount_1.setIsArchived(null);
@@ -545,13 +546,13 @@ class UserControllerV1Test {
                                            CommonConstants.MUST_NOT_BE_NULL
                                    ).exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath("$.errors.roleId[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                                   .jsonPath("$.errors.role[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
                                    .exists())
                 .andExpect(MockMvcResultMatchers
                                    .jsonPath("$.errors.email[?(@.message == '%s')]", AAUConstants.INVALID_EMAIL)
                                    .exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath("$.errors.groupId[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                                   .jsonPath("$.errors.group[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
                                    .exists())
                 .andExpect(MockMvcResultMatchers
                                    .jsonPath("$.errors.password[?(@.message == '%s')]", AAUConstants.INVALID_PASSWORD)
@@ -565,8 +566,8 @@ class UserControllerV1Test {
         userDtoRequestFromAccount_1.setEmail(null);
         userDtoRequestFromAccount_1.setDeleted(null);
         userDtoRequestFromAccount_1.setPassword(null);
-        userDtoRequestFromAccount_1.setGroupId(null);
-        userDtoRequestFromAccount_1.setRoleId(null);
+        userDtoRequestFromAccount_1.setGroup(null);
+        userDtoRequestFromAccount_1.setRole(null);
         userDtoRequestFromAccount_1.setName(null);
         userDtoRequestFromAccount_1.setPhone(null);
         userDtoRequestFromAccount_1.setIsArchived(null);
@@ -592,13 +593,13 @@ class UserControllerV1Test {
                                            CommonConstants.MUST_NOT_BE_NULL
                                    ).exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath("$.errors.roleId[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                                   .jsonPath("$.errors.role[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
                                    .exists())
                 .andExpect(MockMvcResultMatchers
                                    .jsonPath("$.errors.email[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
                                    .exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath("$.errors.groupId[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                                   .jsonPath("$.errors.group[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
                                    .exists());
         verify(service, times(0)).update(any());
     }
@@ -831,8 +832,6 @@ class UserControllerV1Test {
         userFilterDto.setEmail(INVALID_EMAIL_1);
         userFilterDto.setName(INVALID_NAME);
         userFilterDto.setPhone(INVALID_PHONE);
-        String INVALID_SORT_BY = "ERROR";
-        userFilterDto.setSortBy(INVALID_SORT_BY);
         String INVALID_DELETED = "ERROR";
         userFilterDto.setDeleted(INVALID_DELETED);
         String INVALID_DIRECTION = "ERROR";
@@ -861,13 +860,7 @@ class UserControllerV1Test {
                                    .jsonPath(
                                            "$.errors.direction[?(@.message == '%s')]",
                                            CommonConstants.MUST_BE_ANY_OF_ASC_DESC
-                                   ).exists())
-                .andExpect(MockMvcResultMatchers
-                                   .jsonPath(
-                                           "$.errors.sortBy[?(@.message == '%s')]",
-                                           AAUConstants.MUST_BE_ANY_OF_NAME
-                                   )
-                                   .exists());
+                                   ).exists());
         verify(service, times(0)).findAllByFilter(any(), any());
     }
 
@@ -892,7 +885,6 @@ class UserControllerV1Test {
         userFilterDto.setEmail("");
         userFilterDto.setName("");
         userFilterDto.setPhone("");
-        userFilterDto.setSortBy("");
         userFilterDto.setDeleted("");
         userFilterDto.setDirection("");
         MockHttpServletRequestBuilder request = get(HOST + PORT + API)
@@ -919,13 +911,7 @@ class UserControllerV1Test {
                                    .jsonPath(
                                            "$.errors.direction[?(@.message == '%s')]",
                                            CommonConstants.MUST_BE_ANY_OF_ASC_DESC
-                                   ).exists())
-                .andExpect(MockMvcResultMatchers
-                                   .jsonPath(
-                                           "$.errors.sortBy[?(@.message == '%s')]",
-                                           AAUConstants.MUST_BE_ANY_OF_NAME
-                                   )
-                                   .exists());
+                                   ).exists());
         verify(service, times(0)).findAllByFilter(any(), any());
     }
 
@@ -956,7 +942,6 @@ class UserControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getByFilter_shouldFindTwoUsers_whenDefaultFieldsInFilterIsNull() throws Exception {
-        userFilterDto.setSortBy(null);
         userFilterDto.setDeleted(null);
         userFilterDto.setDirection(null);
         Pageable pageable =

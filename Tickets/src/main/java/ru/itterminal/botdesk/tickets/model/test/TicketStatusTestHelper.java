@@ -9,7 +9,7 @@ import ru.itterminal.botdesk.tickets.model.TicketStatus;
 import ru.itterminal.botdesk.tickets.model.dto.TicketStatusDto;
 import ru.itterminal.botdesk.tickets.model.dto.TicketStatusFilterDto;
 
-public class TicketStatusTestHelper extends EntityTestHelperImpl<TicketStatus, TicketStatusDto,
+public class TicketStatusTestHelper extends EntityTestHelperImpl<TicketStatus, TicketStatusDto, TicketStatusDto,
         TicketStatusFilterDto> {
 
     private static final String INVALID_TICKET_STATUS_NAME_REGEX = "[A-Za-z0-9]{129}";
@@ -79,7 +79,7 @@ public class TicketStatusTestHelper extends EntityTestHelperImpl<TicketStatus, T
                 .isCanceledPredefined(false)
                 .account(accountTestHelper.getPredefinedValidEntityList().get(1))
                 .build();
-        setPropertiesOfBaseEntity(ticketStatus3, UUID.fromString("dcf29ccb-26c7-4e38-9256-f45918a4c4a6"),
+        setPropertiesOfBaseEntity(ticketStatus3, UUID.fromString("6dc9c0de-2143-40ce-ac65-5be97e3019fc"),
                                   0, false, null);
         TicketStatus ticketStatus4 = TicketStatus.builder()
                 .name("canceled")
@@ -103,6 +103,6 @@ public class TicketStatusTestHelper extends EntityTestHelperImpl<TicketStatus, T
                 .build();
         setPropertiesOfBaseEntity(ticketStatus5, UUID.fromString("6dc9c0de-2143-40ce-ac65-5be97e3019fc"),
                                   0, false, null);
-        return List.of(ticketStatus1);
+        return List.of(ticketStatus1, ticketStatus2, ticketStatus3, ticketStatus4, ticketStatus5);
     }
 }

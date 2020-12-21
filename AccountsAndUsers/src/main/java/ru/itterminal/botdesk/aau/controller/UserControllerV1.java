@@ -6,12 +6,10 @@ import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
-import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -79,8 +77,8 @@ public class UserControllerV1 extends BaseController {
         user.setAccount(accountService.findById(jwtUser.getAccountId()));
         UUID accountId = user.getAccount().getId();
 
-        user.setRole(roleService.findById(request.getRoleId()));
-        user.setGroup(groupService.findByIdAndAccountId(request.getGroupId(), accountId));
+        user.setRole(roleService.findById(request.getRole()));
+        user.setGroup(groupService.findByIdAndAccountId(request.getGroup(), accountId));
 
         User createdUser = userService.create(user);
 
@@ -109,8 +107,8 @@ public class UserControllerV1 extends BaseController {
         user.setAccount(accountService.findById(jwtUser.getAccountId()));
         UUID accountId = user.getAccount().getId();
 
-        user.setRole(roleService.findById(request.getRoleId()));
-        user.setGroup(groupService.findByIdAndAccountId(request.getGroupId(), accountId));
+        user.setRole(roleService.findById(request.getRole()));
+        user.setGroup(groupService.findByIdAndAccountId(request.getGroup(), accountId));
 
         User updatedUser = userService.update(user);
         UserDtoResponse returnedUser =
@@ -153,16 +151,13 @@ public class UserControllerV1 extends BaseController {
         if (filter.getDirection() == null) {
             filter.setDirection("ASC");
         }
-        if (filter.getSortBy() == null) {
-            filter.setSortBy("name");
-        }
         if (filter.getDeleted() == null) {
             filter.setDeleted("all");
         }
         Pageable pageable =
                 PageRequest.of(page, size, Sort.by(
                         Sort.Direction.fromString(filter.getDirection()),
-                        filter.getSortBy()
+                        "name"
                 ));
         Page<User> foundUsers;
         Page<UserDtoResponse> returnedUsers;

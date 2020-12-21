@@ -120,7 +120,6 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
         UUID id = UUID.randomUUID();
         entity.setId(id);
         entity.setIsArchived(false);
-        entity.setDeleted(false);
         validator.checkUniqueness(entity);
         entity.setPassword(encoder.encode(entity.getPassword()));
         if (entity.getRole().equals(roleService.getAccountOwnerRole())) {
@@ -162,7 +161,7 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
     public User update(User entity) {
         validator.beforeUpdate(entity);
         log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
-        User entityFromDatabase = super.findById(entity.getId());
+        User entityFromDatabase = super.findByIdAndAccountId(entity.getId(), entity.getAccount().getId());
         if (entity.getPassword() == null || entity.getPassword().isEmpty()) {
             entity.setPassword(entityFromDatabase.getPassword());
         } else {

@@ -5,17 +5,21 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import org.modelmapper.ModelMapper;
+
 import com.github.javafaker.Faker;
 
 import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 
 @SuppressWarnings("deprecation")
-public abstract class EntityTestHelperImpl<E extends BaseEntity, D extends BaseEntityDto,
-        F extends BaseFilterDto> implements EntityTestHelper<E, D, F> {
+public abstract class EntityTestHelperImpl<E extends BaseEntity, DtoRequest extends BaseEntityDto,
+        DtoResponse extends BaseEntityDto, F extends BaseFilterDto>
+        implements EntityTestHelper<E, DtoRequest, DtoResponse, F> {
 
     protected Faker fakerRU = new Faker(new Locale("ru", "RU"));
     protected Faker fakerEN = new Faker(new Locale("en", "US"));
+    protected ModelMapper modelMapper = new ModelMapper();
 
     @SuppressWarnings("FieldMayBeFinal")
     private List<E> predefinedValidEntityList = new ArrayList<>();
@@ -52,7 +56,7 @@ public abstract class EntityTestHelperImpl<E extends BaseEntity, D extends BaseE
     public final E getEntityFromPredefinedValidEntityByEntityId(String entityId) {
         List<E> listEntities = getPredefinedValidEntityList();
         UUID entityUUID = UUID.fromString(entityId);
-        for (E entity: listEntities) {
+        for (E entity : listEntities) {
             if (entity.getId().equals(entityUUID)) {
                 return entity;
             }
@@ -63,34 +67,12 @@ public abstract class EntityTestHelperImpl<E extends BaseEntity, D extends BaseE
     // EntityDto
 
     @Override
-    public D getRandomValidEntityDto() {
+    public DtoRequest convertEntityToDtoRequest(E entity) {
         return null;
     }
 
     @Override
-    public D getRandomInvalidEntityDto() {
-        return null;
-    }
-
-    // FilterDto
-
-    @Override
-    public F getRandomValidFilterDto() {
-        return null;
-    }
-
-    @Override
-    public F getRandomInvalidFilterDto() {
-        return null;
-    }
-
-    @Override
-    public F getPredefinedValidFilterDto() {
-        return null;
-    }
-
-    @Override
-    public F getPredefinedInvalidFilterDto() {
+    public DtoResponse convertEntityToDtoResponse(E entity) {
         return null;
     }
 
@@ -117,7 +99,7 @@ public abstract class EntityTestHelperImpl<E extends BaseEntity, D extends BaseE
     // BaseEntityDto
 
     @Override
-    public final void setRandomValidPropertiesOfBaseEntityDto(D entityDto) {
+    public final void setRandomValidPropertiesOfBaseEntityDto(E entityDto) {
         entityDto.setId(UUID.randomUUID());
         entityDto.setVersion(fakerRU.number().numberBetween(0, 100));
         entityDto.setDeleted(1 == fakerRU.number().numberBetween(0, 2));
@@ -125,7 +107,8 @@ public abstract class EntityTestHelperImpl<E extends BaseEntity, D extends BaseE
     }
 
     @Override
-    public final void setPropertiesOfBaseEntityDto(D entityDto, UUID id, int version, boolean deleted, String outId) {
+    public final void setPropertiesOfBaseEntityDto(E entityDto, UUID id, int version, boolean deleted,
+                                                   String outId) {
         entityDto.setId(id);
         entityDto.setVersion(version);
         entityDto.setDeleted(deleted);

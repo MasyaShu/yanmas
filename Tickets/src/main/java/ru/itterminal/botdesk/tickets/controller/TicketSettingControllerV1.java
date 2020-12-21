@@ -14,12 +14,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,16 +36,20 @@ import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
+import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
 import ru.itterminal.botdesk.tickets.model.TicketSetting;
-import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDto;
+import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoRequest;
+import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoResponse;
 import ru.itterminal.botdesk.tickets.model.dto.TicketSettingFilterDto;
+import ru.itterminal.botdesk.tickets.model.spec.TicketSettingSpec;
 import ru.itterminal.botdesk.tickets.service.impl.TicketSettingServiceImpl;
 import ru.itterminal.botdesk.tickets.service.impl.TicketStatusServiceImpl;
 import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
 
+@SuppressWarnings("DuplicatedCode")
 @Slf4j
 @RestController("TicketSettingControllerV1")
 @Validated
@@ -57,13 +63,14 @@ public class TicketSettingControllerV1 extends BaseController {
     private final TicketStatusServiceImpl ticketStatusService;
     private final TicketTypeServiceImpl ticketTypeService;
     private final TicketSettingServiceImpl ticketSettingService;
+    private final TicketSettingSpec spec;
 
     private final String ENTITY_NAME = TicketSetting.class.getSimpleName();
 
     @PostMapping()
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
-    public ResponseEntity<TicketSettingDto> create(Principal principal,
-                                                   @Validated(Create.class) @RequestBody TicketSettingDto request) {
+    public ResponseEntity<TicketSettingDtoResponse> create(Principal principal,
+                                                           @Validated(Create.class) @RequestBody TicketSettingDtoRequest request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
         TicketSetting ticketSetting = modelMapper.map(request, TicketSetting.class);
 
@@ -71,37 +78,36 @@ public class TicketSettingControllerV1 extends BaseController {
         ticketSetting.setAccount(accountService.findById(jwtUser.getAccountId()));
         UUID accountId = ticketSetting.getAccount().getId();
 
-        ticketSetting.setGroup(groupService.findByIdAndAccountId(request.getGroupId(), accountId));
-        ticketSetting.setAuthor(userService.findByIdAndAccountId(request.getAuthorId(), accountId));
+        ticketSetting.setGroup(groupService.findByIdAndAccountId(request.getGroup(), accountId));
+        ticketSetting.setAuthor(userService.findByIdAndAccountId(request.getAuthor(), accountId));
 
-        List<User> observers = userService.findAllByAccountIdAndListId(accountId, request.getObserversId());
+        List<User> observers = userService.findAllByAccountIdAndListId(accountId, request.getObservers());
         ticketSetting.setObservers(observers);
 
-        List<User> executors = userService.findAllByAccountIdAndListId(accountId, request.getExecutorsId());
+        List<User> executors = userService.findAllByAccountIdAndListId(accountId, request.getExecutors());
         ticketSetting.setObservers(executors);
 
         ticketSetting.setTicketTypeForNew(
-                ticketTypeService.findByIdAndAccountId(request.getTicketTypeIdForNew(), accountId)
+                ticketTypeService.findByIdAndAccountId(request.getTicketTypeForNew(), accountId)
         );
 
         ticketSetting.setTicketStatusForNew(
-                ticketStatusService.findByIdAndAccountId(request.getTicketStatusIdForNew(), accountId)
+                ticketStatusService.findByIdAndAccountId(request.getTicketStatusForNew(), accountId)
         );
 
         ticketSetting.setTicketStatusForReopen(
-                ticketStatusService.findByIdAndAccountId(request.getTicketStatusIdForReopen(), accountId)
+                ticketStatusService.findByIdAndAccountId(request.getTicketStatusForReopen(), accountId)
         );
         ticketSetting.setTicketStatusForClose(
-                ticketStatusService.findByIdAndAccountId(request.getTicketStatusIdForClose(), accountId)
+                ticketStatusService.findByIdAndAccountId(request.getTicketStatusForClose(), accountId)
         );
         ticketSetting.setTicketStatusForCancel(
-                ticketStatusService.findByIdAndAccountId(request.getTicketStatusIdForCancel(), accountId)
+                ticketStatusService.findByIdAndAccountId(request.getTicketStatusForCancel(), accountId)
         );
 
-        ticketSetting.setDeleted(false);
-
         TicketSetting createdTicketSetting = ticketSettingService.create(ticketSetting);
-        TicketSettingDto returnedTicketSetting = modelMapper.map(createdTicketSetting, TicketSettingDto.class);
+        TicketSettingDtoResponse returnedTicketSetting =
+                modelMapper.map(createdTicketSetting, TicketSettingDtoResponse.class);
         log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdTicketSetting);
         return new ResponseEntity<>(returnedTicketSetting, HttpStatus.CREATED);
     }
@@ -116,8 +122,8 @@ public class TicketSettingControllerV1 extends BaseController {
 
     @PutMapping()
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
-    public ResponseEntity<TicketSettingDto> update(Principal principal,
-                                                  @Validated(Update.class) @RequestBody TicketSettingDto request) {
+    public ResponseEntity<TicketSettingDtoResponse> update(Principal principal,
+                                                           @Validated(Update.class) @RequestBody TicketSettingDtoRequest request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
         TicketSetting ticketSetting = modelMapper.map(request, TicketSetting.class);
 
@@ -125,35 +131,36 @@ public class TicketSettingControllerV1 extends BaseController {
         ticketSetting.setAccount(accountService.findById(jwtUser.getAccountId()));
         UUID accountId = ticketSetting.getAccount().getId();
 
-        ticketSetting.setGroup(groupService.findByIdAndAccountId(request.getGroupId(), accountId));
-        ticketSetting.setAuthor(userService.findByIdAndAccountId(request.getAuthorId(), accountId));
+        ticketSetting.setGroup(groupService.findByIdAndAccountId(request.getGroup(), accountId));
+        ticketSetting.setAuthor(userService.findByIdAndAccountId(request.getAuthor(), accountId));
 
-        List<User> observers = userService.findAllByAccountIdAndListId(accountId, request.getObserversId());
+        List<User> observers = userService.findAllByAccountIdAndListId(accountId, request.getObservers());
         ticketSetting.setObservers(observers);
 
-        List<User> executors = userService.findAllByAccountIdAndListId(accountId, request.getExecutorsId());
+        List<User> executors = userService.findAllByAccountIdAndListId(accountId, request.getExecutors());
         ticketSetting.setObservers(executors);
 
         ticketSetting.setTicketTypeForNew(
-                ticketTypeService.findByIdAndAccountId(request.getTicketTypeIdForNew(), accountId)
+                ticketTypeService.findByIdAndAccountId(request.getTicketTypeForNew(), accountId)
         );
 
         ticketSetting.setTicketStatusForNew(
-                ticketStatusService.findByIdAndAccountId(request.getTicketStatusIdForNew(), accountId)
+                ticketStatusService.findByIdAndAccountId(request.getTicketStatusForNew(), accountId)
         );
 
         ticketSetting.setTicketStatusForReopen(
-                ticketStatusService.findByIdAndAccountId(request.getTicketStatusIdForReopen(), accountId)
+                ticketStatusService.findByIdAndAccountId(request.getTicketStatusForReopen(), accountId)
         );
         ticketSetting.setTicketStatusForClose(
-                ticketStatusService.findByIdAndAccountId(request.getTicketStatusIdForClose(), accountId)
+                ticketStatusService.findByIdAndAccountId(request.getTicketStatusForClose(), accountId)
         );
         ticketSetting.setTicketStatusForCancel(
-                ticketStatusService.findByIdAndAccountId(request.getTicketStatusIdForCancel(), accountId)
+                ticketStatusService.findByIdAndAccountId(request.getTicketStatusForCancel(), accountId)
         );
 
         TicketSetting updatedTicketSetting = ticketSettingService.update(ticketSetting);
-        TicketSettingDto returnedTicketSetting = modelMapper.map(updatedTicketSetting, TicketSettingDto.class);
+        TicketSettingDtoResponse returnedTicketSetting =
+                modelMapper.map(updatedTicketSetting, TicketSettingDtoResponse.class);
         log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedTicketSetting);
         return new ResponseEntity<>(returnedTicketSetting, HttpStatus.OK);
     }
@@ -166,51 +173,46 @@ public class TicketSettingControllerV1 extends BaseController {
         return ResponseEntity.ok(message);
     }
 
-//    @GetMapping()
-//    public ResponseEntity<Page<TicketSettingDto>> getByFilter(
-//            Principal user,
-//            @Valid @RequestBody TicketSettingFilterDto filter,
-//            @RequestParam(defaultValue = PAGE_DEFAULT_VALUE) @PositiveOrZero int page,
-//            @RequestParam(defaultValue = SIZE_DEFAULT_VALUE) @Positive int size) {
-//        log.debug(FIND_INIT_MESSAGE, ENTITY_NAME, page, size, filter);
-//        if (filter.getDirection() == null) {
-//            filter.setDirection("ASC");
-//        }
-//        if (filter.getSortBy() == null) {
-//            filter.setSortBy("sortIndex");
-//        }
-//        if (filter.getDeleted() == null) {
-//            filter.setDeleted("all");
-//        }
-//        Pageable pageable =
-//                PageRequest.of(page, size, Sort.by(
-//                        Sort.Direction.fromString(filter.getDirection()),
-//                        filter.getSortBy()
-//                ));
-//        Page<TicketStatus> foundTicketStatus;
-//        Page<TicketStatusDto> returnedTicketStatus;
-//        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
-//        Specification<TicketStatus> ticketTypesSpecification = Specification
-//                .where(filter.getName() == null ? null : spec.getTicketStatusByNameSpec(filter.getName()))
-//                .and(spec.getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted.fromString(filter.getDeleted())))
-//                .and(spec.getEntityByAccountSpec(jwtUser.getAccountId()))
-//                .and(filter.getOutId() == null ? null : spec.getEntityByOutIdSpec(filter.getOutId()));
-//
-//        foundTicketStatus = service.findAllByFilter(ticketTypesSpecification, pageable);
-//        returnedTicketStatus = mapPage(foundTicketStatus, TicketStatusDto.class, pageable);
-//        log.debug(FIND_FINISH_MESSAGE, ENTITY_NAME, foundTicketStatus.getTotalElements());
-//        return new ResponseEntity<>(returnedTicketStatus, HttpStatus.OK);
-//    }
+    @GetMapping()
+    public ResponseEntity<Page<TicketSettingDtoResponse>> getByFilter(
+            Principal user,
+            @Valid @RequestBody TicketSettingFilterDto filter,
+            @RequestParam(defaultValue = PAGE_DEFAULT_VALUE) @PositiveOrZero int page,
+            @RequestParam(defaultValue = SIZE_DEFAULT_VALUE) @Positive int size) {
+        log.debug(FIND_INIT_MESSAGE, ENTITY_NAME, page, size, filter);
+        if (filter.getDirection() == null) {
+            filter.setDirection("ASC");
+        }
+        if (filter.getDeleted() == null) {
+            filter.setDeleted("all");
+        }
+        Pageable pageable =
+                PageRequest.of(page, size, Sort.by(
+                        Sort.Direction.fromString(filter.getDirection()),
+                        "displayName"
+                ));
+        Page<TicketSetting> foundTicketSetting;
+        Page<TicketSettingDtoResponse> returnedTicketSetting;
+        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
+        Specification<TicketSetting> ticketSettingSpecification = Specification
+                .where(spec.getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted.fromString(filter.getDeleted())))
+                .and(spec.getEntityByAccountSpec(jwtUser.getAccountId()))
+                .and(filter.getOutId() == null ? null : spec.getEntityByOutIdSpec(filter.getOutId()));
 
+        foundTicketSetting = ticketSettingService.findAllByFilter(ticketSettingSpecification, pageable);
+        returnedTicketSetting = mapPage(foundTicketSetting, TicketSettingDtoResponse.class, pageable);
+        log.debug(FIND_FINISH_MESSAGE, ENTITY_NAME, foundTicketSetting.getTotalElements());
+        return new ResponseEntity<>(returnedTicketSetting, HttpStatus.OK);
+    }
 
-    //    @GetMapping("/{id}")
-    //    public ResponseEntity<TicketStatusDto> getById(Principal user, @PathVariable UUID id) {
-    //        log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
-    //        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
-    //        TicketStatus foundTicketStatus;
-    //        foundTicketStatus = service.findByIdAndAccountId(id, jwtUser.getAccountId());
-    //        TicketStatusDto returnedTicketStatus = modelMapper.map(foundTicketStatus, TicketStatusDto.class);
-    //        log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundTicketStatus);
-    //        return new ResponseEntity<>(returnedTicketStatus, HttpStatus.OK);
-    //    }
+    @GetMapping("/{id}")
+    public ResponseEntity<TicketSettingDtoResponse> getById(Principal user, @PathVariable UUID id) {
+        log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
+        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
+        TicketSetting foundTicketSetting;
+        foundTicketSetting = ticketSettingService.findByIdAndAccountId(id, jwtUser.getAccountId());
+        TicketSettingDtoResponse returnedTicketSetting = modelMapper.map(foundTicketSetting, TicketSettingDtoResponse.class);
+        log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundTicketSetting);
+        return new ResponseEntity<>(returnedTicketSetting, HttpStatus.OK);
+    }
 }

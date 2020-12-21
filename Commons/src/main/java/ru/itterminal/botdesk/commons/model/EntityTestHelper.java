@@ -7,7 +7,8 @@ import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 
 @SuppressWarnings("unused")
-public interface EntityTestHelper<E extends BaseEntity, D extends BaseEntityDto, F extends BaseFilterDto> {
+public interface EntityTestHelper<E extends BaseEntity, DtoRequest extends BaseEntityDto,
+        DtoResponse extends BaseEntityDto, F extends BaseFilterDto> {
 
     // Entity
     E getRandomValidEntity();
@@ -18,22 +19,18 @@ public interface EntityTestHelper<E extends BaseEntity, D extends BaseEntityDto,
     List<E> getPredefinedValidEntityList();
     E getEntityFromPredefinedValidEntityByEntityId(String entityId);
 
-    // EntityDto
-    D getRandomValidEntityDto();
-    D getRandomInvalidEntityDto();
+    // EntityDtoRequest
+    DtoRequest convertEntityToDtoRequest(E entity);
 
-    // FilterDto
-    F getRandomValidFilterDto();
-    F getRandomInvalidFilterDto();
-    F getPredefinedValidFilterDto();
-    F getPredefinedInvalidFilterDto();
+    // EntityDtoResponse
+    DtoResponse convertEntityToDtoResponse(E entity);
 
     // BaseEntity
     void setRandomValidPropertiesOfBaseEntity(E entity);
     void setPropertiesOfBaseEntity(E entity, UUID id, int version, boolean deleted, String outId);
 
     // BaseEntityDto
-    void setRandomValidPropertiesOfBaseEntityDto(D entityDto);
-    void setPropertiesOfBaseEntityDto(D entityDto, UUID id, int version, boolean deleted, String outId);
+    void setRandomValidPropertiesOfBaseEntityDto(E entityDto);
+    void setPropertiesOfBaseEntityDto(E entityDto, UUID id, int version, boolean deleted, String outId);
 
 }

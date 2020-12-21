@@ -49,16 +49,4 @@ class TestAccountHelperTest {
         assertEquals(2, accountList.size());
     }
 
-
-    @Test
-    void getRandomValidEntityDto() {
-        AccountDto accountDto = accountHelper.getRandomValidEntityDto();
-        assertTrue(accountDto.getName().length() <= 128);
-    }
-
-    @Test
-    void getRandomInvalidEntityDto() {
-        AccountDto accountDto = accountHelper.getRandomInvalidEntityDto();
-        assertTrue(accountDto.getName().length() > 128);
-    }
 }

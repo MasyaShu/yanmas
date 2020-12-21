@@ -8,7 +8,7 @@ import ru.itterminal.botdesk.aau.model.dto.AccountDto;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 
-public class AccountTestHelper extends EntityTestHelperImpl<Account, AccountDto, BaseFilterDto> {
+public class AccountTestHelper extends EntityTestHelperImpl<Account, AccountDto, AccountDto, BaseFilterDto> {
 
     private static final String INVALID_ACCOUNT_NAME_REGEX = "[A-Za-z0-9]{129}";
 
@@ -55,21 +55,4 @@ public class AccountTestHelper extends EntityTestHelperImpl<Account, AccountDto,
         return List.of(account1, account2);
     }
 
-    @Override
-    public AccountDto getRandomValidEntityDto() {
-        AccountDto accountDto = AccountDto.builder()
-                .name(fakerRU.name().firstName())
-                .build();
-        setRandomValidPropertiesOfBaseEntityDto(accountDto);
-        return accountDto;
-    }
-
-    @Override
-    public AccountDto getRandomInvalidEntityDto() {
-        AccountDto accountDto = AccountDto.builder()
-                .name(fakerRU.regexify(INVALID_ACCOUNT_NAME_REGEX))
-                .build();
-        setRandomValidPropertiesOfBaseEntityDto(accountDto);
-        return accountDto;
-    }
 }

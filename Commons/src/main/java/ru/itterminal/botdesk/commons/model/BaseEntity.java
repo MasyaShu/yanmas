@@ -7,9 +7,11 @@ import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Version;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 @Getter
@@ -17,6 +19,8 @@ import lombok.experimental.SuperBuilder;
 @MappedSuperclass
 @NoArgsConstructor
 @SuperBuilder
+@ToString
+@EqualsAndHashCode
 public abstract class BaseEntity {
     @Id
     private UUID id;

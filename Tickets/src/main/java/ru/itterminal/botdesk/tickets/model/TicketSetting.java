@@ -2,7 +2,6 @@ package ru.itterminal.botdesk.tickets.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -13,13 +12,15 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.User;
-import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 
 @Entity
@@ -29,6 +30,8 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class TicketSetting extends BaseEntity {
 
     @ManyToOne
@@ -36,12 +39,12 @@ public class TicketSetting extends BaseEntity {
     private Account account;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id")
-    private User author;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
     private Group group;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id")
+    private User author;
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -80,41 +83,26 @@ public class TicketSetting extends BaseEntity {
     private TicketStatus ticketStatusForCancel;
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof TicketSetting)) {
-            return false;
-        }
-        TicketSetting that = (TicketSetting) o;
-        return Objects.equals(account, that.account) &&
-                Objects.equals(author, that.author) &&
-                Objects.equals(group, that.group) &&
-                Objects.equals(observers, that.observers) &&
-                Objects.equals(executors, that.executors) &&
-                Objects.equals(ticketTypeForNew, that.ticketTypeForNew) &&
-                Objects.equals(ticketStatusForNew, that.ticketStatusForNew) &&
-                Objects.equals(ticketStatusForReopen, that.ticketStatusForReopen) &&
-                Objects.equals(ticketStatusForClose, that.ticketStatusForClose) &&
-                Objects.equals(ticketStatusForCancel, that.ticketStatusForCancel) &&
-                Objects.equals(getId(), that.getId()) &&
-                Objects.equals(getOutId(), that.getOutId()) &&
-                Objects.equals(getVersion(), that.getVersion()) &&
-                Objects.equals(getDeleted(), that.getDeleted());
-
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(account, author, group, observers, executors, ticketTypeForNew, ticketStatusForNew,
-                            ticketStatusForReopen, ticketStatusForClose, ticketStatusForCancel,
-                            getId(), getOutId(), getVersion(), getDeleted()
-        );
-    }
-
-    @Override
     public void generateDisplayName() {
+
+        String resultGroup = getGroup() != null && getGroup().getDisplayName() != null
+                ? getGroup().getDisplayName()
+                : null;
+        String resultAuthor = getAuthor() != null && getAuthor().getDisplayName() != null
+                ? getAuthor().getDisplayName()
+                : null;
+
+        if (resultGroup != null && resultAuthor != null) {
+            setDisplayName(resultGroup + " " + resultAuthor);
+        }
+
+        if (resultGroup != null && resultAuthor == null) {
+            setDisplayName(resultGroup);
+        }
+
+        if (resultGroup == null && resultAuthor != null) {
+            setDisplayName(resultAuthor);
+        }
 
     }
 }

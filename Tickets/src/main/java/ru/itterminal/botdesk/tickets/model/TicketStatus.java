@@ -1,7 +1,5 @@
 package ru.itterminal.botdesk.tickets.model;
 
-import java.util.Objects;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -9,9 +7,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
@@ -23,6 +23,8 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class TicketStatus extends BaseEntity {
 
     @ManyToOne
@@ -46,36 +48,6 @@ public class TicketStatus extends BaseEntity {
 
     @Column(name = "is_canceled_predefined", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean isCanceledPredefined;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        TicketStatus ticketStatus = (TicketStatus) o;
-        return Objects.equals(name, ticketStatus.name) &&
-                Objects.equals(sortIndex, ticketStatus.sortIndex) &&
-                Objects.equals(isStartedPredefined, ticketStatus.isStartedPredefined) &&
-                Objects.equals(isFinishedPredefined, ticketStatus.isFinishedPredefined) &&
-                Objects.equals(isReopenedPredefined, ticketStatus.isReopenedPredefined) &&
-                Objects.equals(isCanceledPredefined, ticketStatus.isCanceledPredefined) &&
-                Objects.equals(account, ticketStatus.account) &&
-                Objects.equals(getId(), ticketStatus.getId()) &&
-                Objects.equals(getOutId(), ticketStatus.getOutId()) &&
-                Objects.equals(getVersion(), ticketStatus.getVersion()) &&
-                Objects.equals(getDeleted(), ticketStatus.getDeleted());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(account, name, sortIndex, isStartedPredefined, isFinishedPredefined,
-                isReopenedPredefined, isCanceledPredefined,
-                getId(), getOutId(), getVersion(), getDeleted()
-        );
-    }
 
     @Override
     public void generateDisplayName() {

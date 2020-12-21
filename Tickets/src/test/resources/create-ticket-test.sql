@@ -61,7 +61,7 @@ VALUES (null, 'false', '0', '9c8183ba-5d13-442f-a741-5b3134a3c140', 'cdfa6483-07
         '0223e51a-4bb2-44ee-bc8e-1f047a2145e7', 'd592facb-e6ee-4801-8310-9c7708eb6e6c',
         '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9', '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9',
         '17b13694-1907-4af9-8f5d-bfa444356e73', '17b13694-1907-4af9-8f5d-bfa444356e73',
-        '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9');
+        '17b13694-1907-4af9-8f5d-bfa444356e73');
 
 INSERT INTO ticket_settings_executors (out_id, deleted, version, id, ticket_settings_id, executor_id)
 VALUES (null, 'false', '0', '1bab6fdd-4ef5-4222-a986-b6b2ae9e978d', '9c8183ba-5d13-442f-a741-5b3134a3c140',

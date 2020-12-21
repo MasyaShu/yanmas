@@ -72,24 +72,30 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
         var errors = createMapForLogicalErrors();
         Account account = entity.getAccount();
 
-        Account accountOfGroup = entity.getGroup().getAccount();
-        chekObjectsIsEquals(account, accountOfGroup, ACCOUNTS_ARENT_EQUAL,
-                            format(ACCOUNTS_ARENT_EQUAL_MESSAGE, account, entity.getGroup()),
-                            errors
-        );
+        if (entity.getGroup() != null) {
+            Account accountOfGroup = entity.getGroup().getAccount();
+            chekObjectsIsEquals(account, accountOfGroup, ACCOUNTS_ARENT_EQUAL,
+                                format(ACCOUNTS_ARENT_EQUAL_MESSAGE, account, entity.getGroup()),
+                                errors
+            );
+        }
 
-        Account accountOfAuthor = entity.getAuthor().getAccount();
-        chekObjectsIsEquals(account, accountOfAuthor, ACCOUNTS_ARENT_EQUAL,
-                            format(ACCOUNTS_ARENT_EQUAL_MESSAGE, account, entity.getAuthor()),
-                            errors
-        );
+        if (entity.getAuthor() != null) {
+            Account accountOfAuthor = entity.getAuthor().getAccount();
+            chekObjectsIsEquals(account, accountOfAuthor, ACCOUNTS_ARENT_EQUAL,
+                                format(ACCOUNTS_ARENT_EQUAL_MESSAGE, account, entity.getAuthor()),
+                                errors
+            );
 
-        Group groupOfEntity = entity.getGroup();
-        Group groupOfAuthor = entity.getAuthor().getGroup();
-        chekObjectsIsEquals(groupOfEntity, groupOfAuthor, GROUPS_ARENT_EQUAL,
-                            format(GROUPS_ARENT_EQUAL_MESSAGE, groupOfEntity, groupOfAuthor),
-                            errors
-        );
+            Group groupOfEntity = entity.getGroup();
+            if (groupOfEntity!=null) {
+                Group groupOfAuthor = entity.getAuthor().getGroup();
+                chekObjectsIsEquals(groupOfEntity, groupOfAuthor, GROUPS_ARENT_EQUAL,
+                                    format(GROUPS_ARENT_EQUAL_MESSAGE, groupOfEntity, groupOfAuthor),
+                                    errors
+                );
+            }
+        }
 
         if (entity.getTicketTypeForNew() != null) {
             Account accountOfTicketTypeForNew = entity.getTicketTypeForNew().getAccount();
