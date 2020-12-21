@@ -7,30 +7,15 @@ import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
 import ru.itterminal.botdesk.tickets.model.TicketType;
 import ru.itterminal.botdesk.tickets.model.dto.TicketTypeDto;
-import ru.itterminal.botdesk.tickets.model.dto.TicketTypeFilterDto;
 
-public class TicketTypeTestHelper extends EntityTestHelperImpl<TicketType, TicketTypeDto, TicketTypeDto,
-        TicketTypeFilterDto> {
+public class TicketTypeTestHelper extends EntityTestHelperImpl<TicketType, TicketTypeDto, TicketTypeDto> {
 
-    private static final String INVALID_TICKET_TYPE_NAME_REGEX = "[A-Za-z0-9]{129}";
     private final AccountTestHelper accountTestHelper = new AccountTestHelper();
 
     @Override
     public TicketType getRandomValidEntity() {
         TicketType ticketType = TicketType.builder()
                 .name(fakerRU.hipster().word())
-                .comment(fakerRU.lorem().paragraph())
-                .isPredefined(fakerRU.bool().bool())
-                .account(accountTestHelper.getRandomValidEntity())
-                .build();
-        setRandomValidPropertiesOfBaseEntity(ticketType);
-        return ticketType;
-    }
-
-    @Override
-    public TicketType getRandomInvalidEntity() {
-        TicketType ticketType = TicketType.builder()
-                .name(fakerRU.regexify(INVALID_TICKET_TYPE_NAME_REGEX))
                 .comment(fakerRU.lorem().paragraph())
                 .isPredefined(fakerRU.bool().bool())
                 .account(accountTestHelper.getRandomValidEntity())

@@ -4,17 +4,15 @@ import java.util.List;
 import java.util.UUID;
 
 import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
-import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 
 @SuppressWarnings("unused")
 public interface EntityTestHelper<E extends BaseEntity, DtoRequest extends BaseEntityDto,
-        DtoResponse extends BaseEntityDto, F extends BaseFilterDto> {
+        DtoResponse extends BaseEntityDto> {
 
     // Entity
     E getRandomValidEntity();
-    E getRandomInvalidEntity();
+
     List<E> getRandomValidEntityList(int countEntity);
-    List<E> getRandomInvalidEntityList(int countEntity);
     List<E> setPredefinedValidEntityList();
     List<E> getPredefinedValidEntityList();
     E getEntityFromPredefinedValidEntityByEntityId(String entityId);

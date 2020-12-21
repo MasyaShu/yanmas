@@ -18,10 +18,9 @@ import ru.itterminal.botdesk.tickets.model.TicketStatus;
 import ru.itterminal.botdesk.tickets.model.TicketType;
 import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoRequest;
 import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoResponse;
-import ru.itterminal.botdesk.tickets.model.dto.TicketSettingFilterDto;
 
 public class TicketSettingTestHelper extends EntityTestHelperImpl<TicketSetting, TicketSettingDtoRequest,
-        TicketSettingDtoResponse, TicketSettingFilterDto> {
+        TicketSettingDtoResponse> {
 
     private final AccountTestHelper accountTestHelper = new AccountTestHelper();
     private final UserTestHelper userTestHelper = new UserTestHelper();
@@ -76,25 +75,6 @@ public class TicketSettingTestHelper extends EntityTestHelperImpl<TicketSetting,
                 .ticketStatusForReopen(fakerRU.bool().bool() ? null : ticketStatusForReopen)
                 .ticketStatusForClose(fakerRU.bool().bool() ? null : ticketStatusForClose)
                 .ticketStatusForCancel(fakerRU.bool().bool() ? null : ticketStatusForCancel)
-                .build();
-        ticketSetting.generateDisplayName();
-        setRandomValidPropertiesOfBaseEntity(ticketSetting);
-        return ticketSetting;
-    }
-
-    @Override
-    public TicketSetting getRandomInvalidEntity() {
-        TicketSetting ticketSetting = TicketSetting.builder()
-                .account(accountTestHelper.getRandomValidEntity())
-                .author(userTestHelper.getRandomValidEntity())
-                .group(groupTestHelper.getRandomValidEntity())
-                .observers(userTestHelper.getRandomValidEntityList(5))
-                .executors(userTestHelper.getRandomValidEntityList(5))
-                .ticketTypeForNew(ticketTypeTestHelper.getRandomValidEntity())
-                .ticketStatusForNew(ticketStatusTestHelper.getRandomValidEntity())
-                .ticketStatusForReopen(ticketStatusTestHelper.getRandomValidEntity())
-                .ticketStatusForClose(ticketStatusTestHelper.getRandomValidEntity())
-                .ticketStatusForCancel(ticketStatusTestHelper.getRandomValidEntity())
                 .build();
         ticketSetting.generateDisplayName();
         setRandomValidPropertiesOfBaseEntity(ticketSetting);

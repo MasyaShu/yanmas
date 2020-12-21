@@ -5,21 +5,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import org.modelmapper.ModelMapper;
-
 import com.github.javafaker.Faker;
 
 import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
-import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 
 @SuppressWarnings("deprecation")
 public abstract class EntityTestHelperImpl<E extends BaseEntity, DtoRequest extends BaseEntityDto,
-        DtoResponse extends BaseEntityDto, F extends BaseFilterDto>
-        implements EntityTestHelper<E, DtoRequest, DtoResponse, F> {
+        DtoResponse extends BaseEntityDto>
+        implements EntityTestHelper<E, DtoRequest, DtoResponse> {
 
     protected Faker fakerRU = new Faker(new Locale("ru", "RU"));
     protected Faker fakerEN = new Faker(new Locale("en", "US"));
-    protected ModelMapper modelMapper = new ModelMapper();
 
     @SuppressWarnings("FieldMayBeFinal")
     private List<E> predefinedValidEntityList = new ArrayList<>();
@@ -31,15 +27,6 @@ public abstract class EntityTestHelperImpl<E extends BaseEntity, DtoRequest exte
         List<E> list = new ArrayList<>();
         for (int i = 0; i < countEntity; i++) {
             list.add(getRandomValidEntity());
-        }
-        return list;
-    }
-
-    @Override
-    public final List<E> getRandomInvalidEntityList(int countEntity) {
-        List<E> list = new ArrayList<>();
-        for (int i = 0; i < countEntity; i++) {
-            list.add(getRandomInvalidEntity());
         }
         return list;
     }

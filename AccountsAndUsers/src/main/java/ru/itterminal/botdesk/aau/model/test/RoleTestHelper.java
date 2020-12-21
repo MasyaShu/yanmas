@@ -8,9 +8,8 @@ import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.dto.RoleDto;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
-import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 
-public class RoleTestHelper extends EntityTestHelperImpl<Role, RoleDto,RoleDto, BaseFilterDto> {
+public class RoleTestHelper extends EntityTestHelperImpl<Role, RoleDto,RoleDto> {
 
     private final String[] rolesName = new String[] {Roles.ACCOUNT_OWNER.toString(),
             Roles.ADMIN.toString(), Roles.EXECUTOR.toString(), Roles.AUTHOR.toString(),
@@ -33,11 +32,6 @@ public class RoleTestHelper extends EntityTestHelperImpl<Role, RoleDto,RoleDto, 
                 .build();
         setPropertiesOfBaseEntity(role, rolesId[index], 0, false, null);
         return role;
-    }
-
-    @Override
-    public Role getRandomInvalidEntity() {
-        return null;
     }
 
     @Override

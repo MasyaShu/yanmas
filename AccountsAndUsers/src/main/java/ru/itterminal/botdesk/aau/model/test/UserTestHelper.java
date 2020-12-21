@@ -6,17 +6,14 @@ import java.util.UUID;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.dto.UserDtoRequest;
 import ru.itterminal.botdesk.aau.model.dto.UserDtoResponse;
-import ru.itterminal.botdesk.aau.model.dto.UserFilterDto;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
 
-public class UserTestHelper extends EntityTestHelperImpl<User, UserDtoRequest, UserDtoResponse, UserFilterDto> {
+public class UserTestHelper extends EntityTestHelperImpl<User, UserDtoRequest, UserDtoResponse> {
 
     RoleTestHelper roleHelper = new RoleTestHelper();
     AccountTestHelper accountHelper = new AccountTestHelper();
     GroupTestHelper groupHelper = new GroupTestHelper();
 
-    private static final String INVALID_FIRST_NAME_REGEX = "[A-Za-z0-9]{129}";
-    private static final String INVALID_PHONE_REGEX = "[A-Za-z0-9]{129}";
     private static final String PASSWORD = "$2a$10$ejjUoWxoPs.4vjQOoBnFquybNHJAxIyKz7QIXL6.BSVyHPow8jmxK";
     private static final String PHONE = "211-15-15";
     private static final String COMMENT = "comment comment";
@@ -39,23 +36,6 @@ public class UserTestHelper extends EntityTestHelperImpl<User, UserDtoRequest, U
         return user;
     }
 
-    @Override
-    public User getRandomInvalidEntity() {
-        User user = User.builder()
-                .email(fakerEN.bothify("####botdesk.app"))
-                .name(fakerRU.regexify(INVALID_FIRST_NAME_REGEX))
-                .password(fakerRU.bothify("????##???##"))
-                .phone(fakerRU.regexify(INVALID_PHONE_REGEX))
-                .comment(fakerRU.lorem().paragraph())
-                .emailVerificationStatus(fakerRU.bool().bool())
-                .isArchived(fakerRU.bool().bool())
-                .account(accountHelper.getRandomValidEntity())
-                .group(groupHelper.getRandomValidEntity())
-                .role(roleHelper.getRandomValidEntity())
-                .build();
-        setRandomValidPropertiesOfBaseEntity(user);
-        return user;
-    }
 
     @Override
     public List<User> setPredefinedValidEntityList() {
