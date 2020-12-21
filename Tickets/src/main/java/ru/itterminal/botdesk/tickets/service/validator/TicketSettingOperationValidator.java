@@ -2,6 +2,7 @@ package ru.itterminal.botdesk.tickets.service.validator;
 
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.addValidationErrorIntoErrors;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekObjectsIsEquals;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.ifErrorsNotEmptyThrowLogicalValidationException;
@@ -32,6 +33,8 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
     public static final String GROUPS_ARENT_EQUAL_MESSAGE =
             "TicketSetting.Create/Update groups aren't equal: %s %s";
     public static final String TICKET_SETTING_UNIQUE_FIELDS = "Account, Group, Author";
+    public static final String TICKET_SETTING_IS_EMPTY = "Ticket setting is empty";
+    public static final String MUST_NOT_BE_EMPTY = "Ticket setting mustn't be empty";
 
     private final TicketSettingServiceImpl service;
 
@@ -69,7 +72,9 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
     }
 
     private boolean checkBeforeCreateUpdate(TicketSetting entity) {
+        var isTicketSettingIsEmpty = true;
         var errors = createMapForLogicalErrors();
+
         Account account = entity.getAccount();
 
         if (entity.getGroup() != null) {
@@ -88,7 +93,7 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
             );
 
             Group groupOfEntity = entity.getGroup();
-            if (groupOfEntity!=null) {
+            if (groupOfEntity != null) {
                 Group groupOfAuthor = entity.getAuthor().getGroup();
                 chekObjectsIsEquals(groupOfEntity, groupOfAuthor, GROUPS_ARENT_EQUAL,
                                     format(GROUPS_ARENT_EQUAL_MESSAGE, groupOfEntity, groupOfAuthor),
@@ -98,6 +103,7 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
         }
 
         if (entity.getTicketTypeForNew() != null) {
+            isTicketSettingIsEmpty = false;
             Account accountOfTicketTypeForNew = entity.getTicketTypeForNew().getAccount();
             chekObjectsIsEquals(account, accountOfTicketTypeForNew, ACCOUNTS_ARENT_EQUAL,
                                 format(
@@ -109,6 +115,7 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
         }
 
         if (entity.getTicketStatusForNew() != null) {
+            isTicketSettingIsEmpty = false;
             Account accountOfTicketStatusForNew = entity.getTicketStatusForNew().getAccount();
             chekObjectsIsEquals(account, accountOfTicketStatusForNew, ACCOUNTS_ARENT_EQUAL,
                                 format(
@@ -120,6 +127,7 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
         }
 
         if (entity.getTicketStatusForReopen() != null) {
+            isTicketSettingIsEmpty = false;
             Account accountOfTicketStatusForReopen = entity.getTicketStatusForReopen().getAccount();
             chekObjectsIsEquals(account, accountOfTicketStatusForReopen, ACCOUNTS_ARENT_EQUAL,
                                 format(
@@ -131,6 +139,7 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
         }
 
         if (entity.getTicketStatusForClose() != null) {
+            isTicketSettingIsEmpty = false;
             Account accountOfTicketStatusForClose = entity.getTicketStatusForClose().getAccount();
             chekObjectsIsEquals(account, accountOfTicketStatusForClose, ACCOUNTS_ARENT_EQUAL,
                                 format(
@@ -142,6 +151,7 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
         }
 
         if (entity.getTicketStatusForCancel() != null) {
+            isTicketSettingIsEmpty = false;
             Account accountOfTicketStatusForCancel = entity.getTicketStatusForCancel().getAccount();
             chekObjectsIsEquals(account, accountOfTicketStatusForCancel, ACCOUNTS_ARENT_EQUAL,
                                 format(
@@ -150,6 +160,10 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
                                 ),
                                 errors
             );
+        }
+
+        if (entity.getObservers() != null && !entity.getObservers().isEmpty()) {
+            isTicketSettingIsEmpty = false;
         }
 
         if (entity.getObservers() != null) {
@@ -162,6 +176,10 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
             }
         }
 
+        if (entity.getExecutors() != null && !entity.getExecutors().isEmpty()) {
+            isTicketSettingIsEmpty = false;
+        }
+
         if (entity.getExecutors() != null) {
             for (User executor : entity.getExecutors()) {
                 Account accountOfExecutor = executor.getAccount();
@@ -170,6 +188,10 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
                                     errors
                 );
             }
+        }
+
+        if (isTicketSettingIsEmpty) {
+            addValidationErrorIntoErrors(TICKET_SETTING_IS_EMPTY, MUST_NOT_BE_EMPTY, errors);
         }
 
         ifErrorsNotEmptyThrowLogicalValidationException(errors);
