@@ -1,12 +1,8 @@
 package ru.itterminal.botdesk.aau.model;
 
-import java.util.Objects;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-
-import org.apache.commons.lang3.builder.ToStringSummary;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
