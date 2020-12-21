@@ -9,6 +9,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -25,6 +26,7 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class TicketType extends BaseEntity {
 
     @ManyToOne
@@ -39,32 +41,6 @@ public class TicketType extends BaseEntity {
 
     @Column(name = "is_predefined", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean isPredefined;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        TicketType ticketType = (TicketType) o;
-        return Objects.equals(name, ticketType.name) &&
-                Objects.equals(comment, ticketType.comment) &&
-                Objects.equals(isPredefined, ticketType.isPredefined) &&
-                Objects.equals(account, ticketType.account) &&
-                Objects.equals(getId(), ticketType.getId()) &&
-                Objects.equals(getOutId(), ticketType.getOutId()) &&
-                Objects.equals(getVersion(), ticketType.getVersion()) &&
-                Objects.equals(getDeleted(), ticketType.getDeleted());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(account, name, comment, isPredefined,
-                getId(), getOutId(), getVersion(), getDeleted()
-        );
-    }
 
     @Override
     public void generateDisplayName() {

@@ -1,6 +1,7 @@
 package ru.itterminal.botdesk.aau.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,32 +22,12 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class Role extends BaseEntity {
 
     @Column(nullable = false, unique = true, length = 30)
     private String name;
     private int weight;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Role)) {
-            return false;
-        }
-        Role role = (Role) o;
-        return Objects.equals(name, role.name) &&
-                Objects.equals(weight, role.weight) &&
-                Objects.equals(getId(), role.getId()) &&
-                Objects.equals(getVersion(), role.getVersion()) &&
-                Objects.equals(getDeleted(), role.getDeleted());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId(), name, weight);
-    }
 
     @Override
     public void generateDisplayName() {

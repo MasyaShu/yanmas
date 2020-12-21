@@ -9,6 +9,7 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.builder.ToStringSummary;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,31 +25,11 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class Account extends BaseEntity {
 
     @Column(nullable = false, length = 128)
     private String name;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Account)) {
-            return false;
-        }
-        Account account = (Account) o;
-        return Objects.equals(name, account.name) &&
-                Objects.equals(getOutId(), account.getOutId()) &&
-                Objects.equals(getId(), account.getId()) &&
-                Objects.equals(getVersion(), account.getVersion()) &&
-                Objects.equals(getDeleted(), account.getDeleted());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name);
-    }
 
     @Override
     public void generateDisplayName() {

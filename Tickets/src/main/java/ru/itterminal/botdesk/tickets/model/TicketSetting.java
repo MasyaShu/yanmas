@@ -13,6 +13,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -31,6 +32,7 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class TicketSetting extends BaseEntity {
 
     @ManyToOne
@@ -80,40 +82,6 @@ public class TicketSetting extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ticket_status_id_for_cancel")
     private TicketStatus ticketStatusForCancel;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof TicketSetting)) {
-            return false;
-        }
-        TicketSetting that = (TicketSetting) o;
-        return Objects.equals(account, that.account) &&
-                Objects.equals(author, that.author) &&
-                Objects.equals(group, that.group) &&
-                Objects.equals(observers, that.observers) &&
-                Objects.equals(executors, that.executors) &&
-                Objects.equals(ticketTypeForNew, that.ticketTypeForNew) &&
-                Objects.equals(ticketStatusForNew, that.ticketStatusForNew) &&
-                Objects.equals(ticketStatusForReopen, that.ticketStatusForReopen) &&
-                Objects.equals(ticketStatusForClose, that.ticketStatusForClose) &&
-                Objects.equals(ticketStatusForCancel, that.ticketStatusForCancel) &&
-                Objects.equals(getId(), that.getId()) &&
-                Objects.equals(getOutId(), that.getOutId()) &&
-                Objects.equals(getVersion(), that.getVersion()) &&
-                Objects.equals(getDeleted(), that.getDeleted());
-
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(account, author, group, observers, executors, ticketTypeForNew, ticketStatusForNew,
-                            ticketStatusForReopen, ticketStatusForClose, ticketStatusForCancel,
-                            getId(), getOutId(), getVersion(), getDeleted()
-        );
-    }
 
     @Override
     public void generateDisplayName() {

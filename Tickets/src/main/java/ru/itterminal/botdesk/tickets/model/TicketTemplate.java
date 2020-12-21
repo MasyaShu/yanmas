@@ -5,6 +5,7 @@ import java.util.Objects;
 import javax.persistence.*;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,6 +23,7 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class TicketTemplate extends BaseEntity {
 
     @ManyToOne
@@ -62,41 +64,6 @@ public class TicketTemplate extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type_ticket_id", nullable = false)
     private TicketType ticketType;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        TicketTemplate ticketTemplate = (TicketTemplate) o;
-        return Objects.equals(subject, ticketTemplate.subject) &&
-                Objects.equals(description, ticketTemplate.description) &&
-                Objects.equals(dateNextRun, ticketTemplate.dateNextRun) &&
-                Objects.equals(dateStart, ticketTemplate.dateStart) &&
-                Objects.equals(dateEnd, ticketTemplate.dateEnd) &&
-                Objects.equals(zoneId, ticketTemplate.zoneId) &&
-                Objects.equals(expressionSchedule, ticketTemplate.expressionSchedule) &&
-                Objects.equals(isOnlyOneTicketInWork, ticketTemplate.isOnlyOneTicketInWork) &&
-                Objects.equals(isActive, ticketTemplate.isActive) &&
-                Objects.equals(account, ticketTemplate.account) &&
-                Objects.equals(Author, ticketTemplate.Author) &&
-                Objects.equals(ticketType, ticketTemplate.ticketType) &&
-                Objects.equals(getId(), ticketTemplate.getId()) &&
-                Objects.equals(getOutId(), ticketTemplate.getOutId()) &&
-                Objects.equals(getVersion(), ticketTemplate.getVersion()) &&
-                Objects.equals(getDeleted(), ticketTemplate.getDeleted());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(account, subject, description, dateNextRun, dateStart, dateEnd, zoneId, expressionSchedule,
-                isOnlyOneTicketInWork, isActive, Author, ticketType,
-                getId(), getOutId(), getVersion(), getDeleted()
-        );
-    }
 
     @Override
     public void generateDisplayName() {

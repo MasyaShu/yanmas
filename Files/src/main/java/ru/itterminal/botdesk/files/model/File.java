@@ -10,6 +10,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,6 +27,7 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class File extends BaseEntity {
 
     @Column(name = "file_name", nullable = false, length = 260)
@@ -46,33 +48,6 @@ public class File extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof File)) {
-            return false;
-        }
-        File file = (File) o;
-        return Objects.equals(fileName, file.fileName) &&
-                Objects.equals(size, file.size) &&
-                Objects.equals(createdAt, file.createdAt) &&
-                Objects.equals(entityId, file.entityId) &&
-                Objects.equals(account, file.account) &&
-                Objects.equals(getId(), file.getId()) &&
-                Objects.equals(getOutId(), file.getOutId()) &&
-                Objects.equals(getVersion(), file.getVersion()) &&
-                Objects.equals(getDeleted(), file.getDeleted());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(fileName, size, createdAt, entityId, account,
-                            getId(), getOutId(), getVersion(), getDeleted()
-        );
-    }
 
     @Override
     public void generateDisplayName() {
