@@ -5,31 +5,16 @@ import java.util.UUID;
 
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.dto.GroupDto;
-import ru.itterminal.botdesk.aau.model.dto.GroupFilterDto;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
 
-public class GroupTestHelper extends EntityTestHelperImpl<Group, GroupDto, GroupDto, GroupFilterDto> {
+public class GroupTestHelper extends EntityTestHelperImpl<Group, GroupDto, GroupDto> {
 
-    private static final String INVALID_GROUP_NAME_REGEX = "[A-Za-z0-9]{129}";
     private final AccountTestHelper accountHelper = new AccountTestHelper();
 
     @Override
     public Group getRandomValidEntity() {
         Group group = Group.builder()
                 .name(fakerRU.hipster().word())
-                .comment(fakerRU.lorem().paragraph())
-                .isInner(fakerRU.bool().bool())
-                .isDeprecated(fakerRU.bool().bool())
-                .account(accountHelper.getRandomValidEntity())
-                .build();
-        setRandomValidPropertiesOfBaseEntity(group);
-        return group;
-    }
-
-    @Override
-    public Group getRandomInvalidEntity() {
-        Group group = Group.builder()
-                .name(fakerRU.regexify(INVALID_GROUP_NAME_REGEX))
                 .comment(fakerRU.lorem().paragraph())
                 .isInner(fakerRU.bool().bool())
                 .isDeprecated(fakerRU.bool().bool())

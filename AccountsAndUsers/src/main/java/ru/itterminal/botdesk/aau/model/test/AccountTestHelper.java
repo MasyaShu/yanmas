@@ -6,25 +6,13 @@ import java.util.UUID;
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.dto.AccountDto;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
-import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 
-public class AccountTestHelper extends EntityTestHelperImpl<Account, AccountDto, AccountDto, BaseFilterDto> {
-
-    private static final String INVALID_ACCOUNT_NAME_REGEX = "[A-Za-z0-9]{129}";
+public class AccountTestHelper extends EntityTestHelperImpl<Account, AccountDto, AccountDto> {
 
     @Override
     public Account getRandomValidEntity() {
         Account account = Account.builder()
                 .name(fakerRU.name().firstName())
-                .build();
-        setRandomValidPropertiesOfBaseEntity(account);
-        return account;
-    }
-
-    @Override
-    public Account getRandomInvalidEntity() {
-        Account account = Account.builder()
-                .name(fakerRU.regexify(INVALID_ACCOUNT_NAME_REGEX))
                 .build();
         setRandomValidPropertiesOfBaseEntity(account);
         return account;

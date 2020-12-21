@@ -125,7 +125,7 @@ public class CommonMethodsForValidation {
 
     }
 
-    private static void addValidationErrorIntoErrors(String keyError, String errorMessage,
+    public static void addValidationErrorIntoErrors(String keyError, String errorMessage,
                                                      Map<String, List<ValidationError>> errors) {
         var error = new ValidationError(keyError, errorMessage);
         if (errors.isEmpty() || !errors.containsKey(keyError)) {

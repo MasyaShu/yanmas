@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
-import ru.itterminal.botdesk.aau.model.dto.AccountDto;
 
 class TestAccountHelperTest {
 
@@ -22,24 +21,10 @@ class TestAccountHelperTest {
     }
 
     @Test
-    void getRandomInvalidEntity() {
-        Account account = accountHelper.getRandomInvalidEntity();
-        assertTrue(account.getName().length() > 128);
-    }
-
-    @Test
     void getRandomValidEntityList() {
         List<Account> accountList = accountHelper.getRandomValidEntityList(3);
         for (Account account : accountList) {
             assertTrue(account.getName().length() <= 128);
-        }
-    }
-
-    @Test
-    void getRandomInvalidEntityList() {
-        List<Account> accountList = accountHelper.getRandomInvalidEntityList(3);
-        for (Account account : accountList) {
-            assertTrue(account.getName().length() > 128);
         }
     }
 

@@ -36,6 +36,7 @@ public class BotDeskApp {
         vendorAdapter.setShowSql(Boolean.TRUE);
         LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
         factory.setJpaVendorAdapter(vendorAdapter);
+
         factory.setPackagesToScan("ru.itterminal.botdesk");
         factory.setDataSource(dataSource);
         factory.afterPropertiesSet();

@@ -7,10 +7,8 @@ import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
 import ru.itterminal.botdesk.tickets.model.TicketStatus;
 import ru.itterminal.botdesk.tickets.model.dto.TicketStatusDto;
-import ru.itterminal.botdesk.tickets.model.dto.TicketStatusFilterDto;
 
-public class TicketStatusTestHelper extends EntityTestHelperImpl<TicketStatus, TicketStatusDto, TicketStatusDto,
-        TicketStatusFilterDto> {
+public class TicketStatusTestHelper extends EntityTestHelperImpl<TicketStatus, TicketStatusDto, TicketStatusDto> {
 
     private static final String INVALID_TICKET_STATUS_NAME_REGEX = "[A-Za-z0-9]{129}";
     private final AccountTestHelper accountTestHelper = new AccountTestHelper();
@@ -25,21 +23,6 @@ public class TicketStatusTestHelper extends EntityTestHelperImpl<TicketStatus, T
                 .isFinishedPredefined(isRandomPredefined == 2)
                 .isReopenedPredefined(isRandomPredefined == 3)
                 .isCanceledPredefined(isRandomPredefined == 4)
-                .account(accountTestHelper.getRandomValidEntity())
-                .build();
-        setRandomValidPropertiesOfBaseEntity(ticketStatus);
-        return ticketStatus;
-    }
-
-    @Override
-    public TicketStatus getRandomInvalidEntity() {
-        TicketStatus ticketStatus = TicketStatus.builder()
-                .name(fakerRU.regexify(INVALID_TICKET_STATUS_NAME_REGEX))
-                .sortIndex(fakerRU.number().numberBetween(10, 101))
-                .isStartedPredefined(fakerRU.bool().bool())
-                .isFinishedPredefined(fakerRU.bool().bool())
-                .isReopenedPredefined(fakerRU.bool().bool())
-                .isCanceledPredefined(fakerRU.bool().bool())
                 .account(accountTestHelper.getRandomValidEntity())
                 .build();
         setRandomValidPropertiesOfBaseEntity(ticketStatus);

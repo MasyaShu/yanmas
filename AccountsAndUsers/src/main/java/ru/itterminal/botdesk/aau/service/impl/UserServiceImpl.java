@@ -60,6 +60,8 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
     private final SenderEmailViaAwsSes senderEmailViaAwsSes;
     private final CreateAwsS3BucketFlow.CreateAwsBucketGateway createAwsBucketGateway;
 
+    // TODO перенести проверки на уровень валидации
+
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     public UserServiceImpl(BCryptPasswordEncoder encoder, JwtProvider jwtProvider,

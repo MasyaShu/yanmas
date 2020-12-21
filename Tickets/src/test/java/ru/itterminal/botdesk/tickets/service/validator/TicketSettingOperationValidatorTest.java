@@ -13,8 +13,7 @@ import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperatio
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_MESSAGE;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
-import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.ACCOUNTS_ARENT_EQUAL;
-import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.GROUPS_ARENT_EQUAL;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.TICKET_SETTING_IS_EMPTY;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.TICKET_SETTING_UNIQUE_FIELDS;
 
 import java.util.Collections;
@@ -112,13 +111,12 @@ class TicketSettingOperationValidatorTest {
     }
 
     @Test
-    void beforeUpdate_shouldGetLogicalValidationException_whenPassedRandomInvalidEntity() {
+    void beforeUpdate_shouldGetLogicalValidationException_whenAllPassedSettingIsNull() {
         when(service.findByUniqueFields(any())).thenReturn(Collections.emptyList());
-        TicketSetting ticketSetting = ticketSettingTestHelper.getRandomInvalidEntity();
+        TicketSetting ticketSetting = new TicketSetting();
         LogicalValidationException exception = assertThrows(LogicalValidationException.class,
-                     ()-> validator.beforeUpdate(ticketSetting));
-        assertEquals(17, exception.getFieldErrors().get(ACCOUNTS_ARENT_EQUAL).size());
-        assertEquals(1, exception.getFieldErrors().get(GROUPS_ARENT_EQUAL).size());
+                                                            ()-> validator.beforeUpdate(ticketSetting));
+        assertEquals(1, exception.getFieldErrors().get(TICKET_SETTING_IS_EMPTY).size());
         verify(service, times(1)).findByUniqueFields(any());
     }
 
