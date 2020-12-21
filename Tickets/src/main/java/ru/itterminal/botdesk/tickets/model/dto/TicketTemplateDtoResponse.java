@@ -2,7 +2,6 @@ package ru.itterminal.botdesk.tickets.model.dto;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import ru.itterminal.botdesk.commons.model.BaseEntity;
 import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
 
 @Getter
@@ -31,7 +30,7 @@ public class TicketTemplateDtoResponse extends BaseEntityDto {
 
     private Boolean isActive;
 
-    private BaseEntity author;
+    private BaseEntityDto author;
 
-    private BaseEntity ticketType;
+    private BaseEntityDto ticketType;
 }
