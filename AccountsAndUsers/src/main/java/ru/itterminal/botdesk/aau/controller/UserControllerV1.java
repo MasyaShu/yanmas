@@ -77,8 +77,8 @@ public class UserControllerV1 extends BaseController {
         user.setAccount(accountService.findById(jwtUser.getAccountId()));
         UUID accountId = user.getAccount().getId();
 
-        user.setRole(roleService.findById(request.getRoleId()));
-        user.setGroup(groupService.findByIdAndAccountId(request.getGroupId(), accountId));
+        user.setRole(roleService.findById(request.getRole()));
+        user.setGroup(groupService.findByIdAndAccountId(request.getGroup(), accountId));
 
         User createdUser = userService.create(user);
 
@@ -107,8 +107,8 @@ public class UserControllerV1 extends BaseController {
         user.setAccount(accountService.findById(jwtUser.getAccountId()));
         UUID accountId = user.getAccount().getId();
 
-        user.setRole(roleService.findById(request.getRoleId()));
-        user.setGroup(groupService.findByIdAndAccountId(request.getGroupId(), accountId));
+        user.setRole(roleService.findById(request.getRole()));
+        user.setGroup(groupService.findByIdAndAccountId(request.getGroup(), accountId));
 
         User updatedUser = userService.update(user);
         UserDtoResponse returnedUser =

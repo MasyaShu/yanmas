@@ -8,7 +8,7 @@ import ru.itterminal.botdesk.aau.model.dto.GroupDto;
 import ru.itterminal.botdesk.aau.model.dto.GroupFilterDto;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
 
-public class GroupTestHelper extends EntityTestHelperImpl<Group, GroupDto, GroupFilterDto> {
+public class GroupTestHelper extends EntityTestHelperImpl<Group, GroupDto, GroupDto, GroupFilterDto> {
 
     private static final String INVALID_GROUP_NAME_REGEX = "[A-Za-z0-9]{129}";
     private final AccountTestHelper accountHelper = new AccountTestHelper();
@@ -85,27 +85,4 @@ public class GroupTestHelper extends EntityTestHelperImpl<Group, GroupDto, Group
         );
         return List.of(group1, group2, group3);
     }
-
-    @Override
-    public GroupDto getRandomValidEntityDto() {
-        GroupDto groupDto = GroupDto.builder()
-                .name(fakerRU.hipster().word())
-                .comment(fakerRU.lorem().paragraph())
-                .isInner(fakerRU.bool().bool())
-                .isDeprecated(fakerRU.bool().bool())
-                .build();
-        setRandomValidPropertiesOfBaseEntityDto(groupDto);
-        return groupDto;
-    }
-
-    @Override
-    public GroupDto getRandomInvalidEntityDto() {
-        GroupDto groupDto = GroupDto.builder()
-                .name(fakerRU.regexify(INVALID_GROUP_NAME_REGEX))
-                .comment(fakerRU.lorem().paragraph())
-                .isInner(fakerRU.bool().bool())
-                .isDeprecated(fakerRU.bool().bool())
-                .build();
-        setRandomValidPropertiesOfBaseEntityDto(groupDto);
-        return groupDto;    }
 }

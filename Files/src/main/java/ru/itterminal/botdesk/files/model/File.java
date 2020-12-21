@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
@@ -24,6 +25,7 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(callSuper = true)
 public class File extends BaseEntity {
 
     @Column(name = "file_name", nullable = false, length = 260)
@@ -74,6 +76,6 @@ public class File extends BaseEntity {
 
     @Override
     public void generateDisplayName() {
-
+        setDisplayName(fileName);
     }
 }

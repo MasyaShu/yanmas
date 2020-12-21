@@ -6,10 +6,13 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.builder.ToStringSummary;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 
@@ -20,6 +23,7 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(callSuper = true)
 public class Account extends BaseEntity {
 
     @Column(nullable = false, length = 128)

@@ -5,10 +5,11 @@ import java.util.UUID;
 
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.dto.UserDtoRequest;
+import ru.itterminal.botdesk.aau.model.dto.UserDtoResponse;
 import ru.itterminal.botdesk.aau.model.dto.UserFilterDto;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
 
-public class UserTestHelper extends EntityTestHelperImpl<User, UserDtoRequest, UserFilterDto> {
+public class UserTestHelper extends EntityTestHelperImpl<User, UserDtoRequest, UserDtoResponse, UserFilterDto> {
 
     RoleTestHelper roleHelper = new RoleTestHelper();
     AccountTestHelper accountHelper = new AccountTestHelper();

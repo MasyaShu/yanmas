@@ -86,7 +86,8 @@ public class CommonMethodsForValidation {
     public static void chekObjectsIsEquals(Object objectOne, Object objectTwo, String keyError,
                                            String errorMessageIfObjectsIsNotEquals,
                                            Map<String, List<ValidationError>> errors) {
-        if (!objectOne.equals(objectTwo)) {
+        if ((objectOne != null && !objectOne.equals(objectTwo)) ||
+                (objectOne == null && objectTwo != null)) {
             addValidationErrorIntoErrors(keyError, errorMessageIfObjectsIsNotEquals, errors);
         }
     }

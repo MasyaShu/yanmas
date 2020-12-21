@@ -1,7 +1,5 @@
 package ru.itterminal.botdesk.tickets.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -16,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
-import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.tickets.model.TicketSetting;
 import ru.itterminal.botdesk.tickets.model.projection.TicketSettingUniqueFields;
 import ru.itterminal.botdesk.tickets.model.test.TicketSettingTestHelper;
@@ -49,23 +45,14 @@ class TicketSettingServiceImplTest {
     }
 
     @Test
-    void findByUniqueFields_shouldGetEntityNotExistException_whenTicketSettingIsNull() {
-        assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(null));
-        verify(repository, times(0)).findByUniqueFields(any(), any(), any(), any());
-    }
-
-    @Test
-    void findByUniqueFields_shouldGetLogicalValidationException_whenAccountGroupAuthorAreNull() {
+    void findByUniqueFields_shouldGetEmptyList_whenGroupAndAuthorIsNull() {
+        when(repository.findByUniqueFields(any(), any(), any(), any())).thenReturn(Collections.emptyList());
         TicketSetting ticketSetting = ticketSettingTestHelper.getRandomValidEntity();
-        ticketSetting.setAccount(null);
-        ticketSetting.setGroup(null);
         ticketSetting.setAuthor(null);
-        LogicalValidationException exception = assertThrows(
-                LogicalValidationException.class,
-                () -> service.findByUniqueFields(ticketSetting)
-        );
-        assertEquals(3, exception.getFieldErrors().size());
-        verify(repository, times(0)).findByUniqueFields(any(), any(), any(), any());
+        ticketSetting.setGroup(null);
+        List<TicketSettingUniqueFields> list = service.findByUniqueFields(ticketSetting);
+        assertTrue(list.isEmpty());
+        verify(repository, times(1)).findByUniqueFields(any(), any(), any(), any());
     }
 
 }

@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 
@@ -23,6 +24,7 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(callSuper = true)
 public class User extends BaseEntity {
 
     @Column(nullable = false, unique = true, length = 128)

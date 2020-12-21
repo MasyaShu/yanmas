@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static ru.itterminal.botdesk.commons.service.CrudServiceWithAccount.FIND_INVALID_MESSAGE_WITH_ACCOUNT;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -65,7 +66,6 @@ class UserServiceImplTest {
     @SuppressWarnings("unused")
     @MockBean
     private CreateAwsBucketGateway createAwsBucketGateway;
-
 
     @Autowired
     private BCryptPasswordEncoder encoder;
@@ -148,14 +148,14 @@ class UserServiceImplTest {
         when(validator.beforeUpdate(any())).thenReturn(true);
         when(validator.checkUniqueness(any())).thenReturn(true);
         when(userRepository.existsById(any())).thenReturn(true);
-        when(userRepository.findById(any())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(user));
         when(userRepository.update(any())).thenReturn(user);
         User createdUser = service.update(user);
         assertEquals(createdUser, user);
         verify(validator, times(1)).beforeUpdate(any());
         verify(validator, times(0)).checkUniqueness(any());
         verify(userRepository, times(1)).existsById(any());
-        verify(userRepository, times(1)).findById(any());
+        verify(userRepository, times(1)).findByIdAndAccountId(any(), any());
         verify(userRepository, times(1)).update(any());
     }
 
@@ -164,14 +164,17 @@ class UserServiceImplTest {
         when(validator.beforeUpdate(any())).thenReturn(true);
         when(validator.checkUniqueness(any())).thenReturn(true);
         when(userRepository.existsById(any())).thenReturn(false);
-        when(userRepository.findById(any())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(user));
         when(userRepository.update(any())).thenReturn(user);
         Throwable throwable = assertThrows(EntityNotExistException.class, () -> service.update(user));
-        assertEquals(String.format(CrudService.FIND_INVALID_MESSAGE, "id", user.getId()), throwable.getMessage());
+        var expectedMessage = String.format(FIND_INVALID_MESSAGE_WITH_ACCOUNT, "id and accountId", user.getId(),
+                                               user.getAccount().getId());
+        var actualMessage = throwable.getMessage();
+        assertEquals(expectedMessage, actualMessage);
         verify(validator, times(1)).beforeUpdate(any());
         verify(validator, times(0)).checkUniqueness(any());
         verify(userRepository, times(1)).existsById(any());
-        verify(userRepository, times(0)).findById(any());
+        verify(userRepository, times(0)).findByIdAndAccountId(any(), any());
         verify(userRepository, times(0)).update(any());
     }
 
@@ -181,14 +184,14 @@ class UserServiceImplTest {
         when(validator.beforeUpdate(any())).thenReturn(true);
         when(validator.checkUniqueness(any())).thenReturn(true);
         when(userRepository.existsById(any())).thenReturn(true);
-        when(userRepository.findById(any())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(user));
         when(userRepository.update(any())).thenThrow(new OptimisticLockingFailureException(message));
         Throwable throwable = assertThrows(OptimisticLockingFailureException.class, () -> service.update(user));
         assertEquals(message, throwable.getMessage());
         verify(validator, times(1)).beforeUpdate(any());
         verify(validator, times(0)).checkUniqueness(any());
         verify(userRepository, times(1)).existsById(any());
-        verify(userRepository, times(1)).findById(any());
+        verify(userRepository, times(1)).findByIdAndAccountId(any(), any());
         verify(userRepository, times(1)).update(any());
     }
 
@@ -231,7 +234,6 @@ class UserServiceImplTest {
         assertNotNull(service.findByIdAndAccountId(UUID.randomUUID(), UUID.randomUUID()));
         verify(userRepository, times(1)).findByIdAndAccountId(any(), any());
     }
-
 
     @Test
     void findByIdAndAccountId_shouldGetEntityNotExistException_whenUserIdIsNull() {

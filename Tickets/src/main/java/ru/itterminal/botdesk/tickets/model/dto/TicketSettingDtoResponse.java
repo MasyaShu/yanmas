@@ -5,7 +5,9 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
@@ -17,26 +19,27 @@ import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 @Setter
 @SuperBuilder
 @AllArgsConstructor
-@ToString
+@NoArgsConstructor
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class TicketSettingDtoResponse extends BaseEntityDto {
 
-    @NotNull(groups = {Create.class, Update.class})
-    private BaseEntityDto authorId;
+    private BaseEntityDto author;
 
-    @NotNull(groups = {Create.class, Update.class})
-    private BaseEntityDto groupId;
+    private BaseEntityDto group;
 
-    List<BaseEntityDto> observersId;
+    List<BaseEntityDto> observers;
 
-    List<BaseEntityDto> executorsId;
+    List<BaseEntityDto> executors;
 
-    private BaseEntityDto ticketTypeIdForNew;
+    private BaseEntityDto ticketTypeForNew;
 
-    private BaseEntityDto ticketStatusIdForNew;
+    private BaseEntityDto ticketStatusForNew;
 
-    private BaseEntityDto ticketStatusIdForReopen;
+    private BaseEntityDto ticketStatusForReopen;
 
-    private BaseEntityDto ticketStatusIdForClose;
+    private BaseEntityDto ticketStatusForClose;
 
-    private BaseEntityDto ticketStatusIdForCancel;
+    private BaseEntityDto ticketStatusForCancel;
+
 }

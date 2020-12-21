@@ -78,31 +78,31 @@ public class TicketSettingControllerV1 extends BaseController {
         ticketSetting.setAccount(accountService.findById(jwtUser.getAccountId()));
         UUID accountId = ticketSetting.getAccount().getId();
 
-        ticketSetting.setGroup(groupService.findByIdAndAccountId(request.getGroupId(), accountId));
-        ticketSetting.setAuthor(userService.findByIdAndAccountId(request.getAuthorId(), accountId));
+        ticketSetting.setGroup(groupService.findByIdAndAccountId(request.getGroup(), accountId));
+        ticketSetting.setAuthor(userService.findByIdAndAccountId(request.getAuthor(), accountId));
 
-        List<User> observers = userService.findAllByAccountIdAndListId(accountId, request.getObserversId());
+        List<User> observers = userService.findAllByAccountIdAndListId(accountId, request.getObservers());
         ticketSetting.setObservers(observers);
 
-        List<User> executors = userService.findAllByAccountIdAndListId(accountId, request.getExecutorsId());
+        List<User> executors = userService.findAllByAccountIdAndListId(accountId, request.getExecutors());
         ticketSetting.setObservers(executors);
 
         ticketSetting.setTicketTypeForNew(
-                ticketTypeService.findByIdAndAccountId(request.getTicketTypeIdForNew(), accountId)
+                ticketTypeService.findByIdAndAccountId(request.getTicketTypeForNew(), accountId)
         );
 
         ticketSetting.setTicketStatusForNew(
-                ticketStatusService.findByIdAndAccountId(request.getTicketStatusIdForNew(), accountId)
+                ticketStatusService.findByIdAndAccountId(request.getTicketStatusForNew(), accountId)
         );
 
         ticketSetting.setTicketStatusForReopen(
-                ticketStatusService.findByIdAndAccountId(request.getTicketStatusIdForReopen(), accountId)
+                ticketStatusService.findByIdAndAccountId(request.getTicketStatusForReopen(), accountId)
         );
         ticketSetting.setTicketStatusForClose(
-                ticketStatusService.findByIdAndAccountId(request.getTicketStatusIdForClose(), accountId)
+                ticketStatusService.findByIdAndAccountId(request.getTicketStatusForClose(), accountId)
         );
         ticketSetting.setTicketStatusForCancel(
-                ticketStatusService.findByIdAndAccountId(request.getTicketStatusIdForCancel(), accountId)
+                ticketStatusService.findByIdAndAccountId(request.getTicketStatusForCancel(), accountId)
         );
 
         TicketSetting createdTicketSetting = ticketSettingService.create(ticketSetting);
@@ -131,31 +131,31 @@ public class TicketSettingControllerV1 extends BaseController {
         ticketSetting.setAccount(accountService.findById(jwtUser.getAccountId()));
         UUID accountId = ticketSetting.getAccount().getId();
 
-        ticketSetting.setGroup(groupService.findByIdAndAccountId(request.getGroupId(), accountId));
-        ticketSetting.setAuthor(userService.findByIdAndAccountId(request.getAuthorId(), accountId));
+        ticketSetting.setGroup(groupService.findByIdAndAccountId(request.getGroup(), accountId));
+        ticketSetting.setAuthor(userService.findByIdAndAccountId(request.getAuthor(), accountId));
 
-        List<User> observers = userService.findAllByAccountIdAndListId(accountId, request.getObserversId());
+        List<User> observers = userService.findAllByAccountIdAndListId(accountId, request.getObservers());
         ticketSetting.setObservers(observers);
 
-        List<User> executors = userService.findAllByAccountIdAndListId(accountId, request.getExecutorsId());
+        List<User> executors = userService.findAllByAccountIdAndListId(accountId, request.getExecutors());
         ticketSetting.setObservers(executors);
 
         ticketSetting.setTicketTypeForNew(
-                ticketTypeService.findByIdAndAccountId(request.getTicketTypeIdForNew(), accountId)
+                ticketTypeService.findByIdAndAccountId(request.getTicketTypeForNew(), accountId)
         );
 
         ticketSetting.setTicketStatusForNew(
-                ticketStatusService.findByIdAndAccountId(request.getTicketStatusIdForNew(), accountId)
+                ticketStatusService.findByIdAndAccountId(request.getTicketStatusForNew(), accountId)
         );
 
         ticketSetting.setTicketStatusForReopen(
-                ticketStatusService.findByIdAndAccountId(request.getTicketStatusIdForReopen(), accountId)
+                ticketStatusService.findByIdAndAccountId(request.getTicketStatusForReopen(), accountId)
         );
         ticketSetting.setTicketStatusForClose(
-                ticketStatusService.findByIdAndAccountId(request.getTicketStatusIdForClose(), accountId)
+                ticketStatusService.findByIdAndAccountId(request.getTicketStatusForClose(), accountId)
         );
         ticketSetting.setTicketStatusForCancel(
-                ticketStatusService.findByIdAndAccountId(request.getTicketStatusIdForCancel(), accountId)
+                ticketStatusService.findByIdAndAccountId(request.getTicketStatusForCancel(), accountId)
         );
 
         TicketSetting updatedTicketSetting = ticketSettingService.update(ticketSetting);

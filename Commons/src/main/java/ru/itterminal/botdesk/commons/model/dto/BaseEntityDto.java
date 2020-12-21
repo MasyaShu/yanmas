@@ -2,6 +2,7 @@ package ru.itterminal.botdesk.commons.model.dto;
 
 import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.validation.constraints.Max;
@@ -14,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Delete;
@@ -28,6 +30,7 @@ import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class BaseEntityDto {
 
     @Null(groups = Create.class,
@@ -54,5 +57,25 @@ public class BaseEntityDto {
     @NotNull(groups = {Update.class, Delete.class})
     private Boolean deleted;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof BaseEntityDto)) {
+            return false;
+        }
+        BaseEntityDto that = (BaseEntityDto) o;
+        return Objects.equals(id, that.id) &&
+                Objects.equals(outId, that.outId) &&
+                Objects.equals(displayName, that.displayName) &&
+                Objects.equals(version, that.version) &&
+                Objects.equals(deleted, that.deleted);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, outId, displayName, version, deleted);
+    }
 }
 

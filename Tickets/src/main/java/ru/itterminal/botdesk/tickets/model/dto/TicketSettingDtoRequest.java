@@ -7,6 +7,7 @@ import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
@@ -18,26 +19,27 @@ import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 @Setter
 @SuperBuilder
 @AllArgsConstructor
+@NoArgsConstructor
 @ToString
 public class TicketSettingDtoRequest extends BaseEntityDto {
 
     @NotNull(groups = {Create.class, Update.class})
-    private UUID authorId;
+    private UUID author;
 
     @NotNull(groups = {Create.class, Update.class})
-    private UUID groupId;
+    private UUID group;
 
-    List<UUID> observersId;
+    List<UUID> observers;
 
-    List<UUID> executorsId;
+    List<UUID> executors;
 
-    private UUID ticketTypeIdForNew;
+    private UUID ticketTypeForNew;
 
-    private UUID ticketStatusIdForNew;
+    private UUID ticketStatusForNew;
 
-    private UUID ticketStatusIdForReopen;
+    private UUID ticketStatusForReopen;
 
-    private UUID ticketStatusIdForClose;
+    private UUID ticketStatusForClose;
 
-    private UUID ticketStatusIdForCancel;
+    private UUID ticketStatusForCancel;
 }
