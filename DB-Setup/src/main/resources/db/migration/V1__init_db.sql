@@ -135,8 +135,8 @@ create TABLE IF NOT EXISTS ticket_template
     type_ticket_id             uuid    NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (account_id) REFERENCES account (id),
-    FOREIGN KEY (user_id) REFERENCES account (id),
-    FOREIGN KEY (type_ticket_id) REFERENCES account (id)
+    FOREIGN KEY (user_id) REFERENCES users (id),
+    FOREIGN KEY (type_ticket_id) REFERENCES ticket_types (id)
 );
 create TABLE IF NOT EXISTS ticket_settings
 (
