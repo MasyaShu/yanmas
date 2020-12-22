@@ -140,4 +140,12 @@ public class CommonMethodsForValidation {
         );
     }
 
+    public static void chekStringForEquals(String StringOne, String StringTwo, String keyError,
+                                           String errorMessageIfObjectsIsNotEquals,
+                                           Map<String, List<ValidationError>> errors) {
+        if (StringOne.equalsIgnoreCase(StringTwo)) {
+            addValidationErrorIntoErrors(keyError, errorMessageIfObjectsIsNotEquals, errors);
+        }
+    }
+
 }

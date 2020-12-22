@@ -18,6 +18,7 @@ import java.util.Map;
 
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekStringForEquals;
 
 @Slf4j
 @Component
@@ -41,24 +42,17 @@ public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> 
         return super.beforeUpdate(entity);
     }
 
-    @SuppressWarnings("DuplicatedCode")
     @Override
     public boolean checkUniqueness(Group entity) {
         log.trace(CHECK_UNIQUENESS, entity);
         Map<String, List<ValidationError>> errors = new HashMap<>();
         List<GroupUniqueFields> foundGroup = service.findByUniqueFields(entity);
-        if (foundGroup.isEmpty()) {
-            log.trace(FIELDS_UNIQUE, entity);
-            return true;
-        } else {
-            String validatedField;
-            if (entity.getName().equalsIgnoreCase(foundGroup.get(0).getName())) {
-                validatedField = "name";
-                errors.put(validatedField, singletonList(new ValidationError(NOT_UNIQUE_CODE, format(NOT_UNIQUE_MESSAGE, validatedField))));
-            }
-            log.error(FIELDS_NOT_UNIQUE, errors);
-            throw new LogicalValidationException(VALIDATION_FAILED, errors);
+        if (!foundGroup.isEmpty()) {
+            chekStringForEquals(entity.getName(), foundGroup.get(0).getName(),
+                    NOT_UNIQUE_CODE, format(NOT_UNIQUE_MESSAGE, "name"), errors);
         }
+        log.trace(FIELDS_UNIQUE, entity);
+        return true;
     }
 
     private void checkIsInnerGroupForCreateUpdate() {
