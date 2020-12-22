@@ -34,38 +34,6 @@ class TicketStatusServiceImplTest {
 
     private final TicketStatusTestHelper ticketSettingTestHelper = new TicketStatusTestHelper();
 
-
-    @Test
-    void findByUniqueFields_shouldGetEntityNotExistException_whenUserIsNull() {
-        assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(null));
-        verify(ticketStatusRepository, times(0)).getByNameAndAccount_IdAndIdNot(any(), any(), any());
-    }
-
-    @Test
-    void findByUniqueFields_shouldGetEntityNotExistException_whenUserEmailIsNull() {
-        TicketStatus ticketStatus = ticketSettingTestHelper.getRandomValidEntity();
-        ticketStatus.setName(null);
-        assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(ticketStatus));
-        verify(ticketStatusRepository, times(0)).getByNameAndAccount_IdAndIdNot(any(), any(), any());
-    }
-
-    @Test
-    void findByUniqueFields_shouldGetEntityNotExistException_whenUserIdIsNull() {
-        TicketStatus ticketStatus = ticketSettingTestHelper.getRandomValidEntity();
-        ticketStatus.setId(null);
-        assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(ticketStatus));
-        verify(ticketStatusRepository, times(0)).getByNameAndAccount_IdAndIdNot(any(), any(), any());
-    }
-
-    @Test
-    void findByUniqueFields_shouldGetEntityNotExistException_whenUserAccountIsNull() {
-        TicketStatus ticketStatus = ticketSettingTestHelper.getRandomValidEntity();
-        ticketStatus.setAccount(null);
-        assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(ticketStatus));
-        verify(ticketStatusRepository, times(0)).getByNameAndAccount_IdAndIdNot(any(), any(), any());
-    }
-
-
     @Test
     void update_shouldUpdateUser_whenPassedValidData() {
         TicketStatus ticketStatus = ticketSettingTestHelper.getRandomValidEntity();
@@ -83,7 +51,7 @@ class TicketStatusServiceImplTest {
 
     @Test
     void update_shouldGetEntityNotExistException_whenUserIdNotExistInDatabase() {
-        TicketStatus ticketStatus = ticketSettingTestHelper.getRandomInvalidEntity();
+        TicketStatus ticketStatus = ticketSettingTestHelper.getRandomValidEntity();
         when(ticketStatusRepository.existsById(any())).thenReturn(false);
         when(ticketStatusRepository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(ticketStatus));
         when(ticketStatusRepository.update(any())).thenReturn(ticketStatus);

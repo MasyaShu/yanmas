@@ -3,16 +3,16 @@ package ru.itterminal.botdesk.tickets.model.test;
 import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
-import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 import ru.itterminal.botdesk.tickets.model.TicketTemplate;
 import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateDtoRequest;
+import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateDtoResponse;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplate, TicketTemplateDtoRequest,
-        BaseFilterDto> {
+        TicketTemplateDtoResponse> {
 
     private final AccountTestHelper accountTestHelper = new AccountTestHelper();
     private final UserTestHelper userTestHelper = new UserTestHelper();
@@ -28,26 +28,6 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
                 .dateEnd(null)
                 .zoneId("Europe/Moscow")
                 .expressionSchedule("25 6 5 25 2 *")
-                .isOnlyOneTicketInWork(fakerRU.bool().bool())
-                .isActive(fakerRU.bool().bool())
-                .account(accountTestHelper.getRandomValidEntity())
-                .Author(userTestHelper.getRandomValidEntity())
-                .ticketType(ticketTypeTestHelper.getRandomValidEntity())
-                .build();
-        setRandomValidPropertiesOfBaseEntity(ticketTemplate);
-        return ticketTemplate;
-    }
-
-    @Override
-    public TicketTemplate getRandomInvalidEntity() {
-        TicketTemplate ticketTemplate = TicketTemplate.builder()
-                .subject(fakerRU.hipster().word())
-                .description(fakerRU.lorem().paragraph())
-                .dateNextRun(null)
-                .dateStart(1639144829000L)
-                .dateEnd(1139144829000L)
-                .zoneId("Europe/Mosco")
-                .expressionSchedule("25 6 5 32 2 *")
                 .isOnlyOneTicketInWork(fakerRU.bool().bool())
                 .isActive(fakerRU.bool().bool())
                 .account(accountTestHelper.getRandomValidEntity())

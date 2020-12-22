@@ -81,7 +81,7 @@ class TicketTypeServiceImplTest {
 
     @Test
     void update_shouldGetEntityNotExistException_whenUserIdNotExistInDatabase() {
-        TicketType ticketType = ticketTypeTestHelper.getRandomInvalidEntity();
+        TicketType ticketType = ticketTypeTestHelper.getRandomValidEntity();
         when(ticketTypeRepository.existsById(any())).thenReturn(false);
         when(ticketTypeRepository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(ticketType));
         when(ticketTypeRepository.update(any())).thenReturn(ticketType);
