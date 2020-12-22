@@ -7,7 +7,11 @@ import ru.itterminal.botdesk.tickets.model.TicketTemplate;
 import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateDtoRequest;
 import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateDtoResponse;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,7 +27,7 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
         TicketTemplate ticketTemplate = TicketTemplate.builder()
                 .subject(fakerRU.hipster().word())
                 .description(fakerRU.lorem().paragraph())
-                .dateNextRun(1639144829000L)
+                .dateNextRun(null)
                 .dateStart(null)
                 .dateEnd(null)
                 .zoneId("Europe/Moscow")
@@ -33,8 +37,12 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
                 .account(accountTestHelper.getRandomValidEntity())
                 .Author(userTestHelper.getRandomValidEntity())
                 .ticketType(ticketTypeTestHelper.getRandomValidEntity())
+                .id(UUID.randomUUID())
+                .version(fakerRU.number().numberBetween(0, 100))
+                .deleted(1 == fakerRU.number().numberBetween(0, 2))
+                .outId(UUID.randomUUID().toString())
                 .build();
-        setRandomValidPropertiesOfBaseEntity(ticketTemplate);
+        ticketTemplate.generateDisplayName();
         return ticketTemplate;
     }
 
@@ -84,5 +92,25 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
         );
         ticketTemplates.add(ticketTemplate2);
         return ticketTemplates;
+    }
+
+    public static Date atStartOfDay(Date date) {
+        LocalDateTime localDateTime = dateToLocalDateTime(date);
+        LocalDateTime startOfDay = localDateTime.with(LocalTime.MIN);
+        return localDateTimeToDate(startOfDay);
+    }
+
+    public static Date atEndOfDay(Date date) {
+        LocalDateTime localDateTime = dateToLocalDateTime(date);
+        LocalDateTime endOfDay = localDateTime.with(LocalTime.MAX);
+        return localDateTimeToDate(endOfDay);
+    }
+
+    private static LocalDateTime dateToLocalDateTime(Date date) {
+        return LocalDateTime.ofInstant(date.toInstant(), ZoneId.of("GMT"));
+    }
+
+    private static Date localDateTimeToDate(LocalDateTime localDateTime) {
+        return Date.from(localDateTime.atZone(ZoneId.of("GMT")).toInstant());
     }
 }

@@ -1,7 +1,7 @@
 package ru.itterminal.botdesk.tickets.service.validator;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl;
 import ru.itterminal.botdesk.tickets.model.TicketStatus;
@@ -15,14 +15,10 @@ import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chec
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class TicketStatusOperationValidator extends BasicOperationValidatorImpl<TicketStatus> {
 
     private final TicketStatusServiceImpl service;
-
-    @Autowired
-    public TicketStatusOperationValidator(TicketStatusServiceImpl service) {
-        this.service = service;
-    }
 
     @Override
     public boolean checkUniqueness(TicketStatus entity) {

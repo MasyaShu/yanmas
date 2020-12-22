@@ -33,38 +33,7 @@ class TicketTypeServiceImplTest {
 
     private final TicketTypeTestHelper ticketTypeTestHelper = new TicketTypeTestHelper();
 
-    @Test
-    void findByUniqueFields_shouldGetEntityNotExistException_whenUserIsNull() {
-        assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(null));
-        verify(ticketTypeRepository, times(0)).getByNameAndAccount_IdAndIdNot(any(), any(), any());
-    }
-
-    @Test
-    void findByUniqueFields_shouldGetEntityNotExistException_whenUserEmailIsNull() {
-        TicketType ticketType = ticketTypeTestHelper.getRandomValidEntity();
-        ticketType.setName(null);
-        assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(ticketType));
-        verify(ticketTypeRepository, times(0)).getByNameAndAccount_IdAndIdNot(any(), any(), any());
-    }
-
-    @Test
-    void findByUniqueFields_shouldGetEntityNotExistException_whenUserIdIsNull() {
-        TicketType ticketType = ticketTypeTestHelper.getRandomValidEntity();
-        ticketType.setId(null);
-        assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(ticketType));
-        verify(ticketTypeRepository, times(0)).getByNameAndAccount_IdAndIdNot(any(), any(), any());
-    }
-
-    @Test
-    void findByUniqueFields_shouldGetEntityNotExistException_whenUserAccountIsNull() {
-        TicketType ticketType = ticketTypeTestHelper.getRandomValidEntity();
-        ticketType.setAccount(null);
-        assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(ticketType));
-        verify(ticketTypeRepository, times(0)).getByNameAndAccount_IdAndIdNot(any(), any(), any());
-    }
-
-
-    @Test
+       @Test
     void update_shouldUpdateUser_whenPassedValidData() {
         TicketType ticketType = ticketTypeTestHelper.getRandomValidEntity();
         when(validator.beforeUpdate(any())).thenReturn(true);

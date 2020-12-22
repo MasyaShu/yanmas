@@ -7,7 +7,6 @@ import org.springframework.scheduling.support.SimpleTriggerContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
-import ru.itterminal.botdesk.commons.util.CommonMethodsForValidation;
 import ru.itterminal.botdesk.tickets.model.TicketTemplate;
 import ru.itterminal.botdesk.tickets.repository.TicketTemplateRepository;
 import ru.itterminal.botdesk.tickets.service.validator.TicketTemplateOperationValidator;
@@ -20,8 +19,6 @@ import java.util.Date;
 @Service
 @Transactional
 public class TicketTemplateServiceImpl extends CrudServiceImpl<TicketTemplate, TicketTemplateOperationValidator, TicketTemplateRepository> {
-
-    public static final String ERROR_NEXT_RUN = "error in determining the time of the next execution";
 
     @Override
     public TicketTemplate create(TicketTemplate entity) {
@@ -45,14 +42,9 @@ public class TicketTemplateServiceImpl extends CrudServiceImpl<TicketTemplate, T
         //noinspection ConstantConditions
         triggerContext.update(null, null, new Date(dateCountdown));
         Date dateNextRun;
-        try {
-            dateNextRun = cronTrigger.nextExecutionTime(triggerContext);
-            assert dateNextRun != null;
-            if (ticketTemplate.getDateEnd() == null || ticketTemplate.getDateEnd() <= dateNextRun.getTime()) {
-                ticketTemplate.setDateNextRun(dateNextRun.getTime());
-            }
-        } catch (IllegalArgumentException ex) {
-            throw CommonMethodsForValidation.createExpectedLogicalValidationException(ERROR_NEXT_RUN, ex.getMessage());
+        dateNextRun = cronTrigger.nextExecutionTime(triggerContext);
+        if (dateNextRun != null && (ticketTemplate.getDateEnd() == null || ticketTemplate.getDateEnd() >= dateNextRun.getTime())) {
+            ticketTemplate.setDateNextRun(dateNextRun.getTime());
         }
     }
 }
