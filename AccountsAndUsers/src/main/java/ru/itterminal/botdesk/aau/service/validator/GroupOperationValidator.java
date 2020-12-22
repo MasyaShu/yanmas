@@ -35,18 +35,17 @@ public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> 
 
     @Override
     public boolean beforeCreate(Group entity) {
-        super.beforeCreate(entity);
         checkIsInnerGroupForCreateUpdate();
-        return true;
+        return super.beforeCreate(entity);
     }
 
     @Override
     public boolean beforeUpdate(Group entity) {
-        super.beforeUpdate(entity);
         checkIsInnerGroupForCreateUpdate();
-        return true;
+        return super.beforeUpdate(entity);
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @Override
     public boolean checkUniqueness(Group entity) {
         log.trace(CHECK_UNIQUENESS, entity);
@@ -57,10 +56,9 @@ public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> 
             return true;
         } else {
             String validatedField;
-            if (entity.getName().equalsIgnoreCase(foundGroup.get(0).getName()) && entity.getIsInner().equals(foundGroup.get(0).getIsInner())) {
+            if (entity.getName().equalsIgnoreCase(foundGroup.get(0).getName())) {
                 validatedField = "name";
-                errors.put(validatedField, singletonList(new ValidationError(NOT_UNIQUE_CODE,
-                        format(NOT_UNIQUE_MESSAGE, validatedField))));
+                errors.put(validatedField, singletonList(new ValidationError(NOT_UNIQUE_CODE, format(NOT_UNIQUE_MESSAGE, validatedField))));
             }
             log.error(FIELDS_NOT_UNIQUE, errors);
             throw new LogicalValidationException(VALIDATION_FAILED, errors);
