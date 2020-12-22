@@ -1,7 +1,7 @@
 package ru.itterminal.botdesk.aau.service.validator;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import ru.itterminal.botdesk.aau.model.Group;
@@ -21,17 +21,13 @@ import static java.util.Collections.singletonList;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> {
 
     private final GroupServiceImpl service;
     private static final String INNER_GROUP = "Inner group";
     private static final String USER_FROM_AN_INNER_GROUP_CANNOT_CREATE_UPDATE_GROUPS =
             "A user from not inner group cannot create or update groups";
-
-    @Autowired
-    public GroupOperationValidator(GroupServiceImpl service) {
-        this.service = service;
-    }
 
     @Override
     public boolean beforeCreate(Group entity) {

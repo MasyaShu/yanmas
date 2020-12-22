@@ -1,7 +1,7 @@
 package ru.itterminal.botdesk.aau.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.itterminal.botdesk.aau.model.Account;
@@ -17,19 +17,12 @@ import java.util.UUID;
 @Slf4j
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class AccountServiceImpl extends CrudServiceImpl<Account, AccountOperationValidator, AccountRepository> {
 
     private final UserServiceImpl userService;
     private final GroupServiceImpl groupService;
     private final RoleServiceImpl roleService;
-
-    @Autowired
-    public AccountServiceImpl(UserServiceImpl userService,
-                              GroupServiceImpl groupService, RoleServiceImpl roleService) {
-        this.userService = userService;
-        this.groupService = groupService;
-        this.roleService = roleService;
-    }
 
     private static final String START_CREATE_NEW_ACCOUNT = "Start create a new account {}";
     private static final String FINISH_CREATE_NEW_ACCOUNT = "Finish create a new account with name {}";

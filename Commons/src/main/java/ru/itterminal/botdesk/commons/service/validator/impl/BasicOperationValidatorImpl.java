@@ -1,8 +1,7 @@
 package ru.itterminal.botdesk.commons.service.validator.impl;
 
-import org.springframework.stereotype.Component;
-
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import ru.itterminal.botdesk.commons.exception.NullEntityException;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 import ru.itterminal.botdesk.commons.service.validator.OperationValidator;
@@ -53,5 +52,4 @@ public class BasicOperationValidatorImpl<E extends BaseEntity> implements Operat
         }
         return checkUniqueness(entity);
     }
-
 }
