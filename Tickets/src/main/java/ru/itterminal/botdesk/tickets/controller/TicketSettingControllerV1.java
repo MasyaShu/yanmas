@@ -69,8 +69,9 @@ public class TicketSettingControllerV1 extends BaseController {
 
     @PostMapping()
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
-    public ResponseEntity<TicketSettingDtoResponse> create(Principal principal,
-                                                           @Validated(Create.class) @RequestBody TicketSettingDtoRequest request) {
+    public ResponseEntity<TicketSettingDtoResponse>
+    create(Principal principal,
+           @Validated(Create.class) @RequestBody TicketSettingDtoRequest request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
         TicketSetting ticketSetting = modelMapper.map(request, TicketSetting.class);
 
@@ -122,8 +123,9 @@ public class TicketSettingControllerV1 extends BaseController {
 
     @PutMapping()
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
-    public ResponseEntity<TicketSettingDtoResponse> update(Principal principal,
-                                                           @Validated(Update.class) @RequestBody TicketSettingDtoRequest request) {
+    public ResponseEntity<TicketSettingDtoResponse>
+    update(Principal principal,
+           @Validated(Update.class) @RequestBody TicketSettingDtoRequest request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
         TicketSetting ticketSetting = modelMapper.map(request, TicketSetting.class);
 
@@ -202,17 +204,6 @@ public class TicketSettingControllerV1 extends BaseController {
         foundTicketSetting = ticketSettingService.findAllByFilter(ticketSettingSpecification, pageable);
         returnedTicketSetting = mapPage(foundTicketSetting, TicketSettingDtoResponse.class, pageable);
         log.debug(FIND_FINISH_MESSAGE, ENTITY_NAME, foundTicketSetting.getTotalElements());
-        return new ResponseEntity<>(returnedTicketSetting, HttpStatus.OK);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<TicketSettingDtoResponse> getById(Principal user, @PathVariable UUID id) {
-        log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
-        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
-        TicketSetting foundTicketSetting;
-        foundTicketSetting = ticketSettingService.findByIdAndAccountId(id, jwtUser.getAccountId());
-        TicketSettingDtoResponse returnedTicketSetting = modelMapper.map(foundTicketSetting, TicketSettingDtoResponse.class);
-        log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundTicketSetting);
         return new ResponseEntity<>(returnedTicketSetting, HttpStatus.OK);
     }
 }
