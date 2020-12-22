@@ -1,7 +1,7 @@
 package ru.itterminal.botdesk.aau.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -40,18 +40,12 @@ import static java.lang.String.format;
 @RestController("GroupControllerV1")
 @Validated
 @RequestMapping("api/v1/group")
+@RequiredArgsConstructor
 public class GroupControllerV1 extends BaseController {
 
     private final GroupServiceImpl service;
     private final GroupSpec spec;
     private final AccountServiceImpl accountService;
-
-    @Autowired
-    public GroupControllerV1(GroupServiceImpl service, GroupSpec userSpec, AccountServiceImpl accountService) {
-        this.spec = userSpec;
-        this.service = service;
-        this.accountService = accountService;
-    }
 
     private final String ENTITY_NAME = Group.class.getSimpleName();
 
