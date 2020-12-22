@@ -36,7 +36,7 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String password;
 
-    @Column (length = 30)
+    @Column(length = 30)
     private String phone;
 
     @Column
@@ -54,21 +54,21 @@ public class User extends BaseEntity {
     @Column(name = "is_archived", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean isArchived;
 
-    @ManyToOne (fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id", nullable = false)
     private Group group;
 
-    @ManyToOne (fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
-    @ManyToOne (fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
     @Override
     public void generateDisplayName() {
-        if (name==null || name.isEmpty()) {
+        if (name == null || name.isEmpty()) {
             setDisplayName(email);
             return;
         }

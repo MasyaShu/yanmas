@@ -79,18 +79,17 @@ class UserServiceImplTest {
     private static final UUID USER_ID = UUID.fromString("41ca3b9a-8e94-42a0-acbd-a2d3756af379");
     private User user;
     private User userFromDatabase;
-    private Account account;
     private final Role roleAdmin = new Role(Roles.ADMIN.toString(), Roles.ADMIN.getWeight());
     private final Role roleAccountOwner = new Role(Roles.ACCOUNT_OWNER.toString(), Roles.ACCOUNT_OWNER.getWeight());
 
     @BeforeEach
     void setUpBeforeEach() {
-        account = new Account();
+        Account account = new Account();
         account.setId(UUID.fromString(TestSecurityConfig.ACCOUNT_1_ID));
         Group group = new Group();
         group.setId(UUID.fromString(TestSecurityConfig.GROUP_1_ID));
         String PASSWORD = "12345";
-        String SOME_TEST_TOKEN = "asdfjhasjdf734y57823asdfsabdfhsabdf";
+        String SOME_TEST_TOKEN = "5423198156154519813598481";
         user = User
                 .builder()
                 .email(TestSecurityConfig.EMAIL_1)
@@ -196,76 +195,11 @@ class UserServiceImplTest {
     }
 
     @Test
-    void findByEmail_shouldGetEntityNotExistException_whenEmailIsNull() {
-        assertThrows(EntityNotExistException.class, () -> service.findByEmail(null));
-        verify(userRepository, times(0)).getByEmail(any());
-    }
-
-    @Test
-    void findByEmail_shouldGetEntityNotExistException_whenEmailIsEmpty() {
-        assertThrows(EntityNotExistException.class, () -> service.findByEmail(""));
-        verify(userRepository, times(0)).getByEmail(any());
-    }
-
-    @Test
-    void findByUniqueFields_shouldGetEntityNotExistException_whenUserIsNull() {
-        assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(null));
-        verify(userRepository, times(0)).getByEmailAndIdNot(any(), any());
-    }
-
-    @Test
-    void findByUniqueFields_shouldGetEntityNotExistException_whenUserEmailIsNull() {
-        user.setEmail(null);
-        assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(user));
-        verify(userRepository, times(0)).getByEmailAndIdNot(any(), any());
-    }
-
-    @Test
-    void findByUniqueFields_shouldGetEntityNotExistException_whenUserIdIsNull() {
-        user.setId(null);
-        assertThrows(EntityNotExistException.class, () -> service.findByUniqueFields(user));
-        verify(userRepository, times(0)).getByEmailAndIdNot(any(), any());
-    }
-
-    @Test
     void findByIdAndAccountId_shouldGetUser_whenPassedValidData() {
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(user));
         assertNotNull(service.findByIdAndAccountId(UUID.randomUUID(), UUID.randomUUID()));
         verify(userRepository, times(1)).findByIdAndAccountId(any(), any());
-    }
-
-    @Test
-    void findByIdAndAccountId_shouldGetEntityNotExistException_whenUserIdIsNull() {
-        UUID accountId = account.getId();
-        assertThrows(EntityNotExistException.class, () -> service.findByIdAndAccountId(null, accountId));
-        verify(userRepository, times(0)).getByIdAndAccount_Id(any(), any());
-    }
-
-    @Test
-    void findByIdAndAccountId_shouldGetEntityNotExistException_whenAccountIdIsNull() {
-        UUID userId = user.getId();
-        assertThrows(EntityNotExistException.class, () -> service.findByIdAndAccountId(userId, null));
-        verify(userRepository, times(0)).getByIdAndAccount_Id(any(), any());
-    }
-
-    @Test
-    void findAllByRoleAndIdNot_shouldGetEntityNotExistException_whenRoleIsNull() {
-        UUID userId = user.getId();
-        assertThrows(EntityNotExistException.class, () -> service.findAllByRoleAndIdNot(null, userId));
-        verify(userRepository, times(0)).findAllByRoleAndIdNot(any(), any());
-    }
-
-    @Test
-    void findAllByRoleAndIdNot_shouldGetEntityNotExistException_whenUserIdIsNull() {
-        assertThrows(EntityNotExistException.class, () -> service.findAllByRoleAndIdNot(roleAdmin, null));
-        verify(userRepository, times(0)).findAllByRoleAndIdNot(any(), any());
-    }
-
-    @Test
-    void findAllByRole_shouldGetEntityNotExistException_whenRoleIsNull() {
-        assertThrows(EntityNotExistException.class, () -> service.findAllByRole(null));
-        verify(userRepository, times(0)).findAllByRole(any());
     }
 
     @Test

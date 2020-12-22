@@ -24,8 +24,6 @@ public interface UserRepository extends EntityRepositoryWithAccount<User> {
 
     Optional<User> getByEmail(String email);
 
-    Optional<User> getByIdAndAccount_Id(UUID id, UUID accountId);
-
     Optional<User> getByIdAndAccount_IdAndGroup_Id(UUID id, UUID accountId, UUID groupId);
 
     List<User> findAllByRole(Role role);

@@ -23,13 +23,6 @@ import ru.itterminal.botdesk.commons.repository.CustomizedParentEntityRepository
 import ru.itterminal.botdesk.commons.service.CrudService;
 import ru.itterminal.botdesk.commons.service.validator.OperationValidator;
 
-/**
- * Skeletal implementation of general CRUD operations for each dictionary
- *
- * @param <E> extends BaseEntity
- * @param <V> extends OperationValidate
- * @param <R> extends CustomizedParentEntityRepository
- */
 @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
 @Slf4j
 @Service
@@ -45,13 +38,6 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
     @Autowired
     protected V validator;
 
-    /**
-     * Set random UUID for object and save it in database
-     * <p> If id or unique fields conflict with  entity that already exist in database will throw exception
-     *
-     * @param entity extends BaseEntity
-     * @return entity from database
-     */
     @Override
     public E create(E entity) {
         validator.beforeCreate(entity);
@@ -66,67 +52,6 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
         return createdEntity;
     }
 
-    /**
-     * Get entity from database by it's id
-     * <p>Will return entity even if it marked for delete
-     * <p>If entity with required Id do not exist will throw exception ResourceNotFoundException
-     *
-     * @param id of required entity
-     * @return entity from database
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public E findById(UUID id) {
-        String searchParameter = "id";
-        log.trace(format(FIND_INIT_MESSAGE, searchParameter, id));
-        if (repository.existsById(id)) {
-            Optional<E> baseEntity = repository.findById(id);
-            log.trace(format(FIND_FINISH_MESSAGE, searchParameter, id, baseEntity.get()));
-            return baseEntity.get();
-        } else {
-            String errorMessage = format(FIND_INVALID_MESSAGE, searchParameter, id);
-            log.error(errorMessage);
-            throw new EntityNotExistException(errorMessage);
-        }
-    }
-
-    /**
-     * Find entities in database by filter
-     *
-     * @param specification contains conditions for filtering
-     * @return page(s) in selected format
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public Page<E> findAllByFilter(Specification<E> specification, Pageable pageable) {
-        log.trace(format(ALL_FIND_BY_FILTER_INIT_MESSAGE, pageable.getPageSize()));
-        Page<E> page = repository.findAll(specification, pageable);
-        log.trace(format(ALL_FIND_BY_FILTER_FINISH_MESSAGE, page.getTotalElements(), pageable.getPageNumber()));
-        return page;
-    }
-
-    /**
-     * Get all available entities from database table in selected page format
-     * Can't use null as input
-     *
-     * @param pageable from springframework
-     * @return page(s) in selected format
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public Page<E> findAll(Pageable pageable) {
-        log.trace(format(ALL_FIND_INIT_MESSAGE, pageable.getPageSize()));
-        Page<E> page = repository.findAll(pageable);
-        log.trace(format(ALL_FIND_FINISH_MESSAGE, page.getTotalElements(), pageable.getPageNumber()));
-        return page;
-    }
-
-    /**
-     * Update existing entity if it haven't been marked as deleted (including in the database)
-     *
-     * @param entity with new parameters
-     * @return updated version of entity
-     */
     @Override
     public E update(E entity) {
         validator.beforeUpdate(entity);
@@ -145,6 +70,40 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
         catch (OptimisticLockException ex) {
             throw new OptimisticLockingFailureException(format(VERSION_INVALID_MESSAGE, entity.getId()));
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public E findById(UUID id) {
+        String searchParameter = "id";
+        log.trace(format(FIND_INIT_MESSAGE, searchParameter, id));
+        if (repository.existsById(id)) {
+            Optional<E> baseEntity = repository.findById(id);
+            log.trace(format(FIND_FINISH_MESSAGE, searchParameter, id, baseEntity.get()));
+            return baseEntity.get();
+        } else {
+            String errorMessage = format(FIND_INVALID_MESSAGE, searchParameter, id);
+            log.error(errorMessage);
+            throw new EntityNotExistException(errorMessage);
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<E> findAllByFilter(Specification<E> specification, Pageable pageable) {
+        log.trace(format(ALL_FIND_BY_FILTER_INIT_MESSAGE, pageable.getPageSize()));
+        Page<E> page = repository.findAll(specification, pageable);
+        log.trace(format(ALL_FIND_BY_FILTER_FINISH_MESSAGE, page.getTotalElements(), pageable.getPageNumber()));
+        return page;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<E> findAll(Pageable pageable) {
+        log.trace(format(ALL_FIND_INIT_MESSAGE, pageable.getPageSize()));
+        Page<E> page = repository.findAll(pageable);
+        log.trace(format(ALL_FIND_FINISH_MESSAGE, page.getTotalElements(), pageable.getPageNumber()));
+        return page;
     }
 
     @Override

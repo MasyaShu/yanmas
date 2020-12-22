@@ -1,8 +1,6 @@
 package ru.itterminal.botdesk.aau.service.impl;
 
 import static java.lang.String.format;
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekObjectForNull;
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekStringForNullOrEmpty;
 
 import java.io.IOException;
 import java.util.List;
@@ -12,7 +10,6 @@ import java.util.UUID;
 import javax.mail.MessagingException;
 import javax.persistence.OptimisticLockException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -21,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import io.jsonwebtoken.JwtException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.User;
@@ -39,6 +37,7 @@ import software.amazon.awssdk.services.ses.model.SendRawEmailRequest;
 @Slf4j
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperationValidator, UserRepository> {
 
     @Value("${emailVerificationToken.subject}")
@@ -60,23 +59,6 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
     private final SenderEmailViaAwsSes senderEmailViaAwsSes;
     private final CreateAwsS3BucketFlow.CreateAwsBucketGateway createAwsBucketGateway;
 
-    // TODO перенести проверки на уровень валидации
-
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    @Autowired
-    public UserServiceImpl(BCryptPasswordEncoder encoder, JwtProvider jwtProvider,
-                           RoleServiceImpl roleService,
-                           SendingEmailViaAwsSesFlow.MailSenderViaAwsSesMessagingGateway mailSenderViaAwsSesMessagingGateway,
-                           SenderEmailViaAwsSes senderEmailViaAwsSes,
-                           CreateAwsS3BucketFlow.CreateAwsBucketGateway createAwsBucketGateway) {
-        this.encoder = encoder;
-        this.jwtProvider = jwtProvider;
-        this.roleService = roleService;
-        this.mailSenderViaAwsSesMessagingGateway = mailSenderViaAwsSesMessagingGateway;
-        this.senderEmailViaAwsSes = senderEmailViaAwsSes;
-        this.createAwsBucketGateway = createAwsBucketGateway;
-    }
-
     public static final String START_FIND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID
             = "Start find user by id: {} and accountId: {} and own group id {}";
     public static final String START_REQUEST_PASSWORD_RESET_BY_EMAIL = "Start request password reset by email: {}";
@@ -88,25 +70,14 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
     public static final String NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID
             = "Not found user by id: %s and account id: %s and own group id %s";
     public static final String START_FIND_USER_BY_EMAIL = "Start find user by email: {}";
-    public static final String NOT_FOUND_USER_BY_EMAIL_EMAIL_IS_NULL = "Not found user by email, email is null";
-    public static final String NOT_FOUND_USER_BY_EMAIL_EMAIL_IS_EMPTY = "Not found user by email, email is empty";
     public static final String NOT_FOUND_USER_BY_EMAIL = "Not found user by email: %s";
     public static final String START_FIND_USER_BY_UNIQUE_FIELDS =
             "Start find user by unique fields, email: {} and not id: {}";
-    public static final String NOT_FOUND_USERS_BY_UNIQUE_FIELDS =
-            "Not found users by unique fields, %s is null";
-    public static final String NOT_FOUND_USER =
-            "Not found user by email because ";
     public static final String START_FIND_ALL_USERS_BY_ROLE_AND_NOT_ID =
             "Start find all users by role: {} and not id: {}";
     public static final String START_FIND_ALL_USERS_BY_ROLE_ACCOUNT_ID_AND_NOT_ID =
             "Start find all users by role: {}, accountId: {} and not id: {}";
-    public static final String NOT_FOUND_USERS_BY_ROLE_AND_NOT_ID = "Not found users by role: %s and not userId: %s";
-    public static final String NOT_FOUND_USERS_BY_ROLE_AND_ACCOUNT_ID = "Not found users by role: %s and accountId %s";
-    public static final String NOT_FOUND_USERS_BY_ROLE_AND_ACCOUNT_ID_AND_NOT_ID = "Not found users by role: %s and "
-            + "accountId %s and not userId: %s";
     public static final String START_FIND_ALL_USERS_BY_ROLE = "Start find all users by role: {}";
-    public static final String NOT_FOUND_USERS_ROLE_IS_NULL = "Not found users, role is null";
     public static final String START_VERIFY_EMAIL_TOKEN = "Start verify email token: {}";
     public static final String FAILED_SAVE_USER_AFTER_VERIFY_EMAIL_TOKEN = "Failed save user after verify email token";
     public static final String FAILED_SAVE_USER_AFTER_RESET_PASSWORD = "Failed save user after reset password";
@@ -185,24 +156,12 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
 
     @Transactional(readOnly = true)
     public Optional<User> findByEmail(String email) {
-        chekStringForNullOrEmpty(email, NOT_FOUND_USER_BY_EMAIL_EMAIL_IS_NULL,
-                                 NOT_FOUND_USER_BY_EMAIL_EMAIL_IS_EMPTY, EntityNotExistException.class, NOT_FOUND_USER
-        );
         log.trace(START_FIND_USER_BY_EMAIL, email);
         return repository.getByEmail(email);
     }
 
     @Transactional(readOnly = true)
     public List<UserUniqueFields> findByUniqueFields(User user) {
-        chekObjectForNull(user, format(NOT_FOUND_USERS_BY_UNIQUE_FIELDS, "user"),
-                          EntityNotExistException.class
-        );
-        chekObjectForNull(user.getEmail(), format(NOT_FOUND_USERS_BY_UNIQUE_FIELDS, "email"),
-                          EntityNotExistException.class
-        );
-        chekObjectForNull(user.getId(), format(NOT_FOUND_USERS_BY_UNIQUE_FIELDS, "userId"),
-                          EntityNotExistException.class
-        );
         log.trace(START_FIND_USER_BY_UNIQUE_FIELDS, user.getEmail(), user.getId());
         return repository.getByEmailAndIdNot(user.getEmail(), user.getId());
     }
@@ -210,19 +169,6 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
     @SuppressWarnings("DuplicatedCode")
     @Transactional(readOnly = true)
     public User findByIdAndAccountIdAndGroupId(UUID id, UUID accountId, UUID groupId) {
-        chekObjectForNull(id, format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, groupId),
-                          EntityNotExistException.class
-        );
-        chekObjectForNull(
-                accountId,
-                format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, groupId),
-                EntityNotExistException.class
-        );
-        chekObjectForNull(
-                groupId,
-                format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, groupId),
-                EntityNotExistException.class
-        );
         log.trace(START_FIND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, groupId);
         return repository.getByIdAndAccount_IdAndGroup_Id(id, accountId, groupId).orElseThrow(
                 () -> new EntityNotExistException(
@@ -233,12 +179,6 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
 
     @Transactional(readOnly = true)
     public List<User> findAllByRoleAndIdNot(Role role, UUID id) {
-        chekObjectForNull(role, format(NOT_FOUND_USERS_BY_ROLE_AND_NOT_ID, role, id),
-                          EntityNotExistException.class
-        );
-        chekObjectForNull(id, format(NOT_FOUND_USERS_BY_ROLE_AND_NOT_ID, role, id),
-                          EntityNotExistException.class
-        );
         log.trace(START_FIND_ALL_USERS_BY_ROLE_AND_NOT_ID, role, id);
         return repository.findAllByRoleAndIdNot(role, id);
     }
@@ -246,34 +186,18 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
     @SuppressWarnings("DuplicatedCode")
     @Transactional(readOnly = true)
     public List<User> findAllByRoleAndAccount_IdAndIdNot(Role role, UUID accountId, UUID id) {
-        chekObjectForNull(role, format(NOT_FOUND_USERS_BY_ROLE_AND_ACCOUNT_ID_AND_NOT_ID, role, accountId, id),
-                          EntityNotExistException.class
-        );
-        chekObjectForNull(accountId, format(NOT_FOUND_USERS_BY_ROLE_AND_ACCOUNT_ID_AND_NOT_ID, role, accountId, id),
-                          EntityNotExistException.class
-        );
-        chekObjectForNull(id, format(NOT_FOUND_USERS_BY_ROLE_AND_ACCOUNT_ID_AND_NOT_ID, role, accountId, id),
-                          EntityNotExistException.class
-        );
         log.trace(START_FIND_ALL_USERS_BY_ROLE_ACCOUNT_ID_AND_NOT_ID, role, accountId, id);
         return repository.findAllByRoleAndAccount_IdAndIdNot(role, accountId, id);
     }
 
     @Transactional(readOnly = true)
     public List<User> findAllByRole(Role role) {
-        chekObjectForNull(role, NOT_FOUND_USERS_ROLE_IS_NULL, EntityNotExistException.class);
         log.trace(START_FIND_ALL_USERS_BY_ROLE, role);
         return repository.findAllByRole(role);
     }
 
     @Transactional(readOnly = true)
     public List<User> findAllByRoleAndAccountId(Role role, UUID accountId) {
-        chekObjectForNull(role, format(NOT_FOUND_USERS_BY_ROLE_AND_ACCOUNT_ID, role, accountId),
-                          EntityNotExistException.class
-        );
-        chekObjectForNull(accountId, format(NOT_FOUND_USERS_BY_ROLE_AND_ACCOUNT_ID, role, accountId),
-                          EntityNotExistException.class
-        );
         log.trace(START_FIND_ALL_USERS_BY_ROLE, role);
         return repository.findAllByRoleAndAccount_Id(role, accountId);
     }

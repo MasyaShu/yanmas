@@ -7,10 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
@@ -24,7 +24,9 @@ import ru.itterminal.botdesk.security.jwt.JwtUser;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
+
     private final UserServiceImpl service;
     private final RoleServiceImpl roleService;
 
@@ -44,13 +46,6 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
     protected static final String CREATE_UPDATE_ONLY_HIS_GROUP =
             "If user is not in inner group, then he can create/update user only in his "
                     + "group";
-
-    @Autowired
-    public UserOperationValidator(UserServiceImpl service,
-            RoleServiceImpl roleService) {
-        this.service = service;
-        this.roleService = roleService;
-    }
 
     @Override
     public boolean beforeCreate(User entity) {
