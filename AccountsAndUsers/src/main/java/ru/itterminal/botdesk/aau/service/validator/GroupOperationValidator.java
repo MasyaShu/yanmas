@@ -19,6 +19,7 @@ import java.util.Map;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekStringForEquals;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.ifErrorsNotEmptyThrowLogicalValidationException;
 
 @Slf4j
 @Component
@@ -45,11 +46,11 @@ public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> 
     @Override
     public boolean checkUniqueness(Group entity) {
         log.trace(CHECK_UNIQUENESS, entity);
-        Map<String, List<ValidationError>> errors = new HashMap<>();
         List<GroupUniqueFields> foundGroup = service.findByUniqueFields(entity);
         if (!foundGroup.isEmpty()) {
+            String validatedField = "name";
             chekStringForEquals(entity.getName(), foundGroup.get(0).getName(),
-                    NOT_UNIQUE_CODE, format(NOT_UNIQUE_MESSAGE, "name"), errors);
+                    "name", format(NOT_UNIQUE_MESSAGE, validatedField));
         }
         log.trace(FIELDS_UNIQUE, entity);
         return true;

@@ -141,10 +141,9 @@ public class CommonMethodsForValidation {
     }
 
     public static void chekStringForEquals(String StringOne, String StringTwo, String keyError,
-                                           String errorMessageIfObjectsIsNotEquals,
-                                           Map<String, List<ValidationError>> errors) {
+                                           String errorMessage) {
         if (StringOne.equalsIgnoreCase(StringTwo)) {
-            addValidationErrorIntoErrors(keyError, errorMessageIfObjectsIsNotEquals, errors);
+            throw createExpectedLogicalValidationException(keyError, errorMessage);
         }
     }
 

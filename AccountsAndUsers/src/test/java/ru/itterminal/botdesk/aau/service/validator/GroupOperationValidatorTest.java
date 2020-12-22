@@ -22,12 +22,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.LOGIC_CONSTRAINT_CODE;
-import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
+import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.*;
 
 @SpringJUnitConfig(value = {GroupOperationValidator.class})
 @Import(TestSecurityConfig.class)
@@ -44,6 +44,7 @@ class GroupOperationValidatorTest {
     private final GroupOperationValidator validator = new GroupOperationValidator(service);
 
     private static final String EXIST_NAME = "groupName1";
+    private static final String VALIDATED_FIELDS = "name";
     private static LogicalValidationException logicalValidationException;
     private static final Map<String, List<ValidationError>> errors = new HashMap<>();
     private static final String USER_FROM_AN_INNER_GROUP_CANNOT_CREATE_UPDATE_GROUPS =
@@ -65,8 +66,8 @@ class GroupOperationValidatorTest {
         group.setName(EXIST_NAME);
         when(service.findByUniqueFields(any())).thenReturn(List.of(userUniqueFields));
         when(userUniqueFields.getName()).thenReturn(EXIST_NAME);
-        errors.put("name", singletonList(new ValidationError("not unique", "name is occupied")));
-        logicalValidationException = new LogicalValidationException("Validation failed", errors);
+        errors.put("name", singletonList(new ValidationError(VALIDATED_FIELDS, "name is occupied")));
+        logicalValidationException = new LogicalValidationException(VALIDATED_FIELDS, errors);
         LogicalValidationException thrown = assertThrows(LogicalValidationException.class,
                 () -> validator.checkUniqueness(group));
         assertEquals(logicalValidationException.getFieldErrors().get("name").get(0),

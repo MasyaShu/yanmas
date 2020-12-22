@@ -29,11 +29,11 @@ public class TicketTypeOperationValidator extends BasicOperationValidatorImpl<Ti
     @Override
     public boolean checkUniqueness(TicketType entity) {
         log.trace(CHECK_UNIQUENESS, entity);
-        var errors = createMapForLogicalErrors();
         List<TicketTypeUniqueFields> foundTicketTypes = service.findByUniqueFields(entity);
         if (!foundTicketTypes.isEmpty()) {
+            String validatedField = "name";
             chekStringForEquals(entity.getName(), foundTicketTypes.get(0).getName(),
-                    NOT_UNIQUE_CODE, format(NOT_UNIQUE_MESSAGE, "name"), errors);
+                    validatedField, format(NOT_UNIQUE_MESSAGE, validatedField));
         }
         log.trace(FIELDS_UNIQUE, entity);
         return true;
