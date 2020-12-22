@@ -1,17 +1,12 @@
 package ru.itterminal.botdesk.aau.model;
 
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import ru.itterminal.botdesk.commons.model.BaseEntity;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-import lombok.experimental.SuperBuilder;
-import ru.itterminal.botdesk.commons.model.BaseEntity;
 
 @Entity
 @Table(name = "account")

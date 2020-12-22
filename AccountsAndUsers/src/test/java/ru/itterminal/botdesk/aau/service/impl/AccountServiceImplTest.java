@@ -103,47 +103,4 @@ class AccountServiceImplTest {
         verify(userService, times(1)).create(any());
         verify(roleService, times(1)).getAccountOwnerRole();
     }
-
-    @Test
-    void update_shouldUpdateAccount_whenPassedValidData() {
-        when(validator.beforeUpdate(any())).thenReturn(true);
-        when(repository.existsById(any())).thenReturn(true);
-        when(repository.findById(any())).thenReturn(Optional.of(account));
-        when(repository.update(any())).thenReturn(account);
-        Account updatedAccount = service.update(account);
-        assertEquals(account, updatedAccount);
-        verify(validator, times(1)).beforeUpdate(any());
-        verify(repository, times(1)).existsById(any());
-        verify(repository, times(1)).findById(any());
-        verify(repository, times(1)).update(any());
-    }
-
-    @Test
-    void update_shouldGetEntityNotExistException_whenAccountIdNotExistInDatabase() {
-        when(validator.beforeUpdate(any())).thenReturn(true);
-        when(repository.existsById(any())).thenReturn(false);
-        when(repository.findById(any())).thenReturn(Optional.empty());
-        when(repository.update(any())).thenReturn(account);
-        Throwable throwable = assertThrows(EntityNotExistException.class, ()-> service.update(account));
-        assertEquals(String.format(CrudService.FIND_INVALID_MESSAGE, "id", account.getId()), throwable.getMessage());
-        verify(validator, times(1)).beforeUpdate(any());
-        verify(repository, times(1)).existsById(any());
-        verify(repository, times(0)).findById(any());
-        verify(repository, times(0)).update(any());
-    }
-
-    @Test
-    void update_shouldGetOptimisticLockingFailureException_whenPassedInvalidVersionOfAccount() {
-        String message = String.format(CrudService.VERSION_INVALID_MESSAGE, account.getId());
-        when(validator.beforeUpdate(any())).thenReturn(true);
-        when(repository.existsById(any())).thenReturn(true);
-        when(repository.findById(any())).thenReturn(Optional.of(account));
-        when(repository.update(any())).thenThrow(new OptimisticLockingFailureException(message));
-        Throwable throwable = assertThrows(OptimisticLockingFailureException.class, ()-> service.update(account));
-        assertEquals(message, throwable.getMessage());
-        verify(validator, times(1)).beforeUpdate(any());
-        verify(repository, times(1)).existsById(any());
-        verify(repository, times(1)).findById(any());
-        verify(repository, times(1)).update(any());
-    }
 }
