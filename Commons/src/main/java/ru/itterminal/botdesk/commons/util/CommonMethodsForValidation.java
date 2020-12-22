@@ -1,18 +1,18 @@
 package ru.itterminal.botdesk.commons.util;
 
-import static java.util.Collections.singletonList;
-import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.FIELDS_ARE_NOT_VALID;
-import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
+import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
-import ru.itterminal.botdesk.commons.exception.error.ValidationError;
+import static java.util.Collections.singletonList;
+import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.FIELDS_ARE_NOT_VALID;
+import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 @Slf4j
@@ -140,9 +140,9 @@ public class CommonMethodsForValidation {
         );
     }
 
-    public static void chekStringForEquals(String StringOne, String StringTwo, String keyError,
-                                           String errorMessage) {
-        if (StringOne.equalsIgnoreCase(StringTwo)) {
+    public static void checkStringForEquals(String stringOne, String stringTwo, String keyError,
+                                            String errorMessage) {
+        if (stringOne.equalsIgnoreCase(stringTwo)) {
             throw createExpectedLogicalValidationException(keyError, errorMessage);
         }
     }

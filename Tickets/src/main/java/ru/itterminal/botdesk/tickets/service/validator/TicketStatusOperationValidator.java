@@ -11,8 +11,7 @@ import ru.itterminal.botdesk.tickets.service.impl.TicketStatusServiceImpl;
 import java.util.List;
 
 import static java.lang.String.format;
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekStringForEquals;
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.checkStringForEquals;
 
 @Slf4j
 @Component
@@ -31,7 +30,7 @@ public class TicketStatusOperationValidator extends BasicOperationValidatorImpl<
         List<TicketStatusUniqueFields> foundTicketStatus = service.findByUniqueFields(entity);
         if (!foundTicketStatus.isEmpty()) {
             String validatedField = "name";
-            chekStringForEquals(entity.getName(), foundTicketStatus.get(0).getName(),
+            checkStringForEquals(entity.getName(), foundTicketStatus.get(0).getName(),
                     validatedField, format(NOT_UNIQUE_MESSAGE, validatedField));
         }
         log.trace(FIELDS_UNIQUE, entity);
