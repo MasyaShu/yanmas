@@ -13,7 +13,7 @@ import javax.persistence.criteria.Predicate;
 public class TicketTypeSpec implements BaseSpec<TicketType, Account> {
     private static final String COMMENT = "comment";
     private static final String NAME = "name";
-    private static final String IS_PREDEFINED = "isPredefined";
+    private static final String IS_PREDEFINED = "isPredefinedForNewTicket";
     private static final String EMPTY_STRING = "";
 
 
@@ -36,7 +36,7 @@ public class TicketTypeSpec implements BaseSpec<TicketType, Account> {
         };
     }
 
-    public Specification<TicketType> getTicketTypesByIsPredefinedSpec(Boolean isDeprecated) {
+    public Specification<TicketType> getTicketTypesByIsPredefinedForNewTicketSpec(Boolean isDeprecated) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get(IS_PREDEFINED), isDeprecated);
     }
 }

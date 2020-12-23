@@ -37,6 +37,7 @@ public class TicketTypeServiceImpl extends
     private static final String CANT_FIND_BY_UNIQUE = "Can't find by unique fields";
 
     @SuppressWarnings("DuplicatedCode")
+    @Transactional(readOnly = true)
     public List<TicketTypeUniqueFields> findByUniqueFields(TicketType ticketType) {
         chekObjectForNull(ticketType, TICKET_TYPE_IS_NULL, EntityNotExistException.class);
         chekStringForNullOrEmpty(ticketType.getName(), NAME_IS_NULL,
@@ -52,7 +53,7 @@ public class TicketTypeServiceImpl extends
     @Override
     public TicketType update(TicketType entity) {
         TicketType entityFromDatabase = findByIdAndAccountId(entity.getId(), entity.getAccount().getId());
-        entity.setIsPredefined(entityFromDatabase.getIsPredefined());
+        entity.setIsPredefinedForNewTicket(entityFromDatabase.getIsPredefinedForNewTicket());
         return super.update(entity);
     }
 }

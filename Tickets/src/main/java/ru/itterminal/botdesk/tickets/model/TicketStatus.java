@@ -1,5 +1,7 @@
 package ru.itterminal.botdesk.tickets.model;
 
+import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -26,6 +28,15 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class TicketStatus extends BaseEntity {
+
+    public static final UUID PREDEFINED_TICKET_STATUS_FOR_NEW_ID =
+            UUID.fromString("b78653b8-6704-4777-92dc-831d6e27a36a");
+    public static final UUID PREDEFINED_TICKET_STATUS_FOR_REOPEN_ID =
+            UUID.fromString("efc5aa64-91ce-4cec-8ac5-7b8ebd3233a8");
+    public static final UUID PREDEFINED_TICKET_STATUS_FOR_CANCEL_ID =
+            UUID.fromString("e256cbe7-dd33-4caf-a853-2bb535215ddc");
+    public static final UUID PREDEFINED_TICKET_STATUS_FOR_CLOSE_ID =
+            UUID.fromString("80ab5c74-6607-470b-93ed-42d0c2333aab");
 
     @ManyToOne
     @JoinColumn(name = "account_id", nullable = false)
