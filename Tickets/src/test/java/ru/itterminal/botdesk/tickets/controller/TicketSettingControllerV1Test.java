@@ -44,8 +44,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ru.itterminal.botdesk.aau.model.User;
-import ru.itterminal.botdesk.aau.model.dto.UserFilterDto;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
@@ -316,7 +314,7 @@ class TicketSettingControllerV1Test {
 
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    void udate_shouldGetStatusForbidden_whenNotAllowedRole() throws Exception {
+    void update_shouldGetStatusForbidden_whenNotAllowedRole() throws Exception {
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -371,7 +369,7 @@ class TicketSettingControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void getByFilter_shouldFindAllUsers_whenFilterIsNew() throws Exception {
+    void getByFilter_shouldFindAll_whenFilterIsNew() throws Exception {
         Pageable pageable =
                 PageRequest.of(Integer.parseInt(BaseController.PAGE_DEFAULT_VALUE), Integer.parseInt(
                         BaseController.SIZE_DEFAULT_VALUE),
@@ -404,5 +402,38 @@ class TicketSettingControllerV1Test {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value(CommonConstants.REQUEST_NOT_READABLE));
         verify(ticketSettingService, times(0)).findAllByFilter(any(), any());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
+    void getByAuthorId_shouldGetTicketSetting_whenPassedValidAuthorId() throws Exception {
+        when(userService.findByIdAndAccountId(any(), any())).thenReturn(ticketSetting.getAuthor());
+        when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any(), any())).thenReturn(ticketSetting);
+
+        TicketSettingDtoResponse expectedTicketSettingDtoResponse =
+                mapper.map(
+                        ticketSetting,
+                        TicketSettingDtoResponse.class
+                );
+
+        MockHttpServletRequestBuilder request =
+                get(HOST + PORT + API + "/" + ticketSetting.getAuthor().getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON);
+
+        var requestResult = mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        TicketSettingDtoResponse actualTicketSettingDtoResponse =
+                objectMapper.readValue(requestResult, TicketSettingDtoResponse.class);
+
+        assertEquals(expectedTicketSettingDtoResponse, actualTicketSettingDtoResponse);
+
+        verify(userService, times(1)).findByIdAndAccountId(any(), any());
+        verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
     }
 }

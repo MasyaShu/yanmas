@@ -64,6 +64,8 @@ public class TicketSettingControllerV1 extends BaseController {
     private final TicketTypeServiceImpl ticketTypeService;
     private final TicketSettingServiceImpl ticketSettingService;
     private final TicketSettingSpec spec;
+    public static final String FIND_BY_AUTHOR_ID_INIT_MESSAGE = "Get request for find {} by authorId: {}";
+    public static final String FIND_BY_AUTHOR_ID_FINISH_MESSAGE = "Done find {} by authorId: {}";
 
     private final String ENTITY_NAME = TicketSetting.class.getSimpleName();
 
@@ -204,6 +206,21 @@ public class TicketSettingControllerV1 extends BaseController {
         foundTicketSetting = ticketSettingService.findAllByFilter(ticketSettingSpecification, pageable);
         returnedTicketSetting = mapPage(foundTicketSetting, TicketSettingDtoResponse.class, pageable);
         log.debug(FIND_FINISH_MESSAGE, ENTITY_NAME, foundTicketSetting.getTotalElements());
+        return new ResponseEntity<>(returnedTicketSetting, HttpStatus.OK);
+    }
+
+    @GetMapping("/{authorId}")
+    public ResponseEntity<TicketSettingDtoResponse> getByAuthorId(Principal user, @PathVariable UUID authorId) {
+        log.debug(FIND_BY_AUTHOR_ID_INIT_MESSAGE, ENTITY_NAME, authorId);
+        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
+        User foundUser = userService.findByIdAndAccountId(authorId, jwtUser.getAccountId());
+        TicketSetting ticketSetting = ticketSettingService.getSettingOrPredefinedValuesForTicket(
+                jwtUser.getAccountId(),
+                foundUser.getGroup().getId(),
+                authorId
+        );
+        var returnedTicketSetting = modelMapper.map(ticketSetting, TicketSettingDtoResponse.class);
+        log.debug(FIND_BY_AUTHOR_ID_FINISH_MESSAGE, ENTITY_NAME, authorId);
         return new ResponseEntity<>(returnedTicketSetting, HttpStatus.OK);
     }
 }
