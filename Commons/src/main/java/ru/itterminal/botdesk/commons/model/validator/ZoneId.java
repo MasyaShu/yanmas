@@ -16,7 +16,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Constraint(validatedBy = ZoneIdValidator.class)
 public @interface ZoneId {
 
-    String message() default "zone id is not valid";
+    String ZONE_ID_NOT_VALID = "zoneId is not valid";
+
+    String message() default ZONE_ID_NOT_VALID;
 
     Class<?>[] groups() default {};
 

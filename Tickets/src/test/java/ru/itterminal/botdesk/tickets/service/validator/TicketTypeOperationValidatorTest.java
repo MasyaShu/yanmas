@@ -35,6 +35,7 @@ class TicketTypeOperationValidatorTest {
     private final TicketTypeOperationValidator validator = new TicketTypeOperationValidator(service);
 
     private static final String EXIST_NAME = "ticketTypes1";
+    private static final String VALIDATED_FIELDS = "name";
     private static final Map<String, List<ValidationError>> errors = new HashMap<>();
     private static LogicalValidationException logicalValidationException;
     private static TicketType ticketType;
@@ -61,8 +62,8 @@ class TicketTypeOperationValidatorTest {
     void checkUniqueness_shouldGetLogicalValidationException_whenPassedDataNotUnique() {
         when(service.findByUniqueFields(any())).thenReturn(List.of(ticketTypeUniqueFields));
         when(ticketTypeUniqueFields.getName()).thenReturn(EXIST_NAME);
-        errors.put("name", singletonList(new ValidationError("not unique", "name is occupied")));
-        logicalValidationException = new LogicalValidationException("Validation failed", errors);
+        errors.put(VALIDATED_FIELDS, singletonList(new ValidationError(VALIDATED_FIELDS, "name is occupied")));
+        logicalValidationException = new LogicalValidationException(VALIDATED_FIELDS, errors);
         LogicalValidationException thrown = assertThrows(LogicalValidationException.class,
                 () -> validator.checkUniqueness(ticketType));
         assertEquals(logicalValidationException.getFieldErrors().get("name").get(0),
