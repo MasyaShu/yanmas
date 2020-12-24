@@ -69,7 +69,7 @@ class FileServiceImplTest {
                 .account(account)
                 .fileName("file_name")
                 .createdAt(1606967833L)
-                .isUploaded(false)
+                .isUploaded(true)
                 .build();
         file.setId(UUID.randomUUID());
     }
@@ -85,56 +85,26 @@ class FileServiceImplTest {
 
     @Test
     void getFileData_shouldGetBytesOfFile_whenAccordingWithPlannedBehavior() {
+        when(repository.existsById(any())).thenReturn(true);
+        when(repository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(file));
         when(awsS3ObjectOperations.getObject(any(), any())).thenReturn(fileData);
         byte[] actualBytesOfFile = service.getFileData(UUID.randomUUID(), UUID.randomUUID());
         assertEquals(fileData, actualBytesOfFile);
         verify(awsS3ObjectOperations, times(1)).getObject(any(), any());
-    }
-
-    @Test
-    void getFileData_shouldGetLogicalValidationException_whenAccountIdIsNull() {
-        LogicalValidationException expectedException = createExpectedLogicalValidationException(
-                ACCOUNT_ID,
-                ACCOUNT_ID_IS_NULL
-        );
-        UUID fileId = UUID.randomUUID();
-        LogicalValidationException actualException = assertThrows(
-                LogicalValidationException.class,
-                () -> service.getFileData(null, fileId)
-        );
-        assertEquals(
-                expectedException.getFieldErrors().get(ACCOUNT_ID).get(0),
-                actualException.getFieldErrors().get(ACCOUNT_ID).get(0)
-        );
-        verify(awsS3ObjectOperations, times(0)).getObject(any(), any());
-    }
-
-    @Test
-    void getFileData_shouldGetLogicalValidationException_whenFileIdIsNull() {
-        LogicalValidationException expectedException = createExpectedLogicalValidationException(
-                FILE_ID,
-                FILE_ID_IS_NULL
-        );
-        UUID accountId = UUID.randomUUID();
-        LogicalValidationException actualException = assertThrows(
-                LogicalValidationException.class,
-                () -> service.getFileData(accountId, null)
-        );
-        assertEquals(
-                expectedException.getFieldErrors().get(FILE_ID).get(0),
-                actualException.getFieldErrors().get(FILE_ID).get(0)
-        );
-        verify(awsS3ObjectOperations, times(0)).getObject(any(), any());
+        verify(repository, times(1)).findByIdAndAccountId(any(), any());
+        verify(repository, times(1)).existsById(any());
     }
 
     @Test
     void putFileData_shouldGetStatusTrue_whenAccordingWithPlannedBehavior() {
-        when(repository.findByAccountIdAndId(any(), any())).thenReturn(Optional.of(file));
+        when(repository.existsById(any())).thenReturn(true);
+        when(repository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(file));
         when(repository.save(any())).thenReturn(file);
         when(awsS3ObjectOperations.putObject(any(), any(), any())).thenReturn(true);
         boolean actualStatus = service.putFileData(account.getId(), file.getId(), fileData);
         assertTrue(actualStatus);
-        verify(repository, times(1)).findByAccountIdAndId(any(), any());
+        verify(repository, times(1)).existsById(any());
+        verify(repository, times(1)).findByIdAndAccountId(any(), any());
         verify(repository, times(1)).save(any());
         verify(awsS3ObjectOperations, times(1)).putObject(any(), any(), any());
     }
@@ -160,54 +130,14 @@ class FileServiceImplTest {
     }
 
     @Test
-    void putFileData_shouldGetLogicalValidationException_whenAccountIdIsNull() {
-        LogicalValidationException expectedException = createExpectedLogicalValidationException(
-                ACCOUNT_ID,
-                ACCOUNT_ID_IS_NULL
-        );
-        UUID fileId = UUID.randomUUID();
-        LogicalValidationException actualException = assertThrows(
-                LogicalValidationException.class,
-                () -> service.putFileData(null, fileId, fileData)
-        );
-        assertEquals(
-                expectedException.getFieldErrors().get(ACCOUNT_ID).get(0),
-                actualException.getFieldErrors().get(ACCOUNT_ID).get(0)
-        );
-        verify(repository, times(0)).findByAccountIdAndId(any(), any());
-        verify(repository, times(0)).save(any());
-        verify(awsS3ObjectOperations, times(0)).putObject(any(), any(), any());
-    }
-
-    @Test
-    void putFileData_shouldGetLogicalValidationException_whenFileDataIsNull() {
-        LogicalValidationException expectedException = createExpectedLogicalValidationException(
-                BYTES_OF_FILE,
-                BYTES_OF_FILE_IS_NULL
-        );
-        UUID fileId = UUID.randomUUID();
-        UUID accountId = UUID.randomUUID();
-        LogicalValidationException actualException = assertThrows(
-                LogicalValidationException.class,
-                () -> service.putFileData(accountId, fileId, null)
-        );
-        assertEquals(
-                expectedException.getFieldErrors().get(BYTES_OF_FILE).get(0),
-                actualException.getFieldErrors().get(BYTES_OF_FILE).get(0)
-        );
-        verify(repository, times(0)).findByAccountIdAndId(any(), any());
-        verify(repository, times(0)).save(any());
-        verify(awsS3ObjectOperations, times(0)).putObject(any(), any(), any());
-    }
-
-    @Test
     void putFileData_shouldGetEntityNotExistException_whenCantFindEntityByPassedParameters() {
-        when(repository.findByAccountIdAndId(any(), any())).thenReturn(Optional.empty());
+        when(repository.existsById(any())).thenReturn(false);
         UUID fileId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
         assertThrows(EntityNotExistException.class,
                      ()-> service.putFileData(accountId, fileId, fileData));
-        verify(repository, times(1)).findByAccountIdAndId(any(), any());
+        verify(repository, times(1)).existsById(any());
+        verify(repository, times(0)).findByIdAndAccountId(any(), any());
         verify(repository, times(0)).save(any());
         verify(awsS3ObjectOperations, times(0)).putObject(any(), any(), any());
     }
