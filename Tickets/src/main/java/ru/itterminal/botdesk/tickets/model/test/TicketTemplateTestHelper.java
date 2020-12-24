@@ -94,6 +94,27 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
         return ticketTemplates;
     }
 
+    @Override
+    public TicketTemplateDtoRequest convertEntityToDtoRequest(TicketTemplate entity) {
+        return TicketTemplateDtoRequest.builder()
+                .dateEnd(entity.getDateEnd())
+                .dateStart(entity.getDateStart())
+                .description(entity.getDescription())
+                .expressionSchedule(entity.getExpressionSchedule())
+                .isActive(entity.getIsActive())
+                .subject(entity.getSubject())
+                .zoneId(entity.getZoneId())
+                .id(entity.getId())
+                .version(entity.getVersion())
+                .deleted(entity.getDeleted())
+                .isOnlyOneTicketInWork(entity.getIsOnlyOneTicketInWork())
+                .outId(entity.getOutId())
+                .authorId(entity.getAuthor() == null ? null : entity.getAuthor().getId())
+                .ticketTypeId(entity.getTicketType() == null ? null : entity.getTicketType().getId())
+                .build();
+    }
+
+
     public static Date atStartOfDay(Date date) {
         LocalDateTime localDateTime = dateToLocalDateTime(date);
         LocalDateTime startOfDay = localDateTime.with(LocalTime.MIN);

@@ -28,11 +28,9 @@ public class TicketTemplateDtoRequest extends BaseEntityDto {
     private Long dateEnd;
 
     @ZoneId(groups = {Create.class, Update.class})
-    @NotNull(groups = {Create.class, Update.class})
     private String zoneId;
 
     @Scheduler(groups = {Create.class, Update.class})
-    @NotNull(groups = {Create.class, Update.class})
     private String expressionSchedule;
 
     @NotNull(groups = {Create.class, Update.class})

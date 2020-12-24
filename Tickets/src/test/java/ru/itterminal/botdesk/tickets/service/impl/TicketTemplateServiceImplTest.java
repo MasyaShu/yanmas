@@ -10,18 +10,13 @@ import ru.itterminal.botdesk.tickets.model.test.TicketTemplateTestHelper;
 import ru.itterminal.botdesk.tickets.repository.TicketTemplateRepository;
 import ru.itterminal.botdesk.tickets.service.validator.TicketTemplateOperationValidator;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Optional;
-import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {TicketTemplateServiceImpl.class})
@@ -99,8 +94,7 @@ class TicketTemplateServiceImplTest {
     void setNextExecutionTime_shouldGetNull_whenExpressionScheduleNotExecutable() {
         long startNowDay = TicketTemplateTestHelper.atStartOfDay(new Date()).getTime();
         TicketTemplate ticketTemplate = ticketTemplateTestHelper.getRandomValidEntity();
-        ticketTemplate.setDateEnd(startNowDay);
-        ticketTemplate.setExpressionSchedule("* * * 31 2 *");
+        ticketTemplate.setExpressionSchedule("0 0 0 30 2 *");
         when(validator.beforeUpdate(any())).thenReturn(true);
         when(ticketTemplateRepository.existsById(any())).thenReturn(true);
         when(ticketTemplateRepository.findById(any())).thenReturn(Optional.of(ticketTemplate));
