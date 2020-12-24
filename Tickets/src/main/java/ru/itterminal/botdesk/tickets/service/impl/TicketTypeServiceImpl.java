@@ -21,6 +21,7 @@ public class TicketTypeServiceImpl extends
     private static final String START_FIND_TICKET_TYPES_BY_UNIQUE_FIELDS =
             "Start find ticket type by unique fields, name: {} and not id: {} and not account: {}";
 
+    @Transactional(readOnly = true)
     public List<TicketTypeUniqueFields> findByUniqueFields(TicketType ticketType) {
         log.trace(START_FIND_TICKET_TYPES_BY_UNIQUE_FIELDS, ticketType.getName(), ticketType.getId(), ticketType.getAccount());
         return repository.getByNameAndAccount_IdAndIdNot(ticketType.getName(), ticketType.getAccount().getId(), ticketType.getId());
