@@ -15,5 +15,4 @@ public interface TicketSettingRepository extends EntityRepositoryWithAccount<Tic
     @Query(value = "select account_id, group_id, author_id  from ticket_settings where"
             + " account_id = ?1 and group_id=?2 and author_id=?3 and id<>?4", nativeQuery = true)
     List<TicketSettingUniqueFields> findByUniqueFields(UUID accountId, UUID groupId, UUID authorId, UUID id);
-
 }

@@ -107,7 +107,7 @@ private final Pageable pageable = PageRequest.of(0, 5, Sort.by((Sort.Direction.A
     @Test
     void getTicketTypesByIsPredefinedSpec_shouldGetTwoTicketType_whenIsPredefinedTrue() {
         Specification<TicketType> userSpecification = Specification
-                .where(spec.getTicketTypesByIsPredefinedSpec(true));
+                .where(spec.getTicketTypesByIsPredefinedForNewTicketSpec(true));
         foundTicketTypes = ticketTypeRepository.findAll(userSpecification, pageable);
         assertEquals(TICKET_TYPES_1_NAME, foundTicketTypes.getContent().get(0).getName());
         assertEquals(TICKET_TYPES_3_NAME, foundTicketTypes.getContent().get(1).getName());
@@ -117,7 +117,7 @@ private final Pageable pageable = PageRequest.of(0, 5, Sort.by((Sort.Direction.A
     @Test
     void getTicketTypesByIsPredefinedSpec_shouldGetTreeTicketType_whenIsPredefinedFalse() {
         Specification<TicketType> userSpecification = Specification
-                .where(spec.getTicketTypesByIsPredefinedSpec(false));
+                .where(spec.getTicketTypesByIsPredefinedForNewTicketSpec(false));
         foundTicketTypes = ticketTypeRepository.findAll(userSpecification, pageable);
         assertEquals(TICKET_TYPES_2_NAME, foundTicketTypes.getContent().get(0).getName());
         assertEquals(TICKET_TYPES_4_NAME, foundTicketTypes.getContent().get(1).getName());

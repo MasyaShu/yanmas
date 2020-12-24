@@ -19,6 +19,7 @@ import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_BE_NULL_FO
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@EqualsAndHashCode(callSuper = true)
 public class GroupDto extends BaseEntityDto {
 
     @NotNull(groups = {Create.class, Update.class, Delete.class})

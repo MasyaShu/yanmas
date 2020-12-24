@@ -19,13 +19,6 @@ public class GroupServiceImpl extends CrudServiceWithAccountImpl<Group, GroupOpe
     private static final String START_FIND_GROUP_BY_UNIQUE_FIELDS =
             "Start find user by unique fields, name: {} and not id: {} and not account: {} and not isInner: {}";
 
-    @Override
-    public Group update(Group entity) {
-        Group entityFromDatabase = findByIdAndAccountId(entity.getId(), entity.getAccount().getId());
-        entity.setIsInner(entityFromDatabase.getIsInner());
-        return super.update(entity);
-    }
-
     public List<GroupUniqueFields> findByUniqueFields(Group group) {
         log.trace(START_FIND_GROUP_BY_UNIQUE_FIELDS, group.getName(), group.getId(), group.getAccount(), group.getIsInner());
         return repository.getByNameAndIsInnerAndAccount_IdAndIdNot(group.getName(), group.getIsInner(), group.getAccount().getId(), group.getId());

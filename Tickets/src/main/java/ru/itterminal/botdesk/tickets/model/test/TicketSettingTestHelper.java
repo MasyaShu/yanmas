@@ -124,17 +124,28 @@ public class TicketSettingTestHelper extends EntityTestHelperImpl<TicketSetting,
     @Override
     public TicketSettingDtoRequest convertEntityToDtoRequest(TicketSetting entity) {
 
-        List<UUID> observersIdList = entity.getObservers()
-                .stream()
-                .map(BaseEntity::getId)
-                .collect(Collectors.toList());
+        List<UUID> observersIdList = new ArrayList<>();
+        if (entity.getObservers() != null) {
+            observersIdList = entity.getObservers()
+                    .stream()
+                    .map(BaseEntity::getId)
+                    .collect(Collectors.toList());
+        }
 
-        List<UUID> executorsIdList = entity.getExecutors()
-                .stream()
-                .map(BaseEntity::getId)
-                .collect(Collectors.toList());
+        List<UUID> executorsIdList = new ArrayList<>();
+        if (entity.getExecutors() != null) {
+            executorsIdList = entity.getExecutors()
+                    .stream()
+                    .map(BaseEntity::getId)
+                    .collect(Collectors.toList());
+        }
 
         return TicketSettingDtoRequest.builder()
+                .id(entity.getId())
+                .outId(entity.getOutId())
+                .deleted(entity.getDeleted())
+                .version(entity.getVersion())
+                .displayName(entity.getDisplayName())
                 .group(entity.getGroup() == null
                                ? null
                                : entity.getGroup().getId())

@@ -5,6 +5,7 @@ import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,6 +21,7 @@ import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@EqualsAndHashCode(callSuper = true)
 public class TicketTypeDto extends BaseEntityDto {
 
     @NotNull(groups = {Create.class, Update.class})
@@ -29,6 +31,6 @@ public class TicketTypeDto extends BaseEntityDto {
     private String comment;
 
     @Null(groups = {Create.class, Update.class})
-    private Boolean isPredefined;
+    private Boolean isPredefinedForNewTicket;
 
 }

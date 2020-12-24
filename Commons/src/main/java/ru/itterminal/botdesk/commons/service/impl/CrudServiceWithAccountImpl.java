@@ -1,6 +1,8 @@
 package ru.itterminal.botdesk.commons.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
@@ -13,6 +15,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static java.lang.String.format;
+
+import javax.persistence.OptimisticLockException;
 
 /**
  * Skeletal implementation of general CRUD operations for each dictionary

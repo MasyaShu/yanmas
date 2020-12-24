@@ -20,19 +20,10 @@ public class TicketStatusServiceImpl extends
     private static final String START_FIND_TICKET_TYPES_BY_UNIQUE_FIELDS =
             "Start find ticket status by unique fields, name: {} and not id: {} and not account: {}";
 
+    @Transactional(readOnly = true)
     public List<TicketStatusUniqueFields> findByUniqueFields(TicketStatus ticketStatus) {
         log.trace(START_FIND_TICKET_TYPES_BY_UNIQUE_FIELDS, ticketStatus.getName(), ticketStatus.getId(), ticketStatus.getAccount());
         return repository.getByNameAndAccount_IdAndIdNot(ticketStatus.getName(), ticketStatus.getAccount().getId(), ticketStatus
                 .getId());
-    }
-
-    @Override
-    public TicketStatus update(TicketStatus entity) {
-        TicketStatus entityFromDatabase = findByIdAndAccountId(entity.getId(), entity.getAccount().getId());
-        entity.setIsCanceledPredefined(entityFromDatabase.getIsCanceledPredefined());
-        entity.setIsFinishedPredefined(entityFromDatabase.getIsFinishedPredefined());
-        entity.setIsReopenedPredefined(entityFromDatabase.getIsReopenedPredefined());
-        entity.setIsStartedPredefined(entityFromDatabase.getIsStartedPredefined());
-        return super.update(entity);
     }
 }
