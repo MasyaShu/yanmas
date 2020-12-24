@@ -48,16 +48,20 @@ public class TicketStatus extends BaseEntity {
     @Column(name = "sort_index", nullable = false)
     private Integer sortIndex;
 
-    @Column(name = "is_started_predefined", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    @Column(name = "is_started_predefined", nullable = false,
+            columnDefinition = "BOOLEAN DEFAULT FALSE", updatable = false)
     private Boolean isStartedPredefined;
 
-    @Column(name = "is_finished_predefined", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    @Column(name = "is_finished_predefined", nullable = false,
+            columnDefinition = "BOOLEAN DEFAULT FALSE", updatable = false)
     private Boolean isFinishedPredefined;
 
-    @Column(name = "is_reopened_predefined", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    @Column(name = "is_reopened_predefined", nullable = false,
+            columnDefinition = "BOOLEAN DEFAULT FALSE", updatable = false)
     private Boolean isReopenedPredefined;
 
-    @Column(name = "is_canceled_predefined", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    @Column(name = "is_canceled_predefined", nullable = false,
+            columnDefinition = "BOOLEAN DEFAULT FALSE", updatable = false)
     private Boolean isCanceledPredefined;
 
     @Override

@@ -49,11 +49,4 @@ public class TicketTypeServiceImpl extends
         return repository.getByNameAndAccount_IdAndIdNot(ticketType.getName(), ticketType.getAccount().getId(), ticketType
                 .getId());
     }
-
-    @Override
-    public TicketType update(TicketType entity) {
-        TicketType entityFromDatabase = findByIdAndAccountId(entity.getId(), entity.getAccount().getId());
-        entity.setIsPredefinedForNewTicket(entityFromDatabase.getIsPredefinedForNewTicket());
-        return super.update(entity);
-    }
 }

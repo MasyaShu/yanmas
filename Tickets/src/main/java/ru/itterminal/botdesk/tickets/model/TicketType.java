@@ -29,7 +29,8 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @EqualsAndHashCode(callSuper = true)
 public class TicketType extends BaseEntity {
 
-    public static final UUID PREDEFINED_TICKET_TYPE_FOR_NEW_ID = UUID.fromString("92cbb319-0d99-4ec2-9d1c-2c4fc3005468");
+    public static final UUID PREDEFINED_TICKET_TYPE_FOR_NEW_ID =
+            UUID.fromString("92cbb319-0d99-4ec2-9d1c-2c4fc3005468");
 
     @ManyToOne
     @JoinColumn(name = "account_id", nullable = false)
@@ -41,7 +42,8 @@ public class TicketType extends BaseEntity {
     @Column
     private String comment;
 
-    @Column(name = "is_predefined", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    @Column(name = "is_predefined", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE",
+            updatable = false)
     private Boolean isPredefinedForNewTicket;
 
     @Override

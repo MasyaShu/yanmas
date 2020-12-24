@@ -26,14 +26,4 @@ public class TicketStatusServiceImpl extends
         return repository.getByNameAndAccount_IdAndIdNot(ticketStatus.getName(), ticketStatus.getAccount().getId(), ticketStatus
                 .getId());
     }
-
-    @Override
-    public TicketStatus update(TicketStatus entity) {
-        TicketStatus entityFromDatabase = findByIdAndAccountId(entity.getId(), entity.getAccount().getId());
-        entity.setIsCanceledPredefined(entityFromDatabase.getIsCanceledPredefined());
-        entity.setIsFinishedPredefined(entityFromDatabase.getIsFinishedPredefined());
-        entity.setIsReopenedPredefined(entityFromDatabase.getIsReopenedPredefined());
-        entity.setIsStartedPredefined(entityFromDatabase.getIsStartedPredefined());
-        return super.update(entity);
-    }
 }
