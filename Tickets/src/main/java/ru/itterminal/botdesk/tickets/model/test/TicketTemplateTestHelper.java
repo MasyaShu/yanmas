@@ -30,7 +30,7 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
                 .dateNextRun(null)
                 .dateStart(null)
                 .dateEnd(null)
-                .zoneId("Europe/Moscow")
+                .zoneId(getValidZoneId())
                 .expressionSchedule("25 6 5 25 2 *")
                 .isOnlyOneTicketInWork(fakerRU.bool().bool())
                 .isActive(fakerRU.bool().bool())
@@ -133,5 +133,11 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
 
     private static Date localDateTimeToDate(LocalDateTime localDateTime) {
         return Date.from(localDateTime.atZone(ZoneId.of("GMT")).toInstant());
+    }
+
+    private String getValidZoneId() {
+        var setZoneId = ZoneId.getAvailableZoneIds();
+        var index = fakerRU.number().numberBetween(0, setZoneId.size() - 1);
+        return setZoneId.toArray()[index].toString();
     }
 }

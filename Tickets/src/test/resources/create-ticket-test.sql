@@ -74,7 +74,7 @@ VALUES (null, 'false', '0', '7b61d578-3eef-4a6e-99c9-6fa137f1bc0b', '9c8183ba-5d
         '0223e51a-4bb2-44ee-bc8e-1f047a2145e7'),
        (null, 'false', '0', '968ee2a2-2af5-474b-b772-8b802aa58c6f', '9c8183ba-5d13-442f-a741-5b3134a3c140',
         'e14d9ffd-0071-4c0e-99ed-932f007963f0');
-INSERT INTO ticket_template(out_id, deleted, version, id, subject, display_name, description, date_next_run, date_start, date_end, zone_id, expression_schedule, is_only_one_ticket_in_work, is_active, account_id, user_id, type_ticket_id)
+INSERT INTO ticket_template(out_id, deleted, version, id, subject, display_name, description, date_next_run, date_start, date_end, zone_id, expression_schedule, is_only_one_ticket_in_work, is_active, account_id, user_id, ticket_type_id)
 VALUES (null, 'false', '0', '21dad366-54d8-445f-b778-4cc3829e07b1', 'subject_1', 'subject_1', 'description_1', 1639144829000, null, null, 'Europe/Moscow', '25 6 5 25 2 *', true, true, 'cdfa6483-0769-4628-ba32-efd338a716de', 'd592facb-e6ee-4801-8310-9c7708eb6e6c', '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9'),
        (null, 'false', '0', 'f8a773d2-0f4d-48e9-b788-7ce671373992', 'subject_2', 'subject_2', 'description_2', 1639144829000, null, null, 'America/New_York', '25 6 5 25 2,4,7 *', false, true, 'cdfa6483-0769-4628-ba32-efd338a716de', 'd592facb-e6ee-4801-8310-9c7708eb6e6c', '17b13694-1907-4af9-8f5d-bfa444356e73'),
        (null, 'false', '0', '8525adcb-9edd-4af5-aa66-a211f47465f8', 'subject_3', 'subject_3', 'description_3', 1639144829000, null, null, 'Europe/Moscow', '25 6 5 25 2 *', true, true, 'cdfa6483-0769-4628-ba32-efd338a716de', 'd592facb-e6ee-4801-8310-9c7708eb6e6c', '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9'),

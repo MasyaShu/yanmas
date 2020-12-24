@@ -132,11 +132,11 @@ create TABLE IF NOT EXISTS ticket_template
     is_active                  bool    NOT NULL DEFAULT 'true',
     account_id                 uuid    NOT NULL,
     user_id                    uuid    NOT NULL,
-    type_ticket_id             uuid    NOT NULL,
+    ticket_type_id             uuid    NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (account_id) REFERENCES account (id),
     FOREIGN KEY (user_id) REFERENCES users (id),
-    FOREIGN KEY (type_ticket_id) REFERENCES ticket_types (id)
+    FOREIGN KEY (ticket_type_id) REFERENCES ticket_types (id)
 );
 create TABLE IF NOT EXISTS ticket_settings
 (

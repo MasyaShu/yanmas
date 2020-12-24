@@ -7,6 +7,7 @@ import org.springframework.scheduling.support.SimpleTriggerContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
+import ru.itterminal.botdesk.commons.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.botdesk.tickets.model.TicketTemplate;
 import ru.itterminal.botdesk.tickets.repository.TicketTemplateRepository;
 import ru.itterminal.botdesk.tickets.service.validator.TicketTemplateOperationValidator;
@@ -18,7 +19,7 @@ import java.util.Date;
 @Slf4j
 @Service
 @Transactional
-public class TicketTemplateServiceImpl extends CrudServiceImpl<TicketTemplate, TicketTemplateOperationValidator, TicketTemplateRepository> {
+public class TicketTemplateServiceImpl extends CrudServiceWithAccountImpl<TicketTemplate, TicketTemplateOperationValidator, TicketTemplateRepository> {
 
     @Override
     public TicketTemplate create(TicketTemplate entity) {

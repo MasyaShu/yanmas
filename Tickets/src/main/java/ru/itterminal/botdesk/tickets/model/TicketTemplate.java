@@ -29,7 +29,7 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @EqualsAndHashCode(callSuper = true)
 public class TicketTemplate extends BaseEntity {
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
@@ -65,7 +65,7 @@ public class TicketTemplate extends BaseEntity {
     private User Author;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "type_ticket_id", nullable = false)
+    @JoinColumn(name = "ticket_type_id", nullable = false)
     private TicketType ticketType;
 
     @Override
