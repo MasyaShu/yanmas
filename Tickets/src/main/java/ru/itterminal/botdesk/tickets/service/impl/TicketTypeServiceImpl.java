@@ -9,6 +9,8 @@ import ru.itterminal.botdesk.tickets.model.projection.TicketTypeUniqueFields;
 import ru.itterminal.botdesk.tickets.repository.TicketTypeRepository;
 import ru.itterminal.botdesk.tickets.service.validator.TicketTypeOperationValidator;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @Transactional
