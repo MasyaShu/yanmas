@@ -65,11 +65,14 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
                         .getEntityFromPredefinedValidEntityByEntityId("d592facb-e6ee-4801-8310-9c7708eb6e6c"))
                 .ticketType(ticketTypeTestHelper
                         .getEntityFromPredefinedValidEntityByEntityId("7f66b241-f8ec-4912-8f58-a4ceef2dd4c9"))
+                .outId(null)
+                .deleted(false)
+                .version(0)
+                .id(UUID.fromString("21dad366-54d8-445f-b778-4cc3829e07b1"))
                 .build();
-        setPropertiesOfBaseEntity(ticketTemplate1, UUID.fromString("21dad366-54d8-445f-b778-4cc3829e07b1"),
-                0, false, null
-        );
+        ticketTemplate1.generateDisplayName();
         ticketTemplates.add(ticketTemplate1);
+
         TicketTemplate ticketTemplate2 = TicketTemplate.builder()
                 .subject("subject_2")
                 .description("description_2")
@@ -86,11 +89,85 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
                         .getEntityFromPredefinedValidEntityByEntityId("d592facb-e6ee-4801-8310-9c7708eb6e6c"))
                 .ticketType(ticketTypeTestHelper
                         .getEntityFromPredefinedValidEntityByEntityId("17b13694-1907-4af9-8f5d-bfa444356e73"))
+                .outId(null)
+                .deleted(false)
+                .version(0)
+                .id(UUID.fromString("f8a773d2-0f4d-48e9-b788-7ce671373992"))
                 .build();
-        setPropertiesOfBaseEntity(ticketTemplate1, UUID.fromString("f8a773d2-0f4d-48e9-b788-7ce671373992"),
-                0, false, null
-        );
+        ticketTemplate2.generateDisplayName();
         ticketTemplates.add(ticketTemplate2);
+
+        TicketTemplate ticketTemplate3 = TicketTemplate.builder()
+                .subject("subject_3")
+                .description("description_3")
+                .dateNextRun(1639144829000L)
+                .dateStart(null)
+                .dateEnd(null)
+                .zoneId("Europe/Moscow")
+                .expressionSchedule("25 6 5 25 2 *")
+                .isOnlyOneTicketInWork(true)
+                .isActive(true)
+                .account(accountTestHelper
+                        .getEntityFromPredefinedValidEntityByEntityId("cdfa6483-0769-4628-ba32-efd338a716de"))
+                .Author(userTestHelper
+                        .getEntityFromPredefinedValidEntityByEntityId("d592facb-e6ee-4801-8310-9c7708eb6e6c"))
+                .ticketType(ticketTypeTestHelper
+                        .getEntityFromPredefinedValidEntityByEntityId("7f66b241-f8ec-4912-8f58-a4ceef2dd4c9"))
+                .outId(null)
+                .deleted(false)
+                .version(0)
+                .id(UUID.fromString("8525adcb-9edd-4af5-aa66-a211f47465f8"))
+                .build();
+        ticketTemplate3.generateDisplayName();
+        ticketTemplates.add(ticketTemplate3);
+
+        TicketTemplate ticketTemplate4 = TicketTemplate.builder()
+                .subject("subject_4")
+                .description("description_4")
+                .dateNextRun(1639144829000L)
+                .dateStart(null)
+                .dateEnd(null)
+                .zoneId("America/New_York")
+                .expressionSchedule("25 6 5 25 2,4,7 *")
+                .isOnlyOneTicketInWork(false)
+                .isActive(false)
+                .account(accountTestHelper
+                        .getEntityFromPredefinedValidEntityByEntityId("bcf98101-2a22-42bf-94cc-c900b50a0b69"))
+                .Author(userTestHelper
+                        .getEntityFromPredefinedValidEntityByEntityId("d592facb-e6ee-4801-8310-9c7708eb6e6c"))
+                .ticketType(ticketTypeTestHelper
+                        .getEntityFromPredefinedValidEntityByEntityId("dcf29ccb-26c7-4e38-9256-f45918a4c4a6"))
+                .outId(null)
+                .deleted(false)
+                .version(0)
+                .id(UUID.fromString("4713d994-18fc-4629-aa95-9792bbc53215"))
+                .build();
+        ticketTemplate4.generateDisplayName();
+        ticketTemplates.add(ticketTemplate4);
+
+        TicketTemplate ticketTemplate5 = TicketTemplate.builder()
+                .subject("subject_5")
+                .description("description_5")
+                .dateNextRun(1639144829000L)
+                .dateStart(null)
+                .dateEnd(null)
+                .zoneId("Europe/Moscow")
+                .expressionSchedule("25 6 5 25 2 *")
+                .isOnlyOneTicketInWork(true)
+                .isActive(false)
+                .account(accountTestHelper
+                        .getEntityFromPredefinedValidEntityByEntityId("bcf98101-2a22-42bf-94cc-c900b50a0b69"))
+                .Author(userTestHelper
+                        .getEntityFromPredefinedValidEntityByEntityId("d592facb-e6ee-4801-8310-9c7708eb6e6c"))
+                .ticketType(ticketTypeTestHelper
+                        .getEntityFromPredefinedValidEntityByEntityId("dcf29ccb-26c7-4e38-9256-f45918a4c4a6"))
+                .outId(null)
+                .deleted(false)
+                .version(0)
+                .id(UUID.fromString("bf052d6c-b9ed-479a-b04b-0fa083c371c9"))
+                .build();
+        ticketTemplate5.generateDisplayName();
+        ticketTemplates.add(ticketTemplate5);
         return ticketTemplates;
     }
 

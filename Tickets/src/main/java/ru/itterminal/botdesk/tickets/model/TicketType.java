@@ -2,11 +2,7 @@ package ru.itterminal.botdesk.tickets.model;
 
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -32,7 +28,7 @@ public class TicketType extends BaseEntity {
     public static final UUID PREDEFINED_TICKET_TYPE_FOR_NEW_ID =
             UUID.fromString("92cbb319-0d99-4ec2-9d1c-2c4fc3005468");
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 

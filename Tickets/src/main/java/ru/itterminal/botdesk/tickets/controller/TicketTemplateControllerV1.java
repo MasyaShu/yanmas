@@ -40,9 +40,6 @@ public class TicketTemplateControllerV1 extends BaseController {
     }
 
     private final String ENTITY_NAME = TicketTemplate.class.getSimpleName();
-    private static final String DATE_START = "dataStart";
-    private static final String DATE_END = "dataEnd";
-
 
     @PostMapping()
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")

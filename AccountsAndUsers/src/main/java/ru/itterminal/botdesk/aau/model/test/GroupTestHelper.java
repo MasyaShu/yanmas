@@ -21,6 +21,7 @@ public class GroupTestHelper extends EntityTestHelperImpl<Group, GroupDto, Group
                 .account(accountHelper.getRandomValidEntity())
                 .build();
         setRandomValidPropertiesOfBaseEntity(group);
+        group.generateDisplayName();
         return group;
     }
 
@@ -40,6 +41,7 @@ public class GroupTestHelper extends EntityTestHelperImpl<Group, GroupDto, Group
                 false,
                 null
         );
+        group1.generateDisplayName();
         Group group2 = Group.builder()
                 .name("groupName3")
                 .comment("")
@@ -54,6 +56,7 @@ public class GroupTestHelper extends EntityTestHelperImpl<Group, GroupDto, Group
                 false,
                 ""
         );
+        group2.generateDisplayName();
         Group group3 = Group.builder()
                 .name("groupName2")
                 .comment(null)
@@ -68,6 +71,7 @@ public class GroupTestHelper extends EntityTestHelperImpl<Group, GroupDto, Group
                 false,
                 null
         );
+        group3.generateDisplayName();
         return List.of(group1, group2, group3);
     }
 }

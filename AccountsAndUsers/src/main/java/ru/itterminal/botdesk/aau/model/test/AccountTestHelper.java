@@ -15,6 +15,7 @@ public class AccountTestHelper extends EntityTestHelperImpl<Account, AccountDto,
                 .name(fakerRU.name().firstName())
                 .build();
         setRandomValidPropertiesOfBaseEntity(account);
+        account.generateDisplayName();
         return account;
     }
 
@@ -30,6 +31,7 @@ public class AccountTestHelper extends EntityTestHelperImpl<Account, AccountDto,
                 false,
                 null
         );
+        account1.generateDisplayName();
         Account account2 = Account.builder()
                 .name("accountName2")
                 .build();
@@ -40,6 +42,7 @@ public class AccountTestHelper extends EntityTestHelperImpl<Account, AccountDto,
                 false,
                 null
         );
+        account2.generateDisplayName();
         return List.of(account1, account2);
     }
 

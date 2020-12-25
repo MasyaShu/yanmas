@@ -19,6 +19,7 @@ import java.util.UUID;
 @ToString
 public class TicketTemplateDtoRequest extends BaseEntityDto {
 
+    @NotNull(groups = {Create.class, Update.class})
     private String subject;
 
     private String description;
@@ -42,6 +43,5 @@ public class TicketTemplateDtoRequest extends BaseEntityDto {
     @NotNull(groups = {Create.class, Update.class})
     private UUID authorId;
 
-    @NotNull(groups = {Create.class, Update.class})
     private UUID ticketTypeId;
 }

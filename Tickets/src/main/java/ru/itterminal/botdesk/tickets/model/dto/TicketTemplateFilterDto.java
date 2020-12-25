@@ -14,7 +14,8 @@ import java.util.UUID;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class TicketTemplateFilterDto extends BaseEntityDto {
 
     private String subject;

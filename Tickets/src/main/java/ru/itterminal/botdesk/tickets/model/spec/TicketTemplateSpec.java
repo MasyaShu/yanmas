@@ -28,16 +28,8 @@ public class TicketTemplateSpec implements BaseSpec<TicketTemplate, Account> {
 
     @SuppressWarnings("DuplicatedCode")
     public Specification<TicketTemplate> getTicketTemplateBySubjectSpec(String subject) {
-        return (root, query, criteriaBuilder) -> {
-            val objectPathComment = root.get(SUBJECT);
-            if (subject.isEmpty()) {
-                Predicate predicateForNull = criteriaBuilder.isNull(objectPathComment);
-                Predicate predicateForEmpty = criteriaBuilder.equal(objectPathComment, EMPTY_STRING);
-                return criteriaBuilder.or(predicateForEmpty, predicateForNull);
-            }
-            return criteriaBuilder
-                    .like(criteriaBuilder.lower(root.get(SUBJECT)), "%" + subject.toLowerCase() + "%");
-        };
+        return (root, query, criteriaBuilder) -> criteriaBuilder
+                .like(criteriaBuilder.lower(root.get(SUBJECT)), "%" + subject.toLowerCase() + "%");
     }
 
     @SuppressWarnings("DuplicatedCode")

@@ -131,7 +131,7 @@ class TicketTemplateControllerV1Test {
         ticketTemplateDtoRequest.setZoneId(null);
         ticketTemplateDtoRequest.setExpressionSchedule(null);
         ticketTemplateDtoRequest.setAuthorId(null);
-        ticketTemplateDtoRequest.setTicketTypeId(null);
+        ticketTemplateDtoRequest.setSubject(null);
         ticketTemplateDtoRequest.setIsActive(null);
         ticketTemplateDtoRequest.setIsOnlyOneTicketInWork(null);
         when(templateService.create(any())).thenReturn(ticketTemplate);
@@ -157,7 +157,7 @@ class TicketTemplateControllerV1Test {
                 .andExpect(MockMvcResultMatchers
                         .jsonPath("$.errors.authorId[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists())
                 .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.ticketTypeId[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists())
+                        .jsonPath("$.errors.subject[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists())
                 .andExpect(MockMvcResultMatchers
                         .jsonPath("$.errors.isActive[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists())
                 .andExpect(MockMvcResultMatchers
@@ -286,7 +286,7 @@ class TicketTemplateControllerV1Test {
         ticketTemplateDtoRequest.setZoneId(null);
         ticketTemplateDtoRequest.setExpressionSchedule(null);
         ticketTemplateDtoRequest.setAuthorId(null);
-        ticketTemplateDtoRequest.setTicketTypeId(null);
+        ticketTemplateDtoRequest.setSubject(null);
         ticketTemplateDtoRequest.setIsActive(null);
         ticketTemplateDtoRequest.setIsOnlyOneTicketInWork(null);
         ticketTemplateDtoRequest.setId(null);
@@ -315,7 +315,7 @@ class TicketTemplateControllerV1Test {
                 .andExpect(MockMvcResultMatchers
                         .jsonPath("$.errors.authorId[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists())
                 .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.ticketTypeId[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists())
+                        .jsonPath("$.errors.subject[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists())
                 .andExpect(MockMvcResultMatchers
                         .jsonPath("$.errors.isActive[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists())
                 .andExpect(MockMvcResultMatchers
