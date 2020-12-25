@@ -7,9 +7,9 @@ VALUES (null, 'false', '0', 'cdfa6483-0769-4628-ba32-efd338a716de', 'accountName
 INSERT INTO group_users(out_id, deleted, version, id, name, display_name, comment, account_id, is_deprecated, is_inner)
 VALUES (null, 'false', '0', '0223e51a-4bb2-44ee-bc8e-1f047a2145e7', 'groupName1', 'groupName1', 'comment for group1 of users',
         'cdfa6483-0769-4628-ba32-efd338a716de', 'false', 'true'),
-       ('', 'false', '0', '63c1940d-e323-47af-8265-dbf8089727de', 'groupName3', 'groupName1', '',
+       ('', 'false', '0', '63c1940d-e323-47af-8265-dbf8089727de', 'groupName3', 'groupName3', '',
         'cdfa6483-0769-4628-ba32-efd338a716de', 'true', 'false'),
-       (null, 'false', '0', '99f6b488-7687-4451-b8a1-9fbeb2a3efec', 'groupName2', 'groupName1', null,
+       (null, 'false', '0', '99f6b488-7687-4451-b8a1-9fbeb2a3efec', 'groupName2', 'groupName2', null,
         'bcf98101-2a22-42bf-94cc-c900b50a0b69', 'false', 'false');
 
 INSERT INTO users(out_id, deleted, version, id, email, name, display_name, password, phone, comment,
@@ -97,11 +97,11 @@ VALUES (null, 'false', '0', '21dad366-54d8-445f-b778-4cc3829e07b1', 'subject_1',
         'd592facb-e6ee-4801-8310-9c7708eb6e6c', '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9'),
        (null, 'false', '0', '4713d994-18fc-4629-aa95-9792bbc53215', 'subject_4', 'subject_4', 'description_4',
         1639144829000, 1577836800000, null, 'America/New_York', '25 6 5 25 2,4,7 *', false, false,
-        'bcf98101-2a22-42bf-94cc-c900b50a0b69', 'd592facb-e6ee-4801-8310-9c7708eb6e6c',
+        'bcf98101-2a22-42bf-94cc-c900b50a0b69', '86840939-c488-448b-a473-cd9e1097dd32',
         'dcf29ccb-26c7-4e38-9256-f45918a4c4a6'),
-       (null, 'false', '0', 'bf052d6c-b9ed-479a-b04b-0fa083c371c9', 'subject_5', 'subject_5', 'description_5',
+       (null, 'false', '0', 'bf052d6c-b9ed-479a-b04b-0fa083c371c9', 'subject_5', 'subject_5', null,
         1639144829000, null, null, 'Europe/Moscow', '25 6 5 25 2 *', true, false,
-        'bcf98101-2a22-42bf-94cc-c900b50a0b69', 'd592facb-e6ee-4801-8310-9c7708eb6e6c',
-        'dcf29ccb-26c7-4e38-9256-f45918a4c4a6');
+        'bcf98101-2a22-42bf-94cc-c900b50a0b69', '86840939-c488-448b-a473-cd9e1097dd32',
+        null);
 
 

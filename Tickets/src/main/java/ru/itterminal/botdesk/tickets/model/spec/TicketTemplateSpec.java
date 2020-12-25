@@ -46,35 +46,65 @@ public class TicketTemplateSpec implements BaseSpec<TicketTemplate, Account> {
         };
     }
 
-    public Specification<TicketTemplate> getTicketTemplateByDateEndSpec(long date, String comparison) {
-        return getTicketTemplateByDateSpec(date, comparison, DATE_END);
-    }
-
     public Specification<TicketTemplate> getTicketTemplateByDateStartSpec(long date, String comparison) {
-        return getTicketTemplateByDateSpec(date, comparison, DATE_START);
-    }
-
-    private Specification<TicketTemplate> getTicketTemplateByDateSpec(long date, String comparison, String field) {
         switch (comparison) {
             case ">=" -> {
-                return (root, query, criteriaBuilder) -> criteriaBuilder
-                        .ge(root.get(field), date);
+                return (root, query, criteriaBuilder) ->
+                        criteriaBuilder
+                                .ge(root.get(DATE_START), date);
             }
             case ">" -> {
                 return (root, query, criteriaBuilder) -> criteriaBuilder
-                        .gt(root.get(field), date);
+                        .gt(root.get(DATE_START), date);
             }
             case "<=" -> {
-                return (root, query, criteriaBuilder) -> criteriaBuilder
-                        .le(root.get(field), date);
+                return (root, query, criteriaBuilder) -> {
+                    Predicate predicateForNull = criteriaBuilder.isNull(root.get(DATE_START));
+                    Predicate predicateLE = criteriaBuilder.le(root.get(DATE_START), date);
+                    return criteriaBuilder.or(predicateForNull, predicateLE);
+                };
             }
             case "<" -> {
-                return (root, query, criteriaBuilder) -> criteriaBuilder
-                        .lt(root.get(field), date);
+                return (root, query, criteriaBuilder) -> {
+                    Predicate predicateForNull = criteriaBuilder.isNull(root.get(DATE_START));
+                    Predicate predicateLT = criteriaBuilder.lt(root.get(DATE_START), date);
+                    return criteriaBuilder.or(predicateForNull, predicateLT);
+                };
             }
             default -> {
                 return (root, query, criteriaBuilder) -> criteriaBuilder
-                        .equal(root.get(field), date);
+                        .equal(root.get(DATE_START), date);
+            }
+        }
+    }
+
+    public Specification<TicketTemplate> getTicketTemplateByDateEndSpec(long date, String comparison) {
+        switch (comparison) {
+            case ">=" -> {
+                return (root, query, criteriaBuilder) -> {
+                    Predicate predicateForNull = criteriaBuilder.isNull(root.get(DATE_END));
+                    Predicate predicateGE = criteriaBuilder.ge(root.get(DATE_END), date);
+                    return criteriaBuilder.or(predicateForNull, predicateGE);
+                };
+            }
+            case ">" -> {
+                return (root, query, criteriaBuilder) -> {
+                    Predicate predicateForNull = criteriaBuilder.isNull(root.get(DATE_END));
+                    Predicate predicateGT = criteriaBuilder.gt(root.get(DATE_END), date);
+                    return criteriaBuilder.or(predicateForNull, predicateGT);
+                };
+            }
+            case "<=" -> {
+                return (root, query, criteriaBuilder) -> criteriaBuilder
+                        .le(root.get(DATE_END), date);
+            }
+            case "<" -> {
+                return (root, query, criteriaBuilder) -> criteriaBuilder
+                        .lt(root.get(DATE_END), date);
+            }
+            default -> {
+                return (root, query, criteriaBuilder) -> criteriaBuilder
+                        .equal(root.get(DATE_END), date);
             }
         }
     }
@@ -91,9 +121,9 @@ public class TicketTemplateSpec implements BaseSpec<TicketTemplate, Account> {
     public Specification<TicketTemplate> getTicketTemplateByListOfAuthorsSpec(List<UUID> listAuthorId) {
         return (root, query, criteriaBuilder) -> {
             Join<TicketTemplate, User> ticketTemplateJoin = root.join(AUTHOR);
-            Predicate returnedPredicate = criteriaBuilder.equal(ticketTemplateJoin.<UUID> get("id"), listAuthorId.get(0));
+            Predicate returnedPredicate = criteriaBuilder.equal(ticketTemplateJoin.<UUID>get("id"), listAuthorId.get(0));
             for (int i = 1; i < listAuthorId.size(); i++) {
-                Predicate predicate = criteriaBuilder.equal(ticketTemplateJoin.<UUID> get("id"), listAuthorId.get(i));
+                Predicate predicate = criteriaBuilder.equal(ticketTemplateJoin.<UUID>get("id"), listAuthorId.get(i));
                 returnedPredicate = criteriaBuilder.or(returnedPredicate, predicate);
             }
             return returnedPredicate;
@@ -101,16 +131,20 @@ public class TicketTemplateSpec implements BaseSpec<TicketTemplate, Account> {
     }
 
     @SuppressWarnings("DuplicatedCode")
-    public Specification<TicketTemplate> getTicketTemplateByListOfTicketTemplatesSpec(List<UUID> listTicketTypeId) {
+    public Specification<TicketTemplate> getTicketTemplateByListOfTicketTypeSpec(List<UUID> listTicketTypeId) {
         return (root, query, criteriaBuilder) -> {
             Join<TicketTemplate, TicketType> ticketTemplateJoin = root.join(TICKET_TYPE);
-            Predicate returnedPredicate = criteriaBuilder.equal(ticketTemplateJoin.<UUID> get("id"), listTicketTypeId.get(0));
+            Predicate returnedPredicate = criteriaBuilder.equal(ticketTemplateJoin.<UUID>get("id"), listTicketTypeId.get(0));
             for (int i = 1; i < listTicketTypeId.size(); i++) {
-                Predicate predicate = criteriaBuilder.equal(ticketTemplateJoin.<UUID> get("id"), listTicketTypeId.get(i));
+                Predicate predicate = criteriaBuilder.equal(ticketTemplateJoin.<UUID>get("id"), listTicketTypeId.get(i));
                 returnedPredicate = criteriaBuilder.or(returnedPredicate, predicate);
             }
             return returnedPredicate;
         };
     }
-
+    //TODO one spec for null and List
+    public Specification<TicketTemplate> getTicketTemplateByListOfTicketTypeNullSpec() {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.isNull(root.get(TICKET_TYPE));
+    }
 }

@@ -20,18 +20,20 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
 
     public static final String EUROPE_MOSCOW = "Europe/Moscow";
     private static final String ACCOUNT_ID_1 = "cdfa6483-0769-4628-ba32-efd338a716de";
-    private static final String AUTHOR_ID_1 = "d592facb-e6ee-4801-8310-9c7708eb6e6c";
-    private static final String TICKET_TYPE_ID_1 = "7f66b241-f8ec-4912-8f58-a4ceef2dd4c9";
+    public static final String AUTHOR_ID_1 = "d592facb-e6ee-4801-8310-9c7708eb6e6c";
+    public static final String AUTHOR_ID_2 = "86840939-c488-448b-a473-cd9e1097dd32";
+    public static final String TICKET_TYPE_ID_1 = "7f66b241-f8ec-4912-8f58-a4ceef2dd4c9";
     private static final String ACCOUNT_ID_2 = "bcf98101-2a22-42bf-94cc-c900b50a0b69";
-    private static final String TICKET_TYPE_ID_2 = "dcf29ccb-26c7-4e38-9256-f45918a4c4a6";
+    public static final String TICKET_TYPE_ID_2 = "dcf29ccb-26c7-4e38-9256-f45918a4c4a6";
     private static final String EXPRESSION_SCHEDULE_1 = "25 6 5 25 2 *";
     private static final String EXPRESSION_SCHEDULE_2 = "25 6 5 25 2,4,7 *";
     private static final String AMERICA_NEW_YORK = "America/New_York";
-    private static final long DATE_2019_01_01 = 1546300800000L;
-    private static final long DATE_2020_01_01 = 1577836800000L;
-    private static final long DATE_2021_01_01 = 1609459200000L;
-    private static final long DATE_2024_01_01 = 1704067200000L;
-    private static final long DATE_2099_01_01 = 4070908800000L;
+    public static final long DATE_2019_01_01 = 1546300800000L;
+    public static final long DATE_2020_01_01 = 1577836800000L;
+    public static final long DATE_2021_01_01 = 1609459200000L;
+    public static final long DATE_2024_01_01 = 1704067200000L;
+    public static final long DATE_2099_01_01 = 4070908800000L;
+    public static final String TICKET_TYPE_ID_3 = "17b13694-1907-4af9-8f5d-bfa444356e73";
     private final AccountTestHelper accountTestHelper = new AccountTestHelper();
     private final UserTestHelper userTestHelper = new UserTestHelper();
     private final TicketTypeTestHelper ticketTypeTestHelper = new TicketTypeTestHelper();
@@ -49,7 +51,7 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
                 .isOnlyOneTicketInWork(fakerRU.bool().bool())
                 .isActive(fakerRU.bool().bool())
                 .account(accountTestHelper.getRandomValidEntity())
-                .Author(userTestHelper.getRandomValidEntity())
+                .author(userTestHelper.getRandomValidEntity())
                 .ticketType(ticketTypeTestHelper.getRandomValidEntity())
                 .id(UUID.randomUUID())
                 .version(fakerRU.number().numberBetween(0, 100))
@@ -75,7 +77,7 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
                 .isActive(true)
                 .account(accountTestHelper
                         .getEntityFromPredefinedValidEntityByEntityId(ACCOUNT_ID_1))
-                .Author(userTestHelper
+                .author(userTestHelper
                         .getEntityFromPredefinedValidEntityByEntityId(AUTHOR_ID_1))
                 .ticketType(ticketTypeTestHelper
                         .getEntityFromPredefinedValidEntityByEntityId(TICKET_TYPE_ID_1))
@@ -99,10 +101,10 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
                 .isActive(true)
                 .account(accountTestHelper
                         .getEntityFromPredefinedValidEntityByEntityId(ACCOUNT_ID_1))
-                .Author(userTestHelper
+                .author(userTestHelper
                         .getEntityFromPredefinedValidEntityByEntityId(AUTHOR_ID_1))
                 .ticketType(ticketTypeTestHelper
-                        .getEntityFromPredefinedValidEntityByEntityId("17b13694-1907-4af9-8f5d-bfa444356e73"))
+                        .getEntityFromPredefinedValidEntityByEntityId(TICKET_TYPE_ID_3))
                 .outId(null)
                 .deleted(false)
                 .version(0)
@@ -123,7 +125,7 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
                 .isActive(true)
                 .account(accountTestHelper
                         .getEntityFromPredefinedValidEntityByEntityId(ACCOUNT_ID_1))
-                .Author(userTestHelper
+                .author(userTestHelper
                         .getEntityFromPredefinedValidEntityByEntityId(AUTHOR_ID_1))
                 .ticketType(ticketTypeTestHelper
                         .getEntityFromPredefinedValidEntityByEntityId(TICKET_TYPE_ID_1))
@@ -147,8 +149,8 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
                 .isActive(false)
                 .account(accountTestHelper
                         .getEntityFromPredefinedValidEntityByEntityId(ACCOUNT_ID_2))
-                .Author(userTestHelper
-                        .getEntityFromPredefinedValidEntityByEntityId(AUTHOR_ID_1))
+                .author(userTestHelper
+                        .getEntityFromPredefinedValidEntityByEntityId(AUTHOR_ID_2))
                 .ticketType(ticketTypeTestHelper
                         .getEntityFromPredefinedValidEntityByEntityId(TICKET_TYPE_ID_2))
                 .outId(null)
@@ -161,7 +163,7 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
 
         TicketTemplate ticketTemplate5 = TicketTemplate.builder()
                 .subject("subject_5")
-                .description("description_5")
+                .description(null)
                 .dateNextRun(1639144829000L)
                 .dateStart(null)
                 .dateEnd(null)
@@ -171,10 +173,9 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
                 .isActive(false)
                 .account(accountTestHelper
                         .getEntityFromPredefinedValidEntityByEntityId(ACCOUNT_ID_2))
-                .Author(userTestHelper
-                        .getEntityFromPredefinedValidEntityByEntityId(AUTHOR_ID_1))
-                .ticketType(ticketTypeTestHelper
-                        .getEntityFromPredefinedValidEntityByEntityId(TICKET_TYPE_ID_2))
+                .author(userTestHelper
+                        .getEntityFromPredefinedValidEntityByEntityId(AUTHOR_ID_2))
+                .ticketType(null)
                 .outId(null)
                 .deleted(false)
                 .version(0)
