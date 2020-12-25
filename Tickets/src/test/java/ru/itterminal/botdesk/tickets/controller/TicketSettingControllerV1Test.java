@@ -96,7 +96,7 @@ class TicketSettingControllerV1Test {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String HOST = "http://localhost";
     private static final String PORT = ":8081";
-    private static final String API = "api/v1/ticketSetting";
+    private static final String API = "api/v1/ticket-setting";
     private final TicketSettingTestHelper helper = new TicketSettingTestHelper();
     private final ModelMapper mapper = new ModelMapper();
 

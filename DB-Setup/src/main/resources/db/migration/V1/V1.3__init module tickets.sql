@@ -12,6 +12,7 @@ create TABLE IF NOT EXISTS ticket_types
     PRIMARY KEY (id),
     FOREIGN KEY (account_id) REFERENCES account (id)
 );
+
 create TABLE IF NOT EXISTS ticket_statuses
 (
     out_id                 varchar(128),
@@ -54,6 +55,7 @@ create TABLE IF NOT EXISTS ticket_template
     FOREIGN KEY (user_id) REFERENCES users (id),
     FOREIGN KEY (ticket_type_id) REFERENCES ticket_types (id)
 );
+
 create TABLE IF NOT EXISTS ticket_settings
 (
     out_id                      varchar(128),
@@ -79,7 +81,9 @@ create TABLE IF NOT EXISTS ticket_settings
     FOREIGN KEY (ticket_status_id_for_close) REFERENCES ticket_statuses (id),
     FOREIGN KEY (ticket_status_id_for_cancel) REFERENCES ticket_statuses (id)
 );
+
 CREATE UNIQUE INDEX unique_fields_ticket_settings ON ticket_settings (account_id, group_id, author_id);
+
 create TABLE IF NOT EXISTS ticket_settings_executors
 (
     ticket_settings_id uuid NOT NULL,
@@ -87,10 +91,22 @@ create TABLE IF NOT EXISTS ticket_settings_executors
     FOREIGN KEY (ticket_settings_id) REFERENCES ticket_settings (id),
     FOREIGN KEY (executor_id) REFERENCES users (id)
 );
+
 create TABLE IF NOT EXISTS ticket_settings_observers
 (
     ticket_settings_id uuid NOT NULL,
     observer_id        uuid NOT NULL,
     FOREIGN KEY (ticket_settings_id) REFERENCES ticket_settings (id),
     FOREIGN KEY (observer_id) REFERENCES users (id)
+);
+
+create TABLE IF NOT EXISTS ticket_counters
+(
+    out_id         varchar(128),
+    display_name   varchar(256)    DEFAULT (NULL),
+    deleted        bool   NOT NULL DEFAULT 'false',
+    version        int4   NOT NULL DEFAULT (0),
+    id             uuid   NOT NULL,
+    current_number bigint NOT NULL,
+    PRIMARY KEY (id)
 );

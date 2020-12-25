@@ -28,7 +28,7 @@ import ru.itterminal.botdesk.files.model.File;
 
 @SuppressWarnings("JpaDataSourceORMInspection")
 @Entity
-@Table(name = "ticket")
+@Table(name = "tickets")
 @Getter
 @Setter
 @SuperBuilder
@@ -47,7 +47,7 @@ public class Ticket extends BaseEntity {
     private User author;
 
     @Column(nullable = false)
-    private Integer number;
+    private Long number;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Long createdAt;
