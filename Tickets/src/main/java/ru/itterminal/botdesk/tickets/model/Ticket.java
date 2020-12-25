@@ -22,10 +22,11 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.aau.model.Account;
-import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
+import ru.itterminal.botdesk.files.model.File;
 
+@SuppressWarnings("JpaDataSourceORMInspection")
 @Entity
 @Table(name = "ticket")
 @Getter
@@ -37,7 +38,7 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @EqualsAndHashCode(callSuper = true)
 public class Ticket extends BaseEntity {
 
-    @ManyToOne
+    @ManyToOne (fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
@@ -95,6 +96,10 @@ public class Ticket extends BaseEntity {
     )
     List<User> executors = new ArrayList<>();
 
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "entity_id")
+    private List<File> files;
+
     @PrePersist
     protected void onCreate() {
         createdAt = System.currentTimeMillis();
@@ -102,6 +107,10 @@ public class Ticket extends BaseEntity {
 
     @Override
     public void generateDisplayName() {
-        setDisplayName(number.toString());
+        var result = number.toString();
+        if (!subject.isEmpty()) {
+            result = result + " " + subject;
+        }
+        setDisplayName(result);
     }
 }
