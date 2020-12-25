@@ -27,6 +27,11 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
     private static final String EXPRESSION_SCHEDULE_1 = "25 6 5 25 2 *";
     private static final String EXPRESSION_SCHEDULE_2 = "25 6 5 25 2,4,7 *";
     private static final String AMERICA_NEW_YORK = "America/New_York";
+    private static final long DATE_2019_01_01 = 1546300800000L;
+    private static final long DATE_2020_01_01 = 1577836800000L;
+    private static final long DATE_2021_01_01 = 1609459200000L;
+    private static final long DATE_2024_01_01 = 1704067200000L;
+    private static final long DATE_2099_01_01 = 4070908800000L;
     private final AccountTestHelper accountTestHelper = new AccountTestHelper();
     private final UserTestHelper userTestHelper = new UserTestHelper();
     private final TicketTypeTestHelper ticketTypeTestHelper = new TicketTypeTestHelper();
@@ -62,8 +67,8 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
                 .subject("subject_1")
                 .description("description_1")
                 .dateNextRun(1639144829000L)
-                .dateStart(null)
-                .dateEnd(null)
+                .dateStart(DATE_2019_01_01)
+                .dateEnd(DATE_2021_01_01)
                 .zoneId(EUROPE_MOSCOW)
                 .expressionSchedule(EXPRESSION_SCHEDULE_1)
                 .isOnlyOneTicketInWork(true)
@@ -86,8 +91,8 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
                 .subject("subject_2")
                 .description("description_2")
                 .dateNextRun(1639144829000L)
-                .dateStart(null)
-                .dateEnd(null)
+                .dateStart(DATE_2020_01_01)
+                .dateEnd(DATE_2024_01_01)
                 .zoneId(AMERICA_NEW_YORK)
                 .expressionSchedule(EXPRESSION_SCHEDULE_2)
                 .isOnlyOneTicketInWork(false)
@@ -110,8 +115,8 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
                 .subject("subject_3")
                 .description("description_3")
                 .dateNextRun(1639144829000L)
-                .dateStart(null)
-                .dateEnd(null)
+                .dateStart(DATE_2019_01_01)
+                .dateEnd(DATE_2099_01_01)
                 .zoneId(EUROPE_MOSCOW)
                 .expressionSchedule(EXPRESSION_SCHEDULE_1)
                 .isOnlyOneTicketInWork(true)
@@ -134,7 +139,7 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
                 .subject("subject_4")
                 .description("description_4")
                 .dateNextRun(1639144829000L)
-                .dateStart(null)
+                .dateStart(DATE_2020_01_01)
                 .dateEnd(null)
                 .zoneId(AMERICA_NEW_YORK)
                 .expressionSchedule(EXPRESSION_SCHEDULE_2)
