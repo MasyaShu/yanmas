@@ -42,6 +42,7 @@ class TicketTemplateSpecTest {
     private static final String LT = "<";
     private static final String EQUALS = "=";
     private static final String DESCRIPTION = "description";
+    private static final String DESCRIPTION_2 = "description_2";
     @Autowired
     private TicketTemplateRepository repository;
 
@@ -106,13 +107,16 @@ class TicketTemplateSpecTest {
     }
 
     @Test
-    void getTicketTemplateByDescriptionSpec_shouldGetOneEntity_whenDescriptionExistInDatabase() {
-        TicketTemplate ticketTemplate = ticketTemplateTestHelper.getEntityFromPredefinedValidEntityByEntityId("f8a773d2-0f4d-48e9-b788-7ce671373992");
+    void getTicketTemplateByDescriptionSpec_shouldGetEntity_whenDescriptionExistInDatabase() {
+        List<TicketTemplate> ticketTemplates = ticketTemplateTestHelper.setPredefinedValidEntityList();
+        var expectedTicketTemplates = ticketTemplates.stream()
+                .filter(tt ->  tt.getDescription() != null && tt.getDescription().equals(DESCRIPTION_2))
+                .collect(Collectors.toList());
         Specification<TicketTemplate> tSpecification = Specification
-                .where(spec.getTicketTemplateByDescriptionSpec("description_2"));
+                .where(spec.getTicketTemplateByDescriptionSpec(DESCRIPTION_2));
         foundTicketTemplate = repository.findAll(tSpecification, pageable);
-        assertEquals(1, foundTicketTemplate.getContent().size());
-        assertEquals(ticketTemplate, foundTicketTemplate.getContent().get(0));
+        Assertions.assertThat(foundTicketTemplate).isNotNull().hasSize(expectedTicketTemplates.size());
+        assertThat(foundTicketTemplate.getContent()).containsExactlyInAnyOrderElementsOf(expectedTicketTemplates);
     }
 
     @Test
