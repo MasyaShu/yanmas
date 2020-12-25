@@ -12,18 +12,16 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import lombok.RequiredArgsConstructor;
 import ru.itterminal.botdesk.commons.repository.ParentEntityRepositoryImpl;
 
 @SpringBootApplication(scanBasePackages = "ru.itterminal.botdesk")
 @EnableTransactionManagement
 @EnableJpaRepositories(basePackages = "ru.itterminal.botdesk", repositoryBaseClass = ParentEntityRepositoryImpl.class)
+@RequiredArgsConstructor
 public class BotDeskApp {
 
-    final DataSource dataSource;
-
-    public BotDeskApp(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
+    private final DataSource dataSource;
 
     public static void main(String[] args) {
         SpringApplication.run(BotDeskApp.class, args);

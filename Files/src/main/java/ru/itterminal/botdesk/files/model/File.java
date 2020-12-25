@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
@@ -39,20 +40,20 @@ public class File extends BaseEntity {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Long createdAt;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = System.currentTimeMillis();
-    }
-
     @Column(name = "entity_id", nullable = false)
     private UUID entityId;
 
     @Column(name = "is_uploaded", nullable = false)
     private Boolean isUploaded;
 
-    @ManyToOne
+    @ManyToOne (fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = System.currentTimeMillis();
+    }
 
     @Override
     public void generateDisplayName() {

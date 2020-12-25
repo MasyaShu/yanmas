@@ -34,7 +34,7 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @EqualsAndHashCode(callSuper = true)
 public class TicketSetting extends BaseEntity {
 
-    @ManyToOne
+    @ManyToOne (fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
