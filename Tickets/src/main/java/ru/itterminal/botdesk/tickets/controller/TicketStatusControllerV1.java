@@ -37,7 +37,7 @@ import static java.lang.String.format;
 @Slf4j
 @RestController("TicketStatusControllerV1")
 @Validated
-@RequestMapping("api/v1/ticketStatus")
+@RequestMapping("api/v1/ticket-status")
 public class TicketStatusControllerV1 extends BaseController {
 
     private final TicketStatusServiceImpl service;

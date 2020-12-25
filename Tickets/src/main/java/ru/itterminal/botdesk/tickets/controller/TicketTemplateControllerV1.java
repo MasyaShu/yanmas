@@ -27,7 +27,7 @@ import static java.lang.String.format;
 @Slf4j
 @RestController("TicketTemplateControllerV1")
 @Validated
-@RequestMapping("api/v1/ticketTemplate")
+@RequestMapping("api/v1/ticket-template")
 public class TicketTemplateControllerV1 extends BaseController {
 
     private final AccountServiceImpl accountService;

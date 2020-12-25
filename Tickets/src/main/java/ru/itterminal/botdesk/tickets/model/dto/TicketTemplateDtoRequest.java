@@ -16,7 +16,8 @@ import java.util.UUID;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class TicketTemplateDtoRequest extends BaseEntityDto {
 
     @NotNull(groups = {Create.class, Update.class})

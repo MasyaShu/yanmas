@@ -83,7 +83,7 @@ class TicketTemplateControllerV1Test {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String HOST = "http://localhost";
     private static final String PORT = ":8081";
-    private static final String API = "api/v1/ticketTemplate/";
+    private static final String API = "api/v1/ticket-template/";
     private final TicketTemplateTestHelper templateTestHelper = new TicketTemplateTestHelper();
     private final ModelMapper mapper = new ModelMapper();
 

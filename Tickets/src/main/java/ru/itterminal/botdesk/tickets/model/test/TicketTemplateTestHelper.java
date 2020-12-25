@@ -18,6 +18,15 @@ import java.util.UUID;
 public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplate, TicketTemplateDtoRequest,
         TicketTemplateDtoResponse> {
 
+    public static final String EUROPE_MOSCOW = "Europe/Moscow";
+    private static final String ACCOUNT_ID_1 = "cdfa6483-0769-4628-ba32-efd338a716de";
+    private static final String AUTHOR_ID_1 = "d592facb-e6ee-4801-8310-9c7708eb6e6c";
+    private static final String TICKET_TYPE_ID_1 = "7f66b241-f8ec-4912-8f58-a4ceef2dd4c9";
+    private static final String ACCOUNT_ID_2 = "bcf98101-2a22-42bf-94cc-c900b50a0b69";
+    private static final String TICKET_TYPE_ID_2 = "dcf29ccb-26c7-4e38-9256-f45918a4c4a6";
+    private static final String EXPRESSION_SCHEDULE_1 = "25 6 5 25 2 *";
+    private static final String EXPRESSION_SCHEDULE_2 = "25 6 5 25 2,4,7 *";
+    private static final String AMERICA_NEW_YORK = "America/New_York";
     private final AccountTestHelper accountTestHelper = new AccountTestHelper();
     private final UserTestHelper userTestHelper = new UserTestHelper();
     private final TicketTypeTestHelper ticketTypeTestHelper = new TicketTypeTestHelper();
@@ -31,7 +40,7 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
                 .dateStart(null)
                 .dateEnd(null)
                 .zoneId(getValidZoneId())
-                .expressionSchedule("25 6 5 25 2 *")
+                .expressionSchedule(EXPRESSION_SCHEDULE_1)
                 .isOnlyOneTicketInWork(fakerRU.bool().bool())
                 .isActive(fakerRU.bool().bool())
                 .account(accountTestHelper.getRandomValidEntity())
@@ -55,16 +64,16 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
                 .dateNextRun(1639144829000L)
                 .dateStart(null)
                 .dateEnd(null)
-                .zoneId("Europe/Moscow")
-                .expressionSchedule("25 6 5 25 2 *")
+                .zoneId(EUROPE_MOSCOW)
+                .expressionSchedule(EXPRESSION_SCHEDULE_1)
                 .isOnlyOneTicketInWork(true)
                 .isActive(true)
                 .account(accountTestHelper
-                        .getEntityFromPredefinedValidEntityByEntityId("cdfa6483-0769-4628-ba32-efd338a716de"))
+                        .getEntityFromPredefinedValidEntityByEntityId(ACCOUNT_ID_1))
                 .Author(userTestHelper
-                        .getEntityFromPredefinedValidEntityByEntityId("d592facb-e6ee-4801-8310-9c7708eb6e6c"))
+                        .getEntityFromPredefinedValidEntityByEntityId(AUTHOR_ID_1))
                 .ticketType(ticketTypeTestHelper
-                        .getEntityFromPredefinedValidEntityByEntityId("7f66b241-f8ec-4912-8f58-a4ceef2dd4c9"))
+                        .getEntityFromPredefinedValidEntityByEntityId(TICKET_TYPE_ID_1))
                 .outId(null)
                 .deleted(false)
                 .version(0)
@@ -79,14 +88,14 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
                 .dateNextRun(1639144829000L)
                 .dateStart(null)
                 .dateEnd(null)
-                .zoneId("America/New_York")
-                .expressionSchedule("25 6 5 25 2,4,7 *")
+                .zoneId(AMERICA_NEW_YORK)
+                .expressionSchedule(EXPRESSION_SCHEDULE_2)
                 .isOnlyOneTicketInWork(false)
                 .isActive(true)
                 .account(accountTestHelper
-                        .getEntityFromPredefinedValidEntityByEntityId("cdfa6483-0769-4628-ba32-efd338a716de"))
+                        .getEntityFromPredefinedValidEntityByEntityId(ACCOUNT_ID_1))
                 .Author(userTestHelper
-                        .getEntityFromPredefinedValidEntityByEntityId("d592facb-e6ee-4801-8310-9c7708eb6e6c"))
+                        .getEntityFromPredefinedValidEntityByEntityId(AUTHOR_ID_1))
                 .ticketType(ticketTypeTestHelper
                         .getEntityFromPredefinedValidEntityByEntityId("17b13694-1907-4af9-8f5d-bfa444356e73"))
                 .outId(null)
@@ -103,16 +112,16 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
                 .dateNextRun(1639144829000L)
                 .dateStart(null)
                 .dateEnd(null)
-                .zoneId("Europe/Moscow")
-                .expressionSchedule("25 6 5 25 2 *")
+                .zoneId(EUROPE_MOSCOW)
+                .expressionSchedule(EXPRESSION_SCHEDULE_1)
                 .isOnlyOneTicketInWork(true)
                 .isActive(true)
                 .account(accountTestHelper
-                        .getEntityFromPredefinedValidEntityByEntityId("cdfa6483-0769-4628-ba32-efd338a716de"))
+                        .getEntityFromPredefinedValidEntityByEntityId(ACCOUNT_ID_1))
                 .Author(userTestHelper
-                        .getEntityFromPredefinedValidEntityByEntityId("d592facb-e6ee-4801-8310-9c7708eb6e6c"))
+                        .getEntityFromPredefinedValidEntityByEntityId(AUTHOR_ID_1))
                 .ticketType(ticketTypeTestHelper
-                        .getEntityFromPredefinedValidEntityByEntityId("7f66b241-f8ec-4912-8f58-a4ceef2dd4c9"))
+                        .getEntityFromPredefinedValidEntityByEntityId(TICKET_TYPE_ID_1))
                 .outId(null)
                 .deleted(false)
                 .version(0)
@@ -127,16 +136,16 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
                 .dateNextRun(1639144829000L)
                 .dateStart(null)
                 .dateEnd(null)
-                .zoneId("America/New_York")
-                .expressionSchedule("25 6 5 25 2,4,7 *")
+                .zoneId(AMERICA_NEW_YORK)
+                .expressionSchedule(EXPRESSION_SCHEDULE_2)
                 .isOnlyOneTicketInWork(false)
                 .isActive(false)
                 .account(accountTestHelper
-                        .getEntityFromPredefinedValidEntityByEntityId("bcf98101-2a22-42bf-94cc-c900b50a0b69"))
+                        .getEntityFromPredefinedValidEntityByEntityId(ACCOUNT_ID_2))
                 .Author(userTestHelper
-                        .getEntityFromPredefinedValidEntityByEntityId("d592facb-e6ee-4801-8310-9c7708eb6e6c"))
+                        .getEntityFromPredefinedValidEntityByEntityId(AUTHOR_ID_1))
                 .ticketType(ticketTypeTestHelper
-                        .getEntityFromPredefinedValidEntityByEntityId("dcf29ccb-26c7-4e38-9256-f45918a4c4a6"))
+                        .getEntityFromPredefinedValidEntityByEntityId(TICKET_TYPE_ID_2))
                 .outId(null)
                 .deleted(false)
                 .version(0)
@@ -151,16 +160,16 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
                 .dateNextRun(1639144829000L)
                 .dateStart(null)
                 .dateEnd(null)
-                .zoneId("Europe/Moscow")
-                .expressionSchedule("25 6 5 25 2 *")
+                .zoneId(EUROPE_MOSCOW)
+                .expressionSchedule(EXPRESSION_SCHEDULE_1)
                 .isOnlyOneTicketInWork(true)
                 .isActive(false)
                 .account(accountTestHelper
-                        .getEntityFromPredefinedValidEntityByEntityId("bcf98101-2a22-42bf-94cc-c900b50a0b69"))
+                        .getEntityFromPredefinedValidEntityByEntityId(ACCOUNT_ID_2))
                 .Author(userTestHelper
-                        .getEntityFromPredefinedValidEntityByEntityId("d592facb-e6ee-4801-8310-9c7708eb6e6c"))
+                        .getEntityFromPredefinedValidEntityByEntityId(AUTHOR_ID_1))
                 .ticketType(ticketTypeTestHelper
-                        .getEntityFromPredefinedValidEntityByEntityId("dcf29ccb-26c7-4e38-9256-f45918a4c4a6"))
+                        .getEntityFromPredefinedValidEntityByEntityId(TICKET_TYPE_ID_2))
                 .outId(null)
                 .deleted(false)
                 .version(0)

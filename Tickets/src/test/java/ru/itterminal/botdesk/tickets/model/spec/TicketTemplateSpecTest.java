@@ -39,7 +39,7 @@ class TicketTemplateSpecTest {
     @Autowired
     TicketTemplateSpec spec;
 
-    public static final String SUBJECT = "subject";
+    private static final String SUBJECT = "subject";
     private final Pageable pageable = PageRequest.of(0, 5, Sort.by((Sort.Direction.ASC), "subject"));
     private Page<TicketTemplate> foundTicketTemplate;
     private final TicketTemplateTestHelper ticketTemplateTestHelper = new TicketTemplateTestHelper();
@@ -91,10 +91,4 @@ class TicketTemplateSpecTest {
         foundTicketTemplate = repository.findAll(tSpecification, pageable);
         assertEquals(3, foundTicketTemplate.getContent().size());
     }
-
-
-
-
-
-
 }
