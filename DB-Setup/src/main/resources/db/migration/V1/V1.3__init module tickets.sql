@@ -34,22 +34,22 @@ create TABLE IF NOT EXISTS ticket_statuses
 create TABLE IF NOT EXISTS ticket_templates
 (
     out_id                     varchar(128),
-    display_name               varchar(256)     DEFAULT (NULL),
-    deleted                    bool    NOT NULL DEFAULT 'false',
-    version                    int4    NOT NULL DEFAULT (0),
-    id                         uuid    NOT NULL,
-    subject                    varchar(256),
+    display_name               varchar(256)          DEFAULT (NULL),
+    deleted                    bool         NOT NULL DEFAULT 'false',
+    version                    int4         NOT NULL DEFAULT (0),
+    id                         uuid         NOT NULL,
+    subject                    varchar(256) NOT NULL,
     description                text,
     date_next_run              bigint,
     date_start                 bigint,
     date_end                   bigint,
-    zone_id                    varchar NOT NULL,
-    expression_schedule        varchar NOT NULL,
-    is_only_one_ticket_in_work bool    NOT NULL DEFAULT 'false',
-    is_active                  bool    NOT NULL DEFAULT 'true',
-    account_id                 uuid    NOT NULL,
-    author_id                  uuid    NOT NULL,
-    ticket_type_id             uuid    NOT NULL,
+    zone_id                    varchar      NOT NULL,
+    expression_schedule        varchar      NOT NULL,
+    is_only_one_ticket_in_work bool         NOT NULL DEFAULT 'false',
+    is_active                  bool         NOT NULL DEFAULT 'true',
+    account_id                 uuid         NOT NULL,
+    author_id                  uuid         NOT NULL,
+    ticket_type_id             uuid,
     PRIMARY KEY (id),
     FOREIGN KEY (account_id) REFERENCES accounts (id),
     FOREIGN KEY (author_id) REFERENCES users (id),
@@ -109,4 +109,47 @@ create TABLE IF NOT EXISTS ticket_counters
     id             uuid   NOT NULL,
     current_number bigint NOT NULL,
     PRIMARY KEY (id)
+);
+
+create TABLE IF NOT EXISTS tickets
+(
+    out_id              varchar(128),
+    display_name        varchar(256)    DEFAULT (NULL),
+    deleted             bool   NOT NULL DEFAULT 'false',
+    version             int4   NOT NULL DEFAULT (0),
+    id                  uuid   NOT NULL,
+    account_id          uuid   NOT NULL,
+    author_id           uuid   NOT NULL,
+    number              bigint NOT NULL,
+    created_at          bigint NOT NULL,
+    subject             varchar(256),
+    description         text,
+    deadline            bigint,
+    is_finished         bool   NOT NULL DEFAULT 'false',
+    ticket_type_id      uuid   NOT NULL,
+    ticket_status_id    uuid   NOT NULL,
+    ticket_template_id  uuid   NOT NULL,
+    ticket_inheritor_id uuid   NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (account_id) REFERENCES accounts (id),
+    FOREIGN KEY (ticket_type_id) REFERENCES ticket_types (id),
+    FOREIGN KEY (ticket_status_id) REFERENCES ticket_statuses (id),
+    FOREIGN KEY (ticket_template_id) REFERENCES ticket_templates (id),
+    FOREIGN KEY (ticket_inheritor_id) REFERENCES tickets (id)
+);
+
+create TABLE IF NOT EXISTS ticket_executors
+(
+    ticket_id   uuid NOT NULL,
+    executor_id uuid NOT NULL,
+    FOREIGN KEY (ticket_id) REFERENCES tickets (id),
+    FOREIGN KEY (executor_id) REFERENCES users (id)
+);
+
+create TABLE IF NOT EXISTS ticket_observers
+(
+    ticket_id   uuid NOT NULL,
+    observer_id uuid NOT NULL,
+    FOREIGN KEY (ticket_id) REFERENCES tickets (id),
+    FOREIGN KEY (observer_id) REFERENCES users (id)
 );
