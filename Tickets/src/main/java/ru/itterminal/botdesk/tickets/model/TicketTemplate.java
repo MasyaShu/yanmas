@@ -19,7 +19,7 @@ import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 
 @Entity
-@Table(name = "ticket_template")
+@Table(name = "ticket_templates")
 @Getter
 @Setter
 @SuperBuilder
@@ -61,7 +61,7 @@ public class TicketTemplate extends BaseEntity {
     private Boolean isActive;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "author_id", nullable = false)
     private User Author;
 
     @ManyToOne(fetch = FetchType.LAZY)
