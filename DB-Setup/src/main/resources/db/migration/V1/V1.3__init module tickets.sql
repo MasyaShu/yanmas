@@ -10,7 +10,7 @@ create TABLE IF NOT EXISTS ticket_types
     is_predefined bool         NOT NULL DEFAULT 'false',
     account_id    uuid         NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (account_id) REFERENCES account (id)
+    FOREIGN KEY (account_id) REFERENCES accounts (id)
 );
 create TABLE IF NOT EXISTS ticket_statuses
 (
@@ -27,10 +27,10 @@ create TABLE IF NOT EXISTS ticket_statuses
     is_canceled_predefined bool         NOT NULL DEFAULT 'false',
     account_id             uuid         NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (account_id) REFERENCES account (id)
+    FOREIGN KEY (account_id) REFERENCES accounts (id)
 );
 
-create TABLE IF NOT EXISTS ticket_template
+create TABLE IF NOT EXISTS ticket_templates
 (
     out_id                     varchar(128),
     display_name               varchar(256)          DEFAULT (NULL),
@@ -50,7 +50,7 @@ create TABLE IF NOT EXISTS ticket_template
     author_id                    uuid         NOT NULL,
     ticket_type_id             uuid,
     PRIMARY KEY (id),
-    FOREIGN KEY (account_id) REFERENCES account (id),
+    FOREIGN KEY (account_id) REFERENCES accounts (id),
     FOREIGN KEY (author_id) REFERENCES users (id),
     FOREIGN KEY (ticket_type_id) REFERENCES ticket_types (id)
 );
@@ -70,7 +70,7 @@ create TABLE IF NOT EXISTS ticket_settings
     ticket_status_id_for_close  uuid,
     ticket_status_id_for_cancel uuid,
     PRIMARY KEY (id),
-    FOREIGN KEY (account_id) REFERENCES account (id),
+    FOREIGN KEY (account_id) REFERENCES accounts (id),
     FOREIGN KEY (author_id) REFERENCES users (id),
     FOREIGN KEY (group_id) REFERENCES group_users (id),
     FOREIGN KEY (ticket_type_id_for_new) REFERENCES ticket_types (id),
@@ -93,4 +93,15 @@ create TABLE IF NOT EXISTS ticket_settings_observers
     observer_id        uuid NOT NULL,
     FOREIGN KEY (ticket_settings_id) REFERENCES ticket_settings (id),
     FOREIGN KEY (observer_id) REFERENCES users (id)
+);
+
+create TABLE IF NOT EXISTS ticket_counters
+(
+    out_id         varchar(128),
+    display_name   varchar(256)    DEFAULT (NULL),
+    deleted        bool   NOT NULL DEFAULT 'false',
+    version        int4   NOT NULL DEFAULT (0),
+    id             uuid   NOT NULL,
+    current_number bigint NOT NULL,
+    PRIMARY KEY (id)
 );

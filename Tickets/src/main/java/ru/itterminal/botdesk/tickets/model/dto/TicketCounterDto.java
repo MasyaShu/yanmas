@@ -1,4 +1,6 @@
-package ru.itterminal.botdesk.aau.model.dto;
+package ru.itterminal.botdesk.tickets.model.dto;
+
+import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -8,6 +10,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
+import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 
 @Getter
 @Setter
@@ -16,20 +19,9 @@ import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
 @NoArgsConstructor
 @ToString
 @EqualsAndHashCode(callSuper = true)
-public class UserDtoResponse extends BaseEntityDto {
+public class TicketCounterDto extends BaseEntityDto {
 
-    private String email;
-
-    private String name;
-
-    private String phone;
-
-    private String comment;
-
-    private Boolean isArchived;
-
-    private BaseEntityDto group;
-
-    private BaseEntityDto role;
+    @NotNull(groups = {Update.class})
+    private Long currentNumber;
 
 }

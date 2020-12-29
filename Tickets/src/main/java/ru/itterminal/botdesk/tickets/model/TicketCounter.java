@@ -1,4 +1,8 @@
-package ru.itterminal.botdesk.aau.model;
+package ru.itterminal.botdesk.tickets.model;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -9,28 +13,22 @@ import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import java.util.Objects;
-
 @Entity
-@Table(name = "roles")
-@Setter
+@Table(name = "ticket_counters")
 @Getter
+@Setter
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class Role extends BaseEntity {
+public class TicketCounter extends BaseEntity {
 
-    @Column(nullable = false, unique = true, length = 30)
-    private String name;
-    private int weight;
+    @Column(name = "current_number", nullable = false)
+    private Long currentNumber;
 
     @Override
     public void generateDisplayName() {
-        setDisplayName(name);
+        setDisplayName(getId().toString());
     }
 }

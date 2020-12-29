@@ -53,7 +53,7 @@ import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
 @Slf4j
 @RestController("TicketSettingControllerV1")
 @Validated
-@RequestMapping("api/v1/ticketSetting")
+@RequestMapping("api/v1/ticket-setting")
 @AllArgsConstructor
 public class TicketSettingControllerV1 extends BaseController {
 

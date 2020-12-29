@@ -1,6 +1,6 @@
 -- noinspection SpellCheckingInspectionForFile
 
-INSERT INTO account(out_id, deleted, version, id, name)
+INSERT INTO accounts(out_id, deleted, version, id, name)
 VALUES (null, 'false', '0', 'cdfa6483-0769-4628-ba32-efd338a716de', 'accountName1'),
        (null, 'false', '0', 'bcf98101-2a22-42bf-94cc-c900b50a0b69', 'accountName2');
 

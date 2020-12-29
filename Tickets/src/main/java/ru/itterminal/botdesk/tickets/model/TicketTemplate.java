@@ -19,7 +19,7 @@ import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 
 @Entity
-@Table(name = "ticket_template")
+@Table(name = "ticket_templates")
 @Getter
 @Setter
 @SuperBuilder
@@ -67,7 +67,6 @@ public class TicketTemplate extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ticket_type_id")
     private TicketType ticketType;
-
 
     @Override
     public void generateDisplayName() {
