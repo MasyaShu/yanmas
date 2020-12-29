@@ -84,7 +84,7 @@ VALUES ('9c8183ba-5d13-442f-a741-5b3134a3c140', '0223e51a-4bb2-44ee-bc8e-1f047a2
 
 INSERT INTO ticket_template(out_id, deleted, version, id, subject, display_name, description, date_next_run, date_start,
                             date_end, zone_id, expression_schedule, is_only_one_ticket_in_work, is_active, account_id,
-                            user_id, ticket_type_id)
+                            author_id, ticket_type_id)
 VALUES (null, 'false', '0', '21dad366-54d8-445f-b778-4cc3829e07b1', 'subject_1', 'subject_1', 'description_1',
         1639144829000, 1546300800000, 1609459200000, 'Europe/Moscow', '25 6 5 25 2 *', true, true, 'cdfa6483-0769-4628-ba32-efd338a716de',
         'd592facb-e6ee-4801-8310-9c7708eb6e6c', '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9'),

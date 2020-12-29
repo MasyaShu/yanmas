@@ -142,7 +142,7 @@ public class TicketTemplateSpec implements BaseSpec<TicketTemplate, Account> {
             return returnedPredicate;
         };
     }
-    //TODO one spec for null and List
+
     public Specification<TicketTemplate> getTicketTemplateByListOfTicketTypeNullSpec() {
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.isNull(root.get(TICKET_TYPE));
