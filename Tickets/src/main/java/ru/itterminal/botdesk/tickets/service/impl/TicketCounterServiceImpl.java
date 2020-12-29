@@ -2,6 +2,8 @@ package ru.itterminal.botdesk.tickets.service.impl;
 
 import java.util.UUID;
 
+import javax.persistence.OptimisticLockException;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +38,7 @@ public class TicketCounterServiceImpl
             ticketCounter.setCurrentNumber(ticketNumber + 1);
             update(ticketCounter);
         }
-        catch (Exception e) {
+        catch (OptimisticLockException e) {
             ticketNumber = getTicketNumber(accountId);
         }
         log.debug(FINISH, accountId);

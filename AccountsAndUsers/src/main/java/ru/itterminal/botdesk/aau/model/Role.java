@@ -15,7 +15,7 @@ import javax.persistence.Table;
 import java.util.Objects;
 
 @Entity
-@Table(name = "role")
+@Table(name = "roles")
 @Setter
 @Getter
 @SuperBuilder

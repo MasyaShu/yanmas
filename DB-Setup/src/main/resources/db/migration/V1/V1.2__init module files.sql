@@ -12,5 +12,5 @@ create TABLE IF NOT EXISTS files
     entity_id    uuid         NOT NULL,
     is_uploaded  bool         NOT NULL DEFAULT 'false',
     PRIMARY KEY (id),
-    FOREIGN KEY (account_id) REFERENCES account (id)
+    FOREIGN KEY (account_id) REFERENCES accounts (id)
 );

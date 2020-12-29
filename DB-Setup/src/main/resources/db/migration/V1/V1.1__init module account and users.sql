@@ -1,4 +1,4 @@
-create TABLE IF NOT EXISTS account
+create TABLE IF NOT EXISTS accounts
 (
     out_id       varchar(128),
     display_name varchar(256)         DEFAULT (NULL),
@@ -22,7 +22,7 @@ create TABLE IF NOT EXISTS group_users
     account_id    uuid         NOT NULL,
     PRIMARY KEY (id)
 );
-create TABLE IF NOT EXISTS role
+create TABLE IF NOT EXISTS roles
 (
     out_id       varchar(128),
     display_name varchar(256)         DEFAULT (NULL),
@@ -53,7 +53,7 @@ create TABLE IF NOT EXISTS users
     role_id                   uuid         NOT NULL,
     group_id                  uuid         NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (role_id) REFERENCES role (id),
-    FOREIGN KEY (account_id) REFERENCES account (id),
+    FOREIGN KEY (role_id) REFERENCES roles (id),
+    FOREIGN KEY (account_id) REFERENCES accounts (id),
     FOREIGN KEY (group_id) REFERENCES group_users (id)
 );

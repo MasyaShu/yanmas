@@ -10,7 +10,7 @@ create TABLE IF NOT EXISTS ticket_types
     is_predefined bool         NOT NULL DEFAULT 'false',
     account_id    uuid         NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (account_id) REFERENCES account (id)
+    FOREIGN KEY (account_id) REFERENCES accounts (id)
 );
 
 create TABLE IF NOT EXISTS ticket_statuses
@@ -28,31 +28,31 @@ create TABLE IF NOT EXISTS ticket_statuses
     is_canceled_predefined bool         NOT NULL DEFAULT 'false',
     account_id             uuid         NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (account_id) REFERENCES account (id)
+    FOREIGN KEY (account_id) REFERENCES accounts (id)
 );
 
-create TABLE IF NOT EXISTS ticket_template
+create TABLE IF NOT EXISTS ticket_templates
 (
     out_id                     varchar(128),
-    display_name               varchar(256)          DEFAULT (NULL),
-    deleted                    bool         NOT NULL DEFAULT 'false',
-    version                    int4         NOT NULL DEFAULT (0),
-    id                         uuid         NOT NULL,
-    subject                    varchar(256) NOT NULL,
+    display_name               varchar(256)     DEFAULT (NULL),
+    deleted                    bool    NOT NULL DEFAULT 'false',
+    version                    int4    NOT NULL DEFAULT (0),
+    id                         uuid    NOT NULL,
+    subject                    varchar(256),
     description                text,
     date_next_run              bigint,
     date_start                 bigint,
     date_end                   bigint,
-    zone_id                    varchar      NOT NULL,
-    expression_schedule        varchar      NOT NULL,
-    is_only_one_ticket_in_work bool         NOT NULL DEFAULT 'false',
-    is_active                  bool         NOT NULL DEFAULT 'true',
-    account_id                 uuid         NOT NULL,
-    user_id                    uuid         NOT NULL,
-    ticket_type_id             uuid,
+    zone_id                    varchar NOT NULL,
+    expression_schedule        varchar NOT NULL,
+    is_only_one_ticket_in_work bool    NOT NULL DEFAULT 'false',
+    is_active                  bool    NOT NULL DEFAULT 'true',
+    account_id                 uuid    NOT NULL,
+    author_id                  uuid    NOT NULL,
+    ticket_type_id             uuid    NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (account_id) REFERENCES account (id),
-    FOREIGN KEY (user_id) REFERENCES users (id),
+    FOREIGN KEY (account_id) REFERENCES accounts (id),
+    FOREIGN KEY (author_id) REFERENCES users (id),
     FOREIGN KEY (ticket_type_id) REFERENCES ticket_types (id)
 );
 
@@ -72,7 +72,7 @@ create TABLE IF NOT EXISTS ticket_settings
     ticket_status_id_for_close  uuid,
     ticket_status_id_for_cancel uuid,
     PRIMARY KEY (id),
-    FOREIGN KEY (account_id) REFERENCES account (id),
+    FOREIGN KEY (account_id) REFERENCES accounts (id),
     FOREIGN KEY (author_id) REFERENCES users (id),
     FOREIGN KEY (group_id) REFERENCES group_users (id),
     FOREIGN KEY (ticket_type_id_for_new) REFERENCES ticket_types (id),
