@@ -4,12 +4,9 @@ import lombok.val;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import ru.itterminal.botdesk.aau.model.Account;
-import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.commons.model.spec.BaseSpec;
 import ru.itterminal.botdesk.tickets.model.TicketTemplate;
-import ru.itterminal.botdesk.tickets.model.TicketType;
 
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import java.util.List;
 import java.util.UUID;
@@ -26,13 +23,11 @@ public class TicketTemplateSpec implements BaseSpec<TicketTemplate, Account> {
     public static final String AUTHOR = "author";
     public static final String TICKET_TYPE = "ticketType";
 
-    @SuppressWarnings("DuplicatedCode")
     public Specification<TicketTemplate> getTicketTemplateBySubjectSpec(String subject) {
         return (root, query, criteriaBuilder) -> criteriaBuilder
                 .like(criteriaBuilder.lower(root.get(SUBJECT)), "%" + subject.toLowerCase() + "%");
     }
 
-    @SuppressWarnings("DuplicatedCode")
     public Specification<TicketTemplate> getTicketTemplateByDescriptionSpec(String description) {
         return (root, query, criteriaBuilder) -> {
             val objectPathComment = root.get(DESCRIPTION);
@@ -117,30 +112,12 @@ public class TicketTemplateSpec implements BaseSpec<TicketTemplate, Account> {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get(IS_ACTIVE), isActive);
     }
 
-    @SuppressWarnings("DuplicatedCode")
     public Specification<TicketTemplate> getTicketTemplateByListOfAuthorsSpec(List<UUID> listAuthorId) {
-        return (root, query, criteriaBuilder) -> {
-            Join<TicketTemplate, User> ticketTemplateJoin = root.join(AUTHOR);
-            Predicate returnedPredicate = criteriaBuilder.equal(ticketTemplateJoin.<UUID>get("id"), listAuthorId.get(0));
-            for (int i = 1; i < listAuthorId.size(); i++) {
-                Predicate predicate = criteriaBuilder.equal(ticketTemplateJoin.<UUID>get("id"), listAuthorId.get(i));
-                returnedPredicate = criteriaBuilder.or(returnedPredicate, predicate);
-            }
-            return returnedPredicate;
-        };
+        return (root, query, criteriaBuilder) -> root.get(AUTHOR).<UUID>get("id").in(listAuthorId);
     }
 
-    @SuppressWarnings("DuplicatedCode")
     public Specification<TicketTemplate> getTicketTemplateByListOfTicketTypeSpec(List<UUID> listTicketTypeId) {
-        return (root, query, criteriaBuilder) -> {
-            Join<TicketTemplate, TicketType> ticketTemplateJoin = root.join(TICKET_TYPE);
-            Predicate returnedPredicate = criteriaBuilder.equal(ticketTemplateJoin.<UUID>get("id"), listTicketTypeId.get(0));
-            for (int i = 1; i < listTicketTypeId.size(); i++) {
-                Predicate predicate = criteriaBuilder.equal(ticketTemplateJoin.<UUID>get("id"), listTicketTypeId.get(i));
-                returnedPredicate = criteriaBuilder.or(returnedPredicate, predicate);
-            }
-            return returnedPredicate;
-        };
+        return (root, query, criteriaBuilder) -> root.get(TICKET_TYPE).<UUID>get("id").in(listTicketTypeId);
     }
 
     public Specification<TicketTemplate> getTicketTemplateByListOfTicketTypeNullSpec() {
