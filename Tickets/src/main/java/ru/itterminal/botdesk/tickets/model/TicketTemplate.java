@@ -1,22 +1,12 @@
 package ru.itterminal.botdesk.tickets.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
+
+import javax.persistence.*;
 
 @Entity
 @Table(name = "ticket_templates")
@@ -27,6 +17,23 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @NoArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
+@NamedEntityGraph(name = "ticket-template-graph",
+        attributeNodes = {
+                @NamedAttributeNode("account"),
+                @NamedAttributeNode(value = "author", subgraph = "user-graph"),
+                @NamedAttributeNode("ticketType")
+        },
+        subgraphs = {
+                @NamedSubgraph(
+                        name = "user-graph",
+                        attributeNodes = {
+                                @NamedAttributeNode("account"),
+                                @NamedAttributeNode("group"),
+                                @NamedAttributeNode("role")
+                        }
+                )
+        }
+)
 public class TicketTemplate extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -65,7 +72,7 @@ public class TicketTemplate extends BaseEntity {
     private User author;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ticket_type_id")
+    @JoinColumn(name = "ticket_type_id", insertable = false)
     private TicketType ticketType;
 
     @Override
