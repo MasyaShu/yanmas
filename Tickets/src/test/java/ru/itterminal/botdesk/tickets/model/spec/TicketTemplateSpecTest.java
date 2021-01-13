@@ -1,11 +1,13 @@
 package ru.itterminal.botdesk.tickets.model.spec;
 
 import org.assertj.core.api.Assertions;
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -49,6 +51,9 @@ class TicketTemplateSpecTest {
     @Autowired
     TicketTemplateSpec spec;
 
+    @Autowired
+    private TestEntityManager em;
+
     private static final String SUBJECT = "subject";
     private final Pageable pageable = PageRequest.of(0, 5, Sort.by((Sort.Direction.ASC), "subject"));
     private Page<TicketTemplate> foundTicketTemplate;
@@ -57,16 +62,22 @@ class TicketTemplateSpecTest {
 
     @Test
     void getTicketTemplateBySubjectSpec_shouldGetEntitySubjectContainsString_whenSubjectEqualSubject() {
+        SessionFactory sessionFactory = em.getEntityManager().getEntityManagerFactory()
+                .unwrap(SessionFactory.class);
+        sessionFactory.getStatistics().setStatisticsEnabled(true);
+
         List<TicketTemplate> ticketTemplates = ticketTemplateTestHelper.setPredefinedValidEntityList();
         Specification<TicketTemplate> tSpecification = Specification
                 .where(spec.getTicketTemplateBySubjectSpec(SUBJECT));
         foundTicketTemplate = repository.findAll(tSpecification, pageable);
         Assertions.assertThat(foundTicketTemplate).isNotNull().hasSize(ticketTemplates.size());
         assertThat(foundTicketTemplate.getContent()).containsExactlyInAnyOrderElementsOf(ticketTemplates);
+        Assertions.assertThat(sessionFactory.getStatistics().getPrepareStatementCount()).isEqualTo(2);
     }
 
     @Test
     void getTicketTemplateBySubjectSpec_shouldGetOneEntity_whenSubjectExistInDatabase() {
+
         TicketTemplate ticketTemplate = ticketTemplateTestHelper.getEntityFromPredefinedValidEntityByEntityId("f8a773d2-0f4d-48e9-b788-7ce671373992");
         Specification<TicketTemplate> tSpecification = Specification
                 .where(spec.getTicketTemplateBySubjectSpec("subject_2"));
