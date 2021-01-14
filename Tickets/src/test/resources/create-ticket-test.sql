@@ -65,6 +65,7 @@ VALUES (null, 'false', '0', '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9', 'started', '
         'bcf98101-2a22-42bf-94cc-c900b50a0b69'),
        (null, 'false', '0', '6dc9c0de-2143-40ce-ac65-5be97e3019fc', 'inWork', 'inWork', 40, false, false, false, false,
         'bcf98101-2a22-42bf-94cc-c900b50a0b69');
+
 INSERT INTO ticket_settings(out_id, deleted, version, id, account_id, group_id, author_id, ticket_type_id_for_new,
                             ticket_status_id_for_new, ticket_status_id_for_reopen, ticket_status_id_for_close,
                             ticket_status_id_for_cancel)
@@ -81,6 +82,22 @@ VALUES ('9c8183ba-5d13-442f-a741-5b3134a3c140', 'd592facb-e6ee-4801-8310-9c7708e
 INSERT INTO ticket_settings_observers (ticket_settings_id, observer_id)
 VALUES ('9c8183ba-5d13-442f-a741-5b3134a3c140', '0223e51a-4bb2-44ee-bc8e-1f047a2145e7'),
        ('9c8183ba-5d13-442f-a741-5b3134a3c140', 'e14d9ffd-0071-4c0e-99ed-932f007963f0');
+
+INSERT INTO tickets(id, out_id, deleted, version, account_id, author_id, number, created_at, subject, description,
+                    deadline, is_finished, ticket_type_id, ticket_status_id, ticket_template_id, ticket_inheritor_id)
+VALUES ('b927e5af-0db3-4f55-8da0-a31d0f6421d0', null, false, '0',  'cdfa6483-0769-4628-ba32-efd338a716de',
+        'cdfa6483-0769-4628-ba32-efd338a716de', 100, 1639144829000, 'subject ticket number 100',
+        'description ticket number 100', null, false, '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9',
+        '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9', null, null),
+       ('7e1daf3c-d5f5-49a7-86e7-0f295c84941d', null, false, '0',  'cdfa6483-0769-4628-ba32-efd338a716de',
+        'cdfa6483-0769-4628-ba32-efd338a716de', 101, 1639144829000, 'subject ticket number 101',
+        'description ticket number 101', null, false, '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9',
+        '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9', null, null),
+       ('e39a9ecb-ff7c-4c7f-94e2-4b121faffe28', null, false, '0',  'cdfa6483-0769-4628-ba32-efd338a716de',
+        'cdfa6483-0769-4628-ba32-efd338a716de', 102, 1639144829000, 'subject ticket number 102',
+        'description ticket number 102', null, false, '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9',
+        '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9', null, null);
+
 
 INSERT INTO ticket_templates(out_id, deleted, version, id, subject, display_name, description, date_next_run,
                              date_start,
@@ -105,4 +122,29 @@ VALUES (null, 'false', '0', '21dad366-54d8-445f-b778-4cc3829e07b1', 'subject_1',
         'bcf98101-2a22-42bf-94cc-c900b50a0b69', 'd592facb-e6ee-4801-8310-9c7708eb6e6c',
         'dcf29ccb-26c7-4e38-9256-f45918a4c4a6');
 
+-- ticket number 100
+INSERT INTO ticket_executors (ticket_id, executor_id)
+VALUES ('b927e5af-0db3-4f55-8da0-a31d0f6421d0', '0223e51a-4bb2-44ee-bc8e-1f047a2145e7'),
+       ('b927e5af-0db3-4f55-8da0-a31d0f6421d0', 'e14d9ffd-0071-4c0e-99ed-932f007963f0');
 
+INSERT INTO ticket_observers (ticket_id, observer_id)
+VALUES ('b927e5af-0db3-4f55-8da0-a31d0f6421d0', '0223e51a-4bb2-44ee-bc8e-1f047a2145e7'),
+       ('b927e5af-0db3-4f55-8da0-a31d0f6421d0', 'e14d9ffd-0071-4c0e-99ed-932f007963f0');
+
+-- ticket number 101
+INSERT INTO ticket_executors (ticket_id, executor_id)
+VALUES ('7e1daf3c-d5f5-49a7-86e7-0f295c84941d', 'd592facb-e6ee-4801-8310-9c7708eb6e6c'),
+       ('7e1daf3c-d5f5-49a7-86e7-0f295c84941d', 'cdfa6483-0769-4628-ba32-efd338a716de');
+
+INSERT INTO ticket_observers (ticket_id, observer_id)
+VALUES ('7e1daf3c-d5f5-49a7-86e7-0f295c84941d', 'd592facb-e6ee-4801-8310-9c7708eb6e6c'),
+       ('7e1daf3c-d5f5-49a7-86e7-0f295c84941d', 'cdfa6483-0769-4628-ba32-efd338a716de');
+
+-- ticket number 102
+INSERT INTO ticket_executors (ticket_id, executor_id)
+VALUES ('e39a9ecb-ff7c-4c7f-94e2-4b121faffe28', '0223e51a-4bb2-44ee-bc8e-1f047a2145e7'),
+       ('e39a9ecb-ff7c-4c7f-94e2-4b121faffe28', 'd592facb-e6ee-4801-8310-9c7708eb6e6c');
+
+INSERT INTO ticket_observers (ticket_id, observer_id)
+VALUES ('e39a9ecb-ff7c-4c7f-94e2-4b121faffe28', '0223e51a-4bb2-44ee-bc8e-1f047a2145e7'),
+       ('e39a9ecb-ff7c-4c7f-94e2-4b121faffe28', 'd592facb-e6ee-4801-8310-9c7708eb6e6c');
