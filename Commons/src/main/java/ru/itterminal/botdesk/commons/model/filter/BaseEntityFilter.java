@@ -12,7 +12,7 @@ import ru.itterminal.botdesk.commons.model.validator.ValueOfEnum;
 @SuppressWarnings("unused")
 @Data
 @Builder
-public class BaseEntityFilter {
+public class BaseEntityFilter implements Filter {
 
     @ValueOfEnum(enumClass = TypeComparisonForBaseEntityFilter.class,
             message = "must be any of: is_empty, is_not_empty, exist_in, not_exist_in")

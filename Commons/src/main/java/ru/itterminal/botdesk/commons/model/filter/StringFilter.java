@@ -9,14 +9,15 @@ import ru.itterminal.botdesk.commons.model.validator.ValueOfEnum;
 @SuppressWarnings("unused")
 @Data
 @Builder
-public class StringFilter {
+public class StringFilter implements Filter {
 
     @ValueOfEnum(enumClass = TypeComparisonForStringFilter.class,
             message = "must be any of: is_empty, is_not_empty, text_contains, text_not_contains, text_starts_with, "
                     + "text_ends_with, text_equals")
     private String typeComparison;
 
-    private String text;
+    private String value;
+
 
     public enum TypeComparisonForStringFilter {
         IS_EMPTY,
@@ -36,5 +37,6 @@ public class StringFilter {
                         format("Invalid value '%s' for value given!", value), exception);
             }
         }
+
     }
 }

@@ -9,7 +9,7 @@ import ru.itterminal.botdesk.commons.model.validator.ValueOfEnum;
 @SuppressWarnings("unused")
 @Data
 @Builder
-public class NumberFilter {
+public class NumberFilter implements Filter {
 
     @ValueOfEnum(enumClass = TypeComparisonForNumberFilter.class,
             message = "must be any of: is_empty, is_not_empty, greater_than, greater_than_or_equal_to, less_than,"

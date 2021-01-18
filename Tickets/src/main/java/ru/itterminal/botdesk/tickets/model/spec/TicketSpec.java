@@ -243,12 +243,12 @@ public class TicketSpec implements BaseSpec<Ticket, Account> {
             Subquery<Long> subQuerySizeOfList = query.subquery(Long.class);
             Root<Ticket> subRootSizeOfList = subQuerySizeOfList.from(Ticket.class);
 
-            ListJoin<Ticket, User> executors2 = subRootSizeOfList.joinList("executors");
+            ListJoin<Ticket, User> executors = subRootSizeOfList.joinList("executors");
 
-            Predicate ticketsIdIsEqualsPredicate2 = criteriaBuilder.equal(root.get("id"), subRootSizeOfList.get("id"));
+            Predicate ticketsIdIsEqualsPredicate = criteriaBuilder.equal(root.get("id"), subRootSizeOfList.get("id"));
 
             subQuerySizeOfList.select(criteriaBuilder.count(subRootSizeOfList.get("id")));
-            subQuerySizeOfList.where(ticketsIdIsEqualsPredicate2);
+            subQuerySizeOfList.where(ticketsIdIsEqualsPredicate);
 
             return criteriaBuilder.equal(subQuerySizeOfList, 0);
         };
@@ -260,12 +260,12 @@ public class TicketSpec implements BaseSpec<Ticket, Account> {
             Subquery<Long> subQuerySizeOfList = query.subquery(Long.class);
             Root<Ticket> subRootSizeOfList = subQuerySizeOfList.from(Ticket.class);
 
-            ListJoin<Ticket, User> executors2 = subRootSizeOfList.joinList("executors");
+            ListJoin<Ticket, User> executors = subRootSizeOfList.joinList("executors");
 
-            Predicate ticketsIdIsEqualsPredicate2 = criteriaBuilder.equal(root.get("id"), subRootSizeOfList.get("id"));
+            Predicate ticketsIdIsEqualsPredicate = criteriaBuilder.equal(root.get("id"), subRootSizeOfList.get("id"));
 
             subQuerySizeOfList.select(criteriaBuilder.count(subRootSizeOfList.get("id")));
-            subQuerySizeOfList.where(ticketsIdIsEqualsPredicate2);
+            subQuerySizeOfList.where(ticketsIdIsEqualsPredicate);
 
             return criteriaBuilder.notEqual(subQuerySizeOfList, 0);
         };
