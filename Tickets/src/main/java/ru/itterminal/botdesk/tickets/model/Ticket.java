@@ -26,7 +26,6 @@ import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 import ru.itterminal.botdesk.files.model.File;
 
-@SuppressWarnings("JpaDataSourceORMInspection")
 @Entity
 @Table(name = "tickets")
 @Getter

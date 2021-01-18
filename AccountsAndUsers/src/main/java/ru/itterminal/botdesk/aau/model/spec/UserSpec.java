@@ -17,6 +17,7 @@ import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.commons.model.spec.BaseSpec;
 
 @Component
+@SuppressWarnings("DuplicatedCode")
 public class UserSpec implements BaseSpec<User, Account> {
 
     private static final String NAME = "name";
@@ -29,7 +30,6 @@ public class UserSpec implements BaseSpec<User, Account> {
                 "%" + email.toLowerCase() + "%");
     }
 
-    @SuppressWarnings("DuplicatedCode")
     public Specification<User> getUserByNameSpec(String name) {
         return (root, query, criteriaBuilder) -> {
             val objectPathname = root.get(NAME);
@@ -43,7 +43,6 @@ public class UserSpec implements BaseSpec<User, Account> {
         };
     }
 
-    @SuppressWarnings("DuplicatedCode")
     public Specification<User> getUserByPhoneSpec(String phone) {
         return (root, query, criteriaBuilder) -> {
             val objectPathPhone = root.get(PHONE);
@@ -57,7 +56,6 @@ public class UserSpec implements BaseSpec<User, Account> {
         };
     }
 
-    @SuppressWarnings("DuplicatedCode")
     public Specification<User> getUserByCommentSpec(String comment) {
         return (root, query, criteriaBuilder) -> {
             val objectPathComment = root.get(COMMENT);
@@ -75,7 +73,6 @@ public class UserSpec implements BaseSpec<User, Account> {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("isArchived"), isArchived);
     }
 
-    @SuppressWarnings("DuplicatedCode")
     public Specification<User> getUserByListOfGroupsSpec(List<UUID> listGroupId) {
         return (root, query, criteriaBuilder) -> {
             Join<User, Group> userJoin = root.join("group");
@@ -88,7 +85,6 @@ public class UserSpec implements BaseSpec<User, Account> {
         };
     }
 
-    @SuppressWarnings("DuplicatedCode")
     public Specification<User> getUserByListOfRolesSpec(List<UUID> listRoleId) {
         return (root, query, criteriaBuilder) -> {
             Join<User, Role> userJoin = root.join("role");
