@@ -14,10 +14,11 @@ public class NumberFilter implements Filter {
     @ValueOfEnum(enumClass = TypeComparisonForNumberFilter.class,
             message = "must be any of: is_empty, is_not_empty, greater_than, greater_than_or_equal_to, less_than,"
                     + " less_than_or_equal_to, is_between_inclusive, is_between_exclusion, is_not_between_inclusive,"
-                    + " is_not_between_exclusion, exist_in, not_exist_in")
+                    + " is_not_between_exclusion, is_equal_to, is_not_equal_to")
     private String typeComparison;
 
-    private Number number;
+    private Number valueOne;
+    private Number valueTwo;
 
     public enum TypeComparisonForNumberFilter {
         IS_EMPTY,
@@ -30,8 +31,8 @@ public class NumberFilter implements Filter {
         IS_BETWEEN_EXCLUSION,
         IS_NOT_BETWEEN_INCLUSIVE,
         IS_NOT_BETWEEN_EXCLUSION,
-        EXIST_IN,
-        NOT_EXIST_IN;
+        IS_EQUAL_TO,
+        IS_NOT_EQUAL_TO;
 
         public static TypeComparisonForNumberFilter fromString(String value) {
             try {

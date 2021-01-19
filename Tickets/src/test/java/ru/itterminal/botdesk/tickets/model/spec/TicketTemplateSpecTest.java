@@ -16,7 +16,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import ru.itterminal.botdesk.commons.model.filter.NumberFilter;
 import ru.itterminal.botdesk.commons.model.spec.BaseSpec;
+import ru.itterminal.botdesk.commons.model.spec.NumberFilterSpecificationsFactory;
 import ru.itterminal.botdesk.tickets.model.TicketTemplate;
 import ru.itterminal.botdesk.tickets.model.test.TicketTemplateTestHelper;
 import ru.itterminal.botdesk.tickets.repository.TicketRepositoryTestConfig;
@@ -29,6 +31,8 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
+import static ru.itterminal.botdesk.commons.model.filter.NumberFilter.TypeComparisonForNumberFilter.*;
+import static ru.itterminal.botdesk.tickets.model.spec.TicketTemplateSpec.DATE_START;
 import static ru.itterminal.botdesk.tickets.model.test.TicketTemplateTestHelper.*;
 
 @TestInstance(PER_CLASS)
@@ -58,7 +62,8 @@ class TicketTemplateSpecTest {
     private final Pageable pageable = PageRequest.of(0, 5, Sort.by((Sort.Direction.ASC), "subject"));
     private Page<TicketTemplate> foundTicketTemplate;
     private final TicketTemplateTestHelper ticketTemplateTestHelper = new TicketTemplateTestHelper();
-
+    private final NumberFilterSpecificationsFactory numberFactory =
+            new NumberFilterSpecificationsFactory();
 
     @Test
     void getTicketTemplateBySubjectSpec_shouldGetEntitySubjectContainsString_whenSubjectEqualSubject() {
@@ -157,8 +162,12 @@ class TicketTemplateSpecTest {
         var expectedTicketTemplates = ticketTemplates.stream()
                 .filter(tt ->  tt.getDateStart() != null && tt.getDateStart() > DATE_2020_01_01)
                 .collect(Collectors.toList());
-        Specification<TicketTemplate> tSpecification = Specification
-                .where(spec.getTicketTemplateByDateStartSpec(DATE_2020_01_01, GT));
+        var filter = NumberFilter.builder()
+                .typeComparison(GREATER_THAN.toString())
+                .valueOne(DATE_2020_01_01)
+                .build();
+        Specification<TicketTemplate> tSpecification =
+                numberFactory.makeSpecification(filter, DATE_START);
         foundTicketTemplate = repository.findAll(tSpecification, pageable);
         Assertions.assertThat(foundTicketTemplate).isNotNull().hasSize(expectedTicketTemplates.size());
         assertThat(foundTicketTemplate.getContent()).containsExactlyInAnyOrderElementsOf(expectedTicketTemplates);
@@ -170,8 +179,12 @@ class TicketTemplateSpecTest {
         var expectedTicketTemplates = ticketTemplates.stream()
                 .filter(tt ->  tt.getDateStart() != null && tt.getDateStart() >= DATE_2020_01_01)
                 .collect(Collectors.toList());
-        Specification<TicketTemplate> tSpecification = Specification
-                .where(spec.getTicketTemplateByDateStartSpec(DATE_2020_01_01, GE));
+        var filter = NumberFilter.builder()
+                .typeComparison(GREATER_THAN_OR_EQUAL_TO.toString())
+                .valueOne(DATE_2020_01_01)
+                .build();
+        Specification<TicketTemplate> tSpecification =
+                numberFactory.makeSpecification(filter, DATE_START);
         foundTicketTemplate = repository.findAll(tSpecification, pageable);
         Assertions.assertThat(foundTicketTemplate).isNotNull().hasSize(expectedTicketTemplates.size());
         assertThat(foundTicketTemplate.getContent()).containsExactlyInAnyOrderElementsOf(expectedTicketTemplates);
@@ -181,10 +194,14 @@ class TicketTemplateSpecTest {
     void getTicketTemplateByDateStartSpec_shouldEntityWithDateStartNullAndLessEquals_whenDate20190101() {
         var ticketTemplates = ticketTemplateTestHelper.setPredefinedValidEntityList();
         var expectedTicketTemplates = ticketTemplates.stream()
-                .filter(tt ->  tt.getDateStart() == null || tt.getDateStart() <= DATE_2019_01_01)
+                .filter(tt ->  tt.getDateStart() != null && tt.getDateStart() <= DATE_2019_01_01)
                 .collect(Collectors.toList());
-        Specification<TicketTemplate> tSpecification = Specification
-                .where(spec.getTicketTemplateByDateStartSpec(DATE_2019_01_01, LE));
+        var filter = NumberFilter.builder()
+                .typeComparison(LESS_THAN_OR_EQUAL_TO.toString())
+                .valueOne(DATE_2019_01_01)
+                .build();
+        Specification<TicketTemplate> tSpecification =
+                numberFactory.makeSpecification(filter, DATE_START);
         foundTicketTemplate = repository.findAll(tSpecification, pageable);
         Assertions.assertThat(foundTicketTemplate).isNotNull().hasSize(expectedTicketTemplates.size());
         assertThat(foundTicketTemplate.getContent()).containsExactlyInAnyOrderElementsOf(expectedTicketTemplates);
@@ -194,10 +211,14 @@ class TicketTemplateSpecTest {
     void getTicketTemplateByDateStartSpec_shouldEntityWithDateStartNullAndLessThan_whenDate20190101() {
         var ticketTemplates = ticketTemplateTestHelper.setPredefinedValidEntityList();
         var expectedTicketTemplates = ticketTemplates.stream()
-                .filter(tt ->  tt.getDateStart() == null || tt.getDateStart() < DATE_2019_01_01)
+                .filter(tt -> tt.getDateStart() != null && tt.getDateStart() < DATE_2019_01_01)
                 .collect(Collectors.toList());
-        Specification<TicketTemplate> tSpecification = Specification
-                .where(spec.getTicketTemplateByDateStartSpec(DATE_2019_01_01, LT));
+        var filter = NumberFilter.builder()
+                .typeComparison(LESS_THAN.toString())
+                .valueOne(DATE_2019_01_01)
+                .build();
+        Specification<TicketTemplate> tSpecification =
+                numberFactory.makeSpecification(filter, DATE_START);
         foundTicketTemplate = repository.findAll(tSpecification, pageable);
         Assertions.assertThat(foundTicketTemplate).isNotNull().hasSize(expectedTicketTemplates.size());
         assertThat(foundTicketTemplate.getContent()).containsExactlyInAnyOrderElementsOf(expectedTicketTemplates);
@@ -209,8 +230,29 @@ class TicketTemplateSpecTest {
         var expectedTicketTemplates = ticketTemplates.stream()
                 .filter(tt ->  tt.getDateStart() != null && tt.getDateStart() == DATE_2019_01_01)
                 .collect(Collectors.toList());
-        Specification<TicketTemplate> tSpecification = Specification
-                .where(spec.getTicketTemplateByDateStartSpec(DATE_2019_01_01, EQUALS));
+        var filter = NumberFilter.builder()
+                .typeComparison(IS_EQUAL_TO.toString())
+                .valueOne(DATE_2019_01_01)
+                .build();
+        Specification<TicketTemplate> tSpecification =
+                numberFactory.makeSpecification(filter, DATE_START);
+        foundTicketTemplate = repository.findAll(tSpecification, pageable);
+        Assertions.assertThat(foundTicketTemplate).isNotNull().hasSize(expectedTicketTemplates.size());
+        assertThat(foundTicketTemplate.getContent()).containsExactlyInAnyOrderElementsOf(expectedTicketTemplates);
+    }
+
+    @Test
+    void getTicketTemplateByDateStartSpec_shouldEntityWithDateStartNullAndNotEquals_whenDate20190101() {
+        var ticketTemplates = ticketTemplateTestHelper.setPredefinedValidEntityList();
+        var expectedTicketTemplates = ticketTemplates.stream()
+                .filter(tt ->  tt.getDateStart() != null && tt.getDateStart() != DATE_2019_01_01)
+                .collect(Collectors.toList());
+        var filter = NumberFilter.builder()
+                .typeComparison(IS_NOT_EQUAL_TO.toString())
+                .valueOne(DATE_2019_01_01)
+                .build();
+        Specification<TicketTemplate> tSpecification =
+                numberFactory.makeSpecification(filter, DATE_START);
         foundTicketTemplate = repository.findAll(tSpecification, pageable);
         Assertions.assertThat(foundTicketTemplate).isNotNull().hasSize(expectedTicketTemplates.size());
         assertThat(foundTicketTemplate.getContent()).containsExactlyInAnyOrderElementsOf(expectedTicketTemplates);
