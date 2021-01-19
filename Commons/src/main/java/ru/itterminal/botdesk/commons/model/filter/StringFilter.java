@@ -18,7 +18,6 @@ public class StringFilter implements Filter {
 
     private String value;
 
-
     public enum TypeComparisonForStringFilter {
         IS_EMPTY,
         IS_NOT_EMPTY,

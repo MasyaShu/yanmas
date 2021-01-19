@@ -30,7 +30,9 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import ru.itterminal.botdesk.commons.model.filter.ListOfBaseEntityFilter;
+import ru.itterminal.botdesk.commons.model.filter.StringFilter;
 import ru.itterminal.botdesk.commons.model.spec.ListOfBaseEntityFilterSpecificationsFactory;
+import ru.itterminal.botdesk.commons.model.spec.StringFilterSpecificationsFactory;
 import ru.itterminal.botdesk.tickets.model.Ticket;
 import ru.itterminal.botdesk.tickets.repository.TicketRepository;
 import ru.itterminal.botdesk.tickets.repository.TicketRepositoryTestConfig;
@@ -40,7 +42,7 @@ import ru.itterminal.botdesk.tickets.repository.TicketRepositoryTestConfig;
 @DataJpaTest
 @ContextConfiguration(classes = {TicketRepositoryTestConfig.class})
 @Sql({"/create-ticket-test.sql"})
-class TicketSpecTest {
+class ListOfBaseEntityFilterSpecificationsFactoryTest {
 
     public static final String EXECUTORS = "executors";
 
@@ -54,7 +56,7 @@ class TicketSpecTest {
             new ListOfBaseEntityFilterSpecificationsFactory();
 
     @Test
-    void getTicketByAnyInListOfTicketExecutorsSpec_shouldGetTwoTickets_whenAnyFromPassedIdExistsInListOfExecutors() {
+    void CONTAINS_ANY_IN_LIST_shouldGetTwoTickets_whenAnyFromPassedIdExistsInListOfExecutors() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(CONTAINS_ANY_IN_LIST.toString())
                 .listOfIdEntities(
@@ -75,7 +77,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketByAnyInListOfTicketExecutorsSpec_shouldGetThreeTickets_whenAnyFromPassedIdExistsInListOfExecutors() {
+    void CONTAINS_ANY_IN_LIST_shouldGetThreeTickets_whenAnyFromPassedIdExistsInListOfExecutors() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(CONTAINS_ANY_IN_LIST.toString())
                 .listOfIdEntities(
@@ -95,7 +97,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketByAnyInListOfTicketExecutorsSpec_shouldGetOneTicket_whenAnyFromPassedIdExistsInListOfExecutors() {
+    void CONTAINS_ANY_IN_LIST_shouldGetOneTicket_whenAnyFromPassedIdExistsInListOfExecutors() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(CONTAINS_ANY_IN_LIST.toString())
                 .listOfIdEntities(
@@ -115,7 +117,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketByAnyInListOfTicketExecutorsSpec_shouldGetZeroTickets_whenPassedRandomId() {
+    void CONTAINS_ANY_IN_LIST_shouldGetZeroTickets_whenPassedRandomId() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(CONTAINS_ANY_IN_LIST.toString())
                 .listOfIdEntities(
@@ -132,7 +134,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketByAllInListOfTicketExecutors_shouldGetOneTicket_whenAllPassedIsExistInOneTicket() {
+    void CONTAINS_ALL_OF_LIST_shouldGetOneTicket_whenAllPassedIsExistInOneTicket() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(CONTAINS_ALL_OF_LIST.toString())
                 .listOfIdEntities(
@@ -153,7 +155,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketByAllInListOfTicketExecutors_shouldGetEmpty_whenThereAreNotExistTicketWithPassedListOfExecutors() {
+    void CONTAINS_ALL_OF_LIST_shouldGetEmpty_whenThereAreNotExistTicketWithPassedListOfExecutors() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(CONTAINS_ALL_OF_LIST.toString())
                 .listOfIdEntities(
@@ -171,7 +173,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketByAllInListOfTicketExecutors_shouldGetTwoTickets_whenThereAreTwoTicketWithPassedIdInListOfExecutors() {
+    void CONTAINS_ALL_OF_LIST_shouldGetTwoTickets_whenThereAreTwoTicketWithPassedIdInListOfExecutors() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(CONTAINS_ALL_OF_LIST.toString())
                 .listOfIdEntities(
@@ -187,7 +189,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketByAllInListOfTicketExecutors_shouldGetEmpty_whenPassedIdNotExist() {
+    void CONTAINS_ALL_OF_LIST_shouldGetEmpty_whenPassedIdNotExist() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(CONTAINS_ALL_OF_LIST.toString())
                 .listOfIdEntities(
@@ -203,7 +205,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketByAllNotInListOfTicketExecutorsSpec_shouldGetFiveTickets_whenAllIdNotExist() {
+    void NOT_CONTAINS_ALL_OF_LIST_shouldGetFiveTickets_whenAllIdNotExist() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(NOT_CONTAINS_ALL_OF_LIST.toString())
                 .listOfIdEntities(
@@ -220,7 +222,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketByAllNotInListOfTicketExecutorsSpec_shouldGetFourTickets_whenPassedListExistInOneTicket() {
+    void NOT_CONTAINS_ALL_OF_LIST_shouldGetFourTickets_whenPassedListExistInOneTicket() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(NOT_CONTAINS_ALL_OF_LIST.toString())
                 .listOfIdEntities(
@@ -237,7 +239,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketByAllNotInListOfTicketExecutorsSpec_shouldGetFiveTickets_whenSizeOfListEqualThree() {
+    void NOT_CONTAINS_ALL_OF_LIST_shouldGetFiveTickets_whenSizeOfListEqualThree() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(NOT_CONTAINS_ALL_OF_LIST.toString())
                 .listOfIdEntities(
@@ -255,7 +257,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketByAllNotInListOfTicketExecutorsSpec_shouldGetThreeTicket_whenTwoTicketHavePassedIdInListOfExecutors() {
+    void NOT_CONTAINS_ALL_OF_LIST_shouldGetThreeTicket_whenTwoTicketHavePassedIdInListOfExecutors() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(NOT_CONTAINS_ALL_OF_LIST.toString())
                 .listOfIdEntities(
@@ -271,7 +273,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketByAllNotInListOfTicketExecutorsSpec_shouldGetFiveTickets_whenPassedIdNotExist() {
+    void NOT_CONTAINS_ALL_OF_LIST_shouldGetFiveTickets_whenPassedIdNotExist() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(NOT_CONTAINS_ALL_OF_LIST.toString())
                 .listOfIdEntities(
@@ -287,7 +289,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketByNotAnyInListOfTicketExecutorsSpec_shouldGetOne_whenOneTicketDoesntHaveListOfExecutors() {
+    void NOT_CONTAINS_ANY_IN_LIST_shouldGetOne_whenOneTicketDoesntHaveListOfExecutors() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(NOT_CONTAINS_ANY_IN_LIST.toString())
                 .listOfIdEntities(
@@ -304,7 +306,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketByNotAnyInListOfTicketExecutorsSpec_shouldGetThreeTickets_whenTwoFromFiveTicketsHavePassedId() {
+    void NOT_CONTAINS_ANY_IN_LIST_shouldGetThreeTickets_whenTwoFromFiveTicketsHavePassedId() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(NOT_CONTAINS_ANY_IN_LIST.toString())
                 .listOfIdEntities(
@@ -320,7 +322,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketByNotAnyInListOfTicketExecutorsSpec_shouldGetFiveTickets_whenPassedIdNotExist() {
+    void NOT_CONTAINS_ANY_IN_LIST_shouldGetFiveTickets_whenPassedIdNotExist() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(NOT_CONTAINS_ANY_IN_LIST.toString())
                 .listOfIdEntities(
@@ -336,7 +338,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketIsEqualListOfTicketExecutorsSpec_shouldGetOneTicketWithNumber100_whenThereIsEqualListOfExecutors() {
+    void IS_EQUAL_TO_shouldGetOneTicketWithNumber100_whenThereIsEqualListOfExecutors() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(IS_EQUAL_TO.toString())
                 .listOfIdEntities(
@@ -357,7 +359,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketIsEqualListOfTicketExecutorsSpec_shouldGetOneTicketWithNumber101_whenThereIsEqualListOfExecutors() {
+    void IS_EQUAL_TO_shouldGetOneTicketWithNumber101_whenThereIsEqualListOfExecutors() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(IS_EQUAL_TO.toString())
                 .listOfIdEntities(
@@ -378,7 +380,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketIsEqualListOfTicketExecutorsSpec_shouldGetEmpty_whenThereAreNotEqualListOfExecutorsWithSizeTwoThree() {
+    void IS_EQUAL_TO_shouldGetEmpty_whenThereAreNotEqualListOfExecutorsWithSizeTwoThree() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(IS_EQUAL_TO.toString())
                 .listOfIdEntities(
@@ -396,7 +398,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketIsEqualListOfTicketExecutorsSpec_shouldGetEmpty_whenThereAreNotEqualListOfExecutorsWithSizeTwo() {
+    void IS_EQUAL_TO_shouldGetEmpty_whenThereAreNotEqualListOfExecutorsWithSizeTwo() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(IS_EQUAL_TO.toString())
                 .listOfIdEntities(
@@ -413,7 +415,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketIsEqualListOfTicketExecutorsSpec_shouldGetEmpty_whenThereAreNotEqualListOfExecutorsWithSizeOne() {
+    void IS_EQUAL_TO_shouldGetEmpty_whenThereAreNotEqualListOfExecutorsWithSizeOne() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(IS_EQUAL_TO.toString())
                 .listOfIdEntities(List.of(UUID.fromString("0223e51a-4bb2-44ee-bc8e-1f047a2145e7")))
@@ -425,7 +427,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketIsNotEqualListOfTicketExecutorsSpec_shouldGetFiveTickets_whenPassedOneNotExistId() {
+    void IS_NOT_EQUAL_TO_shouldGetFiveTickets_whenPassedOneNotExistId() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(IS_NOT_EQUAL_TO.toString())
                 .listOfIdEntities(List.of(UUID.fromString("83776624-be47-480e-9a23-98cab111aa9c")))
@@ -437,7 +439,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketIsNotEqualListOfTicketExecutorsSpec_shouldGetFiveTickets_whenPassedTwoNotExistId() {
+    void IS_NOT_EQUAL_TO_shouldGetFiveTickets_whenPassedTwoNotExistId() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(IS_NOT_EQUAL_TO.toString())
                 .listOfIdEntities(
@@ -454,7 +456,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketIsNotEqualListOfTicketExecutorsSpec_shouldGetFiveTickets_whenPassedThreeNotExistId() {
+    void IS_NOT_EQUAL_TO_shouldGetFiveTickets_whenPassedThreeNotExistId() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(IS_NOT_EQUAL_TO.toString())
                 .listOfIdEntities(
@@ -472,7 +474,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketIsNotEqualListOfTicketExecutorsSpec_shouldGetFourTickets_whenPassedTwoExistIdInTheSameTicket() {
+    void IS_NOT_EQUAL_TO_shouldGetFourTickets_whenPassedTwoExistIdInTheSameTicket() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(IS_NOT_EQUAL_TO.toString())
                 .listOfIdEntities(
@@ -489,7 +491,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketIsNotEqualListOfTicketExecutorsSpec_shouldGetFiveTickets_whenPassedTwoExistIdInDifferentTickets() {
+    void IS_NOT_EQUAL_TO_shouldGetFiveTickets_whenPassedTwoExistIdInDifferentTickets() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(IS_NOT_EQUAL_TO.toString())
                 .listOfIdEntities(
@@ -506,7 +508,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketIsNotEqualListOfTicketExecutorsSpec_shouldGetFourTickets_whenOneFromFiveTicketsHaveTheSameIdInListOfExecutors() {
+    void IS_NOT_EQUAL_TO_shouldGetFourTickets_whenOneFromFiveTicketsHaveTheSameIdInListOfExecutors() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(IS_NOT_EQUAL_TO.toString())
                 .listOfIdEntities(
@@ -522,7 +524,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketIsEmptyListOfTicketExecutorsSpec_shouldGetOneTicket_whenOnlyOneTicketDoesntHaveExecutors() {
+    void IS_EMPTY_shouldGetOneTicket_whenOnlyOneTicketDoesntHaveExecutors() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(IS_EMPTY.toString())
                 .build();
@@ -537,7 +539,7 @@ class TicketSpecTest {
     }
 
     @Test
-    void getTicketIsNotEmptyListOfTicketExecutorsSpec_shouldGetFourTickets_whenFourTicketsWithListOfExecutors() {
+    void IS_NOT_EMPTY_shouldGetFourTickets_whenFourTicketsWithListOfExecutors() {
         var filter = ListOfBaseEntityFilter.builder()
                 .typeComparison(IS_NOT_EMPTY.toString())
                 .build();
