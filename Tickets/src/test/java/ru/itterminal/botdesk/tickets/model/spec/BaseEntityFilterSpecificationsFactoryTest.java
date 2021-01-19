@@ -16,9 +16,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter;
-import ru.itterminal.botdesk.commons.model.filter.NumberFilter;
 import ru.itterminal.botdesk.commons.model.spec.BaseEntityFilterSpecificationsFactory;
-import ru.itterminal.botdesk.commons.model.spec.NumberFilterSpecificationsFactory;
 import ru.itterminal.botdesk.tickets.model.TicketTemplate;
 import ru.itterminal.botdesk.tickets.model.test.TicketTemplateTestHelper;
 import ru.itterminal.botdesk.tickets.repository.TicketRepositoryTestConfig;
@@ -33,7 +31,6 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import static ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
 import static ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.NOT_EXIST_IN;
 import static ru.itterminal.botdesk.commons.model.filter.NumberFilter.TypeComparisonForNumberFilter.*;
-import static ru.itterminal.botdesk.tickets.model.spec.TicketTemplateSpec.DATE_START;
 import static ru.itterminal.botdesk.tickets.model.test.TicketTemplateTestHelper.*;
 
 @TestInstance(PER_CLASS)
@@ -96,7 +93,7 @@ class BaseEntityFilterSpecificationsFactoryTest {
                 .collect(Collectors.toList());
         var filter = BaseEntityFilter.builder()
                 .typeComparison(EXIST_IN.toString())
-                .idEntity(List.of(UUID.fromString(TICKET_TYPE_ID_1), UUID.fromString(TICKET_TYPE_ID_2)))
+                .listOfIdEntities(List.of(UUID.fromString(TICKET_TYPE_ID_1), UUID.fromString(TICKET_TYPE_ID_2)))
                 .build();
         Specification<TicketTemplate> tSpecification =
                 baseEntityFactory.makeSpecification(filter, TICKET_TYPE);
@@ -115,7 +112,7 @@ class BaseEntityFilterSpecificationsFactoryTest {
                 .collect(Collectors.toList());
         var filter = BaseEntityFilter.builder()
                 .typeComparison(NOT_EXIST_IN.toString())
-                .idEntity(List.of(UUID.fromString(TICKET_TYPE_ID_1), UUID.fromString(TICKET_TYPE_ID_2)))
+                .listOfIdEntities(List.of(UUID.fromString(TICKET_TYPE_ID_1), UUID.fromString(TICKET_TYPE_ID_2)))
                 .build();
         Specification<TicketTemplate> tSpecification =
                 baseEntityFactory.makeSpecification(filter, TICKET_TYPE);

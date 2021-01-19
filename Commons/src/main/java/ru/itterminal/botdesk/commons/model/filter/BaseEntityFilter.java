@@ -18,7 +18,7 @@ public class BaseEntityFilter implements Filter {
             message = "must be any of: is_empty, is_not_empty, exist_in, not_exist_in")
     private String typeComparison;
 
-    private List<UUID> idEntity;
+    private List<UUID> listOfIdEntities;
 
     public enum TypeComparisonForBaseEntityFilter {
         IS_EMPTY,
