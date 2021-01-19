@@ -44,4 +44,8 @@ public class NumberFilter implements Filter {
             }
         }
     }
+
+    public boolean isValid() {
+       return true;
+    }
 }
