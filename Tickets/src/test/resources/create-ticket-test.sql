@@ -99,12 +99,12 @@ VALUES ('b927e5af-0db3-4f55-8da0-a31d0f6421d0', null, false, '0', 'cdfa6483-0769
         'description ticket number 102', null, false, '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9',
         '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9', null, null),
        ('a2782c2c-5054-4c12-815e-c26b3c5275ee', null, false, '0', 'cdfa6483-0769-4628-ba32-efd338a716de',
-        'cdfa6483-0769-4628-ba32-efd338a716de', 103, 1639144829003, 'subject ticket number 103',
+        'cdfa6483-0769-4628-ba32-efd338a716de', 103, 1639144829003, null,
         'description ticket number 103', null, false, '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9',
         '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9', null, null),
        ('4baeea68-ad24-43f9-b983-7541db1d3158', null, false, '0', 'cdfa6483-0769-4628-ba32-efd338a716de',
-        'cdfa6483-0769-4628-ba32-efd338a716de', 104, 1639144829004, 'subject ticket number 104',
-        'description ticket number 104', null, false, '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9',
+        'cdfa6483-0769-4628-ba32-efd338a716de', 104, 1639144829004, '',
+        'description ticket number 104', null, true, '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9',
         '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9', null, null);
 
 
