@@ -25,9 +25,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
+import ru.itterminal.botdesk.commons.model.filter.NumberFilter;
+import ru.itterminal.botdesk.commons.model.filter.StringFilter;
 import ru.itterminal.botdesk.commons.util.CommonConstants;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
-import ru.itterminal.botdesk.tickets.controller.validator.ValidatorTicketTemplateFilterDto;
 import ru.itterminal.botdesk.tickets.model.TicketTemplate;
 import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateDtoRequest;
 import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateDtoResponse;
@@ -36,24 +37,21 @@ import ru.itterminal.botdesk.tickets.model.spec.TicketTemplateSpec;
 import ru.itterminal.botdesk.tickets.model.test.TicketTemplateTestHelper;
 import ru.itterminal.botdesk.tickets.service.impl.TicketTemplateServiceImpl;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.itterminal.botdesk.commons.model.validator.ZoneId.ZONE_ID_NOT_VALID;
-import static ru.itterminal.botdesk.tickets.util.TicketConstants.INVALID_COMPARISON;
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {TicketTemplateControllerV1.class, FilterChainProxy.class,
-        ValidatorTicketTemplateFilterDto.class, TicketTemplateSpec.class})
+        TicketTemplateSpec.class})
 @Import({TestSecurityConfig.class, HttpEncodingAutoConfiguration.class})
 @WebMvcTest
 @ActiveProfiles("Test")
@@ -74,9 +72,6 @@ class TicketTemplateControllerV1Test {
 
     @Autowired
     FilterChainProxy springSecurityFilterChain;
-
-    @Autowired
-    ValidatorTicketTemplateFilterDto validatorTicketTemplateFilterDto;
 
     @Autowired
     TicketTemplateSpec ticketTemplateSpec;
@@ -384,38 +379,18 @@ class TicketTemplateControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getByFilter_shouldGetStatusBadRequest_whenIdIsInvalid() throws Exception {
-        var ticketTypeFilterDto = TicketTemplateFilterDto.builder()
-                .comparisonDataEnd("fff")
-                .dateEnd(21321321321L)
-                .comparisonDataStart("null")
-                .dateStart(21321321321L)
+        var dateFilter = NumberFilter.builder()
+                .typeComparison("isbetween_exclusion")
+                .valueOne(1.9)
+                .valueTwo(1L)
                 .build();
-
-        MockHttpServletRequestBuilder request = get(HOST + PORT + API)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(ticketTypeFilterDto));
-        mockMvc.perform(request)
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.ComparisonDataEnd[?(@.message =~ /%s.*/)]", INVALID_COMPARISON).exists());
-        verify(templateService, times(0)).findAllByFilter(any(), any());
-    }
-
-    @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void getByFilter_shouldGetStatusBadRequest_whenIdIsInvalid1() throws Exception {
-        ArrayList<UUID> listTT = new ArrayList<>();
-        listTT.add(UUID.randomUUID());
-        //listTT.add(null);
-
+        var subF = StringFilter.builder()
+                .typeComparison("textcontains")
+                .value("dd")
+                .build();
         var ticketTypeFilterDto = TicketTemplateFilterDto.builder()
-                .comparisonDataEnd("<")
-                .dateEnd(21321321321L)
-                .comparisonDataStart(">")
-                .dateStart(21321321321L)
-                .ticketTypeId(listTT)
+                .dateEnd(dateFilter)
+                .subject(subF)
                 .build();
         when(templateService.findAllByFilter(any(), any())).thenReturn(new PageImpl<>(List.of(new TicketTemplate(), new TicketTemplate())));
         MockHttpServletRequestBuilder request = get(HOST + PORT + API)
@@ -423,10 +398,34 @@ class TicketTemplateControllerV1Test {
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(ticketTypeFilterDto));
         mockMvc.perform(request)
-                .andDo(print())
-                .andExpect(status().isOk());
-                //.andExpect(MockMvcResultMatchers
-                //        .jsonPath("$.errors.ComparisonDataEnd[?(@.message =~ /%s.*/)]", INVALID_COMPARISON).exists());
-        verify(templateService, times(1)).findAllByFilter(any(), any());
+                .andExpect(status().isBadRequest())
+                .andDo(print());
+        verify(templateService, times(0)).findAllByFilter(any(), any());
     }
+//
+//    @Test
+//    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
+//    void getByFilter_shouldGetStatusBadRequest_whenIdIsInvalid1() throws Exception {
+//        ArrayList<UUID> listTT = new ArrayList<>();
+//        listTT.add(UUID.randomUUID());
+//        //listTT.add(null);
+//
+//        var ticketTypeFilterDto = TicketTemplateFilterDto.builder()
+//                .dateEnd(21321321321L)
+//                .comparisonDataStart(">")
+//                .dateStart(21321321321L)
+//                .ticketTypeId(listTT)
+//                .build();
+//        when(templateService.findAllByFilter(any(), any())).thenReturn(new PageImpl<>(List.of(new TicketTemplate(), new TicketTemplate())));
+//        MockHttpServletRequestBuilder request = get(HOST + PORT + API)
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .content(objectMapper.writeValueAsString(ticketTypeFilterDto));
+//        mockMvc.perform(request)
+//                .andDo(print())
+//                .andExpect(status().isOk());
+//                //.andExpect(MockMvcResultMatchers
+//                //        .jsonPath("$.errors.ComparisonDataEnd[?(@.message =~ /%s.*/)]", INVALID_COMPARISON).exists());
+//        verify(templateService, times(1)).findAllByFilter(any(), any());
+//    }
 }

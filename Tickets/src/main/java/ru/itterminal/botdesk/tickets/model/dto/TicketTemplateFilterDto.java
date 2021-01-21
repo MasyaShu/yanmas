@@ -3,9 +3,11 @@ package ru.itterminal.botdesk.tickets.model.dto;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
-
-import java.util.List;
-import java.util.UUID;
+import ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter;
+import ru.itterminal.botdesk.commons.model.filter.BooleanFilter;
+import ru.itterminal.botdesk.commons.model.filter.NumberFilter;
+import ru.itterminal.botdesk.commons.model.filter.StringFilter;
+import ru.itterminal.botdesk.commons.model.validator.ValidateFilter;
 
 @Getter
 @Setter
@@ -16,23 +18,30 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 public class TicketTemplateFilterDto extends BaseFilterDto {
 
-    private String subject;
+    @ValidateFilter(min = 7)
+    private StringFilter subject;
 
-    private String description;
+    @ValidateFilter()
+    private StringFilter description;
 
-    private Long dateStart;
+    @ValidateFilter()
+    private NumberFilter dateStart;
 
-    private String comparisonDataEnd;
+    @ValidateFilter()
+    private NumberFilter dateEnd;
 
-    private Long dateEnd;
+    @ValidateFilter()
+    private BooleanFilter isOnlyOneTicketInWork;
 
-    private String comparisonDataStart;
+    @ValidateFilter()
+    private BooleanFilter isActive;
 
-    private Boolean isOnlyOneTicketInWork;
+    @ValidateFilter()
+    private BaseEntityFilter authorId;
 
-    private Boolean isActive;
+    @ValidateFilter()
+    private BaseEntityFilter ticketTypeId;
 
-    private List<UUID> authorId;
 
-    private List<UUID> ticketTypeId;
+    private String sort;
 }

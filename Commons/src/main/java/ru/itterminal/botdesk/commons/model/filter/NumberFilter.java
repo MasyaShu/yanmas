@@ -1,14 +1,19 @@
 package ru.itterminal.botdesk.commons.model.filter;
 
 import static java.lang.String.format;
+import static ru.itterminal.botdesk.commons.model.filter.NumberFilter.TypeComparisonForNumberFilter.*;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.itterminal.botdesk.commons.model.validator.ValueOfEnum;
 
 @SuppressWarnings("unused")
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class NumberFilter implements Filter {
 
     @ValueOfEnum(enumClass = TypeComparisonForNumberFilter.class,
@@ -37,15 +42,36 @@ public class NumberFilter implements Filter {
         public static TypeComparisonForNumberFilter fromString(String value) {
             try {
                 return valueOf(value.toUpperCase());
-            }
-            catch (Exception exception) {
+            } catch (Exception exception) {
                 throw new IllegalArgumentException(
                         format("Invalid value '%s' for value given!", value), exception);
             }
         }
     }
 
-    public boolean isValid() {
-       return true;
+    @Override
+    public boolean IsValid(int max, int min, String regexp) {
+        if ((fromString(typeComparison).equals(IS_BETWEEN_EXCLUSION)
+                || fromString(typeComparison).equals(IS_BETWEEN_INCLUSIVE)
+                || fromString(typeComparison).equals(IS_NOT_BETWEEN_INCLUSIVE)
+                || fromString(typeComparison).equals(IS_NOT_BETWEEN_EXCLUSION))) {
+            if(valueOne == null || valueTwo == null) {
+                throw new IllegalArgumentException(format("ValueOne and ValueTwo must not be null for comparison %s", typeComparison));
+            } else if (valueOne.doubleValue() > valueTwo.doubleValue()) {
+                throw new IllegalArgumentException("ValueTwo must be greater ValueOne");
+            }
+        }
+
+        if ((fromString(typeComparison).equals(GREATER_THAN)
+                || fromString(typeComparison).equals(GREATER_THAN_OR_EQUAL_TO)
+                || fromString(typeComparison).equals(LESS_THAN)
+                || fromString(typeComparison).equals(LESS_THAN_OR_EQUAL_TO)
+                || fromString(typeComparison).equals(IS_EQUAL_TO)
+                || fromString(typeComparison).equals(IS_NOT_EQUAL_TO))
+                && valueOne == null) {
+                throw new IllegalArgumentException(format("ValueOne must not be null for comparison %s", typeComparison));
+        }
+        return true;
     }
+
 }

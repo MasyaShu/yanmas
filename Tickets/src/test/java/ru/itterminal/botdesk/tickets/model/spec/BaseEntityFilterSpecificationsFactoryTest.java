@@ -16,9 +16,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter;
-import ru.itterminal.botdesk.commons.model.filter.NumberFilter;
 import ru.itterminal.botdesk.commons.model.spec.BaseEntityFilterSpecificationsFactory;
-import ru.itterminal.botdesk.commons.model.spec.NumberFilterSpecificationsFactory;
 import ru.itterminal.botdesk.tickets.model.TicketTemplate;
 import ru.itterminal.botdesk.tickets.model.test.TicketTemplateTestHelper;
 import ru.itterminal.botdesk.tickets.repository.TicketRepositoryTestConfig;
@@ -32,9 +30,10 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import static ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
 import static ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.NOT_EXIST_IN;
-import static ru.itterminal.botdesk.commons.model.filter.NumberFilter.TypeComparisonForNumberFilter.*;
-import static ru.itterminal.botdesk.tickets.model.spec.TicketTemplateSpec.DATE_START;
-import static ru.itterminal.botdesk.tickets.model.test.TicketTemplateTestHelper.*;
+import static ru.itterminal.botdesk.commons.model.filter.NumberFilter.TypeComparisonForNumberFilter.IS_EMPTY;
+import static ru.itterminal.botdesk.commons.model.filter.NumberFilter.TypeComparisonForNumberFilter.IS_NOT_EMPTY;
+import static ru.itterminal.botdesk.tickets.model.test.TicketTemplateTestHelper.TICKET_TYPE_ID_1;
+import static ru.itterminal.botdesk.tickets.model.test.TicketTemplateTestHelper.TICKET_TYPE_ID_2;
 
 @TestInstance(PER_CLASS)
 @ExtendWith(SpringExtension.class)
@@ -123,6 +122,5 @@ class BaseEntityFilterSpecificationsFactoryTest {
         Assertions.assertThat(foundTicketTemplate).isNotNull().hasSize(expectedTicketTemplates.size());
         assertThat(foundTicketTemplate.getContent()).containsExactlyInAnyOrderElementsOf(expectedTicketTemplates);
     }
-
 
 }

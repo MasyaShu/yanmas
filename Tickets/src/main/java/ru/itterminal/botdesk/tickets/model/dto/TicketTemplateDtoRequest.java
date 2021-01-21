@@ -45,4 +45,5 @@ public class TicketTemplateDtoRequest extends BaseEntityDto {
     private UUID authorId;
 
     private UUID ticketTypeId;
+
 }

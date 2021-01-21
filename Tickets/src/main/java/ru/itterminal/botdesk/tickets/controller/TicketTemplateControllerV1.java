@@ -13,15 +13,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
-import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
-import ru.itterminal.botdesk.tickets.controller.validator.ValidatorTicketTemplateFilterDto;
 import ru.itterminal.botdesk.tickets.model.TicketTemplate;
 import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateDtoRequest;
 import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateDtoResponse;
@@ -44,21 +41,15 @@ public class TicketTemplateControllerV1 extends BaseController {
 
     private final AccountServiceImpl accountService;
     private final TicketTemplateServiceImpl templateService;
-    private final ValidatorTicketTemplateFilterDto validatorTicketTemplateFilterDto;
     private final TicketTemplateSpec spec;
 
     @Autowired
-    public TicketTemplateControllerV1(AccountServiceImpl accountService, TicketTemplateServiceImpl templateService,
-                                      ValidatorTicketTemplateFilterDto validatorTicketTemplateFilterDto, TicketTemplateSpec spec) {
+    public TicketTemplateControllerV1(AccountServiceImpl accountService,
+                                      TicketTemplateServiceImpl templateService,
+                                      TicketTemplateSpec spec) {
         this.accountService = accountService;
         this.templateService = templateService;
-        this.validatorTicketTemplateFilterDto = validatorTicketTemplateFilterDto;
         this.spec = spec;
-    }
-
-    @InitBinder
-    protected void initBinder(WebDataBinder binder) {
-        binder.addValidators(validatorTicketTemplateFilterDto);
     }
 
     private final String ENTITY_NAME = TicketTemplate.class.getSimpleName();
@@ -66,7 +57,7 @@ public class TicketTemplateControllerV1 extends BaseController {
     @PostMapping()
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
     public ResponseEntity<TicketTemplateDtoResponse> create(Principal principal,
-                                                           @Validated(Create.class) @RequestBody TicketTemplateDtoRequest request) {
+                                                            @Validated(Create.class) @RequestBody TicketTemplateDtoRequest request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
         TicketTemplate ticketTemplate = modelMapper.map(request, TicketTemplate.class);
         ticketTemplate.setDeleted(false);
@@ -90,7 +81,7 @@ public class TicketTemplateControllerV1 extends BaseController {
     @PutMapping()
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
     public ResponseEntity<TicketTemplateDtoResponse> update(Principal principal,
-                                                  @Validated(Update.class) @RequestBody TicketTemplateDtoRequest request) {
+                                                            @Validated(Update.class) @RequestBody TicketTemplateDtoRequest request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
         TicketTemplate ticketType = modelMapper.map(request, TicketTemplate.class);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
@@ -141,20 +132,7 @@ public class TicketTemplateControllerV1 extends BaseController {
         Page<TicketTemplateDtoResponse> returnedTicketTemplate;
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
         Specification<TicketTemplate> ticketTemplateSpecification = Specification
-                .where(filter.getSubject() == null ? null : spec.getTicketTemplateBySubjectSpec(filter.getSubject()))
-                .and(filter.getDescription() == null ? null : spec.getTicketTemplateByDescriptionSpec(filter.getDescription()))
-                .and(filter.getComparisonDataEnd() == null || filter.getDateEnd() == null ? null :
-                        spec.getTicketTemplateByDateEndSpec(filter.getDateEnd(), filter.getComparisonDataEnd()))
-                .and(filter.getComparisonDataStart() == null || filter.getDateStart() == null ? null :
-                        spec.getTicketTemplateByDateEndSpec(filter.getDateStart(), filter.getComparisonDataStart()))
-                .and(filter.getIsOnlyOneTicketInWork() == null ? null : spec.getTicketTemplatesByIsOnlyOneTicketInWorkSpec(filter.getIsOnlyOneTicketInWork()))
-                .and(filter.getIsActive() == null ? null : spec.getTicketTemplatesByIsActiveSpec(filter.getIsActive()))
-                .and(filter.getAuthorId() == null ? null : spec.getTicketTemplateByListOfAuthorsSpec(filter.getAuthorId()))
-                .and(filter.getTicketTypeId() == null ? null : spec.getTicketTemplateByListOfTicketTypeSpec(filter.getTicketTypeId()))
-                .and(filter.getTicketTypeId() == null || !filter.getTicketTypeId().contains(null) ? null : spec.getTicketTemplateByListOfTicketTypeNullSpec())
-                .and(spec.getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted.fromString(filter.getDeleted())))
-                .and(spec.getEntityByAccountSpec(jwtUser.getAccountId()))
-                .and(filter.getOutId() == null ? null :  spec.getEntityByOutIdSpec(filter.getOutId()));
+                .where(spec.getEntityByAccountSpec(jwtUser.getAccountId()));
 
         foundTicketTemplate = templateService.findAllByFilter(ticketTemplateSpecification, pageable);
         returnedTicketTemplate = mapPage(foundTicketTemplate, TicketTemplateDtoResponse.class, pageable);
