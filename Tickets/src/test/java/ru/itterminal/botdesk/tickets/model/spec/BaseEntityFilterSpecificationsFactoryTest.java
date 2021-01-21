@@ -95,7 +95,7 @@ class BaseEntityFilterSpecificationsFactoryTest {
                 .collect(Collectors.toList());
         var filter = BaseEntityFilter.builder()
                 .typeComparison(EXIST_IN.toString())
-                .idEntity(List.of(UUID.fromString(TICKET_TYPE_ID_1), UUID.fromString(TICKET_TYPE_ID_2)))
+                .listOfIdEntities(List.of(UUID.fromString(TICKET_TYPE_ID_1), UUID.fromString(TICKET_TYPE_ID_2)))
                 .build();
         Specification<TicketTemplate> tSpecification =
                 baseEntityFactory.makeSpecification(filter, TICKET_TYPE);
