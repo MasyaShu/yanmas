@@ -85,7 +85,7 @@ public class Ticket extends BaseEntity {
             joinColumns = @JoinColumn(name = "ticket_id"),
             inverseJoinColumns = @JoinColumn(name = "observer_id")
     )
-    List<User> observers = new ArrayList<>();
+    private List<User> observers = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -93,7 +93,7 @@ public class Ticket extends BaseEntity {
             joinColumns = @JoinColumn(name = "ticket_id"),
             inverseJoinColumns = @JoinColumn(name = "executor_id")
     )
-    List<User> executors = new ArrayList<>();
+    private List<User> executors = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "entity_id")

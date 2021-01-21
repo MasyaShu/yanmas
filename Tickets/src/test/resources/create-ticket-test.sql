@@ -109,19 +109,20 @@ VALUES ('b927e5af-0db3-4f55-8da0-a31d0f6421d0', null, false, '0', 'cdfa6483-0769
 
 
 INSERT INTO ticket_templates(out_id, deleted, version, id, subject, display_name, description, date_next_run,
-                             date_start,
-                             date_end, zone_id, expression_schedule, is_only_one_ticket_in_work, is_active, account_id,
-                             author_id, ticket_type_id)
+                             date_start,date_end, zone_id, expression_schedule, is_only_one_ticket_in_work, is_active,
+                             account_id, author_id, ticket_type_id)
 VALUES (null, 'false', '0', '21dad366-54d8-445f-b778-4cc3829e07b1', 'subject_1', 'subject_1', 'description_1',
-        1639144829000, 1546300800000, 1609459200000, 'Europe/Moscow', '25 6 5 25 2 *', true, true, 'cdfa6483-0769-4628-ba32-efd338a716de',
-        'd592facb-e6ee-4801-8310-9c7708eb6e6c', '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9'),
+        1639144829000, 1546300800000, 1609459200000, 'Europe/Moscow', '25 6 5 25 2 *', true, true,
+        'cdfa6483-0769-4628-ba32-efd338a716de', 'd592facb-e6ee-4801-8310-9c7708eb6e6c',
+        '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9'),
        (null, 'false', '0', 'f8a773d2-0f4d-48e9-b788-7ce671373992', 'subject_2', 'subject_2', 'description_2',
         1639144829000, 1577836800000, 1704067200000, 'America/New_York', '25 6 5 25 2,4,7 *', false, true,
         'cdfa6483-0769-4628-ba32-efd338a716de', 'd592facb-e6ee-4801-8310-9c7708eb6e6c',
         '17b13694-1907-4af9-8f5d-bfa444356e73'),
        (null, 'false', '0', '8525adcb-9edd-4af5-aa66-a211f47465f8', 'subject_3', 'subject_3', 'description_3',
-        1639144829000, 1546300800000, 4070908800000, 'Europe/Moscow', '25 6 5 25 2 *', true, true, 'cdfa6483-0769-4628-ba32-efd338a716de',
-        'd592facb-e6ee-4801-8310-9c7708eb6e6c', '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9'),
+        1639144829000, 1546300800000, 4070908800000, 'Europe/Moscow', '25 6 5 25 2 *', true, true,
+        'cdfa6483-0769-4628-ba32-efd338a716de', 'd592facb-e6ee-4801-8310-9c7708eb6e6c',
+        '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9'),
        (null, 'false', '0', '4713d994-18fc-4629-aa95-9792bbc53215', 'subject_4', 'subject_4', 'description_4',
         1639144829000, 1577836800000, null, 'America/New_York', '25 6 5 25 2,4,7 *', false, false,
         'bcf98101-2a22-42bf-94cc-c900b50a0b69', '86840939-c488-448b-a473-cd9e1097dd32',
@@ -143,7 +144,7 @@ VALUES ('b927e5af-0db3-4f55-8da0-a31d0f6421d0', '0223e51a-4bb2-44ee-bc8e-1f047a2
        ('e39a9ecb-ff7c-4c7f-94e2-4b121faffe28', '0223e51a-4bb2-44ee-bc8e-1f047a2145e7'),
        ('e39a9ecb-ff7c-4c7f-94e2-4b121faffe28', 'd592facb-e6ee-4801-8310-9c7708eb6e6c'),
 -- ticket number 102
-        -- list of executors is empty
+       -- list of executors is empty
 -- ticket number 104
        ('4baeea68-ad24-43f9-b983-7541db1d3158', 'd592facb-e6ee-4801-8310-9c7708eb6e6c');
 

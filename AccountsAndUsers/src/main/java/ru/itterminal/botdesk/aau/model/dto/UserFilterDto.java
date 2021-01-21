@@ -42,4 +42,5 @@ public class UserFilterDto extends BaseFilterDto {
     private List<UUID> groups;
 
     private List<UUID> roles;
+
 }

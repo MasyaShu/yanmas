@@ -21,8 +21,8 @@ public class BaseEntityFilterSpecificationsFactory {
         return switch (typeComparison) {
             case IS_EMPTY -> isEmpty(field);
             case IS_NOT_EMPTY -> isNotEmpty(field);
-            case EXIST_IN -> existIn(field, filter.getIdEntity());
-            case NOT_EXIST_IN -> notExistIn(field, filter.getIdEntity());
+            case EXIST_IN -> existIn(field, filter.getListOfIdEntities());
+            case NOT_EXIST_IN -> notExistIn(field, filter.getListOfIdEntities());
         };
     }
 
