@@ -27,7 +27,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
-import ru.itterminal.botdesk.aau.model.dto.UserFilterDtoNew;
+import ru.itterminal.botdesk.aau.model.dto.UserFilterDto;
 import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
 import ru.itterminal.botdesk.aau.repository.UserRepositoryTestConfig;
@@ -91,7 +91,7 @@ class SpecificationsFactoryWithUserRepositoryTest {
                 .typeComparison(TEXT_EQUALS.toString())
                 .value(USER_1_EMAIL_EXIST)
                 .build();
-        var filterDto = UserFilterDtoNew.builder()
+        var filterDto = UserFilterDto.builder()
                 .email(emailFilter)
                 .build();
         var userSpecification = specificationsFactory
@@ -106,7 +106,7 @@ class SpecificationsFactoryWithUserRepositoryTest {
                 .typeComparison(TEXT_EQUALS.toString())
                 .value(userTestHelper.getRandomValidEntity().getEmail())
                 .build();
-        var filterDto = UserFilterDtoNew.builder()
+        var filterDto = UserFilterDto.builder()
                 .email(emailFilter)
                 .build();
         var userSpecification = specificationsFactory
@@ -121,7 +121,7 @@ class SpecificationsFactoryWithUserRepositoryTest {
                 .typeComparison(TEXT_EQUALS.toString())
                 .value(USER_1_NAME_EXIST)
                 .build();
-        var filterDto = UserFilterDtoNew.builder()
+        var filterDto = UserFilterDto.builder()
                 .name(nameFilter)
                 .build();
         var userSpecification = specificationsFactory
@@ -135,7 +135,7 @@ class SpecificationsFactoryWithUserRepositoryTest {
         var nameFilter = StringFilter.builder()
                 .typeComparison(IS_EMPTY.toString())
                 .build();
-        var filterDto = UserFilterDtoNew.builder()
+        var filterDto = UserFilterDto.builder()
                 .name(nameFilter)
                 .build();
         var userSpecification = specificationsFactory
@@ -150,7 +150,7 @@ class SpecificationsFactoryWithUserRepositoryTest {
                 .typeComparison(TEXT_EQUALS.toString())
                 .value(userTestHelper.getRandomValidEntity().getName())
                 .build();
-        var filterDto = UserFilterDtoNew.builder()
+        var filterDto = UserFilterDto.builder()
                 .name(nameFilter)
                 .build();
         var userSpecification = specificationsFactory
@@ -166,7 +166,7 @@ class SpecificationsFactoryWithUserRepositoryTest {
                 .typeComparison(TEXT_EQUALS.toString())
                 .value(userTestHelper.getPredefinedValidEntityList().get(0).getPhone())
                 .build();
-        var filterDto = UserFilterDtoNew.builder()
+        var filterDto = UserFilterDto.builder()
                 .phone(phoneFilter)
                 .build();
         var userSpecification = specificationsFactory
@@ -180,7 +180,7 @@ class SpecificationsFactoryWithUserRepositoryTest {
         var phoneFilter = StringFilter.builder()
                 .typeComparison(IS_EMPTY.toString())
                 .build();
-        var filterDto = UserFilterDtoNew.builder()
+        var filterDto = UserFilterDto.builder()
                 .phone(phoneFilter)
                 .build();
         var userSpecification = specificationsFactory
@@ -195,7 +195,7 @@ class SpecificationsFactoryWithUserRepositoryTest {
                 .typeComparison(TEXT_EQUALS.toString())
                 .value(userTestHelper.getRandomValidEntity().getPhone())
                 .build();
-        var filterDto = UserFilterDtoNew.builder()
+        var filterDto = UserFilterDto.builder()
                 .phone(phoneFilter)
                 .build();
         var userSpecification = specificationsFactory
@@ -210,7 +210,7 @@ class SpecificationsFactoryWithUserRepositoryTest {
                 .typeComparison(TEXT_EQUALS.toString())
                 .value(userTestHelper.getPredefinedValidEntityList().get(0).getComment())
                 .build();
-        var filterDto = UserFilterDtoNew.builder()
+        var filterDto = UserFilterDto.builder()
                 .comment(commentFilter)
                 .build();
         var userSpecification = specificationsFactory
@@ -224,7 +224,7 @@ class SpecificationsFactoryWithUserRepositoryTest {
         var commentFilter = StringFilter.builder()
                 .typeComparison(IS_EMPTY.toString())
                 .build();
-        var filterDto = UserFilterDtoNew.builder()
+        var filterDto = UserFilterDto.builder()
                 .comment(commentFilter)
                 .build();
         var userSpecification = specificationsFactory
@@ -239,7 +239,7 @@ class SpecificationsFactoryWithUserRepositoryTest {
                 .typeComparison(TEXT_EQUALS.toString())
                 .value(userTestHelper.getRandomValidEntity().getComment())
                 .build();
-        var filterDto = UserFilterDtoNew.builder()
+        var filterDto = UserFilterDto.builder()
                 .comment(commentFilter)
                 .build();
         var userSpecification = specificationsFactory
@@ -253,7 +253,7 @@ class SpecificationsFactoryWithUserRepositoryTest {
         var isArchivedFilter = BooleanFilter.builder()
                 .value(false)
                 .build();
-        var filterDto = UserFilterDtoNew.builder()
+        var filterDto = UserFilterDto.builder()
                 .isArchived(isArchivedFilter)
                 .build();
         var userSpecification = specificationsFactory
@@ -267,7 +267,7 @@ class SpecificationsFactoryWithUserRepositoryTest {
         var isArchivedFilter = BooleanFilter.builder()
                 .value(true)
                 .build();
-        var filterDto = UserFilterDtoNew.builder()
+        var filterDto = UserFilterDto.builder()
                 .isArchived(isArchivedFilter)
                 .build();
         var userSpecification = specificationsFactory
@@ -283,7 +283,7 @@ class SpecificationsFactoryWithUserRepositoryTest {
                 .typeComparison(EXIST_IN.toString())
                 .listOfIdEntities(List.of(ROLE_ACCOUNT_OWNER_ID, ROLE_AUTHOR_ID))
                 .build();
-        var filterDto = UserFilterDtoNew.builder()
+        var filterDto = UserFilterDto.builder()
                 .role(roleFilter)
                 .build();
         var userSpecification = specificationsFactory
@@ -298,7 +298,7 @@ class SpecificationsFactoryWithUserRepositoryTest {
                 .typeComparison(EXIST_IN.toString())
                 .listOfIdEntities(List.of(ROLE_ACCOUNT_OWNER_ID))
                 .build();
-        var filterDto = UserFilterDtoNew.builder()
+        var filterDto = UserFilterDto.builder()
                 .role(roleFilter)
                 .build();
         var userSpecification = specificationsFactory
@@ -313,7 +313,7 @@ class SpecificationsFactoryWithUserRepositoryTest {
                 .typeComparison(EXIST_IN.toString())
                 .listOfIdEntities(List.of(ROLE_ADMIN_ID))
                 .build();
-        var filterDto = UserFilterDtoNew.builder()
+        var filterDto = UserFilterDto.builder()
                 .role(roleFilter)
                 .build();
         var userSpecification = specificationsFactory
@@ -327,7 +327,7 @@ class SpecificationsFactoryWithUserRepositoryTest {
         var deletedFilter = BooleanFilter.builder()
                 .value(true)
                 .build();
-        var filterDto = UserFilterDtoNew.builder()
+        var filterDto = UserFilterDto.builder()
                 .deleted(deletedFilter)
                 .build();
         var userSpecification = specificationsFactory
@@ -341,7 +341,7 @@ class SpecificationsFactoryWithUserRepositoryTest {
         var deletedFilter = BooleanFilter.builder()
                 .value(false)
                 .build();
-        var filterDto = UserFilterDtoNew.builder()
+        var filterDto = UserFilterDto.builder()
                 .deleted(deletedFilter)
                 .build();
         var userSpecification = specificationsFactory
@@ -355,7 +355,7 @@ class SpecificationsFactoryWithUserRepositoryTest {
         var outIdFilter = StringFilter.builder()
                 .typeComparison(IS_EMPTY.toString())
                 .build();
-        var filterDto = UserFilterDtoNew.builder()
+        var filterDto = UserFilterDto.builder()
                 .outId(outIdFilter)
                 .build();
         var userSpecification = specificationsFactory
@@ -370,7 +370,7 @@ class SpecificationsFactoryWithUserRepositoryTest {
                 .typeComparison(TEXT_EQUALS.toString())
                 .value(USER_3_OUT_ID_EXIST)
                 .build();
-        var filterDto = UserFilterDtoNew.builder()
+        var filterDto = UserFilterDto.builder()
                 .outId(outIdFilter)
                 .build();
         var userSpecification = specificationsFactory
@@ -393,7 +393,7 @@ class SpecificationsFactoryWithUserRepositoryTest {
                 .typeComparison(TEXT_EQUALS.toString())
                 .value(USER_3_EMAIL_EXIST)
                 .build();
-        var filterDto = UserFilterDtoNew.builder()
+        var filterDto = UserFilterDto.builder()
                 .outId(outIdFilter)
                 .deleted(deletedFilter)
                 .email(emailFilter)

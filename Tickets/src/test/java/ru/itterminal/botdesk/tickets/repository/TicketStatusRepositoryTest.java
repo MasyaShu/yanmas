@@ -8,7 +8,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.itterminal.botdesk.tickets.model.spec.TicketStatusSpec;
 
 import java.util.UUID;
 
@@ -19,7 +18,7 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 @TestInstance(PER_CLASS)
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
-@ContextConfiguration(classes = {TicketRepositoryTestConfig.class, TicketStatusSpec.class, TicketStatusRepository.class})
+@ContextConfiguration(classes = {TicketRepositoryTestConfig.class, TicketStatusRepository.class})
 @Sql({"/create-ticket-test.sql"})
 class TicketStatusRepositoryTest {
 

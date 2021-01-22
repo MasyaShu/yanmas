@@ -27,13 +27,13 @@ import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
 import ru.itterminal.botdesk.commons.model.filter.NumberFilter;
 import ru.itterminal.botdesk.commons.model.filter.StringFilter;
+import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.botdesk.commons.util.CommonConstants;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 import ru.itterminal.botdesk.tickets.model.TicketTemplate;
 import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateDtoRequest;
 import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateDtoResponse;
 import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateFilterDto;
-import ru.itterminal.botdesk.tickets.model.spec.TicketTemplateSpec;
 import ru.itterminal.botdesk.tickets.model.test.TicketTemplateTestHelper;
 import ru.itterminal.botdesk.tickets.service.impl.TicketTemplateServiceImpl;
 
@@ -50,8 +50,7 @@ import static ru.itterminal.botdesk.commons.model.validator.ZoneId.ZONE_ID_NOT_V
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringJUnitConfig(value = {TicketTemplateControllerV1.class, FilterChainProxy.class,
-        TicketTemplateSpec.class})
+@SpringJUnitConfig(value = {TicketTemplateControllerV1.class, FilterChainProxy.class})
 @Import({TestSecurityConfig.class, HttpEncodingAutoConfiguration.class})
 @WebMvcTest
 @ActiveProfiles("Test")
@@ -67,14 +66,14 @@ class TicketTemplateControllerV1Test {
     @MockBean
     TicketTemplateServiceImpl templateService;
 
+    @MockBean
+    private SpecificationsFactory specFactory;
+
     @Autowired
     private TicketTemplateControllerV1 controller;
 
     @Autowired
     FilterChainProxy springSecurityFilterChain;
-
-    @Autowired
-    TicketTemplateSpec ticketTemplateSpec;
 
     private final TicketTemplateTestHelper ticketTemplateTestHelper = new TicketTemplateTestHelper();
 

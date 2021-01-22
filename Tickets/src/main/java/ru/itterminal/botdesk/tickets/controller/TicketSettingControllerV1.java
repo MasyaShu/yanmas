@@ -14,7 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,7 +35,7 @@ import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
-import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
+import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
@@ -44,7 +43,6 @@ import ru.itterminal.botdesk.tickets.model.TicketSetting;
 import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoRequest;
 import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoResponse;
 import ru.itterminal.botdesk.tickets.model.dto.TicketSettingFilterDto;
-import ru.itterminal.botdesk.tickets.model.spec.TicketSettingSpec;
 import ru.itterminal.botdesk.tickets.service.impl.TicketSettingServiceImpl;
 import ru.itterminal.botdesk.tickets.service.impl.TicketStatusServiceImpl;
 import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
@@ -63,7 +61,7 @@ public class TicketSettingControllerV1 extends BaseController {
     private final TicketStatusServiceImpl ticketStatusService;
     private final TicketTypeServiceImpl ticketTypeService;
     private final TicketSettingServiceImpl ticketSettingService;
-    private final TicketSettingSpec spec;
+    private final SpecificationsFactory specFactory;
     public static final String FIND_BY_AUTHOR_ID_INIT_MESSAGE = "Get request for find {} by authorId: {}";
     public static final String FIND_BY_AUTHOR_ID_FINISH_MESSAGE = "Done find {} by authorId: {}";
 
@@ -180,29 +178,23 @@ public class TicketSettingControllerV1 extends BaseController {
     @GetMapping()
     public ResponseEntity<Page<TicketSettingDtoResponse>> getByFilter(
             Principal user,
-            @Valid @RequestBody TicketSettingFilterDto filter,
+            @Valid @RequestBody TicketSettingFilterDto filterDto,
             @RequestParam(defaultValue = PAGE_DEFAULT_VALUE) @PositiveOrZero int page,
             @RequestParam(defaultValue = SIZE_DEFAULT_VALUE) @Positive int size) {
-        log.debug(FIND_INIT_MESSAGE, ENTITY_NAME, page, size, filter);
-        if (filter.getDirection() == null) {
-            filter.setDirection("ASC");
-        }
-        if (filter.getDeleted() == null) {
-            filter.setDeleted("all");
+        log.debug(FIND_INIT_MESSAGE, ENTITY_NAME, page, size, filterDto);
+        if (filterDto.getSortDirection() == null) {
+            filterDto.setSortDirection("ASC");
         }
         Pageable pageable =
                 PageRequest.of(page, size, Sort.by(
-                        Sort.Direction.fromString(filter.getDirection()),
+                        Sort.Direction.fromString(filterDto.getSortDirection()),
                         "displayName"
                 ));
         Page<TicketSetting> foundTicketSetting;
         Page<TicketSettingDtoResponse> returnedTicketSetting;
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
-        Specification<TicketSetting> ticketSettingSpecification = Specification
-                .where(spec.getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted.fromString(filter.getDeleted())))
-                .and(spec.getEntityByAccountSpec(jwtUser.getAccountId()))
-                .and(filter.getOutId() == null ? null : spec.getEntityByOutIdSpec(filter.getOutId()));
-
+        var accountId = jwtUser.getAccountId();
+        var ticketSettingSpecification = specFactory.makeSpecificationFromEntityFilterDto(TicketSetting.class, filterDto, accountId);
         foundTicketSetting = ticketSettingService.findAllByFilter(ticketSettingSpecification, pageable);
         returnedTicketSetting = mapPage(foundTicketSetting, TicketSettingDtoResponse.class, pageable);
         log.debug(FIND_FINISH_MESSAGE, ENTITY_NAME, foundTicketSetting.getTotalElements());

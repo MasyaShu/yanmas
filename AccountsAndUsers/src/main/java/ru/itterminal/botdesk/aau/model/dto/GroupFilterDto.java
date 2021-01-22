@@ -3,6 +3,9 @@ package ru.itterminal.botdesk.aau.model.dto;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
+import ru.itterminal.botdesk.commons.model.filter.BooleanFilter;
+import ru.itterminal.botdesk.commons.model.filter.StringFilter;
+import ru.itterminal.botdesk.commons.model.validator.ValidateFilter;
 
 import javax.validation.constraints.Size;
 
@@ -14,13 +17,13 @@ import javax.validation.constraints.Size;
 @ToString
 public class GroupFilterDto extends BaseFilterDto {
 
-    @Size(min = 1, max = 128)
-    private String name;
+    @ValidateFilter(min = 1, max = 128)
+    private StringFilter name;
 
-    private String comment;
+    private StringFilter comment;
 
-    private Boolean isDeprecated;
+    private BooleanFilter isDeprecated;
 
-    private Boolean isInner;
+    private BooleanFilter isInner;
 
 }

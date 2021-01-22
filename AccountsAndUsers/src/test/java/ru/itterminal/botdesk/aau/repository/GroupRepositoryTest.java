@@ -8,7 +8,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.itterminal.botdesk.aau.model.spec.GroupSpec;
 
 import java.util.UUID;
 
@@ -19,15 +18,12 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 @TestInstance(PER_CLASS)
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
-@ContextConfiguration(classes = {GroupRepositoryTestConfig.class, GroupSpec.class, GroupRepository.class})
+@ContextConfiguration(classes = {GroupRepositoryTestConfig.class, GroupRepository.class})
 @Sql({"/create-user-test.sql"})
 class GroupRepositoryTest {
 
     @Autowired
     private GroupRepository groupRepository;
-
-    @Autowired
-    GroupSpec spec;
 
     private static final String EXIST_NAME = "groupName1";
     private static final String NOT_EXIST_NAME = "groupName4";

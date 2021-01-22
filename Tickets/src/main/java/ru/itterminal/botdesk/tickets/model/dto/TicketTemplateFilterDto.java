@@ -37,10 +37,10 @@ public class TicketTemplateFilterDto extends BaseFilterDto {
     private BooleanFilter isActive;
 
     @ValidateFilter()
-    private BaseEntityFilter authorId;
+    private BaseEntityFilter author;
 
     @ValidateFilter()
-    private BaseEntityFilter ticketTypeId;
+    private BaseEntityFilter ticketType;
 
 
     private String sort;

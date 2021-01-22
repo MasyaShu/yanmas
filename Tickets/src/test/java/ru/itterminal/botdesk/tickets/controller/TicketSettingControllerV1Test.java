@@ -49,20 +49,20 @@ import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
+import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.botdesk.commons.util.CommonConstants;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 import ru.itterminal.botdesk.tickets.model.TicketSetting;
 import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoRequest;
 import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoResponse;
 import ru.itterminal.botdesk.tickets.model.dto.TicketSettingFilterDto;
-import ru.itterminal.botdesk.tickets.model.spec.TicketSettingSpec;
 import ru.itterminal.botdesk.tickets.model.test.TicketSettingTestHelper;
 import ru.itterminal.botdesk.tickets.service.impl.TicketSettingServiceImpl;
 import ru.itterminal.botdesk.tickets.service.impl.TicketStatusServiceImpl;
 import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringJUnitConfig(value = {TicketSettingControllerV1.class, TicketSettingSpec.class, FilterChainProxy.class})
+@SpringJUnitConfig(value = {TicketSettingControllerV1.class, FilterChainProxy.class})
 @Import(TestSecurityConfig.class)
 @WebMvcTest
 @ActiveProfiles("Test")
@@ -71,6 +71,9 @@ class TicketSettingControllerV1Test {
     public static final String DISPLAY_NAME = "displayName";
     @MockBean
     private UserServiceImpl userService;
+
+    @MockBean
+    private SpecificationsFactory specFactory;
 
     @MockBean
     private AccountServiceImpl accountService;

@@ -1,6 +1,5 @@
 package ru.itterminal.botdesk.aau.controller;
 
-import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -13,7 +12,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -25,11 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithAnonymousUser;
@@ -52,7 +45,6 @@ import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.dto.UserDtoRequest;
 import ru.itterminal.botdesk.aau.model.dto.UserFilterDto;
-import ru.itterminal.botdesk.aau.model.spec.UserSpec;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.RoleServiceImpl;
@@ -66,7 +58,7 @@ import ru.itterminal.botdesk.commons.util.CommonConstants;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringJUnitConfig(value = {UserControllerV1.class, SpecificationsFactory.class, FilterChainProxy.class})
+@SpringJUnitConfig(value = {UserControllerV1.class, FilterChainProxy.class})
 @Import(TestSecurityConfig.class)
 @WebMvcTest
 @ActiveProfiles("Test")
@@ -77,6 +69,9 @@ class UserControllerV1Test {
 
     @MockBean
     private UserServiceImpl service;
+
+    @MockBean
+    private SpecificationsFactory specFactory;
 
     @MockBean
     private AccountServiceImpl accountService;
@@ -148,8 +143,6 @@ class UserControllerV1Test {
     private static final String ROLE_ADMIN_OUT_ID = "role admin outId";
     public static final String GROUP_DISPLAY_NAME = "group display name";
     public static final String GROUP_OUT_ID = "group outId";
-    public static final String FILTER_NAME_IVAN = "Filter name - Ivan";
-    public static final String PHONE = "123456";
 
     private final Set<String> invalidPassword =
             Set.of(INVALID_PASSWORD_1, INVALID_PASSWORD_2, INVALID_PASSWORD_3, INVALID_PASSWORD_4,
@@ -157,7 +150,6 @@ class UserControllerV1Test {
             );
 
     private User user_1;
-    private User user_2;
     private Account account_1;
     private Group group_1;
     private Role roleAdmin;
@@ -200,16 +192,6 @@ class UserControllerV1Test {
                 .role(roleAdmin)
                 .id(UUID.fromString(USER_1_ID))
                 .build();
-        user_2 = User
-                .builder()
-                .email(TestSecurityConfig.EMAIL_2)
-                .password(PASSWORD_2)
-                .account(account_1)
-                .group(group_1)
-                .isArchived(false)
-                .role(roleAccountOwner)
-                .id(UUID.fromString(USER_2_ID))
-                .build();
         userDtoRequestFromAccount_1 = UserDtoRequest
                 .builder()
                 .email(TestSecurityConfig.EMAIL_1)
@@ -218,10 +200,6 @@ class UserControllerV1Test {
                 .role(roleAdmin.getId())
                 .build();
         userDtoRequestFromAccount_1.setDeleted(false);
-        userFilterDto = new UserFilterDto();
-        userFilterDto.setEmail(TestSecurityConfig.EMAIL_1);
-        userFilterDto.setName(FILTER_NAME_IVAN);
-        userFilterDto.setPhone(PHONE);
     }
 
     @Test

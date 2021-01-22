@@ -1,21 +1,17 @@
 package ru.itterminal.botdesk.aau.model.dto;
 
-import java.util.List;
-import java.util.UUID;
-
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
-
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
-import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
-import ru.itterminal.botdesk.commons.model.validator.ValueOfEnum;
 import ru.itterminal.botdesk.aau.util.AAUConstants;
+import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
+import ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter;
+import ru.itterminal.botdesk.commons.model.filter.BooleanFilter;
+import ru.itterminal.botdesk.commons.model.filter.StringFilter;
+import ru.itterminal.botdesk.commons.model.validator.ValidateFilter;
 
 @Getter
 @Setter
@@ -25,22 +21,24 @@ import ru.itterminal.botdesk.aau.util.AAUConstants;
 @ToString
 public class UserFilterDto extends BaseFilterDto {
 
-    @Pattern(regexp = AAUConstants.EMAIL_PATTERN,
-            message = AAUConstants.INVALID_EMAIL)
-    private String email;
+    @ValidateFilter(regexp = AAUConstants.EMAIL_PATTERN, messageRegexp = AAUConstants.INVALID_EMAIL)
+    private StringFilter email;
 
-    @Size(max = 128)
-    private String name;
+    @ValidateFilter(max = 128)
+    private StringFilter name;
 
-    @Size(min = 6, max = 30)
-    private String phone;
+    @ValidateFilter(min = 6, max = 128)
+    private StringFilter phone;
 
-    private String comment;
+    @ValidateFilter
+    private StringFilter comment;
 
-    private Boolean isArchived;
+    @ValidateFilter
+    private BooleanFilter isArchived;
 
-    private List<UUID> groups;
+    @ValidateFilter
+    private BaseEntityFilter group;
 
-    private List<UUID> roles;
-
+    @ValidateFilter
+    private BaseEntityFilter role;
 }

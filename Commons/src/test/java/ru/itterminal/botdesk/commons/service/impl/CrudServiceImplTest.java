@@ -1,5 +1,18 @@
 package ru.itterminal.botdesk.commons.service.impl;
 
+import static java.lang.String.format;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.times;
+
+import java.time.ZonedDateTime;
+import java.util.Collections;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.UUID;
+
+import javax.persistence.OptimisticLockException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,32 +21,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.data.domain.*;
-import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.NullEntityException;
 import ru.itterminal.botdesk.commons.model.GeneralEntity;
-import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 import ru.itterminal.botdesk.commons.repository.GeneralEntityRepository;
 import ru.itterminal.botdesk.commons.service.CrudService;
 import ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl;
 
-import javax.persistence.OptimisticLockException;
-import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.UUID;
-
-import static java.lang.String.format;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.times;
-
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {BasicOperationValidatorImpl.class, GeneralEntityService.class, BaseEntitySpec.class})
+@ContextConfiguration(classes = {BasicOperationValidatorImpl.class, GeneralEntityService.class})
 class CrudServiceImplTest {
 
     @MockBean
@@ -44,9 +48,6 @@ class CrudServiceImplTest {
 
     @Autowired
     private GeneralEntityService service;
-
-    @Autowired
-    private BaseEntitySpec spec;
 
     private GeneralEntity testEntity;
     private GeneralEntity baseEntity;
@@ -119,21 +120,6 @@ class CrudServiceImplTest {
         assertThrows(NoSuchElementException.class, () -> service.findById(TEST_ENTITY_ID));
     }
 
-    @Test
-    void findAllByFilter_shouldReturnPageOfGeneralEntity_whenEntitiesExistByFilter() {
-        Specification<GeneralEntity> generalEntitySpecification = spec.getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted.ALL);
-        Mockito.when(repository.findAll(generalEntitySpecification, pageable)).thenReturn(expectedPage);
-        Page<GeneralEntity> actualPage = service.findAllByFilter(generalEntitySpecification, pageable);
-        assertEquals(expectedPage, actualPage);
-    }
-
-    @Test
-    void findAllByFilter_shouldReturnEmptyPage_whenEntitiesNotExistByFilter() {
-        Specification<GeneralEntity> generalEntitySpecification = spec.getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted.ALL);
-        Mockito.when(repository.findAll(generalEntitySpecification, pageable)).thenReturn(Page.empty());
-        Page<GeneralEntity> actualPage = service.findAllByFilter(generalEntitySpecification, pageable);
-        assertEquals(Page.empty(), actualPage);
-    }
 
     @Test
     void findAll_shouldReturnPageOfGeneralEntity_whenEntitiesExist() {
