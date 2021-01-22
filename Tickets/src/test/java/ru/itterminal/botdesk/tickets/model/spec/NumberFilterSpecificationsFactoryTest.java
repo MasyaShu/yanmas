@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import static ru.itterminal.botdesk.commons.model.filter.NumberFilter.TypeComparisonForNumberFilter.*;
-import static ru.itterminal.botdesk.tickets.model.spec.TicketTemplateSpec.DATE_START;
 import static ru.itterminal.botdesk.tickets.model.test.TicketTemplateTestHelper.DATE_2019_01_01;
 import static ru.itterminal.botdesk.tickets.model.test.TicketTemplateTestHelper.DATE_2020_01_01;
 
@@ -38,6 +37,7 @@ import static ru.itterminal.botdesk.tickets.model.test.TicketTemplateTestHelper.
 @Sql({"/create-ticket-test.sql"})
 class NumberFilterSpecificationsFactoryTest {
 
+    public static final String DATE_START = "dateStart";
     @Autowired
     private TicketTemplateRepository repository;
 

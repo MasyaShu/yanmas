@@ -11,7 +11,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 import ru.itterminal.botdesk.commons.model.BaseEntity;
-import ru.itterminal.botdesk.commons.model.dto.BaseFilterDtoNew;
+import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 import ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter;
 import ru.itterminal.botdesk.commons.model.filter.BooleanFilter;
 import ru.itterminal.botdesk.commons.model.filter.ListOfBaseEntityFilter;
@@ -32,7 +32,7 @@ public class SpecificationsFactory {
             new ListOfBaseEntityFilterSpecificationsFactory();
     private final BaseEntityFilterSpecificationsFactory baseEntityFactory = new BaseEntityFilterSpecificationsFactory();
 
-    public <E extends BaseEntity, F extends BaseFilterDtoNew> Specification<E> makeSpecificationFromEntityFilterDto
+    public <E extends BaseEntity, F extends BaseFilterDto> Specification<E> makeSpecificationFromEntityFilterDto
             (Class<E> entityClass, F filterDto, UUID accountId) {
 
         var filterForAccount = BaseEntityFilter.builder()

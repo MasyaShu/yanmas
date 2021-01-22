@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
-import ru.itterminal.botdesk.commons.model.dto.BaseFilterDtoNew;
+import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 import ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter;
 import ru.itterminal.botdesk.commons.model.filter.BooleanFilter;
 import ru.itterminal.botdesk.commons.model.filter.ListOfBaseEntityFilter;
@@ -19,7 +19,7 @@ import ru.itterminal.botdesk.commons.model.filter.StringFilter;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class TicketFilterDto extends BaseFilterDtoNew {
+public class TicketFilterDto extends BaseFilterDto {
 
     private BaseEntityFilter author;
 

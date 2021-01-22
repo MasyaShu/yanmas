@@ -1,12 +1,18 @@
 package ru.itterminal.botdesk.aau.controller;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import static java.lang.String.format;
+
+import java.security.Principal;
+import java.util.UUID;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -14,26 +20,28 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.dto.GroupDto;
 import ru.itterminal.botdesk.aau.model.dto.GroupFilterDto;
-import ru.itterminal.botdesk.aau.model.spec.GroupSpec;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
-import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
+import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
-
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
-import java.security.Principal;
-import java.util.UUID;
-
-import static java.lang.String.format;
 
 
 @Slf4j
@@ -44,8 +52,8 @@ import static java.lang.String.format;
 public class GroupControllerV1 extends BaseController {
 
     private final GroupServiceImpl service;
-    private final GroupSpec spec;
     private final AccountServiceImpl accountService;
+    private final SpecificationsFactory specFactory;
 
     private final String ENTITY_NAME = Group.class.getSimpleName();
 
@@ -102,37 +110,27 @@ public class GroupControllerV1 extends BaseController {
     @GetMapping()
     public ResponseEntity<Page<GroupDto>> getByFilter(
             Principal user,
-            @Valid @RequestBody GroupFilterDto filter,
+            @Valid @RequestBody GroupFilterDto filterDto,
             @RequestParam(defaultValue = PAGE_DEFAULT_VALUE) @PositiveOrZero int page,
             @RequestParam(defaultValue = SIZE_DEFAULT_VALUE) @Positive int size) {
-        log.debug(FIND_INIT_MESSAGE, ENTITY_NAME, page, size, filter);
-        if (filter.getDirection() == null) {
-            filter.setDirection("ASC");
-        }
-        if (filter.getDeleted() == null) {
-            filter.setDeleted("all");
+        log.debug(FIND_INIT_MESSAGE, ENTITY_NAME, page, size, filterDto);
+        if (filterDto.getSortDirection() == null) {
+            filterDto.setSortDirection("ASC");
         }
         Pageable pageable =
-                PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(filter.getDirection()),
+                PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(filterDto.getSortDirection()),
                         "name"));
         Page<Group> foundGroups;
         Page<GroupDto> returnedGroups;
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
-        Specification<Group> groupSpecification = Specification
-                .where(filter.getName() == null ? null : spec.getGroupByNameSpec(filter.getName()))
-                .and(filter.getComment() == null ? null : spec.getGroupByCommentSpec(filter.getComment()))
-                .and(filter.getIsDeprecated() == null ? null : spec.getGroupByIsDeprecatedSpec(filter.getIsDeprecated()))
-                .and(filter.getIsInner() == null ? null : spec.getGroupByIsInnerSpec(filter.getIsInner()))
-                .and(spec.getEntityByDeletedSpec(BaseFilterDto.FilterByDeleted.fromString(filter.getDeleted())))
-                .and(spec.getEntityByAccountSpec(jwtUser.getAccountId()))
-                .and(jwtUser.isInnerGroup() ? null : spec.getGroupByGroupSpec(jwtUser.getGroupId()))
-                .and(filter.getOutId() == null ? null :  spec.getEntityByOutIdSpec(filter.getOutId()));
-
+        var accountId = jwtUser.getAccountId();
+        var groupSpecification = specFactory.makeSpecificationFromEntityFilterDto(Group.class, filterDto, accountId);
         foundGroups = service.findAllByFilter(groupSpecification, pageable);
         returnedGroups = mapPage(foundGroups, GroupDto.class, pageable);
         log.debug(FIND_FINISH_MESSAGE, ENTITY_NAME, foundGroups.getTotalElements());
         return new ResponseEntity<>(returnedGroups, HttpStatus.OK);
     }
+
     @GetMapping("/{id}")
     public ResponseEntity<GroupDto> getById(Principal user, @PathVariable UUID id) {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);

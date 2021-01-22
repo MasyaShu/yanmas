@@ -44,7 +44,7 @@ public class BaseEntityFilter implements Filter {
     public boolean IsValid(int max, int min, String regexp) {
         if (fromString(typeComparison).equals(EXIST_IN)
                 || fromString(typeComparison).equals(NOT_EXIST_IN)
-                && (idEntity == null || idEntity.isEmpty())) {
+                && (listOfIdEntities == null || listOfIdEntities.isEmpty())) {
             throw new IllegalArgumentException(format("idEntity must not be null or empty for comparison %s", typeComparison));
         }
         return true;

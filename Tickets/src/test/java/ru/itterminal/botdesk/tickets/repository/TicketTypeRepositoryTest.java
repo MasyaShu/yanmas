@@ -18,13 +18,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import ru.itterminal.botdesk.tickets.model.spec.TicketTypeSpec;
 import ru.itterminal.botdesk.tickets.model.test.TicketTypeTestHelper;
 
 @TestInstance(PER_CLASS)
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
-@ContextConfiguration(classes = {TicketRepositoryTestConfig.class, TicketTypeSpec.class, TicketTypeRepository.class})
+@ContextConfiguration(classes = {TicketRepositoryTestConfig.class, TicketTypeRepository.class})
 @Sql({"/create-ticket-test.sql"})
 class TicketTypeRepositoryTest {
 

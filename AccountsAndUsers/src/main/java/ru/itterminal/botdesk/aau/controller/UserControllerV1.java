@@ -33,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.dto.UserDtoRequest;
 import ru.itterminal.botdesk.aau.model.dto.UserDtoResponse;
-import ru.itterminal.botdesk.aau.model.dto.UserFilterDtoNew;
+import ru.itterminal.botdesk.aau.model.dto.UserFilterDto;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.RoleServiceImpl;
@@ -140,7 +140,7 @@ public class UserControllerV1 extends BaseController {
     @GetMapping()
     public ResponseEntity<Page<UserDtoResponse>> getByFilter(
             Principal user,
-            @Valid @RequestBody UserFilterDtoNew filterDto,
+            @Valid @RequestBody UserFilterDto filterDto,
             @RequestParam(defaultValue = PAGE_DEFAULT_VALUE) @PositiveOrZero int page,
             @RequestParam(defaultValue = SIZE_DEFAULT_VALUE) @Positive int size) {
 

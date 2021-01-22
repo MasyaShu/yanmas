@@ -35,7 +35,7 @@ import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.botdesk.tickets.model.Ticket;
 import ru.itterminal.botdesk.tickets.model.TicketTemplate;
 import ru.itterminal.botdesk.tickets.model.dto.TicketFilterDto;
-import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateFilterDtoNew;
+import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateFilterDto;
 import ru.itterminal.botdesk.tickets.model.test.TicketTemplateTestHelper;
 import ru.itterminal.botdesk.tickets.repository.TicketRepository;
 import ru.itterminal.botdesk.tickets.repository.TicketRepositoryTestConfig;
@@ -108,7 +108,7 @@ class SpecificationsFactoryTest {
         var dateStartFilter = NumberFilter.builder()
                 .typeComparison(IS_NOT_EMPTY.toString())
                 .build();
-        var filterDto = TicketTemplateFilterDtoNew.builder()
+        var filterDto = TicketTemplateFilterDto.builder()
                 .dateStart(dateStartFilter)
                 .build();
         var specification = specificationsFactory
@@ -137,7 +137,7 @@ class SpecificationsFactoryTest {
                         )
                 )
                 .build();
-        var filterDto = TicketTemplateFilterDtoNew.builder()
+        var filterDto = TicketTemplateFilterDto.builder()
                 .ticketType(ticketType)
                 .build();
         var specification = specificationsFactory
