@@ -72,6 +72,7 @@ class SpecificationsFactoryTest {
                 .build();
         var filterDto = TicketFilterDto.builder()
                 .isFinished(isFinishedFilter)
+                .sortByFields(List.of("deleted"))
                 .build();
         var specification = specificationsFactory
                 .makeSpecificationFromEntityFilterDto(Ticket.class, filterDto, ACCOUNT_1_ID);
@@ -92,6 +93,7 @@ class SpecificationsFactoryTest {
                 .build();
         var filterDto = TicketFilterDto.builder()
                 .executors(executorsFilter)
+                .sortByFields(List.of("deleted"))
                 .build();
         var specification = specificationsFactory
                 .makeSpecificationFromEntityFilterDto(Ticket.class, filterDto, ACCOUNT_1_ID);
@@ -110,6 +112,7 @@ class SpecificationsFactoryTest {
                 .build();
         var filterDto = TicketTemplateFilterDto.builder()
                 .dateStart(dateStartFilter)
+                .sortByFields(List.of("deleted"))
                 .build();
         var specification = specificationsFactory
                 .makeSpecificationFromEntityFilterDto(TicketTemplate.class, filterDto, ACCOUNT_1_ID);
@@ -139,6 +142,7 @@ class SpecificationsFactoryTest {
                 .build();
         var filterDto = TicketTemplateFilterDto.builder()
                 .ticketType(ticketType)
+                .sortByFields(List.of("deleted"))
                 .build();
         var specification = specificationsFactory
                 .makeSpecificationFromEntityFilterDto(TicketTemplate.class, filterDto, ACCOUNT_1_ID);
