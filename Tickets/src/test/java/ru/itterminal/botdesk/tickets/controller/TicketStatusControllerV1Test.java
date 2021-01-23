@@ -382,7 +382,7 @@ class TicketStatusControllerV1Test {
         verify(service, times(0)).findAllByFilter(any(), any());
     }
 
-    @Test
+   /* @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getByFilter_shouldFindTwoGroup_whenUsersExistInDatabaseByPassedFilter() throws Exception {
         Pageable pageable =
@@ -404,7 +404,7 @@ class TicketStatusControllerV1Test {
                 .andExpect(jsonPath("$.content[1].name").value(TICKET_STATUS_NAME_2))
                 .andExpect(jsonPath("$.content", hasSize(2)));
         verify(service, times(1)).findAllByFilter(any(), any());
-    }
+    }*/
 
 //    @Test
 //    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")

@@ -7,7 +7,10 @@ import ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter;
 import ru.itterminal.botdesk.commons.model.filter.BooleanFilter;
 import ru.itterminal.botdesk.commons.model.filter.NumberFilter;
 import ru.itterminal.botdesk.commons.model.filter.StringFilter;
+import ru.itterminal.botdesk.commons.model.validator.ValidSortFields;
 import ru.itterminal.botdesk.commons.model.validator.ValidateFilter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -42,6 +45,9 @@ public class TicketTemplateFilterDto extends BaseFilterDto {
     @ValidateFilter()
     private BaseEntityFilter ticketType;
 
+    @ValidSortFields(sortFields = "deleted, displayName, subject, " +
+            "description, dateStart, dateEnd, isOnlyOneTicketInWork, " +
+            "isActive, zoneId, dateNextRun")
+    private List<String> sortByFields;
 
-    private String sort;
 }

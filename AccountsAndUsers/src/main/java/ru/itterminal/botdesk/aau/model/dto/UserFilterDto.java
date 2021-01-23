@@ -11,7 +11,10 @@ import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 import ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter;
 import ru.itterminal.botdesk.commons.model.filter.BooleanFilter;
 import ru.itterminal.botdesk.commons.model.filter.StringFilter;
+import ru.itterminal.botdesk.commons.model.validator.ValidSortFields;
 import ru.itterminal.botdesk.commons.model.validator.ValidateFilter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -41,4 +44,8 @@ public class UserFilterDto extends BaseFilterDto {
 
     @ValidateFilter
     private BaseEntityFilter role;
+
+    @ValidSortFields(sortFields = "deleted, displayName, email, " +
+            "name, phone, comment, isArchived")
+    private List<String> sortByFields;
 }

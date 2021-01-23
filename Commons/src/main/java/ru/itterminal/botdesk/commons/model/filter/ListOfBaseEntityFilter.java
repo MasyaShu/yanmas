@@ -49,12 +49,11 @@ public  class ListOfBaseEntityFilter implements Filter{
 
     @Override
     public boolean IsValid(int max, int min, String regexp) {
-        if (fromString(typeComparison).equals(IS_EQUAL_TO)
+        if ((fromString(typeComparison).equals(IS_EQUAL_TO)
                 || fromString(typeComparison).equals(IS_NOT_EQUAL_TO)
                 || fromString(typeComparison).equals(NOT_CONTAINS_ANY_IN_LIST)
                 || fromString(typeComparison).equals(CONTAINS_ANY_IN_LIST)
-                || fromString(typeComparison).equals(CONTAINS_ALL_OF_LIST)
-                || fromString(typeComparison).equals(NOT_CONTAINS_ALL_OF_LIST)
+                || fromString(typeComparison).equals(CONTAINS_ALL_OF_LIST))
                 && (listOfIdEntities == null || listOfIdEntities.isEmpty())) {
             throw new IllegalArgumentException(format("listOfIdEntities must not be null or empty for comparison %s", typeComparison));
         }
