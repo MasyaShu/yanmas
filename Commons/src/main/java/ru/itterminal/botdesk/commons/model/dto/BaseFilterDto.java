@@ -8,6 +8,7 @@ import lombok.experimental.SuperBuilder;
 import org.springframework.data.domain.Sort;
 import ru.itterminal.botdesk.commons.model.filter.BooleanFilter;
 import ru.itterminal.botdesk.commons.model.filter.StringFilter;
+import ru.itterminal.botdesk.commons.model.validator.ValidateFilter;
 import ru.itterminal.botdesk.commons.model.validator.ValueOfEnum;
 
 
@@ -18,9 +19,10 @@ import ru.itterminal.botdesk.commons.model.validator.ValueOfEnum;
 @NoArgsConstructor
 public class BaseFilterDto {
 
-    //@Size(max = 128)
+    @ValidateFilter(max = 128)
     private StringFilter outId;
 
+    @ValidateFilter
     private BooleanFilter deleted;
 
     @ValueOfEnum(enumClass = Sort.Direction.class, message = "must be any of: asc, desc")

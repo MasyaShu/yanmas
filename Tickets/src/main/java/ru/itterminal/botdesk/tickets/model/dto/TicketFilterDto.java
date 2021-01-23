@@ -24,7 +24,7 @@ import java.util.List;
 @ToString
 public class TicketFilterDto extends BaseFilterDto {
 
-   private BaseEntityFilter author;
+    private BaseEntityFilter author;
 
     private NumberFilter number;
 
