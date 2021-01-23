@@ -62,7 +62,9 @@ public class SpecificationsFactory {
                 if (filter != null) {
                     var fieldName = field.getName();
                     var spec = makeSpecification(entityClass, fieldName, filter);
-                    createdSpec.add(spec);
+                    if (spec!=null) {
+                        createdSpec.add(spec);
+                    }
                 }
             }
             catch (IllegalAccessException e) {
@@ -84,7 +86,7 @@ public class SpecificationsFactory {
             case "NumberFilter" -> makeSpecificationForNumberFilter(filter, field);
             case "BaseEntityFilter" -> makeSpecificationForBaseEntityFilter(filter, field);
             case "ListOfBaseEntityFilter" -> makeSpecificationForListOfBaseEntityFilter(entityClass, field, filter);
-            default -> throw new IllegalStateException("Unexpected value: " + clazzFilterName);
+            default -> null;
         };
     }
 
