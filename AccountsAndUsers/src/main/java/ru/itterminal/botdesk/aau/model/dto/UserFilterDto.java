@@ -24,9 +24,6 @@ import java.util.List;
 @ToString
 public class UserFilterDto extends BaseFilterDto {
 
-    private static final String SORT_FIELDS = "deleted, displayName, email, name, phone, comment, isArchived";
-
-
     @ValidateFilter(regexp = AAUConstants.EMAIL_PATTERN, messageRegexp = AAUConstants.INVALID_EMAIL)
     private StringFilter email;
 
@@ -48,6 +45,7 @@ public class UserFilterDto extends BaseFilterDto {
     @ValidateFilter
     private BaseEntityFilter role;
 
-    @ValidSortFields(sortFields = SORT_FIELDS)
+    @ValidSortFields(sortFields = "deleted, displayName, email, " +
+            "name, phone, comment, isArchived")
     private List<String> sortByFields;
 }

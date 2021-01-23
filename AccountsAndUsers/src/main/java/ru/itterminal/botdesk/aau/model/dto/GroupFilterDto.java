@@ -18,8 +18,6 @@ import java.util.List;
 @ToString
 public class GroupFilterDto extends BaseFilterDto {
 
-    private static final String SORT_FIELDS = "deleted, displayName, name, comment, isDeprecated";
-
     @ValidateFilter(min = 1, max = 128)
     private StringFilter name;
 
@@ -29,7 +27,7 @@ public class GroupFilterDto extends BaseFilterDto {
 
     private BooleanFilter isInner;
 
-    @ValidSortFields(sortFields = SORT_FIELDS)
+    @ValidSortFields(sortFields = "deleted, displayName, name, comment, isDeprecated")
     private List<String> sortByFields;
 
 }

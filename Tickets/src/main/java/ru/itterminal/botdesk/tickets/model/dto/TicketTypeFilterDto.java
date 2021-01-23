@@ -16,13 +16,11 @@ import java.util.List;
 @ToString
 public class TicketTypeFilterDto extends BaseFilterDto {
 
-    private static final String SORT_FIELDS = "deleted, displayName, name, comment";
-
     @Size(min = 1, max = 128)
     private String name;
 
     private String comment;
 
-    @ValidSortFields(sortFields = SORT_FIELDS)
+    @ValidSortFields(sortFields = "deleted, displayName, name, comment")
     private List<String> sortByFields;
 }

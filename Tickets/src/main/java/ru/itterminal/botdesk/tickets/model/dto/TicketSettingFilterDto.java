@@ -17,9 +17,7 @@ import java.util.List;
 @ToString
 public class TicketSettingFilterDto extends BaseFilterDto {
 
-    private static final String SORT_FIELDS = "deleted, displayName";
-
-    @ValidSortFields(sortFields = SORT_FIELDS)
+    @ValidSortFields(sortFields = "deleted, displayName")
     private List<String> sortByFields;
 
 }

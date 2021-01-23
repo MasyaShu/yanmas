@@ -21,8 +21,6 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class TicketTemplateFilterDto extends BaseFilterDto {
 
-    private static final String SORT_FIELDS = "deleted, displayName, subject, description, dateStart, dateEnd, isOnlyOneTicketInWork, isActive, zoneId, dateNextRun";
-
     @ValidateFilter(min = 7)
     private StringFilter subject;
 
@@ -47,7 +45,9 @@ public class TicketTemplateFilterDto extends BaseFilterDto {
     @ValidateFilter()
     private BaseEntityFilter ticketType;
 
-    @ValidSortFields(sortFields = SORT_FIELDS)
+    @ValidSortFields(sortFields = "deleted, displayName, subject, " +
+            "description, dateStart, dateEnd, isOnlyOneTicketInWork, " +
+            "isActive, zoneId, dateNextRun")
     private List<String> sortByFields;
 
 }

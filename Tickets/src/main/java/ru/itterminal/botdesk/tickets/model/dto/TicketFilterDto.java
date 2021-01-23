@@ -24,9 +24,7 @@ import java.util.List;
 @ToString
 public class TicketFilterDto extends BaseFilterDto {
 
-    private static final String SORT_FIELDS = "deleted, displayName, isFinished, createdAt, deadline,  subject, description, number";
-
-    private BaseEntityFilter author;
+   private BaseEntityFilter author;
 
     private NumberFilter number;
 
@@ -54,6 +52,7 @@ public class TicketFilterDto extends BaseFilterDto {
 
     private ListOfBaseEntityFilter files;
 
-    @ValidSortFields(sortFields = SORT_FIELDS)
+    @ValidSortFields(sortFields = "deleted, displayName, isFinished, " +
+            "createdAt, deadline,  subject, description, number")
     private List<String> sortByFields;
 }
