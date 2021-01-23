@@ -15,8 +15,8 @@ class StringFilterTest {
     private static final String TEXT_CONTAINS = "text_contains";
     private static final String STRING_20_CHARACTERS = "string 20 characters";
     StringFilter stringFilter;
-    int max = Integer.MAX_VALUE;
-    int min = 0;
+    int max;
+    int min;
     String regexp = "";
 
     @BeforeEach
@@ -25,6 +25,8 @@ class StringFilterTest {
                 .value(STRING_20_CHARACTERS)
                 .typeComparison(IS_EMPTY)
                 .build();
+        max = Integer.MAX_VALUE;
+        min = 0;
     }
 
     @Test
