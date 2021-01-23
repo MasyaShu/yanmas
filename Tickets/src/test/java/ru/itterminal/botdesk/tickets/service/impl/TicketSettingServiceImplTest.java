@@ -75,14 +75,14 @@ class TicketSettingServiceImplTest {
     @Test
     void getSettingOrPredefinedValuesForTicket_shouldGetAllValueFromTicketSetting_whenAccordingWithPlannedBehavior() {
         when(ticketSettingUniqueFields.getId()).thenReturn(UUID.randomUUID());
-        when(repository.findByUniqueFields(any(), any(), any(), any())).thenReturn(List.of(ticketSettingUniqueFields));
+        when(repository.findByUniqueFieldsWithoutDeleted(any(), any(), any(), any())).thenReturn(List.of(ticketSettingUniqueFields));
         var expectedTicketSetting = helper.getPredefinedValidEntityList().get(0);
         when(repository.findById(any())).thenReturn(Optional.of(expectedTicketSetting));
         var someId = UUID.randomUUID();
         var actualTicketSetting = service.getSettingOrPredefinedValuesForTicket(someId, someId, someId);
         assertEquals(expectedTicketSetting, actualTicketSetting);
         verify(ticketSettingUniqueFields, times(1)).getId();
-        verify(repository, times(1)).findByUniqueFields(any(), any(), any(), any());
+        verify(repository, times(1)).findByUniqueFieldsWithoutDeleted(any(), any(), any(), any());
         verify(repository, times(1)).findById(any());
         verify(ticketTypeService, times(0)).findByIdAndAccountId(any(), any());
         verify(ticketStatusService, times(0)).findByIdAndAccountId(any(), any());
@@ -90,7 +90,7 @@ class TicketSettingServiceImplTest {
 
     @Test
     void getSettingOrPredefinedValuesForTicket_shouldGetAllValueFromPredefinedValues_whenAccordingWithPlannedBehavior() {
-        when(repository.findByUniqueFields(any(), any(), any(), any())).thenReturn(Collections.emptyList());
+        when(repository.findByUniqueFieldsWithoutDeleted(any(), any(), any(), any())).thenReturn(Collections.emptyList());
         var expectedTicketTypeForNew = ticketTypeHelper.getRandomValidEntity();
         var expectedTicketStatus = ticketStatusHelper.getRandomValidEntity();
 
@@ -107,7 +107,7 @@ class TicketSettingServiceImplTest {
         assertEquals(expectedTicketStatus, actualTicketSetting.getTicketStatusForCancel());
 
         verify(ticketSettingUniqueFields, times(0)).getId();
-        verify(repository, times(3)).findByUniqueFields(any(), any(), any(), any());
+        verify(repository, times(3)).findByUniqueFieldsWithoutDeleted(any(), any(), any(), any());
         verify(repository, times(0)).findById(any());
         verify(ticketTypeService, times(1)).findByIdAndAccountId(any(), any());
         verify(ticketStatusService, times(4)).findByIdAndAccountId(any(), any());

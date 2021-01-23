@@ -45,15 +45,15 @@ public class TicketSettingServiceImpl extends CrudServiceWithAccountImpl<TicketS
     @Transactional(readOnly = true)
     public TicketSetting getSettingOrPredefinedValuesForTicket(@NotNull UUID accountId, @NotNull UUID groupId,
                                                                @NotNull UUID authorId) {
-        var ticketSetting = repository.findByUniqueFields(accountId, groupId, authorId, null);
-        if (ticketSetting.isEmpty()) {
-            ticketSetting = repository.findByUniqueFields(accountId, groupId, null, null);
+        var ticketSettingProjection = repository.findByUniqueFieldsWithoutDeleted(accountId, groupId, authorId, null);
+        if (ticketSettingProjection.isEmpty()) {
+            ticketSettingProjection = repository.findByUniqueFieldsWithoutDeleted(accountId, groupId, null, null);
         }
-        if (ticketSetting.isEmpty()) {
-            ticketSetting = repository.findByUniqueFields(accountId, null, null, null);
+        if (ticketSettingProjection.isEmpty()) {
+            ticketSettingProjection = repository.findByUniqueFieldsWithoutDeleted(accountId, null, null, null);
         }
         var valuesForTicket =
-                ticketSetting.isEmpty() ? new TicketSetting() : repository.findById(ticketSetting.get(0).getId()).get();
+                ticketSettingProjection.isEmpty() ? new TicketSetting() : repository.findById(ticketSettingProjection.get(0).getId()).get();
         if (valuesForTicket.getTicketTypeForNew() == null) {
             var predefinedTicketTypeForNew =
                     ticketTypeService.findByIdAndAccountId(TicketType.PREDEFINED_TICKET_TYPE_FOR_NEW_ID, accountId);
