@@ -392,13 +392,13 @@ class TicketTemplateControllerV1Test {
                 .valueTwo(1L)
                 .build();
         var subF = StringFilter.builder()
-                .typeComparison("textcontains")
+                .typeComparison("t")
                 .value("dd")
                 .build();
         var ticketTypeFilterDto = TicketTemplateFilterDto.builder()
                 .dateEnd(dateFilter)
                 .subject(subF)
-                .sortByFields(List.of("Subject", "desfcription"))
+                .sortByFields(List.of("S", "dateStart"))
                 .build();
         when(templateService.findAllByFilter(any(), any())).thenReturn(new PageImpl<>(List.of(new TicketTemplate(), new TicketTemplate())));
         MockHttpServletRequestBuilder request = get(HOST + PORT + API)
