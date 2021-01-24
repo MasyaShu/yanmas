@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.itterminal.botdesk.commons.model.validator.ValueOfEnum;
+import ru.itterminal.botdesk.commons.model.validator.enums.ValueOfEnum;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

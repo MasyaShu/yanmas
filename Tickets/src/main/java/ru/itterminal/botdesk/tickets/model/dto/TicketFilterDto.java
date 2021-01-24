@@ -12,7 +12,7 @@ import ru.itterminal.botdesk.commons.model.filter.BooleanFilter;
 import ru.itterminal.botdesk.commons.model.filter.ListOfBaseEntityFilter;
 import ru.itterminal.botdesk.commons.model.filter.NumberFilter;
 import ru.itterminal.botdesk.commons.model.filter.StringFilter;
-import ru.itterminal.botdesk.commons.model.validator.ValidSortFields;
+import ru.itterminal.botdesk.commons.model.validator.sortfields.ValidateSortFields;
 
 import java.util.List;
 
@@ -52,7 +52,7 @@ public class TicketFilterDto extends BaseFilterDto {
 
     private ListOfBaseEntityFilter files;
 
-    @ValidSortFields(sortFields = "deleted, displayName, isFinished, " +
+    @ValidateSortFields(permittedFieldsForSort = "deleted, displayName, isFinished, " +
             "createdAt, deadline,  subject, description, number")
     private List<String> sortByFields;
 }

@@ -5,8 +5,8 @@ import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 import ru.itterminal.botdesk.commons.model.filter.BooleanFilter;
 import ru.itterminal.botdesk.commons.model.filter.StringFilter;
-import ru.itterminal.botdesk.commons.model.validator.ValidSortFields;
-import ru.itterminal.botdesk.commons.model.validator.ValidateFilter;
+import ru.itterminal.botdesk.commons.model.validator.sortfields.ValidateSortFields;
+import ru.itterminal.botdesk.commons.model.validator.filter.ValidateFilter;
 
 import java.util.List;
 
@@ -27,7 +27,7 @@ public class GroupFilterDto extends BaseFilterDto {
 
     private BooleanFilter isInner;
 
-    @ValidSortFields(sortFields = "deleted, displayName, name, comment, isDeprecated")
+    @ValidateSortFields(permittedFieldsForSort = "deleted, displayName, name, comment, isDeprecated")
     private List<String> sortByFields;
 
 }

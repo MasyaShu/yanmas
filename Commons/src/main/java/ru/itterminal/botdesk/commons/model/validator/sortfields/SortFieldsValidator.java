@@ -1,19 +1,19 @@
-package ru.itterminal.botdesk.commons.model.validator;
+package ru.itterminal.botdesk.commons.model.validator.sortfields;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class SortFieldsValidator implements ConstraintValidator<ValidSortFields, List<String>> {
+public class SortFieldsValidator implements ConstraintValidator<ValidateSortFields, List<String>> {
 
     private String sortFields;
     private String message;
 
 
     @Override
-    public void initialize(ValidSortFields constraintAnnotation) {
-        sortFields = constraintAnnotation.sortFields();
+    public void initialize(ValidateSortFields constraintAnnotation) {
+        sortFields = constraintAnnotation.permittedFieldsForSort();
         message = constraintAnnotation.message();
     }
 

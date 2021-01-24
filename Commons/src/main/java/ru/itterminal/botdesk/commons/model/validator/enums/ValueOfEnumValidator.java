@@ -1,4 +1,4 @@
-package ru.itterminal.botdesk.commons.model.validator;
+package ru.itterminal.botdesk.commons.model.validator.enums;
 
 import static java.util.stream.Collectors.toList;
 

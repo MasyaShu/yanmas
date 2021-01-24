@@ -1,9 +1,9 @@
-package ru.itterminal.botdesk.commons.model.validator;
-
-import ru.itterminal.botdesk.commons.model.filter.Filter;
+package ru.itterminal.botdesk.commons.model.validator.filter;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+
+import ru.itterminal.botdesk.commons.model.filter.Filter;
 
 public class FilterValidator implements ConstraintValidator<ValidateFilter, Filter> {
 

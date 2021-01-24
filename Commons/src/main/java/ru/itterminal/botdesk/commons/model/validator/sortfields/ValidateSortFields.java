@@ -1,4 +1,4 @@
-package ru.itterminal.botdesk.commons.model.validator;
+package ru.itterminal.botdesk.commons.model.validator.sortfields;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
@@ -15,17 +15,19 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
-@SuppressWarnings("unused")
 @Target({METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE})
 @Retention(RUNTIME)
 @Documented
-@Constraint(validatedBy = ValueOfEnumValidator.class)
-public @interface ValueOfEnum {
-    Class<? extends Enum<?>> enumClass();
+@Constraint(validatedBy = SortFieldsValidator.class)
+public @interface ValidateSortFields {
 
-    String message() default "must be any of enum {enumClass}";
+    String message() default "the sort field is invalid";
 
     Class<?>[] groups() default {};
 
+    @SuppressWarnings("unused")
     Class<? extends Payload>[] payload() default {};
+
+    String permittedFieldsForSort() default "";
+
 }

@@ -3,7 +3,7 @@ package ru.itterminal.botdesk.tickets.model.dto;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
-import ru.itterminal.botdesk.commons.model.validator.ValidSortFields;
+import ru.itterminal.botdesk.commons.model.validator.sortfields.ValidateSortFields;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ import java.util.List;
 @ToString
 public class TicketSettingFilterDto extends BaseFilterDto {
 
-    @ValidSortFields(sortFields = "deleted, displayName")
+    @ValidateSortFields(permittedFieldsForSort = "deleted, displayName")
     private List<String> sortByFields;
 
 }

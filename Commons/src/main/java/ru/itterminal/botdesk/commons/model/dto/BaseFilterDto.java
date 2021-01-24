@@ -8,8 +8,8 @@ import lombok.experimental.SuperBuilder;
 import org.springframework.data.domain.Sort;
 import ru.itterminal.botdesk.commons.model.filter.BooleanFilter;
 import ru.itterminal.botdesk.commons.model.filter.StringFilter;
-import ru.itterminal.botdesk.commons.model.validator.ValidateFilter;
-import ru.itterminal.botdesk.commons.model.validator.ValueOfEnum;
+import ru.itterminal.botdesk.commons.model.validator.filter.ValidateFilter;
+import ru.itterminal.botdesk.commons.model.validator.enums.ValueOfEnum;
 
 
 @Getter

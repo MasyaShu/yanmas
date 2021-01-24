@@ -1,6 +1,21 @@
 package ru.itterminal.botdesk.tickets.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.itterminal.botdesk.commons.model.validator.zoneid.ValidateZoneId.ZONE_ID_NOT_VALID;
+
+import java.util.List;
+import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -22,6 +37,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
@@ -37,17 +55,6 @@ import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateFilterDto;
 import ru.itterminal.botdesk.tickets.model.test.TicketTemplateTestHelper;
 import ru.itterminal.botdesk.tickets.service.impl.TicketTemplateServiceImpl;
 
-import java.util.List;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.itterminal.botdesk.commons.model.validator.ZoneId.ZONE_ID_NOT_VALID;
-
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {TicketTemplateControllerV1.class, FilterChainProxy.class})
@@ -57,8 +64,8 @@ import static ru.itterminal.botdesk.commons.model.validator.ZoneId.ZONE_ID_NOT_V
 class TicketTemplateControllerV1Test {
 
     public static final String INVALID_VALUE_FOR = "Invalid value for";
-    private static final String SCHEDULER = "Scheduler";
-    private static final String ZONE_ID = "ZoneId";
+    private static final String SCHEDULER = "ValidateScheduler";
+    private static final String ZONE_ID = "ValidateZoneId";
     public static final String EXPRESSION_MUST_CONSIST = "Cron expression must consist";
     @MockBean
     private AccountServiceImpl accountService;
@@ -66,6 +73,7 @@ class TicketTemplateControllerV1Test {
     @MockBean
     TicketTemplateServiceImpl templateService;
 
+    @SuppressWarnings("unused")
     @MockBean
     private SpecificationsFactory specFactory;
 

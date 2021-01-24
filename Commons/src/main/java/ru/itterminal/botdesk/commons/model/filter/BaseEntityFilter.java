@@ -10,7 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.itterminal.botdesk.commons.model.validator.ValueOfEnum;
+import ru.itterminal.botdesk.commons.model.validator.enums.ValueOfEnum;
 
 @SuppressWarnings("unused")
 @Data

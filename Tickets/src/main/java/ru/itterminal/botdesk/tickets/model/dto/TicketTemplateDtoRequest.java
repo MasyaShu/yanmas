@@ -3,8 +3,8 @@ package ru.itterminal.botdesk.tickets.model.dto;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
-import ru.itterminal.botdesk.commons.model.validator.Scheduler;
-import ru.itterminal.botdesk.commons.model.validator.ZoneId;
+import ru.itterminal.botdesk.commons.model.validator.scheduler.ValidateScheduler;
+import ru.itterminal.botdesk.commons.model.validator.zoneid.ValidateZoneId;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 
@@ -29,10 +29,10 @@ public class TicketTemplateDtoRequest extends BaseEntityDto {
 
     private Long dateEnd;
 
-    @ZoneId(groups = {Create.class, Update.class})
+    @ValidateZoneId(groups = {Create.class, Update.class})
     private String zoneId;
 
-    @Scheduler(groups = {Create.class, Update.class})
+    @ValidateScheduler(groups = {Create.class, Update.class})
     private String expressionSchedule;
 
     @NotNull(groups = {Create.class, Update.class})

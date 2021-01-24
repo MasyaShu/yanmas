@@ -1,11 +1,11 @@
-package ru.itterminal.botdesk.commons.model.validator;
+package ru.itterminal.botdesk.commons.model.validator.scheduler;
 
 import org.springframework.scheduling.support.CronExpression;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-public class SchedulerValidator implements ConstraintValidator<Scheduler, String> {
+public class SchedulerValidator implements ConstraintValidator<ValidateScheduler, String> {
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {

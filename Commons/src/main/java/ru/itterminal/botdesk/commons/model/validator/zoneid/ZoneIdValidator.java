@@ -1,10 +1,11 @@
-package ru.itterminal.botdesk.commons.model.validator;
+package ru.itterminal.botdesk.commons.model.validator.zoneid;
+
+import java.time.ZoneId;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import java.time.ZoneId;
 
-public class ZoneIdValidator implements ConstraintValidator<ru.itterminal.botdesk.commons.model.validator.ZoneId, String> {
+public class ZoneIdValidator implements ConstraintValidator<ValidateZoneId, String> {
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
