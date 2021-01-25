@@ -11,6 +11,7 @@ public class CommonConstants {
     public static final String MESSAGE_NOT_READABLE = "Message Not Readable";
     public static final String NOT_FOUND_ENTITY_BY_ID_AND_ACCOUNT_ID = "Not found %s by id: %s and accountId: "
             + "%s";
+    public static final String DO_NOT_MATCH_THE_AVAILABLE_SORT_VALUES = "do not match the available sort values";
 
     private CommonConstants() {
     }

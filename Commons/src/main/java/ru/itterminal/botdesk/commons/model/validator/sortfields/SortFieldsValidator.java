@@ -19,14 +19,14 @@ public class SortFieldsValidator implements ConstraintValidator<ValidateSortFiel
 
     @Override
     public boolean isValid(List<String> value, ConstraintValidatorContext context) {
-
+        if (value==null) {
+            return true;
+        }
         List<String> sortFieldsList = Arrays.asList(permittedFieldsForSort.toLowerCase().split(", "));
-
         String notValidField =
                 value.stream()
                         .filter(tt -> !sortFieldsList.contains(tt.toLowerCase()))
                         .collect(Collectors.joining(", "));
-
         if (!notValidField.isEmpty()) {
             message = String.format("the passed values '%s' do not match the available sort values: %s", notValidField,
                                     permittedFieldsForSort
@@ -36,7 +36,6 @@ public class SortFieldsValidator implements ConstraintValidator<ValidateSortFiel
                     .addConstraintViolation();
             return false;
         }
-
         return true;
     }
 }

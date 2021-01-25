@@ -13,7 +13,6 @@ public class FilterValidator implements ConstraintValidator<ValidateFilter, Filt
     private String message;
     private String messageRegexp;
 
-
     @Override
     public void initialize(ValidateFilter constraintAnnotation) {
         max = constraintAnnotation.max();
@@ -26,17 +25,16 @@ public class FilterValidator implements ConstraintValidator<ValidateFilter, Filt
     @Override
     public boolean isValid(Filter value, ConstraintValidatorContext context) {
         try {
-           return value == null || value.IsValid(max, min, regexp);
-        } catch (IllegalArgumentException ex) {
-            if(ex.getMessage() == null) {
+            return value == null || value.IsValid(max, min, regexp);
+        }
+        catch (IllegalArgumentException ex) {
+            if (ex.getMessage() == null) {
                 message = messageRegexp;
             } else {
                 message = ex.getMessage();
             }
-                context.disableDefaultConstraintViolation();
-                context.buildConstraintViolationWithTemplate(message)
-                        .addConstraintViolation();
-
+            context.disableDefaultConstraintViolation();
+            context.buildConstraintViolationWithTemplate(message).addConstraintViolation();
             return false;
         }
     }

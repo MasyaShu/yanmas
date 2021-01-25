@@ -150,7 +150,11 @@ public class UserControllerV1 extends BaseController {
         if (filterDto.getSortDirection() == null) {
             filterDto.setSortDirection("ASC");
         }
-        var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(filterDto.getSortDirection()), NAME));
+        String[] fieldsForSort = filterDto.getSortByFields() == null
+                ? new String[] {NAME}
+                : filterDto.getSortByFields().toArray(new String[0]);
+        var pageable = PageRequest
+                .of(page, size, Sort.by(Sort.Direction.fromString(filterDto.getSortDirection()),  fieldsForSort));
         var userSpecification = specFactory.makeSpecificationFromEntityFilterDto(User.class, filterDto, accountId);
         var foundUsers = userService.findAllByFilter(userSpecification, pageable);
         var returnedUsers = mapPage(foundUsers, UserDtoResponse.class, pageable);
