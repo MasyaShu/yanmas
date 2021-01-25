@@ -8,7 +8,9 @@ import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 public abstract class BaseController {
 
@@ -32,15 +34,27 @@ public abstract class BaseController {
 
     public <S, T> Page<T> mapPage(Page<S> source, Class<T> targetClass, Pageable pageable) {
         return new PageImpl<>(source.getContent()
-                .stream()
-                .map(element -> modelMapper.map(element, targetClass))
-                .collect(toList()),
-                pageable, source.getTotalElements());
+                                      .stream()
+                                      .map(element -> modelMapper.map(element, targetClass))
+                                      .collect(toList()),
+                              pageable, source.getTotalElements()
+        );
     }
 
     public <S, T> List<T> mapList(List<S> source, Class<T> targetClass) {
         List<T> result = new ArrayList<>();
         source.forEach(entity -> result.add(modelMapper.map(entity, targetClass)));
         return result;
+    }
+
+    protected Pageable createPageable(int size, int page, List<String> listOfFieldsForSort, String sortDirection) {
+        if (sortDirection == null) {
+            sortDirection = "ASC";
+        }
+        String[] arrayOfFieldsForSort = listOfFieldsForSort == null || listOfFieldsForSort.isEmpty()
+                ? new String[] {"displayName"}
+                : listOfFieldsForSort.toArray(new String[0]);
+        return PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(sortDirection), arrayOfFieldsForSort));
+
     }
 }

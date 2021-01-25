@@ -10,9 +10,6 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -43,7 +40,6 @@ import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
 
-
 @Slf4j
 @RestController("GroupControllerV1")
 @Validated
@@ -60,7 +56,7 @@ public class GroupControllerV1 extends BaseController {
     @PostMapping()
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
     public ResponseEntity<GroupDto> create(Principal principal,
-            @Validated(Create.class) @RequestBody GroupDto request) {
+                                           @Validated(Create.class) @RequestBody GroupDto request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
         Group group = modelMapper.map(request, Group.class);
         group.setDeleted(false);
@@ -86,7 +82,7 @@ public class GroupControllerV1 extends BaseController {
     @PutMapping()
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')")
     public ResponseEntity<GroupDto> update(Principal principal,
-            @Validated(Update.class) @RequestBody GroupDto request) {
+                                           @Validated(Update.class) @RequestBody GroupDto request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
         Group group = modelMapper.map(request, Group.class);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
@@ -114,12 +110,7 @@ public class GroupControllerV1 extends BaseController {
             @RequestParam(defaultValue = PAGE_DEFAULT_VALUE) @PositiveOrZero int page,
             @RequestParam(defaultValue = SIZE_DEFAULT_VALUE) @Positive int size) {
         log.debug(FIND_INIT_MESSAGE, ENTITY_NAME, page, size, filterDto);
-        if (filterDto.getSortDirection() == null) {
-            filterDto.setSortDirection("ASC");
-        }
-        Pageable pageable =
-                PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(filterDto.getSortDirection()),
-                        "name"));
+        var pageable = createPageable(size, page, filterDto.getSortByFields(), filterDto.getSortDirection());
         Page<Group> foundGroups;
         Page<GroupDto> returnedGroups;
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
@@ -148,7 +139,7 @@ public class GroupControllerV1 extends BaseController {
         throw new UnsupportedOperationException("Physical delete will be implement in the further");
     }
 
-    private void isUserInInnerGroup(){
+    private void isUserInInnerGroup() {
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (!jwtUser.isInnerGroup()) {
             throw new AccessDeniedException("access is denied");

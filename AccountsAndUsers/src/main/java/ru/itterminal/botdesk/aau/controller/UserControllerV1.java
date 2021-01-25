@@ -10,8 +10,6 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -52,7 +50,6 @@ import ru.itterminal.botdesk.security.jwt.JwtUser;
 @AllArgsConstructor
 public class UserControllerV1 extends BaseController {
 
-    public static final String NAME = "name";
     private final UserServiceImpl userService;
     private final AccountServiceImpl accountService;
     private final RoleServiceImpl roleService;
@@ -147,14 +144,7 @@ public class UserControllerV1 extends BaseController {
         log.debug(FIND_INIT_MESSAGE, ENTITY_NAME, page, size, filterDto);
         var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
         var accountId = jwtUser.getAccountId();
-        if (filterDto.getSortDirection() == null) {
-            filterDto.setSortDirection("ASC");
-        }
-        String[] fieldsForSort = filterDto.getSortByFields() == null
-                ? new String[] {NAME}
-                : filterDto.getSortByFields().toArray(new String[0]);
-        var pageable = PageRequest
-                .of(page, size, Sort.by(Sort.Direction.fromString(filterDto.getSortDirection()),  fieldsForSort));
+        var pageable = createPageable(size, page, filterDto.getSortByFields(), filterDto.getSortDirection());
         var userSpecification = specFactory.makeSpecificationFromEntityFilterDto(User.class, filterDto, accountId);
         var foundUsers = userService.findAllByFilter(userSpecification, pageable);
         var returnedUsers = mapPage(foundUsers, UserDtoResponse.class, pageable);
