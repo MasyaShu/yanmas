@@ -21,7 +21,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class TicketTemplateFilterDto extends BaseFilterDto {
 
-    @ValidateFilter(min = 7)
+    @ValidateFilter()
     private StringFilter subject;
 
     @ValidateFilter()

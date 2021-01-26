@@ -390,69 +390,6 @@ class TicketTypeControllerV1Test {
         verify(service, times(0)).findAllByFilter(any(), any());
     }
 
-    /*@Test
-    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void getByFilter_shouldFindTwoGroup_whenUsersExistInDatabaseByPassedFilter() throws Exception {
-        Pageable pageable =
-                PageRequest.of(Integer.parseInt(BaseController.PAGE_DEFAULT_VALUE), Integer.parseInt(
-                        BaseController.SIZE_DEFAULT_VALUE),
-                        Sort.by("name").ascending());
-        Page<TicketType> ticketTypesPageExpected = new PageImpl<>(List.of(ticketType_1, ticketType_2), pageable, 2);
-        when(service.findAllByFilter(any(), any())).thenReturn(ticketTypesPageExpected);
-        MockHttpServletRequestBuilder request = get(HOST + PORT + API)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(ticketTypeFilterDto));
-        mockMvc.perform(request)
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].id").value(TICKET_TYPES_ID_1))
-                .andExpect(jsonPath("$.content[1].id").value(TICKET_TYPES_ID_2))
-                .andExpect(jsonPath("$.content[0].name").value(TICKET_TYPES_NAME_1))
-                .andExpect(jsonPath("$.content[1].name").value(TICKET_TYPES_NAME_2))
-                .andExpect(jsonPath("$.content", hasSize(2)));
-        verify(service, times(1)).findAllByFilter(any(), any());
-    }*/
-
-//    @Test
-//    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-//    void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
-//        ticketTypeFilterDto.setName(INVALID_NAME);
-//        ticketTypeFilterDto.setDeleted(INVALID_DELETED);
-//        ticketTypeFilterDto.setDirection(INVALID_DIRECTION);
-//        MockHttpServletRequestBuilder request = get(HOST + PORT + API)
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .content(objectMapper.writeValueAsString(ticketTypeFilterDto));
-//        mockMvc.perform(request)
-//                .andDo(print())
-//                .andExpect(status().isBadRequest())
-//                .andExpect(MockMvcResultMatchers
-//                        .jsonPath("$.errors.name[?(@.message =~ /%s.*/)]", CommonConstants.SIZE_MUST_BE_BETWEEN).exists())
-//                .andExpect(MockMvcResultMatchers
-//                        .jsonPath("$.errors.deleted[?(@.message == '%s')]", CommonConstants.MUST_BE_ANY_OF_ALL_TRUE_FALSE).exists())
-//                .andExpect(MockMvcResultMatchers
-//                        .jsonPath("$.errors.direction[?(@.message == '%s')]", CommonConstants.MUST_BE_ANY_OF_ASC_DESC).exists());
-//        verify(service, times(0)).findAllByFilter(any(), any());
-//    }
-
-
-    @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void physicalDelete_shouldThrowUnsupportedOperationException_untilMethodWouldBeImplemented() throws Exception {
-        mockMvc.perform(delete(HOST + PORT + API + TICKET_TYPES_ID_1))
-                .andDo(print())
-                .andExpect(status().isMethodNotAllowed());
-    }
-
-    @Test
-    @WithAnonymousUser
-    void physicalDelete_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
-        mockMvc.perform(delete(HOST + PORT + API + TICKET_TYPES_ID_1))
-                .andDo(print())
-                .andExpect(status().isForbidden());
-    }
-
     @Test
     @WithAnonymousUser
     void createCheckAccess_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {

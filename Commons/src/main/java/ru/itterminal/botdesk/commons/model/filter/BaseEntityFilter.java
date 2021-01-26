@@ -2,6 +2,7 @@ package ru.itterminal.botdesk.commons.model.filter;
 
 import static java.lang.String.format;
 import static ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.*;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.INVALID_TYPE_COMPARISON_FOR_VALUE_GIVEN;
 
 import java.util.List;
 import java.util.UUID;
@@ -35,7 +36,7 @@ public class BaseEntityFilter implements Filter {
                 return valueOf(value.toUpperCase());
             } catch (Exception exception) {
                 throw new IllegalArgumentException(
-                        format("Invalid value '%s' for value given!", value), exception);
+                        format(INVALID_TYPE_COMPARISON_FOR_VALUE_GIVEN, value), exception);
             }
         }
     }

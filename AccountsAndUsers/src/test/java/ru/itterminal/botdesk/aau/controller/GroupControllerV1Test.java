@@ -193,24 +193,24 @@ class GroupControllerV1Test {
                                 .jsonPath("$.errors.isInner[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
                                 .exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath("$.errors.name[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
-                                   .exists())
+                        .jsonPath("$.errors.name[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                        .exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath(
-                                           "$.errors.isDeprecated[?(@.message == '%s')]",
-                                           CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY
-                                   )
-                                   .exists())
+                        .jsonPath(
+                                "$.errors.isDeprecated[?(@.message == '%s')]",
+                                CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY
+                        )
+                        .exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath(
-                                           "$.errors.id[?(@.message == '%s')]",
-                                           CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY
-                                   ).exists())
+                        .jsonPath(
+                                "$.errors.id[?(@.message == '%s')]",
+                                CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY
+                        ).exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath(
-                                           "$.errors.version[?(@.message == '%s')]",
-                                           CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY
-                                   ).exists())
+                        .jsonPath(
+                                "$.errors.version[?(@.message == '%s')]",
+                                CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY
+                        ).exists())
                 .andExpect(
                         MockMvcResultMatchers
                                 .jsonPath(
@@ -324,22 +324,22 @@ class GroupControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath("$.errors.name[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
-                                   .exists())
+                        .jsonPath("$.errors.name[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                        .exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath(
-                                           "$.errors.isDeprecated[?(@.message == '%s')]",
-                                           CommonConstants.MUST_NOT_BE_NULL
-                                   ).exists())
+                        .jsonPath(
+                                "$.errors.isDeprecated[?(@.message == '%s')]",
+                                CommonConstants.MUST_NOT_BE_NULL
+                        ).exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath("$.errors.id[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
-                                   .exists())
+                        .jsonPath("$.errors.id[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                        .exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath("$.errors.version[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
-                                   .exists())
+                        .jsonPath("$.errors.version[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                        .exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath("$.errors.deleted[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
-                                   .exists());
+                        .jsonPath("$.errors.deleted[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                        .exists());
         verify(service, times(0)).create(any());
     }
 
@@ -451,7 +451,7 @@ class GroupControllerV1Test {
         Pageable pageable =
                 PageRequest.of(Integer.parseInt(BaseController.PAGE_DEFAULT_VALUE), Integer.parseInt(
                         BaseController.SIZE_DEFAULT_VALUE),
-                               Sort.by("name").ascending()
+                        Sort.by("name").ascending()
                 );
         Page<Group> groupPageExpected = new PageImpl<>(List.of(group_1, group_2), pageable, 2);
         when(service.findAllByFilter(any(), any())).thenReturn(groupPageExpected);
@@ -472,7 +472,7 @@ class GroupControllerV1Test {
         Pageable pageable =
                 PageRequest.of(Integer.parseInt(BaseController.PAGE_DEFAULT_VALUE), Integer.parseInt(
                         BaseController.SIZE_DEFAULT_VALUE),
-                               Sort.by("name").ascending()
+                        Sort.by("name").ascending()
                 );
         Page<Group> groupPageExpected = new PageImpl<>(List.of(group_1, group_2), pageable, 2);
         when(service.findAllByFilter(any(), any())).thenReturn(groupPageExpected);
@@ -515,106 +515,22 @@ class GroupControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath(
-                                           "$.errors.name[?(@.message =~ /%s.*/)]",
-                                           "Value must not be null or empty for comparison"
-                                   ).exists())
+                        .jsonPath(
+                                "$.errors.name[?(@.message =~ /%s.*/)]",
+                                "Value must not be null or empty for comparison"
+                        ).exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath(
-                                           "$.errors.deleted[?(@.message == '%s')]",
-                                           CommonConstants.VALUE_MUST_NOT_BE_NULL
-                                   ).exists())
+                        .jsonPath(
+                                "$.errors.deleted[?(@.message == '%s')]",
+                                CommonConstants.VALUE_MUST_NOT_BE_NULL
+                        ).exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath(
-                                           "$.errors.sortDirection[?(@.message == '%s')]",
-                                           CommonConstants.MUST_BE_ANY_OF_ASC_DESC
-                                   ).exists());
+                        .jsonPath(
+                                "$.errors.sortDirection[?(@.message == '%s')]",
+                                CommonConstants.MUST_BE_ANY_OF_ASC_DESC
+                        ).exists());
         verify(service, times(0)).findAllByFilter(any(), any());
     }
-
-    //    @Test
-    //    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    //    void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidSizeAndPagePassed()
-    //            throws Exception {
-    //        MockHttpServletRequestBuilder request = get(HOST + PORT + API + "?page=-1&size=0")
-    //                .contentType(MediaType.APPLICATION_JSON)
-    //                .accept(MediaType.APPLICATION_JSON)
-    //                .content(objectMapper.writeValueAsString(groupFilterDto));
-    //        mockMvc.perform(request)
-    //                .andDo(print())
-    //                .andExpect(status().isBadRequest())
-    //                .andExpect(jsonPath("$.title").value(CommonConstants.REQUEST_NOT_READABLE));
-    //        verify(service, times(0)).findAllByFilter(any(), any());
-    //    }
-
-    //    @Test
-    //    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    //    void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenFilterIsEmpty() throws Exception {
-    //        groupFilterDto.setName("");
-    //        groupFilterDto.setDeleted("");
-    //        groupFilterDto.setDirection("");
-    //        MockHttpServletRequestBuilder request = get(HOST + PORT + API)
-    //                .contentType(MediaType.APPLICATION_JSON)
-    //                .accept(MediaType.APPLICATION_JSON)
-    //                .content(objectMapper.writeValueAsString(groupFilterDto));
-    //        mockMvc.perform(request)
-    //                .andDo(print())
-    //                .andExpect(status().isBadRequest())
-    //                .andExpect(MockMvcResultMatchers
-    //                        .jsonPath("$.errors.name[?(@.message =~ /%s.*/)]", CommonConstants.SIZE_MUST_BE_BETWEEN).exists())
-    //                .andExpect(MockMvcResultMatchers
-    //                        .jsonPath("$.errors.deleted[?(@.message == '%s')]", CommonConstants.MUST_BE_ANY_OF_ALL_TRUE_FALSE).exists())
-    //                .andExpect(MockMvcResultMatchers
-    //                        .jsonPath("$.errors.direction[?(@.message == '%s')]", CommonConstants.MUST_BE_ANY_OF_ASC_DESC).exists());
-    //        verify(service, times(0)).findAllByFilter(any(), any());
-    //    }
-
-    //    @Test
-    //    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    //    void getByFilter_shouldFindTwoGroups_whenFilterIsNew() throws Exception {
-    //        GroupFilterDto groupFilterDto = new GroupFilterDto();
-    //        Pageable pageable =
-    //                PageRequest.of(Integer.parseInt(BaseController.PAGE_DEFAULT_VALUE), Integer.parseInt(
-    //                        BaseController.SIZE_DEFAULT_VALUE),
-    //                        Sort.by("name").ascending());
-    //        Page<Group> groupPageExpected = new PageImpl<>(List.of(group_1, group_2), pageable, 2);
-    //        when(service.findAllByFilter(any(), any())).thenReturn(groupPageExpected);
-    //        MockHttpServletRequestBuilder request = get(HOST + PORT + API)
-    //                .contentType(MediaType.APPLICATION_JSON)
-    //                .accept(MediaType.APPLICATION_JSON)
-    //                .content(objectMapper.writeValueAsString(groupFilterDto));
-    //        mockMvc.perform(request)
-    //                .andDo(print())
-    //                .andExpect(status().isOk())
-    //                .andExpect(jsonPath("$.content[0].id").value(GROUP_1_ID))
-    //                .andExpect(jsonPath("$.content[1].id").value(GROUP_2_ID))
-    //                .andExpect(jsonPath("$.content", hasSize(2)));
-    //        verify(service, times(1)).findAllByFilter(any(), any());
-    //    }
-
-    //    @Test
-    //    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    //    void getByFilter_shouldFindTwoGroups_whenDefaultFieldsInFilterIsNull() throws Exception {
-    //        groupFilterDto.setDeleted(null);
-    //        groupFilterDto.setDirection(null);
-    //        Pageable pageable =
-    //                PageRequest.of(Integer.parseInt(BaseController.PAGE_DEFAULT_VALUE), Integer.parseInt(
-    //                        BaseController.SIZE_DEFAULT_VALUE),
-    //                        Sort.by("firstName").ascending());
-    //        Page<Group> groupPageExpected = new PageImpl<>(List.of(group_1, group_2), pageable, 2);
-    //        when(service.findAllByFilter(any(), any())).thenReturn(groupPageExpected);
-    //        MockHttpServletRequestBuilder request = get(HOST + PORT + API)
-    //                .contentType(MediaType.APPLICATION_JSON)
-    //                .accept(MediaType.APPLICATION_JSON)
-    //                .content(objectMapper.writeValueAsString(groupFilterDto));
-    //        mockMvc.perform(request)
-    //                .andDo(print())
-    //                .andExpect(status().isOk())
-    //                .andExpect(jsonPath("$.content[0].id").value(GROUP_1_ID))
-    //                .andExpect(jsonPath("$.content[1].id").value(GROUP_2_ID))
-    //                .andExpect(jsonPath("$.content", hasSize(2)));
-    //        verify(service, times(1)).findAllByFilter(any(), any());
-    //    }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
