@@ -88,7 +88,6 @@ public class TicketTypeControllerV1 extends BaseController {
         return ResponseEntity.ok(message);
     }
 
-    @SuppressWarnings("DuplicatedCode")
     @GetMapping()
     public ResponseEntity<Page<TicketTypeDto>> getByFilter(
             Principal user,
