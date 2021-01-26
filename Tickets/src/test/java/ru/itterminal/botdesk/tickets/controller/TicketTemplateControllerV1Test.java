@@ -1,24 +1,6 @@
 package ru.itterminal.botdesk.tickets.controller;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.itterminal.botdesk.commons.model.validator.zoneid.ValidateZoneId.ZONE_ID_NOT_VALID;
-import static ru.itterminal.botdesk.commons.util.CommonConstants.INVALID_TYPE_COMPARISON_FOR_VALUE_GIVEN;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,10 +23,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
@@ -62,6 +40,20 @@ import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateDtoResponse;
 import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateFilterDto;
 import ru.itterminal.botdesk.tickets.model.test.TicketTemplateTestHelper;
 import ru.itterminal.botdesk.tickets.service.impl.TicketTemplateServiceImpl;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.itterminal.botdesk.commons.model.validator.zoneid.ValidateZoneId.ZONE_ID_NOT_VALID;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.INVALID_TYPE_COMPARISON_FOR_VALUE_GIVEN;
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -98,15 +90,8 @@ class TicketTemplateControllerV1Test {
 
     private final TicketTemplateTestHelper ticketTemplateTestHelper = new TicketTemplateTestHelper();
 
-    private StringFilter stringFilter;
-    private BaseEntityFilter baseEntityFilter;
-    private NumberFilter numberFilter;
-    private BooleanFilter booleanFilter;
     private TicketTemplateFilterDto ticketTypeFilterDto;
     private List<String> sortFieldsList;
-    private String permittedFieldsForSort = "deleted, displayName, subject, " +
-            "description, dateStart, dateEnd, isOnlyOneTicketInWork, " +
-            "isActive, zoneId, dateNextRun";
 
 
     private MockMvc mockMvc;
@@ -121,20 +106,20 @@ class TicketTemplateControllerV1Test {
 
     @BeforeEach
     void setUp() {
-        stringFilter = StringFilter.builder()
+        StringFilter stringFilter = StringFilter.builder()
                 .typeComparison(TEXT_CONTAINS)
                 .value(STRING)
                 .build();
-        baseEntityFilter = BaseEntityFilter.builder()
+        BaseEntityFilter baseEntityFilter = BaseEntityFilter.builder()
                 .typeComparison(EXIST_IN)
                 .listOfIdEntities(List.of(UUID.fromString(RANDOM_UUID)))
                 .build();
-        numberFilter = NumberFilter.builder()
+        NumberFilter numberFilter = NumberFilter.builder()
                 .typeComparison(IS_BETWEEN_EXCLUSION)
                 .valueOne(Long.MIN_VALUE)
                 .valueTwo(Long.MAX_VALUE)
                 .build();
-        booleanFilter = BooleanFilter.builder()
+        BooleanFilter booleanFilter = BooleanFilter.builder()
                 .value(true)
                 .build();
         ticketTypeFilterDto = TicketTemplateFilterDto.builder()
@@ -144,6 +129,9 @@ class TicketTemplateControllerV1Test {
                 .ticketType(baseEntityFilter)
                 .sortByFields(sortFieldsList)
                 .build();
+        String permittedFieldsForSort = "deleted, displayName, subject, " +
+                "description, dateStart, dateEnd, isOnlyOneTicketInWork, " +
+                "isActive, zoneId, dateNextRun";
         sortFieldsList = Arrays.asList(permittedFieldsForSort.toLowerCase().split(", "));
     }
 
