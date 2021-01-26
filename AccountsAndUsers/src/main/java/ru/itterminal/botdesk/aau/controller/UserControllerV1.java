@@ -1,8 +1,10 @@
 package ru.itterminal.botdesk.aau.controller;
 
 import static java.lang.String.format;
+import static ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.UUID;
 
 import javax.validation.Valid;
@@ -37,6 +39,7 @@ import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.RoleServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
+import ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter;
 import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
@@ -140,10 +143,16 @@ public class UserControllerV1 extends BaseController {
             @Valid @RequestBody UserFilterDto filterDto,
             @RequestParam(defaultValue = PAGE_DEFAULT_VALUE) @PositiveOrZero int page,
             @RequestParam(defaultValue = SIZE_DEFAULT_VALUE) @Positive int size) {
-
         log.debug(FIND_INIT_MESSAGE, ENTITY_NAME, page, size, filterDto);
         var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
         var accountId = jwtUser.getAccountId();
+        if (!jwtUser.isInnerGroup()) {
+            var groupFilter = BaseEntityFilter.builder()
+                    .typeComparison(EXIST_IN.toString())
+                    .listOfIdEntities(List.of(jwtUser.getGroupId()))
+                    .build();
+            filterDto.setGroup(groupFilter);
+        }
         var pageable = createPageable(size, page, filterDto.getSortByFields(), filterDto.getSortDirection());
         var userSpecification = specFactory.makeSpecificationFromEntityFilterDto(User.class, filterDto, accountId);
         var foundUsers = userService.findAllByFilter(userSpecification, pageable);

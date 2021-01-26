@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -842,22 +841,6 @@ class UserControllerV1Test {
                     .andExpect(jsonPath("$.title").value(CommonConstants.REQUEST_NOT_READABLE));
             verify(service, times(0)).findAllByFilter(any(), any());
         }
-
-    @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void physicalDelete_shouldThrowUnsupportedOperationException_untilMethodWouldBeImplemented() throws Exception {
-        mockMvc.perform(delete(HOST + PORT + API + USER_1_ID))
-                .andDo(print())
-                .andExpect(status().isMethodNotAllowed());
-    }
-
-    @Test
-    @WithAnonymousUser
-    void physicalDelete_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
-        mockMvc.perform(delete(HOST + PORT + API + USER_1_ID))
-                .andDo(print())
-                .andExpect(status().isForbidden());
-    }
 
     @Test
     @WithAnonymousUser

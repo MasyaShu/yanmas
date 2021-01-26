@@ -4,12 +4,14 @@ import static java.lang.String.format;
 
 import java.security.Principal;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -117,6 +119,13 @@ public class GroupControllerV1 extends BaseController {
         var accountId = jwtUser.getAccountId();
         var groupSpecification = specFactory.makeSpecificationFromEntityFilterDto(Group.class, filterDto, accountId);
         foundGroups = service.findAllByFilter(groupSpecification, pageable);
+        if (!jwtUser.isInnerGroup()) {
+            var trimFoundGroups =  foundGroups.stream()
+                    .filter(group -> group.getId().equals(jwtUser.getGroupId()))
+                    .collect(Collectors.toList());
+            foundGroups = new PageImpl<>(trimFoundGroups, pageable, trimFoundGroups.size());
+
+        }
         returnedGroups = mapPage(foundGroups, GroupDto.class, pageable);
         log.debug(FIND_FINISH_MESSAGE, ENTITY_NAME, foundGroups.getTotalElements());
         return new ResponseEntity<>(returnedGroups, HttpStatus.OK);
@@ -127,7 +136,11 @@ public class GroupControllerV1 extends BaseController {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
         Group foundGroup;
-        foundGroup = service.findByIdAndAccountId(id, jwtUser.getAccountId());
+        if (jwtUser.isInnerGroup() || jwtUser.getGroupId().equals(id)) {
+            foundGroup = service.findByIdAndAccountId(id, jwtUser.getAccountId());
+        } else {
+            throw new AccessDeniedException("access is denied for searching by passed groupId");
+        }
         GroupDto returnedGroup = modelMapper.map(foundGroup, GroupDto.class);
         log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundGroup);
         return new ResponseEntity<>(returnedGroup, HttpStatus.OK);
