@@ -1,6 +1,5 @@
 package ru.itterminal.botdesk.tickets.controller;
 
-import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -13,7 +12,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -25,11 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithUserDetails;
@@ -47,7 +40,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
-import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
 import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.botdesk.commons.util.CommonConstants;
@@ -55,7 +47,6 @@ import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 import ru.itterminal.botdesk.tickets.model.TicketSetting;
 import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoRequest;
 import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoResponse;
-import ru.itterminal.botdesk.tickets.model.dto.TicketSettingFilterDto;
 import ru.itterminal.botdesk.tickets.model.test.TicketSettingTestHelper;
 import ru.itterminal.botdesk.tickets.service.impl.TicketSettingServiceImpl;
 import ru.itterminal.botdesk.tickets.service.impl.TicketStatusServiceImpl;
@@ -68,10 +59,10 @@ import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
 @ActiveProfiles("Test")
 class TicketSettingControllerV1Test {
 
-    public static final String DISPLAY_NAME = "displayName";
     @MockBean
     private UserServiceImpl userService;
 
+    @SuppressWarnings("unused")
     @MockBean
     private SpecificationsFactory specFactory;
 
@@ -356,56 +347,6 @@ class TicketSettingControllerV1Test {
         verify(ticketStatusService, times(0)).findByIdAndAccountId(any(), any());
         verify(ticketSettingService, times(0)).update(any());
     }
-
-    @Test
-    @WithAnonymousUser
-    void getByFilter_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
-        MockHttpServletRequestBuilder request = get(HOST + PORT + API)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new TicketSettingFilterDto()));
-        mockMvc.perform(request)
-                .andDo(print())
-                .andExpect(status().isForbidden());
-        verify(ticketSettingService, times(0)).findAllByFilter(any(), any());
-    }
-
-   /* @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void getByFilter_shouldFindAll_whenFilterIsNew() throws Exception {
-        Pageable pageable =
-                PageRequest.of(Integer.parseInt(BaseController.PAGE_DEFAULT_VALUE), Integer.parseInt(
-                        BaseController.SIZE_DEFAULT_VALUE),
-                               Sort.by(DISPLAY_NAME).ascending()
-                );
-        Page<TicketSetting> ticketSettingPageExpected = new PageImpl<>(List.of(ticketSetting), pageable, 1);
-        when(ticketSettingService.findAllByFilter(any(), any())).thenReturn(ticketSettingPageExpected);
-        MockHttpServletRequestBuilder request = get(HOST + PORT + API)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new TicketSettingFilterDto()));
-        mockMvc.perform(request)
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].id").value(ticketSetting.getId().toString()))
-                .andExpect(jsonPath("$.content", hasSize(1)));
-        verify(ticketSettingService, times(1)).findAllByFilter(any(), any());
-    }*/
-
-   /* @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidSizeAndPagePassed()
-            throws Exception {
-        MockHttpServletRequestBuilder request = get(HOST + PORT + API + "?page=-1&size=0")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new TicketSettingFilterDto()));
-        mockMvc.perform(request)
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.title").value(CommonConstants.REQUEST_NOT_READABLE));
-        verify(ticketSettingService, times(0)).findAllByFilter(any(), any());
-    }*/
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")

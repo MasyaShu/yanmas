@@ -11,9 +11,6 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
@@ -52,7 +49,7 @@ import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
 @RestController("TicketSettingControllerV1")
 @Validated
 @RequestMapping("api/v1/ticket-setting")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class TicketSettingControllerV1 extends BaseController {
 
     private final AccountServiceImpl accountService;
@@ -182,19 +179,13 @@ public class TicketSettingControllerV1 extends BaseController {
             @RequestParam(defaultValue = PAGE_DEFAULT_VALUE) @PositiveOrZero int page,
             @RequestParam(defaultValue = SIZE_DEFAULT_VALUE) @Positive int size) {
         log.debug(FIND_INIT_MESSAGE, ENTITY_NAME, page, size, filterDto);
-        if (filterDto.getSortDirection() == null) {
-            filterDto.setSortDirection("ASC");
-        }
-        Pageable pageable =
-                PageRequest.of(page, size, Sort.by(
-                        Sort.Direction.fromString(filterDto.getSortDirection()),
-                        "displayName"
-                ));
+        var pageable = createPageable(size, page, filterDto.getSortByFields(), filterDto.getSortDirection());
         Page<TicketSetting> foundTicketSetting;
         Page<TicketSettingDtoResponse> returnedTicketSetting;
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
         var accountId = jwtUser.getAccountId();
-        var ticketSettingSpecification = specFactory.makeSpecificationFromEntityFilterDto(TicketSetting.class, filterDto, accountId);
+        var ticketSettingSpecification =
+                specFactory.makeSpecificationFromEntityFilterDto(TicketSetting.class, filterDto, accountId);
         foundTicketSetting = ticketSettingService.findAllByFilter(ticketSettingSpecification, pageable);
         returnedTicketSetting = mapPage(foundTicketSetting, TicketSettingDtoResponse.class, pageable);
         log.debug(FIND_FINISH_MESSAGE, ENTITY_NAME, foundTicketSetting.getTotalElements());
@@ -202,7 +193,8 @@ public class TicketSettingControllerV1 extends BaseController {
     }
 
     @GetMapping("/{authorId}")
-    public ResponseEntity<TicketSettingDtoResponse> getByAuthorId(Principal user, @PathVariable UUID authorId) {
+    public ResponseEntity<TicketSettingDtoResponse> getSettingOrPredefinedValuesForTicket
+            (Principal user, @PathVariable UUID authorId) {
         log.debug(FIND_BY_AUTHOR_ID_INIT_MESSAGE, ENTITY_NAME, authorId);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
         User foundUser = userService.findByIdAndAccountId(authorId, jwtUser.getAccountId());
