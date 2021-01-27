@@ -21,7 +21,7 @@ public class RoleTestHelper extends EntityTestHelperImpl<Role, RoleDto,RoleDto> 
             UUID.fromString("933f20bf-9262-47bb-83d2-0ca55bbbd3fd"),
             UUID.fromString("586e087f-f5a0-4db8-af57-edead19db706")};
 
-    private final int[] rolesWeight = new int[] {3, 2, 1, 0, 0};
+    private final int[] rolesWeight = new int[] {50, 40, 30, 20, 10};
 
     @Override
     public Role getRandomValidEntity() {

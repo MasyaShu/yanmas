@@ -1,22 +1,18 @@
 package ru.itterminal.botdesk.tickets.service.impl;
 
-import java.util.List;
-import java.util.UUID;
-
-import javax.validation.constraints.NotNull;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.botdesk.tickets.model.TicketSetting;
-import ru.itterminal.botdesk.tickets.model.TicketStatus;
-import ru.itterminal.botdesk.tickets.model.TicketType;
 import ru.itterminal.botdesk.tickets.model.projection.TicketSettingUniqueFields;
 import ru.itterminal.botdesk.tickets.repository.TicketSettingRepository;
 import ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator;
+
+import javax.validation.constraints.NotNull;
+import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -56,31 +52,32 @@ public class TicketSettingServiceImpl extends CrudServiceWithAccountImpl<TicketS
                 ticketSettingProjection.isEmpty() ? new TicketSetting() : repository.findById(ticketSettingProjection.get(0).getId()).get();
         if (valuesForTicket.getTicketTypeForNew() == null) {
             var predefinedTicketTypeForNew =
-                    ticketTypeService.findByIdAndAccountId(TicketType.PREDEFINED_TICKET_TYPE_FOR_NEW_ID, accountId);
+                    ticketTypeService
+                            .findStartedPredefinedTicketTypeForNewTicket(accountId);
             valuesForTicket.setTicketTypeForNew(predefinedTicketTypeForNew);
         }
         if (valuesForTicket.getTicketStatusForNew() == null) {
             var predefinedTicketStatusForNew =
                     ticketStatusService
-                            .findByIdAndAccountId(TicketStatus.PREDEFINED_TICKET_STATUS_FOR_NEW_ID, accountId);
+                            .findStartedPredefinedStatus(accountId);
             valuesForTicket.setTicketStatusForNew(predefinedTicketStatusForNew);
         }
         if (valuesForTicket.getTicketStatusForReopen() == null) {
             var predefinedTicketStatusForReopen =
-                    ticketStatusService.findByIdAndAccountId(
-                            TicketStatus.PREDEFINED_TICKET_STATUS_FOR_REOPEN_ID, accountId);
+                    ticketStatusService
+                            .findReopenedPredefinedStatus(accountId);
             valuesForTicket.setTicketStatusForReopen(predefinedTicketStatusForReopen);
         }
         if (valuesForTicket.getTicketStatusForClose() == null) {
             var predefinedTicketStatusForClose =
-                    ticketStatusService.findByIdAndAccountId(
-                            TicketStatus.PREDEFINED_TICKET_STATUS_FOR_CLOSE_ID, accountId);
+                    ticketStatusService
+                            .findFinishedPredefinedStatus(accountId);
             valuesForTicket.setTicketStatusForClose(predefinedTicketStatusForClose);
         }
         if (valuesForTicket.getTicketStatusForCancel() == null) {
             var predefinedTicketStatusForCancel =
-                    ticketStatusService.findByIdAndAccountId(
-                            TicketStatus.PREDEFINED_TICKET_STATUS_FOR_CANCEL_ID, accountId);
+                    ticketStatusService
+                            .findCanceledPredefinedStatus(accountId);
             valuesForTicket.setTicketStatusForCancel(predefinedTicketStatusForCancel);
         }
         return valuesForTicket;

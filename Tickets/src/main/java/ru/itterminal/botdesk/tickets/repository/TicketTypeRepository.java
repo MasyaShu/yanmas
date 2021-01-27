@@ -19,4 +19,6 @@ public interface TicketTypeRepository extends EntityRepositoryWithAccount<Ticket
 
     Optional<TicketType> getByIdAndAccount_Id(UUID id, UUID accountId);
 
+    Optional<TicketType> getByIsPredefinedForNewTicketTrueAndAccount_Id(UUID accountId);
+
 }

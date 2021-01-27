@@ -18,6 +18,7 @@ import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chec
 @RequiredArgsConstructor
 public class TicketStatusOperationValidator extends BasicOperationValidatorImpl<TicketStatus> {
 
+    private static final String NAME = "name";
     private final TicketStatusServiceImpl service;
 
     @Override
@@ -25,7 +26,7 @@ public class TicketStatusOperationValidator extends BasicOperationValidatorImpl<
         log.trace(CHECK_UNIQUENESS, entity);
         List<TicketStatusUniqueFields> foundTicketStatus = service.findByUniqueFields(entity);
         if (!foundTicketStatus.isEmpty()) {
-            String validatedField = "name";
+            String validatedField = NAME;
             checkStringForEquals(entity.getName(), foundTicketStatus.get(0).getName(),
                     validatedField, format(NOT_UNIQUE_MESSAGE, validatedField));
         }

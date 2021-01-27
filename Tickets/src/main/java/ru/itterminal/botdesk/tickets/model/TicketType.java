@@ -1,18 +1,11 @@
 package ru.itterminal.botdesk.tickets.model;
 
-import java.util.UUID;
-
-import javax.persistence.*;
-
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
+
+import javax.persistence.*;
 
 @Entity
 @Table(name = "ticket_types")
@@ -24,9 +17,6 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class TicketType extends BaseEntity {
-
-    public static final UUID PREDEFINED_TICKET_TYPE_FOR_NEW_ID =
-            UUID.fromString("92cbb319-0d99-4ec2-9d1c-2c4fc3005468");
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", nullable = false)

@@ -94,8 +94,11 @@ class TicketSettingServiceImplTest {
         var expectedTicketTypeForNew = ticketTypeHelper.getRandomValidEntity();
         var expectedTicketStatus = ticketStatusHelper.getRandomValidEntity();
 
-        when(ticketTypeService.findByIdAndAccountId(any(), any())).thenReturn(expectedTicketTypeForNew);
-        when(ticketStatusService.findByIdAndAccountId(any(), any())).thenReturn(expectedTicketStatus);
+        when(ticketTypeService.findStartedPredefinedTicketTypeForNewTicket(any())).thenReturn(expectedTicketTypeForNew);
+        when(ticketStatusService.findStartedPredefinedStatus(any())).thenReturn(expectedTicketStatus);
+        when(ticketStatusService.findReopenedPredefinedStatus(any())).thenReturn(expectedTicketStatus);
+        when(ticketStatusService.findFinishedPredefinedStatus(any())).thenReturn(expectedTicketStatus);
+        when(ticketStatusService.findCanceledPredefinedStatus(any())).thenReturn(expectedTicketStatus);
 
         var someId = UUID.randomUUID();
         var actualTicketSetting = service.getSettingOrPredefinedValuesForTicket(someId, someId, someId);
@@ -109,8 +112,11 @@ class TicketSettingServiceImplTest {
         verify(ticketSettingUniqueFields, times(0)).getId();
         verify(repository, times(3)).findByUniqueFieldsWithoutDeleted(any(), any(), any(), any());
         verify(repository, times(0)).findById(any());
-        verify(ticketTypeService, times(1)).findByIdAndAccountId(any(), any());
-        verify(ticketStatusService, times(4)).findByIdAndAccountId(any(), any());
+        verify(ticketTypeService, times(1)).findStartedPredefinedTicketTypeForNewTicket(any());
+        verify(ticketStatusService, times(1)).findStartedPredefinedStatus(any());
+        verify(ticketStatusService, times(1)).findReopenedPredefinedStatus(any());
+        verify(ticketStatusService, times(1)).findFinishedPredefinedStatus(any());
+        verify(ticketStatusService, times(1)).findCanceledPredefinedStatus(any());
     }
 
 }
