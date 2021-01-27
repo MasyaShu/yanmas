@@ -47,9 +47,9 @@ class TicketOperationValidatorTest {
     @Autowired
     private final TicketOperationValidator validator = new TicketOperationValidator(groupService);
 
-    private TicketTestHelper ticketTestHelper = new TicketTestHelper();
-    private GroupTestHelper groupTestHelper = new GroupTestHelper();
-    private AccountTestHelper accountTestHelper = new AccountTestHelper();
+    private final TicketTestHelper ticketTestHelper = new TicketTestHelper();
+    private final GroupTestHelper groupTestHelper = new GroupTestHelper();
+    private final AccountTestHelper accountTestHelper = new AccountTestHelper();
 
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")

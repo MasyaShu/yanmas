@@ -85,27 +85,27 @@ VALUES ('9c8183ba-5d13-442f-a741-5b3134a3c140', '0223e51a-4bb2-44ee-bc8e-1f047a2
        ('9c8183ba-5d13-442f-a741-5b3134a3c140', 'e14d9ffd-0071-4c0e-99ed-932f007963f0');
 
 INSERT INTO tickets(id, out_id, deleted, version, account_id, author_id, number, created_at, subject, description,
-                    deadline, is_finished, ticket_type_id, ticket_status_id, ticket_template_id, ticket_inheritor_id)
+                    deadline, is_finished, ticket_type_id, ticket_status_id, ticket_template_id, group_id)
 VALUES ('b927e5af-0db3-4f55-8da0-a31d0f6421d0', null, false, '0', 'cdfa6483-0769-4628-ba32-efd338a716de',
         'cdfa6483-0769-4628-ba32-efd338a716de', 100, 1639144829000, 'subject ticket number 100',
         'description ticket number 100', null, false, '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9',
-        '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9', null, null),
+        '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9', null, '0223e51a-4bb2-44ee-bc8e-1f047a2145e7'),
        ('7e1daf3c-d5f5-49a7-86e7-0f295c84941d', null, false, '0', 'cdfa6483-0769-4628-ba32-efd338a716de',
         'cdfa6483-0769-4628-ba32-efd338a716de', 101, 1639144829001, 'subject ticket number 101',
         'description ticket number 101', null, false, '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9',
-        '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9', null, null),
+        '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9', null, '0223e51a-4bb2-44ee-bc8e-1f047a2145e7'),
        ('e39a9ecb-ff7c-4c7f-94e2-4b121faffe28', null, false, '0', 'cdfa6483-0769-4628-ba32-efd338a716de',
         'cdfa6483-0769-4628-ba32-efd338a716de', 102, 1639144829002, 'subject ticket number 102',
         'description ticket number 102', null, false, '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9',
-        '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9', null, null),
+        '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9', null, '0223e51a-4bb2-44ee-bc8e-1f047a2145e7'),
        ('a2782c2c-5054-4c12-815e-c26b3c5275ee', null, false, '0', 'cdfa6483-0769-4628-ba32-efd338a716de',
         'cdfa6483-0769-4628-ba32-efd338a716de', 103, 1639144829003, null,
         'description ticket number 103', null, false, '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9',
-        '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9', null, null),
+        '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9', null, '0223e51a-4bb2-44ee-bc8e-1f047a2145e7'),
        ('4baeea68-ad24-43f9-b983-7541db1d3158', null, false, '0', 'cdfa6483-0769-4628-ba32-efd338a716de',
         'cdfa6483-0769-4628-ba32-efd338a716de', 104, 1639144829004, '',
         'description ticket number 104', null, true, '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9',
-        '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9', null, null);
+        '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9', null, '0223e51a-4bb2-44ee-bc8e-1f047a2145e7');
 
 
 INSERT INTO ticket_templates(out_id, deleted, version, id, subject, display_name, description, date_next_run,
