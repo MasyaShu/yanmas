@@ -1,22 +1,8 @@
 package ru.itterminal.botdesk.tickets.controller;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.itterminal.botdesk.commons.model.validator.zoneid.ValidateZoneId.ZONE_ID_NOT_VALID;
-
-import java.util.List;
-import java.util.UUID;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.modelmapper.ModelMapper;
@@ -25,7 +11,7 @@ import org.springframework.boot.autoconfigure.web.servlet.HttpEncodingAutoConfig
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithUserDetails;
@@ -37,12 +23,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
+import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
+import ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter;
+import ru.itterminal.botdesk.commons.model.filter.BooleanFilter;
 import ru.itterminal.botdesk.commons.model.filter.NumberFilter;
 import ru.itterminal.botdesk.commons.model.filter.StringFilter;
 import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
@@ -54,6 +40,20 @@ import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateDtoResponse;
 import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateFilterDto;
 import ru.itterminal.botdesk.tickets.model.test.TicketTemplateTestHelper;
 import ru.itterminal.botdesk.tickets.service.impl.TicketTemplateServiceImpl;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.itterminal.botdesk.commons.model.validator.zoneid.ValidateZoneId.ZONE_ID_NOT_VALID;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.INVALID_TYPE_COMPARISON_FOR_VALUE_GIVEN;
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -67,13 +67,18 @@ class TicketTemplateControllerV1Test {
     private static final String SCHEDULER = "ValidateScheduler";
     private static final String ZONE_ID = "ValidateZoneId";
     public static final String EXPRESSION_MUST_CONSIST = "Cron expression must consist";
+    private static final String TEXT_CONTAINS = "text_contains";
+    private static final String STRING = "19 character string";
+    private static final String EXIST_IN = "exist_in";
+    private static final String RANDOM_UUID = "f38b1ec1-d0f1-4e00-b594-647134fdc807";
+    private static final String IS_BETWEEN_EXCLUSION = "is_between_exclusion";
+    private static final String NONAME = "noname";
     @MockBean
     private AccountServiceImpl accountService;
 
     @MockBean
     TicketTemplateServiceImpl templateService;
 
-    @SuppressWarnings("unused")
     @MockBean
     private SpecificationsFactory specFactory;
 
@@ -85,6 +90,9 @@ class TicketTemplateControllerV1Test {
 
     private final TicketTemplateTestHelper ticketTemplateTestHelper = new TicketTemplateTestHelper();
 
+    private TicketTemplateFilterDto ticketTypeFilterDto;
+    private List<String> sortFieldsList;
+
 
     private MockMvc mockMvc;
 
@@ -94,6 +102,37 @@ class TicketTemplateControllerV1Test {
                 .setControllerAdvice(new RestExceptionHandler())
                 .apply(SecurityMockMvcConfigurers.springSecurity(springSecurityFilterChain))
                 .build();
+    }
+
+    @BeforeEach
+    void setUp() {
+        StringFilter stringFilter = StringFilter.builder()
+                .typeComparison(TEXT_CONTAINS)
+                .value(STRING)
+                .build();
+        BaseEntityFilter baseEntityFilter = BaseEntityFilter.builder()
+                .typeComparison(EXIST_IN)
+                .listOfIdEntities(List.of(UUID.fromString(RANDOM_UUID)))
+                .build();
+        NumberFilter numberFilter = NumberFilter.builder()
+                .typeComparison(IS_BETWEEN_EXCLUSION)
+                .valueOne(Long.MIN_VALUE)
+                .valueTwo(Long.MAX_VALUE)
+                .build();
+        BooleanFilter booleanFilter = BooleanFilter.builder()
+                .value(true)
+                .build();
+        ticketTypeFilterDto = TicketTemplateFilterDto.builder()
+                .dateEnd(numberFilter)
+                .subject(stringFilter)
+                .isOnlyOneTicketInWork(booleanFilter)
+                .ticketType(baseEntityFilter)
+                .sortByFields(sortFieldsList)
+                .build();
+        String permittedFieldsForSort = "deleted, displayName, subject, " +
+                "description, dateStart, dateEnd, isOnlyOneTicketInWork, " +
+                "isActive, zoneId, dateNextRun";
+        sortFieldsList = Arrays.asList(permittedFieldsForSort.toLowerCase().split(", "));
     }
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -385,55 +424,105 @@ class TicketTemplateControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void getByFilter_shouldGetStatusBadRequest_whenIdIsInvalid() throws Exception {
-        var dateFilter = NumberFilter.builder()
-                .typeComparison("isbetween_exclusion")
-                .valueOne(1.9)
-                .valueTwo(1L)
-                .build();
-        var subF = StringFilter.builder()
-                .typeComparison("t")
-                .value("dd")
-                .build();
-        var ticketTypeFilterDto = TicketTemplateFilterDto.builder()
-                .dateEnd(dateFilter)
-                .subject(subF)
-                .sortByFields(List.of("S", "dateStart"))
-                .build();
-        when(templateService.findAllByFilter(any(), any())).thenReturn(new PageImpl<>(List.of(new TicketTemplate(), new TicketTemplate())));
+    void getByFilter_shouldGetStatusIsOk_whenValidDataFilter() throws Exception {
+        var ticketTemplate = ticketTemplateTestHelper.setPredefinedValidEntityList();
+        String[] arrayOfFieldsForSort = sortFieldsList.toArray(new String[0]);
+        Pageable pageable =
+                PageRequest.of(Integer.parseInt(BaseController.PAGE_DEFAULT_VALUE), Integer.parseInt(
+                        BaseController.SIZE_DEFAULT_VALUE),
+                        Sort.by(Sort.Direction.fromString("ASC"),
+                                arrayOfFieldsForSort));
+        Page<TicketTemplate> expectedPageOfTicketTemplate = new PageImpl<>(List.of(ticketTemplate.get(0), ticketTemplate.get(1)), pageable, 2);
+        when(templateService.findAllByFilter(any(), any())).thenReturn(expectedPageOfTicketTemplate);
+        when(specFactory.makeSpecificationFromEntityFilterDto(any(), any(), any())).thenReturn(null);
         MockHttpServletRequestBuilder request = get(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(ticketTypeFilterDto));
         mockMvc.perform(request)
-                .andExpect(status().isBadRequest())
-                .andDo(print());
-        verify(templateService, times(0)).findAllByFilter(any(), any());
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value(ticketTemplate.get(0).getId().toString()))
+                .andExpect(jsonPath("$.content[1].id").value(ticketTemplate.get(1).getId().toString()))
+                .andExpect(jsonPath("$.content", hasSize(2)));
+        verify(templateService, times(1)).findAllByFilter(any(), any());
+        verify(specFactory, times(1)).makeSpecificationFromEntityFilterDto(any(), any(), any());
     }
-//
-//    @Test
-//    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-//    void getByFilter_shouldGetStatusBadRequest_whenIdIsInvalid1() throws Exception {
-//        ArrayList<UUID> listTT = new ArrayList<>();
-//        listTT.add(UUID.randomUUID());
-//        //listTT.add(null);
-//
-//        var ticketTypeFilterDto = TicketTemplateFilterDto.builder()
-//                .dateEnd(21321321321L)
-//                .comparisonDataStart(">")
-//                .dateStart(21321321321L)
-//                .ticketTypeId(listTT)
-//                .build();
-//        when(templateService.findAllByFilter(any(), any())).thenReturn(new PageImpl<>(List.of(new TicketTemplate(), new TicketTemplate())));
-//        MockHttpServletRequestBuilder request = get(HOST + PORT + API)
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .content(objectMapper.writeValueAsString(ticketTypeFilterDto));
-//        mockMvc.perform(request)
-//                .andDo(print())
-//                .andExpect(status().isOk());
-//                //.andExpect(MockMvcResultMatchers
-//                //        .jsonPath("$.errors.ComparisonDataEnd[?(@.message =~ /%s.*/)]", INVALID_COMPARISON).exists());
-//        verify(templateService, times(1)).findAllByFilter(any(), any());
-//    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
+    void getByFilter_shouldGetStatusIsBadRequest_whenInvalidDataFilter() throws Exception {
+        ticketTypeFilterDto.getIsOnlyOneTicketInWork().setValue(null);
+        ticketTypeFilterDto.getDateEnd().setValueOne(1);
+        ticketTypeFilterDto.getDateEnd().setValueTwo(0);
+        ticketTypeFilterDto.getSubject().setValue(null);
+        ticketTypeFilterDto.getTicketType().setListOfIdEntities(List.of());
+        ticketTypeFilterDto.setSortByFields(List.of(NONAME));
+        MockHttpServletRequestBuilder request = get(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(ticketTypeFilterDto));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.sortByFields[?(@.message =~ /.*%s.*/)]",
+                                CommonConstants.DO_NOT_MATCH_THE_AVAILABLE_SORT_VALUES
+                        )
+                        .exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.isOnlyOneTicketInWork[?(@.message =~ /.*%s.*/)]",
+                                CommonConstants.MUST_NOT_BE_NULL
+                        )
+                        .exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.dateEnd[?(@.message =~ /.*%s.*/)]",
+                                "ValueTwo must be greater ValueOne"
+                        )
+                        .exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.subject[?(@.message =~ /.*%s.*/)]",
+                                CommonConstants.MUST_NOT_BE_NULL
+                        )
+                        .exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.ticketType[?(@.message =~ /.*%s.*/)]",
+                                CommonConstants.MUST_NOT_BE_NULL
+                        )
+                        .exists());
+        verify(templateService, times(0)).findAllByFilter(any(), any());
+        verify(specFactory, times(0)).makeSpecificationFromEntityFilterDto(any(), any(), any());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
+    void getByFilter_shouldGetStatusIsBadRequest_whenInvalidTypeComparisonFilter() throws Exception {
+        ticketTypeFilterDto.getDateEnd().setTypeComparison(NONAME);
+        ticketTypeFilterDto.getSubject().setTypeComparison(NONAME);
+        ticketTypeFilterDto.getTicketType().setTypeComparison(NONAME);
+        MockHttpServletRequestBuilder request = get(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(ticketTypeFilterDto));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.dateEnd[?(@.message =~ /.*%s.*/)]",
+                                String.format(INVALID_TYPE_COMPARISON_FOR_VALUE_GIVEN, NONAME)
+                        )
+                        .exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.subject[?(@.message =~ /.*%s.*/)]",
+                                String.format(INVALID_TYPE_COMPARISON_FOR_VALUE_GIVEN, NONAME)
+                        )
+                        .exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("$.errors.ticketType[?(@.message =~ /.*%s.*/)]",
+                                String.format(INVALID_TYPE_COMPARISON_FOR_VALUE_GIVEN, NONAME)
+                        )
+                        .exists());
+        verify(templateService, times(0)).findAllByFilter(any(), any());
+        verify(specFactory, times(0)).makeSpecificationFromEntityFilterDto(any(), any(), any());
+    }
 }

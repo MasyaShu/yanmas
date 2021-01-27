@@ -2,11 +2,11 @@ package ru.itterminal.botdesk.aau.model;
 
 @SuppressWarnings("unused")
 public enum Roles {
-    ACCOUNT_OWNER(3),
-    ADMIN(2),
-    EXECUTOR(1),
-    AUTHOR (0),
-    OBSERVER (0);
+    ACCOUNT_OWNER(50),
+    ADMIN(40),
+    EXECUTOR(30),
+    AUTHOR (20),
+    OBSERVER (10);
 
     private final int weight;
 

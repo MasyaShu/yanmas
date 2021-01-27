@@ -10,6 +10,7 @@ public class CommonConstants {
     public static final String MUST_BE_ANY_OF_ASC_DESC = "must be any of: asc, desc";
     public static final String MESSAGE_NOT_READABLE = "Message Not Readable";
     public static final String DO_NOT_MATCH_THE_AVAILABLE_SORT_VALUES = "do not match the available sort values";
+    public static final String INVALID_TYPE_COMPARISON_FOR_VALUE_GIVEN = "Invalid type comparison '%s' for value given!";
 
     private CommonConstants() {
     }
