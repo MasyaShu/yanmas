@@ -18,4 +18,12 @@ public interface TicketStatusRepository extends EntityRepositoryWithAccount<Tick
     Optional<TicketStatus> getByNameAndAccount_Id(String name, UUID accountId);
 
     Optional<TicketStatus> getByIdAndAccount_Id(UUID id, UUID accountId);
+
+    Optional<TicketStatus> getByIsStartedPredefinedTrueAndAccount_Id(UUID accountId);
+
+    Optional<TicketStatus> getByIsCanceledPredefinedTrueAndAccount_Id(UUID accountId);
+
+    Optional<TicketStatus> getByIsReopenedPredefinedTrueAndAccount_Id(UUID accountId);
+
+    Optional<TicketStatus> getByIsFinishedPredefinedTrueAndAccount_Id(UUID accountId);
 }

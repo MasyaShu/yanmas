@@ -20,7 +20,7 @@ create TABLE IF NOT EXISTS ticket_statuses
     version                int4         NOT NULL DEFAULT (0),
     id                     uuid         NOT NULL,
     name                   varchar(128) NOT NULL,
-    sort_index             int2         NOT NULL,
+    sort_index             int2         NOT NULL DEFAULT (0),
     is_started_predefined  bool         NOT NULL DEFAULT 'false',
     is_finished_predefined bool         NOT NULL DEFAULT 'false',
     is_reopened_predefined bool         NOT NULL DEFAULT 'false',
