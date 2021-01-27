@@ -9,17 +9,15 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.messaging.MessageChannel;
 
+import lombok.RequiredArgsConstructor;
 import ru.itterminal.botdesk.integration.aws.s3.AwsS3Object;
 import ru.itterminal.botdesk.integration.aws.s3.AwsS3ObjectOperations;
 
 @Configuration
+@RequiredArgsConstructor
 public class PutAwsS3ObjectFlow {
 
     private final AwsS3ObjectOperations awsS3ObjectOperations;
-
-    public PutAwsS3ObjectFlow(AwsS3ObjectOperations awsS3ObjectOperations) {
-        this.awsS3ObjectOperations = awsS3ObjectOperations;
-    }
 
     @Bean
     public MessageChannel putAwsS3ObjectChannel() {

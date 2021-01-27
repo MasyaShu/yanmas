@@ -9,16 +9,14 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.messaging.MessageChannel;
 
+import lombok.RequiredArgsConstructor;
 import ru.itterminal.botdesk.integration.aws.s3.AwsS3BucketOperations;
 
 @Configuration
+@RequiredArgsConstructor
 public class CreateAwsS3BucketFlow {
 
     private final AwsS3BucketOperations awsS3BucketOperations;
-
-    public CreateAwsS3BucketFlow(AwsS3BucketOperations awsS3BucketOperations) {
-        this.awsS3BucketOperations = awsS3BucketOperations;
-    }
 
     @Bean
     public MessageChannel createAwsBucketChannel() {
