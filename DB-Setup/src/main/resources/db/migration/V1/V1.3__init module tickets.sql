@@ -128,13 +128,11 @@ create TABLE IF NOT EXISTS tickets
     ticket_type_id      uuid   NOT NULL,
     ticket_status_id    uuid   NOT NULL,
     ticket_template_id  uuid,
-    ticket_inheritor_id uuid,
     PRIMARY KEY (id),
     FOREIGN KEY (account_id) REFERENCES accounts (id),
     FOREIGN KEY (ticket_type_id) REFERENCES ticket_types (id),
     FOREIGN KEY (ticket_status_id) REFERENCES ticket_statuses (id),
-    FOREIGN KEY (ticket_template_id) REFERENCES ticket_templates (id),
-    FOREIGN KEY (ticket_inheritor_id) REFERENCES tickets (id)
+    FOREIGN KEY (ticket_template_id) REFERENCES ticket_templates (id)
 );
 
 create TABLE IF NOT EXISTS ticket_executors

@@ -1,6 +1,5 @@
 package ru.itterminal.botdesk.tickets.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -10,7 +9,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
@@ -75,17 +73,13 @@ public class Ticket extends BaseEntity {
     @JoinColumn(name = "ticket_template_id")
     private TicketTemplate ticketTemplate;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ticket_inheritor_id")
-    private Ticket ticketInheritor;
-
     @OneToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "ticket_observers",
             joinColumns = @JoinColumn(name = "ticket_id"),
             inverseJoinColumns = @JoinColumn(name = "observer_id")
     )
-    private List<User> observers = new ArrayList<>();
+    private List<User> observers;
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -93,7 +87,7 @@ public class Ticket extends BaseEntity {
             joinColumns = @JoinColumn(name = "ticket_id"),
             inverseJoinColumns = @JoinColumn(name = "executor_id")
     )
-    private List<User> executors = new ArrayList<>();
+    private List<User> executors;
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "entity_id")
@@ -102,6 +96,7 @@ public class Ticket extends BaseEntity {
     @PrePersist
     protected void onCreate() {
         createdAt = System.currentTimeMillis();
+        isFinished = false;
     }
 
     @Override
