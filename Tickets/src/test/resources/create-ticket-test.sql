@@ -56,9 +56,9 @@ VALUES (null, 'false', '0', '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9', 'ticketTypes
 INSERT INTO ticket_statuses(out_id, deleted, version, id, name, display_name, sort_index, is_started_predefined,
                             is_finished_predefined, is_reopened_predefined, is_canceled_predefined, account_id)
 VALUES (null, 'false', '0', '7f66b241-f8ec-4912-8f58-a4ceef2dd4c9', 'started', 'started', 10, true, false, false, false,
-        'bcf98101-2a22-42bf-94cc-c900b50a0b69'),
+        'cdfa6483-0769-4628-ba32-efd338a716de'),
        (null, 'false', '0', '17b13694-1907-4af9-8f5d-bfa444356e73', 'finished', 'finished', 50, false, true, false,
-        false, 'bcf98101-2a22-42bf-94cc-c900b50a0b69'),
+        false, 'cdfa6483-0769-4628-ba32-efd338a716de'),
        (null, 'false', '0', 'dcf29ccb-26c7-4e38-9256-f45918a4c4a6', 'reopened', 'reopened', 20, false, false, true,
         false, 'bcf98101-2a22-42bf-94cc-c900b50a0b69'),
        (null, 'false', '0', 'e251aad2-1a47-46ed-a405-0d8a6468627e', 'canceled', 'canceled', 60, false, false, false,

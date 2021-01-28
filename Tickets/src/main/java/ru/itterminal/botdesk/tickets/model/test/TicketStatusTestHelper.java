@@ -37,7 +37,7 @@ public class TicketStatusTestHelper extends EntityTestHelperImpl<TicketStatus, T
                 .isFinishedPredefined(false)
                 .isReopenedPredefined(false)
                 .isCanceledPredefined(false)
-                .account(accountTestHelper.getPredefinedValidEntityList().get(1))
+                .account(accountTestHelper.getPredefinedValidEntityList().get(0))
                 .build();
         setPropertiesOfBaseEntity(ticketStatus1, UUID.fromString("7f66b241-f8ec-4912-8f58-a4ceef2dd4c9"),
                                   0, false, null);
@@ -48,7 +48,7 @@ public class TicketStatusTestHelper extends EntityTestHelperImpl<TicketStatus, T
                 .isFinishedPredefined(true)
                 .isReopenedPredefined(false)
                 .isCanceledPredefined(false)
-                .account(accountTestHelper.getPredefinedValidEntityList().get(1))
+                .account(accountTestHelper.getPredefinedValidEntityList().get(0))
                 .build();
         setPropertiesOfBaseEntity(ticketStatus2, UUID.fromString("17b13694-1907-4af9-8f5d-bfa444356e73"),
                                   0, false, null);
