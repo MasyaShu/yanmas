@@ -20,7 +20,7 @@ import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
+@ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class TicketTypeDto extends BaseEntityDto {
 

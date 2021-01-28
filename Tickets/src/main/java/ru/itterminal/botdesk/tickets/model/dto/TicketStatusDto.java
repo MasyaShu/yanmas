@@ -15,7 +15,8 @@ import javax.validation.constraints.Size;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class TicketStatusDto  extends BaseEntityDto {
 
     @NotNull(groups = {Create.class, Update.class})
