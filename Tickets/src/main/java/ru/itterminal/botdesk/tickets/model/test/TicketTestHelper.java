@@ -29,7 +29,7 @@ public class TicketTestHelper extends EntityTestHelperImpl<Ticket, TicketDtoRequ
         var author = userTestHelper.getRandomValidEntity();
         author.setAccount(account);
         author.setGroup(group);
-        author.setRole(roleTestHelper.getPredefinedValidEntityList().get(1));
+        author.setRole(roleTestHelper.getPredefinedValidEntityList().get(3));
         var ticketType = ticketTypeTestHelper.getRandomValidEntity();
         ticketType.setAccount(account);
         var ticketStatus = ticketStatusTestHelper.getRandomValidEntity();

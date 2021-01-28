@@ -61,25 +61,25 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
     @Override
     public boolean beforeCreate(Ticket entity) {
         var result = super.beforeCreate(entity);
-        var errors = createMapForLogicalErrors();
-        IsEmptySubjectDescriptionAndFiles(entity, errors);
-        checkGroupOfCurrentUserAndGroupFromTicket(entity, errors);
-        checkAccountOfTicketAndAccountsFromAllNestedObjectsOfTicket(entity, errors);
-        checkAuthorExecutorsAndObserversForWeightOfRoles(entity, errors);
-        ifErrorsNotEmptyThrowLogicalValidationException(errors);
+        beforeCreateUpdate(entity);
         return result;
     }
 
     @Override
     public boolean beforeUpdate(Ticket entity) {
         var result = super.beforeUpdate(entity);
+        beforeCreateUpdate(entity);
+        return result;
+    }
+
+    private void beforeCreateUpdate(Ticket entity) {
         var errors = createMapForLogicalErrors();
         IsEmptySubjectDescriptionAndFiles(entity, errors);
-        checkGroupOfCurrentUserAndGroupFromTicket(entity, errors);
+        checkGroupsOfAuthorAndTicket(entity, errors);
+        checkCurrentUserForGroupAndIsInner(entity, errors);
         checkAccountOfTicketAndAccountsFromAllNestedObjectsOfTicket(entity, errors);
         checkAuthorExecutorsAndObserversForWeightOfRoles(entity, errors);
         ifErrorsNotEmptyThrowLogicalValidationException(errors);
-        return result;
     }
 
     private void IsEmptySubjectDescriptionAndFiles(Ticket ticket, Map<String, List<ValidationError>> errors) {
@@ -95,19 +95,9 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
         }
     }
 
-    private void checkGroupOfCurrentUserAndGroupFromTicket(Ticket ticket, Map<String, List<ValidationError>> errors) {
-        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        var groupOfCurrentUser = groupService.findByIdAndAccountId(jwtUser.getGroupId(), jwtUser.getAccountId());
+    private void checkGroupsOfAuthorAndTicket(Ticket ticket, Map<String, List<ValidationError>> errors) {
         var groupFromTicket = ticket.getGroup();
         var groupFromAuthorOfTicket = ticket.getAuthor().getGroup();
-        if (Boolean.FALSE.equals(groupOfCurrentUser.getIsInner()) && !groupOfCurrentUser.equals(groupFromTicket)) {
-            addValidationErrorIntoErrors(
-                    USER_IS_NOT_FROM_INNER_GROUP,
-                    USER_FROM_NOT_INNER_GROUP_MUST_CREATE_UPDATE_TICKET_ONLY_WITH_HIS_GROUP,
-                    errors
-            );
-            log.error(LOG_USER_FROM_NOT_INNER_GROUP, jwtUser, ticket);
-        }
         if (!groupFromAuthorOfTicket.equals(groupFromTicket)) {
             addValidationErrorIntoErrors(
                     GROUP_OF_TICKET,
@@ -115,6 +105,20 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
                     errors
             );
             log.error(LOG_GROUP_OF_TICKET, groupFromTicket, groupFromAuthorOfTicket);
+        }
+    }
+
+    private void checkCurrentUserForGroupAndIsInner(Ticket ticket, Map<String, List<ValidationError>> errors) {
+        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var groupOfCurrentUser = groupService.findByIdAndAccountId(jwtUser.getGroupId(), jwtUser.getAccountId());
+        var groupFromTicket = ticket.getGroup();
+        if (Boolean.FALSE.equals(groupOfCurrentUser.getIsInner()) && !groupOfCurrentUser.equals(groupFromTicket)) {
+            addValidationErrorIntoErrors(
+                    USER_IS_NOT_FROM_INNER_GROUP,
+                    USER_FROM_NOT_INNER_GROUP_MUST_CREATE_UPDATE_TICKET_ONLY_WITH_HIS_GROUP,
+                    errors
+            );
+            log.error(LOG_USER_FROM_NOT_INNER_GROUP, jwtUser, ticket);
         }
     }
 
