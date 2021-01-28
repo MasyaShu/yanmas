@@ -11,8 +11,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
-import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.ACCOUNTS_ARE_DIFFERENT;
-import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.ACCOUNT_OF_TICKET_IS_NOT_EQUAL_FOR_THE_FOLLOWING_FIELDS;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.EMPTY_TICKET;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.GROUP_OF_TICKET;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.GROUP_OF_TICKET_MUST_EQUALS_GROUP_OF_AUTHOR_OF_TICKET;
@@ -37,7 +35,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import ru.itterminal.botdesk.aau.model.Roles;
-import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.aau.model.test.GroupTestHelper;
 import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
@@ -59,7 +56,6 @@ class TicketOperationValidatorTest {
 
     private final TicketTestHelper ticketTestHelper = new TicketTestHelper();
     private final GroupTestHelper groupTestHelper = new GroupTestHelper();
-    private final AccountTestHelper accountTestHelper = new AccountTestHelper();
     private final RoleTestHelper roleTestHelper = new RoleTestHelper();
 
     @Test
@@ -273,80 +269,6 @@ class TicketOperationValidatorTest {
         assertEquals(
                 expectedException.getFieldErrors().get(GROUP_OF_TICKET).get(0),
                 actualException.getFieldErrors().get(GROUP_OF_TICKET).get(0)
-        );
-        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
-    }
-
-    @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    void beforeCreate_shouldGetLogicalValidationException_whenAccountOfTicketIsNotEqualForTheNestedFields() {
-        var expectedErrors = createMapForLogicalErrors();
-        var ticket = ticketTestHelper.getRandomValidEntity();
-        ticket.getAuthor().setAccount(accountTestHelper.getRandomValidEntity());
-        ticket.getGroup().setAccount(accountTestHelper.getRandomValidEntity());
-        ticket.setTicketStatus(null);
-        ticket.setTicketTemplate(null);
-        ticket.setTicketType(null);
-        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getGroup());
-        expectedErrors.put(
-                ACCOUNTS_ARE_DIFFERENT,
-                singletonList(
-                        new ValidationError(
-                                ACCOUNTS_ARE_DIFFERENT,
-                                format(
-                                        ACCOUNT_OF_TICKET_IS_NOT_EQUAL_FOR_THE_FOLLOWING_FIELDS,
-                                        "group, author"
-                                )
-                        )
-                )
-        );
-        LogicalValidationException expectedException =
-                new LogicalValidationException(VALIDATION_FAILED, expectedErrors);
-        LogicalValidationException actualException =
-                assertThrows(
-                        LogicalValidationException.class,
-                        () -> validator.beforeCreate(ticket)
-                );
-        assertEquals(
-                expectedException.getFieldErrors().get(ACCOUNTS_ARE_DIFFERENT).get(0),
-                actualException.getFieldErrors().get(ACCOUNTS_ARE_DIFFERENT).get(0)
-        );
-        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
-    }
-
-    @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    void beforeUpdate_shouldGetLogicalValidationException_whenAccountOfTicketIsNotEqualForTheNestedFields() {
-        var expectedErrors = createMapForLogicalErrors();
-        var ticket = ticketTestHelper.getRandomValidEntity();
-        ticket.getAuthor().setAccount(accountTestHelper.getRandomValidEntity());
-        ticket.getGroup().setAccount(accountTestHelper.getRandomValidEntity());
-        ticket.setTicketStatus(null);
-        ticket.setTicketTemplate(null);
-        ticket.setTicketType(null);
-        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getGroup());
-        expectedErrors.put(
-                ACCOUNTS_ARE_DIFFERENT,
-                singletonList(
-                        new ValidationError(
-                                ACCOUNTS_ARE_DIFFERENT,
-                                format(
-                                        ACCOUNT_OF_TICKET_IS_NOT_EQUAL_FOR_THE_FOLLOWING_FIELDS,
-                                        "group, author"
-                                )
-                        )
-                )
-        );
-        LogicalValidationException expectedException =
-                new LogicalValidationException(VALIDATION_FAILED, expectedErrors);
-        LogicalValidationException actualException =
-                assertThrows(
-                        LogicalValidationException.class,
-                        () -> validator.beforeUpdate(ticket)
-                );
-        assertEquals(
-                expectedException.getFieldErrors().get(ACCOUNTS_ARE_DIFFERENT).get(0),
-                actualException.getFieldErrors().get(ACCOUNTS_ARE_DIFFERENT).get(0)
         );
         verify(groupService, times(1)).findByIdAndAccountId(any(), any());
     }

@@ -5,7 +5,6 @@ import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.addV
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.ifErrorsNotEmptyThrowLogicalValidationException;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +18,6 @@ import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 import ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl;
-import ru.itterminal.botdesk.files.model.File;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
 import ru.itterminal.botdesk.tickets.model.Ticket;
 
@@ -38,9 +36,6 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
             "Group of ticket must equals group of author of ticket";
     public static final String LOG_GROUP_OF_TICKET =
             "Group of ticket {} must equals group of author of ticket {}";
-    public static final String ACCOUNTS_ARE_DIFFERENT = "Accounts are different";
-    public static final String ACCOUNT_OF_TICKET_IS_NOT_EQUAL_FOR_THE_FOLLOWING_FIELDS =
-            "Account of ticket is not equal for the following fields: %s";
     public static final String WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR = "Weight of role into field Author";
     public static final String WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS = "Weight of role into field Executors";
     public static final String WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS = "Weight of role into field Observers";
@@ -77,7 +72,6 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
         IsEmptySubjectDescriptionAndFiles(entity, errors);
         checkGroupsOfAuthorAndTicket(entity, errors);
         checkCurrentUserForGroupAndIsInner(entity, errors);
-        checkAccountOfTicketAndAccountsFromAllNestedObjectsOfTicket(entity, errors);
         checkAuthorExecutorsAndObserversForWeightOfRoles(entity, errors);
         ifErrorsNotEmptyThrowLogicalValidationException(errors);
     }
@@ -119,67 +113,6 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
                     errors
             );
             log.error(LOG_USER_FROM_NOT_INNER_GROUP, jwtUser, ticket);
-        }
-    }
-
-    private void checkAccountOfTicketAndAccountsFromAllNestedObjectsOfTicket
-            (Ticket ticket, Map<String, List<ValidationError>> errors) {
-        List<String> problemFieldsOfTicket = new ArrayList<>();
-        var accountOfTicket = ticket.getAccount();
-        if (ticket.getGroup() != null && !ticket.getGroup().getAccount().equals(accountOfTicket)) {
-            problemFieldsOfTicket.add("group");
-        }
-        if (ticket.getAuthor() != null && !ticket.getAuthor().getAccount().equals(accountOfTicket)) {
-            problemFieldsOfTicket.add("author");
-        }
-        if (ticket.getTicketStatus() != null && !ticket.getTicketStatus().getAccount().equals(accountOfTicket)) {
-            problemFieldsOfTicket.add("ticketStatus");
-        }
-        if (ticket.getTicketType() != null && !ticket.getTicketType().getAccount().equals(accountOfTicket)) {
-            problemFieldsOfTicket.add("ticketType");
-        }
-        if (ticket.getTicketTemplate() != null && !ticket.getTicketTemplate().getAccount().equals(accountOfTicket)) {
-            problemFieldsOfTicket.add("ticketTemplate");
-        }
-        if (ticket.getObservers() != null && !ticket.getObservers().isEmpty()) {
-            for (User observer : ticket.getObservers()) {
-                if (!observer.getAccount().equals(accountOfTicket)) {
-                    problemFieldsOfTicket.add("observers");
-                    break;
-                }
-            }
-        }
-        if (ticket.getExecutors() != null && !ticket.getExecutors().isEmpty()) {
-            for (User executor : ticket.getExecutors()) {
-                if (!executor.getAccount().equals(accountOfTicket)) {
-                    problemFieldsOfTicket.add("executors");
-                    break;
-                }
-            }
-        }
-        if (ticket.getFiles() != null && !ticket.getFiles().isEmpty()) {
-            for (File file : ticket.getFiles()) {
-                if (!file.getAccount().equals(accountOfTicket)) {
-                    problemFieldsOfTicket.add("files");
-                    break;
-                }
-            }
-        }
-        if (!problemFieldsOfTicket.isEmpty()) {
-            addValidationErrorIntoErrors(
-                    ACCOUNTS_ARE_DIFFERENT,
-                    format(
-                            ACCOUNT_OF_TICKET_IS_NOT_EQUAL_FOR_THE_FOLLOWING_FIELDS,
-                            String.join(", ", problemFieldsOfTicket)
-                    ),
-                    errors
-            );
-            log.error(
-                    format(
-                            ACCOUNT_OF_TICKET_IS_NOT_EQUAL_FOR_THE_FOLLOWING_FIELDS,
-                            String.join(", ", problemFieldsOfTicket)
-                    )
-            );
         }
     }
 
