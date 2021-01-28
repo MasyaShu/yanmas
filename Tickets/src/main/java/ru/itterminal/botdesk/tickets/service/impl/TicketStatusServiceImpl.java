@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceWithAccountImpl;
+import ru.itterminal.botdesk.integration.innerflow.CompletedVerificationAccount;
 import ru.itterminal.botdesk.tickets.model.TicketStatus;
 import ru.itterminal.botdesk.tickets.model.projection.TicketStatusUniqueFields;
 import ru.itterminal.botdesk.tickets.repository.TicketStatusRepository;
@@ -22,7 +23,9 @@ import static java.lang.String.format;
 @Transactional
 @AllArgsConstructor
 public class TicketStatusServiceImpl extends
-        CrudServiceWithAccountImpl<TicketStatus, TicketStatusOperationValidator, TicketStatusRepository> {
+        CrudServiceWithAccountImpl<TicketStatus, TicketStatusOperationValidator, TicketStatusRepository>
+        implements CompletedVerificationAccount {
+
 
     private final AccountServiceImpl accountService;
 
@@ -30,10 +33,10 @@ public class TicketStatusServiceImpl extends
             "Start find ticket status by unique fields, name: {} and not id: {} and not account: {}";
     private static final String START_FIND_STATUS_FOR_ACCOUNT = "Start find {} predefined status for account: {}";
     private static final String IS_PREDEFINED_TRUE = "IsPredefinedTrue";
-    private static final String START = "'Start'";
-    private static final String CANCELED = "'Canceled'";
-    private static final String REOPENED = "'Reopened'";
-    private static final String FINISHED = "'Finished'";
+    private static final String CANCELED = "Canceled";
+    private static final String REOPENED = "Reopened";
+    private static final String FINISHED = "Finished";
+    private static final String STARTED = "Started";
 
     @Transactional(readOnly = true)
     public List<TicketStatusUniqueFields> findByUniqueFields(TicketStatus ticketStatus) {
@@ -44,10 +47,10 @@ public class TicketStatusServiceImpl extends
 
     @Transactional(readOnly = true)
     public TicketStatus findStartedPredefinedStatus(UUID accountId) {
-        log.trace(START_FIND_STATUS_FOR_ACCOUNT, START, accountId);
+        log.trace(START_FIND_STATUS_FOR_ACCOUNT, STARTED, accountId);
         return repository.getByIsStartedPredefinedTrueAndAccount_Id(accountId).orElseThrow(
                 () -> {
-                    String errorMessage = format(FIND_INVALID_MESSAGE_WITH_ACCOUNT, IS_PREDEFINED_TRUE, START, accountId);
+                    String errorMessage = format(FIND_INVALID_MESSAGE_WITH_ACCOUNT, IS_PREDEFINED_TRUE, STARTED, accountId);
                     log.error(errorMessage);
                     throw new EntityNotExistException(errorMessage);
                 }
@@ -90,42 +93,54 @@ public class TicketStatusServiceImpl extends
         );
     }
 
-    public void createPredefinedStatus(UUID accountId) {
-        var startedPredefinedStatus = TicketStatus.builder()
-                .account(accountService.findById(accountId))
-                .isFinishedPredefined(true)
-                .name("Started")
-                .id(UUID.randomUUID())
-                .sortIndex(100)
-                .build();
-        create(startedPredefinedStatus);
+    @Override
+    public void createPredefinedEntity(UUID accountId) {
+        try {
+            findStartedPredefinedStatus(accountId);
+        } catch (EntityNotExistException e) {
+            var startedPredefinedStatus = TicketStatus.builder()
+                    .account(accountService.findById(accountId))
+                    .isFinishedPredefined(true)
+                    .name(STARTED)
+                    .sortIndex(100)
+                    .build();
+            create(startedPredefinedStatus);
+        }
 
-        var reopenedPredefinedStatus = TicketStatus.builder()
-                .account(accountService.findById(accountId))
-                .isFinishedPredefined(true)
-                .name("Reopened")
-                .id(UUID.randomUUID())
-                .sortIndex(200)
-                .build();
-        create(reopenedPredefinedStatus);
+        try {
+            findReopenedPredefinedStatus(accountId);
+        } catch (EntityNotExistException e) {
+            var reopenedPredefinedStatus = TicketStatus.builder()
+                    .account(accountService.findById(accountId))
+                    .isFinishedPredefined(true)
+                    .name(REOPENED)
+                    .sortIndex(200)
+                    .build();
+            create(reopenedPredefinedStatus);
+        }
 
-        var finishedPredefinedStatus = TicketStatus.builder()
-                .account(accountService.findById(accountId))
-                .isFinishedPredefined(true)
-                .name("Finished")
-                .id(UUID.randomUUID())
-                .sortIndex(300)
-                .build();
-        create(finishedPredefinedStatus);
+        try {
+            findFinishedPredefinedStatus(accountId);
+        } catch (EntityNotExistException e) {
+            var finishedPredefinedStatus = TicketStatus.builder()
+                    .account(accountService.findById(accountId))
+                    .isFinishedPredefined(true)
+                    .name(FINISHED)
+                    .sortIndex(300)
+                    .build();
+            create(finishedPredefinedStatus);
+        }
 
-
-        var canceledPredefinedStatus = TicketStatus.builder()
-                .account(accountService.findById(accountId))
-                .isFinishedPredefined(true)
-                .name("Canceled")
-                .id(UUID.randomUUID())
-                .sortIndex(400)
-                .build();
-        create(canceledPredefinedStatus);
+        try {
+            findCanceledPredefinedStatus(accountId);
+        } catch (EntityNotExistException e) {
+            var canceledPredefinedStatus = TicketStatus.builder()
+                    .account(accountService.findById(accountId))
+                    .isFinishedPredefined(true)
+                    .name(CANCELED)
+                    .sortIndex(400)
+                    .build();
+            create(canceledPredefinedStatus);
+        }
     }
 }

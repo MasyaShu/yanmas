@@ -31,6 +31,7 @@ import ru.itterminal.botdesk.commons.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.botdesk.integration.aws.s3.flow.CreateAwsS3BucketFlow;
 import ru.itterminal.botdesk.integration.aws.ses.SenderEmailViaAwsSes;
 import ru.itterminal.botdesk.integration.aws.ses.flow.SendingEmailViaAwsSesFlow;
+import ru.itterminal.botdesk.integration.innerflow.CompletedVerificationAccountFlow;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
 import software.amazon.awssdk.services.ses.model.SendRawEmailRequest;
 
@@ -58,6 +59,7 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
     private final SendingEmailViaAwsSesFlow.MailSenderViaAwsSesMessagingGateway mailSenderViaAwsSesMessagingGateway;
     private final SenderEmailViaAwsSes senderEmailViaAwsSes;
     private final CreateAwsS3BucketFlow.CreateAwsBucketGateway createAwsBucketGateway;
+    private final CompletedVerificationAccountFlow.CreateCompletedVerificationAccountGateway createCompletedVerificationAccountGateway;
 
     public static final String START_FIND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID
             = "Start find user by id: {} and accountId: {} and own group id {}";
@@ -225,6 +227,7 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
             throw new FailedSaveEntityException(FAILED_SAVE_USER_AFTER_VERIFY_EMAIL_TOKEN);
         }
         createAwsBucketGateway.process(savedUser.getAccount().getId().toString());
+        createCompletedVerificationAccountGateway.process(savedUser.getAccount().getId());
     }
 
     public void requestPasswordReset(String email) {
