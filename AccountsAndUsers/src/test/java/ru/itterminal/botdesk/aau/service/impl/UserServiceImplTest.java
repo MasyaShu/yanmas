@@ -38,6 +38,7 @@ import ru.itterminal.botdesk.commons.service.CrudService;
 import ru.itterminal.botdesk.integration.aws.s3.flow.CreateAwsS3BucketFlow.CreateAwsBucketGateway;
 import ru.itterminal.botdesk.integration.aws.ses.SenderEmailViaAwsSes;
 import ru.itterminal.botdesk.integration.aws.ses.flow.SendingEmailViaAwsSesFlow.MailSenderViaAwsSesMessagingGateway;
+import ru.itterminal.botdesk.integration.innerflow.CompletedVerificationAccountFlow;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
 
@@ -58,6 +59,10 @@ class UserServiceImplTest {
     @SuppressWarnings("unused")
     @MockBean
     private MailSenderViaAwsSesMessagingGateway mailSenderViaAwsSesMessagingGateway;
+
+    @SuppressWarnings("unused")
+    @MockBean
+    private CompletedVerificationAccountFlow.CreateCompletedVerificationAccountGateway createCompletedVerificationAccountGateway;
 
     @SuppressWarnings("unused")
     @MockBean
