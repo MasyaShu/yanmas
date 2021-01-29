@@ -71,7 +71,6 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
         entity.setCreatedAt(entityFromDatabase.getCreatedAt());
         entity.setFiles(entityFromDatabase.getFiles());
         entity.setTicketTemplate(entityFromDatabase.getTicketTemplate());
-        validator.checkUniqueness(entity);
         try {
             entity.generateDisplayName();
             var updatedEntity = repository.update(entity);

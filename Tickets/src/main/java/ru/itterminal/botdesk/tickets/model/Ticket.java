@@ -102,6 +102,7 @@ public class Ticket extends BaseEntity {
     protected void onCreate() {
         createdAt = System.currentTimeMillis();
         isFinished = false;
+        setDeleted(false);
     }
 
     @Override
