@@ -10,6 +10,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
+import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
@@ -20,6 +21,7 @@ import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateDtoRequest;
 import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateDtoResponse;
 import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateFilterDto;
 import ru.itterminal.botdesk.tickets.service.impl.TicketTemplateServiceImpl;
+import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -38,6 +40,8 @@ public class TicketTemplateControllerV1 extends BaseController {
     private final AccountServiceImpl accountService;
     private final TicketTemplateServiceImpl templateService;
     private final SpecificationsFactory specFactory;
+    private final TicketTypeServiceImpl ticketTypeService;
+    private final UserServiceImpl userService;
 
     private final String ENTITY_NAME = TicketTemplate.class.getSimpleName();
 
@@ -49,7 +53,7 @@ public class TicketTemplateControllerV1 extends BaseController {
         TicketTemplate ticketTemplate = modelMapper.map(request, TicketTemplate.class);
         ticketTemplate.setDeleted(false);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        ticketTemplate.setAccount(accountService.findById(jwtUser.getAccountId()));
+        setNestedObjectsIntoEntityFromEntityDtoRequest(ticketTemplate, request, jwtUser.getAccountId());
         TicketTemplate createdTicketTemplate = templateService.create(ticketTemplate);
         TicketTemplateDtoResponse returnedTicketTemplate =
                 modelMapper.map(createdTicketTemplate, TicketTemplateDtoResponse.class);
@@ -70,10 +74,10 @@ public class TicketTemplateControllerV1 extends BaseController {
     public ResponseEntity<TicketTemplateDtoResponse> update(Principal principal,
                                                             @Validated(Update.class) @RequestBody TicketTemplateDtoRequest request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
-        TicketTemplate ticketType = modelMapper.map(request, TicketTemplate.class);
+        TicketTemplate ticketTemplate = modelMapper.map(request, TicketTemplate.class);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        ticketType.setAccount(accountService.findById(jwtUser.getAccountId()));
-        TicketTemplate updatedTicketStatus = templateService.update(ticketType);
+        setNestedObjectsIntoEntityFromEntityDtoRequest(ticketTemplate, request, jwtUser.getAccountId());
+        TicketTemplate updatedTicketStatus = templateService.update(ticketTemplate);
         TicketTemplateDtoResponse returnedTicketTemplate =
                 modelMapper.map(updatedTicketStatus, TicketTemplateDtoResponse.class);
         log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedTicketStatus);
@@ -116,6 +120,12 @@ public class TicketTemplateControllerV1 extends BaseController {
         returnedTicketTemplate = mapPage(foundTicketTemplate, TicketTemplateDtoResponse.class, pageable);
         log.debug(FIND_FINISH_MESSAGE, ENTITY_NAME, foundTicketTemplate.getTotalElements());
         return new ResponseEntity<>(returnedTicketTemplate, HttpStatus.OK);
+    }
+
+    private void setNestedObjectsIntoEntityFromEntityDtoRequest(TicketTemplate ticketTemplate, TicketTemplateDtoRequest request, UUID accountId) {
+        ticketTemplate.setAccount(accountService.findById(accountId));
+        ticketTemplate.setAuthor(userService.findByIdAndAccountId(request.getAuthorId(), accountId));
+        ticketTemplate.setTicketType(ticketTypeService.findByIdAndAccountId(request.getTicketTypeId(), accountId));
     }
 
 }

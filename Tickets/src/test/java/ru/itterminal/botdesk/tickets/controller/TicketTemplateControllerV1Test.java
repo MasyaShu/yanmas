@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
+import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
@@ -40,6 +41,7 @@ import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateDtoResponse;
 import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateFilterDto;
 import ru.itterminal.botdesk.tickets.model.test.TicketTemplateTestHelper;
 import ru.itterminal.botdesk.tickets.service.impl.TicketTemplateServiceImpl;
+import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
 
 import java.util.Arrays;
 import java.util.List;
@@ -88,6 +90,12 @@ class TicketTemplateControllerV1Test {
     @Autowired
     FilterChainProxy springSecurityFilterChain;
 
+    @MockBean
+    private TicketTypeServiceImpl ticketTypeService;
+
+    @MockBean
+    private UserServiceImpl userService;
+
     private final TicketTemplateTestHelper ticketTemplateTestHelper = new TicketTemplateTestHelper();
 
     private TicketTemplateFilterDto ticketTypeFilterDto;
@@ -101,6 +109,10 @@ class TicketTemplateControllerV1Test {
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new RestExceptionHandler())
                 .apply(SecurityMockMvcConfigurers.springSecurity(springSecurityFilterChain))
+                .addFilter((request, response, chain) -> {
+                    response.setCharacterEncoding("UTF-8"); // this is crucial
+                    chain.doFilter(request, response);
+                }, "/*")
                 .build();
     }
 
@@ -153,6 +165,8 @@ class TicketTemplateControllerV1Test {
         ticketTemplateDtoRequest.setDeleted(null);
         when(templateService.create(any())).thenReturn(ticketTemplate);
         when(accountService.findById(any())).thenReturn(ticketTemplate.getAccount());
+        when(userService.findByIdAndAccountId(any(), any())).thenReturn(ticketTemplate.getAuthor());
+        when(ticketTypeService.findByIdAndAccountId(any(), any())).thenReturn(ticketTemplate.getTicketType());
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -308,9 +322,12 @@ class TicketTemplateControllerV1Test {
         TicketTemplateDtoRequest ticketTemplateDtoRequest = ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate);
         when(templateService.update(any())).thenReturn(ticketTemplate);
         when(accountService.findById(any())).thenReturn(ticketTemplate.getAccount());
+        when(userService.findByIdAndAccountId(any(), any())).thenReturn(ticketTemplate.getAuthor());
+        when(ticketTypeService.findByIdAndAccountId(any(), any())).thenReturn(ticketTemplate.getTicketType());
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
+                .characterEncoding("UTF-8")
                 .content(objectMapper.writeValueAsString(ticketTemplateDtoRequest));
 
         var requestResult = mockMvc.perform(request)

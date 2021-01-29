@@ -9,7 +9,8 @@ import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class TicketTemplateDtoResponse extends BaseEntityDto {
 
     private String subject;
