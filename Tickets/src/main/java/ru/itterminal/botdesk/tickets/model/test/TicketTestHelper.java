@@ -4,6 +4,7 @@ import java.util.List;
 
 import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.aau.model.test.GroupTestHelper;
+import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
 import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
 import ru.itterminal.botdesk.tickets.model.Ticket;
@@ -18,6 +19,7 @@ public class TicketTestHelper extends EntityTestHelperImpl<Ticket, TicketDtoRequ
     private final TicketTypeTestHelper ticketTypeTestHelper = new TicketTypeTestHelper();
     private final TicketStatusTestHelper ticketStatusTestHelper = new TicketStatusTestHelper();
     private final TicketTemplateTestHelper ticketTemplateTestHelper = new TicketTemplateTestHelper();
+    private final RoleTestHelper roleTestHelper = new RoleTestHelper();
 
     @Override
     public Ticket getRandomValidEntity() {
@@ -27,6 +29,7 @@ public class TicketTestHelper extends EntityTestHelperImpl<Ticket, TicketDtoRequ
         var author = userTestHelper.getRandomValidEntity();
         author.setAccount(account);
         author.setGroup(group);
+        author.setRole(roleTestHelper.getPredefinedValidEntityList().get(3));
         var ticketType = ticketTypeTestHelper.getRandomValidEntity();
         ticketType.setAccount(account);
         var ticketStatus = ticketStatusTestHelper.getRandomValidEntity();

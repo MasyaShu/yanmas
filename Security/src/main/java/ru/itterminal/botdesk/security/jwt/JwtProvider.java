@@ -22,8 +22,10 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.RequiredArgsConstructor;
 
 @Component
+@RequiredArgsConstructor
 public class JwtProvider {
 
     @Value("${jwt.token.secret}")
@@ -45,11 +47,6 @@ public class JwtProvider {
     public static final String EMAIL_IS_EMPTY = "email is empty";
     public static final String TOKEN_IS_EMPTY = "token is empty";
     public static final String CANT_CREATE_TOKEN_IF_USER_ID_IS_NULL = "Can't create token if userId is null";
-
-    public JwtProvider(
-            ApplicationContext appContext) {
-        this.appContext = appContext;
-    }
 
     @PostConstruct
     protected void init() {

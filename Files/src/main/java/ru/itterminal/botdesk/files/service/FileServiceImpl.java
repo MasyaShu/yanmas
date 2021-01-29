@@ -27,10 +27,6 @@ import ru.itterminal.botdesk.integration.aws.s3.AwsS3ObjectOperations;
 public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperationValidator, FileRepository> {
 
     private static final String METHOD_UPDATE = "For now this method doesn't implement yet";
-    private static final String BYTES_OF_FILE = "Bytes of file";
-    private static final String BYTES_OF_FILE_IS_NULL = "Bytes of file is null";
-    private static final String ACCOUNT_ID = "Account id";
-    private static final String ACCOUNT_ID_IS_NULL = "Account id is null";
     private static final String FILE_ID = "File id";
     private static final String FILE_ID_IS_NULL = "File id is null";
     public static final String FILE = "File";
