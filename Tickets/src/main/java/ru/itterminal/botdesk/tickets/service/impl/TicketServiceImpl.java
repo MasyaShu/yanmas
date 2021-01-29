@@ -31,6 +31,8 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
             "You must use method update(Ticket entity, User currentUser)";
     public static final String BY_USER = " by user: ";
     private final TicketCounterServiceImpl ticketCounterService;
+    private final TicketSettingServiceImpl ticketSettingService;
+
 
     @Override
     @Deprecated
@@ -48,14 +50,10 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
     public Ticket create(Ticket entity, User currentUser) {
         validator.beforeCreate(entity);
         log.trace(format(CREATE_INIT_MESSAGE, entity.getClass().getSimpleName(),
-                         entity.toString() + BY_USER + currentUser.toString()
+                entity.toString() + BY_USER + currentUser.getEmail()
         ));
-        UUID id = UUID.randomUUID();
-        entity.setId(id);
-        entity.generateDisplayName();
-        // TODO upload settings into the ticket according permissions of the current user
+        setValueToFieldsOnCreation(entity, currentUser);
         validator.checkUniqueness(entity);
-        entity.setNumber(ticketCounterService.getTicketNumber(entity.getAccount().getId()));
         var createdEntity = repository.create(entity);
         log.trace(format(CREATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), createdEntity.toString()));
         return createdEntity;
@@ -63,23 +61,51 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
 
     public Ticket update(Ticket entity, User currentUser) {
         log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(),
-                         entity.toString() + BY_USER + currentUser.toString()
+                entity.toString() + BY_USER + currentUser.toString()
         ));
         validator.beforeUpdate(entity);
-        var entityFromDatabase = super.findByIdAndAccountId(entity.getId(), entity.getAccount().getId());
-        entity.setNumber(entityFromDatabase.getNumber());
-        entity.setCreatedAt(entityFromDatabase.getCreatedAt());
-        entity.setFiles(entityFromDatabase.getFiles());
-        entity.setTicketTemplate(entityFromDatabase.getTicketTemplate());
-        // TODO upload values into the ticket from entityFromDatabase according permissions of the current user
+        setValueToFieldsOnUpdate(entity, currentUser);
         try {
             entity.generateDisplayName();
             var updatedEntity = repository.update(entity);
             log.trace(format(UPDATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), updatedEntity));
             return updatedEntity;
-        }
-        catch (OptimisticLockException | ObjectOptimisticLockingFailureException ex) {
+        } catch (OptimisticLockException | ObjectOptimisticLockingFailureException ex) {
             throw new OptimisticLockingFailureException(format(VERSION_INVALID_MESSAGE, entity.getId()));
+        }
+    }
+
+    private void setValueToFieldsOnCreation(Ticket entity, User currentUser) {
+        UUID id = UUID.randomUUID();
+        entity.setId(id);
+        entity.generateDisplayName();
+        entity.setGroup(entity.getAuthor().getGroup());
+        entity.setNumber(ticketCounterService.getTicketNumber(entity.getAccount().getId()));
+
+        if ((currentUser.getRole().getWeight() <= 40 && !currentUser.getGroup().getIsInner())
+                || currentUser.getRole().getWeight() <= 20) {
+            var ticketSetting = ticketSettingService.getSettingOrPredefinedValuesForTicket
+                    (entity.getAccount().getId(), entity.getGroup().getId(),
+                            entity.getAuthor().getId());
+            entity.setTicketStatus(ticketSetting.getTicketStatusForNew());
+            entity.setTicketType(ticketSetting.getTicketTypeForNew());
+            entity.setExecutors(ticketSetting.getExecutors());
+            entity.setObservers(ticketSetting.getObservers());
+        }
+    }
+
+    private void setValueToFieldsOnUpdate(Ticket entity, User currentUser) {
+        var entityFromDatabase = super.findByIdAndAccountId(entity.getId(), entity.getAccount().getId());
+        entity.setNumber(entityFromDatabase.getNumber());
+        entity.setCreatedAt(entityFromDatabase.getCreatedAt());
+        entity.setFiles(entityFromDatabase.getFiles());
+        entity.setTicketTemplate(entityFromDatabase.getTicketTemplate());
+        entity.setGroup(entity.getAuthor().getGroup());
+
+        if ((currentUser.getRole().getWeight() <= 40 && !currentUser.getGroup().getIsInner())
+                || currentUser.getRole().getWeight() <= 20) {
+            entity.setExecutors(entityFromDatabase.getExecutors());
+            entity.setObservers(entityFromDatabase.getObservers());
         }
     }
 
