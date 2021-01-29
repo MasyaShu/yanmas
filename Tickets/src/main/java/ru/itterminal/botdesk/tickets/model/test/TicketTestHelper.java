@@ -2,6 +2,7 @@ package ru.itterminal.botdesk.tickets.model.test;
 
 import java.util.List;
 
+import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.aau.model.test.GroupTestHelper;
 import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
@@ -54,6 +55,17 @@ public class TicketTestHelper extends EntityTestHelperImpl<Ticket, TicketDtoRequ
                 .ticketTemplate(ticketTemplate)
                 .build();
         setRandomValidPropertiesOfBaseEntity(ticket);
+        List<User> observers = userTestHelper.getRandomValidEntityList(3);
+        for (User user : observers) {
+            user.setAccount(account);
+        }
+        List<User> executors = userTestHelper.getRandomValidEntityList(3);
+        for (User user : executors) {
+            user.setAccount(account);
+        }
+        ticket.setObservers(observers);
+        ticket.setExecutors(executors);
+
         return ticket;
     }
 
