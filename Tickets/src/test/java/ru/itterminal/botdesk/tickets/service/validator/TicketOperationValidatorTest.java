@@ -38,6 +38,7 @@ import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.test.GroupTestHelper;
 import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
+import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
@@ -51,8 +52,11 @@ class TicketOperationValidatorTest {
     @MockBean
     private GroupServiceImpl groupService;
 
+    @MockBean
+    private UserServiceImpl userService;
+
     @Autowired
-    private final TicketOperationValidator validator = new TicketOperationValidator(groupService);
+    private final TicketOperationValidator validator = new TicketOperationValidator(groupService, userService);
 
     private final TicketTestHelper ticketTestHelper = new TicketTestHelper();
     private final GroupTestHelper groupTestHelper = new GroupTestHelper();

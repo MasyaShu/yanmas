@@ -53,9 +53,9 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
         UUID id = UUID.randomUUID();
         entity.setId(id);
         entity.generateDisplayName();
+        // TODO upload settings into the ticket according permissions of the current user
         validator.checkUniqueness(entity);
-        var numberForNewTicket = ticketCounterService.getTicketNumber(entity.getAccount().getId());
-        entity.setNumber(numberForNewTicket);
+        entity.setNumber(ticketCounterService.getTicketNumber(entity.getAccount().getId()));
         var createdEntity = repository.create(entity);
         log.trace(format(CREATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), createdEntity.toString()));
         return createdEntity;
@@ -71,6 +71,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
         entity.setCreatedAt(entityFromDatabase.getCreatedAt());
         entity.setFiles(entityFromDatabase.getFiles());
         entity.setTicketTemplate(entityFromDatabase.getTicketTemplate());
+        // TODO upload values into the ticket from entityFromDatabase according permissions of the current user
         try {
             entity.generateDisplayName();
             var updatedEntity = repository.update(entity);

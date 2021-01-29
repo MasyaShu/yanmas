@@ -8,6 +8,7 @@ import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.ifEr
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
+import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 import ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
@@ -25,6 +27,9 @@ import ru.itterminal.botdesk.tickets.model.Ticket;
 @Component
 @RequiredArgsConstructor
 public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket> {
+
+    private final GroupServiceImpl groupService;
+    private final UserServiceImpl userService;
 
     public static final String USER_IS_NOT_FROM_INNER_GROUP = "User is not from inner group";
     public static final String USER_FROM_NOT_INNER_GROUP_MUST_CREATE_UPDATE_TICKET_ONLY_WITH_HIS_GROUP =
@@ -45,7 +50,15 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
             "Weight of role (%s) into field Executors less than weight of role Executor (%s)";
     public static final String WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS_LESS_THAN_WEIGHT_OF_ROLE_OBSERVER =
             "Weight of role (%s) into field Observers less than weight of role Observer (%s)";
-    private final GroupServiceImpl groupService;
+    public static final String
+            CURRENT_USER_WITH_ROLE_AUTHOR_CAN_NOT_UPDATE_TICKET =
+            "Current user with role AUTHOR can not update ticket if author of ticket is not equal current user";
+    public static final String
+            CURRENT_USER_WITH_ROLE_EXECUTOR_CAN_NOT_UPDATE_TICKET =
+            "Current user with role EXECUTOR can not update ticket if he is not in executors of ticket";
+    public static final String
+            LOG_CURRENT_USER_WITH_ROLE_AUTHOR_CAN_NOT_CREATE_TICKET =
+            "Current user %s with role AUTHOR can not create ticket if author of ticket %s is not equal current user";
 
     public static final String EMPTY_TICKET = "Empty ticket";
     public static final String LOG_EMPTY_TICKET = "Mustn't create/update ticket if subject, description and files are"
@@ -63,6 +76,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
     @Override
     public boolean beforeUpdate(Ticket entity) {
         var result = super.beforeUpdate(entity);
+        checkAccessForCreate(entity);
         beforeCreateUpdate(entity);
         return result;
     }
@@ -188,6 +202,33 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
             }
         }
 
+    }
+
+    private void checkAccessForCreate(Ticket ticket) {
+        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var currentUser = userService.findByEmail(jwtUser.getUsername()).get();
+        var nameOfRoleOfCurrentUser = currentUser.getRole().getName();
+        var isCurrentUserFromInnerGroup = currentUser.getGroup().getIsInner();
+        var isAuthorOfTicketFromInnerGroup = ticket.getAuthor().getGroup().getIsInner();
+
+        if (nameOfRoleOfCurrentUser.equals(Roles.ADMIN.toString())
+                && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
+                && Boolean.TRUE.equals(isAuthorOfTicketFromInnerGroup)) {
+            throw new AccessDeniedException
+                    ("Current user with role ADMIN from outer group can not create ticket if author of ticket is "
+                             + "from inner group");
+        }
+
+//        if (nameOfRoleOfCurrentUser.getName().equals(Roles.AUTHOR.toString()) && !currentUser
+//                .equals(ticket.getAuthor())) {
+//            log.error(format(LOG_CURRENT_USER_WITH_ROLE_AUTHOR_CAN_NOT_CREATE_TICKET, currentUser, ticket));
+//            throw new AccessDeniedException(CURRENT_USER_WITH_ROLE_AUTHOR_CAN_NOT_UPDATE_TICKET);
+//        }
+//        if (nameOfRoleOfCurrentUser.getName().equals(Roles.EXECUTOR.toString())
+//                && !ticket.getExecutors().contains(currentUser)) {
+//            log.error(format(""));
+//            throw new AccessDeniedException(CURRENT_USER_WITH_ROLE_AUTHOR_CAN_NOT_UPDATE_TICKET);
+//        }
     }
 
 }
