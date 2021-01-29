@@ -2,6 +2,8 @@ package ru.itterminal.botdesk.tickets.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -111,8 +113,9 @@ class TicketServiceImplTest {
         assertEquals(ticket.getNumber(), number);
     }
 
-    @Test
-    void create_shouldCreateTicketAndSetTicketSetting_whenCurrentUserAdminExecutorAuthorNotInnerGroup() {
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3})
+    void create_shouldCreateTicketAndSetTicketSetting_whenCurrentUserAdminExecutorAuthorNotInnerGroup(int indexRole) {
         currentUser.getGroup().setIsInner(false);
         Long number = (long) (Math.random() * 1000);
         when(validator.beforeCreate(any())).thenReturn(true);
@@ -120,22 +123,20 @@ class TicketServiceImplTest {
         when(repository.create(any())).thenReturn(ticket);
         when(counterService.getTicketNumber(any())).thenReturn(number);
         when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any(), any())).thenReturn(ticketSetting);
-        for (int i = 1; i <= 3; i++) {
-            currentUser.setRole(roleTestHelper.setPredefinedValidEntityList().get(1));
-            var updatedTicket = service.create(ticket, currentUser);
-            assertEquals(ticket, updatedTicket);
-            verify(validator, times(i)).beforeCreate(any());
-            verify(validator, times(i)).checkUniqueness(any());
-            verify(repository, times(i)).create(any());
-            verify(counterService, times(i)).getTicketNumber(any());
-            verify(ticketSettingService, times(i)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
-            assertEquals(ticket.getTicketStatus(), ticketSetting.getTicketStatusForNew());
-            assertEquals(ticket.getTicketType(), ticketSetting.getTicketTypeForNew());
-            assertEquals(ticket.getExecutors(), ticketSetting.getExecutors());
-            assertEquals(ticket.getObservers(), ticketSetting.getObservers());
-            assertEquals(ticket.getGroup(), ticket.getAuthor().getGroup());
-            assertEquals(ticket.getNumber(), number);
-        }
+        currentUser.setRole(roleTestHelper.setPredefinedValidEntityList().get(indexRole));
+        var updatedTicket = service.create(ticket, currentUser);
+        assertEquals(ticket, updatedTicket);
+        verify(validator, times(1)).beforeCreate(any());
+        verify(validator, times(1)).checkUniqueness(any());
+        verify(repository, times(1)).create(any());
+        verify(counterService, times(1)).getTicketNumber(any());
+        verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
+        assertEquals(ticket.getTicketStatus(), ticketSetting.getTicketStatusForNew());
+        assertEquals(ticket.getTicketType(), ticketSetting.getTicketTypeForNew());
+        assertEquals(ticket.getExecutors(), ticketSetting.getExecutors());
+        assertEquals(ticket.getObservers(), ticketSetting.getObservers());
+        assertEquals(ticket.getGroup(), ticket.getAuthor().getGroup());
+        assertEquals(ticket.getNumber(), number);
     }
 
     @Test
@@ -163,8 +164,9 @@ class TicketServiceImplTest {
         assertEquals(ticket.getNumber(), number);
     }
 
-    @Test
-    void create_shouldCreateTicket_whenPassedValidDataCurrentUserAccountOwnerAdminExecutorInnerGroup() {
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 2})
+    void create_shouldCreateTicket_whenPassedValidDataCurrentUserAccountOwnerAdminExecutorInnerGroup(int indexRole) {
         currentUser.getGroup().setIsInner(true);
         Long number = (long) (Math.random() * 1000);
         when(validator.beforeCreate(any())).thenReturn(true);
@@ -172,22 +174,17 @@ class TicketServiceImplTest {
         when(repository.create(any())).thenReturn(ticket);
         when(counterService.getTicketNumber(any())).thenReturn(number);
         when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any(), any())).thenReturn(ticketSetting);
-        for (int i = 0; i <= 2; i++) {
-            currentUser.setRole(roleTestHelper.setPredefinedValidEntityList().get(i));
-            var updatedTicket = service.create(ticket, currentUser);
-            assertEquals(ticket, updatedTicket);
-            verify(validator, times(i + 1)).beforeCreate(any());
-            verify(validator, times(i + 1)).checkUniqueness(any());
-            verify(repository, times(i + 1)).create(any());
-            verify(counterService, times(i + 1)).getTicketNumber(any());
-            verify(ticketSettingService, times(0)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
-            assertEquals(ticket.getGroup(), ticket.getAuthor().getGroup());
-            assertEquals(ticket.getNumber(), number);
-        }
+        currentUser.setRole(roleTestHelper.setPredefinedValidEntityList().get(indexRole));
+        var updatedTicket = service.create(ticket, currentUser);
+        assertEquals(ticket, updatedTicket);
+        verify(validator, times(1)).beforeCreate(any());
+        verify(validator, times(1)).checkUniqueness(any());
+        verify(repository, times(1)).create(any());
+        verify(counterService, times(1)).getTicketNumber(any());
+        verify(ticketSettingService, times(0)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
+        assertEquals(ticket.getGroup(), ticket.getAuthor().getGroup());
+        assertEquals(ticket.getNumber(), number);
     }
-
-
-    ////////////////////////
 
     @Test
     void update_shouldUpdateTicketAndSetFieldsFromDataBase_whenPassedValidDataCurrentUserAuthorInnerGroup() {
@@ -218,34 +215,30 @@ class TicketServiceImplTest {
         assertEquals(updatedTicket.getExecutors(), ticketFromDataBase.getExecutors());
     }
 
-    @Test
-    void update_shouldUpdateTicketAndSetFieldsFromDataBase_whenCurrentUserAdminExecutorAuthorNotInnerGroup() {
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3})
+    void update_shouldUpdateTicketAndSetFieldsFromDataBase_whenCurrentUserAdminExecutorAuthorNotInnerGroup(int indexRole) {
         currentUser.getGroup().setIsInner(true);
         var ticketFromDataBase = ticketTestHelper.getRandomValidEntity();
         when(validator.beforeUpdate(any())).thenReturn(true);
         when(repository.existsById(any())).thenReturn(true);
         when(repository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(ticketFromDataBase));
         when(repository.update(any())).thenReturn(ticket);
-        for (int i = 1; i <= 3; i++) {
-            currentUser.setRole(roleTestHelper.setPredefinedValidEntityList().get(i));
-            var updatedTicket = service.update(ticket, currentUser);
-            assertEquals(ticket, updatedTicket);
-
-            verify(validator, times(i)).beforeUpdate(any());
-            verify(repository, times(i)).existsById(any());
-            verify(repository, times(i)).findByIdAndAccountId(any(), any());
-            verify(repository, times(i)).update(any());
-            verify(counterService, times(0)).getTicketNumber(any());
-
-            assertEquals(updatedTicket.getNumber(), ticketFromDataBase.getNumber());
-            assertEquals(updatedTicket.getCreatedAt(), ticketFromDataBase.getCreatedAt());
-            assertEquals(updatedTicket.getFiles(), ticketFromDataBase.getFiles());
-            assertEquals(updatedTicket.getTicketTemplate(), ticketFromDataBase.getTicketTemplate());
-            assertEquals(ticket.getGroup(), ticket.getAuthor().getGroup());
-
-            assertEquals(updatedTicket.getObservers(), ticketFromDataBase.getObservers());
-            assertEquals(updatedTicket.getExecutors(), ticketFromDataBase.getExecutors());
-        }
+        currentUser.setRole(roleTestHelper.setPredefinedValidEntityList().get(indexRole));
+        var updatedTicket = service.update(ticket, currentUser);
+        assertEquals(ticket, updatedTicket);
+        verify(validator, times(1)).beforeUpdate(any());
+        verify(repository, times(1)).existsById(any());
+        verify(repository, times(1)).findByIdAndAccountId(any(), any());
+        verify(repository, times(1)).update(any());
+        verify(counterService, times(0)).getTicketNumber(any());
+        assertEquals(updatedTicket.getNumber(), ticketFromDataBase.getNumber());
+        assertEquals(updatedTicket.getCreatedAt(), ticketFromDataBase.getCreatedAt());
+        assertEquals(updatedTicket.getFiles(), ticketFromDataBase.getFiles());
+        assertEquals(updatedTicket.getTicketTemplate(), ticketFromDataBase.getTicketTemplate());
+        assertEquals(ticket.getGroup(), ticket.getAuthor().getGroup());
+        assertEquals(updatedTicket.getObservers(), ticketFromDataBase.getObservers());
+        assertEquals(updatedTicket.getExecutors(), ticketFromDataBase.getExecutors());
     }
 
     @Test
@@ -277,34 +270,30 @@ class TicketServiceImplTest {
         assertEquals(updatedTicket.getExecutors(), ticketFromDataBase.getExecutors());
     }
 
-    @Test
-    void update_shouldUpdateTicketAndNotSetFieldsFromDataBase_whenPassedValidDataCurrentUserAccountOwnerAdminExecutorInnerGroup() {
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 2})
+    void update_shouldUpdateTicketAndNotSetFieldsFromDataBase_whenPassedValidDataCurrentUserAccountOwnerAdminExecutorInnerGroup(int indexRole) {
         currentUser.getGroup().setIsInner(true);
         var ticketFromDataBase = ticketTestHelper.getRandomValidEntity();
         when(validator.beforeUpdate(any())).thenReturn(true);
         when(repository.existsById(any())).thenReturn(true);
         when(repository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(ticketFromDataBase));
         when(repository.update(any())).thenReturn(ticket);
-        for (int i = 0; i <= 2; i++) {
-            currentUser.setRole(roleTestHelper.setPredefinedValidEntityList().get(i));
-            var updatedTicket = service.update(ticket, currentUser);
-            assertEquals(ticket, updatedTicket);
-
-            verify(validator, times(i + 1)).beforeUpdate(any());
-            verify(repository, times(i + 1)).existsById(any());
-            verify(repository, times(i + 1)).findByIdAndAccountId(any(), any());
-            verify(repository, times(i + 1)).update(any());
-            verify(counterService, times(0)).getTicketNumber(any());
-
-            assertEquals(updatedTicket.getNumber(), ticketFromDataBase.getNumber());
-            assertEquals(updatedTicket.getCreatedAt(), ticketFromDataBase.getCreatedAt());
-            assertEquals(updatedTicket.getFiles(), ticketFromDataBase.getFiles());
-            assertEquals(updatedTicket.getTicketTemplate(), ticketFromDataBase.getTicketTemplate());
-            assertEquals(ticket.getGroup(), ticket.getAuthor().getGroup());
-
-            assertEquals(updatedTicket.getObservers(), updatedTicket.getObservers());
-            assertEquals(updatedTicket.getExecutors(), updatedTicket.getExecutors());
-        }
-    }
+        currentUser.setRole(roleTestHelper.setPredefinedValidEntityList().get(indexRole));
+        var updatedTicket = service.update(ticket, currentUser);
+        assertEquals(ticket, updatedTicket);
+        verify(validator, times(1)).beforeUpdate(any());
+        verify(repository, times(1)).existsById(any());
+        verify(repository, times(1)).findByIdAndAccountId(any(), any());
+        verify(repository, times(1)).update(any());
+        verify(counterService, times(0)).getTicketNumber(any());
+        assertEquals(updatedTicket.getNumber(), ticketFromDataBase.getNumber());
+        assertEquals(updatedTicket.getCreatedAt(), ticketFromDataBase.getCreatedAt());
+        assertEquals(updatedTicket.getFiles(), ticketFromDataBase.getFiles());
+        assertEquals(updatedTicket.getTicketTemplate(), ticketFromDataBase.getTicketTemplate());
+        assertEquals(ticket.getGroup(), ticket.getAuthor().getGroup());
+        assertEquals(updatedTicket.getObservers(), updatedTicket.getObservers());
+        assertEquals(updatedTicket.getExecutors(), updatedTicket.getExecutors());
+}
 
 }
