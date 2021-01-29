@@ -13,6 +13,8 @@ import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperatio
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_MESSAGE;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.GROUPS_ARENT_EQUAL;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.GROUPS_ARENT_EQUAL_MESSAGE;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.TICKET_SETTING_IS_EMPTY;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.TICKET_SETTING_UNIQUE_FIELDS;
 
@@ -35,6 +37,7 @@ import ru.itterminal.botdesk.tickets.service.impl.TicketSettingServiceImpl;
 @SpringJUnitConfig(value = {TicketSettingOperationValidator.class})
 class TicketSettingOperationValidatorTest {
 
+    public static final String WRONG_NAME = "Wrong name";
     @MockBean
     private TicketSettingServiceImpl service;
 
@@ -117,6 +120,70 @@ class TicketSettingOperationValidatorTest {
         LogicalValidationException exception = assertThrows(LogicalValidationException.class,
                                                             ()-> validator.beforeUpdate(ticketSetting));
         assertEquals(1, exception.getFieldErrors().get(TICKET_SETTING_IS_EMPTY).size());
+        verify(service, times(1)).findByUniqueFields(any());
+    }
+
+    @Test
+    void beforeCreate_shouldGetLogicalValidationException_whenPassedTicketSettingWithDifferentGroupAndGroupOfAuthor() {
+        var expectedErrors = createMapForLogicalErrors();
+        var ticketSetting = ticketSettingTestHelper.getPredefinedValidEntityList().get(0);
+        var groupOfAuthor = ticketSetting.getAuthor().getGroup();
+        var groupOfEntity = ticketSetting.getGroup();
+        groupOfAuthor.setName(WRONG_NAME);
+        ticketSetting.getAuthor().setGroup(groupOfAuthor);
+        expectedErrors.put(
+                GROUPS_ARENT_EQUAL,
+                singletonList(
+                        new ValidationError(
+                                GROUPS_ARENT_EQUAL,
+                                format(GROUPS_ARENT_EQUAL_MESSAGE, groupOfEntity, groupOfAuthor)
+                        )
+                )
+        );
+        LogicalValidationException expectedException =
+                new LogicalValidationException(VALIDATION_FAILED, expectedErrors);
+
+        LogicalValidationException actualException =
+                assertThrows(
+                        LogicalValidationException.class,
+                        () -> validator.beforeCreate(ticketSetting)
+                );
+        assertEquals(
+                expectedException.getFieldErrors().get(GROUPS_ARENT_EQUAL).get(0),
+                actualException.getFieldErrors().get(GROUPS_ARENT_EQUAL).get(0)
+        );
+        verify(service, times(0)).findByUniqueFields(any());
+    }
+
+    @Test
+    void beforeUpdate_shouldGetLogicalValidationException_whenPassedTicketSettingWithDifferentGroupAndGroupOfAuthor() {
+        var expectedErrors = createMapForLogicalErrors();
+        var ticketSetting = ticketSettingTestHelper.getPredefinedValidEntityList().get(0);
+        var groupOfAuthor = ticketSetting.getAuthor().getGroup();
+        var groupOfEntity = ticketSetting.getGroup();
+        groupOfAuthor.setName(WRONG_NAME);
+        ticketSetting.getAuthor().setGroup(groupOfAuthor);
+        expectedErrors.put(
+                GROUPS_ARENT_EQUAL,
+                singletonList(
+                        new ValidationError(
+                                GROUPS_ARENT_EQUAL,
+                                format(GROUPS_ARENT_EQUAL_MESSAGE, groupOfEntity, groupOfAuthor)
+                        )
+                )
+        );
+        LogicalValidationException expectedException =
+                new LogicalValidationException(VALIDATION_FAILED, expectedErrors);
+
+        LogicalValidationException actualException =
+                assertThrows(
+                        LogicalValidationException.class,
+                        () -> validator.beforeUpdate(ticketSetting)
+                );
+        assertEquals(
+                expectedException.getFieldErrors().get(GROUPS_ARENT_EQUAL).get(0),
+                actualException.getFieldErrors().get(GROUPS_ARENT_EQUAL).get(0)
+        );
         verify(service, times(1)).findByUniqueFields(any());
     }
 

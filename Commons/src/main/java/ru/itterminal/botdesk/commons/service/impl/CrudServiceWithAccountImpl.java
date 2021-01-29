@@ -1,22 +1,20 @@
 package ru.itterminal.botdesk.commons.service.impl;
 
-import lombok.extern.slf4j.Slf4j;
+import static java.lang.String.format;
 
-import org.springframework.dao.OptimisticLockingFailureException;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 import ru.itterminal.botdesk.commons.repository.EntityRepositoryWithAccount;
 import ru.itterminal.botdesk.commons.service.CrudServiceWithAccount;
 import ru.itterminal.botdesk.commons.service.validator.OperationValidator;
-
-import java.util.List;
-import java.util.UUID;
-
-import static java.lang.String.format;
-
-import javax.persistence.OptimisticLockException;
 
 /**
  * Skeletal implementation of general CRUD operations for each dictionary
@@ -44,7 +42,10 @@ public abstract class CrudServiceWithAccountImpl<
     @Transactional(readOnly = true)
     @Override
     public List<E> findAllByAccountIdAndListId(UUID accountId, List<UUID> listId) {
-        return repository.findAllByAccountIdAndListId(accountId, listId);
+        if (listId!=null && !listId.isEmpty()) {
+            return repository.findAllByAccountIdAndListId(accountId, listId);
+        }
+        return Collections.emptyList();
     }
 
     @Transactional(readOnly = true)

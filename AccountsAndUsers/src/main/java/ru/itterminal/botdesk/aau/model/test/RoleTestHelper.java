@@ -34,6 +34,15 @@ public class RoleTestHelper extends EntityTestHelperImpl<Role, RoleDto,RoleDto> 
         return role;
     }
 
+    /*
+    indexes
+     0 - ACCOUNT_OWNER
+     1  - ADMIN
+     2  - EXECUTOR
+     3 - AUTHOR
+     4 - OBSERVER
+     */
+
     @Override
     public List<Role> setPredefinedValidEntityList() {
         List<Role> roleList = new ArrayList<>();

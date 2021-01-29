@@ -130,7 +130,6 @@ class UserServiceImplTest {
         verify(validator, times(1)).beforeCreate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(userRepository, times(1)).create(any());
-
     }
 
     @Test

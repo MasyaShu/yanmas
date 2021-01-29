@@ -11,14 +11,20 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
-import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.ACCOUNTS_ARE_DIFFERENT;
-import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.ACCOUNT_OF_TICKET_IS_NOT_EQUAL_FOR_THE_FOLLOWING_FIELDS;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.EMPTY_TICKET;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.GROUP_OF_TICKET;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.GROUP_OF_TICKET_MUST_EQUALS_GROUP_OF_AUTHOR_OF_TICKET;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.MUST_NOT_CREATE_UPDATE_TICKET_IF_SUBJECT_DESCRIPTION_AND_FILES_ARE_EMPTY;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.USER_FROM_NOT_INNER_GROUP_MUST_CREATE_UPDATE_TICKET_ONLY_WITH_HIS_GROUP;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.USER_IS_NOT_FROM_INNER_GROUP;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR_LESS_THAN_WEIGHT_OF_ROLE_AUTHOR;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS_LESS_THAN_WEIGHT_OF_ROLE_EXECUTOR;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS_LESS_THAN_WEIGHT_OF_ROLE_OBSERVER;
+
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +34,11 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
+import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.test.GroupTestHelper;
+import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
+import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
@@ -44,12 +52,15 @@ class TicketOperationValidatorTest {
     @MockBean
     private GroupServiceImpl groupService;
 
+    @MockBean
+    private UserServiceImpl userService;
+
     @Autowired
-    private final TicketOperationValidator validator = new TicketOperationValidator(groupService);
+    private final TicketOperationValidator validator = new TicketOperationValidator(groupService, userService);
 
     private final TicketTestHelper ticketTestHelper = new TicketTestHelper();
     private final GroupTestHelper groupTestHelper = new GroupTestHelper();
-    private final AccountTestHelper accountTestHelper = new AccountTestHelper();
+    private final RoleTestHelper roleTestHelper = new RoleTestHelper();
 
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
@@ -90,7 +101,6 @@ class TicketOperationValidatorTest {
         var actualResult = validator.beforeCreate(ticket);
         assertTrue(actualResult);
         verify(groupService, times(1)).findByIdAndAccountId(any(), any());
-        // Account of ticket is not equal for the following fields: group, author, ticketStatus, ticketType, ticketTemplate
     }
 
     @Test
@@ -269,23 +279,20 @@ class TicketOperationValidatorTest {
 
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    void beforeCreate_shouldGetLogicalValidationException_whenAccountOfTicketIsNotEqualForTheNestedFields() {
+    void beforeCreate_shouldGetLogicalValidationException_whenWeightOfRoleOfAuthorLessThanAccordingWeightOfRole() {
         var expectedErrors = createMapForLogicalErrors();
         var ticket = ticketTestHelper.getRandomValidEntity();
-        ticket.getAuthor().setAccount(accountTestHelper.getRandomValidEntity());
-        ticket.getGroup().setAccount(accountTestHelper.getRandomValidEntity());
-        ticket.setTicketStatus(null);
-        ticket.setTicketTemplate(null);
-        ticket.setTicketType(null);
+        ticket.getAuthor().setRole(roleTestHelper.getPredefinedValidEntityList().get(4));
         when(groupService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getGroup());
         expectedErrors.put(
-                ACCOUNTS_ARE_DIFFERENT,
+                WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR,
                 singletonList(
                         new ValidationError(
-                                ACCOUNTS_ARE_DIFFERENT,
+                                WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR,
                                 format(
-                                        ACCOUNT_OF_TICKET_IS_NOT_EQUAL_FOR_THE_FOLLOWING_FIELDS,
-                                        "group, author"
+                                        WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR_LESS_THAN_WEIGHT_OF_ROLE_AUTHOR,
+                                        ticket.getAuthor().getRole().getWeight(),
+                                        Roles.AUTHOR.getWeight()
                                 )
                         )
                 )
@@ -298,31 +305,100 @@ class TicketOperationValidatorTest {
                         () -> validator.beforeCreate(ticket)
                 );
         assertEquals(
-                expectedException.getFieldErrors().get(ACCOUNTS_ARE_DIFFERENT).get(0),
-                actualException.getFieldErrors().get(ACCOUNTS_ARE_DIFFERENT).get(0)
+                expectedException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR).get(0),
+                actualException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR).get(0)
         );
         verify(groupService, times(1)).findByIdAndAccountId(any(), any());
     }
 
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    void beforeUpdate_shouldGetLogicalValidationException_whenAccountOfTicketIsNotEqualForTheNestedFields() {
+    void beforeCreate_shouldGetLogicalValidationException_whenWeightOfRoleOfObserverLessThanAccordingWeightOfRole() {
         var expectedErrors = createMapForLogicalErrors();
         var ticket = ticketTestHelper.getRandomValidEntity();
-        ticket.getAuthor().setAccount(accountTestHelper.getRandomValidEntity());
-        ticket.getGroup().setAccount(accountTestHelper.getRandomValidEntity());
-        ticket.setTicketStatus(null);
-        ticket.setTicketTemplate(null);
-        ticket.setTicketType(null);
+        var observer = ticket.getAuthor();
+        observer.getRole().setWeight(0);
+        ticket.setObservers(List.of(observer));
         when(groupService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getGroup());
         expectedErrors.put(
-                ACCOUNTS_ARE_DIFFERENT,
+                WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS,
                 singletonList(
                         new ValidationError(
-                                ACCOUNTS_ARE_DIFFERENT,
+                                WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS,
                                 format(
-                                        ACCOUNT_OF_TICKET_IS_NOT_EQUAL_FOR_THE_FOLLOWING_FIELDS,
-                                        "group, author"
+                                        WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS_LESS_THAN_WEIGHT_OF_ROLE_OBSERVER,
+                                        ticket.getObservers().get(0).getRole().getWeight(),
+                                        Roles.OBSERVER.getWeight()
+                                )
+                        )
+                )
+        );
+        LogicalValidationException expectedException =
+                new LogicalValidationException(VALIDATION_FAILED, expectedErrors);
+        LogicalValidationException actualException =
+                assertThrows(
+                        LogicalValidationException.class,
+                        () -> validator.beforeCreate(ticket)
+                );
+        assertEquals(
+                expectedException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS).get(0),
+                actualException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS).get(0)
+        );
+        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
+    }
+
+    @Test
+    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
+    void beforeCreate_shouldGetLogicalValidationException_whenWeightOfRoleOfExecutorLessThanAccordingWeightOfRole() {
+        var expectedErrors = createMapForLogicalErrors();
+        var ticket = ticketTestHelper.getRandomValidEntity();
+        var executor = ticket.getAuthor();
+        executor.getRole().setWeight(0);
+        ticket.setExecutors(List.of(executor));
+        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getGroup());
+        expectedErrors.put(
+                WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS,
+                singletonList(
+                        new ValidationError(
+                                WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS,
+                                format(
+                                        WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS_LESS_THAN_WEIGHT_OF_ROLE_EXECUTOR,
+                                        ticket.getExecutors().get(0).getRole().getWeight(),
+                                        Roles.EXECUTOR.getWeight()
+                                )
+                        )
+                )
+        );
+        LogicalValidationException expectedException =
+                new LogicalValidationException(VALIDATION_FAILED, expectedErrors);
+        LogicalValidationException actualException =
+                assertThrows(
+                        LogicalValidationException.class,
+                        () -> validator.beforeCreate(ticket)
+                );
+        assertEquals(
+                expectedException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS).get(0),
+                actualException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS).get(0)
+        );
+        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
+    }
+
+    @Test
+    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
+    void beforeUpdate_shouldGetLogicalValidationException_whenWeightOfRoleOfAuthorLessThanAccordingWeightOfRole() {
+        var expectedErrors = createMapForLogicalErrors();
+        var ticket = ticketTestHelper.getRandomValidEntity();
+        ticket.getAuthor().setRole(roleTestHelper.getPredefinedValidEntityList().get(4));
+        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getGroup());
+        expectedErrors.put(
+                WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR,
+                singletonList(
+                        new ValidationError(
+                                WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR,
+                                format(
+                                        WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR_LESS_THAN_WEIGHT_OF_ROLE_AUTHOR,
+                                        ticket.getAuthor().getRole().getWeight(),
+                                        Roles.AUTHOR.getWeight()
                                 )
                         )
                 )
@@ -335,8 +411,80 @@ class TicketOperationValidatorTest {
                         () -> validator.beforeUpdate(ticket)
                 );
         assertEquals(
-                expectedException.getFieldErrors().get(ACCOUNTS_ARE_DIFFERENT).get(0),
-                actualException.getFieldErrors().get(ACCOUNTS_ARE_DIFFERENT).get(0)
+                expectedException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR).get(0),
+                actualException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR).get(0)
+        );
+        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
+    }
+
+    @Test
+    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
+    void beforeUpdate_shouldGetLogicalValidationException_whenWeightOfRoleOfObserverLessThanAccordingWeightOfRole() {
+        var expectedErrors = createMapForLogicalErrors();
+        var ticket = ticketTestHelper.getRandomValidEntity();
+        var observer = ticket.getAuthor();
+        observer.getRole().setWeight(0);
+        ticket.setObservers(List.of(observer));
+        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getGroup());
+        expectedErrors.put(
+                WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS,
+                singletonList(
+                        new ValidationError(
+                                WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS,
+                                format(
+                                        WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS_LESS_THAN_WEIGHT_OF_ROLE_OBSERVER,
+                                        ticket.getObservers().get(0).getRole().getWeight(),
+                                        Roles.OBSERVER.getWeight()
+                                )
+                        )
+                )
+        );
+        LogicalValidationException expectedException =
+                new LogicalValidationException(VALIDATION_FAILED, expectedErrors);
+        LogicalValidationException actualException =
+                assertThrows(
+                        LogicalValidationException.class,
+                        () -> validator.beforeUpdate(ticket)
+                );
+        assertEquals(
+                expectedException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS).get(0),
+                actualException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS).get(0)
+        );
+        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
+    }
+
+    @Test
+    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
+    void beforeUpdate_shouldGetLogicalValidationException_whenWeightOfRoleOfExecutorLessThanAccordingWeightOfRole() {
+        var expectedErrors = createMapForLogicalErrors();
+        var ticket = ticketTestHelper.getRandomValidEntity();
+        var executor = ticket.getAuthor();
+        executor.getRole().setWeight(0);
+        ticket.setExecutors(List.of(executor));
+        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getGroup());
+        expectedErrors.put(
+                WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS,
+                singletonList(
+                        new ValidationError(
+                                WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS,
+                                format(
+                                        WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS_LESS_THAN_WEIGHT_OF_ROLE_EXECUTOR,
+                                        ticket.getExecutors().get(0).getRole().getWeight(),
+                                        Roles.EXECUTOR.getWeight()
+                                )
+                        )
+                )
+        );
+        LogicalValidationException expectedException =
+                new LogicalValidationException(VALIDATION_FAILED, expectedErrors);
+        LogicalValidationException actualException =
+                assertThrows(
+                        LogicalValidationException.class,
+                        () -> validator.beforeUpdate(ticket)
+                );
+        assertEquals(
+                expectedException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS).get(0),
+                actualException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS).get(0)
         );
         verify(groupService, times(1)).findByIdAndAccountId(any(), any());
     }
