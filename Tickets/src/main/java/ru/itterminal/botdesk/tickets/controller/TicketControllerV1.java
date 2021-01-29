@@ -96,7 +96,7 @@ public class TicketControllerV1 extends BaseController {
     }
 
     @PutMapping("/check-access")
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR', 'AUTHOR')")
     public ResponseEntity<String> updateCheckAccess() {
         String message = format(SUCCESSFUL_CHECK_ACCESS, WORD_UPDATE, ENTITY_NAME);
         log.trace(message);

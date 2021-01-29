@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
-import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 import ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl;
@@ -28,19 +27,54 @@ import ru.itterminal.botdesk.tickets.model.Ticket;
 @RequiredArgsConstructor
 public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket> {
 
-    private final GroupServiceImpl groupService;
-    private final UserServiceImpl userService;
-
-    public static final String USER_IS_NOT_FROM_INNER_GROUP = "User is not from inner group";
-    public static final String USER_FROM_NOT_INNER_GROUP_MUST_CREATE_UPDATE_TICKET_ONLY_WITH_HIS_GROUP =
-            "User from not inner group must create/update ticket only with his group";
-    public static final String LOG_USER_FROM_NOT_INNER_GROUP =
-            "User {} from not inner group must create/update ticket {} only with his group";
-    public static final String GROUP_OF_TICKET = "Group of ticket";
-    public static final String GROUP_OF_TICKET_MUST_EQUALS_GROUP_OF_AUTHOR_OF_TICKET =
-            "Group of ticket must equals group of author of ticket";
-    public static final String LOG_GROUP_OF_TICKET =
-            "Group of ticket {} must equals group of author of ticket {}";
+    public static final String
+            CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP =
+            "Current user with role ADMIN from outer group can not create/update ticket if author of ticket is from inner group";
+    public static final String
+            LOG_CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP =
+            "Current user (%s) with role ADMIN from outer group can not create/update ticket (%s) if author of ticket is from inner group";
+    public static final String
+            LOG_CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP =
+            "Current user (%s) with role ADMIN from outer group can not create/update ticket (%s) if ticket is from another group";
+    public static final String
+            CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP =
+            "Current user with role ADMIN from outer group can not create/update ticket if ticket is from another group";
+    public static final String
+            LOG_CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP =
+            "Current user (%s) with role EXECUTOR from outer group can not create/update ticket (%s) if author of ticket is from inner group";
+    public static final String
+            CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP =
+            "Current user with role EXECUTOR from outer group can not create/update ticket if author of ticket is from inner group";
+    public static final String
+            LOG_CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP =
+            "Current user (%s) with role EXECUTOR from outer group can not create/update ticket (%s) if ticket is from another group";
+    public static final String
+            CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP =
+            "Current user with role EXECUTOR from outer group can not create/update ticket if ticket is from another group";
+    public static final String
+            LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER =
+            "Current user (%s) with role AUTHOR from inner group can not create/update ticket (%s) if author of ticket is not current user";
+    public static final String
+            CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER =
+            "Current user with role AUTHOR from inner group can not create/update ticket if author of ticket is not current user";
+    public static final String
+            LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER =
+            "Current user (%s) with role AUTHOR from outer group can not create/update ticket (%s) if author of ticket is not current user";
+    public static final String
+            CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER =
+            "Current user with role AUTHOR from outer group can not create/update ticket if author of ticket is not current user";
+    public static final String
+            LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP =
+            "Current user (%s) with role AUTHOR from outer group can not create/update ticket (%s) if author of ticket is from inner group";
+    public static final String
+            CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP =
+            "Current user with role AUTHOR from outer group can not create/update ticket if author of ticket is from inner group";
+    public static final String
+            LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_OUTER_GROUP =
+            "Current user (%s) with role AUTHOR from inner group can not create/update ticket (%s) if author of ticket is from outer group";
+    public static final String
+            CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_OUTER_GROUP =
+            "Current user with role AUTHOR from inner group can not create/update ticket if author of ticket is from outer group";
     public static final String WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR = "Weight of role into field Author";
     public static final String WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS = "Weight of role into field Executors";
     public static final String WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS = "Weight of role into field Observers";
@@ -50,25 +84,90 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
             "Weight of role (%s) into field Executors less than weight of role Executor (%s)";
     public static final String WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS_LESS_THAN_WEIGHT_OF_ROLE_OBSERVER =
             "Weight of role (%s) into field Observers less than weight of role Observer (%s)";
-    public static final String
-            CURRENT_USER_WITH_ROLE_AUTHOR_CAN_NOT_UPDATE_TICKET =
-            "Current user with role AUTHOR can not update ticket if author of ticket is not equal current user";
-    public static final String
-            CURRENT_USER_WITH_ROLE_EXECUTOR_CAN_NOT_UPDATE_TICKET =
-            "Current user with role EXECUTOR can not update ticket if he is not in executors of ticket";
-    public static final String
-            LOG_CURRENT_USER_WITH_ROLE_AUTHOR_CAN_NOT_CREATE_TICKET =
-            "Current user %s with role AUTHOR can not create ticket if author of ticket %s is not equal current user";
-
     public static final String EMPTY_TICKET = "Empty ticket";
     public static final String LOG_EMPTY_TICKET = "Mustn't create/update ticket if subject, description and files are"
             + " empty: {}";
     public static final String MUST_NOT_CREATE_UPDATE_TICKET_IF_SUBJECT_DESCRIPTION_AND_FILES_ARE_EMPTY =
             "Mustn't create/update ticket if subject, description and files are empty";
+    public static final String
+            LOG_CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP =
+            "Current user (%s) with role ADMIN from outer group can not read ticket (%s) if author of ticket is from inner group";
+    public static final String
+            CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP =
+            "Current user with role ADMIN from outer group can not read ticket if author of ticket is from inner group";
+    public static final String
+            LOG_CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP =
+            "Current user (%s) with role ADMIN from outer group can not read ticket (%s) if ticket is from another group";
+    public static final String
+            CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP =
+            "Current user with role ADMIN from outer group can not read ticket if ticket is from another group";
+    public static final String
+            LOG_CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP =
+            "Current user (%s) with role EXECUTOR from outer group can not read ticket (%s) if author of ticket is from inner group";
+    public static final String
+            CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP =
+            "Current user with role EXECUTOR from outer group can not read ticket if author of ticket is from inner group";
+    public static final String
+            LOG_CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP =
+            "Current user (%s) with role EXECUTOR from outer group can not read ticket (%s) if ticket is from another group";
+    public static final String
+            CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP =
+            "Current user with role EXECUTOR from outer group can not read ticket if ticket is from another group";
+    public static final String
+            LOG_CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_IN_EXECUTORS =
+            "Current user (%s) with role EXECUTOR from outer group can not read ticket (%s) if ticket has not current user in executors";
+    public static final String
+            CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_AS_A_AUTHOR_AND_HAS_NOT_IN_EXECUTORS_AND_HAS_NOT_IN_OBSERVERS =
+            "Current user with role EXECUTOR from outer group can not read ticket if ticket has not current user as a author and has not in executors and has not in observers";
+    public static final String
+            LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER =
+            "Current user (%s) with role AUTHOR from inner group can not read ticket (%s) if author of ticket is not current user";
+    public static final String
+            CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER =
+            "Current user with role AUTHOR from inner group can not read ticket if author of ticket is not current user";
+    public static final String
+            LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_OUTER_GROUP =
+            "Current user (%s) with role AUTHOR from inner group can not read ticket (%s) if author of ticket is from outer group";
+    public static final String
+            CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_OUTER_GROUP =
+            "Current user with role AUTHOR from inner group can not read ticket if author of ticket is from outer group";
+    public static final String
+            LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_AS_A_AUTHOR_AND_HAS_NOT_IN_OBSERVERS =
+            "Current user (%s) with role AUTHOR from inner group can not read ticket (%s) if ticket has not current user as a author and has not in observers";
+    public static final String
+            CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_AS_A_AUTHOR_AND_HAS_NOT_IN_OBSERVERS =
+            "Current user with role AUTHOR from inner group can not read ticket if ticket has not current user as a author and has not in observers";
+    public static final String
+            LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP =
+            "Current user (%s) with role AUTHOR from outer group can not read ticket (%s) if author of ticket is from inner group";
+    public static final String
+            CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP =
+            "Current user with role AUTHOR from outer group can not read ticket if author of ticket is from inner group";
+    public static final String
+            LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER =
+            "Current user (%s) with role AUTHOR from outer group can not read ticket (%s) if author of ticket is not current user";
+    public static final String
+            CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER =
+            "Current user with role AUTHOR from outer group can not read ticket if author of ticket is not current user";
+    public static final String
+            LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_AS_A_AUTHOR_AND_HAS_NOT_CURRENT_USER_IN_OBSERVERS =
+            "Current user (%s) with role AUTHOR from outer group can not read ticket (%s) if ticket has not current user as a author and has not current user in observers";
+    public static final String
+            CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_AS_A_AUTHOR_AND_HAS_NOT_IN_OBSERVERS1 =
+            "Current user with role AUTHOR from outer group can not read ticket if ticket has not current user as a author and has not in observers";
+    public static final String
+            LOG_CURRENT_USER_WITH_ROLE_OBSERVER_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_IN_OBSERVERS =
+            "Current user (%s) with role OBSERVER can not read ticket (%s) if ticket has not current user in observers";
+    public static final String
+            CURRENT_USER_WITH_ROLE_OBSERVER_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_IN_OBSERVERS =
+            "Current user with role OBSERVER can not read ticket if ticket has not current user in observers";
+
+    private final UserServiceImpl userService;
 
     @Override
     public boolean beforeCreate(Ticket entity) {
         var result = super.beforeCreate(entity);
+        checkAccessForCreateAndUpdate(entity);
         beforeCreateUpdate(entity);
         return result;
     }
@@ -76,7 +175,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
     @Override
     public boolean beforeUpdate(Ticket entity) {
         var result = super.beforeUpdate(entity);
-        checkAccessForCreate(entity);
+        checkAccessForCreateAndUpdate(entity);
         beforeCreateUpdate(entity);
         return result;
     }
@@ -84,8 +183,6 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
     private void beforeCreateUpdate(Ticket entity) {
         var errors = createMapForLogicalErrors();
         IsEmptySubjectDescriptionAndFiles(entity, errors);
-        checkGroupsOfAuthorAndTicket(entity, errors);
-        checkCurrentUserForGroupAndIsInner(entity, errors);
         checkAuthorExecutorsAndObserversForWeightOfRoles(entity, errors);
         ifErrorsNotEmptyThrowLogicalValidationException(errors);
     }
@@ -100,33 +197,6 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
                     errors
             );
             log.error(LOG_EMPTY_TICKET, ticket);
-        }
-    }
-
-    private void checkGroupsOfAuthorAndTicket(Ticket ticket, Map<String, List<ValidationError>> errors) {
-        var groupFromTicket = ticket.getGroup();
-        var groupFromAuthorOfTicket = ticket.getAuthor().getGroup();
-        if (!groupFromAuthorOfTicket.equals(groupFromTicket)) {
-            addValidationErrorIntoErrors(
-                    GROUP_OF_TICKET,
-                    GROUP_OF_TICKET_MUST_EQUALS_GROUP_OF_AUTHOR_OF_TICKET,
-                    errors
-            );
-            log.error(LOG_GROUP_OF_TICKET, groupFromTicket, groupFromAuthorOfTicket);
-        }
-    }
-
-    private void checkCurrentUserForGroupAndIsInner(Ticket ticket, Map<String, List<ValidationError>> errors) {
-        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        var groupOfCurrentUser = groupService.findByIdAndAccountId(jwtUser.getGroupId(), jwtUser.getAccountId());
-        var groupFromTicket = ticket.getGroup();
-        if (Boolean.FALSE.equals(groupOfCurrentUser.getIsInner()) && !groupOfCurrentUser.equals(groupFromTicket)) {
-            addValidationErrorIntoErrors(
-                    USER_IS_NOT_FROM_INNER_GROUP,
-                    USER_FROM_NOT_INNER_GROUP_MUST_CREATE_UPDATE_TICKET_ONLY_WITH_HIS_GROUP,
-                    errors
-            );
-            log.error(LOG_USER_FROM_NOT_INNER_GROUP, jwtUser, ticket);
         }
     }
 
@@ -204,31 +274,277 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
 
     }
 
-    private void checkAccessForCreate(Ticket ticket) {
+    @SuppressWarnings("DuplicatedCode")
+    private void checkAccessForCreateAndUpdate(Ticket ticket) {
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         var currentUser = userService.findByEmail(jwtUser.getUsername()).get();
         var nameOfRoleOfCurrentUser = currentUser.getRole().getName();
         var isCurrentUserFromInnerGroup = currentUser.getGroup().getIsInner();
         var isAuthorOfTicketFromInnerGroup = ticket.getAuthor().getGroup().getIsInner();
+        var groupOfCurrentUser = currentUser.getGroup();
+        var groupOfAuthorOfTicket = ticket.getAuthor().getGroup();
+        var authorOfTicket = ticket.getAuthor();
 
         if (nameOfRoleOfCurrentUser.equals(Roles.ADMIN.toString())
                 && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
                 && Boolean.TRUE.equals(isAuthorOfTicketFromInnerGroup)) {
+            log.trace(
+                    format(
+                            LOG_CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP,
+                            currentUser, ticket
+                    ));
             throw new AccessDeniedException
-                    ("Current user with role ADMIN from outer group can not create ticket if author of ticket is "
-                             + "from inner group");
+                    (CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP);
         }
 
-//        if (nameOfRoleOfCurrentUser.getName().equals(Roles.AUTHOR.toString()) && !currentUser
-//                .equals(ticket.getAuthor())) {
-//            log.error(format(LOG_CURRENT_USER_WITH_ROLE_AUTHOR_CAN_NOT_CREATE_TICKET, currentUser, ticket));
-//            throw new AccessDeniedException(CURRENT_USER_WITH_ROLE_AUTHOR_CAN_NOT_UPDATE_TICKET);
-//        }
-//        if (nameOfRoleOfCurrentUser.getName().equals(Roles.EXECUTOR.toString())
-//                && !ticket.getExecutors().contains(currentUser)) {
-//            log.error(format(""));
-//            throw new AccessDeniedException(CURRENT_USER_WITH_ROLE_AUTHOR_CAN_NOT_UPDATE_TICKET);
-//        }
+        if (nameOfRoleOfCurrentUser.equals(Roles.ADMIN.toString())
+                && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
+                && Boolean.FALSE.equals(isAuthorOfTicketFromInnerGroup)
+                && !groupOfCurrentUser.equals(groupOfAuthorOfTicket)) {
+            log.trace(
+                    format(
+                            LOG_CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP,
+                            currentUser, ticket
+                    ));
+            throw new AccessDeniedException
+                    (CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP);
+        }
+
+        if (nameOfRoleOfCurrentUser.equals(Roles.EXECUTOR.toString())
+                && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
+                && Boolean.TRUE.equals(isAuthorOfTicketFromInnerGroup)) {
+            log.trace(
+                    format(
+                            LOG_CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP,
+                            currentUser, ticket
+                    ));
+            throw new AccessDeniedException
+                    (CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP);
+        }
+
+        if (nameOfRoleOfCurrentUser.equals(Roles.EXECUTOR.toString())
+                && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
+                && Boolean.FALSE.equals(isAuthorOfTicketFromInnerGroup)
+                && !groupOfCurrentUser.equals(groupOfAuthorOfTicket)) {
+            log.trace(
+                    format(
+                            LOG_CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP,
+                            currentUser, ticket
+                    ));
+            throw new AccessDeniedException
+                    (CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP);
+        }
+
+        if (nameOfRoleOfCurrentUser.equals(Roles.AUTHOR.toString())
+                && Boolean.TRUE.equals(isCurrentUserFromInnerGroup)
+                && Boolean.TRUE.equals(isAuthorOfTicketFromInnerGroup)
+                && !authorOfTicket.equals(currentUser)) {
+            log.trace(
+                    format(
+                            LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER,
+                            currentUser, ticket
+                    ));
+            throw new AccessDeniedException
+                    (CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER);
+        }
+
+        if (nameOfRoleOfCurrentUser.equals(Roles.AUTHOR.toString())
+                && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
+                && Boolean.FALSE.equals(isAuthorOfTicketFromInnerGroup)
+                && !authorOfTicket.equals(currentUser)) {
+            log.trace(
+                    format(
+                            LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER,
+                            currentUser, ticket
+                    ));
+            throw new AccessDeniedException
+                    (CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER);
+        }
+
+        if (nameOfRoleOfCurrentUser.equals(Roles.AUTHOR.toString())
+                && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
+                && Boolean.TRUE.equals(isAuthorOfTicketFromInnerGroup)) {
+            log.trace(
+                    format(
+                            LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP,
+                            currentUser, ticket
+                    ));
+            throw new AccessDeniedException
+                    (CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP);
+        }
+
+        if (nameOfRoleOfCurrentUser.equals(Roles.AUTHOR.toString())
+                && Boolean.TRUE.equals(isCurrentUserFromInnerGroup)
+                && Boolean.FALSE.equals(isAuthorOfTicketFromInnerGroup)) {
+            log.trace(
+                    format(
+                            LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_OUTER_GROUP,
+                            currentUser, ticket
+                    ));
+            throw new AccessDeniedException
+                    (CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_OUTER_GROUP);
+        }
+
+    }
+
+    @SuppressWarnings("DuplicatedCode")
+    public void checkAccessForRead(Ticket ticket) {
+        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var currentUser = userService.findByEmail(jwtUser.getUsername()).get();
+        var nameOfRoleOfCurrentUser = currentUser.getRole().getName();
+        var isCurrentUserFromInnerGroup = currentUser.getGroup().getIsInner();
+        var isAuthorOfTicketFromInnerGroup = ticket.getAuthor().getGroup().getIsInner();
+        var groupOfCurrentUser = currentUser.getGroup();
+        var groupOfAuthorOfTicket = ticket.getAuthor().getGroup();
+        var authorOfTicket = ticket.getAuthor();
+
+        if (nameOfRoleOfCurrentUser.equals(Roles.ADMIN.toString())
+                && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
+                && Boolean.TRUE.equals(isAuthorOfTicketFromInnerGroup)) {
+            log.trace(format(
+                    LOG_CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP,
+                    currentUser, ticket
+            ));
+            throw new AccessDeniedException
+                    (CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP);
+        }
+
+        if (nameOfRoleOfCurrentUser.equals(Roles.ADMIN.toString())
+                && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
+                && Boolean.FALSE.equals(isAuthorOfTicketFromInnerGroup)
+                && !groupOfCurrentUser.equals(groupOfAuthorOfTicket)) {
+            log.trace(format(
+                    LOG_CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP,
+                    currentUser, ticket
+            ));
+            throw new AccessDeniedException
+                    (CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP);
+        }
+
+        if (nameOfRoleOfCurrentUser.equals(Roles.EXECUTOR.toString())
+                && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
+                && Boolean.TRUE.equals(isAuthorOfTicketFromInnerGroup)) {
+            log.trace(
+                    format(
+                            LOG_CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP,
+                            currentUser, ticket
+                    ));
+            throw new AccessDeniedException
+                    (CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP);
+        }
+
+        if (nameOfRoleOfCurrentUser.equals(Roles.EXECUTOR.toString())
+                && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
+                && Boolean.FALSE.equals(isAuthorOfTicketFromInnerGroup)
+                && !groupOfCurrentUser.equals(groupOfAuthorOfTicket)) {
+            log.trace(
+                    format(
+                            LOG_CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP,
+                            currentUser, ticket
+                    ));
+            throw new AccessDeniedException
+                    (CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP);
+        }
+
+        if (nameOfRoleOfCurrentUser.equals(Roles.EXECUTOR.toString())
+                && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
+                && !currentUser.equals(authorOfTicket)
+                && !ticket.getExecutors().contains(currentUser)
+                && !ticket.getObservers().contains(currentUser)) {
+            log.trace(
+                    format(
+                            LOG_CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_IN_EXECUTORS,
+                            currentUser, ticket
+                    ));
+            throw new AccessDeniedException
+                    (CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_AS_A_AUTHOR_AND_HAS_NOT_IN_EXECUTORS_AND_HAS_NOT_IN_OBSERVERS);
+        }
+
+        if (nameOfRoleOfCurrentUser.equals(Roles.AUTHOR.toString())
+                && Boolean.TRUE.equals(isCurrentUserFromInnerGroup)
+                && Boolean.TRUE.equals(isAuthorOfTicketFromInnerGroup)
+                && !authorOfTicket.equals(currentUser)) {
+            log.trace(format(
+                    LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER,
+                    currentUser, ticket
+            ));
+            throw new AccessDeniedException
+                    (CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER);
+        }
+
+        if (nameOfRoleOfCurrentUser.equals(Roles.AUTHOR.toString())
+                && Boolean.TRUE.equals(isCurrentUserFromInnerGroup)
+                && Boolean.FALSE.equals(isAuthorOfTicketFromInnerGroup)) {
+            log.trace(
+                    format(
+                            LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_OUTER_GROUP,
+                            currentUser, ticket
+                    ));
+            throw new AccessDeniedException
+                    (CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_OUTER_GROUP);
+        }
+
+        if (nameOfRoleOfCurrentUser.equals(Roles.AUTHOR.toString())
+                && Boolean.TRUE.equals(isCurrentUserFromInnerGroup)
+                && !currentUser.equals(authorOfTicket)
+                && !ticket.getObservers().contains(currentUser)) {
+            log.trace(
+                    format(
+                            LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_AS_A_AUTHOR_AND_HAS_NOT_IN_OBSERVERS,
+                            currentUser, ticket
+                    ));
+            throw new AccessDeniedException
+                    (CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_AS_A_AUTHOR_AND_HAS_NOT_IN_OBSERVERS);
+        }
+
+        if (nameOfRoleOfCurrentUser.equals(Roles.AUTHOR.toString())
+                && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
+                && Boolean.TRUE.equals(isAuthorOfTicketFromInnerGroup)) {
+            log.trace(
+                    format(
+                            LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP,
+                            currentUser, ticket
+                    ));
+            throw new AccessDeniedException
+                    (CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP);
+        }
+
+        if (nameOfRoleOfCurrentUser.equals(Roles.AUTHOR.toString())
+                && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
+                && Boolean.FALSE.equals(isAuthorOfTicketFromInnerGroup)
+                && !authorOfTicket.equals(currentUser)) {
+            log.trace(format(
+                    LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER,
+                    currentUser, ticket
+            ));
+            throw new AccessDeniedException
+                    (CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER);
+        }
+
+        if (nameOfRoleOfCurrentUser.equals(Roles.AUTHOR.toString())
+                && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
+                && !currentUser.equals(authorOfTicket)
+                && !ticket.getObservers().contains(currentUser)) {
+            log.trace(
+                    format(
+                            LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_AS_A_AUTHOR_AND_HAS_NOT_CURRENT_USER_IN_OBSERVERS,
+                            currentUser, ticket
+                    ));
+            throw new AccessDeniedException
+                    (CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_AS_A_AUTHOR_AND_HAS_NOT_IN_OBSERVERS1);
+        }
+
+        if (nameOfRoleOfCurrentUser.equals(Roles.OBSERVER.toString())
+                && !ticket.getObservers().contains(currentUser)) {
+            log.trace(
+                    format(
+                            LOG_CURRENT_USER_WITH_ROLE_OBSERVER_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_IN_OBSERVERS,
+                            currentUser, ticket
+                    ));
+            throw new AccessDeniedException
+                    (CURRENT_USER_WITH_ROLE_OBSERVER_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_IN_OBSERVERS);
+        }
+
     }
 
 }

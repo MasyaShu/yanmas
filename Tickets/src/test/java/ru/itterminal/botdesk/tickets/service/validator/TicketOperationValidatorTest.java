@@ -12,11 +12,7 @@ import static org.mockito.Mockito.when;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.EMPTY_TICKET;
-import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.GROUP_OF_TICKET;
-import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.GROUP_OF_TICKET_MUST_EQUALS_GROUP_OF_AUTHOR_OF_TICKET;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.MUST_NOT_CREATE_UPDATE_TICKET_IF_SUBJECT_DESCRIPTION_AND_FILES_ARE_EMPTY;
-import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.USER_FROM_NOT_INNER_GROUP_MUST_CREATE_UPDATE_TICKET_ONLY_WITH_HIS_GROUP;
-import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.USER_IS_NOT_FROM_INNER_GROUP;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR_LESS_THAN_WEIGHT_OF_ROLE_AUTHOR;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS;
@@ -25,8 +21,11 @@ import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationVal
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS_LESS_THAN_WEIGHT_OF_ROLE_OBSERVER;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -35,9 +34,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import ru.itterminal.botdesk.aau.model.Roles;
-import ru.itterminal.botdesk.aau.model.test.GroupTestHelper;
 import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
-import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
@@ -50,16 +47,12 @@ import ru.itterminal.botdesk.tickets.model.test.TicketTestHelper;
 class TicketOperationValidatorTest {
 
     @MockBean
-    private GroupServiceImpl groupService;
-
-    @MockBean
     private UserServiceImpl userService;
 
     @Autowired
-    private final TicketOperationValidator validator = new TicketOperationValidator(groupService, userService);
+    private final TicketOperationValidator validator = new TicketOperationValidator(userService);
 
     private final TicketTestHelper ticketTestHelper = new TicketTestHelper();
-    private final GroupTestHelper groupTestHelper = new GroupTestHelper();
     private final RoleTestHelper roleTestHelper = new RoleTestHelper();
 
     @Test
@@ -69,7 +62,7 @@ class TicketOperationValidatorTest {
         var ticket = ticketTestHelper.getRandomValidEntity();
         ticket.setSubject("");
         ticket.setDescription("");
-        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getGroup());
+        when(userService.findByEmail(any())).thenReturn(Optional.of(ticket.getAuthor()));
         expectedErrors.put(
                 EMPTY_TICKET,
                 singletonList(
@@ -90,17 +83,17 @@ class TicketOperationValidatorTest {
                 expectedException.getFieldErrors().get(EMPTY_TICKET).get(0),
                 actualException.getFieldErrors().get(EMPTY_TICKET).get(0)
         );
-        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
+        verify(userService, times(1)).findByEmail(any());
     }
 
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     void beforeCreate_shouldGetTrue_whenPassedTicketIsValid() {
         var ticket = ticketTestHelper.getRandomValidEntity();
-        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getGroup());
+        when(userService.findByEmail(any())).thenReturn(Optional.of(ticket.getAuthor()));
         var actualResult = validator.beforeCreate(ticket);
         assertTrue(actualResult);
-        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
+        verify(userService, times(1)).findByEmail(any());
     }
 
     @Test
@@ -110,8 +103,7 @@ class TicketOperationValidatorTest {
         var ticket = ticketTestHelper.getRandomValidEntity();
         ticket.setSubject("");
         ticket.setDescription("");
-        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getGroup());
-
+        when(userService.findByEmail(any())).thenReturn(Optional.of(ticket.getAuthor()));
         expectedErrors.put(
                 EMPTY_TICKET,
                 singletonList(
@@ -132,149 +124,17 @@ class TicketOperationValidatorTest {
                 expectedException.getFieldErrors().get(EMPTY_TICKET).get(0),
                 actualException.getFieldErrors().get(EMPTY_TICKET).get(0)
         );
-        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
+        verify(userService, times(1)).findByEmail(any());
     }
 
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     void beforeUpdate_shouldGetTrue_whenPassedTicketIsValid() {
         var ticket = ticketTestHelper.getRandomValidEntity();
-        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getGroup());
+        when(userService.findByEmail(any())).thenReturn(Optional.of(ticket.getAuthor()));
         var actualResult = validator.beforeUpdate(ticket);
         assertTrue(actualResult);
-        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
-    }
-
-    @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_NOT_INNER_GROUP")
-    void beforeCreate_shouldGetLogicalValidationException_whenGroupOfCurrentUserIsNotInnerGroupAndGroupOfTicketIsInnerGroup() {
-        var expectedErrors = createMapForLogicalErrors();
-        var ticket = ticketTestHelper.getRandomValidEntity();
-        var groupOfCurrentUser = groupTestHelper.getRandomValidEntity();
-        groupOfCurrentUser.setIsInner(false);
-        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(groupOfCurrentUser);
-        expectedErrors.put(
-                USER_IS_NOT_FROM_INNER_GROUP,
-                singletonList(
-                        new ValidationError(
-                                USER_IS_NOT_FROM_INNER_GROUP,
-                                USER_FROM_NOT_INNER_GROUP_MUST_CREATE_UPDATE_TICKET_ONLY_WITH_HIS_GROUP
-                        )
-                )
-        );
-        LogicalValidationException expectedException =
-                new LogicalValidationException(VALIDATION_FAILED, expectedErrors);
-        LogicalValidationException actualException =
-                assertThrows(
-                        LogicalValidationException.class,
-                        () -> validator.beforeCreate(ticket)
-                );
-        assertEquals(
-                expectedException.getFieldErrors().get(USER_IS_NOT_FROM_INNER_GROUP).get(0),
-                actualException.getFieldErrors().get(USER_IS_NOT_FROM_INNER_GROUP).get(0)
-        );
-        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
-    }
-
-    @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_NOT_INNER_GROUP")
-    void beforeUpdate_shouldGetLogicalValidationException_whenGroupOfCurrentUserIsNotInnerGroupAndGroupOfTicketIsInnerGroup() {
-        var expectedErrors = createMapForLogicalErrors();
-        var ticket = ticketTestHelper.getRandomValidEntity();
-        var groupOfCurrentUser = groupTestHelper.getRandomValidEntity();
-        groupOfCurrentUser.setIsInner(false);
-        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(groupOfCurrentUser);
-        expectedErrors.put(
-                USER_IS_NOT_FROM_INNER_GROUP,
-                singletonList(
-                        new ValidationError(
-                                USER_IS_NOT_FROM_INNER_GROUP,
-                                USER_FROM_NOT_INNER_GROUP_MUST_CREATE_UPDATE_TICKET_ONLY_WITH_HIS_GROUP
-                        )
-                )
-        );
-        LogicalValidationException expectedException =
-                new LogicalValidationException(VALIDATION_FAILED, expectedErrors);
-        LogicalValidationException actualException =
-                assertThrows(
-                        LogicalValidationException.class,
-                        () -> validator.beforeUpdate(ticket)
-                );
-        assertEquals(
-                expectedException.getFieldErrors().get(USER_IS_NOT_FROM_INNER_GROUP).get(0),
-                actualException.getFieldErrors().get(USER_IS_NOT_FROM_INNER_GROUP).get(0)
-        );
-        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
-    }
-
-    @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    void beforeCreate_shouldGetLogicalValidationException_whenGroupOfTicketIsNotEqualGroupOfAuthorOfTicket() {
-        var expectedErrors = createMapForLogicalErrors();
-        var ticket = ticketTestHelper.getRandomValidEntity();
-        var groupOfAuthor = groupTestHelper.getRandomValidEntity();
-        groupOfAuthor.setIsInner(true);
-        groupOfAuthor.setAccount(ticket.getAccount());
-        var author = ticket.getAuthor();
-        author.setGroup(groupOfAuthor);
-        ticket.setAuthor(author);
-        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(groupOfAuthor);
-        expectedErrors.put(
-                GROUP_OF_TICKET,
-                singletonList(
-                        new ValidationError(
-                                GROUP_OF_TICKET,
-                                GROUP_OF_TICKET_MUST_EQUALS_GROUP_OF_AUTHOR_OF_TICKET
-                        )
-                )
-        );
-        LogicalValidationException expectedException =
-                new LogicalValidationException(VALIDATION_FAILED, expectedErrors);
-        LogicalValidationException actualException =
-                assertThrows(
-                        LogicalValidationException.class,
-                        () -> validator.beforeCreate(ticket)
-                );
-        assertEquals(
-                expectedException.getFieldErrors().get(GROUP_OF_TICKET).get(0),
-                actualException.getFieldErrors().get(GROUP_OF_TICKET).get(0)
-        );
-        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
-    }
-
-    @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    void beforeUpdate_shouldGetLogicalValidationException_whenGroupOfTicketIsNotEqualGroupOfAuthorOfTicket() {
-        var expectedErrors = createMapForLogicalErrors();
-        var ticket = ticketTestHelper.getRandomValidEntity();
-        var groupOfAuthor = groupTestHelper.getRandomValidEntity();
-        groupOfAuthor.setIsInner(true);
-        groupOfAuthor.setAccount(ticket.getAccount());
-        var author = ticket.getAuthor();
-        author.setGroup(groupOfAuthor);
-        ticket.setAuthor(author);
-        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(groupOfAuthor);
-        expectedErrors.put(
-                GROUP_OF_TICKET,
-                singletonList(
-                        new ValidationError(
-                                GROUP_OF_TICKET,
-                                GROUP_OF_TICKET_MUST_EQUALS_GROUP_OF_AUTHOR_OF_TICKET
-                        )
-                )
-        );
-        LogicalValidationException expectedException =
-                new LogicalValidationException(VALIDATION_FAILED, expectedErrors);
-        LogicalValidationException actualException =
-                assertThrows(
-                        LogicalValidationException.class,
-                        () -> validator.beforeUpdate(ticket)
-                );
-        assertEquals(
-                expectedException.getFieldErrors().get(GROUP_OF_TICKET).get(0),
-                actualException.getFieldErrors().get(GROUP_OF_TICKET).get(0)
-        );
-        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
+        verify(userService, times(1)).findByEmail(any());
     }
 
     @Test
@@ -283,7 +143,7 @@ class TicketOperationValidatorTest {
         var expectedErrors = createMapForLogicalErrors();
         var ticket = ticketTestHelper.getRandomValidEntity();
         ticket.getAuthor().setRole(roleTestHelper.getPredefinedValidEntityList().get(4));
-        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getGroup());
+        when(userService.findByEmail(any())).thenReturn(Optional.of(ticket.getAuthor()));
         expectedErrors.put(
                 WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR,
                 singletonList(
@@ -308,7 +168,7 @@ class TicketOperationValidatorTest {
                 expectedException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR).get(0),
                 actualException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR).get(0)
         );
-        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
+        verify(userService, times(1)).findByEmail(any());
     }
 
     @Test
@@ -319,7 +179,7 @@ class TicketOperationValidatorTest {
         var observer = ticket.getAuthor();
         observer.getRole().setWeight(0);
         ticket.setObservers(List.of(observer));
-        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getGroup());
+        when(userService.findByEmail(any())).thenReturn(Optional.of(ticket.getAuthor()));
         expectedErrors.put(
                 WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS,
                 singletonList(
@@ -344,7 +204,7 @@ class TicketOperationValidatorTest {
                 expectedException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS).get(0),
                 actualException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS).get(0)
         );
-        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
+        verify(userService, times(1)).findByEmail(any());
     }
 
     @Test
@@ -355,7 +215,7 @@ class TicketOperationValidatorTest {
         var executor = ticket.getAuthor();
         executor.getRole().setWeight(0);
         ticket.setExecutors(List.of(executor));
-        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getGroup());
+        when(userService.findByEmail(any())).thenReturn(Optional.of(ticket.getAuthor()));
         expectedErrors.put(
                 WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS,
                 singletonList(
@@ -380,7 +240,7 @@ class TicketOperationValidatorTest {
                 expectedException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS).get(0),
                 actualException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS).get(0)
         );
-        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
+        verify(userService, times(1)).findByEmail(any());
     }
 
     @Test
@@ -389,7 +249,7 @@ class TicketOperationValidatorTest {
         var expectedErrors = createMapForLogicalErrors();
         var ticket = ticketTestHelper.getRandomValidEntity();
         ticket.getAuthor().setRole(roleTestHelper.getPredefinedValidEntityList().get(4));
-        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getGroup());
+        when(userService.findByEmail(any())).thenReturn(Optional.of(ticket.getAuthor()));
         expectedErrors.put(
                 WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR,
                 singletonList(
@@ -414,7 +274,7 @@ class TicketOperationValidatorTest {
                 expectedException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR).get(0),
                 actualException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR).get(0)
         );
-        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
+        verify(userService, times(1)).findByEmail(any());
     }
 
     @Test
@@ -425,7 +285,7 @@ class TicketOperationValidatorTest {
         var observer = ticket.getAuthor();
         observer.getRole().setWeight(0);
         ticket.setObservers(List.of(observer));
-        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getGroup());
+        when(userService.findByEmail(any())).thenReturn(Optional.of(ticket.getAuthor()));
         expectedErrors.put(
                 WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS,
                 singletonList(
@@ -450,7 +310,7 @@ class TicketOperationValidatorTest {
                 expectedException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS).get(0),
                 actualException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS).get(0)
         );
-        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
+        verify(userService, times(1)).findByEmail(any());
     }
 
     @Test
@@ -461,7 +321,7 @@ class TicketOperationValidatorTest {
         var executor = ticket.getAuthor();
         executor.getRole().setWeight(0);
         ticket.setExecutors(List.of(executor));
-        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getGroup());
+        when(userService.findByEmail(any())).thenReturn(Optional.of(ticket.getAuthor()));
         expectedErrors.put(
                 WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS,
                 singletonList(
@@ -486,7 +346,13 @@ class TicketOperationValidatorTest {
                 expectedException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS).get(0),
                 actualException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS).get(0)
         );
-        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
+        verify(userService, times(1)).findByEmail(any());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4, 5, -3, 15, Integer.MAX_VALUE})
+    void isOdd_ShouldReturnTrueForOddNumbers(int number) {
+        assertTrue(number % 2 == 0);
     }
 
 }
