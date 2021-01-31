@@ -114,18 +114,6 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
             CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP =
             "Current user with role EXECUTOR from outer group can not read ticket if ticket is from another group";
     public static final String
-            LOG_CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_IN_EXECUTORS =
-            "Current user (%s) with role EXECUTOR from outer group can not read ticket (%s) if ticket has not current user in executors";
-    public static final String
-            CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_AS_A_AUTHOR_AND_HAS_NOT_IN_EXECUTORS_AND_HAS_NOT_IN_OBSERVERS =
-            "Current user with role EXECUTOR from outer group can not read ticket if ticket has not current user as a author and has not in executors and has not in observers";
-    public static final String
-            LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER =
-            "Current user (%s) with role AUTHOR from inner group can not read ticket (%s) if author of ticket is not current user";
-    public static final String
-            CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER =
-            "Current user with role AUTHOR from inner group can not read ticket if author of ticket is not current user";
-    public static final String
             LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_OUTER_GROUP =
             "Current user (%s) with role AUTHOR from inner group can not read ticket (%s) if author of ticket is from outer group";
     public static final String
@@ -144,16 +132,10 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
             CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP =
             "Current user with role AUTHOR from outer group can not read ticket if author of ticket is from inner group";
     public static final String
-            LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER =
-            "Current user (%s) with role AUTHOR from outer group can not read ticket (%s) if author of ticket is not current user";
-    public static final String
-            CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER =
-            "Current user with role AUTHOR from outer group can not read ticket if author of ticket is not current user";
-    public static final String
             LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_AS_A_AUTHOR_AND_HAS_NOT_CURRENT_USER_IN_OBSERVERS =
             "Current user (%s) with role AUTHOR from outer group can not read ticket (%s) if ticket has not current user as a author and has not current user in observers";
     public static final String
-            CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_AS_A_AUTHOR_AND_HAS_NOT_IN_OBSERVERS1 =
+            CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_AS_A_AUTHOR_AND_HAS_NOT_IN_OBSERVERS =
             "Current user with role AUTHOR from outer group can not read ticket if ticket has not current user as a author and has not in observers";
     public static final String
             LOG_CURRENT_USER_WITH_ROLE_OBSERVER_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_IN_OBSERVERS =
@@ -275,7 +257,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
     }
 
     @SuppressWarnings("DuplicatedCode")
-    private void checkAccessForCreateAndUpdate(Ticket ticket) {
+    public boolean checkAccessForCreateAndUpdate(Ticket ticket) {
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         var currentUser = userService.findByEmail(jwtUser.getUsername()).get();
         var nameOfRoleOfCurrentUser = currentUser.getRole().getName();
@@ -285,6 +267,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
         var groupOfAuthorOfTicket = ticket.getAuthor().getGroup();
         var authorOfTicket = ticket.getAuthor();
 
+        // test data id = 1
         if (nameOfRoleOfCurrentUser.equals(Roles.ADMIN.toString())
                 && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
                 && Boolean.TRUE.equals(isAuthorOfTicketFromInnerGroup)) {
@@ -297,6 +280,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
                     (CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP);
         }
 
+        // test data id = 2
         if (nameOfRoleOfCurrentUser.equals(Roles.ADMIN.toString())
                 && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
                 && Boolean.FALSE.equals(isAuthorOfTicketFromInnerGroup)
@@ -310,6 +294,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
                     (CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP);
         }
 
+        // test data id = 3
         if (nameOfRoleOfCurrentUser.equals(Roles.EXECUTOR.toString())
                 && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
                 && Boolean.TRUE.equals(isAuthorOfTicketFromInnerGroup)) {
@@ -322,6 +307,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
                     (CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP);
         }
 
+        // test data id = 4
         if (nameOfRoleOfCurrentUser.equals(Roles.EXECUTOR.toString())
                 && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
                 && Boolean.FALSE.equals(isAuthorOfTicketFromInnerGroup)
@@ -335,6 +321,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
                     (CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP);
         }
 
+        // test data id = 5
         if (nameOfRoleOfCurrentUser.equals(Roles.AUTHOR.toString())
                 && Boolean.TRUE.equals(isCurrentUserFromInnerGroup)
                 && Boolean.TRUE.equals(isAuthorOfTicketFromInnerGroup)
@@ -348,6 +335,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
                     (CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER);
         }
 
+        // test data id = 6
         if (nameOfRoleOfCurrentUser.equals(Roles.AUTHOR.toString())
                 && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
                 && Boolean.FALSE.equals(isAuthorOfTicketFromInnerGroup)
@@ -361,6 +349,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
                     (CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER);
         }
 
+        // test data id = 7
         if (nameOfRoleOfCurrentUser.equals(Roles.AUTHOR.toString())
                 && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
                 && Boolean.TRUE.equals(isAuthorOfTicketFromInnerGroup)) {
@@ -373,6 +362,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
                     (CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP);
         }
 
+        // test data id = 8
         if (nameOfRoleOfCurrentUser.equals(Roles.AUTHOR.toString())
                 && Boolean.TRUE.equals(isCurrentUserFromInnerGroup)
                 && Boolean.FALSE.equals(isAuthorOfTicketFromInnerGroup)) {
@@ -384,11 +374,11 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
             throw new AccessDeniedException
                     (CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_OUTER_GROUP);
         }
-
+        return true;
     }
 
     @SuppressWarnings("DuplicatedCode")
-    public void checkAccessForRead(Ticket ticket) {
+    public boolean checkAccessForRead(Ticket ticket) {
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         var currentUser = userService.findByEmail(jwtUser.getUsername()).get();
         var nameOfRoleOfCurrentUser = currentUser.getRole().getName();
@@ -398,6 +388,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
         var groupOfAuthorOfTicket = ticket.getAuthor().getGroup();
         var authorOfTicket = ticket.getAuthor();
 
+        // test data id = 1
         if (nameOfRoleOfCurrentUser.equals(Roles.ADMIN.toString())
                 && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
                 && Boolean.TRUE.equals(isAuthorOfTicketFromInnerGroup)) {
@@ -409,6 +400,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
                     (CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP);
         }
 
+        // test data id = 2
         if (nameOfRoleOfCurrentUser.equals(Roles.ADMIN.toString())
                 && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
                 && Boolean.FALSE.equals(isAuthorOfTicketFromInnerGroup)
@@ -421,6 +413,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
                     (CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP);
         }
 
+        // test data id = 3
         if (nameOfRoleOfCurrentUser.equals(Roles.EXECUTOR.toString())
                 && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
                 && Boolean.TRUE.equals(isAuthorOfTicketFromInnerGroup)) {
@@ -433,6 +426,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
                     (CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP);
         }
 
+        // test data id = 4
         if (nameOfRoleOfCurrentUser.equals(Roles.EXECUTOR.toString())
                 && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
                 && Boolean.FALSE.equals(isAuthorOfTicketFromInnerGroup)
@@ -446,32 +440,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
                     (CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP);
         }
 
-        if (nameOfRoleOfCurrentUser.equals(Roles.EXECUTOR.toString())
-                && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
-                && !currentUser.equals(authorOfTicket)
-                && !ticket.getExecutors().contains(currentUser)
-                && !ticket.getObservers().contains(currentUser)) {
-            log.trace(
-                    format(
-                            LOG_CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_IN_EXECUTORS,
-                            currentUser, ticket
-                    ));
-            throw new AccessDeniedException
-                    (CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_AS_A_AUTHOR_AND_HAS_NOT_IN_EXECUTORS_AND_HAS_NOT_IN_OBSERVERS);
-        }
-
-        if (nameOfRoleOfCurrentUser.equals(Roles.AUTHOR.toString())
-                && Boolean.TRUE.equals(isCurrentUserFromInnerGroup)
-                && Boolean.TRUE.equals(isAuthorOfTicketFromInnerGroup)
-                && !authorOfTicket.equals(currentUser)) {
-            log.trace(format(
-                    LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER,
-                    currentUser, ticket
-            ));
-            throw new AccessDeniedException
-                    (CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER);
-        }
-
+        // test data id = 6
         if (nameOfRoleOfCurrentUser.equals(Roles.AUTHOR.toString())
                 && Boolean.TRUE.equals(isCurrentUserFromInnerGroup)
                 && Boolean.FALSE.equals(isAuthorOfTicketFromInnerGroup)) {
@@ -484,10 +453,11 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
                     (CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_OUTER_GROUP);
         }
 
+        // test data id = 7
         if (nameOfRoleOfCurrentUser.equals(Roles.AUTHOR.toString())
                 && Boolean.TRUE.equals(isCurrentUserFromInnerGroup)
                 && !currentUser.equals(authorOfTicket)
-                && !ticket.getObservers().contains(currentUser)) {
+                && (ticket.getObservers() == null || !ticket.getObservers().contains(currentUser))) {
             log.trace(
                     format(
                             LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_AS_A_AUTHOR_AND_HAS_NOT_IN_OBSERVERS,
@@ -497,6 +467,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
                     (CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_AS_A_AUTHOR_AND_HAS_NOT_IN_OBSERVERS);
         }
 
+        // test data id = 8
         if (nameOfRoleOfCurrentUser.equals(Roles.AUTHOR.toString())
                 && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
                 && Boolean.TRUE.equals(isAuthorOfTicketFromInnerGroup)) {
@@ -509,33 +480,23 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
                     (CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP);
         }
 
-        if (nameOfRoleOfCurrentUser.equals(Roles.AUTHOR.toString())
-                && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
-                && Boolean.FALSE.equals(isAuthorOfTicketFromInnerGroup)
-                && !authorOfTicket.equals(currentUser)) {
-            log.trace(format(
-                    LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER,
-                    currentUser, ticket
-            ));
-            throw new AccessDeniedException
-                    (CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER);
-        }
-
+        // test data id = 9
         if (nameOfRoleOfCurrentUser.equals(Roles.AUTHOR.toString())
                 && Boolean.FALSE.equals(isCurrentUserFromInnerGroup)
                 && !currentUser.equals(authorOfTicket)
-                && !ticket.getObservers().contains(currentUser)) {
+                && (ticket.getObservers() == null || !ticket.getObservers().contains(currentUser))) {
             log.trace(
                     format(
                             LOG_CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_AS_A_AUTHOR_AND_HAS_NOT_CURRENT_USER_IN_OBSERVERS,
                             currentUser, ticket
                     ));
             throw new AccessDeniedException
-                    (CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_AS_A_AUTHOR_AND_HAS_NOT_IN_OBSERVERS1);
+                    (CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_AS_A_AUTHOR_AND_HAS_NOT_IN_OBSERVERS);
         }
 
+        // test data id = 10
         if (nameOfRoleOfCurrentUser.equals(Roles.OBSERVER.toString())
-                && !ticket.getObservers().contains(currentUser)) {
+                && (ticket.getObservers() == null || !ticket.getObservers().contains(currentUser))) {
             log.trace(
                     format(
                             LOG_CURRENT_USER_WITH_ROLE_OBSERVER_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_IN_OBSERVERS,
@@ -544,7 +505,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
             throw new AccessDeniedException
                     (CURRENT_USER_WITH_ROLE_OBSERVER_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_IN_OBSERVERS);
         }
-
+        return true;
     }
 
 }

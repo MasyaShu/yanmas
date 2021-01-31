@@ -11,6 +11,23 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_OUTER_GROUP;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_OUTER_GROUP;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_AS_A_AUTHOR_AND_HAS_NOT_IN_OBSERVERS;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_AS_A_AUTHOR_AND_HAS_NOT_IN_OBSERVERS;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.CURRENT_USER_WITH_ROLE_OBSERVER_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_IN_OBSERVERS;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.EMPTY_TICKET;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.MUST_NOT_CREATE_UPDATE_TICKET_IF_SUBJECT_DESCRIPTION_AND_FILES_ARE_EMPTY;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR;
@@ -22,13 +39,17 @@ import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationVal
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -349,10 +370,447 @@ class TicketOperationValidatorTest {
         verify(userService, times(1)).findByEmail(any());
     }
 
-    @ParameterizedTest
-    @ValueSource(ints = {1, 4, 5, -3, 15, Integer.MAX_VALUE})
-    void isOdd_ShouldReturnTrueForOddNumbers(int number) {
-        assertTrue(number % 2 == 0);
+    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
+    @ParameterizedTest(name = "{index} - id of TestDataCrudTicketPermission ")
+    @MethodSource("getTestDataForCheckAccessForCreateAndUpdateWhenAccessDeniedException")
+    void checkAccessForCreateAndUpdate_ShouldGetAccessDeniedException_whenAccessDenied
+            (TestDataCrudTicketPermission testData) {
+        var expectedExceptionMessage = testData.exceptionMessage;
+        var ticket = ticketTestHelper.getRandomValidEntity();
+        var currentUser = ticket.getAuthor().toBuilder().build();
+        currentUser.setGroup(ticket.getGroup().toBuilder().build());
+        ticket.getAuthor().getGroup().setIsInner(testData.isAuthorOfTicketFromInnerGroup);
+        currentUser.getGroup().setIsInner(testData.isCurrentUserFromInnerGroup);
+        currentUser.getRole().setName(testData.nameOfRoleOfCurrentUser);
+        if (testData.isCurrentUserEqualAuthorOfTicket) {
+            currentUser = ticket.getAuthor();
+        } else {
+            currentUser.setId(UUID.randomUUID());
+        }
+        if (testData.isGroupOfCurrentUserEqualGroupOfAuthorOfTicket) {
+            currentUser.setGroup(ticket.getAuthor().getGroup());
+        } else {
+            currentUser.getGroup().setId(UUID.randomUUID());
+        }
+        if (testData.isTicketsObserversContainsCurrentUser) {
+            ticket.getObservers().add(currentUser);
+        }
+        if (testData.isTicketsExecutorContainsCurrentUser()) {
+            ticket.getExecutors().add(currentUser);
+        }
+        when(userService.findByEmail(any())).thenReturn(Optional.of(currentUser));
+        AccessDeniedException actualException =
+                assertThrows(
+                        AccessDeniedException.class,
+                        () -> validator.beforeCreate(ticket)
+                );
+        assertEquals(expectedExceptionMessage, actualException.getMessage());
+        verify(userService, times(1)).findByEmail(any());
     }
 
+    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
+    @ParameterizedTest(name = "{index} - id of TestDataCrudTicketPermission ")
+    @MethodSource("getTestDataForCheckAccessForReadWhenAccessDeniedException")
+    void checkAccessForRead_ShouldGetAccessDeniedException_whenAccessDenied
+            (TestDataCrudTicketPermission testData) {
+        var expectedExceptionMessage = testData.exceptionMessage;
+        var ticket = ticketTestHelper.getRandomValidEntity();
+        var currentUser = ticket.getAuthor().toBuilder().build();
+        currentUser.setGroup(ticket.getGroup().toBuilder().build());
+        ticket.getAuthor().getGroup().setIsInner(testData.isAuthorOfTicketFromInnerGroup);
+        currentUser.getGroup().setIsInner(testData.isCurrentUserFromInnerGroup);
+        currentUser.getRole().setName(testData.nameOfRoleOfCurrentUser);
+        if (testData.isCurrentUserEqualAuthorOfTicket) {
+            currentUser = ticket.getAuthor();
+        } else {
+            currentUser.setId(UUID.randomUUID());
+        }
+        if (testData.isGroupOfCurrentUserEqualGroupOfAuthorOfTicket) {
+            currentUser.setGroup(ticket.getAuthor().getGroup());
+        } else {
+            currentUser.getGroup().setId(UUID.randomUUID());
+        }
+        if (testData.isTicketsObserversContainsCurrentUser) {
+            ticket.setObservers(List.of(currentUser));
+        }
+        if (testData.isTicketsExecutorContainsCurrentUser()) {
+            ticket.setExecutors(List.of(currentUser));
+        }
+        when(userService.findByEmail(any())).thenReturn(Optional.of(currentUser));
+        AccessDeniedException actualException =
+                assertThrows(
+                        AccessDeniedException.class,
+                        () -> validator.checkAccessForRead(ticket)
+                );
+        assertEquals(expectedExceptionMessage, actualException.getMessage());
+        verify(userService, times(1)).findByEmail(any());
+    }
+
+    private static Stream<Arguments> getTestDataForCheckAccessForCreateAndUpdateWhenAccessDeniedException() {
+        return Stream.of(
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .id(1)
+                                .nameOfRoleOfCurrentUser(Roles.ADMIN.toString())
+                                .isCurrentUserFromInnerGroup(false)
+                                .isAuthorOfTicketFromInnerGroup(true)
+                                .exceptionMessage(
+                                        CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP)
+                                .build()
+                ),
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .id(2)
+                                .nameOfRoleOfCurrentUser(Roles.ADMIN.toString())
+                                .isCurrentUserFromInnerGroup(false)
+                                .isAuthorOfTicketFromInnerGroup(false)
+                                .exceptionMessage(
+                                        CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP)
+                                .build()
+                ),
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .id(3)
+                                .nameOfRoleOfCurrentUser(Roles.EXECUTOR.toString())
+                                .isCurrentUserFromInnerGroup(false)
+                                .isAuthorOfTicketFromInnerGroup(true)
+                                .exceptionMessage(
+                                        CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP)
+                                .build()
+                ),
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .id(4)
+                                .nameOfRoleOfCurrentUser(Roles.EXECUTOR.toString())
+                                .isCurrentUserFromInnerGroup(false)
+                                .isAuthorOfTicketFromInnerGroup(false)
+                                .exceptionMessage(
+                                        CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP)
+                                .build()
+                ),
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .id(5)
+                                .nameOfRoleOfCurrentUser(Roles.AUTHOR.toString())
+                                .isCurrentUserFromInnerGroup(true)
+                                .isAuthorOfTicketFromInnerGroup(true)
+                                .exceptionMessage(
+                                        CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER)
+                                .build()
+                ),
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .id(6)
+                                .nameOfRoleOfCurrentUser(Roles.AUTHOR.toString())
+                                .isCurrentUserFromInnerGroup(false)
+                                .isAuthorOfTicketFromInnerGroup(false)
+                                .exceptionMessage(
+                                        CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER)
+                                .build()
+                ),
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .id(7)
+                                .nameOfRoleOfCurrentUser(Roles.AUTHOR.toString())
+                                .isCurrentUserFromInnerGroup(false)
+                                .isAuthorOfTicketFromInnerGroup(true)
+                                .exceptionMessage(
+                                        CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP)
+                                .build()
+                ),
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .id(8)
+                                .nameOfRoleOfCurrentUser(Roles.AUTHOR.toString())
+                                .isCurrentUserFromInnerGroup(true)
+                                .isAuthorOfTicketFromInnerGroup(false)
+                                .exceptionMessage(
+                                        CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_OUTER_GROUP)
+                                .build()
+                )
+        );
+    }
+
+    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
+    @ParameterizedTest(name = "{index} - id of TestDataCrudTicketPermission ")
+    @MethodSource("getTestDataForCheckAccessForCreateAndUpdateWhenAccessIsAllowed")
+    void checkAccessForCreateAndUpdate_ShouldGetTrue_whenAccessIsAllowed
+            (TestDataCrudTicketPermission testData) {
+        var ticket = ticketTestHelper.getRandomValidEntity();
+        var currentUser = ticket.getAuthor().toBuilder().build();
+        currentUser.setGroup(ticket.getGroup().toBuilder().build());
+        ticket.getAuthor().getGroup().setIsInner(testData.isAuthorOfTicketFromInnerGroup);
+        currentUser.getGroup().setIsInner(testData.isCurrentUserFromInnerGroup);
+        currentUser.getRole().setName(testData.nameOfRoleOfCurrentUser);
+        if (testData.isCurrentUserEqualAuthorOfTicket) {
+            currentUser = ticket.getAuthor();
+        } else {
+            currentUser.setId(UUID.randomUUID());
+        }
+        if (testData.isGroupOfCurrentUserEqualGroupOfAuthorOfTicket) {
+            currentUser.setGroup(ticket.getAuthor().getGroup());
+        } else {
+            currentUser.getGroup().setId(UUID.randomUUID());
+        }
+        if (testData.isTicketsObserversContainsCurrentUser) {
+            ticket.getObservers().add(currentUser);
+        }
+        if (testData.isTicketsExecutorContainsCurrentUser()) {
+            ticket.getExecutors().add(currentUser);
+        }
+        when(userService.findByEmail(any())).thenReturn(Optional.of(currentUser));
+        assertTrue(validator.checkAccessForCreateAndUpdate(ticket));
+        verify(userService, times(1)).findByEmail(any());
+    }
+
+    private static Stream<Arguments> getTestDataForCheckAccessForReadWhenAccessDeniedException() {
+        return Stream.of(
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .id(1)
+                                .nameOfRoleOfCurrentUser(Roles.ADMIN.toString())
+                                .isCurrentUserFromInnerGroup(false)
+                                .isAuthorOfTicketFromInnerGroup(true)
+                                .exceptionMessage(
+                                        CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP)
+                                .build()
+                ),
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .id(2)
+                                .nameOfRoleOfCurrentUser(Roles.ADMIN.toString())
+                                .isCurrentUserFromInnerGroup(false)
+                                .isAuthorOfTicketFromInnerGroup(false)
+                                .exceptionMessage(
+                                        CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP)
+                                .build()
+                ),
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .id(3)
+                                .nameOfRoleOfCurrentUser(Roles.EXECUTOR.toString())
+                                .isCurrentUserFromInnerGroup(false)
+                                .isAuthorOfTicketFromInnerGroup(true)
+                                .exceptionMessage(
+                                        CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP)
+                                .build()
+                ),
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .id(4)
+                                .nameOfRoleOfCurrentUser(Roles.EXECUTOR.toString())
+                                .isCurrentUserFromInnerGroup(false)
+                                .isAuthorOfTicketFromInnerGroup(false)
+                                .exceptionMessage(
+                                        CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP)
+                                .build()
+                ),
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .id(6)
+                                .nameOfRoleOfCurrentUser(Roles.AUTHOR.toString())
+                                .isCurrentUserFromInnerGroup(true)
+                                .isAuthorOfTicketFromInnerGroup(false)
+                                .exceptionMessage(
+                                        CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_OUTER_GROUP)
+                                .build()
+                ),
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .id(7)
+                                .nameOfRoleOfCurrentUser(Roles.AUTHOR.toString())
+                                .isCurrentUserFromInnerGroup(true)
+                                .isAuthorOfTicketFromInnerGroup(true)
+                                .isCurrentUserEqualAuthorOfTicket(false)
+                                .isTicketsObserversContainsCurrentUser(false)
+                                .exceptionMessage(
+                                        CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_AS_A_AUTHOR_AND_HAS_NOT_IN_OBSERVERS)
+                                .build()
+                ),
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .id(8)
+                                .nameOfRoleOfCurrentUser(Roles.AUTHOR.toString())
+                                .isCurrentUserFromInnerGroup(false)
+                                .isAuthorOfTicketFromInnerGroup(true)
+                                .exceptionMessage(
+                                        CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP)
+                                .build()
+                ),
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .id(9)
+                                .nameOfRoleOfCurrentUser(Roles.AUTHOR.toString())
+                                .isCurrentUserFromInnerGroup(false)
+                                .isAuthorOfTicketFromInnerGroup(false)
+                                .isCurrentUserEqualAuthorOfTicket(false)
+                                .isTicketsObserversContainsCurrentUser(false)
+                                .exceptionMessage(
+                                        CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_AS_A_AUTHOR_AND_HAS_NOT_IN_OBSERVERS)
+                                .build()
+                ),
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .id(10)
+                                .nameOfRoleOfCurrentUser(Roles.OBSERVER.toString())
+                                .isTicketsObserversContainsCurrentUser(false)
+                                .exceptionMessage(
+                                        CURRENT_USER_WITH_ROLE_OBSERVER_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_IN_OBSERVERS)
+                                .build()
+                )
+        );
+    }
+
+    private static Stream<Arguments> getTestDataForCheckAccessForCreateAndUpdateWhenAccessIsAllowed() {
+        return Stream.of(
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .nameOfRoleOfCurrentUser(Roles.ACCOUNT_OWNER.toString())
+                                .build()
+                ),
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .nameOfRoleOfCurrentUser(Roles.ADMIN.toString())
+                                .isCurrentUserFromInnerGroup(true)
+                                .build()
+                ),
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .nameOfRoleOfCurrentUser(Roles.EXECUTOR.toString())
+                                .isCurrentUserFromInnerGroup(true)
+                                .build()
+                ),
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .nameOfRoleOfCurrentUser(Roles.AUTHOR.toString())
+                                .isCurrentUserFromInnerGroup(true)
+                                .isCurrentUserEqualAuthorOfTicket(true)
+                                .build()
+                ),
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .nameOfRoleOfCurrentUser(Roles.AUTHOR.toString())
+                                .isCurrentUserFromInnerGroup(false)
+                                .isCurrentUserEqualAuthorOfTicket(true)
+                                .build()
+                )
+        );
+    }
+
+    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
+    @ParameterizedTest(name = "{index} - id of TestDataCrudTicketPermission ")
+    @MethodSource("getTestDataForCheckAccessForReadWhenAccessIsAllowed")
+    void checkAccessForRead_ShouldGetTrue_whenAccessIsAllowed
+            (TestDataCrudTicketPermission testData) {
+        var ticket = ticketTestHelper.getRandomValidEntity();
+        var currentUser = ticket.getAuthor().toBuilder().build();
+        currentUser.setGroup(ticket.getGroup().toBuilder().build());
+        ticket.getAuthor().getGroup().setIsInner(testData.isAuthorOfTicketFromInnerGroup);
+        currentUser.getGroup().setIsInner(testData.isCurrentUserFromInnerGroup);
+        currentUser.getRole().setName(testData.nameOfRoleOfCurrentUser);
+        if (testData.isCurrentUserEqualAuthorOfTicket) {
+            currentUser = ticket.getAuthor();
+        } else {
+            currentUser.setId(UUID.randomUUID());
+        }
+        if (testData.isGroupOfCurrentUserEqualGroupOfAuthorOfTicket) {
+            currentUser.setGroup(ticket.getAuthor().getGroup());
+        } else {
+            currentUser.getGroup().setId(UUID.randomUUID());
+        }
+        if (testData.isTicketsObserversContainsCurrentUser) {
+            ticket.setObservers(List.of(currentUser));
+        }
+        if (testData.isTicketsExecutorContainsCurrentUser()) {
+            ticket.setExecutors(List.of(currentUser));
+        }
+        when(userService.findByEmail(any())).thenReturn(Optional.of(currentUser));
+        assertTrue(validator.checkAccessForRead(ticket));
+        verify(userService, times(1)).findByEmail(any());
+    }
+
+    private static Stream<Arguments> getTestDataForCheckAccessForReadWhenAccessIsAllowed() {
+        return Stream.of(
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .nameOfRoleOfCurrentUser(Roles.ADMIN.toString())
+                                .isCurrentUserFromInnerGroup(true)
+                                .build()
+                ),
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .nameOfRoleOfCurrentUser(Roles.ADMIN.toString())
+                                .isCurrentUserFromInnerGroup(false)
+                                .isAuthorOfTicketFromInnerGroup(false)
+                                .isGroupOfCurrentUserEqualGroupOfAuthorOfTicket(true)
+                                .build()
+                ),
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .nameOfRoleOfCurrentUser(Roles.EXECUTOR.toString())
+                                .isCurrentUserFromInnerGroup(true)
+                                .build()
+                ),
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .nameOfRoleOfCurrentUser(Roles.EXECUTOR.toString())
+                                .isCurrentUserFromInnerGroup(false)
+                                .isAuthorOfTicketFromInnerGroup(false)
+                                .isGroupOfCurrentUserEqualGroupOfAuthorOfTicket(true)
+                                .build()
+                ),
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .nameOfRoleOfCurrentUser(Roles.AUTHOR.toString())
+                                .isCurrentUserFromInnerGroup(true)
+                                .isAuthorOfTicketFromInnerGroup(true)
+                                .isCurrentUserEqualAuthorOfTicket(true)
+                                .build()
+                ),
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .nameOfRoleOfCurrentUser(Roles.AUTHOR.toString())
+                                .isCurrentUserFromInnerGroup(false)
+                                .isAuthorOfTicketFromInnerGroup(false)
+                                .isCurrentUserEqualAuthorOfTicket(true)
+                                .build()
+                ),
+                Arguments.of(
+                        TestDataCrudTicketPermission
+                                .builder()
+                                .nameOfRoleOfCurrentUser(Roles.OBSERVER.toString())
+                                .isTicketsObserversContainsCurrentUser(true)
+                                .build()
+                )
+
+        );
+    }
 }

@@ -29,7 +29,7 @@ import ru.itterminal.botdesk.files.model.File;
 @Table(name = "tickets")
 @Getter
 @Setter
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
