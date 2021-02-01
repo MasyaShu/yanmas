@@ -24,6 +24,11 @@ public class SpecificationsFactory {
     public static final String ACCOUNT = "account";
     public static final String OUT_ID = "outId";
     public static final String DELETED = "deleted";
+    public static final String STRING_FILTER = "StringFilter";
+    public static final String BOOLEAN_FILTER = "BooleanFilter";
+    public static final String NUMBER_FILTER = "NumberFilter";
+    public static final String BASE_ENTITY_FILTER = "BaseEntityFilter";
+    public static final String LIST_OF_BASE_ENTITY_FILTER = "ListOfBaseEntityFilter";
 
     private final StringFilterSpecificationsFactory stringFactory = new StringFilterSpecificationsFactory();
     private final NumberFilterSpecificationsFactory numberFactory = new NumberFilterSpecificationsFactory();
@@ -62,7 +67,7 @@ public class SpecificationsFactory {
                 if (filter != null) {
                     var fieldName = field.getName();
                     var spec = makeSpecification(entityClass, fieldName, filter);
-                    if (spec!=null) {
+                    if (spec != null) {
                         createdSpec.add(spec);
                     }
                 }
@@ -77,15 +82,15 @@ public class SpecificationsFactory {
         return returnedSpec;
     }
 
-    private <E extends BaseEntity> Specification<E> makeSpecification
+    public <E extends BaseEntity> Specification<E> makeSpecification
             (Class<E> entityClass, String field, Object filter) {
         String clazzFilterName = filter.getClass().getSimpleName();
         return switch (clazzFilterName) {
-            case "StringFilter" -> makeSpecificationForStringFilter(filter, field);
-            case "BooleanFilter" -> makeSpecificationForBooleanFilter(filter, field);
-            case "NumberFilter" -> makeSpecificationForNumberFilter(filter, field);
-            case "BaseEntityFilter" -> makeSpecificationForBaseEntityFilter(filter, field);
-            case "ListOfBaseEntityFilter" -> makeSpecificationForListOfBaseEntityFilter(entityClass, field, filter);
+            case STRING_FILTER -> makeSpecificationForStringFilter(filter, field);
+            case BOOLEAN_FILTER -> makeSpecificationForBooleanFilter(filter, field);
+            case NUMBER_FILTER -> makeSpecificationForNumberFilter(filter, field);
+            case BASE_ENTITY_FILTER -> makeSpecificationForBaseEntityFilter(filter, field);
+            case LIST_OF_BASE_ENTITY_FILTER -> makeSpecificationForListOfBaseEntityFilter(entityClass, field, filter);
             default -> null;
         };
     }

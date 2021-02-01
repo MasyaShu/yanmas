@@ -75,6 +75,11 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
         }
     }
 
+    @SuppressWarnings("UnusedReturnValue")
+    public boolean checkAccessForRead(Ticket ticket) {
+        return validator.checkAccessForRead(ticket);
+    }
+
     private void setValueToFieldsOnCreation(Ticket entity, User currentUser) {
         UUID id = UUID.randomUUID();
         entity.setId(id);
