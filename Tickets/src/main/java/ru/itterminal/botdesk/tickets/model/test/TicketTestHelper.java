@@ -1,11 +1,15 @@
 package ru.itterminal.botdesk.tickets.model.test;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.aau.model.test.GroupTestHelper;
 import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
 import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
+import ru.itterminal.botdesk.commons.model.BaseEntity;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
 import ru.itterminal.botdesk.tickets.model.Ticket;
 import ru.itterminal.botdesk.tickets.model.dto.TicketDtoRequest;
@@ -23,7 +27,7 @@ public class TicketTestHelper extends EntityTestHelperImpl<Ticket, TicketDtoRequ
 
     @Override
     public Ticket getRandomValidEntity() {
-        var account  = accountTestHelper.getRandomValidEntity();
+        var account = accountTestHelper.getRandomValidEntity();
         var group = groupTestHelper.getRandomValidEntity();
         group.setAccount(account);
         var author = userTestHelper.getRandomValidEntity();
@@ -60,6 +64,60 @@ public class TicketTestHelper extends EntityTestHelperImpl<Ticket, TicketDtoRequ
     @Override
     public List<Ticket> setPredefinedValidEntityList() {
         return null;
+    }
+
+    @Override
+    public TicketDtoRequest convertEntityToDtoRequest(Ticket entity) {
+        List<UUID> observersIdList = new ArrayList<>();
+        if (entity.getObservers() != null) {
+            observersIdList = entity.getObservers()
+                    .stream()
+                    .map(BaseEntity::getId)
+                    .collect(Collectors.toList());
+        }
+
+        List<UUID> executorsIdList = new ArrayList<>();
+        if (entity.getExecutors() != null) {
+            executorsIdList = entity.getExecutors()
+                    .stream()
+                    .map(BaseEntity::getId)
+                    .collect(Collectors.toList());
+        }
+
+        List<UUID> filesIdList = new ArrayList<>();
+        if (entity.getFiles() != null) {
+            filesIdList = entity.getFiles()
+                    .stream()
+                    .map(BaseEntity::getId)
+                    .collect(Collectors.toList());
+        }
+
+        return TicketDtoRequest.builder()
+                .id(entity.getId())
+                .outId(entity.getOutId())
+                .deleted(entity.getDeleted())
+                .version(entity.getVersion())
+                .displayName(entity.getDisplayName())
+                .author(entity.getAuthor() == null
+                                ? null
+                                : entity.getAuthor().getId())
+                .subject(entity.getSubject())
+                .description(entity.getDescription())
+                .deadline(entity.getDeadline())
+                .isFinished(entity.getIsFinished())
+                .ticketType(entity.getTicketType() == null
+                                ? null
+                                : entity.getTicketType().getId())
+                .ticketStatus(entity.getTicketStatus() == null
+                                    ? null
+                                    : entity.getTicketStatus().getId())
+                .ticketTemplate(entity.getTicketTemplate() == null
+                                      ? null
+                                      : entity.getTicketTemplate().getId())
+                .observers(observersIdList)
+                .executors(executorsIdList)
+                .files(filesIdList)
+                .build();
     }
 
 }

@@ -61,6 +61,7 @@ public class TicketControllerV1 extends BaseController {
     public static final String GROUP = "group";
     public static final String AUTHOR = "author";
     public static final String OBSERVERS = "observers";
+
     private final TicketServiceImpl service;
     private final AccountServiceImpl accountService;
     private final UserServiceImpl userService;
@@ -69,7 +70,6 @@ public class TicketControllerV1 extends BaseController {
     private final TicketStatusServiceImpl ticketStatusService;
     private final FileServiceImpl fileService;
     private final TicketSettingServiceImpl ticketSettingService;
-    @SuppressWarnings("unused")
     private final SpecificationsFactory specFactory;
 
     private final String ENTITY_NAME = Ticket.class.getSimpleName();
@@ -80,8 +80,8 @@ public class TicketControllerV1 extends BaseController {
             (Principal principal, @Validated(Create.class) @RequestBody TicketDtoRequest ticketDtoRequest) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, ticketDtoRequest);
         var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        var accountId = jwtUser.getAccountId();
         var currentUser = userService.findByEmail(jwtUser.getUsername()).get();
+        var accountId = currentUser.getAccount().getId();
         var ticket = modelMapper.map(ticketDtoRequest, Ticket.class);
         setNestedObjectsIntoEntityFromEntityDtoRequest(ticket, ticketDtoRequest, accountId);
         var createdTicket = service.create(ticket, currentUser);

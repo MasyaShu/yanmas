@@ -9,6 +9,7 @@ import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
@@ -20,6 +21,7 @@ import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 @Setter
 @SuperBuilder
 @AllArgsConstructor
+@NoArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class TicketDtoRequest extends BaseEntityDto {
