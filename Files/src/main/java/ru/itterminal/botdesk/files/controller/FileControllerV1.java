@@ -19,9 +19,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ru.itterminal.botdesk.aau.model.Account;
-import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.files.service.FileServiceImpl;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
@@ -30,16 +29,10 @@ import ru.itterminal.botdesk.security.jwt.JwtUser;
 @RestController("FileControllerV1")
 @Validated
 @RequestMapping("api/v1/file-data")
+@RequiredArgsConstructor
 public class FileControllerV1 extends BaseController {
 
     private final FileServiceImpl fileService;
-    private final AccountServiceImpl accountService;
-
-    public FileControllerV1(FileServiceImpl fileService,
-                            AccountServiceImpl accountService) {
-        this.fileService = fileService;
-        this.accountService = accountService;
-    }
 
     @GetMapping()
     public ResponseEntity<Resource> getFileData(
@@ -47,8 +40,7 @@ public class FileControllerV1 extends BaseController {
             @RequestParam("fileId") UUID fileId
     ) {
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        Account account = accountService.findById(jwtUser.getAccountId());
-        byte[] fileData = fileService.getFileData(account.getId(), fileId);
+        byte[] fileData = fileService.getFileData(jwtUser.getAccountId(), fileId);
         ByteArrayResource resource = new ByteArrayResource(fileData);
         return ResponseEntity.ok()
                 .contentLength(fileData.length)
@@ -63,7 +55,6 @@ public class FileControllerV1 extends BaseController {
                                                @RequestParam("file") MultipartFile file
     ) {
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        Account account = accountService.findById(jwtUser.getAccountId());
         byte[] bytesOfFile;
         try {
             bytesOfFile = file.getBytes();
@@ -72,7 +63,7 @@ public class FileControllerV1 extends BaseController {
             log.error(e.getMessage());
             return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
         }
-        boolean result = fileService.putFileData(account.getId(), fileId, bytesOfFile);
+        boolean result = fileService.putFileData(jwtUser.getAccountId(), fileId, bytesOfFile);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
