@@ -18,7 +18,7 @@ import lombok.experimental.SuperBuilder;
 @Setter
 @MappedSuperclass
 @NoArgsConstructor
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 @ToString
 @EqualsAndHashCode
 public abstract class BaseEntity {

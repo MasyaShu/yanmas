@@ -35,7 +35,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import ru.itterminal.botdesk.aau.model.Account;
-import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
 import ru.itterminal.botdesk.files.model.File;
 import ru.itterminal.botdesk.files.service.FileServiceImpl;
@@ -50,9 +49,6 @@ class FileControllerV1Test {
 
     @MockBean
     private FileServiceImpl fileService;
-
-    @MockBean
-    private AccountServiceImpl accountService;
 
     @Autowired
     private FileControllerV1 controller;
@@ -105,16 +101,14 @@ class FileControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getFileData_shouldGetFileData_whenPassedValidParameters() throws Exception {
-        when(accountService.findById(any())).thenReturn(account);
-        when(fileService.getFileData(account.getId(), FILE_ID)).thenReturn(fileData);
+        when(fileService.getFileData(any(),any())).thenReturn(fileData);
         var result = mockMvc.perform(get(HOST + PORT + API + "?fileId=" + FILE_ID))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
         byte[] actualFileData = result.getResponse().getContentAsByteArray();
         assertArrayEquals(fileData, actualFileData);
-        verify(accountService, times(1)).findById(any());
-        verify(fileService, times(1)).getFileData(account.getId(), FILE_ID);
+        verify(fileService, times(1)).getFileData(any(), any());
     }
 
     @Test
@@ -123,7 +117,6 @@ class FileControllerV1Test {
         mockMvc.perform(get(HOST + PORT + API + "?fileId=" + FILE_ID))
                 .andDo(print())
                 .andExpect(status().isForbidden());
-        verify(accountService, times(0)).findById(any());
         verify(fileService, times(0)).getFileData(any(), any());
     }
 
@@ -136,22 +129,19 @@ class FileControllerV1Test {
                 .andExpect(jsonPath("$.title").value(REQUEST_NOT_READABLE))
                 .andExpect(jsonPath("$.detail").value(Matchers.containsString(
                         "Failed to convert value of type 'java.lang.String' to required type 'java.util.UUID'")));
-        verify(accountService, times(0)).findById(any());
         verify(fileService, times(0)).getFileData(any(), any());
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void putFileData_shouldGetStatusOk_whenPassedValidData() throws Exception {
-        when(accountService.findById(any())).thenReturn(account);
-        when(fileService.putFileData(account.getId(), FILE_ID, fileData)).thenReturn(true);
+        when(fileService.putFileData(any(), any(), any())).thenReturn(true);
         mockMvc.perform(MockMvcRequestBuilders.multipart(HOST + PORT + API)
                                 .file(mockMultipartFile)
                                 .param("fileId", String.valueOf(FILE_ID)))
                 .andDo(print())
                 .andExpect(status().isOk());
-        verify(accountService, times(1)).findById(any());
-        verify(fileService, times(1)).putFileData(account.getId(), FILE_ID, fileData);
+        verify(fileService, times(1)).putFileData(any(), any(), any());
     }
 
     @Test
@@ -160,7 +150,6 @@ class FileControllerV1Test {
         mockMvc.perform(post(HOST + PORT + API + "?fileId=" + FILE_ID))
                 .andDo(print())
                 .andExpect(status().isForbidden());
-        verify(accountService, times(0)).findById(any());
         verify(fileService, times(0)).putFileData(any(), any(), any());
     }
 
@@ -175,7 +164,6 @@ class FileControllerV1Test {
                 .andExpect(jsonPath("$.title").value(REQUEST_NOT_READABLE))
                 .andExpect(jsonPath("$.detail").value(Matchers.containsString(
                         "Failed to convert value of type 'java.lang.String' to required type 'java.util.UUID'")));
-        verify(accountService, times(0)).findById(any());
         verify(fileService, times(0)).putFileData(any(), any(), any());
     }
 }
