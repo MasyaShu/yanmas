@@ -28,10 +28,6 @@ public class FileOperationValidator extends BasicOperationValidatorImpl<File> {
     private static final String CREATED_AT = "Created at";
     private static final String CREATED_AT_NULL = "Created at mustn't null";
     private static final String CREATED_AT_ZERO = "Created at mustn't zero";
-    private static final String ACCOUNT = "Account";
-    private static final String ACCOUNT_NULL = "Account mustn't null";
-    private static final String ENTITY_ID = "EntityId";
-    private static final String ENTITY_ID_NULL = "EntityId mustn't null";
 
     private final Long maxSizeOfFile;
 
@@ -46,8 +42,6 @@ public class FileOperationValidator extends BasicOperationValidatorImpl<File> {
         chekNumberForNullOrMoreThan(entity.getSize(), maxSizeOfFile, SIZE_FILE, SIZE_NULL, MAX_SIZE, errors);
         chekStringForNullOrEmpty(entity.getFileName(), FILE_NAME, FILE_NAME_NULL, FILE_NAME_EMPTY, errors);
         chekNumberForNullOrZero(entity.getCreatedAt(), CREATED_AT, CREATED_AT_NULL, CREATED_AT_ZERO, errors);
-        chekObjectForNull(entity.getAccount(), ACCOUNT, ACCOUNT_NULL, errors);
-        chekObjectForNull(entity.getEntityId(), ENTITY_ID, ENTITY_ID_NULL, errors);
         ifErrorsNotEmptyThrowLogicalValidationException(errors);
         return true;
     }

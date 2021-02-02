@@ -152,43 +152,4 @@ class FileOperationValidatorTest {
                 actualException.getFieldErrors().get(CREATED_AT).get(0)
         );
     }
-
-    @Test
-    void beforeCreate_shouldGetLogicalValidationException_whenAccountIsNull() {
-        LogicalValidationException expectedException = createExpectedLogicalValidationException(ACCOUNT, ACCOUNT_NULL);
-        File file = File.builder()
-                .size(1000)
-                .fileName(FILE_NAME)
-                .createdAt(1000L)
-                .account(null)
-                .build();
-        LogicalValidationException actualException = assertThrows(
-                LogicalValidationException.class,
-                () -> validator.beforeCreate(file)
-        );
-        assertEquals(
-                expectedException.getFieldErrors().get(ACCOUNT).get(0),
-                actualException.getFieldErrors().get(ACCOUNT).get(0)
-        );
-    }
-
-    @Test
-    void beforeCreate_shouldGetLogicalValidationException_whenEntityIdIsNull() {
-        LogicalValidationException expectedException = createExpectedLogicalValidationException(ENTITY_ID, ENTITY_ID_NULL);
-        File file = File.builder()
-                .size(1000)
-                .fileName(FILE_NAME)
-                .createdAt(1000L)
-                .account(Account.builder().build())
-                .entityId(null)
-                .build();
-        LogicalValidationException actualException = assertThrows(
-                LogicalValidationException.class,
-                () -> validator.beforeCreate(file)
-        );
-        assertEquals(
-                expectedException.getFieldErrors().get(ENTITY_ID).get(0),
-                actualException.getFieldErrors().get(ENTITY_ID).get(0)
-        );
-    }
 }
