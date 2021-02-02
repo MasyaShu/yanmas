@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.aau.model.test.GroupTestHelper;
 import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
@@ -59,16 +58,6 @@ public class TicketTestHelper extends EntityTestHelperImpl<Ticket, TicketDtoRequ
                 .ticketTemplate(ticketTemplate)
                 .build();
         setRandomValidPropertiesOfBaseEntity(ticket);
-        List<User> observers = userTestHelper.getRandomValidEntityList(3);
-        for (User user : observers) {
-            user.setAccount(account);
-        }
-        List<User> executors = userTestHelper.getRandomValidEntityList(3);
-        for (User user : executors) {
-            user.setAccount(account);
-        }
-        ticket.setObservers(observers);
-        ticket.setExecutors(executors);
 
         return ticket;
     }
@@ -79,6 +68,7 @@ public class TicketTestHelper extends EntityTestHelperImpl<Ticket, TicketDtoRequ
     }
 
     @Override
+    @SuppressWarnings("DuplicatedCode")
     public TicketDtoRequest convertEntityToDtoRequest(Ticket entity) {
         List<UUID> observersIdList = new ArrayList<>();
         if (entity.getObservers() != null) {
