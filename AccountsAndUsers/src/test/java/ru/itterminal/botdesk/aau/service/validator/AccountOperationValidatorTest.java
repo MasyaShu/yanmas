@@ -1,22 +1,5 @@
 package ru.itterminal.botdesk.aau.service.validator;
 
-import static java.lang.String.format;
-import static java.util.Collections.singletonList;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static ru.itterminal.botdesk.aau.service.validator.AccountOperationValidator.EMAIL_OF_ACCOUNT_OWNER;
-import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_CODE;
-import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_MESSAGE;
-import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,16 +7,26 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-
-import ru.itterminal.botdesk.aau.model.Account;
-import ru.itterminal.botdesk.aau.model.Group;
-import ru.itterminal.botdesk.aau.model.Role;
-import ru.itterminal.botdesk.aau.model.Roles;
-import ru.itterminal.botdesk.aau.model.User;
+import ru.itterminal.botdesk.aau.model.*;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
+import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static java.lang.String.format;
+import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static ru.itterminal.botdesk.aau.service.validator.AccountOperationValidator.EMAIL_OF_ACCOUNT_OWNER;
+import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(AccountOperationValidator.class)
@@ -70,13 +63,13 @@ class AccountOperationValidatorTest {
 
     @Test
     void checkUniqueness_shouldGetTrue_whenPassedValidData() {
-        when(userService.findByEmail(any())).thenReturn(Optional.empty());
+        when(userService.findByEmail(any())).thenThrow(EntityNotExistException.class);
         assertTrue(validator.checkUniqueness(TestSecurityConfig.EMAIL_1));
     }
 
     @Test
     void checkUniqueness_shouldGetLogicalValidationException_whenEmailAlreadyExistInDatabase() {
-        when(userService.findByEmail(any())).thenReturn(Optional.of(user));
+        when(userService.findByEmail(any())).thenReturn(user);
         errors.put(EMAIL_OF_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,
                 format(NOT_UNIQUE_MESSAGE, TestSecurityConfig.EMAIL_1))));
         LogicalValidationException logicalValidationException =

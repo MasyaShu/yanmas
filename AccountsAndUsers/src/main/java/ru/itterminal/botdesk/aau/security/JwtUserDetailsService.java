@@ -1,17 +1,15 @@
 package ru.itterminal.botdesk.aau.security;
 
-import java.util.List;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
-
-import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
-import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
+
+import java.util.List;
 
 @Service
 @Slf4j
@@ -25,8 +23,7 @@ public class JwtUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) {
-        User user = userServiceImpl.findByEmail(email)
-                .orElseThrow(() -> new EntityNotExistException("User with username: " + email + " not found"));
+        User user = userServiceImpl.findByEmail(email);
 
         JwtUser jwtUser = JwtUser
                 .builder()

@@ -130,7 +130,7 @@ class TicketControllerV1Test {
         UUID accountId = ticket.getAccount().getId();
         when(accountService.findById(any())).thenReturn(ticket.getAccount());
         when(userService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getAuthor());
-        when(userService.findByEmail(any())).thenReturn(Optional.of(ticket.getAuthor()));
+        when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
         when(ticketTypeService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getTicketType());
         when(ticketStatusService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getTicketStatus());
         when(ticketTemplateService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getTicketTemplate());

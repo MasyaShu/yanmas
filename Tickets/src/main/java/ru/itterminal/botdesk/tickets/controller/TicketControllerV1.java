@@ -80,7 +80,7 @@ public class TicketControllerV1 extends BaseController {
             (Principal principal, @Validated(Create.class) @RequestBody TicketDtoRequest ticketDtoRequest) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, ticketDtoRequest);
         var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        var currentUser = userService.findByEmail(jwtUser.getUsername()).get();
+        var currentUser = userService.findByEmail(jwtUser.getUsername());
         var accountId = currentUser.getAccount().getId();
         var ticket = modelMapper.map(ticketDtoRequest, Ticket.class);
         setNestedObjectsIntoEntityFromEntityDtoRequest(ticket, ticketDtoRequest, accountId);
@@ -106,7 +106,7 @@ public class TicketControllerV1 extends BaseController {
         var ticket = modelMapper.map(ticketDtoRequest, Ticket.class);
         var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
         var accountId = jwtUser.getAccountId();
-        var currentUser = userService.findByEmail(jwtUser.getUsername()).get();
+        var currentUser = userService.findByEmail(jwtUser.getUsername());
         setNestedObjectsIntoEntityFromEntityDtoRequest(ticket, ticketDtoRequest, accountId);
         var updatedTicket = service.update(ticket, currentUser);
         var returnedTicket = modelMapper.map(updatedTicket, TicketDtoResponse.class);
@@ -193,7 +193,7 @@ public class TicketControllerV1 extends BaseController {
     private void setAdditionalConditionsIntoSpecAccordingPermissionOfCurrentUser
             (JwtUser jwtUser, Specification<Ticket> spec) {
 
-        var currentUser = userService.findByEmail(jwtUser.getUsername()).get();
+        var currentUser = userService.findByEmail(jwtUser.getUsername());
         var isCurrentUserFromInnerGroup = currentUser.getGroup().getIsInner();
         var nameOfRoleOfCurrentUser = currentUser.getRole().getName();
 

@@ -1,19 +1,10 @@
 package ru.itterminal.botdesk.tickets.service.validator;
 
-import static java.lang.String.format;
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.addValidationErrorIntoErrors;
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.ifErrorsNotEmptyThrowLogicalValidationException;
-
-import java.util.List;
-import java.util.Map;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
@@ -21,6 +12,12 @@ import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 import ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
 import ru.itterminal.botdesk.tickets.model.Ticket;
+
+import java.util.List;
+import java.util.Map;
+
+import static java.lang.String.format;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.*;
 
 @Slf4j
 @Component
@@ -259,7 +256,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
     @SuppressWarnings("DuplicatedCode")
     public boolean checkAccessForCreateAndUpdate(Ticket ticket) {
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        var currentUser = userService.findByEmail(jwtUser.getUsername()).get();
+        var currentUser = userService.findByEmail(jwtUser.getUsername());
         var nameOfRoleOfCurrentUser = currentUser.getRole().getName();
         var isCurrentUserFromInnerGroup = currentUser.getGroup().getIsInner();
         var isAuthorOfTicketFromInnerGroup = ticket.getAuthor().getGroup().getIsInner();
@@ -381,7 +378,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
     @Override
     public boolean checkAccessForRead(Ticket ticket) {
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        var currentUser = userService.findByEmail(jwtUser.getUsername()).get();
+        var currentUser = userService.findByEmail(jwtUser.getUsername());
         var nameOfRoleOfCurrentUser = currentUser.getRole().getName();
         var isCurrentUserFromInnerGroup = currentUser.getGroup().getIsInner();
         var isAuthorOfTicketFromInnerGroup = ticket.getAuthor().getGroup().getIsInner();

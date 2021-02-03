@@ -83,7 +83,7 @@ class TicketOperationValidatorTest {
         var ticket = ticketTestHelper.getRandomValidEntity();
         ticket.setSubject("");
         ticket.setDescription("");
-        when(userService.findByEmail(any())).thenReturn(Optional.of(ticket.getAuthor()));
+        when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
         expectedErrors.put(
                 EMPTY_TICKET,
                 singletonList(
@@ -111,7 +111,7 @@ class TicketOperationValidatorTest {
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     void beforeCreate_shouldGetTrue_whenPassedTicketIsValid() {
         var ticket = ticketTestHelper.getRandomValidEntity();
-        when(userService.findByEmail(any())).thenReturn(Optional.of(ticket.getAuthor()));
+        when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
         var actualResult = validator.beforeCreate(ticket);
         assertTrue(actualResult);
         verify(userService, times(1)).findByEmail(any());
@@ -124,7 +124,7 @@ class TicketOperationValidatorTest {
         var ticket = ticketTestHelper.getRandomValidEntity();
         ticket.setSubject("");
         ticket.setDescription("");
-        when(userService.findByEmail(any())).thenReturn(Optional.of(ticket.getAuthor()));
+        when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
         expectedErrors.put(
                 EMPTY_TICKET,
                 singletonList(
@@ -152,7 +152,7 @@ class TicketOperationValidatorTest {
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     void beforeUpdate_shouldGetTrue_whenPassedTicketIsValid() {
         var ticket = ticketTestHelper.getRandomValidEntity();
-        when(userService.findByEmail(any())).thenReturn(Optional.of(ticket.getAuthor()));
+        when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
         var actualResult = validator.beforeUpdate(ticket);
         assertTrue(actualResult);
         verify(userService, times(1)).findByEmail(any());
@@ -164,7 +164,7 @@ class TicketOperationValidatorTest {
         var expectedErrors = createMapForLogicalErrors();
         var ticket = ticketTestHelper.getRandomValidEntity();
         ticket.getAuthor().setRole(roleTestHelper.getPredefinedValidEntityList().get(4));
-        when(userService.findByEmail(any())).thenReturn(Optional.of(ticket.getAuthor()));
+        when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
         expectedErrors.put(
                 WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR,
                 singletonList(
@@ -200,7 +200,7 @@ class TicketOperationValidatorTest {
         var observer = ticket.getAuthor();
         observer.getRole().setWeight(0);
         ticket.setObservers(List.of(observer));
-        when(userService.findByEmail(any())).thenReturn(Optional.of(ticket.getAuthor()));
+        when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
         expectedErrors.put(
                 WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS,
                 singletonList(
@@ -236,7 +236,7 @@ class TicketOperationValidatorTest {
         var executor = ticket.getAuthor();
         executor.getRole().setWeight(0);
         ticket.setExecutors(List.of(executor));
-        when(userService.findByEmail(any())).thenReturn(Optional.of(ticket.getAuthor()));
+        when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
         expectedErrors.put(
                 WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS,
                 singletonList(
@@ -270,7 +270,7 @@ class TicketOperationValidatorTest {
         var expectedErrors = createMapForLogicalErrors();
         var ticket = ticketTestHelper.getRandomValidEntity();
         ticket.getAuthor().setRole(roleTestHelper.getPredefinedValidEntityList().get(4));
-        when(userService.findByEmail(any())).thenReturn(Optional.of(ticket.getAuthor()));
+        when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
         expectedErrors.put(
                 WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR,
                 singletonList(
@@ -306,7 +306,7 @@ class TicketOperationValidatorTest {
         var observer = ticket.getAuthor();
         observer.getRole().setWeight(0);
         ticket.setObservers(List.of(observer));
-        when(userService.findByEmail(any())).thenReturn(Optional.of(ticket.getAuthor()));
+        when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
         expectedErrors.put(
                 WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS,
                 singletonList(
@@ -342,7 +342,7 @@ class TicketOperationValidatorTest {
         var executor = ticket.getAuthor();
         executor.getRole().setWeight(0);
         ticket.setExecutors(List.of(executor));
-        when(userService.findByEmail(any())).thenReturn(Optional.of(ticket.getAuthor()));
+        when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
         expectedErrors.put(
                 WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS,
                 singletonList(
@@ -398,7 +398,7 @@ class TicketOperationValidatorTest {
         if (testData.isTicketsExecutorContainsCurrentUser()) {
             ticket.getExecutors().add(currentUser);
         }
-        when(userService.findByEmail(any())).thenReturn(Optional.of(currentUser));
+        when(userService.findByEmail(any())).thenReturn(currentUser);
         AccessDeniedException actualException =
                 assertThrows(
                         AccessDeniedException.class,
@@ -436,7 +436,7 @@ class TicketOperationValidatorTest {
         if (testData.isTicketsExecutorContainsCurrentUser()) {
             ticket.setExecutors(List.of(currentUser));
         }
-        when(userService.findByEmail(any())).thenReturn(Optional.of(currentUser));
+        when(userService.findByEmail(any())).thenReturn(currentUser);
         AccessDeniedException actualException =
                 assertThrows(
                         AccessDeniedException.class,
@@ -566,7 +566,7 @@ class TicketOperationValidatorTest {
         if (testData.isTicketsExecutorContainsCurrentUser()) {
             ticket.getExecutors().add(currentUser);
         }
-        when(userService.findByEmail(any())).thenReturn(Optional.of(currentUser));
+        when(userService.findByEmail(any())).thenReturn(currentUser);
         assertTrue(validator.checkAccessForCreateAndUpdate(ticket));
         verify(userService, times(1)).findByEmail(any());
     }
@@ -746,7 +746,7 @@ class TicketOperationValidatorTest {
         if (testData.isTicketsExecutorContainsCurrentUser()) {
             ticket.setExecutors(List.of(currentUser));
         }
-        when(userService.findByEmail(any())).thenReturn(Optional.of(currentUser));
+        when(userService.findByEmail(any())).thenReturn(currentUser);
         assertTrue(validator.checkAccessForRead(ticket));
         verify(userService, times(1)).findByEmail(any());
     }
