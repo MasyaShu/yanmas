@@ -1,19 +1,6 @@
 package ru.itterminal.botdesk.aau.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.UUID;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +12,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.security.web.FilterChainProxy;
@@ -34,9 +22,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.dto.AccountCreateDto;
 import ru.itterminal.botdesk.aau.model.dto.AccountDto;
@@ -46,6 +31,15 @@ import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
 import ru.itterminal.botdesk.commons.util.CommonConstants;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
+
+import java.util.UUID;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {AccountControllerV1.class, FilterChainProxy.class})
@@ -125,8 +119,8 @@ class AccountControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void create_shouldGetForbiddenStatus_whenAuthenticatedUserHasNotRoleAccountOwner() throws Exception {
+    @WithMockUser(authorities ={"ADMIN", "EXECUTOR", "AUTHOR", "OBSERVER", "ACCOUNT_OWNER"})
+    void create_shouldGetForbiddenStatus_whenAuthenticatedUserHasNotAnonymousUser() throws Exception {
         when(service.create((AccountCreateDto) any())).thenReturn(account);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API + "create-account")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -209,7 +203,7 @@ class AccountControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
+    @WithMockUser(authorities ={"ADMIN", "EXECUTOR", "AUTHOR", "OBSERVER"})
     void update_shouldGetStatusForbidden_whenAuthenticatedUserHasNotRoleAccountOwner() throws Exception {
         accountDto.setDeleted(false);
         accountDto.setVersion(0);
@@ -293,28 +287,6 @@ class AccountControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isForbidden());
         verify(service, times(0)).findById(any());
-    }
-
-    @Test
-    @WithUserDetails("OWNER_ACCOUNT_1_IS_INNER_GROUP")
-    void physicalDelete_shouldThrowUnsupportedOperationException_untilMethodWouldBeImplemented() throws Exception {
-        accountDto.setDeleted(false);
-        accountDto.setVersion(0);
-        MockHttpServletRequestBuilder request = delete(HOST + PORT + API + "account")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(accountDto));
-        mockMvc.perform(request)
-                .andDo(print())
-                .andExpect(status().isMethodNotAllowed());
-    }
-
-    @Test
-    @WithAnonymousUser
-    void physicalDelete_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
-        mockMvc.perform(delete(HOST + PORT + API + "account"))
-                .andDo(print())
-                .andExpect(status().isForbidden());
     }
 
     @Test

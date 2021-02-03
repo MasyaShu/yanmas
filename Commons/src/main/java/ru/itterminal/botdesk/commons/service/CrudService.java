@@ -1,13 +1,12 @@
 package ru.itterminal.botdesk.commons.service;
 
-import java.util.List;
-import java.util.UUID;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-
 import ru.itterminal.botdesk.commons.model.BaseEntity;
+
+import java.util.List;
+import java.util.UUID;
 
 @SuppressWarnings("unused")
 public interface  CrudService<E extends BaseEntity> {

@@ -378,6 +378,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
     }
 
     @SuppressWarnings("DuplicatedCode")
+    @Override
     public boolean checkAccessForRead(Ticket ticket) {
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         var currentUser = userService.findByEmail(jwtUser.getUsername()).get();

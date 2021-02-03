@@ -14,7 +14,6 @@ import ru.itterminal.botdesk.aau.model.dto.AccountDto;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
-import ru.itterminal.botdesk.commons.model.validator.scenario.Delete;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
 
@@ -77,11 +76,5 @@ public class AccountControllerV1 extends BaseController {
         AccountDto returnedAccount = modelMapper.map(foundAccount, AccountDto.class);
         log.debug(DONE_GET_ACCOUNT_FROM_AUTHENTICATED_USER, foundAccount);
         return new ResponseEntity<>(returnedAccount, HttpStatus.OK);
-    }
-
-    @DeleteMapping("account")
-    @PreAuthorize("hasAuthority('ACCOUNT_OWNER') and #request.id == authentication.principal.accountId")
-    public ResponseEntity<Void> physicalDelete(@Validated(Delete.class) @RequestBody AccountDto request) {
-        throw new UnsupportedOperationException("Physical delete will be implement in the further");
     }
 }

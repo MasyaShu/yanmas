@@ -27,6 +27,10 @@ public class BasicOperationValidatorImpl<E extends BaseEntity> implements Operat
     public static final String VALIDATION_FAILED = "Validation failed";
     public static final String FIELDS_ARE_NOT_VALID = "Fields are not valid: {}";
 
+    @Override
+    public boolean checkAccessForRead(E entity) {
+        return true;
+    }
 
     @Override
     public boolean beforeCreate(E entity) {

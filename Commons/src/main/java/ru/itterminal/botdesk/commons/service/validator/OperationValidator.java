@@ -12,4 +12,7 @@ public interface OperationValidator<E extends BaseEntity> {
 
     boolean beforeUpdate(E entity);
 
+    boolean checkAccessForRead(E entity);
+
+
 }

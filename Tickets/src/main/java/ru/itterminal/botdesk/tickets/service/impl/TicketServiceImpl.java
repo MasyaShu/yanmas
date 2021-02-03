@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.botdesk.tickets.model.Ticket;
@@ -87,8 +88,8 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
         entity.setGroup(entity.getAuthor().getGroup());
         entity.setNumber(ticketCounterService.getTicketNumber(entity.getAccount().getId()));
 
-        if ((currentUser.getRole().getWeight() <= 40 && !currentUser.getGroup().getIsInner())
-                || currentUser.getRole().getWeight() <= 20) {
+        if ((currentUser.getRole().getWeight() <= Roles.ADMIN.getWeight() && !currentUser.getGroup().getIsInner())
+                || currentUser.getRole().getWeight() <= Roles.AUTHOR.getWeight()) {
             var ticketSetting = ticketSettingService.getSettingOrPredefinedValuesForTicket
                     (entity.getAccount().getId(), entity.getGroup().getId(),
                             entity.getAuthor().getId());
