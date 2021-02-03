@@ -9,6 +9,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
 import ru.itterminal.botdesk.aau.repository.RoleRepository;
+import ru.itterminal.botdesk.aau.service.validator.RoleOperationValidator;
 
 import java.util.Optional;
 
@@ -25,6 +26,9 @@ class RoleServiceImplTest {
 
     @MockBean
     private RoleRepository repository;
+
+    @MockBean
+    private RoleOperationValidator validator;
 
     @Autowired
     private RoleServiceImpl service;
