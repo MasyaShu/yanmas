@@ -40,7 +40,7 @@ public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperat
             addValidationErrorIntoErrors(FILE, FILE_WAS_NOT_UPLOAD, logicalErrors);
         }
         ifErrorsNotEmptyThrowLogicalValidationException(logicalErrors);
-        return awsS3ObjectOperations.getObject(accountId.toString(), fileId.toString());
+        return awsS3ObjectOperations.getObject( accountId, fileId);
     }
 
     @Transactional
@@ -49,7 +49,7 @@ public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperat
         chekObjectForNull(fileId, FILE_ID, FILE_ID_IS_NULL, logicalErrors);
         ifErrorsNotEmptyThrowLogicalValidationException(logicalErrors);
         File file = super.findByIdAndAccountId(fileId, accountId);
-        boolean isPutFileData = awsS3ObjectOperations.putObject(accountId.toString(), fileId.toString(), ByteBuffer.wrap(bytes));
+        boolean isPutFileData = awsS3ObjectOperations.putObject(accountId, fileId, ByteBuffer.wrap(bytes));
         if (isPutFileData) {
             file.setIsUploaded(true);
             repository.save(file);

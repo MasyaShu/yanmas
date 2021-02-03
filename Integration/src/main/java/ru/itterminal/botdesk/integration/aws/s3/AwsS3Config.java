@@ -1,6 +1,6 @@
 package ru.itterminal.botdesk.integration.aws.s3;
 
-import static ru.itterminal.botdesk.integration.util.IntegrationConstants.REGION;
+import static ru.itterminal.botdesk.integration.aws.AwsConfig.REGION;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

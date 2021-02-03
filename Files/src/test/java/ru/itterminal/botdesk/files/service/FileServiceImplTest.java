@@ -27,7 +27,6 @@ import ru.itterminal.botdesk.files.model.File;
 import ru.itterminal.botdesk.files.repository.FileRepository;
 import ru.itterminal.botdesk.files.service.validator.FileOperationValidator;
 import ru.itterminal.botdesk.integration.aws.s3.AwsS3ObjectOperations;
-import ru.itterminal.botdesk.integration.aws.s3.flow.PutAwsS3ObjectFlow;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {FileServiceImpl.class, FileOperationValidator.class})
@@ -39,10 +38,6 @@ class FileServiceImplTest {
     @SuppressWarnings("unused")
     @MockBean
     private FileOperationValidator validator;
-
-    @SuppressWarnings("unused")
-    @MockBean
-    private PutAwsS3ObjectFlow.PutAwsS3ObjectGateway putAwsS3ObjectGateway;
 
     @MockBean
     private AwsS3ObjectOperations awsS3ObjectOperations;
@@ -121,8 +116,10 @@ class FileServiceImplTest {
         when(repository.existsById(any())).thenReturn(false);
         UUID fileId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
-        assertThrows(EntityNotExistException.class,
-                     ()-> service.putFileData(accountId, fileId, fileData));
+        assertThrows(
+                EntityNotExistException.class,
+                () -> service.putFileData(accountId, fileId, fileData)
+        );
         verify(repository, times(1)).existsById(any());
         verify(repository, times(0)).findByIdAndAccountId(any(), any());
         verify(repository, times(0)).save(any());

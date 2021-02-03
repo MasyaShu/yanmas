@@ -1,7 +1,5 @@
 package ru.itterminal.botdesk.integration.aws;
 
-import static ru.itterminal.botdesk.integration.util.IntegrationConstants.REGION;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -9,6 +7,8 @@ import software.amazon.awssdk.regions.Region;
 
 @Configuration
 public class AwsConfig {
+
+    public static final String REGION = "eu-central-1";
 
     @Bean
     public Region getAwsRegion() {
