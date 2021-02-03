@@ -116,6 +116,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                         .builder()
                         .accountId(UUID.fromString(ACCOUNT_2_ID))
                         .weightRole(2)
+                        .groupId(UUID.fromString(GROUP_1_ID))
                         .isInnerGroup(false)
                         .username(EMAIL_1)
                         .enabled(true)

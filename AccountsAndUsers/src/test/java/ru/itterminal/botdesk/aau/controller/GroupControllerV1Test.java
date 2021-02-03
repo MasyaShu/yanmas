@@ -1,22 +1,6 @@
 package ru.itterminal.botdesk.aau.controller;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.itterminal.botdesk.commons.model.filter.StringFilter.TypeComparisonForStringFilter.TEXT_EQUALS;
-
-import java.util.List;
-import java.util.UUID;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,14 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.security.web.FilterChainProxy;
@@ -42,14 +23,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.dto.GroupDto;
 import ru.itterminal.botdesk.aau.model.dto.GroupFilterDto;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
+import ru.itterminal.botdesk.aau.service.validator.GroupOperationValidator;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
@@ -58,6 +37,18 @@ import ru.itterminal.botdesk.commons.model.filter.StringFilter;
 import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.botdesk.commons.util.CommonConstants;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
+
+import java.util.List;
+import java.util.UUID;
+
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.itterminal.botdesk.commons.model.filter.StringFilter.TypeComparisonForStringFilter.TEXT_EQUALS;
 
 @SuppressWarnings("unused")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -72,6 +63,9 @@ class GroupControllerV1Test {
 
     @MockBean
     private SpecificationsFactory specFactory;
+
+    @MockBean
+    private GroupOperationValidator validator;
 
     @SuppressWarnings("unused")
     @MockBean
@@ -141,7 +135,7 @@ class GroupControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void create_shouldCreate_whenValidDataPassed() throws Exception {
+    void create_shouldCreate_whenValidDataPassedAndUserAdminInnerGroup() throws Exception {
         groupDtoFromAccount_1.setDeleted(null);
         groupDtoFromAccount_1.setIsDeprecated(null);
         when(service.create(any())).thenReturn(group_1);
@@ -155,21 +149,6 @@ class GroupControllerV1Test {
                 .andExpect(jsonPath("$.id").value(GROUP_1_ID))
                 .andExpect(jsonPath("$.name").value(GROUP_NAME_1));
         verify(service, times(1)).create(any());
-    }
-
-    @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    void create_shouldGetStatusForbidden_whenRoleUserAuthor() throws Exception {
-        groupDtoFromAccount_1.setDeleted(null);
-        groupDtoFromAccount_1.setIsDeprecated(null);
-        MockHttpServletRequestBuilder request = post(HOST + PORT + API)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(groupDtoFromAccount_1));
-        mockMvc.perform(request)
-                .andDo(print())
-                .andExpect(status().isForbidden());
-        verify(service, times(0)).create(any());
     }
 
     @Test
@@ -251,6 +230,37 @@ class GroupControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isForbidden());
         verify(service, times(0)).create(any());
+    }
+
+    @Test
+    @WithMockUser(authorities = {"EXECUTOR", "AUTHOR", "OBSERVER"})
+    void create_shouldGetStatusForbidden_whenUserExecutorOrAuthorOrObserver() throws Exception {
+        groupDtoFromAccount_1.setIsDeprecated(null);
+        groupDtoFromAccount_1.setDeleted(null);
+        MockHttpServletRequestBuilder request = post(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(groupDtoFromAccount_1));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isForbidden());
+        verify(service, times(0)).create(any());
+    }
+
+    @Test
+    @WithMockUser(authorities = {"AUTHOR", "OBSERVER"})
+    void update_shouldGetStatusForbidden_whenUserAuthorOrObserver() throws Exception {
+        groupDtoFromAccount_1.setVersion(1);
+        groupDtoFromAccount_1.setIsInner(null);
+        groupDtoFromAccount_1.setId(UUID.fromString(GROUP_1_ID));
+        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(groupDtoFromAccount_1));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isForbidden());
+        verify(service, times(0)).update(any());
     }
 
     @Test
@@ -404,15 +414,6 @@ class GroupControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
-    void getById_shouldGetStatusIsForbidden_whenUserIsNotInInnerGroupAndFindIdForOtherGroup() throws Exception {
-        mockMvc.perform(get(HOST + PORT + API + GROUP_1_ID))
-                .andDo(print())
-                .andExpect(status().isForbidden());
-        verify(service, times(0)).findByIdAndAccountId(any(), any());
-    }
-
-    @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getById_shouldReturnNotFound_whenUserIsInInnerGroupAndFindIdForOtherGroup() throws Exception {
         when(service.findByIdAndAccountId(any(), any())).thenReturn(group_1);
@@ -530,22 +531,6 @@ class GroupControllerV1Test {
                                 CommonConstants.MUST_BE_ANY_OF_ASC_DESC
                         ).exists());
         verify(service, times(0)).findAllByFilter(any(), any());
-    }
-
-    @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void physicalDelete_shouldThrowUnsupportedOperationException_untilMethodWouldBeImplemented() throws Exception {
-        mockMvc.perform(delete(HOST + PORT + API + GROUP_1_ID))
-                .andDo(print())
-                .andExpect(status().isMethodNotAllowed());
-    }
-
-    @Test
-    @WithAnonymousUser
-    void physicalDelete_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
-        mockMvc.perform(delete(HOST + PORT + API + GROUP_1_ID))
-                .andDo(print())
-                .andExpect(status().isForbidden());
     }
 
     @Test

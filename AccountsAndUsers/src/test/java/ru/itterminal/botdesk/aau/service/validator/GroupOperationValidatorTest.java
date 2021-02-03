@@ -5,6 +5,7 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
@@ -17,10 +18,7 @@ import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
@@ -28,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.*;
+import static ru.itterminal.botdesk.security.config.TestSecurityConfig.GROUP_1_ID;
 
 @SpringJUnitConfig(value = {GroupOperationValidator.class})
 @Import(TestSecurityConfig.class)
@@ -85,7 +84,7 @@ class GroupOperationValidatorTest {
 
     @Test
     @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_NOT_INNER_GROUP")
-    void checkIsInnerGroupForCreateUpdate_shouldGetLogicalValidationException_whenUserNotInnerGroup() {
+    void checkIsInnerGroupForCreateUpdate_shouldGetLogicalValidationException_whenUserExecutorNotInnerGroup() {
         Group group = groupTestHelper.getRandomValidEntity();
         errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
                 USER_FROM_AN_INNER_GROUP_CANNOT_CREATE_UPDATE_GROUPS)));
@@ -102,5 +101,28 @@ class GroupOperationValidatorTest {
         Group group = groupTestHelper.getRandomValidEntity();
         when(service.create(any())).thenReturn(group);
         assertTrue(validator.beforeCreate(group));
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
+    void checkAccessForRead_shouldGetTrue_whenUserInnerGroup() {
+        Group group = groupTestHelper.getRandomValidEntity();
+        assertTrue(validator.checkAccessForRead(group));
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
+    void checkAccessForRead_shouldGetAccessError_whenUserNotInnerGroupAndGroupUserNoEqualsEntity() {
+        Group group = groupTestHelper.getRandomValidEntity();
+        assertThrows(AccessDeniedException.class,
+                () -> validator.checkAccessForRead(group));
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
+    void checkAccessForRead_shouldGetTrue_whenUserNotInnerGroupAndGroupUserEqualsEntity() {
+        Group group = groupTestHelper.getRandomValidEntity();
+        group.setId(UUID.fromString(GROUP_1_ID));
+        assertTrue(validator.checkAccessForRead(group));
     }
 }

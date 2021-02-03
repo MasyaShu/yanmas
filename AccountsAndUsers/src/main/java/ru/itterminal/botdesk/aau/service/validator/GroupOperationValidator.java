@@ -2,6 +2,7 @@ package ru.itterminal.botdesk.aau.service.validator;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import ru.itterminal.botdesk.aau.model.Group;
@@ -25,6 +26,7 @@ import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chec
 @RequiredArgsConstructor
 public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> {
 
+    public static final String ACCESS_IS_DENIED_FOR_SEARCHING_BY_PASSED_GROUP_ID = "Access is denied for searching by passed groupId";
     private final GroupServiceImpl service;
     private static final String INNER_GROUP = "Inner group";
     private static final String USER_FROM_AN_INNER_GROUP_CANNOT_CREATE_UPDATE_GROUPS =
@@ -71,4 +73,13 @@ public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> 
         }
     }
 
+    @Override
+    public boolean checkAccessForRead(Group entity) {
+        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (jwtUser.isInnerGroup() || jwtUser.getGroupId().equals(entity.getId())) {
+            return true;
+        } else {
+            throw new AccessDeniedException(ACCESS_IS_DENIED_FOR_SEARCHING_BY_PASSED_GROUP_ID);
+        }
+    }
 }
