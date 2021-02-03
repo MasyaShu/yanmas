@@ -15,6 +15,7 @@ import static java.lang.String.format;
 @Service
 public class RoleServiceImpl extends CrudServiceImpl<Role, RoleOperationValidator, RoleRepository> {
 
+    public static final String METHOD_NOT_SUPPORTED = "Method not supported";
     private Role accountOwnerRole;
 
     public Role getAccountOwnerRole() {
@@ -26,5 +27,17 @@ public class RoleServiceImpl extends CrudServiceImpl<Role, RoleOperationValidato
             });
         }
         return accountOwnerRole;
+    }
+
+    @Override
+    @Deprecated
+    public Role create(Role entity) {
+        throw new UnsupportedOperationException(METHOD_NOT_SUPPORTED);
+    }
+
+    @Override
+    @Deprecated
+    public Role update(Role entity) {
+        throw new UnsupportedOperationException(METHOD_NOT_SUPPORTED);
     }
 }
