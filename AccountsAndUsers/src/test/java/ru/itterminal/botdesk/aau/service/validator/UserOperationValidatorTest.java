@@ -23,6 +23,7 @@ import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperatio
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_MESSAGE;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
 import static ru.itterminal.botdesk.security.config.TestSecurityConfig.GROUP_1_ID;
+import static ru.itterminal.botdesk.security.config.TestSecurityConfig.GROUP_2_ID;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -49,6 +50,7 @@ import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.projection.UserUniqueFields;
+import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
 import ru.itterminal.botdesk.aau.service.impl.RoleServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
@@ -85,6 +87,7 @@ class UserOperationValidatorTest {
     private static User newUser;
     private static LogicalValidationException logicalValidationException;
     private static final Map<String, List<ValidationError>> errors = new HashMap<>();
+    private static RoleTestHelper roleTestHelper = new RoleTestHelper();
 
     @BeforeAll
     static void setUp() {
@@ -100,7 +103,7 @@ class UserOperationValidatorTest {
                 .email(EXIST_EMAIL)
                 .account(account)
                 .group(group)
-                .role(Role.builder().weight(2).build())
+                .role(roleTestHelper.setPredefinedValidEntityList().get(1))
                 .build();
         oldUser = User
                 .builder()
@@ -112,7 +115,7 @@ class UserOperationValidatorTest {
                 .builder()
                 .email(OLD_USER_EMAIL)
                 .account(account)
-                .role(Role.builder().weight(3).build())
+                .role(roleTestHelper.setPredefinedValidEntityList().get(0))
                 .group(group)
                 .build();
         newUser = User
@@ -395,7 +398,7 @@ class UserOperationValidatorTest {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
     void checkAccessForRead_shouldGetTrue_whenUserNotInnerGroupAndGroupUserEqualsEntity() {
-        user.getGroup().setId(UUID.fromString(GROUP_1_ID));
+        user.getGroup().setId(UUID.fromString(GROUP_2_ID));
         assertTrue(validator.checkAccessForRead(user));
     }
 

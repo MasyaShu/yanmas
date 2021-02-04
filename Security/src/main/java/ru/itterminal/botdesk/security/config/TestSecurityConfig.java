@@ -24,13 +24,13 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
     public static final String ACCOUNT_1_ID = "cdfa6483-0769-4628-ba32-efd338a716de";
     public static final String ACCOUNT_2_ID = "bcf98101-2a22-42bf-94cc-c900b50a0b69";
     public static final String GROUP_1_ID = "0223e51a-4bb2-44ee-bc8e-1f047a2145e7";
+    public static final String GROUP_2_ID = "63c1940d-e323-47af-8265-dbf8089727de";
     public static final String ROLE_ADMIN = "ADMIN";
     public static final String ROLE_AUTHOR = "AUTHOR";
     public static final String ROLE_EXECUTOR = "EXECUTOR";
     public static final String ROLE_ACCOUNT_OWNER = "ACCOUNT_OWNER";
 
     public static final String EMAIL_1 = "Mackenzie.lang@gmail.com";
-    public static final String EMAIL_2 = "m4@m.ru";
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -78,8 +78,19 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 case "ADMIN_ACCOUNT_1_IS_INNER_GROUP" -> jwtUser = JwtUser
                         .builder()
                         .accountId(UUID.fromString(ACCOUNT_1_ID))
+                        .groupId(UUID.fromString(GROUP_1_ID))
                         .weightRole(40)
                         .isInnerGroup(true)
+                        .username(EMAIL_1)
+                        .enabled(true)
+                        .authorities(List.of(new SimpleGrantedAuthority(ROLE_ADMIN)))
+                        .build();
+                case "ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP" -> jwtUser = JwtUser
+                        .builder()
+                        .accountId(UUID.fromString(ACCOUNT_1_ID))
+                        .groupId(UUID.fromString(GROUP_2_ID))
+                        .weightRole(40)
+                        .isInnerGroup(false)
                         .username(EMAIL_1)
                         .enabled(true)
                         .authorities(List.of(new SimpleGrantedAuthority(ROLE_ADMIN)))
@@ -87,27 +98,9 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 case "ADMIN_ACCOUNT_2_IS_INNER_GROUP" -> jwtUser = JwtUser
                         .builder()
                         .accountId(UUID.fromString(ACCOUNT_2_ID))
+                        .groupId(UUID.fromString(GROUP_2_ID))
                         .weightRole(40)
                         .isInnerGroup(true)
-                        .username(EMAIL_1)
-                        .enabled(true)
-                        .authorities(List.of(new SimpleGrantedAuthority(ROLE_ADMIN)))
-                        .build();
-                case "AUTHOR_ACCOUNT_1_IS_INNER_GROUP" -> jwtUser = JwtUser
-                        .builder()
-                        .accountId(UUID.fromString(ACCOUNT_1_ID))
-                        .weightRole(20)
-                        .isInnerGroup(true)
-                        .username(EMAIL_1)
-                        .enabled(true)
-                        .authorities(List.of(new SimpleGrantedAuthority(ROLE_AUTHOR)))
-                        .build();
-                case "ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP" -> jwtUser = JwtUser
-                        .builder()
-                        .accountId(UUID.fromString(ACCOUNT_1_ID))
-                        .groupId(UUID.fromString(GROUP_1_ID))
-                        .weightRole(40)
-                        .isInnerGroup(false)
                         .username(EMAIL_1)
                         .enabled(true)
                         .authorities(List.of(new SimpleGrantedAuthority(ROLE_ADMIN)))
@@ -115,32 +108,12 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 case "ADMIN_ACCOUNT_2_IS_NOT_INNER_GROUP" -> jwtUser = JwtUser
                         .builder()
                         .accountId(UUID.fromString(ACCOUNT_2_ID))
+                        .groupId(UUID.fromString(GROUP_2_ID))
                         .weightRole(40)
-                        .groupId(UUID.fromString(GROUP_1_ID))
                         .isInnerGroup(false)
                         .username(EMAIL_1)
                         .enabled(true)
                         .authorities(List.of(new SimpleGrantedAuthority(ROLE_ADMIN)))
-                        .build();
-                case "AUTHOR_ACCOUNT_1_IS_NOT_INNER_GROUP" -> jwtUser = JwtUser
-                        .builder()
-                        .accountId(UUID.fromString(ACCOUNT_1_ID))
-                        .groupId(UUID.fromString(GROUP_1_ID))
-                        .weightRole(20)
-                        .isInnerGroup(false)
-                        .username(EMAIL_1)
-                        .enabled(true)
-                        .authorities(List.of(new SimpleGrantedAuthority(ROLE_AUTHOR)))
-                        .build();
-                case "EXECUTOR_ACCOUNT_1_IS_NOT_INNER_GROUP" -> jwtUser = JwtUser
-                        .builder()
-                        .accountId(UUID.fromString(ACCOUNT_1_ID))
-                        .groupId(UUID.fromString(GROUP_1_ID))
-                        .weightRole(30)
-                        .isInnerGroup(false)
-                        .username(EMAIL_1)
-                        .enabled(true)
-                        .authorities(List.of(new SimpleGrantedAuthority(ROLE_EXECUTOR)))
                         .build();
                 case "EXECUTOR_ACCOUNT_1_IS_INNER_GROUP" -> jwtUser = JwtUser
                         .builder()
@@ -151,6 +124,116 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                         .username(EMAIL_1)
                         .enabled(true)
                         .authorities(List.of(new SimpleGrantedAuthority(ROLE_EXECUTOR)))
+                        .build();
+                case "EXECUTOR_ACCOUNT_1_IS_NOT_INNER_GROUP" -> jwtUser = JwtUser
+                        .builder()
+                        .accountId(UUID.fromString(ACCOUNT_1_ID))
+                        .groupId(UUID.fromString(GROUP_2_ID))
+                        .weightRole(30)
+                        .isInnerGroup(false)
+                        .username(EMAIL_1)
+                        .enabled(true)
+                        .authorities(List.of(new SimpleGrantedAuthority(ROLE_EXECUTOR)))
+                        .build();
+                case "EXECUTOR_ACCOUNT_2_IS_INNER_GROUP" -> jwtUser = JwtUser
+                        .builder()
+                        .accountId(UUID.fromString(ACCOUNT_2_ID))
+                        .groupId(UUID.fromString(GROUP_1_ID))
+                        .weightRole(30)
+                        .isInnerGroup(true)
+                        .username(EMAIL_1)
+                        .enabled(true)
+                        .authorities(List.of(new SimpleGrantedAuthority(ROLE_EXECUTOR)))
+                        .build();
+                case "EXECUTOR_ACCOUNT_2_IS_NOT_INNER_GROUP" -> jwtUser = JwtUser
+                        .builder()
+                        .accountId(UUID.fromString(ACCOUNT_2_ID))
+                        .groupId(UUID.fromString(GROUP_2_ID))
+                        .weightRole(30)
+                        .isInnerGroup(false)
+                        .username(EMAIL_1)
+                        .enabled(true)
+                        .authorities(List.of(new SimpleGrantedAuthority(ROLE_EXECUTOR)))
+                        .build();
+                case "AUTHOR_ACCOUNT_1_IS_INNER_GROUP" -> jwtUser = JwtUser
+                        .builder()
+                        .accountId(UUID.fromString(ACCOUNT_1_ID))
+                        .groupId(UUID.fromString(GROUP_1_ID))
+                        .weightRole(20)
+                        .isInnerGroup(true)
+                        .username(EMAIL_1)
+                        .enabled(true)
+                        .authorities(List.of(new SimpleGrantedAuthority(ROLE_AUTHOR)))
+                        .build();
+                case "AUTHOR_ACCOUNT_1_IS_NOT_INNER_GROUP" -> jwtUser = JwtUser
+                        .builder()
+                        .accountId(UUID.fromString(ACCOUNT_1_ID))
+                        .groupId(UUID.fromString(GROUP_2_ID))
+                        .weightRole(20)
+                        .isInnerGroup(false)
+                        .username(EMAIL_1)
+                        .enabled(true)
+                        .authorities(List.of(new SimpleGrantedAuthority(ROLE_AUTHOR)))
+                        .build();
+                case "AUTHOR_ACCOUNT_2_IS_INNER_GROUP" -> jwtUser = JwtUser
+                        .builder()
+                        .accountId(UUID.fromString(ACCOUNT_2_ID))
+                        .groupId(UUID.fromString(GROUP_1_ID))
+                        .weightRole(20)
+                        .isInnerGroup(true)
+                        .username(EMAIL_1)
+                        .enabled(true)
+                        .authorities(List.of(new SimpleGrantedAuthority(ROLE_AUTHOR)))
+                        .build();
+                case "AUTHOR_ACCOUNT_2_IS_NOT_INNER_GROUP" -> jwtUser = JwtUser
+                        .builder()
+                        .accountId(UUID.fromString(ACCOUNT_2_ID))
+                        .groupId(UUID.fromString(GROUP_2_ID))
+                        .weightRole(20)
+                        .isInnerGroup(false)
+                        .username(EMAIL_1)
+                        .enabled(true)
+                        .authorities(List.of(new SimpleGrantedAuthority(ROLE_AUTHOR)))
+                        .build();
+                case "OBSERVER_ACCOUNT_1_IS_INNER_GROUP" -> jwtUser = JwtUser
+                        .builder()
+                        .accountId(UUID.fromString(ACCOUNT_1_ID))
+                        .groupId(UUID.fromString(GROUP_1_ID))
+                        .weightRole(10)
+                        .isInnerGroup(true)
+                        .username(EMAIL_1)
+                        .enabled(true)
+                        .authorities(List.of(new SimpleGrantedAuthority(ROLE_AUTHOR)))
+                        .build();
+                case "OBSERVER_ACCOUNT_1_IS_NOT_INNER_GROUP" -> jwtUser = JwtUser
+                        .builder()
+                        .accountId(UUID.fromString(ACCOUNT_1_ID))
+                        .groupId(UUID.fromString(GROUP_2_ID))
+                        .weightRole(10)
+                        .isInnerGroup(false)
+                        .username(EMAIL_1)
+                        .enabled(true)
+                        .authorities(List.of(new SimpleGrantedAuthority(ROLE_AUTHOR)))
+                        .build();
+                case "OBSERVER_ACCOUNT_2_IS_INNER_GROUP" -> jwtUser = JwtUser
+                        .builder()
+                        .accountId(UUID.fromString(ACCOUNT_2_ID))
+                        .groupId(UUID.fromString(GROUP_1_ID))
+                        .weightRole(10)
+                        .isInnerGroup(true)
+                        .username(EMAIL_1)
+                        .enabled(true)
+                        .authorities(List.of(new SimpleGrantedAuthority(ROLE_AUTHOR)))
+                        .build();
+                case "OBSERVER_ACCOUNT_2_IS_NOT_INNER_GROUP" -> jwtUser = JwtUser
+                        .builder()
+                        .accountId(UUID.fromString(ACCOUNT_2_ID))
+                        .groupId(UUID.fromString(GROUP_2_ID))
+                        .weightRole(10)
+                        .isInnerGroup(false)
+                        .username(EMAIL_1)
+                        .enabled(true)
+                        .authorities(List.of(new SimpleGrantedAuthority(ROLE_AUTHOR)))
                         .build();
                 default -> jwtUser = null;
             }
