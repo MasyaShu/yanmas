@@ -29,8 +29,7 @@ public class FileDto extends BaseEntityDto {
     @Null(groups = {Update.class})
     private String fileName;
 
-    @NotNull(groups = {Create.class})
-    @Null(groups = {Update.class})
+    @Null(groups = {Create.class, Update.class})
     private Integer size;
 
     @Null(groups = {Create.class, Update.class})

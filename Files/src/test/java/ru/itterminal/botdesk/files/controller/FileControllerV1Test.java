@@ -130,6 +130,7 @@ class FileControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void create_shouldCreate_whenValidDataPassed() throws Exception {
+        fileDto.setSize(null);
         when(accountService.findById(any())).thenReturn(account);
         when(fileService.create(any())).thenReturn(file);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
@@ -153,7 +154,7 @@ class FileControllerV1Test {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
         fileDto.setFileName(null);
-        fileDto.setSize(null);
+        fileDto.setSize(FILE_SIZE);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -169,7 +170,7 @@ class FileControllerV1Test {
                 .andExpect(MockMvcResultMatchers
                                    .jsonPath(
                                            "$.errors.size[?(@.message == '%s')]",
-                                           CommonConstants.MUST_NOT_BE_NULL
+                                           CommonConstants.MUST_BE_NULL
                                    ).exists());
         verify(accountService, times(0)).findById(any());
         verify(fileService, times(0)).create(any());
@@ -232,6 +233,7 @@ class FileControllerV1Test {
         verify(fileService, times(0)).update(any());
 
     }
+
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getFileData_shouldGetFileData_whenPassedValidParameters() throws Exception {
@@ -298,4 +300,5 @@ class FileControllerV1Test {
                         "Failed to convert value of type 'java.lang.String' to required type 'java.util.UUID'")));
         verify(fileService, times(0)).putFileData(any(), any(), any());
     }
+
 }

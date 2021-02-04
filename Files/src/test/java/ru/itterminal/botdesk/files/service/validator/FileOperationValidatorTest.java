@@ -4,12 +4,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createExpectedLogicalValidationException;
+import static ru.itterminal.botdesk.files.service.validator.FileOperationValidator.CREATED_AT;
+import static ru.itterminal.botdesk.files.service.validator.FileOperationValidator.CREATED_AT_NULL;
+import static ru.itterminal.botdesk.files.service.validator.FileOperationValidator.CREATED_AT_ZERO;
+import static ru.itterminal.botdesk.files.service.validator.FileOperationValidator.FILE_NAME;
+import static ru.itterminal.botdesk.files.service.validator.FileOperationValidator.FILE_NAME_EMPTY;
+import static ru.itterminal.botdesk.files.service.validator.FileOperationValidator.FILE_NAME_NULL;
 
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import ru.itterminal.botdesk.aau.model.Account;
@@ -17,22 +22,10 @@ import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.files.model.File;
 
 @SpringJUnitConfig(value = {FileOperationValidator.class})
-@TestPropertySource(properties = {"maxSizeOfFile=26214400"})
 class FileOperationValidatorTest {
 
     @Autowired
     FileOperationValidator validator;
-
-    private static final String SIZE_FILE = "Size of file";
-    private static final String MAX_SIZE = "Size of file mustn't over 25Mb";
-    private static final String FILE_NAME = "Filename";
-    private static final String FILE_NAME_EMPTY = "Filename mustn't empty";
-    private static final String SIZE_NULL = "Size of file mustn't null";
-    private static final String FILE_NAME_NULL = "Filename mustn't null";
-    private static final String CREATED_AT = "Created at";
-    private static final String CREATED_AT_NULL = "Created at mustn't null";
-    private static final String CREATED_AT_ZERO = "Created at mustn't zero";
-
 
     @Test
     void beforeCreate_shouldGetTrue_whenSizeOfFileLessThan25Mb() {
@@ -44,39 +37,6 @@ class FileOperationValidatorTest {
                 .entityId(UUID.randomUUID())
                 .build();
         assertTrue(validator.beforeCreate(file));
-    }
-
-    @Test
-    void beforeCreate_shouldGetLogicalValidationException_whenSizeOfFileMoreThan25Mb() {
-        LogicalValidationException expectedException = createExpectedLogicalValidationException(SIZE_FILE, MAX_SIZE);
-        File file = File.builder()
-                .size(27214400)
-                .build();
-        LogicalValidationException actualException = assertThrows(
-                LogicalValidationException.class,
-                () -> validator.beforeCreate(file)
-        );
-        assertEquals(
-                expectedException.getFieldErrors().get(SIZE_FILE).get(0),
-                actualException.getFieldErrors().get(SIZE_FILE).get(0)
-        );
-    }
-
-    @Test
-    void beforeCreate_shouldGetLogicalValidationException_whenSizeIsNull() {
-        LogicalValidationException expectedException = createExpectedLogicalValidationException(SIZE_FILE, SIZE_NULL);
-        File file = File.builder()
-                .size(null)
-                .fileName(FILE_NAME)
-                .build();
-        LogicalValidationException actualException = assertThrows(
-                LogicalValidationException.class,
-                () -> validator.beforeCreate(file)
-        );
-        assertEquals(
-                expectedException.getFieldErrors().get(SIZE_FILE).get(0),
-                actualException.getFieldErrors().get(SIZE_FILE).get(0)
-        );
     }
 
     @Test
