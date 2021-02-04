@@ -1,38 +1,10 @@
 package ru.itterminal.botdesk.aau.service.validator;
 
-import static java.lang.String.format;
-import static java.util.Collections.singletonList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.ACCOUNT_MUST_HAVE_USER_WITH_ROLE_ACCOUNT_OWNER;
-import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.CREATE_UPDATE_ONLY_HIS_GROUP;
-import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.INNER_GROUP;
-import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.INNER_GROUP_USER_FROM_DATABASE;
-import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.USER_WITH_ROLE_ACCOUNT_OWNER;
-import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.WEIGHT_OF_ROLE;
-import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_FROM_REQUEST;
-import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_OF_UPDATING_USER_FROM_DATABASE;
-import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.WEIGHT_OF_ROLE_USER_FROM_DATABASE;
-import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.LOGIC_CONSTRAINT_CODE;
-import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_CODE;
-import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_MESSAGE;
-import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
-import static ru.itterminal.botdesk.security.config.TestSecurityConfig.GROUP_1_ID;
-import static ru.itterminal.botdesk.security.config.TestSecurityConfig.GROUP_2_ID;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -43,12 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-
-import ru.itterminal.botdesk.aau.model.Account;
-import ru.itterminal.botdesk.aau.model.Group;
-import ru.itterminal.botdesk.aau.model.Role;
-import ru.itterminal.botdesk.aau.model.Roles;
-import ru.itterminal.botdesk.aau.model.User;
+import ru.itterminal.botdesk.aau.model.*;
 import ru.itterminal.botdesk.aau.model.projection.UserUniqueFields;
 import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
 import ru.itterminal.botdesk.aau.service.impl.RoleServiceImpl;
@@ -57,6 +24,18 @@ import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
+
+import java.util.*;
+import java.util.stream.Stream;
+
+import static java.lang.String.format;
+import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.*;
+import static ru.itterminal.botdesk.security.config.TestSecurityConfig.GROUP_1_ID;
+import static ru.itterminal.botdesk.security.config.TestSecurityConfig.GROUP_2_ID;
 
 @SpringJUnitConfig(value = {UserOperationValidator.class})
 @Import(TestSecurityConfig.class)
@@ -85,9 +64,14 @@ class UserOperationValidatorTest {
     private static User oldUser;
     private static User userFromDatabase;
     private static User newUser;
+    private static Role roleAccountOwner;
+    private static Role roleAdmin;
+    private static Role roleExecutor;
+    private static Role roleAuthor;
+    private static Role roleObserver;
     private static LogicalValidationException logicalValidationException;
     private static final Map<String, List<ValidationError>> errors = new HashMap<>();
-    private static RoleTestHelper roleTestHelper = new RoleTestHelper();
+    private static final RoleTestHelper roleTestHelper = new RoleTestHelper();
 
     @BeforeAll
     static void setUp() {
@@ -98,12 +82,18 @@ class UserOperationValidatorTest {
         group.setId(UUID.fromString(GROUP_ID));
         Group groupUserFormDatabase = Group.builder().build();
         groupUserFormDatabase.setId(UUID.randomUUID());
+        List<Role> roleList = roleTestHelper.setPredefinedValidEntityList();
+        roleAccountOwner = roleList.get(0);
+        roleAdmin = roleList.get(1);
+        roleExecutor = roleList.get(2);
+        roleAuthor = roleList.get(3);
+        roleObserver = roleList.get(4);
         user = User
                 .builder()
                 .email(EXIST_EMAIL)
                 .account(account)
                 .group(group)
-                .role(roleTestHelper.setPredefinedValidEntityList().get(1))
+                .role(roleAdmin)
                 .build();
         oldUser = User
                 .builder()
@@ -115,7 +105,7 @@ class UserOperationValidatorTest {
                 .builder()
                 .email(OLD_USER_EMAIL)
                 .account(account)
-                .role(roleTestHelper.setPredefinedValidEntityList().get(0))
+                .role(roleAccountOwner)
                 .group(group)
                 .build();
         newUser = User
@@ -124,7 +114,6 @@ class UserOperationValidatorTest {
                 .account(account)
                 .group(group)
                 .build();
-
     }
 
     @Test
@@ -148,20 +137,26 @@ class UserOperationValidatorTest {
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     void beforeCreate_shouldGetLogicalValidationException_whenUserWithRoleAccountOwnerAlreadyExist() {
-        user.setRole(Role
-                .builder()
-                .name(Roles.ACCOUNT_OWNER.toString())
-                .weight(Roles.ACCOUNT_OWNER.getWeight())
-                .build()
-        );
+        user.setRole(roleAccountOwner);
         when(service.findAllByRoleAndAccountId(any(), any())).thenReturn(List.of(oldUser));
         when(roleService.getAccountOwnerRole())
-                .thenReturn(Role
-                        .builder()
-                        .name(Roles.ACCOUNT_OWNER.toString())
-                        .weight(Roles.ACCOUNT_OWNER.getWeight())
-                        .build()
-                );
+                .thenReturn(roleAccountOwner);
+        errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,
+                format(NOT_UNIQUE_MESSAGE, USER_WITH_ROLE_ACCOUNT_OWNER))));
+        logicalValidationException = new LogicalValidationException(VALIDATION_FAILED, errors);
+        LogicalValidationException thrown = assertThrows(LogicalValidationException.class,
+                () -> validator.beforeCreate(user));
+        assertEquals(logicalValidationException.getFieldErrors().get(USER_WITH_ROLE_ACCOUNT_OWNER).get(0),
+                thrown.getFieldErrors().get(USER_WITH_ROLE_ACCOUNT_OWNER).get(0));
+    }
+
+    @Test
+    @WithUserDetails("OWNER_ACCOUNT_1_IS_INNER_GROUP")
+    void beforeCreate_shouldExceptionUserWithRoleIsOccupied_whenCreateAnotherAccountOwner() {
+        user.setRole(roleAccountOwner);
+        when(service.findAllByRoleAndAccountId(any(), any())).thenReturn(List.of(oldUser));
+        when(roleService.getAccountOwnerRole())
+                .thenReturn(roleAccountOwner);
         errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,
                 format(NOT_UNIQUE_MESSAGE, USER_WITH_ROLE_ACCOUNT_OWNER))));
         logicalValidationException = new LogicalValidationException(VALIDATION_FAILED, errors);
@@ -174,20 +169,9 @@ class UserOperationValidatorTest {
     @Test
     @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_NOT_INNER_GROUP")
     void beforeCreate_shouldGetLogicalValidationException_whenUserIsNotInInnerGroupAndGroupIdsIsDifferent() {
-        user.setRole(Role
-                .builder()
-                .name(Roles.AUTHOR.toString())
-                .weight(Roles.AUTHOR.getWeight())
-                .build()
-        );
+        user.setRole(roleAuthor);
         when(service.findAllByRoleAndAccountId(any(), any())).thenReturn(List.of(oldUser));
-        when(roleService.getAccountOwnerRole())
-                .thenReturn(Role
-                        .builder()
-                        .name(Roles.ACCOUNT_OWNER.toString())
-                        .weight(Roles.ACCOUNT_OWNER.getWeight())
-                        .build()
-                );
+        when(roleService.getAccountOwnerRole()).thenReturn(roleAccountOwner);
         errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
                 CREATE_UPDATE_ONLY_HIS_GROUP)));
         logicalValidationException = new LogicalValidationException(VALIDATION_FAILED, errors);
@@ -200,12 +184,7 @@ class UserOperationValidatorTest {
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     void beforeCreate_shouldGetLogicalValidationException_whenWeightOfRoleOfCurrentUserLessThanWeightOfRoleCreatedEntity() {
-        user.setRole(Role
-                .builder()
-                .name(Roles.ACCOUNT_OWNER.toString())
-                .weight(Roles.ACCOUNT_OWNER.getWeight())
-                .build()
-        );
+        user.setRole(roleAccountOwner);
         when(service.findAllByRole(any())).thenReturn(List.of(oldUser));
         when(roleService.getAccountOwnerRole())
                 .thenReturn(Role.builder().name(Roles.ACCOUNT_OWNER.toString()).build());
@@ -320,21 +299,11 @@ class UserOperationValidatorTest {
     @Test
     @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_NOT_INNER_GROUP")
     void beforeUpdate_shouldGetLogicalValidationException_whenUserIsNotInInnerGroupAndGroupOfCurrentUserIsNotEqualGroupOfUpdatingUser() {
-        user.setRole(Role
-                .builder()
-                .name(Roles.AUTHOR.toString())
-                .weight(0)
-                .build()
-        );
+        user.setRole(roleAuthor);
+        user.getGroup().setId(UUID.fromString(GROUP_1_ID));
         when(service.findAllByRoleAndAccount_IdAndIdNot(any(), any(), any())).thenReturn(List.of(oldUser));
         when(service.findById(any())).thenReturn(userFromDatabase);
-        when(roleService.getAccountOwnerRole())
-                .thenReturn(Role
-                        .builder()
-                        .name(Roles.ACCOUNT_OWNER.toString())
-                        .weight(3)
-                        .build()
-                );
+        when(roleService.getAccountOwnerRole()).thenReturn(roleAccountOwner);
         errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
                 CREATE_UPDATE_ONLY_HIS_GROUP)));
         logicalValidationException = new LogicalValidationException(VALIDATION_FAILED, errors);
@@ -352,21 +321,11 @@ class UserOperationValidatorTest {
     @Test
     @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_NOT_INNER_GROUP")
     void beforeUpdate_shouldGetLogicalValidationException_whenUserIsNotInInnerGroupAndGroupOfCurrentUserIsNotEqualGroupOfUserFromDatabase() {
-        user.setRole(Role
-                .builder()
-                .name(Roles.AUTHOR.toString())
-                .weight(0)
-                .build()
-        );
+        user.setRole(roleAuthor);
+        user.getGroup().setId(UUID.fromString(GROUP_1_ID));
         when(service.findAllByRoleAndAccount_IdAndIdNot(any(), any(), any())).thenReturn(List.of(oldUser));
         when(service.findById(any())).thenReturn(userFromDatabase);
-        when(roleService.getAccountOwnerRole())
-                .thenReturn(Role
-                        .builder()
-                        .name(Roles.ACCOUNT_OWNER.toString())
-                        .weight(3)
-                        .build()
-                );
+        when(roleService.getAccountOwnerRole()).thenReturn(roleAccountOwner);
         errors.put(INNER_GROUP_USER_FROM_DATABASE, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
                 CREATE_UPDATE_ONLY_HIS_GROUP)));
         logicalValidationException = new LogicalValidationException(VALIDATION_FAILED, errors);
@@ -401,5 +360,199 @@ class UserOperationValidatorTest {
         user.getGroup().setId(UUID.fromString(GROUP_2_ID));
         assertTrue(validator.checkAccessForRead(user));
     }
+
+    @ParameterizedTest
+    @MethodSource("getUserRolesThatAnAccountOwnerCanCreate")
+    @WithUserDetails("OWNER_ACCOUNT_1_IS_INNER_GROUP")
+    void beforeCreate_shouldCreateUser_whenRoleAccountOwnerWeightCreatedUserLess(Role role) {
+        user.setRole(role);
+        when(roleService.getAccountOwnerRole())
+                .thenReturn(roleAccountOwner);
+        assertTrue(validator.beforeCreate(user));
+        verify(service, times(0)).findAllByRoleAndAccountId(any(), any());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getUserRolesThatAnAccountOwnerCanUpdate")
+    @WithUserDetails("OWNER_ACCOUNT_1_IS_INNER_GROUP")
+    void beforeUpdate_shouldUpdateUser_whenRoleAccountOwnerWeightCreatedUserEqualsLess(Role role) {
+        newUser.setRole(role);
+        oldUser.setRole(role);
+        when(service.findAllByRoleAndAccount_IdAndIdNot(any(), any(), any())).thenReturn((role.equals(roleAccountOwner))? List.of():List.of(oldUser));
+        when(service.findById(newUser.getId())).thenReturn(userFromDatabase);
+        when(roleService.getAccountOwnerRole()).thenReturn(roleAccountOwner);
+        assertTrue(validator.beforeUpdate(newUser));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getUserRolesThatAnAdminInnerGroupCanCreateAndUpdate")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
+    void beforeCreate_shouldCreateUser_whenRoleAdminWeightCreatedUserLess(Role role, String idGroup) {
+        user.setRole(role);
+        user.getGroup().setId(UUID.fromString(idGroup));
+        when(roleService.getAccountOwnerRole())
+                .thenReturn(roleAccountOwner);
+        assertTrue(validator.beforeCreate(user));
+        verify(service, times(0)).findAllByRoleAndAccountId(any(), any());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getUserRolesThatAnAdminInnerGroupCanCreateAndUpdate")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
+    void beforeUpdate_shouldUpdateUser_whenRoleAdminWeightCreatedUserLess(Role role, String idGroup) {
+        newUser.setRole(role);
+        user.getGroup().setId(UUID.fromString(idGroup));
+        userFromDatabase.setRole(role);
+        userFromDatabase.getGroup().setId(UUID.fromString(idGroup));
+        when(service.findAllByRoleAndAccount_IdAndIdNot(any(), any(), any())).thenReturn(List.of(oldUser));
+        when(service.findById(newUser.getId())).thenReturn(userFromDatabase);
+        when(roleService.getAccountOwnerRole()).thenReturn(roleAccountOwner);
+        assertTrue(validator.beforeUpdate(newUser));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getUserRolesThatAnAdminNotInnerGroupCanCreateAndUpdate")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
+    void beforeCreate_shouldCreateUser_whenRoleAdminNotInnerWeightCreatedUserLess(Role role, String idGroup) {
+        user.setRole(role);
+        user.getGroup().setId(UUID.fromString(idGroup));
+        when(roleService.getAccountOwnerRole())
+                .thenReturn(roleAccountOwner);
+        assertTrue(validator.beforeCreate(user));
+        verify(service, times(0)).findAllByRoleAndAccountId(any(), any());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getUserRolesThatAnAdminNotInnerGroupCanCreateAndUpdate")
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
+    void beforeUpdate_shouldUpdateUser_whenRoleAdminNotInnerWeightCreatedUserThan(Role role, String idGroup) {
+        newUser.setRole(role);
+        user.getGroup().setId(UUID.fromString(idGroup));
+        userFromDatabase.setRole(role);
+        userFromDatabase.getGroup().setId(UUID.fromString(idGroup));
+        when(service.findAllByRoleAndAccount_IdAndIdNot(any(), any(), any())).thenReturn(List.of(oldUser));
+        when(service.findById(newUser.getId())).thenReturn(userFromDatabase);
+        when(roleService.getAccountOwnerRole()).thenReturn(roleAccountOwner);
+        assertTrue(validator.beforeUpdate(newUser));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getUserRolesThatAnAdminNotInnerGroupCanCreateAndUpdate")
+    @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_INNER_GROUP")
+    void beforeCreate_shouldLogicalValidationException_whenRoleExecutorInnerGroupInnerWeightCreatedUserThan(Role role, String idGroup) {
+        user.setRole(role);
+        user.getGroup().setId(UUID.fromString(idGroup));
+        when(roleService.getAccountOwnerRole())
+                .thenReturn(roleAccountOwner);
+        assertThrows(LogicalValidationException.class,
+                () -> validator.beforeUpdate(user));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getUserRolesThatAnExecutorInnerGroupNotCanCreateAndUpdate")
+    @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_INNER_GROUP")
+    void beforeUpdate_shouldLogicalValidationException_whenRoleExecutorInnerGroupInnerWeightCreatedUserThan(Role role, String idGroup) {
+        newUser.setRole(role);
+        user.getGroup().setId(UUID.fromString(idGroup));
+        userFromDatabase.setRole(role);
+        userFromDatabase.getGroup().setId(UUID.fromString(idGroup));
+        when(service.findAllByRoleAndAccount_IdAndIdNot(any(), any(), any())).thenReturn(List.of(oldUser));
+        when(service.findById(newUser.getId())).thenReturn(userFromDatabase);
+        when(roleService.getAccountOwnerRole()).thenReturn(roleAccountOwner);
+        assertThrows(LogicalValidationException.class,
+                () -> validator.beforeUpdate(newUser));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getUserRolesThatAnExecutorNotInnerGroupNotCanCreateAndUpdate")
+    @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_NOT_INNER_GROUP")
+    void beforeCreate_shouldLogicalValidationException_whenRoleExecutorNotInnerGroupInnerWeightCreatedUserThan(Role role, String idGroup) {
+        user.setRole(role);
+        user.getGroup().setId(UUID.fromString(idGroup));
+        when(roleService.getAccountOwnerRole())
+                .thenReturn(roleAccountOwner);
+        assertThrows(LogicalValidationException.class,
+                () -> validator.beforeUpdate(user));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getUserRolesThatAnExecutorNotInnerGroupNotCanCreateAndUpdate")
+    @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_NOT_INNER_GROUP")
+    void beforeUpdate_shouldLogicalValidationException_whenRoleExecutorNotInnerGroupInnerWeightCreatedUserThan(Role role, String idGroup) {
+        newUser.setRole(role);
+        user.getGroup().setId(UUID.fromString(idGroup));
+        userFromDatabase.setRole(role);
+        userFromDatabase.getGroup().setId(UUID.fromString(idGroup));
+        when(service.findAllByRoleAndAccount_IdAndIdNot(any(), any(), any())).thenReturn(List.of(oldUser));
+        when(service.findById(newUser.getId())).thenReturn(userFromDatabase);
+        when(roleService.getAccountOwnerRole()).thenReturn(roleAccountOwner);
+        assertThrows(LogicalValidationException.class,
+                () -> validator.beforeUpdate(newUser));
+    }
+
+    private static Stream<Arguments> getUserRolesThatAnAccountOwnerCanCreate() {
+        return Stream.of(
+                Arguments.of(roleAdmin),
+                Arguments.of(roleExecutor),
+                Arguments.of(roleAuthor),
+                Arguments.of(roleObserver)
+        );
+    }
+
+
+
+    private static Stream<Arguments> getUserRolesThatAnAccountOwnerCanUpdate() {
+        return Stream.of(
+                Arguments.of(roleAccountOwner),
+                Arguments.of(roleAdmin),
+                Arguments.of(roleExecutor),
+                Arguments.of(roleAuthor),
+                Arguments.of(roleObserver)
+        );
+    }
+
+    private static Stream<Arguments> getUserRolesThatAnAdminInnerGroupCanCreateAndUpdate() {
+        return Stream.of(
+                Arguments.of(roleAdmin, GROUP_1_ID),
+                Arguments.of(roleAdmin, GROUP_2_ID),
+                Arguments.of(roleExecutor, GROUP_1_ID),
+                Arguments.of(roleExecutor, GROUP_2_ID),
+                Arguments.of(roleAuthor, GROUP_1_ID),
+                Arguments.of(roleAuthor, GROUP_2_ID),
+                Arguments.of(roleObserver, GROUP_1_ID),
+                Arguments.of(roleObserver, GROUP_2_ID)
+        );
+    }
+
+    private static Stream<Arguments> getUserRolesThatAnAdminNotInnerGroupCanCreateAndUpdate() {
+        return Stream.of(
+                Arguments.of(roleAdmin, GROUP_2_ID),
+                Arguments.of(roleExecutor, GROUP_2_ID),
+                Arguments.of(roleAuthor, GROUP_2_ID),
+                Arguments.of(roleObserver, GROUP_2_ID)
+        );
+    }
+
+    private static Stream<Arguments> getUserRolesThatAnExecutorInnerGroupNotCanCreateAndUpdate() {
+        return Stream.of(
+                Arguments.of(roleAccountOwner, GROUP_1_ID),
+                Arguments.of(roleAccountOwner, GROUP_2_ID),
+                Arguments.of(roleAdmin, GROUP_1_ID),
+                Arguments.of(roleAdmin, GROUP_2_ID)
+        );
+    }
+
+    private static Stream<Arguments> getUserRolesThatAnExecutorNotInnerGroupNotCanCreateAndUpdate() {
+        return Stream.of(
+                Arguments.of(roleAccountOwner, GROUP_1_ID),
+                Arguments.of(roleAccountOwner, GROUP_2_ID),
+                Arguments.of(roleAdmin, GROUP_1_ID),
+                Arguments.of(roleAdmin, GROUP_2_ID),
+                Arguments.of(roleExecutor, GROUP_1_ID),
+                Arguments.of(roleAuthor, GROUP_1_ID),
+                Arguments.of(roleObserver, GROUP_1_ID)
+        );
+    }
+
 
 }
