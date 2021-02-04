@@ -2,7 +2,6 @@ package ru.itterminal.botdesk.files.service.validator;
 
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekNumberForNullOrMoreThan;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekNumberForNullOrZero;
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekObjectForNull;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekStringForNullOrEmpty;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.ifErrorsNotEmptyThrowLogicalValidationException;

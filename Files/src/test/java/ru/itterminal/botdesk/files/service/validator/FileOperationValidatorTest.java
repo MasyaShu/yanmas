@@ -32,10 +32,6 @@ class FileOperationValidatorTest {
     private static final String CREATED_AT = "Created at";
     private static final String CREATED_AT_NULL = "Created at mustn't null";
     private static final String CREATED_AT_ZERO = "Created at mustn't zero";
-    private static final String ACCOUNT = "Account";
-    private static final String ACCOUNT_NULL = "Account mustn't null";
-    private static final String ENTITY_ID = "EntityId";
-    private static final String ENTITY_ID_NULL = "EntityId mustn't null";
 
 
     @Test

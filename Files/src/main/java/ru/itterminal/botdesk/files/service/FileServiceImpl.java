@@ -1,9 +1,6 @@
 package ru.itterminal.botdesk.files.service;
 
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.addValidationErrorIntoErrors;
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekObjectForNull;
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.ifErrorsNotEmptyThrowLogicalValidationException;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createExpectedLogicalValidationException;
 
 import java.nio.ByteBuffer;
 import java.util.UUID;
@@ -13,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.botdesk.files.model.File;
 import ru.itterminal.botdesk.files.repository.FileRepository;
@@ -34,26 +30,27 @@ public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperat
 
     @Transactional(readOnly = true)
     public byte[] getFileData(UUID accountId, UUID fileId) {
-        File file =  super.findByIdAndAccountId(fileId, accountId);
-        val logicalErrors = createMapForLogicalErrors();
-        if (file.getIsUploaded().equals(false)) {
-            addValidationErrorIntoErrors(FILE, FILE_WAS_NOT_UPLOAD, logicalErrors);
+        if (fileId==null) {
+            throw createExpectedLogicalValidationException(FILE_ID, FILE_ID_IS_NULL);
         }
-        ifErrorsNotEmptyThrowLogicalValidationException(logicalErrors);
-        return awsS3ObjectOperations.getObject( accountId, fileId);
+        var file = super.findByIdAndAccountId(fileId, accountId);
+        if (Boolean.FALSE.equals(file.getIsUploaded())) {
+            throw createExpectedLogicalValidationException(FILE, FILE_WAS_NOT_UPLOAD);
+        }
+        return awsS3ObjectOperations.getObject(accountId, fileId);
     }
 
     @Transactional
     public boolean putFileData(UUID accountId, UUID fileId, byte[] bytes) {
-        val logicalErrors = createMapForLogicalErrors();
-        chekObjectForNull(fileId, FILE_ID, FILE_ID_IS_NULL, logicalErrors);
-        ifErrorsNotEmptyThrowLogicalValidationException(logicalErrors);
-        File file = super.findByIdAndAccountId(fileId, accountId);
-        boolean isPutFileData = awsS3ObjectOperations.putObject(accountId, fileId, ByteBuffer.wrap(bytes));
-        if (isPutFileData) {
-            file.setIsUploaded(true);
-            repository.save(file);
+        if (fileId==null) {
+            throw createExpectedLogicalValidationException(FILE_ID, FILE_ID_IS_NULL);
         }
-        return isPutFileData;
+        File file = super.findByIdAndAccountId(fileId, accountId);
+        var isFileUploaded = awsS3ObjectOperations.putObject(accountId, fileId, ByteBuffer.wrap(bytes));
+        if (isFileUploaded) {
+            file.setIsUploaded(true);
+            repository.update(file);
+        }
+        return isFileUploaded;
     }
 }
