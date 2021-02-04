@@ -62,7 +62,7 @@ public class TicketControllerV1 extends BaseController {
     public static final String AUTHOR = "author";
     public static final String OBSERVERS = "observers";
 
-    private final TicketServiceImpl service;
+    private final TicketServiceImpl ticketService;
     private final AccountServiceImpl accountService;
     private final UserServiceImpl userService;
     private final TicketTemplateServiceImpl ticketTemplateService;
@@ -84,7 +84,7 @@ public class TicketControllerV1 extends BaseController {
         var accountId = currentUser.getAccount().getId();
         var ticket = modelMapper.map(ticketDtoRequest, Ticket.class);
         setNestedObjectsIntoEntityFromEntityDtoRequest(ticket, ticketDtoRequest, accountId);
-        var createdTicket = service.create(ticket, currentUser);
+        var createdTicket = ticketService.create(ticket, currentUser);
         var returnedTicket = modelMapper.map(createdTicket, TicketDtoResponse.class);
         log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdTicket);
         return new ResponseEntity<>(returnedTicket, HttpStatus.CREATED);
@@ -103,12 +103,12 @@ public class TicketControllerV1 extends BaseController {
     public ResponseEntity<TicketDtoResponse> update
             (Principal principal, @Validated(Update.class) @RequestBody TicketDtoRequest ticketDtoRequest) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, ticketDtoRequest);
-        var ticket = modelMapper.map(ticketDtoRequest, Ticket.class);
         var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
+        var ticket = modelMapper.map(ticketDtoRequest, Ticket.class);
         var accountId = jwtUser.getAccountId();
         var currentUser = userService.findByEmail(jwtUser.getUsername()).get();
         setNestedObjectsIntoEntityFromEntityDtoRequest(ticket, ticketDtoRequest, accountId);
-        var updatedTicket = service.update(ticket, currentUser);
+        var updatedTicket = ticketService.update(ticket, currentUser);
         var returnedTicket = modelMapper.map(updatedTicket, TicketDtoResponse.class);
         log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedTicket);
         return new ResponseEntity<>(returnedTicket, HttpStatus.OK);
@@ -134,7 +134,7 @@ public class TicketControllerV1 extends BaseController {
         var accountId = jwtUser.getAccountId();
         var ticketSpecification = specFactory.makeSpecificationFromEntityFilterDto(Ticket.class, filterDto, accountId);
         setAdditionalConditionsIntoSpecAccordingPermissionOfCurrentUser(jwtUser, ticketSpecification);
-        var foundTickets = service.findAllByFilter(ticketSpecification, pageable);
+        var foundTickets = ticketService.findAllByFilter(ticketSpecification, pageable);
         var returnedTicketStatus = mapPage(foundTickets, TicketDtoResponse.class, pageable);
         log.debug(FIND_FINISH_MESSAGE, ENTITY_NAME, foundTickets.getTotalElements());
         return new ResponseEntity<>(returnedTicketStatus, HttpStatus.OK);
@@ -144,8 +144,8 @@ public class TicketControllerV1 extends BaseController {
     public ResponseEntity<TicketDtoResponse> getById(Principal user, @PathVariable UUID id) {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
-        var foundTicket = service.findByIdAndAccountId(id, jwtUser.getAccountId());
-        service.checkAccessForRead(foundTicket);
+        var foundTicket = ticketService.findByIdAndAccountId(id, jwtUser.getAccountId());
+        ticketService.checkAccessForRead(foundTicket);
         var returnedTicket = modelMapper.map(foundTicket, TicketDtoResponse.class);
         log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundTicket);
         return new ResponseEntity<>(returnedTicket, HttpStatus.OK);

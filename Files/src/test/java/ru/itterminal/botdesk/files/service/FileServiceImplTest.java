@@ -81,13 +81,13 @@ class FileServiceImplTest {
     void putFileData_shouldGetStatusTrue_whenAccordingWithPlannedBehavior() {
         when(repository.existsById(any())).thenReturn(true);
         when(repository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(file));
-        when(repository.save(any())).thenReturn(file);
+        when(repository.update(any())).thenReturn(file);
         when(awsS3ObjectOperations.putObject(any(), any(), any())).thenReturn(true);
         boolean actualStatus = service.putFileData(account.getId(), file.getId(), fileData);
         assertTrue(actualStatus);
         verify(repository, times(1)).existsById(any());
         verify(repository, times(1)).findByIdAndAccountId(any(), any());
-        verify(repository, times(1)).save(any());
+        verify(repository, times(1)).update(any());
         verify(awsS3ObjectOperations, times(1)).putObject(any(), any(), any());
     }
 

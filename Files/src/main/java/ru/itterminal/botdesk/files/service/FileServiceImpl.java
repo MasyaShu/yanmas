@@ -49,7 +49,7 @@ public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperat
         var isFileUploaded = awsS3ObjectOperations.putObject(accountId, fileId, ByteBuffer.wrap(bytes));
         if (isFileUploaded) {
             file.setIsUploaded(true);
-            repository.save(file);
+            repository.update(file);
         }
         return isFileUploaded;
     }
