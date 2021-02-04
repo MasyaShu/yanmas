@@ -42,7 +42,7 @@ class TicketStatusServiceImplTest {
         when(repository.getByIsReopenedPredefinedTrueAndAccount_Id(any())).thenReturn(Optional.of(ticketStatus));
         when(repository.getByIsFinishedPredefinedTrueAndAccount_Id(any())).thenReturn(Optional.of(ticketStatus));
         when(repository.getByIsCanceledPredefinedTrueAndAccount_Id(any())).thenReturn(Optional.of(ticketStatus));
-        service.createPredefinedEntity(any());
+        service.actionAfterCompletedVerificationAccount(any());
         verify(validator, times(0)).beforeCreate(any());
         verify(validator, times(0)).checkUniqueness(any());
         verify(repository, times(0)).create(any());
@@ -64,7 +64,7 @@ class TicketStatusServiceImplTest {
         when(repository.getByIsReopenedPredefinedTrueAndAccount_Id(any())).thenThrow(EntityNotExistException.class);
         when(repository.getByIsFinishedPredefinedTrueAndAccount_Id(any())).thenThrow(EntityNotExistException.class);
         when(repository.getByIsCanceledPredefinedTrueAndAccount_Id(any())).thenThrow(EntityNotExistException.class);
-        service.createPredefinedEntity(any());
+        service.actionAfterCompletedVerificationAccount(any());
         verify(validator, times(4)).beforeCreate(any());
         verify(validator, times(4)).checkUniqueness(any());
         verify(repository, times(4)).create(any());

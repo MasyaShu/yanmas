@@ -38,7 +38,7 @@ class TicketTypeServiceImplTest {
     void createPredefinedEntity_shouldNoCreatePredefinedStatus_whenStatusInDataBase() {
         TicketType ticketType = ticketTypeTestHelper.getRandomValidEntity();
         when(repository.getByIsPredefinedForNewTicketTrueAndAccount_Id(any())).thenReturn(Optional.of(ticketType));
-        service.createPredefinedEntity(any());
+        service.actionAfterCompletedVerificationAccount(any());
         verify(validator, times(0)).beforeCreate(any());
         verify(validator, times(0)).checkUniqueness(any());
         verify(repository, times(0)).create(any());
@@ -54,7 +54,7 @@ class TicketTypeServiceImplTest {
         when(repository.create(any())).thenReturn(ticketType);
         when(accountService.findById(any())).thenReturn(ticketType.getAccount());
         when(repository.getByIsPredefinedForNewTicketTrueAndAccount_Id(any())).thenThrow(EntityNotExistException.class);
-        service.createPredefinedEntity(any());
+        service.actionAfterCompletedVerificationAccount(any());
         verify(validator, times(1)).beforeCreate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(repository, times(1)).create(any());

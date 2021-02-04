@@ -4,6 +4,7 @@ import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -17,10 +18,8 @@ import ru.itterminal.botdesk.aau.service.validator.UserOperationValidator;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.FailedSaveEntityException;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceWithAccountImpl;
-import ru.itterminal.botdesk.integration.aws.s3.flow.CreateAwsS3BucketFlow;
+import ru.itterminal.botdesk.integration.across_modules.CompletedVerificationAccount;
 import ru.itterminal.botdesk.integration.aws.ses.SenderEmailViaAwsSes;
-import ru.itterminal.botdesk.integration.aws.ses.flow.SendingEmailViaAwsSesFlow;
-import ru.itterminal.botdesk.integration.innerflow.CompletedVerificationAccountFlow;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
 import software.amazon.awssdk.services.ses.model.SendRawEmailRequest;
 
@@ -53,10 +52,8 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
     private final BCryptPasswordEncoder encoder;
     private final JwtProvider jwtProvider;
     private final RoleServiceImpl roleService;
-    private final SendingEmailViaAwsSesFlow.MailSenderViaAwsSesMessagingGateway mailSenderViaAwsSesMessagingGateway;
     private final SenderEmailViaAwsSes senderEmailViaAwsSes;
-    private final CreateAwsS3BucketFlow.CreateAwsBucketGateway createAwsBucketGateway;
-    private final CompletedVerificationAccountFlow.CreateCompletedVerificationAccountGateway createCompletedVerificationAccountGateway;
+    private final ApplicationContext appContext;
 
     public static final String START_FIND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID
             = "Start find user by id: {} and accountId: {} and own group id {}";
@@ -119,7 +116,7 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
                 log.warn(e.getMessage());
             }
             try {
-                mailSenderViaAwsSesMessagingGateway.process(rawEmailRequest);
+                senderEmailViaAwsSes.sendEmail(rawEmailRequest);
                 log.trace(EMAIL_VERIFICATION_TOKEN_WAS_SUCCESSFUL_SENT);
             }
             catch (Exception e) {
@@ -216,8 +213,13 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
                 || !savedUser.getEmailVerificationStatus()) {
             throw new FailedSaveEntityException(FAILED_SAVE_USER_AFTER_VERIFY_EMAIL_TOKEN);
         }
-        createAwsBucketGateway.process(savedUser.getAccount().getId().toString());
-        createCompletedVerificationAccountGateway.process(savedUser.getAccount().getId());
+        var ticketTypeServiceImpl =
+                (CompletedVerificationAccount) appContext.getBean("ticketTypeServiceImpl");
+        ticketTypeServiceImpl.actionAfterCompletedVerificationAccount(user.getAccount().getId());
+
+        var ticketStatusServiceImpl =
+                (CompletedVerificationAccount) appContext.getBean("ticketStatusServiceImpl");
+        ticketStatusServiceImpl.actionAfterCompletedVerificationAccount(user.getAccount().getId());
     }
 
     public void requestPasswordReset(String email) {
@@ -240,7 +242,7 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
             log.warn(e.getMessage());
         }
         try {
-            mailSenderViaAwsSesMessagingGateway.process(rawEmailRequest);
+            senderEmailViaAwsSes.sendEmail(rawEmailRequest);
             log.trace(RESET_TOKEN_WAS_SUCCESSFUL_SENT);
         }
         catch (Exception e) {

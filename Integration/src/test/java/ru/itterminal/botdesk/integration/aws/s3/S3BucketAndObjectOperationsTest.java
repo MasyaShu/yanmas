@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.ByteBuffer;
 import java.util.Random;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
@@ -14,19 +15,16 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 import ru.itterminal.botdesk.integration.aws.AwsConfig;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.Bucket;
-import software.amazon.awssdk.services.s3.model.ListBucketsResponse;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@SpringBootTest(classes = {AwsConfig.class, AwsS3Config.class, AwsS3BucketOperations.class, AwsS3ObjectOperations.class})
+@SpringBootTest(classes = {AwsConfig.class, AwsS3Config.class, AwsS3ObjectOperations.class})
+@TestPropertySource(properties = {"aws.s3.bucket.name=unit-tests.botdesk.app"})
 class S3BucketAndObjectOperationsTest {
-
-    @Autowired
-    AwsS3BucketOperations awsS3BucketOperations;
 
     @Autowired
     AwsS3ObjectOperations awsS3ObjectOperations;
@@ -34,8 +32,11 @@ class S3BucketAndObjectOperationsTest {
     @Autowired
     S3Client s3Client;
 
-    private final String nameBucket = "cdfa6483-0769-4628-ba32-efd338a716de";
     private byte[] data;
+    private final UUID accountId = UUID.fromString("29ef72ac-b94d-4c98-b6f6-efa765f44b2e");
+    private final UUID fileId = UUID.fromString("a4e76f8b-97e0-4aa6-89ba-1415f1f05af0");
+    private final UUID emptyFileId = UUID.fromString("d3e2fe4d-b031-48ad-a0ea-d1650bbbd8c8");
+
 
     @BeforeAll
     void setUp() {
@@ -45,54 +46,33 @@ class S3BucketAndObjectOperationsTest {
 
     @Test
     @Order(10)
-    void createBucket_shouldCreateBucket_whenPassedNameBucketIsUnique() {
-        assertTrue(awsS3BucketOperations.createBucket(nameBucket));
+    void putObject_shouldPutObject_whenPassedValidData() {
+        assertTrue(awsS3ObjectOperations.putObject(accountId, fileId, ByteBuffer.wrap(data)));
     }
 
     @Test
     @Order(20)
-    void putObject_shouldPutObject_whenPassedValidData() {
-        assertTrue(awsS3ObjectOperations.putObject(nameBucket, "test.txt", ByteBuffer.wrap(data)));
-    }
-
-    @Test
-    @Order(25)
     void putObject_shouldPutObject_whenSizeOfFileIsZero() {
-        assertTrue(awsS3ObjectOperations.putObject(nameBucket, "empty_test.txt", ByteBuffer.wrap(new byte[0])));
+        assertTrue(awsS3ObjectOperations.putObject(accountId, emptyFileId, ByteBuffer.wrap(new byte[0])));
     }
 
     @Test
     @Order(30)
     void getObject_shouldGetObject_whenPassedValidParameters() {
-        byte[] dataFromS3 = awsS3ObjectOperations.getObject(nameBucket, "test.txt");
+        byte[] dataFromS3 = awsS3ObjectOperations.getObject( accountId, fileId);
         assertArrayEquals(data, dataFromS3);
     }
 
     @Test
     @Order(40)
     void deleteObject_shouldDeleteObject_whenPassedValidData1() {
-        assertTrue(awsS3ObjectOperations.deleteObject(nameBucket, "test.txt"));
-    }
-
-    @Test
-    @Order(45)
-    void deleteObject_shouldDeleteObject_whenPassedValidData2() {
-        assertTrue(awsS3ObjectOperations.deleteObject(nameBucket, "empty_test.txt"));
+        assertTrue(awsS3ObjectOperations.deleteObject( accountId, fileId));
     }
 
     @Test
     @Order(50)
-    void deleteBucket_shouldDeleteBucket_whenBucketWithPassedNameExist() {
-        assertTrue(awsS3BucketOperations.deleteBucket(nameBucket));
+    void deleteObject_shouldDeleteObject_whenPassedValidData2() {
+        assertTrue(awsS3ObjectOperations.deleteObject( accountId, emptyFileId));
     }
 
-    @SuppressWarnings("unused")
-    void deleteAllBuckets () {
-        ListBucketsResponse buckets = s3Client.listBuckets();
-        System.out.println("There are buckets are, they will delete now:");
-        for (Bucket b : buckets.buckets()) {
-            System.out.println("* " + b.name());
-            awsS3BucketOperations.deleteBucket(b.name());
-        }
-    }
 }

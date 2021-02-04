@@ -22,22 +22,15 @@ import ru.itterminal.botdesk.integration.aws.s3.AwsS3ObjectOperations;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperationValidator, FileRepository> {
 
-    private static final String METHOD_UPDATE = "For now this method doesn't implement yet";
     private static final String FILE_ID = "File id";
     private static final String FILE_ID_IS_NULL = "File id is null";
     public static final String FILE = "File";
     public static final String FILE_WAS_NOT_UPLOAD = "File wasn't upload";
 
     private final AwsS3ObjectOperations awsS3ObjectOperations;
-
-    @Override
-    public File update(File entity) {
-        throw new UnsupportedOperationException(METHOD_UPDATE);
-    }
 
     @Transactional(readOnly = true)
     public byte[] getFileData(UUID accountId, UUID fileId) {
@@ -47,15 +40,16 @@ public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperat
             addValidationErrorIntoErrors(FILE, FILE_WAS_NOT_UPLOAD, logicalErrors);
         }
         ifErrorsNotEmptyThrowLogicalValidationException(logicalErrors);
-        return awsS3ObjectOperations.getObject(accountId.toString(), fileId.toString());
+        return awsS3ObjectOperations.getObject( accountId, fileId);
     }
 
+    @Transactional
     public boolean putFileData(UUID accountId, UUID fileId, byte[] bytes) {
         val logicalErrors = createMapForLogicalErrors();
         chekObjectForNull(fileId, FILE_ID, FILE_ID_IS_NULL, logicalErrors);
         ifErrorsNotEmptyThrowLogicalValidationException(logicalErrors);
         File file = super.findByIdAndAccountId(fileId, accountId);
-        boolean isPutFileData = awsS3ObjectOperations.putObject(accountId.toString(), fileId.toString(), ByteBuffer.wrap(bytes));
+        boolean isPutFileData = awsS3ObjectOperations.putObject(accountId, fileId, ByteBuffer.wrap(bytes));
         if (isPutFileData) {
             file.setIsUploaded(true);
             repository.save(file);

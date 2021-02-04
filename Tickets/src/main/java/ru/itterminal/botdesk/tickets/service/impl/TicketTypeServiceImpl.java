@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceWithAccountImpl;
-import ru.itterminal.botdesk.integration.innerflow.CompletedVerificationAccount;
+import ru.itterminal.botdesk.integration.across_modules.CompletedVerificationAccount;
 import ru.itterminal.botdesk.tickets.model.TicketType;
 import ru.itterminal.botdesk.tickets.model.projection.TicketTypeUniqueFields;
 import ru.itterminal.botdesk.tickets.repository.TicketTypeRepository;
@@ -52,7 +52,7 @@ public class TicketTypeServiceImpl extends
     }
 
     @Override
-    public void createPredefinedEntity(UUID accountId) {
+    public void actionAfterCompletedVerificationAccount(UUID accountId) {
         try {
             findStartedPredefinedTicketTypeForNewTicket(accountId);
         } catch (EntityNotExistException e) {

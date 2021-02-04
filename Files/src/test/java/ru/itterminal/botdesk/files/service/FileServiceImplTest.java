@@ -27,7 +27,6 @@ import ru.itterminal.botdesk.files.model.File;
 import ru.itterminal.botdesk.files.repository.FileRepository;
 import ru.itterminal.botdesk.files.service.validator.FileOperationValidator;
 import ru.itterminal.botdesk.integration.aws.s3.AwsS3ObjectOperations;
-import ru.itterminal.botdesk.integration.aws.s3.flow.PutAwsS3ObjectFlow;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {FileServiceImpl.class, FileOperationValidator.class})
@@ -40,10 +39,6 @@ class FileServiceImplTest {
     @MockBean
     private FileOperationValidator validator;
 
-    @SuppressWarnings("unused")
-    @MockBean
-    private PutAwsS3ObjectFlow.PutAwsS3ObjectGateway putAwsS3ObjectGateway;
-
     @MockBean
     private AwsS3ObjectOperations awsS3ObjectOperations;
 
@@ -53,10 +48,6 @@ class FileServiceImplTest {
     private final byte[] fileData = new byte[10];
     private File file;
     private Account account;
-    private static final String BYTES_OF_FILE = "Bytes of file";
-    private static final String BYTES_OF_FILE_IS_NULL = "Bytes of file is null";
-    private static final String ACCOUNT_ID = "Account id";
-    private static final String ACCOUNT_ID_IS_NULL = "Account id is null";
     private static final String FILE_ID = "File id";
     private static final String FILE_ID_IS_NULL = "File id is null";
 
@@ -72,15 +63,6 @@ class FileServiceImplTest {
                 .isUploaded(true)
                 .build();
         file.setId(UUID.randomUUID());
-    }
-
-    @Test
-    void update_shouldGetUnsupportedOperationException_whenCallMethodUpdate() {
-        File file = File.builder().build();
-        assertThrows(
-                UnsupportedOperationException.class,
-                () -> service.update(file)
-        );
     }
 
     @Test
@@ -134,8 +116,10 @@ class FileServiceImplTest {
         when(repository.existsById(any())).thenReturn(false);
         UUID fileId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
-        assertThrows(EntityNotExistException.class,
-                     ()-> service.putFileData(accountId, fileId, fileData));
+        assertThrows(
+                EntityNotExistException.class,
+                () -> service.putFileData(accountId, fileId, fileData)
+        );
         verify(repository, times(1)).existsById(any());
         verify(repository, times(0)).findByIdAndAccountId(any(), any());
         verify(repository, times(0)).save(any());
