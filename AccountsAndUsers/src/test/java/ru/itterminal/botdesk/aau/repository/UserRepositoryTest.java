@@ -131,17 +131,6 @@ class UserRepositoryTest {
     }
 
     @Test
-    void getByIdAndAccountIdAndGroupId_shouldGetOneUser_whenUserInDatabaseHasAllPassedParameters() {
-        User user = userRepository.getByIdAndAccount_IdAndGroup_Id(USER_1_ID_EXIST, USER_1_ACCOUNT_ID_EXIST,
-                                                                      USER_1_OWN_GROUP_ID_EXIST
-        ).get();
-        assertNotNull(user);
-        Assertions.assertEquals(USER_1_ID_EXIST, user.getId());
-        Assertions.assertEquals(USER_1_ACCOUNT_ID_EXIST, user.getAccount().getId());
-        Assertions.assertEquals(USER_1_OWN_GROUP_ID_EXIST, user.getGroup().getId());
-    }
-
-    @Test
     void findAllByRoleAndAccount_IdAndIdNot_shouldGetThreeUsers_whenDatabaseHasThreeUsersWithPassedParameters() {
         List<User> userList = userRepository.findAllByRoleAndAccount_IdAndIdNot(
                 roleAuthor, USER_2_ACCOUNT_ID_EXIST, USER_1_ID_EXIST);

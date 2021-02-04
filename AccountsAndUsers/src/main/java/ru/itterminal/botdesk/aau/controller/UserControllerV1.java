@@ -38,6 +38,7 @@ import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.RoleServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
+import ru.itterminal.botdesk.aau.service.validator.UserOperationValidator;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter;
 import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
@@ -54,6 +55,7 @@ import ru.itterminal.botdesk.security.jwt.JwtUser;
 public class UserControllerV1 extends BaseController {
 
     private final UserServiceImpl userService;
+    private final UserOperationValidator validator;
     private final AccountServiceImpl accountService;
     private final RoleServiceImpl roleService;
     private final GroupServiceImpl groupService;
@@ -63,7 +65,7 @@ public class UserControllerV1 extends BaseController {
 
     @PostMapping()
     @ResponseStatus(value = HttpStatus.CREATED)
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
     public ResponseEntity<UserDtoResponse> create(Principal principal,
                                                   @Validated(Create.class) @RequestBody UserDtoRequest request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
@@ -86,7 +88,7 @@ public class UserControllerV1 extends BaseController {
     }
 
     @PostMapping("/check-access")
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
     public ResponseEntity<String> createCheckAccess() {
         String message = format(SUCCESSFUL_CHECK_ACCESS, WORD_CREATE, ENTITY_NAME);
         log.trace(message);
@@ -127,11 +129,8 @@ public class UserControllerV1 extends BaseController {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
         User foundUser;
-        if (jwtUser.isInnerGroup()) {
-            foundUser = userService.findByIdAndAccountId(id, jwtUser.getAccountId());
-        } else {
-            foundUser = userService.findByIdAndAccountIdAndGroupId(id, jwtUser.getAccountId(), jwtUser.getGroupId());
-        }
+        foundUser = userService.findByIdAndAccountId(id, jwtUser.getAccountId());
+        validator.checkAccessForRead(foundUser);
         UserDtoResponse returnedUser = modelMapper.map(foundUser, UserDtoResponse.class);
         log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundUser);
         return new ResponseEntity<>(returnedUser, HttpStatus.OK);

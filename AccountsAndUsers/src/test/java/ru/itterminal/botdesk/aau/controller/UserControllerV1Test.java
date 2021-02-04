@@ -33,6 +33,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.security.web.FilterChainProxy;
@@ -56,6 +57,7 @@ import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.RoleServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
+import ru.itterminal.botdesk.aau.service.validator.UserOperationValidator;
 import ru.itterminal.botdesk.aau.util.AAUConstants;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
@@ -76,6 +78,9 @@ class UserControllerV1Test {
 
     @MockBean
     private UserServiceImpl service;
+
+    @MockBean
+    private UserOperationValidator validator;
 
     @SuppressWarnings("unused")
     @MockBean
@@ -232,7 +237,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
+    @WithMockUser(authorities = {"AUTHOR", "OBSERVER", "EXECUTOR"})
     void create_shouldGetStatusForbidden_whenNotAllowedRole() throws Exception {
         userDtoRequestFromAccount_1.setDeleted(null);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
@@ -451,7 +456,7 @@ class UserControllerV1Test {
     }
 
     @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
+    @WithMockUser(authorities = {"AUTHOR", "OBSERVER"})
     void update_shouldGetStatusForbidden_whenNotAllowedRole() throws Exception {
         userDtoRequestFromAccount_1.setId(UUID.fromString(USER_1_ID));
         userDtoRequestFromAccount_1.setVersion(0);
@@ -685,13 +690,13 @@ class UserControllerV1Test {
                 .andExpect(jsonPath("$.role.outId").value(user_1.getRole().getOutId()))
                 .andExpect(jsonPath("$.group.outId").value(user_1.getGroup().getOutId()));
         verify(service, times(1)).findByIdAndAccountId(any(), any());
-        verify(service, times(0)).findByIdAndAccountIdAndGroupId(any(), any(), any());
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
     void getById_shouldFindOneUser_whenUserExistInDatabaseByPassedIdAndHeIsNotInInnerGroup() throws Exception {
-        when(service.findByIdAndAccountIdAndGroupId(any(), any(), any())).thenReturn(user_1);
+        when(service.findByIdAndAccountId(any(), any())).thenReturn(user_1);
+        when(validator.checkAccessForRead(any())).thenReturn(true);
         mockMvc.perform(get(HOST + PORT + API + USER_1_ID))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -701,8 +706,8 @@ class UserControllerV1Test {
                 .andExpect(jsonPath("$.role.displayName").value(user_1.getRole().getDisplayName()))
                 .andExpect(jsonPath("$.group.outId").value(user_1.getGroup().getOutId()))
                 .andExpect(jsonPath("$.group.displayName").value(user_1.getGroup().getDisplayName()));
-        verify(service, times(0)).findByIdAndAccountId(any(), any());
-        verify(service, times(1)).findByIdAndAccountIdAndGroupId(any(), any(), any());
+        verify(service, times(1)).findByIdAndAccountId(any(), any());
+        verify(validator, times(1)).checkAccessForRead(any());
     }
 
     @Test

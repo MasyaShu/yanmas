@@ -114,6 +114,7 @@ class GroupOperationValidatorTest {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
     void checkAccessForRead_shouldGetAccessError_whenUserNotInnerGroupAndGroupUserNoEqualsEntity() {
         Group group = groupTestHelper.getRandomValidEntity();
+        group.setId(UUID.randomUUID());
         assertThrows(AccessDeniedException.class,
                 () -> validator.checkAccessForRead(group));
     }

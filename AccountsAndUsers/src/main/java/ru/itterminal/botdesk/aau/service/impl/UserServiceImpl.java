@@ -169,17 +169,6 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
         return repository.getByEmailAndIdNot(user.getEmail(), user.getId());
     }
 
-    @SuppressWarnings("DuplicatedCode")
-    @Transactional(readOnly = true)
-    public User findByIdAndAccountIdAndGroupId(UUID id, UUID accountId, UUID groupId) {
-        log.trace(START_FIND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, groupId);
-        return repository.getByIdAndAccount_IdAndGroup_Id(id, accountId, groupId).orElseThrow(
-                () -> new EntityNotExistException(
-                        format(NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID, id, accountId, groupId)
-                )
-        );
-    }
-
     @Transactional(readOnly = true)
     public List<User> findAllByRoleAndIdNot(Role role, UUID id) {
         log.trace(START_FIND_ALL_USERS_BY_ROLE_AND_NOT_ID, role, id);

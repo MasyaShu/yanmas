@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +28,7 @@ import ru.itterminal.botdesk.security.jwt.JwtUser;
 @RequiredArgsConstructor
 public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
 
-    private final UserServiceImpl service;
+        private final UserServiceImpl service;
     private final RoleServiceImpl roleService;
 
     protected static final String USER_WITH_ROLE_ACCOUNT_OWNER_IS_UNIQUE = "User: {} with role ACCOUNT_OWNER is unique";
@@ -46,6 +47,8 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
     protected static final String CREATE_UPDATE_ONLY_HIS_GROUP =
             "If user is not in inner group, then he can create/update user only in his "
                     + "group";
+    public static final String ACCESS_IS_DENIED_FOR_SEARCHING_BY_PASSED_ID = "Access is denied for searching by passed Id";
+    private static final String EMAIL = "email";
 
     @Override
     public boolean beforeCreate(User entity) {
@@ -125,12 +128,22 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         } else {
             String validatedField;
             if (entity.getEmail().equalsIgnoreCase(foundUser.get(0).getEmail())) {
-                validatedField = "email";
+                validatedField = EMAIL;
                 errors.put(validatedField, singletonList(new ValidationError(NOT_UNIQUE_CODE,
                         format(NOT_UNIQUE_MESSAGE, validatedField))));
             }
             log.error(FIELDS_NOT_UNIQUE, errors);
             throw new LogicalValidationException(VALIDATION_FAILED, errors);
+        }
+    }
+
+    @Override
+    public boolean checkAccessForRead(User entity) {
+        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (jwtUser.isInnerGroup() || jwtUser.getGroupId().equals(entity.getGroup().getId())) {
+            return true;
+        } else {
+            throw new AccessDeniedException(ACCESS_IS_DENIED_FOR_SEARCHING_BY_PASSED_ID);
         }
     }
 

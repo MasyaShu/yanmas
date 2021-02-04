@@ -22,6 +22,7 @@ import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperatio
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_CODE;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_MESSAGE;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
+import static ru.itterminal.botdesk.security.config.TestSecurityConfig.GROUP_1_ID;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,6 +36,7 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.test.context.support.WithUserDetails;
@@ -146,7 +148,7 @@ class UserOperationValidatorTest {
         user.setRole(Role
                 .builder()
                 .name(Roles.ACCOUNT_OWNER.toString())
-                .weight(3)
+                .weight(Roles.ACCOUNT_OWNER.getWeight())
                 .build()
         );
         when(service.findAllByRoleAndAccountId(any(), any())).thenReturn(List.of(oldUser));
@@ -154,7 +156,7 @@ class UserOperationValidatorTest {
                 .thenReturn(Role
                         .builder()
                         .name(Roles.ACCOUNT_OWNER.toString())
-                        .weight(3)
+                        .weight(Roles.ACCOUNT_OWNER.getWeight())
                         .build()
                 );
         errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,
@@ -172,7 +174,7 @@ class UserOperationValidatorTest {
         user.setRole(Role
                 .builder()
                 .name(Roles.AUTHOR.toString())
-                .weight(0)
+                .weight(Roles.AUTHOR.getWeight())
                 .build()
         );
         when(service.findAllByRoleAndAccountId(any(), any())).thenReturn(List.of(oldUser));
@@ -180,7 +182,7 @@ class UserOperationValidatorTest {
                 .thenReturn(Role
                         .builder()
                         .name(Roles.ACCOUNT_OWNER.toString())
-                        .weight(3)
+                        .weight(Roles.ACCOUNT_OWNER.getWeight())
                         .build()
                 );
         errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
@@ -198,7 +200,7 @@ class UserOperationValidatorTest {
         user.setRole(Role
                 .builder()
                 .name(Roles.ACCOUNT_OWNER.toString())
-                .weight(3)
+                .weight(Roles.ACCOUNT_OWNER.getWeight())
                 .build()
         );
         when(service.findAllByRole(any())).thenReturn(List.of(oldUser));
@@ -263,7 +265,7 @@ class UserOperationValidatorTest {
                 Role
                         .builder()
                         .name(Roles.ACCOUNT_OWNER.toString())
-                        .weight(3)
+                        .weight(Roles.ACCOUNT_OWNER.getWeight())
                         .build()
         );
         when(service.findAllByRole(any())).thenReturn(List.of(oldUser));
@@ -291,7 +293,7 @@ class UserOperationValidatorTest {
                 Role
                         .builder()
                         .name(Roles.ACCOUNT_OWNER.toString())
-                        .weight(3)
+                        .weight(Roles.ACCOUNT_OWNER.getWeight())
                         .build()
         );
         when(service.findAllByRole(any())).thenReturn(List.of(oldUser));
@@ -300,13 +302,13 @@ class UserOperationValidatorTest {
                 .thenReturn(Role.builder().name(Roles.ACCOUNT_OWNER.toString()).build());
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         errors.put(WEIGHT_OF_ROLE_USER_FROM_DATABASE, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
-                format(WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_OF_UPDATING_USER_FROM_DATABASE, jwtUser.getWeightRole(),
+                format(WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_FROM_REQUEST, jwtUser.getWeightRole(),
                         user.getRole().getWeight()))));
         logicalValidationException = new LogicalValidationException(VALIDATION_FAILED, errors);
         LogicalValidationException thrown = assertThrows(LogicalValidationException.class,
                 () -> validator.beforeUpdate(user));
         assertEquals(logicalValidationException.getFieldErrors().get(WEIGHT_OF_ROLE_USER_FROM_DATABASE).get(0),
-                thrown.getFieldErrors().get(WEIGHT_OF_ROLE_USER_FROM_DATABASE).get(0));
+                thrown.getFieldErrors().get(WEIGHT_OF_ROLE).get(0));
         verify(service, times(1)).findAllByRoleAndAccount_IdAndIdNot(any(), any(), any());
         verify(service, times(1)).findById(user.getId());
         verify(roleService, times(1)).getAccountOwnerRole();
@@ -380,6 +382,21 @@ class UserOperationValidatorTest {
         String encodedPassword = encoder.encode("12345");
         System.out.println("encodedPassword: " + encodedPassword);
         assertTrue(encoder.matches("12345", encodedPassword));
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
+    void checkAccessForRead_shouldGetAccessError_whenUserNotInnerGroupAndGroupUserNoEqualsEntity() {
+        user.getGroup().setId(UUID.randomUUID());
+        assertThrows(AccessDeniedException.class,
+                () -> validator.checkAccessForRead(user));
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
+    void checkAccessForRead_shouldGetTrue_whenUserNotInnerGroupAndGroupUserEqualsEntity() {
+        user.getGroup().setId(UUID.fromString(GROUP_1_ID));
+        assertTrue(validator.checkAccessForRead(user));
     }
 
 }
