@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.botdesk.files.model.File;
 import ru.itterminal.botdesk.files.repository.FileRepository;
@@ -29,6 +30,8 @@ public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperat
     public static final String FILE_WAS_NOT_UPLOAD = "File wasn't upload";
     public static final String SIZE_FILE = "Size of file";
     public static final String MAX_SIZE = "Size of file mustn't over %s bytes";
+    public static final String COULD_NOT_FIND_FILE = "Could not find entity by %s: '%s', '%s', '%s'";
+    public static final String SEARCH_PARAMETER = "accountId, authorId and fileId";
 
     @Value("${maxSizeOfFile}")
     private Long maxSizeOfFile;
@@ -47,14 +50,20 @@ public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperat
     }
 
     @Transactional
-    public boolean putFileData(UUID accountId, UUID fileId, byte[] bytes) {
+    public boolean putFileData(UUID accountId, UUID authorId, UUID fileId, byte[] bytes) {
         if (fileId == null) {
             throw createExpectedLogicalValidationException(FILE_ID, FILE_ID_IS_NULL);
         }
         if (bytes.length > maxSizeOfFile) {
             throw createExpectedLogicalValidationException(SIZE_FILE, format(MAX_SIZE, maxSizeOfFile));
         }
-        File file = super.findByIdAndAccountId(fileId, accountId);
+        File file = repository.findByAccountIdAndAuthorIdAndId(accountId, authorId, fileId).orElseThrow(
+                () -> {
+                    var errorMessage = format(COULD_NOT_FIND_FILE, SEARCH_PARAMETER, accountId, authorId, fileId);
+                    log.error(errorMessage);
+                    throw new EntityNotExistException(errorMessage);
+                }
+        );
         var isFileUploaded = awsS3ObjectOperations.putObject(accountId, fileId, ByteBuffer.wrap(bytes));
         if (isFileUploaded) {
             file.setIsUploaded(true);
@@ -63,4 +72,5 @@ public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperat
         }
         return isFileUploaded;
     }
+
 }

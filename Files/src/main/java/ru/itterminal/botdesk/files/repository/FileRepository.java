@@ -10,5 +10,5 @@ import ru.itterminal.botdesk.files.model.File;
 
 @Repository
 public interface FileRepository extends EntityRepositoryWithAccount<File> {
-    Optional<File> findByAccountIdAndId(UUID accountId, UUID fileId);
+    Optional<File> findByAccountIdAndAuthorIdAndId(UUID accountId, UUID authorId, UUID fileId);
 }

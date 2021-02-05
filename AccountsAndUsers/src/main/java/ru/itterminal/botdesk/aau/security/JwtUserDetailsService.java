@@ -27,6 +27,7 @@ public class JwtUserDetailsService implements UserDetailsService {
 
         JwtUser jwtUser = JwtUser
                 .builder()
+                .id(user.getId())
                 .accountId(user.getAccount().getId())
                 .groupId(user.getGroup().getId())
                 .isInnerGroup(user.getGroup().getIsInner())

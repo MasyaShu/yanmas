@@ -47,6 +47,9 @@ public class File extends BaseEntity {
     @Column(name = "entity_id", nullable = false)
     private UUID entityId;
 
+    @Column(name = "author_id", nullable = false, updatable = false)
+    private UUID authorId;
+
     @Column(name = "is_uploaded", nullable = false)
     private Boolean isUploaded;
 

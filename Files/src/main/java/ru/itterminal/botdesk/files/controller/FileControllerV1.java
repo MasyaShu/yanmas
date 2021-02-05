@@ -85,7 +85,7 @@ public class FileControllerV1 extends BaseController {
             @PathVariable("fileId") UUID fileId
     ) {
         log.debug(GET_REQUEST_FOR_GET_DATA_FOR_FILE_ID, fileId);
-        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
+        var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
         byte[] fileData = fileService.getFileData(jwtUser.getAccountId(), fileId);
         ByteArrayResource resource = new ByteArrayResource(fileData);
         log.debug(DONE_REQUEST_FOR_GET_DATA_FOR_FILE_ID_SIZE_OF_DATA_IS, fileId, fileData.length);
@@ -103,7 +103,7 @@ public class FileControllerV1 extends BaseController {
                                                @RequestParam("file") MultipartFile file
     ) {
         log.debug(GET_REQUEST_FOR_SAVE_DATA_FOR_FILE_ID, fileId);
-        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
+        var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
         byte[] bytesOfFile;
         try {
             bytesOfFile = file.getBytes();
@@ -112,7 +112,7 @@ public class FileControllerV1 extends BaseController {
             log.error(e.getMessage());
             return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
         }
-        var result = fileService.putFileData(jwtUser.getAccountId(), fileId, bytesOfFile);
+        var result = fileService.putFileData(jwtUser.getAccountId(), jwtUser.getId(), fileId, bytesOfFile);
         log.debug(DONE_REQUEST_FOR_SAVE_DATA_FOR_FILE_ID, fileId);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }

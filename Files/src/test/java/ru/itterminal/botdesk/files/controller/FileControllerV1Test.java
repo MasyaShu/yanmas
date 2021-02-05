@@ -271,12 +271,12 @@ class FileControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void putFileData_shouldGetStatusOk_whenPassedValidData() throws Exception {
-        when(fileService.putFileData(any(), any(), any())).thenReturn(true);
+        when(fileService.putFileData(any(), any(), any(), any())).thenReturn(true);
         mockMvc.perform(MockMvcRequestBuilders.multipart(HOST + PORT + API + "/" + FILE_ID + "/data")
                                 .file(mockMultipartFile))
                 .andDo(print())
                 .andExpect(status().isOk());
-        verify(fileService, times(1)).putFileData(any(), any(), any());
+        verify(fileService, times(1)).putFileData(any(), any(), any(), any());
     }
 
     @Test
@@ -285,7 +285,7 @@ class FileControllerV1Test {
         mockMvc.perform(post(HOST + PORT + API + "/" + FILE_ID + "/data"))
                 .andDo(print())
                 .andExpect(status().isForbidden());
-        verify(fileService, times(0)).putFileData(any(), any(), any());
+        verify(fileService, times(0)).putFileData(any(), any(), any(), any());
     }
 
     @Test
@@ -298,7 +298,7 @@ class FileControllerV1Test {
                 .andExpect(jsonPath("$.title").value(REQUEST_NOT_READABLE))
                 .andExpect(jsonPath("$.detail").value(Matchers.containsString(
                         "Failed to convert value of type 'java.lang.String' to required type 'java.util.UUID'")));
-        verify(fileService, times(0)).putFileData(any(), any(), any());
+        verify(fileService, times(0)).putFileData(any(), any(), any(), any());
     }
 
 }
