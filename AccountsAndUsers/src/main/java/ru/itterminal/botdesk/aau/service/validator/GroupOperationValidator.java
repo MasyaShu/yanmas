@@ -8,17 +8,12 @@ import org.springframework.stereotype.Component;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.projection.GroupUniqueFields;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
-import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
-import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 import ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static java.lang.String.format;
-import static java.util.Collections.singletonList;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.checkStringForEquals;
 
 @Slf4j
@@ -28,7 +23,6 @@ public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> 
 
     public static final String ACCESS_IS_DENIED_FOR_SEARCHING_BY_PASSED_GROUP_ID = "Access is denied for searching by passed groupId";
     private final GroupServiceImpl service;
-    private static final String INNER_GROUP = "Inner group";
     private static final String USER_FROM_AN_INNER_GROUP_CANNOT_CREATE_UPDATE_GROUPS =
             "A user from not inner group cannot create or update groups";
 
@@ -58,18 +52,11 @@ public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> 
     }
 
     private void checkIsInnerGroupForCreateUpdate() {
-        Map<String, List<ValidationError>> errors = new HashMap<>();
         if (!SecurityContextHolder.getContext().getAuthentication().getName().contains("anonymous")) {
             JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            errors = new HashMap<>();
             if (!jwtUser.isInnerGroup()) {
-                errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
-                        USER_FROM_AN_INNER_GROUP_CANNOT_CREATE_UPDATE_GROUPS)));
+                throw new AccessDeniedException(USER_FROM_AN_INNER_GROUP_CANNOT_CREATE_UPDATE_GROUPS);
             }
-        }
-        if (!errors.isEmpty()) {
-            log.error(FIELDS_ARE_NOT_VALID, errors);
-            throw new LogicalValidationException(VALIDATION_FAILED, errors);
         }
     }
 
