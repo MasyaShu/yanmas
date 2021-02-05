@@ -175,7 +175,7 @@ class UserControllerV1Test {
                 .build();
         Group group_1 = Group.builder()
                 .isInner(true)
-                .id(UUID.fromString(TestSecurityConfig.GROUP_1_ID))
+                .id(UUID.fromString(TestSecurityConfig.INNER_GROUP_ID))
                 .displayName(GROUP_DISPLAY_NAME)
                 .outId(GROUP_OUT_ID)
                 .build();

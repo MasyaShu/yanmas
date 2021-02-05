@@ -47,7 +47,7 @@ class AccountOperationValidatorTest {
         Account account = new Account();
         account.setId(UUID.fromString(TestSecurityConfig.ACCOUNT_1_ID));
         Group group = new Group();
-        group.setId(UUID.fromString(TestSecurityConfig.GROUP_1_ID));
+        group.setId(UUID.fromString(TestSecurityConfig.INNER_GROUP_ID));
         String PASSWORD = "12345";
         user = User
                 .builder()

@@ -28,7 +28,11 @@ import ru.itterminal.botdesk.security.jwt.JwtUser;
 @RequiredArgsConstructor
 public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
 
-        private final UserServiceImpl service;
+    public static final String IS_FORBIDDEN_TO_ASSIGN_A_USER_WITH_A_ROLE = "With your role it is forbidden to assign a user with a role %s";
+    public static final String IS_FORBIDDEN_TO_CHANGE_THE_USER_WITH_THE_ROLE = "With your role it is forbidden to change the user with the role %s";
+    public static final String NOT_ALLOWED_TO_ASSIGN_A_GROUP_WITH_ID_NOT_EQUAL = "You are not allowed to assign a group with id not equal: %s";
+    public static final String CANNOT_EDIT_A_USER_WHO_IS_NOT_IN_THE_GROUP_WITH_ID = "You cannot edit a user who is not in the group with id: %s";
+    private final UserServiceImpl service;
     private final RoleServiceImpl roleService;
 
     protected static final String USER_WITH_ROLE_ACCOUNT_OWNER_IS_UNIQUE = "User: {} with role ACCOUNT_OWNER is unique";
@@ -37,9 +41,6 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
             "Account must have user with role ACCOUNT_OWNER";
     protected static final String WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_FROM_REQUEST =
             "Weight of role current user (%s) less than weight of role from request (%s)";
-    protected static final String
-            WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_OF_UPDATING_USER_FROM_DATABASE =
-            "Weight of role current user (%s) less than weight of role of updating user from database (%s)";
     protected static final String WEIGHT_OF_ROLE = "Weight of role";
     protected static final String WEIGHT_OF_ROLE_USER_FROM_DATABASE = "Weight of role of user from database";
     protected static final String INNER_GROUP = "Inner group";
@@ -53,67 +54,19 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
     @Override
     public boolean beforeCreate(User entity) {
         super.beforeCreate(entity);
-        Map<String, List<ValidationError>> errors = new HashMap<>();
-
-        if (entity.getRole().equals(roleService.getAccountOwnerRole())) {
-            List<User> foundUsers = service.findAllByRoleAndAccountId(roleService.getAccountOwnerRole(),
-                    entity.getAccount().getId());
-            if (foundUsers.isEmpty()) {
-                log.trace(USER_WITH_ROLE_ACCOUNT_OWNER_IS_UNIQUE, entity);
-            } else {
-                errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,
-                        format(NOT_UNIQUE_MESSAGE, USER_WITH_ROLE_ACCOUNT_OWNER))));
-            }
-        }
-
         if (!SecurityContextHolder.getContext().getAuthentication().getName().contains("anonymous")) {
-            errors.putAll(validateWeightOfRoleAndIsInnerGroup(entity, null));
+            checkAccessCreateUpdate(entity, null);
         }
-
-        if (!errors.isEmpty()) {
-            log.error(FIELDS_ARE_NOT_VALID, errors);
-            throw new LogicalValidationException(VALIDATION_FAILED, errors);
-        }
+        checkAccountOwnerNotExist(entity);
         return true;
     }
 
     @Override
     public boolean beforeUpdate(User entity) {
         super.beforeUpdate(entity);
-        Map<String, List<ValidationError>> errors = new HashMap<>();
-
-        // Schema of constraints "Only one user must have a role "Account owner"
-        // Entity from DB           | new  Entity               | result
-        // has role Acc_Owner       | has role Acc_Owner        | not allowed (User with role ACCOUNT_OWNER is occupied)
-        // has not role Acc_Owner   | has role Acc_Owner        | not possible
-        // has role Acc_Owner       | has not role Acc_Owner    | all right
-        // has not role Acc_Owner   | has not role Acc_Owner    | not allowed, Account must have user with role ACCOUNT_OWNER
-
-        List<User> usersFromDatabaseWithRoleAccountOwner = service.findAllByRoleAndAccount_IdAndIdNot(
-                roleService.getAccountOwnerRole(), entity.getAccount().getId(), entity.getId()
-        );
-        boolean oldUserHasRoleAccountOwner = !usersFromDatabaseWithRoleAccountOwner.isEmpty();
-        boolean newUserHasRoleAccountOwner = entity.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString());
-
-
-        if (oldUserHasRoleAccountOwner && newUserHasRoleAccountOwner) {
-            errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,
-                    format(NOT_UNIQUE_MESSAGE, USER_WITH_ROLE_ACCOUNT_OWNER))));
-        }
-
-        if (!oldUserHasRoleAccountOwner && !newUserHasRoleAccountOwner) {
-            errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,
-                    ACCOUNT_MUST_HAVE_USER_WITH_ROLE_ACCOUNT_OWNER)));
-        }
-
         User userFromDatabase = service.findById(entity.getId());
-
-        errors.putAll(validateWeightOfRoleAndIsInnerGroup(entity, userFromDatabase));
-
-        if (!errors.isEmpty()) {
-            log.error(FIELDS_ARE_NOT_VALID, errors);
-            throw new LogicalValidationException(VALIDATION_FAILED, errors);
-        }
+        checkAccessCreateUpdate(entity, userFromDatabase);
+        checkAccountOwnerExistsAfterUpdate(entity);
         return true;
     }
 
@@ -147,28 +100,75 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         }
     }
 
-    public Map<String, List<ValidationError>> validateWeightOfRoleAndIsInnerGroup(User userFromRequest, User userFromDatabase) {
-        Map<String, List<ValidationError>> errors = new HashMap<>();
+    private void checkAccessCreateUpdate(User userFromRequest, User userFromDatabase) {
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (userFromRequest.getRole().getWeight() > jwtUser.getWeightRole()) {
-            errors.put(WEIGHT_OF_ROLE, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
-                    format(WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_FROM_REQUEST, jwtUser.getWeightRole(),
-                            userFromRequest.getRole().getWeight()))));
+            throw new AccessDeniedException(format(IS_FORBIDDEN_TO_ASSIGN_A_USER_WITH_A_ROLE,
+                    userFromRequest.getRole().getDisplayName()));
         }
         if (userFromDatabase != null && userFromDatabase.getRole().getWeight() > jwtUser.getWeightRole()) {
-            errors.put(WEIGHT_OF_ROLE_USER_FROM_DATABASE, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
-                    format(WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_OF_UPDATING_USER_FROM_DATABASE,
-                            jwtUser.getWeightRole(), userFromDatabase.getRole().getWeight()))));
+            throw new AccessDeniedException(format(IS_FORBIDDEN_TO_CHANGE_THE_USER_WITH_THE_ROLE,
+                    userFromRequest.getRole().getDisplayName()));
         }
         if (!jwtUser.isInnerGroup() && !userFromRequest.getGroup().getId().equals(jwtUser.getGroupId())) {
-            errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
-                    CREATE_UPDATE_ONLY_HIS_GROUP)));
+            throw new AccessDeniedException(format(NOT_ALLOWED_TO_ASSIGN_A_GROUP_WITH_ID_NOT_EQUAL,
+                    jwtUser.getGroupId()));
         }
         if (userFromDatabase != null && !jwtUser.isInnerGroup() && !userFromDatabase.getGroup().getId().equals(jwtUser.getGroupId())) {
-            errors.put(INNER_GROUP_USER_FROM_DATABASE, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
-                    CREATE_UPDATE_ONLY_HIS_GROUP)));
+            throw new AccessDeniedException(format(CANNOT_EDIT_A_USER_WHO_IS_NOT_IN_THE_GROUP_WITH_ID,
+                    jwtUser.getGroupId()));
         }
-        return errors;
+    }
+
+    private void checkAccountOwnerNotExist(User entity) {
+        Map<String, List<ValidationError>> errors = new HashMap<>();
+
+        if (entity.getRole().equals(roleService.getAccountOwnerRole())) {
+            List<User> foundUsers = service.findAllByRoleAndAccountId(roleService.getAccountOwnerRole(),
+                    entity.getAccount().getId());
+            if (foundUsers.isEmpty()) {
+                log.trace(USER_WITH_ROLE_ACCOUNT_OWNER_IS_UNIQUE, entity);
+            } else {
+                errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,
+                        format(NOT_UNIQUE_MESSAGE, USER_WITH_ROLE_ACCOUNT_OWNER))));
+            }
+        }
+
+        if (!errors.isEmpty()) {
+            log.error(FIELDS_ARE_NOT_VALID, errors);
+            throw new LogicalValidationException(VALIDATION_FAILED, errors);
+        }
+    }
+
+    private void checkAccountOwnerExistsAfterUpdate(User entity) {
+
+        // Schema of constraints "Only one user must have a role "Account owner"
+        // Entity from DB           | new  Entity               | result
+        // has role Acc_Owner       | has role Acc_Owner        | not allowed (User with role ACCOUNT_OWNER is occupied)
+        // has not role Acc_Owner   | has role Acc_Owner        | not possible
+        // has role Acc_Owner       | has not role Acc_Owner    | all right
+        // has not role Acc_Owner   | has not role Acc_Owner    | not allowed, Account must have user with role ACCOUNT_OWNER
+
+        Map<String, List<ValidationError>> errors = new HashMap<>();
+        List<User> usersFromDatabaseWithRoleAccountOwner = service.findAllByRoleAndAccount_IdAndIdNot(
+                roleService.getAccountOwnerRole(), entity.getAccount().getId(), entity.getId()
+        );
+
+        boolean oldUserHasRoleAccountOwner = !usersFromDatabaseWithRoleAccountOwner.isEmpty();
+        boolean newUserHasRoleAccountOwner = entity.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString());
+
+        if (oldUserHasRoleAccountOwner && newUserHasRoleAccountOwner) {
+            errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,
+                    format(NOT_UNIQUE_MESSAGE, USER_WITH_ROLE_ACCOUNT_OWNER))));
+        }
+        if (!oldUserHasRoleAccountOwner && !newUserHasRoleAccountOwner) {
+            errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,
+                    ACCOUNT_MUST_HAVE_USER_WITH_ROLE_ACCOUNT_OWNER)));
+        }
+        if (!errors.isEmpty()) {
+            log.error(FIELDS_ARE_NOT_VALID, errors);
+            throw new LogicalValidationException(VALIDATION_FAILED, errors);
+        }
     }
 
 }

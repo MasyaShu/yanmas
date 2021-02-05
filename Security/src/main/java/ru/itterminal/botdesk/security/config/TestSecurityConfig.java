@@ -23,8 +23,8 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
 
     public static final String ACCOUNT_1_ID = "cdfa6483-0769-4628-ba32-efd338a716de";
     public static final String ACCOUNT_2_ID = "bcf98101-2a22-42bf-94cc-c900b50a0b69";
-    public static final String GROUP_1_ID = "0223e51a-4bb2-44ee-bc8e-1f047a2145e7";
-    public static final String GROUP_2_ID = "63c1940d-e323-47af-8265-dbf8089727de";
+    public static final String INNER_GROUP_ID = "0223e51a-4bb2-44ee-bc8e-1f047a2145e7";
+    public static final String NOT_INNER_GROUP_ID = "63c1940d-e323-47af-8265-dbf8089727de";
     public static final String ROLE_ADMIN = "ADMIN";
     public static final String ROLE_AUTHOR = "AUTHOR";
     public static final String ROLE_EXECUTOR = "EXECUTOR";
@@ -78,7 +78,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 case "ADMIN_ACCOUNT_1_IS_INNER_GROUP" -> jwtUser = JwtUser
                         .builder()
                         .accountId(UUID.fromString(ACCOUNT_1_ID))
-                        .groupId(UUID.fromString(GROUP_1_ID))
+                        .groupId(UUID.fromString(INNER_GROUP_ID))
                         .weightRole(40)
                         .isInnerGroup(true)
                         .username(EMAIL_1)
@@ -88,7 +88,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 case "ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP" -> jwtUser = JwtUser
                         .builder()
                         .accountId(UUID.fromString(ACCOUNT_1_ID))
-                        .groupId(UUID.fromString(GROUP_2_ID))
+                        .groupId(UUID.fromString(NOT_INNER_GROUP_ID))
                         .weightRole(40)
                         .isInnerGroup(false)
                         .username(EMAIL_1)
@@ -98,7 +98,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 case "ADMIN_ACCOUNT_2_IS_INNER_GROUP" -> jwtUser = JwtUser
                         .builder()
                         .accountId(UUID.fromString(ACCOUNT_2_ID))
-                        .groupId(UUID.fromString(GROUP_2_ID))
+                        .groupId(UUID.fromString(INNER_GROUP_ID))
                         .weightRole(40)
                         .isInnerGroup(true)
                         .username(EMAIL_1)
@@ -108,7 +108,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 case "ADMIN_ACCOUNT_2_IS_NOT_INNER_GROUP" -> jwtUser = JwtUser
                         .builder()
                         .accountId(UUID.fromString(ACCOUNT_2_ID))
-                        .groupId(UUID.fromString(GROUP_2_ID))
+                        .groupId(UUID.fromString(NOT_INNER_GROUP_ID))
                         .weightRole(40)
                         .isInnerGroup(false)
                         .username(EMAIL_1)
@@ -118,7 +118,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 case "EXECUTOR_ACCOUNT_1_IS_INNER_GROUP" -> jwtUser = JwtUser
                         .builder()
                         .accountId(UUID.fromString(ACCOUNT_1_ID))
-                        .groupId(UUID.fromString(GROUP_1_ID))
+                        .groupId(UUID.fromString(INNER_GROUP_ID))
                         .weightRole(30)
                         .isInnerGroup(true)
                         .username(EMAIL_1)
@@ -128,7 +128,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 case "EXECUTOR_ACCOUNT_1_IS_NOT_INNER_GROUP" -> jwtUser = JwtUser
                         .builder()
                         .accountId(UUID.fromString(ACCOUNT_1_ID))
-                        .groupId(UUID.fromString(GROUP_2_ID))
+                        .groupId(UUID.fromString(NOT_INNER_GROUP_ID))
                         .weightRole(30)
                         .isInnerGroup(false)
                         .username(EMAIL_1)
@@ -138,7 +138,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 case "EXECUTOR_ACCOUNT_2_IS_INNER_GROUP" -> jwtUser = JwtUser
                         .builder()
                         .accountId(UUID.fromString(ACCOUNT_2_ID))
-                        .groupId(UUID.fromString(GROUP_1_ID))
+                        .groupId(UUID.fromString(INNER_GROUP_ID))
                         .weightRole(30)
                         .isInnerGroup(true)
                         .username(EMAIL_1)
@@ -148,7 +148,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 case "EXECUTOR_ACCOUNT_2_IS_NOT_INNER_GROUP" -> jwtUser = JwtUser
                         .builder()
                         .accountId(UUID.fromString(ACCOUNT_2_ID))
-                        .groupId(UUID.fromString(GROUP_2_ID))
+                        .groupId(UUID.fromString(NOT_INNER_GROUP_ID))
                         .weightRole(30)
                         .isInnerGroup(false)
                         .username(EMAIL_1)
@@ -158,7 +158,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 case "AUTHOR_ACCOUNT_1_IS_INNER_GROUP" -> jwtUser = JwtUser
                         .builder()
                         .accountId(UUID.fromString(ACCOUNT_1_ID))
-                        .groupId(UUID.fromString(GROUP_1_ID))
+                        .groupId(UUID.fromString(INNER_GROUP_ID))
                         .weightRole(20)
                         .isInnerGroup(true)
                         .username(EMAIL_1)
@@ -168,7 +168,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 case "AUTHOR_ACCOUNT_1_IS_NOT_INNER_GROUP" -> jwtUser = JwtUser
                         .builder()
                         .accountId(UUID.fromString(ACCOUNT_1_ID))
-                        .groupId(UUID.fromString(GROUP_2_ID))
+                        .groupId(UUID.fromString(NOT_INNER_GROUP_ID))
                         .weightRole(20)
                         .isInnerGroup(false)
                         .username(EMAIL_1)
@@ -178,7 +178,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 case "AUTHOR_ACCOUNT_2_IS_INNER_GROUP" -> jwtUser = JwtUser
                         .builder()
                         .accountId(UUID.fromString(ACCOUNT_2_ID))
-                        .groupId(UUID.fromString(GROUP_1_ID))
+                        .groupId(UUID.fromString(INNER_GROUP_ID))
                         .weightRole(20)
                         .isInnerGroup(true)
                         .username(EMAIL_1)
@@ -188,7 +188,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 case "AUTHOR_ACCOUNT_2_IS_NOT_INNER_GROUP" -> jwtUser = JwtUser
                         .builder()
                         .accountId(UUID.fromString(ACCOUNT_2_ID))
-                        .groupId(UUID.fromString(GROUP_2_ID))
+                        .groupId(UUID.fromString(NOT_INNER_GROUP_ID))
                         .weightRole(20)
                         .isInnerGroup(false)
                         .username(EMAIL_1)
@@ -198,7 +198,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 case "OBSERVER_ACCOUNT_1_IS_INNER_GROUP" -> jwtUser = JwtUser
                         .builder()
                         .accountId(UUID.fromString(ACCOUNT_1_ID))
-                        .groupId(UUID.fromString(GROUP_1_ID))
+                        .groupId(UUID.fromString(INNER_GROUP_ID))
                         .weightRole(10)
                         .isInnerGroup(true)
                         .username(EMAIL_1)
@@ -208,7 +208,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 case "OBSERVER_ACCOUNT_1_IS_NOT_INNER_GROUP" -> jwtUser = JwtUser
                         .builder()
                         .accountId(UUID.fromString(ACCOUNT_1_ID))
-                        .groupId(UUID.fromString(GROUP_2_ID))
+                        .groupId(UUID.fromString(NOT_INNER_GROUP_ID))
                         .weightRole(10)
                         .isInnerGroup(false)
                         .username(EMAIL_1)
@@ -218,7 +218,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 case "OBSERVER_ACCOUNT_2_IS_INNER_GROUP" -> jwtUser = JwtUser
                         .builder()
                         .accountId(UUID.fromString(ACCOUNT_2_ID))
-                        .groupId(UUID.fromString(GROUP_1_ID))
+                        .groupId(UUID.fromString(INNER_GROUP_ID))
                         .weightRole(10)
                         .isInnerGroup(true)
                         .username(EMAIL_1)
@@ -228,7 +228,7 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 case "OBSERVER_ACCOUNT_2_IS_NOT_INNER_GROUP" -> jwtUser = JwtUser
                         .builder()
                         .accountId(UUID.fromString(ACCOUNT_2_ID))
-                        .groupId(UUID.fromString(GROUP_2_ID))
+                        .groupId(UUID.fromString(NOT_INNER_GROUP_ID))
                         .weightRole(10)
                         .isInnerGroup(false)
                         .username(EMAIL_1)

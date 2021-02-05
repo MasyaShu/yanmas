@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.LOGIC_CONSTRAINT_CODE;
-import static ru.itterminal.botdesk.security.config.TestSecurityConfig.GROUP_2_ID;
+import static ru.itterminal.botdesk.security.config.TestSecurityConfig.NOT_INNER_GROUP_ID;
 
 @SpringJUnitConfig(value = {GroupOperationValidator.class})
 @Import(TestSecurityConfig.class)
@@ -120,7 +120,7 @@ class GroupOperationValidatorTest {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
     void checkAccessForRead_shouldGetTrue_whenUserNotInnerGroupAndGroupUserEqualsEntity() {
         Group group = groupTestHelper.getRandomValidEntity();
-        group.setId(UUID.fromString(GROUP_2_ID));
+        group.setId(UUID.fromString(NOT_INNER_GROUP_ID));
         assertTrue(validator.checkAccessForRead(group));
     }
 }
