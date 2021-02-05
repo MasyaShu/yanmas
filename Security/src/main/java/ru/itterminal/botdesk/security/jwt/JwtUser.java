@@ -20,6 +20,7 @@ import lombok.Setter;
 @Builder
 public class JwtUser implements UserDetails {
 
+    private  UUID id;
     private  UUID accountId;
     private  UUID groupId;
     private  int weightRole;
@@ -56,6 +57,7 @@ public class JwtUser implements UserDetails {
         return weightRole == jwtUser.weightRole &&
                 enabled == jwtUser.enabled &&
                 isInnerGroup == jwtUser.isInnerGroup &&
+                Objects.equals(id, jwtUser.id) &&
                 Objects.equals(accountId, jwtUser.accountId) &&
                 Objects.equals(groupId, jwtUser.groupId) &&
                 Objects.equals(username, jwtUser.username) &&
@@ -65,6 +67,6 @@ public class JwtUser implements UserDetails {
 
     @Override
     public int hashCode() {
-        return Objects.hash(accountId, groupId, weightRole, username, password, isInnerGroup, enabled, authorities);
+        return Objects.hash(id, accountId, groupId, weightRole, username, password, isInnerGroup, enabled, authorities);
     }
 }

@@ -31,8 +31,9 @@ class FileRepositoryTest {
 
     public static final String FILE_NAME = "File name";
     public static final int SIZE = 100;
-    private final UUID UUID_FILE = UUID.fromString("d286a51a-a834-48ed-a39b-5ae3d0640001");
-    private final UUID UUID_ACCOUNT = UUID.fromString("cdfa6483-0769-4628-ba32-efd338a716de");
+    private final UUID FILE_ID = UUID.fromString("d286a51a-a834-48ed-a39b-5ae3d0640001");
+    private final UUID ACCOUNT_ID = UUID.fromString("cdfa6483-0769-4628-ba32-efd338a716de");
+    private final UUID AUTHOR_ID = UUID.fromString("ce493fd4-20ca-4d93-85ce-9da4254f311b");
 
     @Autowired
     FileRepository repository;
@@ -42,18 +43,18 @@ class FileRepositoryTest {
 
     @Test
     void findAllByEntityId_shouldFindTwoFiles_whenTwoFilesExistInDatabaseForPassedEntityId() {
-        File file = repository.findByAccountIdAndId(UUID_ACCOUNT, UUID_FILE).get();
+        File file = repository.findByAccountIdAndAuthorIdAndId(ACCOUNT_ID, AUTHOR_ID, FILE_ID).get();
         assertNotNull(file);
     }
 
     @Test
     void save_shouldNotUpdateCreatedAt_whenUpdateEntity () {
-        File file = repository.findByAccountIdAndId(UUID_ACCOUNT, UUID_FILE).get();
+        File file = repository.findByAccountIdAndAuthorIdAndId(ACCOUNT_ID, AUTHOR_ID, FILE_ID).get();
         var createdAtFromDatabaseBeforeUpdate = file.getCreatedAt();
         file.setCreatedAt(System.currentTimeMillis());
         repository.save(file);
         entityManager.clear();
-        file = repository.findByAccountIdAndId(UUID_ACCOUNT, UUID_FILE).get();
+        file = repository.findByAccountIdAndAuthorIdAndId(ACCOUNT_ID, AUTHOR_ID, FILE_ID).get();
         assertEquals(createdAtFromDatabaseBeforeUpdate, file.getCreatedAt());
     }
 
@@ -61,7 +62,7 @@ class FileRepositoryTest {
     void save_shouldAutoSetValueForCreatedAt_whenCreateEntity () {
         AccountTestHelper accountTestHelper = new AccountTestHelper();
         Account account = accountTestHelper.getRandomValidEntity();
-        account.setId(UUID_ACCOUNT);
+        account.setId(ACCOUNT_ID);
         File file = File.builder()
                 .id(UUID.randomUUID())
                 .deleted(false)

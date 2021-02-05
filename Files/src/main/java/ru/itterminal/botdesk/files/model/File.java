@@ -31,10 +31,14 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @EqualsAndHashCode(callSuper = true)
 public class File extends BaseEntity {
 
-    @Column(name = "file_name", nullable = false, length = 260)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id", nullable = false, updatable = false)
+    private Account account;
+
+    @Column(name = "file_name", nullable = false, length = 260, updatable = false)
     private String fileName;
 
-    @Column(nullable = false)
+    @Column
     private Integer size;
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -43,12 +47,11 @@ public class File extends BaseEntity {
     @Column(name = "entity_id", nullable = false)
     private UUID entityId;
 
+    @Column(name = "author_id", nullable = false, updatable = false)
+    private UUID authorId;
+
     @Column(name = "is_uploaded", nullable = false)
     private Boolean isUploaded;
-
-    @ManyToOne (fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_id", nullable = false)
-    private Account account;
 
     @PrePersist
     protected void onCreate() {

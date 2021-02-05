@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.commons.exception.error.ApiError;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 
+@SuppressWarnings("NullableProblems")
 @Slf4j
 @ControllerAdvice
 @NoArgsConstructor
@@ -36,42 +37,42 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(OptimisticLockingFailureException.class)
     public ResponseEntity<?> handleOptimisticLockingFailureException(OptimisticLockingFailureException ex, HttpServletRequest request) {
-        ApiError apiError = new ApiError(HttpStatus.CONFLICT, "OptimisticLocking", ex).withRequest(request);
+        var apiError = new ApiError(HttpStatus.CONFLICT, "OptimisticLocking", ex).withRequest(request);
         log.warn(ex.getMessage());
         return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<?> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
-        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, "Request not readable", ex).withRequest(request);
+        var apiError = new ApiError(HttpStatus.BAD_REQUEST, "Request not readable", ex).withRequest(request);
         log.warn(ex.getMessage());
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(UnsupportedOperationException.class)
     public ResponseEntity<?> handleJwtException(UnsupportedOperationException ex, HttpServletRequest request) {
-        ApiError apiError = new ApiError(HttpStatus.METHOD_NOT_ALLOWED, "Error", ex).withRequest(request);
+        var apiError = new ApiError(HttpStatus.METHOD_NOT_ALLOWED, "Error", ex).withRequest(request);
         log.warn(ex.getMessage());
         return new ResponseEntity<>(apiError, HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     @ExceptionHandler(JwtException.class)
     public ResponseEntity<?> handleJwtException(JwtException ex, HttpServletRequest request) {
-        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, "JWT", ex).withRequest(request);
+        var apiError = new ApiError(HttpStatus.BAD_REQUEST, "JWT", ex).withRequest(request);
         log.warn(ex.getMessage());
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(FailedSaveEntityException.class)
     public ResponseEntity<?> handleFailedSaveEntityException(FailedSaveEntityException ex, HttpServletRequest request) {
-        ApiError apiError = new ApiError(HttpStatus.CONFLICT, "Save entity", ex).withRequest(request);
+        var apiError = new ApiError(HttpStatus.CONFLICT, "Save entity", ex).withRequest(request);
         log.warn(ex.getMessage());
         return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(LogicalValidationException.class)
     public ResponseEntity<Object> handleLogicalValidationException(LogicalValidationException ex, HttpServletRequest request) {
-        ApiError apiError = new ApiError(
+        var apiError = new ApiError(
             HttpStatus.CONFLICT,
             ex.getExceptionCode(), ex)
             .withRequest(request)
@@ -87,7 +88,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex,
             HttpHeaders headers, HttpStatus status, WebRequest request) {
-        ApiError apiError = new ApiError(status, "Unsupported http method", ex).withRequest(request);
+        var apiError = new ApiError(status, "Unsupported http method", ex).withRequest(request);
         log.warn(ex.getMessage());
         return handleExceptionInternal(ex, apiError, headers, HttpStatus.METHOD_NOT_ALLOWED, request);
     }
@@ -95,7 +96,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(
         HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        ApiError apiError = new ApiError(status, "Message Not Readable", ex).withRequest(request);
+        var apiError = new ApiError(status, "Message Not Readable", ex).withRequest(request);
         log.warn(ex.getMessage());
         return handleExceptionInternal(ex, apiError, headers, status, request);
     }
@@ -103,7 +104,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
         MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        ApiError apiError = new ApiError(
+        var apiError = new ApiError(
             HttpStatus.BAD_REQUEST,
             "Validation Failed", ex)
             .withRequest(request)
@@ -125,9 +126,9 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, apiError, headers, status, request);
     }
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ApiError> handleConstraintViolations(ConstraintViolationException ex, WebRequest request) {
-        ApiError apiError = new ApiError(
+    @ExceptionHandler({ConstraintViolationException.class})
+    public ResponseEntity<ApiError> handleConstraintViolations(Exception ex, WebRequest request) {
+        var apiError = new ApiError(
             HttpStatus.BAD_REQUEST,
             "Request not readable", ex)
             .withRequest(request);
@@ -136,21 +137,20 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(JwtAuthenticationException.class)
-    public ResponseEntity<?> handleJwtAuthenticationException(JwtAuthenticationException ex, HttpServletRequest request) {
-        ApiError apiError = new ApiError(HttpStatus.FORBIDDEN, "authentication failed", ex).withRequest(request);
+    public ResponseEntity<ApiError> handleJwtAuthenticationException(JwtAuthenticationException ex, HttpServletRequest request) {
+        var apiError = new ApiError(HttpStatus.FORBIDDEN, "authentication failed", ex).withRequest(request);
         return new ResponseEntity<>(apiError, null, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex, HttpServletRequest request) {
-        ApiError apiError = new ApiError(HttpStatus.FORBIDDEN, "access is denied", ex).withRequest(request);
+    public ResponseEntity<ApiError> handleAccessDeniedException(AccessDeniedException ex, HttpServletRequest request) {
+        var apiError = new ApiError(HttpStatus.FORBIDDEN, "access is denied", ex).withRequest(request);
         return new ResponseEntity<>(apiError, null, HttpStatus.FORBIDDEN);
     }
 
-
     @ExceptionHandler(EntityNotExistException.class)
-    public ResponseEntity<?> handleEntityNotExistException(EntityNotExistException ex, HttpServletRequest request) {
-        ApiError apiError = new ApiError(HttpStatus.NOT_FOUND, "Resource Not Found", ex).withRequest(request);
+    public ResponseEntity<ApiError> handleEntityNotExistException(EntityNotExistException ex, HttpServletRequest request) {
+        var apiError = new ApiError(HttpStatus.NOT_FOUND, "Resource Not Found", ex).withRequest(request);
         return new ResponseEntity<>(apiError, null, HttpStatus.NOT_FOUND);
     }
 

@@ -65,7 +65,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
                 entity.toString() + BY_USER + currentUser.toString()
         ));
         validator.beforeUpdate(entity);
-        setValueToFieldsOnUpdate(entity, currentUser);
+        setValuesToFieldsOnUpdate(entity, currentUser);
         try {
             entity.generateDisplayName();
             var updatedEntity = repository.update(entity);
@@ -100,7 +100,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
         }
     }
 
-    private void setValueToFieldsOnUpdate(Ticket entity, User currentUser) {
+    private void setValuesToFieldsOnUpdate(Ticket entity, User currentUser) {
         var entityFromDatabase = super.findByIdAndAccountId(entity.getId(), entity.getAccount().getId());
         entity.setNumber(entityFromDatabase.getNumber());
         entity.setCreatedAt(entityFromDatabase.getCreatedAt());
