@@ -21,7 +21,7 @@ import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
 public class TicketDtoResponse extends BaseEntityDto {
     private Long number;
     private Long createdAt;
-    private  BaseEntityDto author;
+    private BaseEntityDto author;
     private String subject;
     private String description;
     private Long deadline;
@@ -32,5 +32,4 @@ public class TicketDtoResponse extends BaseEntityDto {
     private List<BaseEntityDto> observers;
     private List<BaseEntityDto> executors;
     private List<BaseEntityDto> files;
-
 }

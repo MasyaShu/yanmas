@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceWithAccountImpl;
+import ru.itterminal.botdesk.files.model.File;
+import ru.itterminal.botdesk.files.service.FileServiceImpl;
 import ru.itterminal.botdesk.tickets.model.Ticket;
 import ru.itterminal.botdesk.tickets.repository.TicketRepository;
 import ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator;
@@ -31,9 +33,10 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
     public static final String YOU_MUST_USE_ANOTHER_METHOD_UPDATE =
             "You must use method update(Ticket entity, User currentUser)";
     public static final String BY_USER = " by user: ";
+
     private final TicketCounterServiceImpl ticketCounterService;
     private final TicketSettingServiceImpl ticketSettingService;
-
+    private final FileServiceImpl fileService;
 
     @Override
     @Deprecated
@@ -51,27 +54,34 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
     public Ticket create(Ticket entity, User currentUser) {
         validator.beforeCreate(entity);
         log.trace(format(CREATE_INIT_MESSAGE, entity.getClass().getSimpleName(),
-                entity.toString() + BY_USER + currentUser.getEmail()
+                         entity.toString() + BY_USER + currentUser.getEmail()
         ));
-        setValueToFieldsOnCreation(entity, currentUser);
+        setPropertiesOfTicketFromSettingsBeforeCreate(entity, currentUser);
         validator.checkUniqueness(entity);
         var createdEntity = repository.create(entity);
+        if (createdEntity.getFiles() != null && !createdEntity.getFiles().isEmpty()) {
+            for (File file : createdEntity.getFiles()) {
+                file.setEntityId(entity.getId());
+                fileService.update(file);
+            }
+        }
         log.trace(format(CREATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), createdEntity.toString()));
         return createdEntity;
     }
 
     public Ticket update(Ticket entity, User currentUser) {
         log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(),
-                entity.toString() + BY_USER + currentUser.toString()
+                         entity.toString() + BY_USER + currentUser.toString()
         ));
         validator.beforeUpdate(entity);
-        setValuesToFieldsOnUpdate(entity, currentUser);
+        setPropertiesOfTicketFromDatabaseBeforeUpdate(entity, currentUser);
         try {
             entity.generateDisplayName();
             var updatedEntity = repository.update(entity);
             log.trace(format(UPDATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), updatedEntity));
             return updatedEntity;
-        } catch (OptimisticLockException | ObjectOptimisticLockingFailureException ex) {
+        }
+        catch (OptimisticLockException | ObjectOptimisticLockingFailureException ex) {
             throw new OptimisticLockingFailureException(format(VERSION_INVALID_MESSAGE, entity.getId()));
         }
     }
@@ -81,37 +91,34 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
         return validator.checkAccessForRead(ticket);
     }
 
-    private void setValueToFieldsOnCreation(Ticket entity, User currentUser) {
-        UUID id = UUID.randomUUID();
-        entity.setId(id);
-        entity.generateDisplayName();
-        entity.setGroup(entity.getAuthor().getGroup());
-        entity.setNumber(ticketCounterService.getTicketNumber(entity.getAccount().getId()));
-
+    private void setPropertiesOfTicketFromSettingsBeforeCreate(Ticket ticket, User currentUser) {
+        ticket.setId(UUID.randomUUID());
+        ticket.generateDisplayName();
+        ticket.setGroup(ticket.getAuthor().getGroup());
+        ticket.setNumber(ticketCounterService.getTicketNumber(ticket.getAccount().getId()));
         if ((currentUser.getRole().getWeight() <= Roles.ADMIN.getWeight() && !currentUser.getGroup().getIsInner())
                 || currentUser.getRole().getWeight() <= Roles.AUTHOR.getWeight()) {
-            var ticketSetting = ticketSettingService.getSettingOrPredefinedValuesForTicket
-                    (entity.getAccount().getId(), entity.getGroup().getId(),
-                            entity.getAuthor().getId());
-            entity.setTicketStatus(ticketSetting.getTicketStatusForNew());
-            entity.setTicketType(ticketSetting.getTicketTypeForNew());
-            entity.setExecutors(ticketSetting.getExecutors());
-            entity.setObservers(ticketSetting.getObservers());
+            var ticketSetting = ticketSettingService.getSettingOrPredefinedValuesForTicket(
+                    ticket.getAccount().getId(), ticket.getGroup().getId(), ticket.getAuthor().getId()
+            );
+            ticket.setTicketStatus(ticketSetting.getTicketStatusForNew());
+            ticket.setTicketType(ticketSetting.getTicketTypeForNew());
+            ticket.setExecutors(ticketSetting.getExecutors());
+            ticket.setObservers(ticketSetting.getObservers());
         }
     }
 
-    private void setValuesToFieldsOnUpdate(Ticket entity, User currentUser) {
-        var entityFromDatabase = super.findByIdAndAccountId(entity.getId(), entity.getAccount().getId());
-        entity.setNumber(entityFromDatabase.getNumber());
-        entity.setCreatedAt(entityFromDatabase.getCreatedAt());
-        entity.setFiles(entityFromDatabase.getFiles());
-        entity.setTicketTemplate(entityFromDatabase.getTicketTemplate());
-        entity.setGroup(entity.getAuthor().getGroup());
-
-        if ((currentUser.getRole().getWeight() <= 40 && !currentUser.getGroup().getIsInner())
-                || currentUser.getRole().getWeight() <= 20) {
-            entity.setExecutors(entityFromDatabase.getExecutors());
-            entity.setObservers(entityFromDatabase.getObservers());
+    private void setPropertiesOfTicketFromDatabaseBeforeUpdate(Ticket ticket, User currentUser) {
+        var ticketFromDatabase = super.findByIdAndAccountId(ticket.getId(), ticket.getAccount().getId());
+        ticket.setNumber(ticketFromDatabase.getNumber());
+        ticket.setCreatedAt(ticketFromDatabase.getCreatedAt());
+        ticket.setFiles(ticketFromDatabase.getFiles());
+        ticket.setTicketTemplate(ticketFromDatabase.getTicketTemplate());
+        ticket.setGroup(ticket.getAuthor().getGroup());
+        if ((currentUser.getRole().getWeight() <= Roles.ADMIN.getWeight() && !currentUser.getGroup().getIsInner())
+                || currentUser.getRole().getWeight() <= Roles.AUTHOR.getWeight()) {
+            ticket.setExecutors(ticketFromDatabase.getExecutors());
+            ticket.setObservers(ticketFromDatabase.getObservers());
         }
     }
 

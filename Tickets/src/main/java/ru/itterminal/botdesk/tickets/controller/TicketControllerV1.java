@@ -48,7 +48,6 @@ import ru.itterminal.botdesk.tickets.model.dto.TicketFilterDto;
 import ru.itterminal.botdesk.tickets.service.impl.TicketServiceImpl;
 import ru.itterminal.botdesk.tickets.service.impl.TicketSettingServiceImpl;
 import ru.itterminal.botdesk.tickets.service.impl.TicketStatusServiceImpl;
-import ru.itterminal.botdesk.tickets.service.impl.TicketTemplateServiceImpl;
 import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
 
 @Slf4j
@@ -65,7 +64,6 @@ public class TicketControllerV1 extends BaseController {
     private final TicketServiceImpl ticketService;
     private final AccountServiceImpl accountService;
     private final UserServiceImpl userService;
-    private final TicketTemplateServiceImpl ticketTemplateService;
     private final TicketTypeServiceImpl ticketTypeService;
     private final TicketStatusServiceImpl ticketStatusService;
     private final FileServiceImpl fileService;
@@ -179,15 +177,9 @@ public class TicketControllerV1 extends BaseController {
             ticket.setTicketStatus(valuesForTicketPredefinedOrFromSettings.getTicketStatusForNew());
         }
 
-        if (request.getTicketTemplate() != null) {
-            var ticketTemplateId = request.getTicketTemplate();
-            ticket.setTicketTemplate(ticketTemplateService.findByIdAndAccountId(ticketTemplateId, accountId));
-        }
-
         ticket.setObservers(userService.findAllByAccountIdAndListId(accountId, request.getObservers()));
         ticket.setExecutors(userService.findAllByAccountIdAndListId(accountId, request.getExecutors()));
         ticket.setFiles(fileService.findAllByAccountIdAndListId(accountId, request.getFiles()));
-
     }
 
     private void setAdditionalConditionsIntoSpecAccordingPermissionOfCurrentUser

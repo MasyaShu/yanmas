@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
+import static ru.itterminal.botdesk.security.config.TestSecurityConfig.AUTHOR_ACCOUNT_1_IS_INNER_GROUP_ID;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP;
@@ -29,6 +30,10 @@ import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationVal
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.CURRENT_USER_WITH_ROLE_OBSERVER_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_IN_OBSERVERS;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.EMPTY_TICKET;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.FILE_ALREADY_HAS_A_LINK_TO_ANOTHER_ENTITY;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.FILE_IS_INVALID;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.FILE_IS_NOT_YET_UPLOADED;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.FILE_WAS_CREATED_BY_ANOTHER_USER_YOU_CANNOT_USE_IT_FOR_CREATE_THIS_TICKET;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.MUST_NOT_CREATE_UPDATE_TICKET_IF_SUBJECT_DESCRIPTION_AND_FILES_ARE_EMPTY;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR_LESS_THAN_WEIGHT_OF_ROLE_AUTHOR;
@@ -38,7 +43,6 @@ import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationVal
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS_LESS_THAN_WEIGHT_OF_ROLE_OBSERVER;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -59,6 +63,7 @@ import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
+import ru.itterminal.botdesk.files.model.File;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 import ru.itterminal.botdesk.tickets.model.test.TicketTestHelper;
 
@@ -75,6 +80,16 @@ class TicketOperationValidatorTest {
 
     private final TicketTestHelper ticketTestHelper = new TicketTestHelper();
     private final RoleTestHelper roleTestHelper = new RoleTestHelper();
+
+    @Test
+    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
+    void beforeCreate_shouldGetTrue_whenPassedTicketIsValid() {
+        var ticket = ticketTestHelper.getRandomValidEntity();
+        when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
+        var actualResult = validator.beforeCreate(ticket);
+        assertTrue(actualResult);
+        verify(userService, times(1)).findByEmail(any());
+    }
 
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
@@ -104,57 +119,6 @@ class TicketOperationValidatorTest {
                 expectedException.getFieldErrors().get(EMPTY_TICKET).get(0),
                 actualException.getFieldErrors().get(EMPTY_TICKET).get(0)
         );
-        verify(userService, times(1)).findByEmail(any());
-    }
-
-    @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    void beforeCreate_shouldGetTrue_whenPassedTicketIsValid() {
-        var ticket = ticketTestHelper.getRandomValidEntity();
-        when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
-        var actualResult = validator.beforeCreate(ticket);
-        assertTrue(actualResult);
-        verify(userService, times(1)).findByEmail(any());
-    }
-
-    @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    void beforeUpdate_shouldGetLogicalValidationException_whenSubjectDescriptionFilesAreEmpty() {
-        var expectedErrors = createMapForLogicalErrors();
-        var ticket = ticketTestHelper.getRandomValidEntity();
-        ticket.setSubject("");
-        ticket.setDescription("");
-        when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
-        expectedErrors.put(
-                EMPTY_TICKET,
-                singletonList(
-                        new ValidationError(
-                                EMPTY_TICKET,
-                                MUST_NOT_CREATE_UPDATE_TICKET_IF_SUBJECT_DESCRIPTION_AND_FILES_ARE_EMPTY
-                        )
-                )
-        );
-        LogicalValidationException expectedException =
-                new LogicalValidationException(VALIDATION_FAILED, expectedErrors);
-        LogicalValidationException actualException =
-                assertThrows(
-                        LogicalValidationException.class,
-                        () -> validator.beforeUpdate(ticket)
-                );
-        assertEquals(
-                expectedException.getFieldErrors().get(EMPTY_TICKET).get(0),
-                actualException.getFieldErrors().get(EMPTY_TICKET).get(0)
-        );
-        verify(userService, times(1)).findByEmail(any());
-    }
-
-    @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    void beforeUpdate_shouldGetTrue_whenPassedTicketIsValid() {
-        var ticket = ticketTestHelper.getRandomValidEntity();
-        when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
-        var actualResult = validator.beforeUpdate(ticket);
-        assertTrue(actualResult);
         verify(userService, times(1)).findByEmail(any());
     }
 
@@ -261,6 +225,152 @@ class TicketOperationValidatorTest {
                 expectedException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS).get(0),
                 actualException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS).get(0)
         );
+        verify(userService, times(1)).findByEmail(any());
+    }
+
+    @Test
+    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
+    void beforeCreate_shouldGetLogicalValidationException_whenPassedFileHasLinkToAnotherTicket() {
+        var expectedErrors = createMapForLogicalErrors();
+        var ticket = ticketTestHelper.getRandomValidEntity();
+        var invalidFile = File.builder()
+                .entityId(UUID.randomUUID())
+                .authorId(UUID.fromString(AUTHOR_ACCOUNT_1_IS_INNER_GROUP_ID))
+                .isUploaded(true)
+                .build();
+        ticket.setFiles(List.of(invalidFile));
+        when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
+        expectedErrors.put(
+                FILE_IS_INVALID,
+                singletonList(
+                        new ValidationError(
+                                FILE_IS_INVALID,
+                                FILE_ALREADY_HAS_A_LINK_TO_ANOTHER_ENTITY
+                        )
+                )
+        );
+        LogicalValidationException expectedException =
+                new LogicalValidationException(VALIDATION_FAILED, expectedErrors);
+        LogicalValidationException actualException =
+                assertThrows(
+                        LogicalValidationException.class,
+                        () -> validator.beforeCreate(ticket)
+                );
+        assertEquals(
+                expectedException.getFieldErrors().get(FILE_IS_INVALID).get(0),
+                actualException.getFieldErrors().get(FILE_IS_INVALID).get(0)
+        );
+        verify(userService, times(1)).findByEmail(any());
+    }
+
+    @Test
+    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
+    void beforeCreate_shouldGetLogicalValidationException_whenFileWasCreatedByAnotherUser() {
+        var expectedErrors = createMapForLogicalErrors();
+        var ticket = ticketTestHelper.getRandomValidEntity();
+        var invalidFile = File.builder()
+                .entityId(null)
+                .authorId(UUID.randomUUID())
+                .isUploaded(true)
+                .build();
+        ticket.setFiles(List.of(invalidFile));
+        when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
+        expectedErrors.put(
+                FILE_IS_INVALID,
+                singletonList(
+                        new ValidationError(
+                                FILE_IS_INVALID,
+                                FILE_WAS_CREATED_BY_ANOTHER_USER_YOU_CANNOT_USE_IT_FOR_CREATE_THIS_TICKET
+                        )
+                )
+        );
+        LogicalValidationException expectedException =
+                new LogicalValidationException(VALIDATION_FAILED, expectedErrors);
+        LogicalValidationException actualException =
+                assertThrows(
+                        LogicalValidationException.class,
+                        () -> validator.beforeCreate(ticket)
+                );
+        assertEquals(
+                expectedException.getFieldErrors().get(FILE_IS_INVALID).get(0),
+                actualException.getFieldErrors().get(FILE_IS_INVALID).get(0)
+        );
+        verify(userService, times(1)).findByEmail(any());
+    }
+
+    @Test
+    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
+    void beforeCreate_shouldGetLogicalValidationException_whenFileIsNotYetUploaded() {
+        var expectedErrors = createMapForLogicalErrors();
+        var ticket = ticketTestHelper.getRandomValidEntity();
+        var invalidFile = File.builder()
+                .entityId(null)
+                .authorId(UUID.fromString(AUTHOR_ACCOUNT_1_IS_INNER_GROUP_ID))
+                .isUploaded(false)
+                .build();
+        ticket.setFiles(List.of(invalidFile));
+        when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
+        expectedErrors.put(
+                FILE_IS_INVALID,
+                singletonList(
+                        new ValidationError(
+                                FILE_IS_INVALID,
+                                FILE_IS_NOT_YET_UPLOADED
+                        )
+                )
+        );
+        LogicalValidationException expectedException =
+                new LogicalValidationException(VALIDATION_FAILED, expectedErrors);
+        LogicalValidationException actualException =
+                assertThrows(
+                        LogicalValidationException.class,
+                        () -> validator.beforeCreate(ticket)
+                );
+        assertEquals(
+                expectedException.getFieldErrors().get(FILE_IS_INVALID).get(0),
+                actualException.getFieldErrors().get(FILE_IS_INVALID).get(0)
+        );
+        verify(userService, times(1)).findByEmail(any());
+    }
+
+    @Test
+    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
+    void beforeUpdate_shouldGetLogicalValidationException_whenSubjectDescriptionFilesAreEmpty() {
+        var expectedErrors = createMapForLogicalErrors();
+        var ticket = ticketTestHelper.getRandomValidEntity();
+        ticket.setSubject("");
+        ticket.setDescription("");
+        when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
+        expectedErrors.put(
+                EMPTY_TICKET,
+                singletonList(
+                        new ValidationError(
+                                EMPTY_TICKET,
+                                MUST_NOT_CREATE_UPDATE_TICKET_IF_SUBJECT_DESCRIPTION_AND_FILES_ARE_EMPTY
+                        )
+                )
+        );
+        LogicalValidationException expectedException =
+                new LogicalValidationException(VALIDATION_FAILED, expectedErrors);
+        LogicalValidationException actualException =
+                assertThrows(
+                        LogicalValidationException.class,
+                        () -> validator.beforeUpdate(ticket)
+                );
+        assertEquals(
+                expectedException.getFieldErrors().get(EMPTY_TICKET).get(0),
+                actualException.getFieldErrors().get(EMPTY_TICKET).get(0)
+        );
+        verify(userService, times(1)).findByEmail(any());
+    }
+
+    @Test
+    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
+    void beforeUpdate_shouldGetTrue_whenPassedTicketIsValid() {
+        var ticket = ticketTestHelper.getRandomValidEntity();
+        when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
+        var actualResult = validator.beforeUpdate(ticket);
+        assertTrue(actualResult);
         verify(userService, times(1)).findByEmail(any());
     }
 

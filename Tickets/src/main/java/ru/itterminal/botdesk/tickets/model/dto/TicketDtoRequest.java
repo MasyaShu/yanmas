@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
 
 import lombok.AllArgsConstructor;
@@ -36,8 +37,9 @@ public class TicketDtoRequest extends BaseEntityDto {
     private Boolean isFinished;
     private UUID ticketType;
     private UUID ticketStatus;
-    private UUID ticketTemplate;
     private List<UUID> observers;
     private List<UUID> executors;
+
+    @Null(groups = {Update.class})
     private List<UUID> files;
 }

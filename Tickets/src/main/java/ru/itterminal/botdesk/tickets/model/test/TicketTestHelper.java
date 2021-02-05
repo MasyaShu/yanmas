@@ -113,9 +113,6 @@ public class TicketTestHelper extends EntityTestHelperImpl<Ticket, TicketDtoRequ
                 .ticketStatus(entity.getTicketStatus() == null
                                     ? null
                                     : entity.getTicketStatus().getId())
-                .ticketTemplate(entity.getTicketTemplate() == null
-                                      ? null
-                                      : entity.getTicketTemplate().getId())
                 .observers(observersIdList)
                 .executors(executorsIdList)
                 .files(filesIdList)

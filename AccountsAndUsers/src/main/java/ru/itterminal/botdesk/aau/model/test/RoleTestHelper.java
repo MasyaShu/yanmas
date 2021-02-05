@@ -57,4 +57,11 @@ public class RoleTestHelper extends EntityTestHelperImpl<Role, RoleDto,RoleDto> 
         return roleList;
     }
 
+    public Role getRoleByName(String nameOfRole) {
+        return getPredefinedValidEntityList().stream()
+                .filter(role -> role.getName().equals(nameOfRole))
+                .findFirst()
+                .get();
+    }
+
 }

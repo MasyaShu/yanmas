@@ -1,23 +1,27 @@
 package ru.itterminal.botdesk.tickets.service.validator;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import static java.lang.String.format;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.addValidationErrorIntoErrors;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.ifErrorsNotEmptyThrowLogicalValidationException;
+
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 import ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl;
+import ru.itterminal.botdesk.files.model.File;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
 import ru.itterminal.botdesk.tickets.model.Ticket;
-
-import java.util.List;
-import java.util.Map;
-
-import static java.lang.String.format;
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.*;
 
 @Slf4j
 @Component
@@ -140,6 +144,11 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
     public static final String
             CURRENT_USER_WITH_ROLE_OBSERVER_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_IN_OBSERVERS =
             "Current user with role OBSERVER can not read ticket if ticket has not current user in observers";
+    public static final String FILE_IS_INVALID = "File is invalid";
+    public static final String FILE_WAS_CREATED_BY_ANOTHER_USER_YOU_CANNOT_USE_IT_FOR_CREATE_THIS_TICKET =
+            "File was created by another user, you cannot use it for create this ticket";
+    public static final String FILE_ALREADY_HAS_A_LINK_TO_ANOTHER_ENTITY = "File already has a link to another entity";
+    public static final String FILE_IS_NOT_YET_UPLOADED = "File is not yet uploaded";
 
     private final UserServiceImpl userService;
 
@@ -147,23 +156,52 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
     public boolean beforeCreate(Ticket entity) {
         var result = super.beforeCreate(entity);
         checkAccessForCreateAndUpdate(entity);
-        beforeCreateUpdate(entity);
+        var errors = createMapForLogicalErrors();
+        IsEmptySubjectDescriptionAndFiles(entity, errors);
+        checkAuthorExecutorsAndObserversForWeightOfRoles(entity, errors);
+        chekFiles(entity, errors);
+        ifErrorsNotEmptyThrowLogicalValidationException(errors);
         return result;
+    }
+
+    private void chekFiles(Ticket entity, Map<String, List<ValidationError>> errors) {
+        if (entity.getFiles() != null && !entity.getFiles().isEmpty()) {
+            JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            for (File file : entity.getFiles()) {
+                if (!file.getAuthorId().equals(jwtUser.getId())) {
+                    addValidationErrorIntoErrors(
+                            FILE_IS_INVALID,
+                            FILE_WAS_CREATED_BY_ANOTHER_USER_YOU_CANNOT_USE_IT_FOR_CREATE_THIS_TICKET,
+                            errors
+                    );
+                }
+                if (file.getEntityId() != null) {
+                    addValidationErrorIntoErrors(
+                            FILE_IS_INVALID,
+                            FILE_ALREADY_HAS_A_LINK_TO_ANOTHER_ENTITY,
+                            errors
+                    );
+                }
+                if (Boolean.FALSE.equals(file.getIsUploaded())) {
+                    addValidationErrorIntoErrors(
+                            FILE_IS_INVALID,
+                            FILE_IS_NOT_YET_UPLOADED,
+                            errors
+                    );
+                }
+            }
+        }
     }
 
     @Override
     public boolean beforeUpdate(Ticket entity) {
         var result = super.beforeUpdate(entity);
         checkAccessForCreateAndUpdate(entity);
-        beforeCreateUpdate(entity);
-        return result;
-    }
-
-    private void beforeCreateUpdate(Ticket entity) {
         var errors = createMapForLogicalErrors();
         IsEmptySubjectDescriptionAndFiles(entity, errors);
         checkAuthorExecutorsAndObserversForWeightOfRoles(entity, errors);
         ifErrorsNotEmptyThrowLogicalValidationException(errors);
+        return result;
     }
 
     private void IsEmptySubjectDescriptionAndFiles(Ticket ticket, Map<String, List<ValidationError>> errors) {

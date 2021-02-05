@@ -48,7 +48,7 @@ public class Ticket extends BaseEntity {
     @JoinColumn(name = "author_id")
     private User author;
 
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private Long number;
 
     @Column(name = "created_at", nullable = false, updatable = false)
