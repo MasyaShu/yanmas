@@ -178,17 +178,8 @@ class TicketControllerV1Test {
         verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
         verify(ticketTypeService, times(1)).findByIdAndAccountId(any(), any());
         verify(ticketStatusService, times(1)).findByIdAndAccountId(any(), any());
-        if (requestDto.getObservers() != null && !requestDto.getObservers().isEmpty()) {
-            verify(userService, times(1)).findAllByAccountIdAndListId(accountId, requestDto.getObservers());
-        }
-        if (requestDto.getExecutors() != null && !requestDto.getExecutors().isEmpty()) {
-            verify(userService, times(1)).findAllByAccountIdAndListId(accountId, requestDto.getExecutors());
-        }
-        if (requestDto.getFiles() != null && !requestDto.getFiles().isEmpty()) {
-            verify(fileService, times(1)).findAllByAccountIdAndListId(accountId, requestDto.getFiles());
-        } else {
-            verify(fileService, times(1)).findAllByAccountIdAndListId(accountId, Collections.emptyList());
-        }
+        verify(userService, times(2)).findAllByAccountIdAndListId(any(), any());
+        verify(fileService, times(1)).findAllByAccountIdAndListId(accountId, requestDto.getFiles());
         verify(ticketService, times(1)).create(any(), any());
     }
 
@@ -210,10 +201,10 @@ class TicketControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers
-                                    .jsonPath(
-                                            "$.errors.author[?(@.message == '%s')]",
-                                            CommonConstants.MUST_NOT_BE_NULL
-                                    ).exists())
+                                   .jsonPath(
+                                           "$.errors.author[?(@.message == '%s')]",
+                                           CommonConstants.MUST_NOT_BE_NULL
+                                   ).exists())
                 .andExpect(MockMvcResultMatchers
                                    .jsonPath(
                                            "$.errors.subject[?(@.message =~ /%s.*/)]",
@@ -276,17 +267,8 @@ class TicketControllerV1Test {
         verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
         verify(ticketTypeService, times(1)).findByIdAndAccountId(any(), any());
         verify(ticketStatusService, times(1)).findByIdAndAccountId(any(), any());
-        if (requestDto.getObservers() != null && !requestDto.getObservers().isEmpty()) {
-            verify(userService, times(1)).findAllByAccountIdAndListId(accountId, requestDto.getObservers());
-        }
-        if (requestDto.getExecutors() != null && !requestDto.getExecutors().isEmpty()) {
-            verify(userService, times(1)).findAllByAccountIdAndListId(accountId, requestDto.getExecutors());
-        }
-        if (requestDto.getFiles() != null && !requestDto.getFiles().isEmpty()) {
-            verify(fileService, times(1)).findAllByAccountIdAndListId(accountId, requestDto.getFiles());
-        } else {
-            verify(fileService, times(1)).findAllByAccountIdAndListId(accountId, null);
-        }
+        verify(userService, times(2)).findAllByAccountIdAndListId(any(), any());
+        verify(fileService, times(1)).findAllByAccountIdAndListId(accountId, requestDto.getFiles());
         verify(ticketService, times(1)).update(any(), any());
     }
 
