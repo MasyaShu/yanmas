@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.aau.model.test.GroupTestHelper;
 import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
@@ -58,7 +59,20 @@ public class TicketTestHelper extends EntityTestHelperImpl<Ticket, TicketDtoRequ
                 .ticketTemplate(ticketTemplate)
                 .build();
         setRandomValidPropertiesOfBaseEntity(ticket);
-
+        if (fakerRU.bool().bool()) {
+            var executorOne = ticket.getAuthor().toBuilder().build();
+            executorOne.setRole(roleTestHelper.getRoleByName(Roles.EXECUTOR.toString()));
+            var executorTwo = ticket.getAuthor().toBuilder().build();
+            executorTwo.setRole(roleTestHelper.getRoleByName(Roles.EXECUTOR.toString()));
+            ticket.setExecutors(List.of(executorOne, executorTwo));
+        }
+        if (fakerRU.bool().bool()) {
+            var observerOne = ticket.getAuthor().toBuilder().build();
+            observerOne.setRole(roleTestHelper.getRoleByName(Roles.OBSERVER.toString()));
+            var observerTwo = ticket.getAuthor().toBuilder().build();
+            observerTwo.setRole(roleTestHelper.getRoleByName(Roles.OBSERVER.toString()));
+            ticket.setObservers(List.of(observerOne, observerTwo));
+        }
         return ticket;
     }
 
