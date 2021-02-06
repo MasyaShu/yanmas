@@ -20,13 +20,12 @@ import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 
 import java.util.*;
 
-import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.*;
-import static ru.itterminal.botdesk.security.config.TestSecurityConfig.GROUP_1_ID;
+import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.LOGIC_CONSTRAINT_CODE;
+import static ru.itterminal.botdesk.security.config.TestSecurityConfig.NOT_INNER_GROUP_ID;
 
 @SpringJUnitConfig(value = {GroupOperationValidator.class})
 @Import(TestSecurityConfig.class)
@@ -44,7 +43,6 @@ class GroupOperationValidatorTest {
 
     private static final String EXIST_NAME = "groupName1";
     private static final String VALIDATED_FIELDS = "name";
-    private static LogicalValidationException logicalValidationException;
     private static final Map<String, List<ValidationError>> errors = new HashMap<>();
     private static final String USER_FROM_AN_INNER_GROUP_CANNOT_CREATE_UPDATE_GROUPS =
             "A user from not inner group cannot create or update groups";
@@ -66,7 +64,7 @@ class GroupOperationValidatorTest {
         when(service.findByUniqueFields(any())).thenReturn(List.of(userUniqueFields));
         when(userUniqueFields.getName()).thenReturn(EXIST_NAME);
         errors.put("name", singletonList(new ValidationError(VALIDATED_FIELDS, "name is occupied")));
-        logicalValidationException = new LogicalValidationException(VALIDATED_FIELDS, errors);
+        LogicalValidationException logicalValidationException = new LogicalValidationException(VALIDATED_FIELDS, errors);
         LogicalValidationException thrown = assertThrows(LogicalValidationException.class,
                 () -> validator.checkUniqueness(group));
         assertEquals(logicalValidationException.getFieldErrors().get("name").get(0),
@@ -88,11 +86,10 @@ class GroupOperationValidatorTest {
         Group group = groupTestHelper.getRandomValidEntity();
         errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
                 USER_FROM_AN_INNER_GROUP_CANNOT_CREATE_UPDATE_GROUPS)));
-        logicalValidationException = new LogicalValidationException(VALIDATION_FAILED, errors);
-        LogicalValidationException thrown = assertThrows(LogicalValidationException.class,
+        AccessDeniedException thrown = assertThrows(AccessDeniedException.class,
                 () -> validator.beforeCreate(group));
-        assertEquals(logicalValidationException.getFieldErrors().get(INNER_GROUP).get(0),
-                thrown.getFieldErrors().get(INNER_GROUP).get(0));
+        assertEquals(USER_FROM_AN_INNER_GROUP_CANNOT_CREATE_UPDATE_GROUPS,
+                thrown.getMessage());
     }
 
     @Test
@@ -123,7 +120,7 @@ class GroupOperationValidatorTest {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
     void checkAccessForRead_shouldGetTrue_whenUserNotInnerGroupAndGroupUserEqualsEntity() {
         Group group = groupTestHelper.getRandomValidEntity();
-        group.setId(UUID.fromString(GROUP_1_ID));
+        group.setId(UUID.fromString(NOT_INNER_GROUP_ID));
         assertTrue(validator.checkAccessForRead(group));
     }
 }
