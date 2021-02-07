@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
-import ru.itterminal.botdesk.commons.service.impl.CrudServiceWithAccountImpl;
+import ru.itterminal.botdesk.aau.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.botdesk.files.model.File;
 import ru.itterminal.botdesk.files.service.FileServiceImpl;
 import ru.itterminal.botdesk.tickets.model.Ticket;
@@ -109,7 +109,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
     }
 
     private void setPropertiesOfTicketFromDatabaseBeforeUpdate(Ticket ticket, User currentUser) {
-        var ticketFromDatabase = super.findByIdAndAccountId(ticket.getId(), ticket.getAccount().getId());
+        var ticketFromDatabase = super.findByIdAndAccountId(ticket.getId());
         ticket.setNumber(ticketFromDatabase.getNumber());
         ticket.setCreatedAt(ticketFromDatabase.getCreatedAt());
         ticket.setFiles(ticketFromDatabase.getFiles());

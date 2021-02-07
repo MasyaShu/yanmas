@@ -1,15 +1,15 @@
 package ru.itterminal.botdesk.aau.service.impl;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.projection.GroupUniqueFields;
 import ru.itterminal.botdesk.aau.repository.GroupRepository;
 import ru.itterminal.botdesk.aau.service.validator.GroupOperationValidator;
-import ru.itterminal.botdesk.commons.service.impl.CrudServiceWithAccountImpl;
-
-import java.util.List;
 
 @Slf4j
 @Service

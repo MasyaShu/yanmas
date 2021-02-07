@@ -139,10 +139,9 @@ public class TicketControllerV1 extends BaseController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TicketDtoResponse> getById(Principal user, @PathVariable UUID id) {
+    public ResponseEntity<TicketDtoResponse> getById(@PathVariable UUID id) {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
-        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
-        var foundTicket = ticketService.findByIdAndAccountId(id, jwtUser.getAccountId());
+        var foundTicket = ticketService.findByIdAndAccountId(id);
         ticketService.checkAccessForRead(foundTicket);
         var returnedTicket = modelMapper.map(foundTicket, TicketDtoResponse.class);
         log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundTicket);
@@ -153,7 +152,7 @@ public class TicketControllerV1 extends BaseController {
                                                                 UUID accountId) {
 
         ticket.setAccount(accountService.findById(accountId));
-        ticket.setAuthor(userService.findByIdAndAccountId(request.getAuthor(), accountId));
+        ticket.setAuthor(userService.findByIdAndAccountId(request.getAuthor()));
         ticket.setGroup(ticket.getAuthor().getGroup());
 
         var valuesForTicketPredefinedOrFromSettings =
@@ -165,21 +164,21 @@ public class TicketControllerV1 extends BaseController {
 
         if (request.getTicketType() != null) {
             var ticketTypeId = request.getTicketType();
-            ticket.setTicketType(ticketTypeService.findByIdAndAccountId(ticketTypeId, accountId));
+            ticket.setTicketType(ticketTypeService.findByIdAndAccountId(ticketTypeId));
         } else {
             ticket.setTicketType(valuesForTicketPredefinedOrFromSettings.getTicketTypeForNew());
         }
 
         if (request.getTicketStatus() != null) {
             var ticketStatusId = request.getTicketStatus();
-            ticket.setTicketStatus(ticketStatusService.findByIdAndAccountId(ticketStatusId, accountId));
+            ticket.setTicketStatus(ticketStatusService.findByIdAndAccountId(ticketStatusId));
         } else {
             ticket.setTicketStatus(valuesForTicketPredefinedOrFromSettings.getTicketStatusForNew());
         }
 
-        ticket.setObservers(userService.findAllByAccountIdAndListId(accountId, request.getObservers()));
-        ticket.setExecutors(userService.findAllByAccountIdAndListId(accountId, request.getExecutors()));
-        ticket.setFiles(fileService.findAllByAccountIdAndListId(accountId, request.getFiles()));
+        ticket.setObservers(userService.findAllByAccountIdAndListId(request.getObservers()));
+        ticket.setExecutors(userService.findAllByAccountIdAndListId(request.getExecutors()));
+        ticket.setFiles(fileService.findAllByAccountIdAndListId(request.getFiles()));
     }
 
     private void setAdditionalConditionsIntoSpecAccordingPermissionOfCurrentUser

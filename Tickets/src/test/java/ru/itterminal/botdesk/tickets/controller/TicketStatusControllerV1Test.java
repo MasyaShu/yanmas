@@ -37,7 +37,6 @@ import ru.itterminal.botdesk.tickets.service.impl.TicketStatusServiceImpl;
 import java.util.List;
 import java.util.UUID;
 
-import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -55,9 +54,11 @@ class TicketStatusControllerV1Test {
     @MockBean
     private TicketStatusServiceImpl service;
 
+    @SuppressWarnings("unused")
     @MockBean
     private SpecificationsFactory specFactory;
 
+    @SuppressWarnings("unused")
     @MockBean
     private AccountServiceImpl accountService;
 
@@ -94,12 +95,6 @@ class TicketStatusControllerV1Test {
     private static final String TICKET_STATUS_ID_2 = "17b13694-1907-4af9-8f5d-bfa444356e73";
     private static final String TICKET_STATUS_NAME_1 = "started";
     private static final String TICKET_STATUS_NAME_2 = "finished";
-    private static final String INVALID_DELETED = "ERROR";
-    private static final String INVALID_SORT_BY = "ERROR";
-    private static final String INVALID_DIRECTION = "ERROR";
-    private static final String INVALID_NAME = "";
-    public static final String MUST_BE_ANY_OF_SORT_INDEX = "must be any of: sortIndex";
-
 
     @BeforeEach
     void setUpBeforeEach() {
@@ -326,19 +321,19 @@ class TicketStatusControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getById_shouldFindOneGroup_whenGroupExistInDatabaseByPassedId() throws Exception {
-        when(service.findByIdAndAccountId(any(), any())).thenReturn(ticketStatus_1);
+        when(service.findByIdAndAccountId(any())).thenReturn(ticketStatus_1);
         mockMvc.perform(get(HOST + PORT + API + TICKET_STATUS_ID_1))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value(TICKET_STATUS_NAME_1))
                 .andExpect(jsonPath("$.id").value(TICKET_STATUS_ID_1));
-        verify(service, times(1)).findByIdAndAccountId(any(), any());
+        verify(service, times(1)).findByIdAndAccountId(any());
     }
 
     @Test
     @WithAnonymousUser
     void getById_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
-        when(service.findByIdAndAccountId(any(), any())).thenReturn(ticketStatus_1);
+        when(service.findByIdAndAccountId(any())).thenReturn(ticketStatus_1);
         mockMvc.perform(get(HOST + PORT + API + TICKET_STATUS_ID_1))
                 .andDo(print())
                 .andExpect(status().isForbidden());
@@ -347,11 +342,11 @@ class TicketStatusControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getById_shouldRespondNotFound_whenPassedIdNotExist() throws Exception {
-        when(service.findByIdAndAccountId(any(), any())).thenThrow(EntityNotExistException.class);
+        when(service.findByIdAndAccountId(any())).thenThrow(EntityNotExistException.class);
         mockMvc.perform(get(HOST + PORT + API + TICKET_STATUS_ID_1))
                 .andDo(print())
                 .andExpect(status().isNotFound());
-        verify(service, times(1)).findByIdAndAccountId(any(), any());
+        verify(service, times(1)).findByIdAndAccountId(any());
     }
 
     @Test

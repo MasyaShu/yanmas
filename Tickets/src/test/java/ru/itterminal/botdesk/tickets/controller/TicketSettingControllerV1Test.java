@@ -119,18 +119,17 @@ class TicketSettingControllerV1Test {
         requestDto.setId(null);
         requestDto.setDeleted(null);
         requestDto.setVersion(null);
-        UUID accountId = ticketSetting.getAccount().getId();
         when(accountService.findById(any())).thenReturn(ticketSetting.getAccount());
-        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(ticketSetting.getGroup());
-        when(userService.findByIdAndAccountId(any(), any())).thenReturn(ticketSetting.getAuthor());
-        when(ticketTypeService.findByIdAndAccountId(any(), any())).thenReturn(ticketSetting.getTicketTypeForNew());
-        when(ticketStatusService.findByIdAndAccountId(ticketSetting.getTicketStatusForNew().getId(), accountId)).
+        when(groupService.findByIdAndAccountId(any())).thenReturn(ticketSetting.getGroup());
+        when(userService.findByIdAndAccountId(any())).thenReturn(ticketSetting.getAuthor());
+        when(ticketTypeService.findByIdAndAccountId(any())).thenReturn(ticketSetting.getTicketTypeForNew());
+        when(ticketStatusService.findByIdAndAccountId(ticketSetting.getTicketStatusForNew().getId())).
                 thenReturn(ticketSetting.getTicketStatusForNew());
-        when(ticketStatusService.findByIdAndAccountId(ticketSetting.getTicketStatusForReopen().getId(), accountId)).
+        when(ticketStatusService.findByIdAndAccountId(ticketSetting.getTicketStatusForReopen().getId())).
                 thenReturn(ticketSetting.getTicketStatusForReopen());
-        when(ticketStatusService.findByIdAndAccountId(ticketSetting.getTicketStatusForClose().getId(), accountId)).
+        when(ticketStatusService.findByIdAndAccountId(ticketSetting.getTicketStatusForClose().getId())).
                 thenReturn(ticketSetting.getTicketStatusForClose());
-        when(ticketStatusService.findByIdAndAccountId(ticketSetting.getTicketStatusForCancel().getId(), accountId)).
+        when(ticketStatusService.findByIdAndAccountId(ticketSetting.getTicketStatusForCancel().getId())).
                 thenReturn(ticketSetting.getTicketStatusForCancel());
         when(ticketSettingService.create(any())).thenReturn(ticketSetting);
 
@@ -158,10 +157,10 @@ class TicketSettingControllerV1Test {
         assertEquals(expectedTicketSettingDtoResponse, actualTicketSettingDtoResponse);
 
         verify(accountService, times(1)).findById(any());
-        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
-        verify(userService, times(1)).findByIdAndAccountId(any(), any());
-        verify(ticketTypeService, times(1)).findByIdAndAccountId(any(), any());
-        verify(ticketStatusService, times(4)).findByIdAndAccountId(any(), any());
+        verify(groupService, times(1)).findByIdAndAccountId(any());
+        verify(userService, times(1)).findByIdAndAccountId(any());
+        verify(ticketTypeService, times(1)).findByIdAndAccountId(any());
+        verify(ticketStatusService, times(4)).findByIdAndAccountId(any());
         verify(ticketSettingService, times(1)).create(any());
     }
 
@@ -177,10 +176,10 @@ class TicketSettingControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isForbidden());
         verify(accountService, times(0)).findById(any());
-        verify(groupService, times(0)).findByIdAndAccountId(any(), any());
-        verify(userService, times(0)).findByIdAndAccountId(any(), any());
-        verify(ticketTypeService, times(0)).findByIdAndAccountId(any(), any());
-        verify(ticketStatusService, times(0)).findByIdAndAccountId(any(), any());
+        verify(groupService, times(0)).findByIdAndAccountId(any());
+        verify(userService, times(0)).findByIdAndAccountId(any());
+        verify(ticketTypeService, times(0)).findByIdAndAccountId(any());
+        verify(ticketStatusService, times(0)).findByIdAndAccountId(any());
         verify(ticketSettingService, times(0)).create(any());
     }
 
@@ -198,10 +197,10 @@ class TicketSettingControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isForbidden());
         verify(accountService, times(0)).findById(any());
-        verify(groupService, times(0)).findByIdAndAccountId(any(), any());
-        verify(userService, times(0)).findByIdAndAccountId(any(), any());
-        verify(ticketTypeService, times(0)).findByIdAndAccountId(any(), any());
-        verify(ticketStatusService, times(0)).findByIdAndAccountId(any(), any());
+        verify(groupService, times(0)).findByIdAndAccountId(any());
+        verify(userService, times(0)).findByIdAndAccountId(any());
+        verify(ticketTypeService, times(0)).findByIdAndAccountId(any());
+        verify(ticketStatusService, times(0)).findByIdAndAccountId(any());
         verify(ticketSettingService, times(0)).create(any());
     }
 
@@ -231,29 +230,28 @@ class TicketSettingControllerV1Test {
                                         CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY
                                 ).exists());
         verify(accountService, times(0)).findById(any());
-        verify(groupService, times(0)).findByIdAndAccountId(any(), any());
-        verify(userService, times(0)).findByIdAndAccountId(any(), any());
-        verify(ticketTypeService, times(0)).findByIdAndAccountId(any(), any());
-        verify(ticketStatusService, times(0)).findByIdAndAccountId(any(), any());
+        verify(groupService, times(0)).findByIdAndAccountId(any());
+        verify(userService, times(0)).findByIdAndAccountId(any());
+        verify(ticketTypeService, times(0)).findByIdAndAccountId(any());
+        verify(ticketStatusService, times(0)).findByIdAndAccountId(any());
         verify(ticketSettingService, times(0)).create(any());
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void update_shouldUpdate_whenValidDataPassed() throws Exception {
-        UUID accountId = ticketSetting.getAccount().getId();
         requestDto.setDeleted(false);
         when(accountService.findById(any())).thenReturn(ticketSetting.getAccount());
-        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(ticketSetting.getGroup());
-        when(userService.findByIdAndAccountId(any(), any())).thenReturn(ticketSetting.getAuthor());
-        when(ticketTypeService.findByIdAndAccountId(any(), any())).thenReturn(ticketSetting.getTicketTypeForNew());
-        when(ticketStatusService.findByIdAndAccountId(ticketSetting.getTicketStatusForNew().getId(), accountId)).
+        when(groupService.findByIdAndAccountId(any())).thenReturn(ticketSetting.getGroup());
+        when(userService.findByIdAndAccountId(any())).thenReturn(ticketSetting.getAuthor());
+        when(ticketTypeService.findByIdAndAccountId(any())).thenReturn(ticketSetting.getTicketTypeForNew());
+        when(ticketStatusService.findByIdAndAccountId(ticketSetting.getTicketStatusForNew().getId())).
                 thenReturn(ticketSetting.getTicketStatusForNew());
-        when(ticketStatusService.findByIdAndAccountId(ticketSetting.getTicketStatusForReopen().getId(), accountId)).
+        when(ticketStatusService.findByIdAndAccountId(ticketSetting.getTicketStatusForReopen().getId())).
                 thenReturn(ticketSetting.getTicketStatusForReopen());
-        when(ticketStatusService.findByIdAndAccountId(ticketSetting.getTicketStatusForClose().getId(), accountId)).
+        when(ticketStatusService.findByIdAndAccountId(ticketSetting.getTicketStatusForClose().getId())).
                 thenReturn(ticketSetting.getTicketStatusForClose());
-        when(ticketStatusService.findByIdAndAccountId(ticketSetting.getTicketStatusForCancel().getId(), accountId)).
+        when(ticketStatusService.findByIdAndAccountId(ticketSetting.getTicketStatusForCancel().getId())).
                 thenReturn(ticketSetting.getTicketStatusForCancel());
         when(ticketSettingService.update(any())).thenReturn(ticketSetting);
 
@@ -281,10 +279,10 @@ class TicketSettingControllerV1Test {
         assertEquals(expectedTicketSettingDtoResponse, actualTicketSettingDtoResponse);
 
         verify(accountService, times(1)).findById(any());
-        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
-        verify(userService, times(1)).findByIdAndAccountId(any(), any());
-        verify(ticketTypeService, times(1)).findByIdAndAccountId(any(), any());
-        verify(ticketStatusService, times(4)).findByIdAndAccountId(any(), any());
+        verify(groupService, times(1)).findByIdAndAccountId(any());
+        verify(userService, times(1)).findByIdAndAccountId(any());
+        verify(ticketTypeService, times(1)).findByIdAndAccountId(any());
+        verify(ticketStatusService, times(4)).findByIdAndAccountId(any());
         verify(ticketSettingService, times(1)).update(any());
     }
 
@@ -299,10 +297,10 @@ class TicketSettingControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isForbidden());
         verify(accountService, times(0)).findById(any());
-        verify(groupService, times(0)).findByIdAndAccountId(any(), any());
-        verify(userService, times(0)).findByIdAndAccountId(any(), any());
-        verify(ticketTypeService, times(0)).findByIdAndAccountId(any(), any());
-        verify(ticketStatusService, times(0)).findByIdAndAccountId(any(), any());
+        verify(groupService, times(0)).findByIdAndAccountId(any());
+        verify(userService, times(0)).findByIdAndAccountId(any());
+        verify(ticketTypeService, times(0)).findByIdAndAccountId(any());
+        verify(ticketStatusService, times(0)).findByIdAndAccountId(any());
         verify(ticketSettingService, times(0)).update(any());
     }
 
@@ -317,10 +315,10 @@ class TicketSettingControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isForbidden());
         verify(accountService, times(0)).findById(any());
-        verify(groupService, times(0)).findByIdAndAccountId(any(), any());
-        verify(userService, times(0)).findByIdAndAccountId(any(), any());
-        verify(ticketTypeService, times(0)).findByIdAndAccountId(any(), any());
-        verify(ticketStatusService, times(0)).findByIdAndAccountId(any(), any());
+        verify(groupService, times(0)).findByIdAndAccountId(any());
+        verify(userService, times(0)).findByIdAndAccountId(any());
+        verify(ticketTypeService, times(0)).findByIdAndAccountId(any());
+        verify(ticketStatusService, times(0)).findByIdAndAccountId(any());
         verify(ticketSettingService, times(0)).update(any());
     }
 
@@ -341,17 +339,17 @@ class TicketSettingControllerV1Test {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value(CommonConstants.MESSAGE_NOT_READABLE));
         verify(accountService, times(0)).findById(any());
-        verify(groupService, times(0)).findByIdAndAccountId(any(), any());
-        verify(userService, times(0)).findByIdAndAccountId(any(), any());
-        verify(ticketTypeService, times(0)).findByIdAndAccountId(any(), any());
-        verify(ticketStatusService, times(0)).findByIdAndAccountId(any(), any());
+        verify(groupService, times(0)).findByIdAndAccountId(any());
+        verify(userService, times(0)).findByIdAndAccountId(any());
+        verify(ticketTypeService, times(0)).findByIdAndAccountId(any());
+        verify(ticketStatusService, times(0)).findByIdAndAccountId(any());
         verify(ticketSettingService, times(0)).update(any());
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getByAuthorId_shouldGetTicketSetting_whenPassedValidAuthorId() throws Exception {
-        when(userService.findByIdAndAccountId(any(), any())).thenReturn(ticketSetting.getAuthor());
+        when(userService.findByIdAndAccountId(any())).thenReturn(ticketSetting.getAuthor());
         when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any(), any())).thenReturn(ticketSetting);
 
         TicketSettingDtoResponse expectedTicketSettingDtoResponse =
@@ -377,7 +375,7 @@ class TicketSettingControllerV1Test {
 
         assertEquals(expectedTicketSettingDtoResponse, actualTicketSettingDtoResponse);
 
-        verify(userService, times(1)).findByIdAndAccountId(any(), any());
+        verify(userService, times(1)).findByIdAndAccountId(any());
         verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
     }
 }

@@ -1,8 +1,14 @@
 package ru.itterminal.botdesk.aau.service.impl;
 
-import io.jsonwebtoken.JwtException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import static java.lang.String.format;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+
+import javax.mail.MessagingException;
+import javax.persistence.OptimisticLockException;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -10,6 +16,10 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import io.jsonwebtoken.JwtException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.projection.UserUniqueFields;
@@ -17,19 +27,10 @@ import ru.itterminal.botdesk.aau.repository.UserRepository;
 import ru.itterminal.botdesk.aau.service.validator.UserOperationValidator;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.FailedSaveEntityException;
-import ru.itterminal.botdesk.commons.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.botdesk.integration.across_modules.CompletedVerificationAccount;
 import ru.itterminal.botdesk.integration.aws.ses.SenderEmailViaAwsSes;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
 import software.amazon.awssdk.services.ses.model.SendRawEmailRequest;
-
-import javax.mail.MessagingException;
-import javax.persistence.OptimisticLockException;
-import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
-
-import static java.lang.String.format;
 
 @Slf4j
 @Service
@@ -55,8 +56,6 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
     private final SenderEmailViaAwsSes senderEmailViaAwsSes;
     private final ApplicationContext appContext;
 
-    public static final String START_FIND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID
-            = "Start find user by id: {} and accountId: {} and own group id {}";
     public static final String START_REQUEST_PASSWORD_RESET_BY_EMAIL = "Start request password reset by email: {}";
     public static final String NOT_FOUND_USER_BY_RESET_PASSWORD_TOKEN = "Not found user by reset password token";
     public static final String NOT_FOUND_USER_BY_EMAIL_VERIFICATION_TOKEN =
@@ -130,7 +129,7 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
     public User update(User entity) {
         validator.beforeUpdate(entity);
         log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
-        User entityFromDatabase = super.findByIdAndAccountId(entity.getId(), entity.getAccount().getId());
+        User entityFromDatabase = super.findByIdAndAccountId(entity.getId());
         if (entity.getPassword() == null || entity.getPassword().isEmpty()) {
             entity.setPassword(entityFromDatabase.getPassword());
         } else {
@@ -166,6 +165,7 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
         return repository.getByEmailAndIdNot(user.getEmail(), user.getId());
     }
 
+    @SuppressWarnings("unused")
     @Transactional(readOnly = true)
     public List<User> findAllByRoleAndIdNot(Role role, UUID id) {
         log.trace(START_FIND_ALL_USERS_BY_ROLE_AND_NOT_ID, role, id);
@@ -179,6 +179,7 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
         return repository.findAllByRoleAndAccount_IdAndIdNot(role, accountId, id);
     }
 
+    @SuppressWarnings("unused")
     @Transactional(readOnly = true)
     public List<User> findAllByRole(Role role) {
         log.trace(START_FIND_ALL_USERS_BY_ROLE, role);

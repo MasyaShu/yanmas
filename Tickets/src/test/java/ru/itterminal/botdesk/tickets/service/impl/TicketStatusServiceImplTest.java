@@ -7,6 +7,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
+import ru.itterminal.botdesk.security.jwt.JwtUser;
+import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
 import ru.itterminal.botdesk.tickets.model.TicketStatus;
 import ru.itterminal.botdesk.tickets.model.test.TicketStatusTestHelper;
 import ru.itterminal.botdesk.tickets.repository.TicketStatusRepository;
@@ -29,6 +31,14 @@ class TicketStatusServiceImplTest {
 
     @MockBean
     private AccountServiceImpl accountService;
+
+    @SuppressWarnings("unused")
+    @MockBean
+    private JwtUserBuilder jwtUserBuilder;
+
+    @SuppressWarnings("unused")
+    @MockBean
+    private JwtUser jwtUser;
 
     @Autowired
     private TicketStatusServiceImpl service;

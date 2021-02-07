@@ -132,27 +132,27 @@ class TicketControllerV1Test {
         requestDto.setDisplayName(null);
         UUID accountId = ticket.getAccount().getId();
         when(accountService.findById(any())).thenReturn(ticket.getAccount());
-        when(userService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getAuthor());
+        when(userService.findByIdAndAccountId(any())).thenReturn(ticket.getAuthor());
         when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
-        when(ticketTypeService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getTicketType());
-        when(ticketStatusService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getTicketStatus());
+        when(ticketTypeService.findByIdAndAccountId(any())).thenReturn(ticket.getTicketType());
+        when(ticketStatusService.findByIdAndAccountId(any())).thenReturn(ticket.getTicketStatus());
         if (requestDto.getObservers() != null && !requestDto.getObservers().isEmpty()) {
-            when(userService.findAllByAccountIdAndListId(accountId, requestDto.getObservers()))
+            when(userService.findAllByAccountIdAndListId(requestDto.getObservers()))
                     .thenReturn(ticket.getObservers());
         } else {
-            when(userService.findAllByAccountIdAndListId(accountId, Collections.emptyList())).thenReturn(null);
+            when(userService.findAllByAccountIdAndListId(Collections.emptyList())).thenReturn(null);
         }
         if (requestDto.getExecutors() != null && !requestDto.getExecutors().isEmpty()) {
-            when(userService.findAllByAccountIdAndListId(accountId, requestDto.getExecutors()))
+            when(userService.findAllByAccountIdAndListId(requestDto.getExecutors()))
                     .thenReturn(ticket.getExecutors());
         } else {
-            when(userService.findAllByAccountIdAndListId(accountId, Collections.emptyList())).thenReturn(null);
+            when(userService.findAllByAccountIdAndListId(Collections.emptyList())).thenReturn(null);
         }
         if (requestDto.getFiles() != null && !requestDto.getFiles().isEmpty()) {
-            when(fileService.findAllByAccountIdAndListId(accountId, requestDto.getFiles()))
+            when(fileService.findAllByAccountIdAndListId(requestDto.getFiles()))
                     .thenReturn(ticket.getFiles());
         } else {
-            when(fileService.findAllByAccountIdAndListId(accountId, Collections.emptyList())).thenReturn(null);
+            when(fileService.findAllByAccountIdAndListId(Collections.emptyList())).thenReturn(null);
         }
         when(ticketService.create(any(), any())).thenReturn(ticket);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
@@ -173,13 +173,13 @@ class TicketControllerV1Test {
         assertEquals(expectedTicketDtoResponse, actualTicketDtoResponse);
 
         verify(accountService, times(1)).findById(any());
-        verify(userService, times(1)).findByIdAndAccountId(any(), any());
+        verify(userService, times(1)).findByIdAndAccountId(any());
         verify(userService, times(1)).findByEmail(any());
         verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
-        verify(ticketTypeService, times(1)).findByIdAndAccountId(any(), any());
-        verify(ticketStatusService, times(1)).findByIdAndAccountId(any(), any());
-        verify(userService, times(2)).findAllByAccountIdAndListId(any(), any());
-        verify(fileService, times(1)).findAllByAccountIdAndListId(accountId, requestDto.getFiles());
+        verify(ticketTypeService, times(1)).findByIdAndAccountId(any());
+        verify(ticketStatusService, times(1)).findByIdAndAccountId(any());
+        verify(userService, times(2)).findAllByAccountIdAndListId(any());
+        verify(fileService, times(1)).findAllByAccountIdAndListId(requestDto.getFiles());
         verify(ticketService, times(1)).create(any(), any());
     }
 
@@ -221,27 +221,27 @@ class TicketControllerV1Test {
         requestDto.setFiles(null);
         UUID accountId = ticket.getAccount().getId();
         when(accountService.findById(any())).thenReturn(ticket.getAccount());
-        when(userService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getAuthor());
+        when(userService.findByIdAndAccountId(any())).thenReturn(ticket.getAuthor());
         when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
-        when(ticketTypeService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getTicketType());
-        when(ticketStatusService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getTicketStatus());
+        when(ticketTypeService.findByIdAndAccountId(any())).thenReturn(ticket.getTicketType());
+        when(ticketStatusService.findByIdAndAccountId(any())).thenReturn(ticket.getTicketStatus());
         if (requestDto.getObservers() != null && !requestDto.getObservers().isEmpty()) {
-            when(userService.findAllByAccountIdAndListId(accountId, requestDto.getObservers()))
+            when(userService.findAllByAccountIdAndListId(requestDto.getObservers()))
                     .thenReturn(ticket.getObservers());
         } else {
-            when(userService.findAllByAccountIdAndListId(accountId, Collections.emptyList())).thenReturn(null);
+            when(userService.findAllByAccountIdAndListId(Collections.emptyList())).thenReturn(null);
         }
         if (requestDto.getExecutors() != null && !requestDto.getExecutors().isEmpty()) {
-            when(userService.findAllByAccountIdAndListId(accountId, requestDto.getExecutors()))
+            when(userService.findAllByAccountIdAndListId(requestDto.getExecutors()))
                     .thenReturn(ticket.getExecutors());
         } else {
-            when(userService.findAllByAccountIdAndListId(accountId, Collections.emptyList())).thenReturn(null);
+            when(userService.findAllByAccountIdAndListId(Collections.emptyList())).thenReturn(null);
         }
         if (requestDto.getFiles() != null && !requestDto.getFiles().isEmpty()) {
-            when(fileService.findAllByAccountIdAndListId(accountId, requestDto.getFiles()))
+            when(fileService.findAllByAccountIdAndListId(requestDto.getFiles()))
                     .thenReturn(ticket.getFiles());
         } else {
-            when(fileService.findAllByAccountIdAndListId(accountId, Collections.emptyList())).thenReturn(null);
+            when(fileService.findAllByAccountIdAndListId(Collections.emptyList())).thenReturn(null);
         }
         when(ticketService.update(any(), any())).thenReturn(ticket);
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
@@ -262,13 +262,13 @@ class TicketControllerV1Test {
         assertEquals(expectedTicketDtoResponse, actualTicketDtoResponse);
 
         verify(accountService, times(1)).findById(any());
-        verify(userService, times(1)).findByIdAndAccountId(any(), any());
+        verify(userService, times(1)).findByIdAndAccountId(any());
         verify(userService, times(1)).findByEmail(any());
         verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
-        verify(ticketTypeService, times(1)).findByIdAndAccountId(any(), any());
-        verify(ticketStatusService, times(1)).findByIdAndAccountId(any(), any());
-        verify(userService, times(2)).findAllByAccountIdAndListId(any(), any());
-        verify(fileService, times(1)).findAllByAccountIdAndListId(accountId, requestDto.getFiles());
+        verify(ticketTypeService, times(1)).findByIdAndAccountId(any());
+        verify(ticketStatusService, times(1)).findByIdAndAccountId(any());
+        verify(userService, times(2)).findAllByAccountIdAndListId(any());
+        verify(fileService, times(1)).findAllByAccountIdAndListId(requestDto.getFiles());
         verify(ticketService, times(1)).update(any(), any());
     }
 

@@ -33,6 +33,8 @@ import ru.itterminal.botdesk.files.model.File;
 import ru.itterminal.botdesk.files.repository.FileRepository;
 import ru.itterminal.botdesk.files.service.validator.FileOperationValidator;
 import ru.itterminal.botdesk.integration.aws.s3.AwsS3ObjectOperations;
+import ru.itterminal.botdesk.security.jwt.JwtUser;
+import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {FileServiceImpl.class})
@@ -43,6 +45,12 @@ class FileServiceImplTest {
 
     @MockBean
     private FileRepository repository;
+
+    @MockBean
+    private JwtUserBuilder jwtUserBuilder;
+
+    @MockBean
+    private JwtUser jwtUser;
 
     @SuppressWarnings("unused")
     @MockBean
@@ -76,6 +84,8 @@ class FileServiceImplTest {
 
     @Test
     void getFileData_shouldGetBytesOfFile_whenAccordingWithPlannedBehavior() {
+        when(jwtUserBuilder.getJwtUser()).thenReturn(jwtUser);
+        when(jwtUser.getAccountId()).thenReturn(UUID.randomUUID());
         when(repository.existsById(any())).thenReturn(true);
         when(repository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(file));
         when(awsS3ObjectOperations.getObject(any(), any())).thenReturn(fileData);

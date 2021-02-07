@@ -1,22 +1,25 @@
 package ru.itterminal.botdesk.tickets.service.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+import java.util.Date;
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+
+import ru.itterminal.botdesk.security.jwt.JwtUser;
+import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
 import ru.itterminal.botdesk.tickets.model.TicketTemplate;
 import ru.itterminal.botdesk.tickets.model.test.TicketTemplateTestHelper;
 import ru.itterminal.botdesk.tickets.repository.TicketTemplateRepository;
 import ru.itterminal.botdesk.tickets.service.validator.TicketTemplateOperationValidator;
-
-import java.util.Date;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {TicketTemplateServiceImpl.class})
@@ -27,6 +30,14 @@ class TicketTemplateServiceImplTest {
 
     @MockBean
     private TicketTemplateRepository ticketTemplateRepository;
+
+    @SuppressWarnings("unused")
+    @MockBean
+    private JwtUserBuilder jwtUserBuilder;
+
+    @SuppressWarnings("unused")
+    @MockBean
+    private JwtUser jwtUser;
 
     @Autowired
     private TicketTemplateServiceImpl service;
@@ -64,7 +75,6 @@ class TicketTemplateServiceImplTest {
 
     @Test
     void setNextExecutionTime_shouldSetDateNextRunToday_whenDateStartNull() {
-        long startNowDay = TicketTemplateTestHelper.atStartOfDay(new Date()).getTime();
         long endNowDay = TicketTemplateTestHelper.atEndOfDay(new Date()).getTime() - 999;
         TicketTemplate ticketTemplate = ticketTemplateTestHelper.getRandomValidEntity();
         ticketTemplate.setExpressionSchedule("59 59 23 * * *");
@@ -92,7 +102,6 @@ class TicketTemplateServiceImplTest {
 
     @Test
     void setNextExecutionTime_shouldGetNull_whenExpressionScheduleNotExecutable() {
-        long startNowDay = TicketTemplateTestHelper.atStartOfDay(new Date()).getTime();
         TicketTemplate ticketTemplate = ticketTemplateTestHelper.getRandomValidEntity();
         ticketTemplate.setExpressionSchedule("0 0 0 30 2 *");
         when(validator.beforeUpdate(any())).thenReturn(true);

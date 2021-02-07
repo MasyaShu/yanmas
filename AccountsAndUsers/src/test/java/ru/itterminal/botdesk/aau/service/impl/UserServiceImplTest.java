@@ -8,7 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static ru.itterminal.botdesk.commons.service.CrudServiceWithAccount.FIND_INVALID_MESSAGE_WITH_ACCOUNT;
+import static ru.itterminal.botdesk.aau.service.CrudServiceWithAccount.FIND_INVALID_MESSAGE_WITH_ACCOUNT;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -38,6 +38,8 @@ import ru.itterminal.botdesk.integration.across_modules.CompletedVerificationAcc
 import ru.itterminal.botdesk.integration.aws.ses.SenderEmailViaAwsSes;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
+import ru.itterminal.botdesk.security.jwt.JwtUser;
+import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {JwtProvider.class, UserServiceImpl.class, BCryptPasswordEncoder.class})
@@ -65,6 +67,12 @@ class UserServiceImplTest {
 
     @MockBean(name = "ticketStatusServiceImpl")
     private MockCompletedVerificationAccount ticketStatusServiceImpl;
+
+    @MockBean
+    private JwtUserBuilder jwtUserBuilder;
+
+    @MockBean
+    private JwtUser jwtUser;
 
     @Autowired
     private BCryptPasswordEncoder encoder;
@@ -110,6 +118,8 @@ class UserServiceImplTest {
                 .role(roleAdmin)
                 .build();
         userFromDatabase.setId(USER_ID);
+        when(jwtUserBuilder.getJwtUser()).thenReturn(jwtUser);
+        when(jwtUser.getAccountId()).thenReturn(user.getAccount().getId());
     }
 
     @Test
@@ -197,7 +207,7 @@ class UserServiceImplTest {
     void findByIdAndAccountId_shouldGetUser_whenPassedValidData() {
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(user));
-        assertNotNull(service.findByIdAndAccountId(UUID.randomUUID(), UUID.randomUUID()));
+        assertNotNull(service.findByIdAndAccountId(UUID.randomUUID()));
         verify(userRepository, times(1)).findByIdAndAccountId(any(), any());
     }
 

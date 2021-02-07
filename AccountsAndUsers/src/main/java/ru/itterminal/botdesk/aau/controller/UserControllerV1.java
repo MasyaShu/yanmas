@@ -74,10 +74,9 @@ public class UserControllerV1 extends BaseController {
 
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
         user.setAccount(accountService.findById(jwtUser.getAccountId()));
-        UUID accountId = user.getAccount().getId();
 
         user.setRole(roleService.findById(request.getRole()));
-        user.setGroup(groupService.findByIdAndAccountId(request.getGroup(), accountId));
+        user.setGroup(groupService.findByIdAndAccountId(request.getGroup()));
 
         User createdUser = userService.create(user);
 
@@ -104,10 +103,9 @@ public class UserControllerV1 extends BaseController {
 
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
         user.setAccount(accountService.findById(jwtUser.getAccountId()));
-        UUID accountId = user.getAccount().getId();
 
         user.setRole(roleService.findById(request.getRole()));
-        user.setGroup(groupService.findByIdAndAccountId(request.getGroup(), accountId));
+        user.setGroup(groupService.findByIdAndAccountId(request.getGroup()));
 
         User updatedUser = userService.update(user);
         UserDtoResponse returnedUser =
@@ -125,13 +123,11 @@ public class UserControllerV1 extends BaseController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDtoResponse> getById(Principal user, @PathVariable UUID id) {
+    public ResponseEntity<UserDtoResponse> getById(@PathVariable UUID id) {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
-        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
-        User foundUser;
-        foundUser = userService.findByIdAndAccountId(id, jwtUser.getAccountId());
+        var foundUser = userService.findByIdAndAccountId(id);
         validator.checkAccessForRead(foundUser);
-        UserDtoResponse returnedUser = modelMapper.map(foundUser, UserDtoResponse.class);
+        var returnedUser = modelMapper.map(foundUser, UserDtoResponse.class);
         log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundUser);
         return new ResponseEntity<>(returnedUser, HttpStatus.OK);
     }

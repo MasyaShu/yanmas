@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +24,8 @@ import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
 import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 import ru.itterminal.botdesk.files.service.FileServiceImpl;
+import ru.itterminal.botdesk.security.jwt.JwtUser;
+import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
 import ru.itterminal.botdesk.tickets.model.Ticket;
 import ru.itterminal.botdesk.tickets.model.TicketSetting;
 import ru.itterminal.botdesk.tickets.model.test.TicketSettingTestHelper;
@@ -46,6 +49,12 @@ class TicketServiceImplTest {
     @MockBean
     private TicketCounterServiceImpl counterService;
 
+    @MockBean
+    private JwtUserBuilder jwtUserBuilder;
+
+    @MockBean
+    private JwtUser jwtUser;
+
     @Autowired
     private TicketServiceImpl service;
 
@@ -66,6 +75,8 @@ class TicketServiceImplTest {
         ticket = ticketTestHelper.getRandomValidEntity();
         currentUser = userTestHelper.getRandomValidEntity();
         ticketSetting = ticketSettingTestHelper.getRandomValidEntity();
+        when(jwtUserBuilder.getJwtUser()).thenReturn(jwtUser);
+        when(jwtUser.getAccountId()).thenReturn(UUID.randomUUID());
     }
 
     @Test

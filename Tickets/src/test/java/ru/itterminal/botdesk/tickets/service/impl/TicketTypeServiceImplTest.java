@@ -6,6 +6,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
+import ru.itterminal.botdesk.security.jwt.JwtUser;
+import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
 import ru.itterminal.botdesk.tickets.model.TicketType;
 import ru.itterminal.botdesk.tickets.model.test.TicketTypeTestHelper;
 import ru.itterminal.botdesk.tickets.repository.TicketTypeRepository;
@@ -31,8 +33,15 @@ class TicketTypeServiceImplTest {
     @MockBean
     TicketTypeOperationValidator validator;
 
-    private final TicketTypeTestHelper ticketTypeTestHelper = new TicketTypeTestHelper();
+    @SuppressWarnings("unused")
+    @MockBean
+    private JwtUserBuilder jwtUserBuilder;
 
+    @SuppressWarnings("unused")
+    @MockBean
+    private JwtUser jwtUser;
+
+    private final TicketTypeTestHelper ticketTypeTestHelper = new TicketTypeTestHelper();
 
     @Test
     void createPredefinedEntity_shouldNoCreatePredefinedStatus_whenStatusInDataBase() {

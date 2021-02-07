@@ -1,14 +1,31 @@
 package ru.itterminal.botdesk.tickets.controller;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import static java.lang.String.format;
+
+import java.security.Principal;
+import java.util.UUID;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
+
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
@@ -19,14 +36,6 @@ import ru.itterminal.botdesk.tickets.model.TicketType;
 import ru.itterminal.botdesk.tickets.model.dto.TicketTypeDto;
 import ru.itterminal.botdesk.tickets.model.dto.TicketTypeFilterDto;
 import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
-
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
-import java.security.Principal;
-import java.util.UUID;
-
-import static java.lang.String.format;
 
 @Slf4j
 @RestController("TicketTypeControllerV1")
@@ -108,11 +117,9 @@ public class TicketTypeControllerV1 extends BaseController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TicketTypeDto> getById(Principal user, @PathVariable UUID id) {
+    public ResponseEntity<TicketTypeDto> getById(@PathVariable UUID id) {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
-        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
-        TicketType foundTicketType;
-        foundTicketType = service.findByIdAndAccountId(id, jwtUser.getAccountId());
+        var foundTicketType = service.findByIdAndAccountId(id);
         TicketTypeDto returnedTicketTypes = modelMapper.map(foundTicketType, TicketTypeDto.class);
         log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundTicketType);
         return new ResponseEntity<>(returnedTicketTypes, HttpStatus.OK);

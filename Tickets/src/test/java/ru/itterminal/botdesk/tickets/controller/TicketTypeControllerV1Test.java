@@ -1,11 +1,9 @@
 package ru.itterminal.botdesk.tickets.controller;
 
-import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -66,9 +64,11 @@ class TicketTypeControllerV1Test {
     @MockBean
     private TicketTypeServiceImpl service;
 
+    @SuppressWarnings("unused")
     @MockBean
     private SpecificationsFactory specFactory;
 
+    @SuppressWarnings("unused")
     @MockBean
     private AccountServiceImpl accountService;
 
@@ -105,10 +105,6 @@ class TicketTypeControllerV1Test {
     private static final String TICKET_TYPES_ID_2 = "0bcefd3c-7986-4f5a-8918-7e675d1d3f3a";
     private static final String TICKET_TYPES_NAME_1 = "ticketTypes1";
     private static final String TICKET_TYPES_NAME_2 = "ticketTypes2";
-    private static final String INVALID_DELETED = "ERROR";
-    private static final String INVALID_SORT_BY = "ERROR";
-    private static final String INVALID_DIRECTION = "ERROR";
-    private static final String INVALID_NAME = "";
 
     @BeforeEach
     void setUpBeforeEach() {
@@ -334,19 +330,19 @@ class TicketTypeControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getById_shouldFindOneGroup_whenGroupExistInDatabaseByPassedId() throws Exception {
-        when(service.findByIdAndAccountId(any(), any())).thenReturn(ticketType_1);
+        when(service.findByIdAndAccountId( any())).thenReturn(ticketType_1);
         mockMvc.perform(get(HOST + PORT + API + TICKET_TYPES_ID_1))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value(TICKET_TYPES_NAME_1))
                 .andExpect(jsonPath("$.id").value(TICKET_TYPES_ID_1));
-        verify(service, times(1)).findByIdAndAccountId(any(), any());
+        verify(service, times(1)).findByIdAndAccountId(any());
     }
 
     @Test
     @WithAnonymousUser
     void getById_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
-        when(service.findByIdAndAccountId(any(), any())).thenReturn(ticketType_1);
+        when(service.findByIdAndAccountId(any())).thenReturn(ticketType_1);
         mockMvc.perform(get(HOST + PORT + API + TICKET_TYPES_ID_1))
                 .andDo(print())
                 .andExpect(status().isForbidden());
@@ -355,11 +351,11 @@ class TicketTypeControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getById_shouldRespondNotFound_whenPassedIdNotExist() throws Exception {
-        when(service.findByIdAndAccountId(any(), any())).thenThrow(EntityNotExistException.class);
+        when(service.findByIdAndAccountId(any())).thenThrow(EntityNotExistException.class);
         mockMvc.perform(get(HOST + PORT + API + TICKET_TYPES_ID_1))
                 .andDo(print())
                 .andExpect(status().isNotFound());
-        verify(service, times(1)).findByIdAndAccountId(any(), any());
+        verify(service, times(1)).findByIdAndAccountId(any());
     }
 
     @Test

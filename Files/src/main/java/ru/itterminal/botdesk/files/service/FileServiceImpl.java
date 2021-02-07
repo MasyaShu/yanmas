@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
-import ru.itterminal.botdesk.commons.service.impl.CrudServiceWithAccountImpl;
+import ru.itterminal.botdesk.aau.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.botdesk.files.model.File;
 import ru.itterminal.botdesk.files.repository.FileRepository;
 import ru.itterminal.botdesk.files.service.validator.FileOperationValidator;
@@ -42,7 +42,7 @@ public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperat
         if (fileId == null) {
             throw createExpectedLogicalValidationException(FILE_ID, FILE_ID_IS_NULL);
         }
-        var file = super.findByIdAndAccountId(fileId, accountId);
+        var file = super.findByIdAndAccountId(fileId);
         if (Boolean.FALSE.equals(file.getIsUploaded())) {
             throw createExpectedLogicalValidationException(FILE, FILE_WAS_NOT_UPLOAD);
         }

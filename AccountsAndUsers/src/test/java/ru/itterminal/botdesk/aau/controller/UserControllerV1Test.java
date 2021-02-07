@@ -198,7 +198,7 @@ class UserControllerV1Test {
         when(service.create(any())).thenReturn(user_1);
         when(accountService.findById(any())).thenReturn(user_1.getAccount());
         when(roleService.findById(any())).thenReturn(user_1.getRole());
-        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(user_1.getGroup());
+        when(groupService.findByIdAndAccountId(any())).thenReturn(user_1.getGroup());
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -216,7 +216,7 @@ class UserControllerV1Test {
         verify(service, times(1)).create(any());
         verify(accountService, times(1)).findById(any());
         verify(roleService, times(1)).findById(any());
-        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
+        verify(groupService, times(1)).findByIdAndAccountId(any());
     }
 
     @Test
@@ -232,7 +232,7 @@ class UserControllerV1Test {
         verify(service, times(0)).create(any());
         verify(accountService, times(0)).findById(any());
         verify(roleService, times(0)).findById(any());
-        verify(groupService, times(0)).findByIdAndAccountId(any(), any());
+        verify(groupService, times(0)).findByIdAndAccountId(any());
 
     }
 
@@ -250,7 +250,7 @@ class UserControllerV1Test {
         verify(service, times(0)).create(any());
         verify(accountService, times(0)).findById(any());
         verify(roleService, times(0)).findById(any());
-        verify(groupService, times(0)).findByIdAndAccountId(any(), any());
+        verify(groupService, times(0)).findByIdAndAccountId(any());
     }
 
     @Test
@@ -421,7 +421,7 @@ class UserControllerV1Test {
         when(service.update(any())).thenReturn(user_1);
         when(accountService.findById(any())).thenReturn(user_1.getAccount());
         when(roleService.findById(any())).thenReturn(user_1.getRole());
-        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(user_1.getGroup());
+        when(groupService.findByIdAndAccountId(any())).thenReturn(user_1.getGroup());
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -439,7 +439,7 @@ class UserControllerV1Test {
         verify(service, times(1)).update(any());
         verify(accountService, times(1)).findById(any());
         verify(roleService, times(1)).findById(any());
-        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
+        verify(groupService, times(1)).findByIdAndAccountId(any());
     }
 
     @Test
@@ -681,7 +681,7 @@ class UserControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getById_shouldFindOneUser_whenUserExistInDatabaseByPassedIdAndHeIsInInnerGroup() throws Exception {
-        when(service.findByIdAndAccountId(any(), any())).thenReturn(user_1);
+        when(service.findByIdAndAccountId(any())).thenReturn(user_1);
         mockMvc.perform(get(HOST + PORT + API + USER_1_ID))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -689,13 +689,13 @@ class UserControllerV1Test {
                 .andExpect(jsonPath("$.id").value(user_1.getId().toString()))
                 .andExpect(jsonPath("$.role.outId").value(user_1.getRole().getOutId()))
                 .andExpect(jsonPath("$.group.outId").value(user_1.getGroup().getOutId()));
-        verify(service, times(1)).findByIdAndAccountId(any(), any());
+        verify(service, times(1)).findByIdAndAccountId(any());
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
     void getById_shouldFindOneUser_whenUserExistInDatabaseByPassedIdAndHeIsNotInInnerGroup() throws Exception {
-        when(service.findByIdAndAccountId(any(), any())).thenReturn(user_1);
+        when(service.findByIdAndAccountId(any())).thenReturn(user_1);
         when(validator.checkAccessForRead(any())).thenReturn(true);
         mockMvc.perform(get(HOST + PORT + API + USER_1_ID))
                 .andDo(print())
@@ -706,14 +706,14 @@ class UserControllerV1Test {
                 .andExpect(jsonPath("$.role.displayName").value(user_1.getRole().getDisplayName()))
                 .andExpect(jsonPath("$.group.outId").value(user_1.getGroup().getOutId()))
                 .andExpect(jsonPath("$.group.displayName").value(user_1.getGroup().getDisplayName()));
-        verify(service, times(1)).findByIdAndAccountId(any(), any());
+        verify(service, times(1)).findByIdAndAccountId(any());
         verify(validator, times(1)).checkAccessForRead(any());
     }
 
     @Test
     @WithAnonymousUser
     void getById_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
-        when(service.findByIdAndAccountId(any(), any())).thenReturn(user_1);
+        when(service.findByIdAndAccountId(any())).thenReturn(user_1);
         mockMvc.perform(get(HOST + PORT + API + USER_1_ID))
                 .andDo(print())
                 .andExpect(status().isForbidden());
@@ -722,7 +722,7 @@ class UserControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getById_shouldRespondNotFound_whenPassedIdNotExist() throws Exception {
-        when(service.findByIdAndAccountId(any(), any())).thenThrow(EntityNotExistException.class);
+        when(service.findByIdAndAccountId(any())).thenThrow(EntityNotExistException.class);
         mockMvc.perform(get(HOST + PORT + API + USER_1_ID))
                 .andDo(print())
                 .andExpect(status().isNotFound());
@@ -741,7 +741,8 @@ class UserControllerV1Test {
     @WithAnonymousUser
     void getByFilter_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
         Pageable pageable = PageRequest.of(
-                Integer.parseInt(BaseController.PAGE_DEFAULT_VALUE), Integer.parseInt(BaseController.SIZE_DEFAULT_VALUE),
+                Integer.parseInt(BaseController.PAGE_DEFAULT_VALUE),
+                Integer.parseInt(BaseController.SIZE_DEFAULT_VALUE),
                 Sort.by("name").ascending()
         );
         Page<User> expectedPageOfUsers = new PageImpl<>(List.of(user_1), pageable, 1);
@@ -757,95 +758,96 @@ class UserControllerV1Test {
         verify(service, times(0)).findAllByFilter(any(), any());
     }
 
-        @Test
-        @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-        void getByFilter_shouldFindTwoUsers_whenUsersExistInDatabaseByPassedFilter() throws Exception {
-            Pageable pageable =
-                    PageRequest.of(Integer.parseInt(BaseController.PAGE_DEFAULT_VALUE), Integer.parseInt(
-                            BaseController.SIZE_DEFAULT_VALUE),
-                                   Sort.by("name").ascending()
-                    );
-            Page<User> expectedPageOfUsers = new PageImpl<>(List.of(user_1, user_2), pageable, 2);
-            when(service.findAllByFilter(any(), any())).thenReturn(expectedPageOfUsers);
-            var userFilterDto = UserFilterDto.builder().build();
-            MockHttpServletRequestBuilder request = get(HOST + PORT + API)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(userFilterDto));
-            mockMvc.perform(request)
-                    .andDo(print())
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content[0].id").value(user_1.getId().toString()))
-                    .andExpect(jsonPath("$.content[1].id").value(user_2.getId().toString()))
-                    .andExpect(jsonPath("$.content", hasSize(2)));
-            verify(service, times(1)).findAllByFilter(any(), any());
-        }
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
+    void getByFilter_shouldFindTwoUsers_whenUsersExistInDatabaseByPassedFilter() throws Exception {
+        Pageable pageable =
+                PageRequest.of(Integer.parseInt(BaseController.PAGE_DEFAULT_VALUE), Integer.parseInt(
+                        BaseController.SIZE_DEFAULT_VALUE),
+                               Sort.by("name").ascending()
+                );
+        Page<User> expectedPageOfUsers = new PageImpl<>(List.of(user_1, user_2), pageable, 2);
+        when(service.findAllByFilter(any(), any())).thenReturn(expectedPageOfUsers);
+        var userFilterDto = UserFilterDto.builder().build();
+        MockHttpServletRequestBuilder request = get(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userFilterDto));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value(user_1.getId().toString()))
+                .andExpect(jsonPath("$.content[1].id").value(user_2.getId().toString()))
+                .andExpect(jsonPath("$.content", hasSize(2)));
+        verify(service, times(1)).findAllByFilter(any(), any());
+    }
 
-        @Test
-        @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-        void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
-            var emailFilter = StringFilter.builder()
-                    .value(INVALID_EMAIL_1)
-                    .typeComparison(TEXT_EQUALS.toString())
-                    .build();
-            var nameFilter = StringFilter.builder()
-                    .value(INVALID_NAME)
-                    .typeComparison(TEXT_EQUALS.toString())
-                    .build();
-            var phoneFilter = StringFilter.builder()
-                    .value(INVALID_PHONE)
-                    .typeComparison(TEXT_EQUALS.toString())
-                    .build();
-            var userFilterDto = UserFilterDto.builder()
-                    .email(emailFilter)
-                    .name(nameFilter)
-                    .phone(phoneFilter)
-                    .sortDirection(ERROR)
-                    .sortByFields(List.of(ERROR))
-                    .build();
-            MockHttpServletRequestBuilder request = get(HOST + PORT + API)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(userFilterDto));
-            mockMvc.perform(request)
-                    .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(MockMvcResultMatchers
-                                       .jsonPath(
-                                               "$.errors.name[?(@.message =~ /%s.*/)]",
-                                               CommonConstants.SIZE_MUST_BE_BETWEEN
-                                       ).exists())
-                    .andExpect(MockMvcResultMatchers
-                                       .jsonPath("$.errors.email[?(@.message == '%s')]", AAUConstants.INVALID_EMAIL)
-                                       .exists())
-                    .andExpect(MockMvcResultMatchers
-                                       .jsonPath("$.errors.sortByFields[?(@.message =~ /.*%s.*/)]",
-                                                 CommonConstants.DO_NOT_MATCH_THE_AVAILABLE_SORT_VALUES
-                                       )
-                                       .exists())
-                    .andExpect(MockMvcResultMatchers
-                                       .jsonPath(
-                                               "$.errors.sortDirection[?(@.message == '%s')]",
-                                               CommonConstants.MUST_BE_ANY_OF_ASC_DESC
-                                       ).exists());
-            verify(service, times(0)).findAllByFilter(any(), any());
-        }
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
+    void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
+        var emailFilter = StringFilter.builder()
+                .value(INVALID_EMAIL_1)
+                .typeComparison(TEXT_EQUALS.toString())
+                .build();
+        var nameFilter = StringFilter.builder()
+                .value(INVALID_NAME)
+                .typeComparison(TEXT_EQUALS.toString())
+                .build();
+        var phoneFilter = StringFilter.builder()
+                .value(INVALID_PHONE)
+                .typeComparison(TEXT_EQUALS.toString())
+                .build();
+        var userFilterDto = UserFilterDto.builder()
+                .email(emailFilter)
+                .name(nameFilter)
+                .phone(phoneFilter)
+                .sortDirection(ERROR)
+                .sortByFields(List.of(ERROR))
+                .build();
+        MockHttpServletRequestBuilder request = get(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userFilterDto));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers
+                                   .jsonPath(
+                                           "$.errors.name[?(@.message =~ /%s.*/)]",
+                                           CommonConstants.SIZE_MUST_BE_BETWEEN
+                                   ).exists())
+                .andExpect(MockMvcResultMatchers
+                                   .jsonPath("$.errors.email[?(@.message == '%s')]", AAUConstants.INVALID_EMAIL)
+                                   .exists())
+                .andExpect(MockMvcResultMatchers
+                                   .jsonPath(
+                                           "$.errors.sortByFields[?(@.message =~ /.*%s.*/)]",
+                                           CommonConstants.DO_NOT_MATCH_THE_AVAILABLE_SORT_VALUES
+                                   )
+                                   .exists())
+                .andExpect(MockMvcResultMatchers
+                                   .jsonPath(
+                                           "$.errors.sortDirection[?(@.message == '%s')]",
+                                           CommonConstants.MUST_BE_ANY_OF_ASC_DESC
+                                   ).exists());
+        verify(service, times(0)).findAllByFilter(any(), any());
+    }
 
-        @Test
-        @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-        void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidSizeAndPagePassed()
-                throws Exception {
-            var userFilterDto = UserFilterDto.builder().build();
-            MockHttpServletRequestBuilder request = get(HOST + PORT + API + "?page=-1&size=0")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(userFilterDto));
-            mockMvc.perform(request)
-                    .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.title").value(CommonConstants.REQUEST_NOT_READABLE));
-            verify(service, times(0)).findAllByFilter(any(), any());
-        }
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
+    void getByFilter_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidSizeAndPagePassed()
+            throws Exception {
+        var userFilterDto = UserFilterDto.builder().build();
+        MockHttpServletRequestBuilder request = get(HOST + PORT + API + "?page=-1&size=0")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userFilterDto));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value(CommonConstants.REQUEST_NOT_READABLE));
+        verify(service, times(0)).findAllByFilter(any(), any());
+    }
 
     @Test
     @WithAnonymousUser
