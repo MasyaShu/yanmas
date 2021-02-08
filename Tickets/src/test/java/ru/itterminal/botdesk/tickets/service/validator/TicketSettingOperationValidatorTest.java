@@ -13,10 +13,8 @@ import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperatio
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_MESSAGE;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
-import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.GROUPS_ARENT_EQUAL;
-import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.GROUPS_ARENT_EQUAL_MESSAGE;
-import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.TICKET_SETTING_IS_EMPTY;
-import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.TICKET_SETTING_UNIQUE_FIELDS;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.*;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketTypeOperationValidator.A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TYPE;
 
 import java.util.Collections;
 import java.util.List;
@@ -25,16 +23,23 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.test.context.support.WithUserDetails;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
+import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 import ru.itterminal.botdesk.tickets.model.TicketSetting;
 import ru.itterminal.botdesk.tickets.model.projection.TicketSettingUniqueFields;
 import ru.itterminal.botdesk.tickets.model.test.TicketSettingTestHelper;
 import ru.itterminal.botdesk.tickets.service.impl.TicketSettingServiceImpl;
 
 @SpringJUnitConfig(value = {TicketSettingOperationValidator.class})
+@Import(TestSecurityConfig.class)
+@ActiveProfiles("Test")
 class TicketSettingOperationValidatorTest {
 
     public static final String WRONG_NAME = "Wrong name";
@@ -86,18 +91,21 @@ class TicketSettingOperationValidatorTest {
     }
 
     @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void beforeCreate_shouldGetTrue_whenPassedRandomValidEntity () {
         TicketSetting ticketSetting = ticketSettingTestHelper.getRandomValidEntity();
         assertTrue(validator.beforeCreate(ticketSetting));
     }
 
     @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void beforeCreate_shouldGetTrue_whenPassedPredefinedValidEntity () {
         TicketSetting ticketSetting = ticketSettingTestHelper.getPredefinedValidEntityList().get(0);
         assertTrue(validator.beforeCreate(ticketSetting));
     }
 
     @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void beforeUpdate_shouldGetTrue_whenPassedRandomValidEntity () {
         when(service.findByUniqueFields(any())).thenReturn(Collections.emptyList());
         TicketSetting ticketSetting = ticketSettingTestHelper.getRandomValidEntity();
@@ -106,6 +114,7 @@ class TicketSettingOperationValidatorTest {
     }
 
     @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void beforeUpdate_shouldGetTrue_whenPassedPredefinedValidEntity () {
         when(service.findByUniqueFields(any())).thenReturn(Collections.emptyList());
         TicketSetting ticketSetting = ticketSettingTestHelper.getPredefinedValidEntityList().get(0);
@@ -114,6 +123,7 @@ class TicketSettingOperationValidatorTest {
     }
 
     @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void beforeUpdate_shouldGetLogicalValidationException_whenAllPassedSettingIsNull() {
         when(service.findByUniqueFields(any())).thenReturn(Collections.emptyList());
         TicketSetting ticketSetting = new TicketSetting();
@@ -124,6 +134,7 @@ class TicketSettingOperationValidatorTest {
     }
 
     @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void beforeCreate_shouldGetLogicalValidationException_whenPassedTicketSettingWithDifferentGroupAndGroupOfAuthor() {
         var expectedErrors = createMapForLogicalErrors();
         var ticketSetting = ticketSettingTestHelper.getPredefinedValidEntityList().get(0);
@@ -156,6 +167,7 @@ class TicketSettingOperationValidatorTest {
     }
 
     @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void beforeUpdate_shouldGetLogicalValidationException_whenPassedTicketSettingWithDifferentGroupAndGroupOfAuthor() {
         var expectedErrors = createMapForLogicalErrors();
         var ticketSetting = ticketSettingTestHelper.getPredefinedValidEntityList().get(0);
@@ -185,6 +197,40 @@ class TicketSettingOperationValidatorTest {
                 actualException.getFieldErrors().get(GROUPS_ARENT_EQUAL).get(0)
         );
         verify(service, times(1)).findByUniqueFields(any());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
+    void beforeCreate_shouldGetAccessDeniedException_whenCurrentUserFromNotInnerGroup() {
+        var ticketSetting = ticketSettingTestHelper.getPredefinedValidEntityList().get(0);
+        AccessDeniedException thrown = assertThrows(AccessDeniedException.class,
+                () -> validator.beforeCreate(ticketSetting));
+        assertEquals(A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_SETTING,
+                thrown.getMessage());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
+    void beforeUpdate_shouldGetAccessDeniedException_whenCurrentUserFromNotInnerGroup() {
+        var ticketSetting = ticketSettingTestHelper.getPredefinedValidEntityList().get(0);
+        AccessDeniedException thrown = assertThrows(AccessDeniedException.class,
+                () -> validator.beforeUpdate(ticketSetting));
+        assertEquals(A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_SETTING,
+                thrown.getMessage());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
+    void beforeCreate_shouldGetTrue_whenCurrentUserFromInnerGroup() {
+        var ticketSetting = ticketSettingTestHelper.getPredefinedValidEntityList().get(0);
+        assertTrue(validator.beforeCreate(ticketSetting));
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
+    void beforeUpdate_shouldGetTrue_whenCurrentUserFromInnerGroup() {
+        var ticketSetting = ticketSettingTestHelper.getPredefinedValidEntityList().get(0);
+        assertTrue(validator.beforeUpdate(ticketSetting));
     }
 
 }

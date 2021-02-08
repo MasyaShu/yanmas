@@ -149,7 +149,7 @@ class TicketTypeControllerV1Test {
 
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    void create_shouldGetStatusForbidden_whenRoleUserAuthor() throws Exception {
+    void create_shouldGetStatusForbidden_whenCurrentUserHasRoleOfAuthor() throws Exception {
         ticketTypeDto.setDeleted(null);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -163,7 +163,7 @@ class TicketTypeControllerV1Test {
 
     @Test
     @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_INNER_GROUP")
-    void create_shouldGetStatusForbidden_whenRoleUserExecutor() throws Exception {
+    void create_shouldGetStatusForbidden_whenCurrentUserHasRoleOfExecutor() throws Exception {
         ticketTypeDto.setDeleted(null);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -255,7 +255,7 @@ class TicketTypeControllerV1Test {
 
     @Test
     @WithAnonymousUser
-    void update_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
+    void update_shouldGetStatusForbidden_whenCurrentUserAnonymousUser() throws Exception {
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -341,7 +341,7 @@ class TicketTypeControllerV1Test {
 
     @Test
     @WithAnonymousUser
-    void getById_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
+    void getById_shouldGetStatusForbidden_whenCurrentUserAnonymousUser() throws Exception {
         when(service.findByIdAndAccountId(any())).thenReturn(ticketType_1);
         mockMvc.perform(get(HOST + PORT + API + TICKET_TYPES_ID_1))
                 .andDo(print())
@@ -369,7 +369,7 @@ class TicketTypeControllerV1Test {
 
     @Test
     @WithAnonymousUser
-    void getByFilter_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
+    void getByFilter_shouldGetStatusForbidden_whenCurrentUserAnonymousUser() throws Exception {
         Pageable pageable =
                 PageRequest.of(Integer.parseInt(BaseController.PAGE_DEFAULT_VALUE), Integer.parseInt(
                         BaseController.SIZE_DEFAULT_VALUE),
@@ -388,7 +388,7 @@ class TicketTypeControllerV1Test {
 
     @Test
     @WithAnonymousUser
-    void createCheckAccess_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
+    void createCheckAccess_shouldGetStatusForbidden_whenCurrentUserAnonymousUser() throws Exception {
         mockMvc.perform(post(HOST + PORT + API + BaseController.CHECK_ACCESS))
                 .andDo(print())
                 .andExpect(status().isForbidden());
@@ -396,7 +396,7 @@ class TicketTypeControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void createCheckAccess_shouldGetStatusOk_whenUserWithRoleAdmin() throws Exception {
+    void createCheckAccess_shouldGetStatusOk_whenCurrentUserHasRoleAdmin() throws Exception {
         mockMvc.perform(post(HOST + PORT + API + BaseController.CHECK_ACCESS))
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -404,7 +404,7 @@ class TicketTypeControllerV1Test {
 
     @Test
     @WithUserDetails("OWNER_ACCOUNT_2_IS_INNER_GROUP")
-    void createCheckAccess_shouldGetStatusOk_whenUserWithRoleAccountOwner() throws Exception {
+    void createCheckAccess_shouldGetStatusOk_whenCurrentUserHasRoleAccountOwner() throws Exception {
         mockMvc.perform(post(HOST + PORT + API + BaseController.CHECK_ACCESS))
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -412,7 +412,7 @@ class TicketTypeControllerV1Test {
 
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    void createCheckAccess_shouldGetStatusForbidden_whenUserWithRoleAuthor() throws Exception {
+    void createCheckAccess_shouldGetStatusForbidden_whenCurrentUserHasRoleAuthor() throws Exception {
         mockMvc.perform(post(HOST + PORT + API + BaseController.CHECK_ACCESS))
                 .andDo(print())
                 .andExpect(status().isForbidden());
@@ -420,7 +420,7 @@ class TicketTypeControllerV1Test {
 
     @Test
     @WithAnonymousUser
-    void updateCheckAccess_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
+    void updateCheckAccess_shouldGetStatusForbidden_whenCurrentUserAnonymousUser() throws Exception {
         mockMvc.perform(put(HOST + PORT + API + BaseController.CHECK_ACCESS))
                 .andDo(print())
                 .andExpect(status().isForbidden());
@@ -444,7 +444,7 @@ class TicketTypeControllerV1Test {
 
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    void updateCheckAccess_shouldGetStatusForbidden_whenUserWithRoleAuthor() throws Exception {
+    void updateCheckAccess_shouldGetStatusForbidden_whenCurrentUserHasRoleAuthor() throws Exception {
         mockMvc.perform(put(HOST + PORT + API + BaseController.CHECK_ACCESS))
                 .andDo(print())
                 .andExpect(status().isForbidden());
@@ -452,9 +452,11 @@ class TicketTypeControllerV1Test {
 
     @Test
     @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_NOT_INNER_GROUP")
-    void updateCheckAccess_shouldGetStatusIsOk_whenUserWithRoleExecutorNotInnerGroup() throws Exception {
+    void updateCheckAccess_shouldGetStatusIsOk_whenCurrentUserHasRoleExecutorNotInnerGroup() throws Exception {
         mockMvc.perform(put(HOST + PORT + API + BaseController.CHECK_ACCESS))
                 .andDo(print())
                 .andExpect(status().isForbidden());
     }
+
+
 }

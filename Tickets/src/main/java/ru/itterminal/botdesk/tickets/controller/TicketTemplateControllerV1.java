@@ -55,7 +55,7 @@ public class TicketTemplateControllerV1 extends BaseController {
     private final String ENTITY_NAME = TicketTemplate.class.getSimpleName();
 
     @PostMapping()
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')")
     public ResponseEntity<TicketTemplateDtoResponse> create(Principal principal,
                                                             @Validated(Create.class) @RequestBody TicketTemplateDtoRequest request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
@@ -71,7 +71,7 @@ public class TicketTemplateControllerV1 extends BaseController {
     }
 
     @PostMapping("/check-access")
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')")
     public ResponseEntity<String> createCheckAccess() {
         String message = format(SUCCESSFUL_CHECK_ACCESS, WORD_CREATE, ENTITY_NAME);
         log.trace(message);
@@ -79,7 +79,7 @@ public class TicketTemplateControllerV1 extends BaseController {
     }
 
     @PutMapping()
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')")
     public ResponseEntity<TicketTemplateDtoResponse> update(Principal principal,
                                                             @Validated(Update.class) @RequestBody TicketTemplateDtoRequest request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
@@ -94,7 +94,7 @@ public class TicketTemplateControllerV1 extends BaseController {
     }
 
     @PutMapping("/check-access")
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')")
     public ResponseEntity<String> updateCheckAccess() {
         String message = format(SUCCESSFUL_CHECK_ACCESS, WORD_UPDATE, ENTITY_NAME);
         log.trace(message);

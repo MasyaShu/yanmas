@@ -5,11 +5,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
+import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 import ru.itterminal.botdesk.tickets.model.TicketType;
 import ru.itterminal.botdesk.tickets.model.projection.TicketTypeUniqueFields;
 import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
@@ -20,8 +24,11 @@ import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketStatusOperationValidator.A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_STATUS;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketTypeOperationValidator.A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TYPE;
 
 @SpringJUnitConfig(value = {TicketTypeOperationValidator.class})
+@Import(TestSecurityConfig.class)
 @ActiveProfiles("Test")
 class TicketTypeOperationValidatorTest {
 
@@ -68,5 +75,35 @@ class TicketTypeOperationValidatorTest {
                 () -> validator.checkUniqueness(ticketType));
         assertEquals(logicalValidationException.getFieldErrors().get("name").get(0),
                 thrown.getFieldErrors().get("name").get(0));
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
+    void beforeCreate_shouldGetAccessDeniedException_whenCurrentUserFromNotInnerGroup() {
+        AccessDeniedException thrown = assertThrows(AccessDeniedException.class,
+                () -> validator.beforeCreate(ticketType));
+        assertEquals(A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TYPE,
+                thrown.getMessage());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
+    void beforeUpdate_shouldGetAccessDeniedException_whenCurrentUserFromNotInnerGroup() {
+        AccessDeniedException thrown = assertThrows(AccessDeniedException.class,
+                () -> validator.beforeUpdate(ticketType));
+        assertEquals(A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TYPE,
+                thrown.getMessage());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
+    void beforeCreate_shouldGetTrue_whenCurrentUserFromInnerGroup() {
+        assertTrue(validator.beforeCreate(ticketType));
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
+    void beforeUpdate_shouldGetTrue_whenCurrentUserFromInnerGroup() {
+        assertTrue(validator.beforeUpdate(ticketType));
     }
 }

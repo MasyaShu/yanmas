@@ -9,6 +9,8 @@ import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.ifEr
 
 import java.util.List;
 
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +18,7 @@ import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 import ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl;
+import ru.itterminal.botdesk.security.jwt.JwtUser;
 import ru.itterminal.botdesk.tickets.model.TicketSetting;
 import ru.itterminal.botdesk.tickets.model.projection.TicketSettingUniqueFields;
 import ru.itterminal.botdesk.tickets.service.impl.TicketSettingServiceImpl;
@@ -30,6 +33,8 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
     public static final String TICKET_SETTING_UNIQUE_FIELDS = "Account, Group, Author";
     public static final String TICKET_SETTING_IS_EMPTY = "Ticket setting is empty";
     public static final String MUST_NOT_BE_EMPTY = "Ticket setting mustn't be empty";
+    public static final String A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_SETTING =
+            "A user from not inner group cannot create or update ticket setting";
 
     private final TicketSettingServiceImpl service;
 
@@ -40,12 +45,14 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
     @Override
     public boolean beforeCreate(TicketSetting entity) {
         super.beforeCreate(entity);
+        checkIsInnerGroupForCreateUpdate();
         return checkBeforeCreateUpdate(entity);
     }
 
     @Override
     public boolean beforeUpdate(TicketSetting entity) {
         super.beforeUpdate(entity);
+        checkIsInnerGroupForCreateUpdate();
         return checkBeforeCreateUpdate(entity);
     }
 
@@ -116,5 +123,12 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
 
         ifErrorsNotEmptyThrowLogicalValidationException(errors);
         return true;
+    }
+
+    private void checkIsInnerGroupForCreateUpdate() {
+            JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (!jwtUser.isInnerGroup()) {
+                throw new AccessDeniedException(A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_SETTING);
+            }
     }
 }
