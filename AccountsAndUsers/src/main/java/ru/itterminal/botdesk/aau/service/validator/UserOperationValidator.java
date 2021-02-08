@@ -2,6 +2,9 @@ package ru.itterminal.botdesk.aau.service.validator;
 
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.addValidationErrorIntoErrors;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.ifErrorsNotEmptyThrowLogicalValidationException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -28,10 +31,16 @@ import ru.itterminal.botdesk.security.jwt.JwtUser;
 @RequiredArgsConstructor
 public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
 
-    public static final String IS_FORBIDDEN_TO_ASSIGN_A_USER_WITH_A_ROLE = "With your role it is forbidden to assign a user with a role %s";
-    public static final String IS_FORBIDDEN_TO_CHANGE_THE_USER_WITH_THE_ROLE = "With your role it is forbidden to change the user with the role %s";
-    public static final String NOT_ALLOWED_TO_ASSIGN_A_GROUP_WITH_ID_NOT_EQUAL = "You are not allowed to assign a group with id not equal: %s";
-    public static final String CANNOT_EDIT_A_USER_WHO_IS_NOT_IN_THE_GROUP_WITH_ID = "You cannot edit a user who is not in the group with id: %s";
+    public static final String IS_FORBIDDEN_TO_ASSIGN_A_USER_WITH_A_ROLE =
+            "With your role it is forbidden to assign a user with a role %s";
+    public static final String IS_FORBIDDEN_TO_CHANGE_THE_USER_WITH_THE_ROLE =
+            "With your role it is forbidden to change the user with the role %s";
+    public static final String NOT_ALLOWED_TO_ASSIGN_A_GROUP_WITH_ID_NOT_EQUAL =
+            "You are not allowed to assign a group with id not equal: %s";
+    public static final String CANNOT_EDIT_A_USER_WHO_IS_NOT_IN_THE_GROUP_WITH_ID =
+            "You cannot edit a user who is not in the group with id: %s";
+    public static final String YOU_CAN_EDIT_EMAIL_OF_THE_USER_WITH_A_ROLE_ACCOUNT_OWNER_ONLY_VIA_SPECIAL_PROCESS =
+            "You can edit email of the user with a role Account owner only via special process called \"update email of account owner\"";
     private final UserServiceImpl service;
     private final RoleServiceImpl roleService;
 
@@ -39,16 +48,8 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
     protected static final String USER_WITH_ROLE_ACCOUNT_OWNER = "User with role ACCOUNT_OWNER";
     protected static final String ACCOUNT_MUST_HAVE_USER_WITH_ROLE_ACCOUNT_OWNER =
             "Account must have user with role ACCOUNT_OWNER";
-    protected static final String WEIGHT_OF_ROLE_CURRENT_USER_LESS_THAN_WEIGHT_OF_ROLE_FROM_REQUEST =
-            "Weight of role current user (%s) less than weight of role from request (%s)";
-    protected static final String WEIGHT_OF_ROLE = "Weight of role";
-    protected static final String WEIGHT_OF_ROLE_USER_FROM_DATABASE = "Weight of role of user from database";
-    protected static final String INNER_GROUP = "Inner group";
-    protected static final String INNER_GROUP_USER_FROM_DATABASE = "Inner group of user from database";
-    protected static final String CREATE_UPDATE_ONLY_HIS_GROUP =
-            "If user is not in inner group, then he can create/update user only in his "
-                    + "group";
-    public static final String ACCESS_IS_DENIED_FOR_SEARCHING_BY_PASSED_ID = "Access is denied for searching by passed Id";
+    public static final String ACCESS_IS_DENIED_FOR_SEARCHING_BY_PASSED_ID =
+            "Access is denied for searching by passed Id";
     private static final String EMAIL = "email";
 
     @Override
@@ -66,7 +67,7 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         super.beforeUpdate(entity);
         User userFromDatabase = service.findById(entity.getId());
         checkAccessCreateUpdate(entity, userFromDatabase);
-        checkAccountOwnerExistsAfterUpdate(entity);
+        checkAccountOwnerExistsAfterUpdateAndRestrictionForEditEmailOfAccountOwner(entity, userFromDatabase);
         return true;
     }
 
@@ -82,8 +83,10 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
             String validatedField;
             if (entity.getEmail().equalsIgnoreCase(foundUser.get(0).getEmail())) {
                 validatedField = EMAIL;
-                errors.put(validatedField, singletonList(new ValidationError(NOT_UNIQUE_CODE,
-                        format(NOT_UNIQUE_MESSAGE, validatedField))));
+                errors.put(validatedField, singletonList(new ValidationError(
+                        NOT_UNIQUE_CODE,
+                        format(NOT_UNIQUE_MESSAGE, validatedField)
+                )));
             }
             log.error(FIELDS_NOT_UNIQUE, errors);
             throw new LogicalValidationException(VALIDATION_FAILED, errors);
@@ -103,20 +106,29 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
     private void checkAccessCreateUpdate(User userFromRequest, User userFromDatabase) {
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (userFromRequest.getRole().getWeight() > jwtUser.getWeightRole()) {
-            throw new AccessDeniedException(format(IS_FORBIDDEN_TO_ASSIGN_A_USER_WITH_A_ROLE,
-                    userFromRequest.getRole().getDisplayName()));
+            throw new AccessDeniedException(format(
+                    IS_FORBIDDEN_TO_ASSIGN_A_USER_WITH_A_ROLE,
+                    userFromRequest.getRole().getDisplayName()
+            ));
         }
         if (userFromDatabase != null && userFromDatabase.getRole().getWeight() > jwtUser.getWeightRole()) {
-            throw new AccessDeniedException(format(IS_FORBIDDEN_TO_CHANGE_THE_USER_WITH_THE_ROLE,
-                    userFromRequest.getRole().getDisplayName()));
+            throw new AccessDeniedException(format(
+                    IS_FORBIDDEN_TO_CHANGE_THE_USER_WITH_THE_ROLE,
+                    userFromRequest.getRole().getDisplayName()
+            ));
         }
         if (!jwtUser.isInnerGroup() && !userFromRequest.getGroup().getId().equals(jwtUser.getGroupId())) {
-            throw new AccessDeniedException(format(NOT_ALLOWED_TO_ASSIGN_A_GROUP_WITH_ID_NOT_EQUAL,
-                    jwtUser.getGroupId()));
+            throw new AccessDeniedException(format(
+                    NOT_ALLOWED_TO_ASSIGN_A_GROUP_WITH_ID_NOT_EQUAL,
+                    jwtUser.getGroupId()
+            ));
         }
-        if (userFromDatabase != null && !jwtUser.isInnerGroup() && !userFromDatabase.getGroup().getId().equals(jwtUser.getGroupId())) {
-            throw new AccessDeniedException(format(CANNOT_EDIT_A_USER_WHO_IS_NOT_IN_THE_GROUP_WITH_ID,
-                    jwtUser.getGroupId()));
+        if (userFromDatabase != null && !jwtUser.isInnerGroup() && !userFromDatabase.getGroup().getId()
+                .equals(jwtUser.getGroupId())) {
+            throw new AccessDeniedException(format(
+                    CANNOT_EDIT_A_USER_WHO_IS_NOT_IN_THE_GROUP_WITH_ID,
+                    jwtUser.getGroupId()
+            ));
         }
     }
 
@@ -124,13 +136,17 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         Map<String, List<ValidationError>> errors = new HashMap<>();
 
         if (entity.getRole().equals(roleService.getAccountOwnerRole())) {
-            List<User> foundUsers = service.findAllByRoleAndAccountId(roleService.getAccountOwnerRole(),
-                    entity.getAccount().getId());
+            List<User> foundUsers = service.findAllByRoleAndAccountId(
+                    roleService.getAccountOwnerRole(),
+                    entity.getAccount().getId()
+            );
             if (foundUsers.isEmpty()) {
                 log.trace(USER_WITH_ROLE_ACCOUNT_OWNER_IS_UNIQUE, entity);
             } else {
-                errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,
-                        format(NOT_UNIQUE_MESSAGE, USER_WITH_ROLE_ACCOUNT_OWNER))));
+                errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(
+                        NOT_UNIQUE_CODE,
+                        format(NOT_UNIQUE_MESSAGE, USER_WITH_ROLE_ACCOUNT_OWNER)
+                )));
             }
         }
 
@@ -140,7 +156,8 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         }
     }
 
-    private void checkAccountOwnerExistsAfterUpdate(User entity) {
+    private void checkAccountOwnerExistsAfterUpdateAndRestrictionForEditEmailOfAccountOwner(User entity,
+                                                                                            User userFromDatabase) {
 
         // Schema of constraints "Only one user must have a role "Account owner"
         // Entity from DB           | new  Entity               | result
@@ -149,7 +166,8 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         // has role Acc_Owner       | has not role Acc_Owner    | all right
         // has not role Acc_Owner   | has not role Acc_Owner    | not allowed, Account must have user with role ACCOUNT_OWNER
 
-        Map<String, List<ValidationError>> errors = new HashMap<>();
+        var errors = createMapForLogicalErrors();
+
         List<User> usersFromDatabaseWithRoleAccountOwner = service.findAllByRoleAndAccount_IdAndIdNot(
                 roleService.getAccountOwnerRole(), entity.getAccount().getId(), entity.getId()
         );
@@ -158,17 +176,25 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         boolean newUserHasRoleAccountOwner = entity.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString());
 
         if (oldUserHasRoleAccountOwner && newUserHasRoleAccountOwner) {
-            errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,
-                    format(NOT_UNIQUE_MESSAGE, USER_WITH_ROLE_ACCOUNT_OWNER))));
+            errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(
+                    NOT_UNIQUE_CODE,
+                    format(NOT_UNIQUE_MESSAGE, USER_WITH_ROLE_ACCOUNT_OWNER)
+            )));
         }
         if (!oldUserHasRoleAccountOwner && !newUserHasRoleAccountOwner) {
-            errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,
-                    ACCOUNT_MUST_HAVE_USER_WITH_ROLE_ACCOUNT_OWNER)));
+            errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(
+                    NOT_UNIQUE_CODE,
+                    ACCOUNT_MUST_HAVE_USER_WITH_ROLE_ACCOUNT_OWNER
+            )));
         }
-        if (!errors.isEmpty()) {
-            log.error(FIELDS_ARE_NOT_VALID, errors);
-            throw new LogicalValidationException(VALIDATION_FAILED, errors);
+        if (newUserHasRoleAccountOwner && !entity.getEmail().equals(userFromDatabase.getEmail())) {
+            addValidationErrorIntoErrors(
+                    USER_WITH_ROLE_ACCOUNT_OWNER,
+                    YOU_CAN_EDIT_EMAIL_OF_THE_USER_WITH_A_ROLE_ACCOUNT_OWNER_ONLY_VIA_SPECIAL_PROCESS,
+                    errors
+            );
         }
+        ifErrorsNotEmptyThrowLogicalValidationException(errors);
     }
 
 }
