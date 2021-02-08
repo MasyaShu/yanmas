@@ -5,15 +5,14 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import ru.itterminal.botdesk.aau.util.AAUConstants;
 import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
-import ru.itterminal.botdesk.aau.util.AAUConstants;
 
 @Getter
 @Setter

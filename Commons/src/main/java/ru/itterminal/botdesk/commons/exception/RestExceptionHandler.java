@@ -63,12 +63,20 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(FailedSaveEntityException.class)
+    @ExceptionHandler({FailedSaveEntityException.class})
     public ResponseEntity<?> handleFailedSaveEntityException(FailedSaveEntityException ex, HttpServletRequest request) {
         var apiError = new ApiError(HttpStatus.CONFLICT, "Save entity", ex).withRequest(request);
         log.warn(ex.getMessage());
         return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
     }
+
+    @ExceptionHandler({AwsSesException.class})
+    public ResponseEntity<?> handleAwsSesException(AwsSesException ex, HttpServletRequest request) {
+        var apiError = new ApiError(HttpStatus.CONFLICT, "AWS SES", ex).withRequest(request);
+        log.warn(ex.getMessage());
+        return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
+    }
+
 
     @ExceptionHandler(LogicalValidationException.class)
     public ResponseEntity<Object> handleLogicalValidationException(LogicalValidationException ex, HttpServletRequest request) {

@@ -25,6 +25,7 @@ import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.projection.UserUniqueFields;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
 import ru.itterminal.botdesk.aau.service.validator.UserOperationValidator;
+import ru.itterminal.botdesk.commons.exception.AwsSesException;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.FailedSaveEntityException;
 import ru.itterminal.botdesk.integration.across_modules.CompletedVerificationAccount;
@@ -34,10 +35,11 @@ import software.amazon.awssdk.services.ses.model.SendRawEmailRequest;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperationValidator, UserRepository> {
 
+    public static final String TICKET_TYPE_SERVICE_IMPL = "ticketTypeServiceImpl";
+    public static final String TICKET_STATUS_SERVICE_IMPL = "ticketStatusServiceImpl";
     @Value("${emailVerificationToken.subject}")
     private String emailVerificationTokenSubject;
 
@@ -82,6 +84,7 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
             + "successful sent";
 
     @Override
+    @Transactional
     public User create(User entity) {
         validator.beforeCreate(entity);
         log.trace(format(CREATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.toString()));
@@ -101,7 +104,7 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
         User createdUser = repository.create(entity);
         log.trace(format(CREATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), createdUser.toString()));
         if (createdUser.getEmailVerificationToken() != null) {
-            SendRawEmailRequest rawEmailRequest = null;
+            SendRawEmailRequest rawEmailRequest;
             try {
                 rawEmailRequest = senderEmailViaAwsSes.createEmail(
                         null,
@@ -113,6 +116,7 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
             }
             catch (MessagingException | IOException e) {
                 log.warn(e.getMessage());
+                throw new AwsSesException(e.getMessage());
             }
             try {
                 senderEmailViaAwsSes.sendEmail(rawEmailRequest);
@@ -120,12 +124,14 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
             }
             catch (Exception e) {
                 log.warn(e.getMessage());
+                throw new AwsSesException(e.getMessage());
             }
         }
         return createdUser;
     }
 
     @Override
+    @Transactional
     public User update(User entity) {
         validator.beforeUpdate(entity);
         log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
@@ -192,6 +198,7 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
         return repository.findAllByRoleAndAccount_Id(role, accountId);
     }
 
+    @Transactional
     public void verifyEmailToken(String token) {
         log.trace(START_VERIFY_EMAIL_TOKEN, token);
         UUID userId = null;
@@ -215,21 +222,22 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
             throw new FailedSaveEntityException(FAILED_SAVE_USER_AFTER_VERIFY_EMAIL_TOKEN);
         }
         var ticketTypeServiceImpl =
-                (CompletedVerificationAccount) appContext.getBean("ticketTypeServiceImpl");
+                (CompletedVerificationAccount) appContext.getBean(TICKET_TYPE_SERVICE_IMPL);
         ticketTypeServiceImpl.actionAfterCompletedVerificationAccount(user.getAccount().getId());
 
         var ticketStatusServiceImpl =
-                (CompletedVerificationAccount) appContext.getBean("ticketStatusServiceImpl");
+                (CompletedVerificationAccount) appContext.getBean(TICKET_STATUS_SERVICE_IMPL);
         ticketStatusServiceImpl.actionAfterCompletedVerificationAccount(user.getAccount().getId());
     }
 
+    @Transactional
     public void requestPasswordReset(String email) {
         log.trace(START_REQUEST_PASSWORD_RESET_BY_EMAIL, email);
         User user = findByEmail(email);
         String token = jwtProvider.createToken(user.getId());
         user.setPasswordResetToken(token);
         repository.save(user);
-        SendRawEmailRequest rawEmailRequest = null;
+        SendRawEmailRequest rawEmailRequest;
         try {
             rawEmailRequest = senderEmailViaAwsSes.createEmail(
                     null,
@@ -241,6 +249,7 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
         }
         catch (MessagingException | IOException e) {
             log.warn(e.getMessage());
+            throw new AwsSesException(e.getMessage());
         }
         try {
             senderEmailViaAwsSes.sendEmail(rawEmailRequest);
@@ -248,9 +257,11 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
         }
         catch (Exception e) {
             log.warn(e.getMessage());
+            throw new AwsSesException(e.getMessage());
         }
     }
 
+    @Transactional
     public void resetPassword(String token, String newPassword) {
         log.trace(START_RESET_PASSWORD_BY_TOKEN_AND_NEW_PASSWORD, token, newPassword);
         UUID userId = null;
