@@ -84,7 +84,7 @@ public class AuthenticationControllerV1 {
             @NotEmpty
             @RequestParam(value = "newEmail") String newEmail
     ) {
-        userService.requestEmailUpdate(newEmail);
+        userService.requestUpdateEmailOfAccountOwner(newEmail);
         return ResponseEntity.ok(TOKEN_FOR_UPDATE_EMAIL_WAS_SENT_TO_NEW_EMAIL);
     }
 
@@ -103,7 +103,7 @@ public class AuthenticationControllerV1 {
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER')")
     @GetMapping(path = "/email-update")
     public ResponseEntity<String> emailUpdate(@RequestParam(value = "token") @NotEmpty String token) {
-        userService.updateEmail(token);
+        userService.updateEmailOfAccountOwner(token);
         return ResponseEntity.ok(EMAIL_WAS_SUCCESSFULLY_UPDATED);
     }
 }

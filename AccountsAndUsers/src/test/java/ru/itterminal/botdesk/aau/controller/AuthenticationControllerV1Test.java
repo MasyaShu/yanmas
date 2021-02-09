@@ -21,6 +21,7 @@ import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_PASSWORD;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_NOT_BE_NULL;
 import static ru.itterminal.botdesk.security.config.TestSecurityConfig.EMAIL_1;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -61,9 +62,7 @@ import ru.itterminal.botdesk.security.jwt.JwtProvider;
 @ActiveProfiles("Test")
 class AuthenticationControllerV1Test {
 
-    public static final String EMAIL_UPDATE_TOKEN_MUST_NOT_BE_EMPTY = "emailUpdate.token: must not be empty";
-    public static final String NOT_BE_EMPTY_REQUEST_EMAIL_UPDATE_NEW_EMAIL_INVALID_EMAIL =
-            "requestEmailUpdate.newEmail: Invalid email, requestEmailUpdate.newEmail: must not be empty";
+    public static final String MUST_NOT_BE_EMPTY = "must not be empty";
     @MockBean
     private UserServiceImpl userService;
 
@@ -274,7 +273,7 @@ class AuthenticationControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").value(TOKEN_FOR_UPDATE_EMAIL_WAS_SENT_TO_NEW_EMAIL));
-        verify(userService, times(1)).requestEmailUpdate(EMAIL_1);
+        verify(userService, times(1)).requestUpdateEmailOfAccountOwner(EMAIL_1);
     }
 
     @Test
@@ -285,7 +284,7 @@ class AuthenticationControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
-        verify(userService, times(0)).requestEmailUpdate(EMAIL_1);
+        verify(userService, times(0)).requestUpdateEmailOfAccountOwner(EMAIL_1);
     }
 
     @Test
@@ -299,7 +298,7 @@ class AuthenticationControllerV1Test {
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers
                                    .jsonPath("$.detail", INVALID_EMAIL).exists());
-        verify(userService, times(0)).requestEmailUpdate(anyString());
+        verify(userService, times(0)).requestUpdateEmailOfAccountOwner(anyString());
     }
 
     @Test
@@ -312,8 +311,9 @@ class AuthenticationControllerV1Test {
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers
                                    .jsonPath("$.detail")
-                                   .value(NOT_BE_EMPTY_REQUEST_EMAIL_UPDATE_NEW_EMAIL_INVALID_EMAIL));
-        verify(userService, times(0)).requestEmailUpdate(anyString());
+                                   .value(Matchers.containsString(
+                                           MUST_NOT_BE_EMPTY)));
+        verify(userService, times(0)).requestUpdateEmailOfAccountOwner(anyString());
     }
 
     @Test
@@ -325,7 +325,7 @@ class AuthenticationControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").value(EMAIL_WAS_SUCCESSFULLY_UPDATED));
-        verify(userService, times(1)).updateEmail(mockEmailVerificationToken);
+        verify(userService, times(1)).updateEmailOfAccountOwner(mockEmailVerificationToken);
     }
 
     @Test
@@ -336,7 +336,7 @@ class AuthenticationControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
-        verify(userService, times(0)).updateEmail(mockEmailVerificationToken);
+        verify(userService, times(0)).updateEmailOfAccountOwner(mockEmailVerificationToken);
     }
 
     @Test
@@ -348,7 +348,9 @@ class AuthenticationControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath("$.detail").value(EMAIL_UPDATE_TOKEN_MUST_NOT_BE_EMPTY));
-        verify(userService, times(0)).updateEmail(anyString());
+                                   .jsonPath("$.detail")
+                                   .value(Matchers.containsString(
+                                           MUST_NOT_BE_EMPTY)));
+        verify(userService, times(0)).updateEmailOfAccountOwner(anyString());
     }
 }
