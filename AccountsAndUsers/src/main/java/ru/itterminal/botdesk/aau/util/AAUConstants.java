@@ -15,7 +15,6 @@ public class AAUConstants {
             "Password expression consists only from latin that requires one lower "
                     + "case letter, "
                     + "one upper case letter, one digit, 6-20 length, and no spaces.";
-    public static final String MUST_BE_ANY_OF_NAME = "must be any of: name";
 
     private AAUConstants() {
     }

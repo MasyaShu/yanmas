@@ -2,7 +2,6 @@ package ru.itterminal.botdesk.aau.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,8 +10,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.itterminal.botdesk.aau.controller.AuthenticationControllerV1.EMAIL_IS_VERIFIED;
+import static ru.itterminal.botdesk.aau.controller.AuthenticationControllerV1.EMAIL_WAS_SUCCESSFULLY_UPDATED;
+import static ru.itterminal.botdesk.aau.controller.AuthenticationControllerV1.INVALID_USERNAME_OR_PASSWORD;
+import static ru.itterminal.botdesk.aau.controller.AuthenticationControllerV1.PASSWORD_WAS_RESET_SUCCESSFULLY;
+import static ru.itterminal.botdesk.aau.controller.AuthenticationControllerV1.TOKEN_FOR_RESET_PASSWORD_WAS_SENT_TO_EMAIL;
+import static ru.itterminal.botdesk.aau.controller.AuthenticationControllerV1.TOKEN_FOR_UPDATE_EMAIL_WAS_SENT_TO_NEW_EMAIL;
+import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_EMAIL;
+import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_PASSWORD;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_NOT_BE_NULL;
 import static ru.itterminal.botdesk.security.config.TestSecurityConfig.EMAIL_1;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -42,9 +51,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ru.itterminal.botdesk.aau.model.dto.AuthenticationRequestDto;
 import ru.itterminal.botdesk.aau.model.dto.ResetPasswordDto;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
-import ru.itterminal.botdesk.aau.util.AAUConstants;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
-import ru.itterminal.botdesk.commons.util.CommonConstants;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
 
@@ -55,6 +62,7 @@ import ru.itterminal.botdesk.security.jwt.JwtProvider;
 @ActiveProfiles("Test")
 class AuthenticationControllerV1Test {
 
+    public static final String MUST_NOT_BE_EMPTY = "must not be empty";
     @MockBean
     private UserServiceImpl userService;
 
@@ -93,9 +101,9 @@ class AuthenticationControllerV1Test {
     private static final String API = "api/v1/auth/";
     private static final String PASSWORD_RESET = "password-reset";
     private static final String mockEmailVerificationToken = "eyJhbGciOiJIUzI1NiJ9";
-    private static final String mockResetPasswordToken = "54434654r5423wfnsdfnw34";
-    private static final String VALID_PASSWORD = "pAssword12345";
-    private static final String INVALID_PASSWORD = "12445";
+    private static final String mockResetPasswordToken = "54434654r5423";
+    private static final String PASSWORD_VALID = "passwordA12345";
+    private static final String PASSWORD_INVALID = "12445";
 
     private AuthenticationRequestDto requestDto;
     private ResetPasswordDto resetPasswordDto;
@@ -105,12 +113,12 @@ class AuthenticationControllerV1Test {
         requestDto = AuthenticationRequestDto
                 .builder()
                 .email(EMAIL_1)
-                .password(VALID_PASSWORD)
+                .password(PASSWORD_VALID)
                 .build();
         resetPasswordDto = ResetPasswordDto
                 .builder()
                 .token(mockResetPasswordToken)
-                .password(VALID_PASSWORD)
+                .password(PASSWORD_VALID)
                 .build();
     }
 
@@ -125,7 +133,6 @@ class AuthenticationControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value(EMAIL_1))
                 .andExpect(jsonPath("$.token").doesNotExist());
         verify(authenticationManager, times(1)).authenticate(any());
     }
@@ -141,27 +148,25 @@ class AuthenticationControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.detail").value(AuthenticationControllerV1.INVALID_USERNAME_OR_PASSWORD));
+                .andExpect(jsonPath("$.detail").value(INVALID_USERNAME_OR_PASSWORD));
         verify(authenticationManager, times(1)).authenticate(any());
     }
 
     @Test
     @WithAnonymousUser
     void verifyEmailToken_shouldVerifyEmailToken_whenPassedValidToken() throws Exception {
-        doNothing().when(userService).verifyEmailToken(mockEmailVerificationToken);
         MockHttpServletRequestBuilder request =
                 get(HOST + PORT + API + "email-verify?token=" + mockEmailVerificationToken);
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(AuthenticationControllerV1.EMAIL_IS_VERIFIED));
+                .andExpect(jsonPath("$").value(EMAIL_IS_VERIFIED));
         verify(userService, times(1)).verifyEmailToken(mockEmailVerificationToken);
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
     void verifyEmailToken_shouldGetStatusForbidden_whenUserIsNotAnonymous() throws Exception {
-        doNothing().when(userService).verifyEmailToken(mockEmailVerificationToken);
         MockHttpServletRequestBuilder request =
                 get(HOST + PORT + API + "email-verify?token=" + mockEmailVerificationToken);
         mockMvc.perform(request)
@@ -173,20 +178,18 @@ class AuthenticationControllerV1Test {
     @Test
     @WithAnonymousUser
     void requestPasswordReset_shouldGetStatusOk_whenPassedValidEmail() throws Exception {
-        doNothing().when(userService).requestPasswordReset(EMAIL_1);
         MockHttpServletRequestBuilder request =
                 get(HOST + PORT + API + "request-password-reset?email=" + EMAIL_1);
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(AuthenticationControllerV1.TOKEN_FOR_RESET_PASSWORD_WAS_SENT_TO_EMAIL));
+                .andExpect(jsonPath("$").value(TOKEN_FOR_RESET_PASSWORD_WAS_SENT_TO_EMAIL));
         verify(userService, times(1)).requestPasswordReset(EMAIL_1);
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
     void requestPasswordReset_shouldGetStatusForbidden_whenUserIsNotAnonymous() throws Exception {
-        doNothing().when(userService).requestPasswordReset(EMAIL_1);
         MockHttpServletRequestBuilder request =
                 get(HOST + PORT + API + "request-password-reset?email=" + EMAIL_1);
         mockMvc.perform(request)
@@ -198,7 +201,6 @@ class AuthenticationControllerV1Test {
     @Test
     @WithAnonymousUser
     void passwordReset_shouldGetStatusOk_whenPassedValidTokenAndNewPassword() throws Exception {
-        doNothing().when(userService).resetPassword(mockResetPasswordToken, VALID_PASSWORD);
         MockHttpServletRequestBuilder request =
                 get(HOST + PORT + API + PASSWORD_RESET)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -207,15 +209,14 @@ class AuthenticationControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(AuthenticationControllerV1.PASSWORD_WAS_RESET_SUCCESSFULLY));
-        verify(userService, times(1)).resetPassword(mockResetPasswordToken, VALID_PASSWORD);
+                .andExpect(jsonPath("$").value(PASSWORD_WAS_RESET_SUCCESSFULLY));
+        verify(userService, times(1)).resetPassword(mockResetPasswordToken, PASSWORD_VALID);
     }
 
     @Test
     @WithAnonymousUser
     void passwordReset_shouldGetStatusBadRequestWithErrorsDescriptions_whenPassedInvalidPassword() throws Exception {
-        resetPasswordDto.setPassword(INVALID_PASSWORD);
-        doNothing().when(userService).resetPassword(mockResetPasswordToken, INVALID_PASSWORD);
+        resetPasswordDto.setPassword(PASSWORD_INVALID);
         MockHttpServletRequestBuilder request =
                 get(HOST + PORT + API + PASSWORD_RESET)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -225,8 +226,8 @@ class AuthenticationControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.password[?(@.message == '%s')]", AAUConstants.INVALID_PASSWORD).exists());
-        verify(userService, times(0)).resetPassword(mockResetPasswordToken, INVALID_PASSWORD);
+                                   .jsonPath("$.errors.password[?(@.message == '%s')]", INVALID_PASSWORD).exists());
+        verify(userService, times(0)).resetPassword(mockResetPasswordToken, PASSWORD_INVALID);
     }
 
     @Test
@@ -234,7 +235,6 @@ class AuthenticationControllerV1Test {
     void passwordReset_shouldGetStatusBadRequestWithErrorsDescriptions_whenPassedDataIsNull() throws Exception {
         resetPasswordDto.setPassword(null);
         resetPasswordDto.setToken(null);
-        doNothing().when(userService).resetPassword(anyString(), anyString());
         MockHttpServletRequestBuilder request =
                 get(HOST + PORT + API + PASSWORD_RESET)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -244,17 +244,16 @@ class AuthenticationControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.token[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists())
+                                   .jsonPath("$.errors.token[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.password[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
-                        .exists());
+                                   .jsonPath("$.errors.password[?(@.message == '%s')]", MUST_NOT_BE_NULL)
+                                   .exists());
         verify(userService, times(0)).resetPassword(anyString(), anyString());
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
     void passwordReset_shouldGetStatusForbidden_whenUserIsNotAnonymous() throws Exception {
-        doNothing().when(userService).resetPassword(mockResetPasswordToken, INVALID_PASSWORD);
         MockHttpServletRequestBuilder request = get(HOST + PORT + API + PASSWORD_RESET)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -263,5 +262,95 @@ class AuthenticationControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isForbidden());
         verify(userService, times(0)).resetPassword(mockEmailVerificationToken, EMAIL_1);
+    }
+
+    @Test
+    @WithUserDetails("OWNER_ACCOUNT_1_IS_INNER_GROUP")
+    void requestEmailUpdate_shouldGetStatusOk_whenPassedValidEmail() throws Exception {
+        MockHttpServletRequestBuilder request =
+                get(HOST + PORT + API + "request-email-update?newEmail=" + EMAIL_1);
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").value(TOKEN_FOR_UPDATE_EMAIL_WAS_SENT_TO_NEW_EMAIL));
+        verify(userService, times(1)).requestUpdateEmailOfAccountOwner(EMAIL_1);
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
+    void requestEmailUpdate_shouldGetStatusForbidden_whenUserIsNotAccountOwner() throws Exception {
+        MockHttpServletRequestBuilder request =
+                get(HOST + PORT + API + "request-email-update?newEmail=" + EMAIL_1);
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isForbidden());
+        verify(userService, times(0)).requestUpdateEmailOfAccountOwner(EMAIL_1);
+    }
+
+    @Test
+    @WithUserDetails("OWNER_ACCOUNT_1_IS_INNER_GROUP")
+    void requestEmailUpdate_shouldGetStatusBadRequestWithErrorsDescriptions_whenPassedInvalidNewEmail()
+            throws Exception {
+        MockHttpServletRequestBuilder request =
+                get(HOST + PORT + API + "request-email-update?newEmail=" + INVALID_EMAIL);
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers
+                                   .jsonPath("$.detail", INVALID_EMAIL).exists());
+        verify(userService, times(0)).requestUpdateEmailOfAccountOwner(anyString());
+    }
+
+    @Test
+    @WithUserDetails("OWNER_ACCOUNT_1_IS_INNER_GROUP")
+    void requestEmailUpdate_shouldGetStatusBadRequestWithErrorsDescriptions_whenPassedEmptyNewEmail() throws Exception {
+        var request =
+                get(HOST + PORT + API + "request-email-update?newEmail=");
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers
+                                   .jsonPath("$.detail")
+                                   .value(Matchers.containsString(
+                                           MUST_NOT_BE_EMPTY)));
+        verify(userService, times(0)).requestUpdateEmailOfAccountOwner(anyString());
+    }
+
+    @Test
+    @WithUserDetails("OWNER_ACCOUNT_1_IS_INNER_GROUP")
+    void emailUpdate_shouldGetStatusOk_whenPassedValidToken() throws Exception {
+        var request =
+                get(HOST + PORT + API + "email-update?token=" + mockEmailVerificationToken);
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").value(EMAIL_WAS_SUCCESSFULLY_UPDATED));
+        verify(userService, times(1)).updateEmailOfAccountOwner(mockEmailVerificationToken);
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
+    void emailUpdate_shouldGetStatusForbidden_whenUserIsNotAccountOwner() throws Exception {
+        var request
+                = get(HOST + PORT + API + "email-update?token=" + mockEmailVerificationToken);
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isForbidden());
+        verify(userService, times(0)).updateEmailOfAccountOwner(mockEmailVerificationToken);
+    }
+
+    @Test
+    @WithUserDetails("OWNER_ACCOUNT_1_IS_INNER_GROUP")
+    void emailUpdate_shouldGetStatusBadRequestWithErrorsDescriptions_whenPassedEmptyToken() throws Exception {
+        MockHttpServletRequestBuilder request =
+                get(HOST + PORT + API + "email-update?token=");
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers
+                                   .jsonPath("$.detail")
+                                   .value(Matchers.containsString(
+                                           MUST_NOT_BE_EMPTY)));
+        verify(userService, times(0)).updateEmailOfAccountOwner(anyString());
     }
 }
