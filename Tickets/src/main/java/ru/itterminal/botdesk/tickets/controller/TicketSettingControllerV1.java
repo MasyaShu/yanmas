@@ -3,7 +3,6 @@ package ru.itterminal.botdesk.tickets.controller;
 import static java.lang.String.format;
 
 import java.security.Principal;
-import java.util.List;
 import java.util.UUID;
 
 import javax.validation.Valid;
@@ -71,40 +70,10 @@ public class TicketSettingControllerV1 extends BaseController {
            @Validated(Create.class) @RequestBody TicketSettingDtoRequest request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
         TicketSetting ticketSetting = modelMapper.map(request, TicketSetting.class);
-
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        ticketSetting.setAccount(accountService.findById(jwtUser.getAccountId()));
-
-        ticketSetting.setGroup(groupService.findByIdAndAccountId(request.getGroup()));
-        ticketSetting.setAuthor(userService.findByIdAndAccountId(request.getAuthor()));
-
-        List<User> observers = userService.findAllByAccountIdAndListId(request.getObservers());
-        ticketSetting.setObservers(observers);
-
-        List<User> executors = userService.findAllByAccountIdAndListId(request.getExecutors());
-        ticketSetting.setObservers(executors);
-
-        ticketSetting.setTicketTypeForNew(
-                ticketTypeService.findByIdAndAccountId(request.getTicketTypeForNew())
-        );
-
-        ticketSetting.setTicketStatusForNew(
-                ticketStatusService.findByIdAndAccountId(request.getTicketStatusForNew())
-        );
-
-        ticketSetting.setTicketStatusForReopen(
-                ticketStatusService.findByIdAndAccountId(request.getTicketStatusForReopen())
-        );
-        ticketSetting.setTicketStatusForClose(
-                ticketStatusService.findByIdAndAccountId(request.getTicketStatusForClose())
-        );
-        ticketSetting.setTicketStatusForCancel(
-                ticketStatusService.findByIdAndAccountId(request.getTicketStatusForCancel())
-        );
-
-        TicketSetting createdTicketSetting = ticketSettingService.create(ticketSetting);
-        TicketSettingDtoResponse returnedTicketSetting =
-                modelMapper.map(createdTicketSetting, TicketSettingDtoResponse.class);
+        setNestedObjectsIntoEntityFromEntityDtoRequest(ticketSetting, request, jwtUser.getAccountId());
+        var createdTicketSetting = ticketSettingService.create(ticketSetting);
+        var returnedTicketSetting = modelMapper.map(createdTicketSetting, TicketSettingDtoResponse.class);
         log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdTicketSetting);
         return new ResponseEntity<>(returnedTicketSetting, HttpStatus.CREATED);
     }
@@ -124,40 +93,10 @@ public class TicketSettingControllerV1 extends BaseController {
            @Validated(Update.class) @RequestBody TicketSettingDtoRequest request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
         TicketSetting ticketSetting = modelMapper.map(request, TicketSetting.class);
-
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        ticketSetting.setAccount(accountService.findById(jwtUser.getAccountId()));
-
-        ticketSetting.setGroup(groupService.findByIdAndAccountId(request.getGroup()));
-        ticketSetting.setAuthor(userService.findByIdAndAccountId(request.getAuthor()));
-
-        List<User> observers = userService.findAllByAccountIdAndListId(request.getObservers());
-        ticketSetting.setObservers(observers);
-
-        List<User> executors = userService.findAllByAccountIdAndListId(request.getExecutors());
-        ticketSetting.setObservers(executors);
-
-        ticketSetting.setTicketTypeForNew(
-                ticketTypeService.findByIdAndAccountId(request.getTicketTypeForNew())
-        );
-
-        ticketSetting.setTicketStatusForNew(
-                ticketStatusService.findByIdAndAccountId(request.getTicketStatusForNew())
-        );
-
-        ticketSetting.setTicketStatusForReopen(
-                ticketStatusService.findByIdAndAccountId(request.getTicketStatusForReopen())
-        );
-        ticketSetting.setTicketStatusForClose(
-                ticketStatusService.findByIdAndAccountId(request.getTicketStatusForClose())
-        );
-        ticketSetting.setTicketStatusForCancel(
-                ticketStatusService.findByIdAndAccountId(request.getTicketStatusForCancel())
-        );
-
-        TicketSetting updatedTicketSetting = ticketSettingService.update(ticketSetting);
-        TicketSettingDtoResponse returnedTicketSetting =
-                modelMapper.map(updatedTicketSetting, TicketSettingDtoResponse.class);
+        setNestedObjectsIntoEntityFromEntityDtoRequest(ticketSetting, request, jwtUser.getAccountId());
+        var updatedTicketSetting = ticketSettingService.update(ticketSetting);
+        var returnedTicketSetting = modelMapper.map(updatedTicketSetting, TicketSettingDtoResponse.class);
         log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedTicketSetting);
         return new ResponseEntity<>(returnedTicketSetting, HttpStatus.OK);
     }
@@ -202,5 +141,26 @@ public class TicketSettingControllerV1 extends BaseController {
         var returnedTicketSetting = modelMapper.map(ticketSetting, TicketSettingDtoResponse.class);
         log.debug(FIND_BY_AUTHOR_ID_FINISH_MESSAGE, ENTITY_NAME, authorId);
         return new ResponseEntity<>(returnedTicketSetting, HttpStatus.OK);
+    }
+
+    private void setNestedObjectsIntoEntityFromEntityDtoRequest
+            (TicketSetting ticketSetting, TicketSettingDtoRequest request, UUID accountId) {
+        ticketSetting.setAccount(accountService.findById(accountId));
+        ticketSetting.setAuthor(userService.findByIdAndAccountId(request.getAuthor()));
+        if (ticketSetting.getAuthor() != null) {
+            ticketSetting.setGroup(ticketSetting.getAuthor().getGroup());
+        } else {
+            ticketSetting.setGroup(groupService.findByIdAndAccountId(request.getGroup()));
+        }
+        ticketSetting.setObservers(userService.findAllByAccountIdAndListId(request.getObservers()));
+        ticketSetting.setObservers(userService.findAllByAccountIdAndListId(request.getExecutors()));
+        ticketSetting.setTicketTypeForNew(ticketTypeService.findByIdAndAccountId(request.getTicketTypeForNew()));
+        ticketSetting.setTicketStatusForNew(ticketStatusService.findByIdAndAccountId(request.getTicketStatusForNew()));
+        ticketSetting
+                .setTicketStatusForReopen(ticketStatusService.findByIdAndAccountId(request.getTicketStatusForReopen()));
+        ticketSetting
+                .setTicketStatusForClose(ticketStatusService.findByIdAndAccountId(request.getTicketStatusForClose()));
+        ticketSetting
+                .setTicketStatusForCancel(ticketStatusService.findByIdAndAccountId(request.getTicketStatusForCancel()));
     }
 }
