@@ -276,7 +276,7 @@ class UserOperationValidatorTest {
                 .thenReturn(List.of());
         when(service.findById(newUser.getId())).thenReturn(userFromDatabase);
         when(roleService.getAccountOwnerRole()).thenReturn(roleAccountOwner);
-        when(ticketServiceImpl.countEntityOwnerByUser(any())).thenReturn(2L);
+        when(ticketServiceImpl.countEntityWithUser(any())).thenReturn(2L);
         var logicalValidationException
                 = assertThrows(LogicalValidationException.class, () -> validator.beforeUpdate(newUser));
         assertEquals(

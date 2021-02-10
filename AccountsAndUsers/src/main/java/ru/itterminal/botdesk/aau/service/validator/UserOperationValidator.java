@@ -206,7 +206,7 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         var errors = createMapForLogicalErrors();
         var ticketServiceImpl =
                 (RequestsFromModuleAccountAndUsers) appContext.getBean("ticketServiceImpl");
-        long countTicket = ticketServiceImpl.countEntityOwnerByUser(entity.getId());
+        long countTicket = ticketServiceImpl.countEntityWithUser(entity.getId());
         if (countTicket!=0) {
             addValidationErrorIntoErrors(
                     CHANGE_USER_GROUP,
