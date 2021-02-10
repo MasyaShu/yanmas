@@ -136,7 +136,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
     }
 
     @Override
-    public long countEntityOwnerByUser(UUID uuid) {
+    public long countEntityWithUser(UUID uuid) {
         var filterByAuthorOfTicket = BaseEntityFilter.builder()
                 .typeComparison(EXIST_IN.toString())
                 .listOfIdEntities(List.of(uuid))
