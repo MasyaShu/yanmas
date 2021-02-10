@@ -1,42 +1,55 @@
 package ru.itterminal.botdesk.tickets.service.impl;
 
-import static java.lang.String.format;
-
-import java.util.UUID;
-
-import javax.persistence.OptimisticLockException;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.service.impl.CrudServiceWithAccountImpl;
+import ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter;
+import ru.itterminal.botdesk.commons.model.filter.ListOfBaseEntityFilter;
+import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.botdesk.files.model.File;
 import ru.itterminal.botdesk.files.service.FileServiceImpl;
+import ru.itterminal.botdesk.integration.across_modules.RequestsFromModuleAccountAndUsers;
 import ru.itterminal.botdesk.tickets.model.Ticket;
 import ru.itterminal.botdesk.tickets.repository.TicketRepository;
 import ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator;
+
+import javax.persistence.OptimisticLockException;
+import java.util.List;
+import java.util.UUID;
+
+import static java.lang.String.format;
+import static ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
+import static ru.itterminal.botdesk.commons.model.filter.ListOfBaseEntityFilter.TypeComparisonForListOfBaseEntityFilter.CONTAINS_ALL_OF_LIST;
 
 @SuppressWarnings("unused")
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, TicketOperationValidator, TicketRepository> {
+public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, TicketOperationValidator, TicketRepository> implements RequestsFromModuleAccountAndUsers {
 
     public static final String YOU_MUST_USE_ANOTHER_METHOD_CREATE =
             "You must use method create(Ticket entity, User currentUser)";
     public static final String YOU_MUST_USE_ANOTHER_METHOD_UPDATE =
             "You must use method update(Ticket entity, User currentUser)";
     public static final String BY_USER = " by user: ";
+    public static final String AUTHOR = "author";
+    public static final String OBSERVERS = "observers";
+    public static final String EXECUTORS = "executors";
 
     private final TicketCounterServiceImpl ticketCounterService;
     private final TicketSettingServiceImpl ticketSettingService;
     private final FileServiceImpl fileService;
+    private final SpecificationsFactory specFactory;
+
 
     @Override
     @Deprecated
@@ -122,4 +135,27 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
         }
     }
 
+    @Override
+    public long countEntityOwnerByUser(UUID uuid) {
+        var filterByAuthorOfTicket = BaseEntityFilter.builder()
+                .typeComparison(EXIST_IN.toString())
+                .listOfIdEntities(List.of(uuid))
+                .build();
+        Specification<Ticket> additionConditionByAuthorOfTicket =
+                specFactory.makeSpecification(Ticket.class, AUTHOR, filterByAuthorOfTicket);
+        var filterByListOfObserversAndExecutors = ListOfBaseEntityFilter.builder()
+                .typeComparison(CONTAINS_ALL_OF_LIST.toString())
+                .listOfIdEntities(List.of(uuid))
+                .build();
+        Specification<Ticket> additionConditionByObserversOfTicket =
+                specFactory.makeSpecification(Ticket.class, OBSERVERS, filterByListOfObserversAndExecutors);
+        Specification<Ticket> additionConditionByExecutorsOfTicket =
+                specFactory.makeSpecification(Ticket.class, EXECUTORS, filterByListOfObserversAndExecutors);
+
+        additionConditionByAuthorOfTicket.or(additionConditionByObserversOfTicket).or(additionConditionByExecutorsOfTicket);
+
+        var pageable = PageRequest.of(1, 25, Sort.by(Sort.Direction.fromString("ASC"), "displayName"));
+        var foundTickets = findAllByFilter(additionConditionByAuthorOfTicket, pageable);
+        return foundTickets.getTotalElements();
+    }
 }

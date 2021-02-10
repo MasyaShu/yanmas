@@ -23,6 +23,7 @@ import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
 import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
+import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.botdesk.files.service.FileServiceImpl;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
 import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
@@ -54,6 +55,9 @@ class TicketServiceImplTest {
 
     @MockBean
     private JwtUser jwtUser;
+
+    @MockBean
+    private SpecificationsFactory specFactory;
 
     @Autowired
     private TicketServiceImpl service;

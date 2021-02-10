@@ -17,23 +17,6 @@ import javax.persistence.*;
 @NoArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-@NamedEntityGraph(name = "ticket-template-graph",
-        attributeNodes = {
-                @NamedAttributeNode("account"),
-                @NamedAttributeNode(value = "author", subgraph = "user-graph"),
-                @NamedAttributeNode("ticketType")
-        },
-        subgraphs = {
-                @NamedSubgraph(
-                        name = "user-graph",
-                        attributeNodes = {
-                                @NamedAttributeNode("account"),
-                                @NamedAttributeNode("group"),
-                                @NamedAttributeNode("role")
-                        }
-                )
-        }
-)
 public class TicketTemplate extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)

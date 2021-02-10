@@ -9,13 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.ACCESS_IS_DENIED_FOR_SEARCHING_BY_PASSED_ID;
-import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.IS_FORBIDDEN_TO_CHANGE_THE_USER_WITH_THE_ROLE;
-import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.NOT_UNIQUE_CODE;
-import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.NOT_UNIQUE_MESSAGE;
-import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.USER_WITH_ROLE_ACCOUNT_OWNER;
-import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.VALIDATION_FAILED;
-import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.YOU_CAN_EDIT_EMAIL_OF_THE_USER_WITH_A_ROLE_ACCOUNT_OWNER_ONLY_VIA_SPECIAL_PROCESS;
+import static ru.itterminal.botdesk.aau.service.validator.UserOperationValidator.*;
 import static ru.itterminal.botdesk.security.config.TestSecurityConfig.INNER_GROUP_ID;
 import static ru.itterminal.botdesk.security.config.TestSecurityConfig.NOT_INNER_GROUP_ID;
 
@@ -35,6 +29,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -53,6 +48,7 @@ import ru.itterminal.botdesk.aau.service.impl.RoleServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
+import ru.itterminal.botdesk.integration.across_modules.RequestsFromModuleAccountAndUsers;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -67,13 +63,19 @@ class UserOperationValidatorTest {
     @Mock
     private UserUniqueFields userUniqueFields;
 
+    @Mock
+    private ApplicationContext appContext;
+
     @MockBean
     private RoleServiceImpl roleService;
+
+    @MockBean(name = "ticketServiceImpl")
+    private RequestsFromModuleAccountAndUsers ticketServiceImpl;
 
     final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @Autowired
-    private final UserOperationValidator validator = new UserOperationValidator(service, roleService);
+    private final UserOperationValidator validator = new UserOperationValidator(service, roleService, appContext);
 
     private static final String EXIST_EMAIL = "mail@mal.ru";
     private static final String NEW_USER_EMAIL = "mail_new@mal.ru";
@@ -262,6 +264,24 @@ class UserOperationValidatorTest {
         assertEquals(
                 YOU_CAN_EDIT_EMAIL_OF_THE_USER_WITH_A_ROLE_ACCOUNT_OWNER_ONLY_VIA_SPECIAL_PROCESS,
                 logicalValidationException.getFieldErrors().get(USER_WITH_ROLE_ACCOUNT_OWNER).get(0).getMessage()
+        );
+    }
+
+    @Test
+    @WithUserDetails("OWNER_ACCOUNT_1_IS_INNER_GROUP")
+    void beforeUpdate_shouldGetLogicalValidationException2_whenUserHasAGroupChangeAndIsAlreadyInTheTickets() {
+        newUser.setRole(roleAccountOwner);
+        userFromDatabase.setGroup(Group.builder().id(UUID.randomUUID()).build());
+        when(service.findAllByRoleAndAccount_IdAndIdNot(any(), any(), any()))
+                .thenReturn(List.of());
+        when(service.findById(newUser.getId())).thenReturn(userFromDatabase);
+        when(roleService.getAccountOwnerRole()).thenReturn(roleAccountOwner);
+        when(ticketServiceImpl.countEntityOwnerByUser(any())).thenReturn(2L);
+        var logicalValidationException
+                = assertThrows(LogicalValidationException.class, () -> validator.beforeUpdate(newUser));
+        assertEquals(
+                THE_USER_CANNOT_CHANGE_THE_GROUP_BECAUSE_HE_IS_PRESENT_IN_TICKETS,
+                logicalValidationException.getFieldErrors().get(CHANGE_USER_GROUP).get(0).getMessage()
         );
     }
 
