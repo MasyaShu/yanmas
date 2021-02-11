@@ -40,7 +40,6 @@
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
-            <version>4.3.3</version>
             <!--https://github.com/rest-assured/rest-assured/issues/1209#issue-488658877-->
             <exclusions>
                 <exclusion>
@@ -48,6 +47,18 @@
                     <artifactId>jaxb-osgi</artifactId>
                 </exclusion>
             </exclusions>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>json-path</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>json-schema-validator</artifactId>
             <scope>test</scope>
         </dependency>
 
