@@ -63,7 +63,7 @@ class AccountOperationValidatorTest {
 
     @Test
     void checkUniqueness_shouldGetTrue_whenPassedValidData() {
-        when(userService.findByEmail(any())).thenThrow(EntityNotExistException.class);
+        when(userService.findByEmailForCreateAccount(any())).thenThrow(EntityNotExistException.class);
         assertTrue(validator.checkUniqueness(TestSecurityConfig.EMAIL_1));
     }
 
