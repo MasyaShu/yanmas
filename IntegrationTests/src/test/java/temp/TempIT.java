@@ -1,7 +1,7 @@
 package temp;
 
 import io.restassured.RestAssured;
-import org.json.JSONException;
+import io.restassured.response.Response;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,21 +11,27 @@ import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 
+import java.util.HashMap;
+
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
 @Import(TestSecurityConfig.class)
 class TempIT {
 
-    public static final String URL_API = "https://localhost:8080/api/v1/";
     public static final String CREATE_ACCOUNT = "create-account";
     public static final String APPLICATION_JSON = "application/json";
+    public static final String REQUEST_PASSWORD_RESET = "auth/request-password-reset";
+    public static final String NOT_EXIS_EMAIL = "notExisEmail@gmail.com";
+    public static final String NOT_FOUND_USER_BY_EMAIL = "Not found user by email: ";
     private final UserTestHelper userTestHelper = new UserTestHelper();
     private final AccountTestHelper accountTestHelper = new AccountTestHelper();
 
     @BeforeEach
     void setUp() {
         RestAssured.useRelaxedHTTPSValidation();
+        RestAssured.baseURI = "https://localhost:8080";
+        RestAssured.basePath = "/api/v1/";
     }
 
     @Test
@@ -33,23 +39,19 @@ class TempIT {
         var user = userTestHelper.getRandomValidEntity();
         var account = accountTestHelper.getRandomValidEntity();
 
-        JSONObject requestParams = null;
-        try {
-            requestParams = new JSONObject()
-                    .put("name", account.getName())
-                    .put("nameGroupAccountOwner", account.getName())
-                    .put("passwordAccountOwner", user.getPassword())
-                    .put("emailAccountOwner", user.getEmail());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        HashMap<String, String> jsonMap = new HashMap<>();
+        jsonMap.put("name", account.getName());
+        jsonMap.put("nameGroupAccountOwner", account.getName());
+        jsonMap.put("passwordAccountOwner", user.getPassword());
+        jsonMap.put("emailAccountOwner", user.getEmail());
+        JSONObject jsonRequest = new JSONObject(jsonMap);
 
 
         given().
                 when().
                 contentType(APPLICATION_JSON).
-                body(requestParams.toString()).
-                post(URL_API + CREATE_ACCOUNT).
+                body(jsonRequest.toString()).
+                post(CREATE_ACCOUNT).
                 then()
                 .body("name", equalTo(account.getName()))
                 .body("deleted", equalTo(false))
@@ -59,16 +61,21 @@ class TempIT {
     }
 
     @Test
-    void requestPasswordReset_shouldNotFound_whendEmailNotExist() {
+    void requestPasswordReset_shouldNotFound_whenEmailNotExist() {
 
-        RestAssured.useRelaxedHTTPSValidation();
+        Response response = given().
+                when()
+                .param("email", NOT_EXIS_EMAIL)
+                .get(REQUEST_PASSWORD_RESET)
+                .then()
+                .body("status", equalTo(404))
+                .body("detail", equalTo(NOT_FOUND_USER_BY_EMAIL + NOT_EXIS_EMAIL))
+                .log().body()
+                .statusCode(HttpStatus.NOT_FOUND.value())
+                .extract()
+                .response();
 
-        given().
-                when().
-                //contentType("application/json").
-                        param("email", "value1@gmail.com").
-                get("https://localhost:8080/api/v1/auth/request-password-reset").
-                then().log().body()
-                .statusCode(HttpStatus.NOT_FOUND.value());
+        String type = response.path("type");
+        System.out.print(type);
     }
 }
