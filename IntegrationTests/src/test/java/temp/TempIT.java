@@ -1,36 +1,37 @@
 package temp;
 
 import io.restassured.RestAssured;
-import lombok.SneakyThrows;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.test.context.support.WithUserDetails;
 import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 
 import static io.restassured.RestAssured.given;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.Matchers.equalTo;
 
 @Import(TestSecurityConfig.class)
 class TempIT {
 
-    private UserTestHelper userTestHelper = new UserTestHelper();
-    private AccountTestHelper accountTestHelper = new AccountTestHelper();
+    public static final String URL_API = "https://localhost:8080/api/v1/";
+    public static final String CREATE_ACCOUNT = "create-account";
+    public static final String APPLICATION_JSON = "application/json";
+    private final UserTestHelper userTestHelper = new UserTestHelper();
+    private final AccountTestHelper accountTestHelper = new AccountTestHelper();
 
-    @Test
-    void method_should_when() {
-        assertTrue(true);
+    @BeforeEach
+    void setUp() {
+        RestAssured.useRelaxedHTTPSValidation();
     }
 
     @Test
-    void method_should_whend() {
+    void createAccount_shouldCreated_whenValidData() {
         var user = userTestHelper.getRandomValidEntity();
         var account = accountTestHelper.getRandomValidEntity();
-        RestAssured.useRelaxedHTTPSValidation();
 
         JSONObject requestParams = null;
         try {
@@ -46,15 +47,19 @@ class TempIT {
 
         given().
                 when().
-                contentType("application/json").
+                contentType(APPLICATION_JSON).
                 body(requestParams.toString()).
-                post("https://localhost:8080/api/v1/create-account").
-                then().log().body()
+                post(URL_API + CREATE_ACCOUNT).
+                then()
+                .body("name", equalTo(account.getName()))
+                .body("deleted", equalTo(false))
+                .body("version", equalTo(0))
+                .log().body()
                 .statusCode(HttpStatus.CREATED.value());
     }
 
     @Test
-    void method_should_whendы() {
+    void requestPasswordReset_shouldNotFound_whendEmailNotExist() {
 
         RestAssured.useRelaxedHTTPSValidation();
 
@@ -64,6 +69,6 @@ class TempIT {
                         param("email", "value1@gmail.com").
                 get("https://localhost:8080/api/v1/auth/request-password-reset").
                 then().log().body()
-                .statusCode(HttpStatus.CREATED.value());
+                .statusCode(HttpStatus.NOT_FOUND.value());
     }
 }
