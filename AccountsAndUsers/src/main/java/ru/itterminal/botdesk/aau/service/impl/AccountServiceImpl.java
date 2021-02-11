@@ -16,7 +16,6 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class AccountServiceImpl extends CrudServiceImpl<Account, AccountOperationValidator, AccountRepository> {
 
@@ -27,29 +26,29 @@ public class AccountServiceImpl extends CrudServiceImpl<Account, AccountOperatio
     private static final String START_CREATE_NEW_ACCOUNT = "Start create a new account {}";
     private static final String FINISH_CREATE_NEW_ACCOUNT = "Finish create a new account with name {}";
 
+    @Transactional
     public Account create(AccountCreateDto accountDto) {
         log.trace(START_CREATE_NEW_ACCOUNT, accountDto);
         validator.checkUniqueness(accountDto.getEmailAccountOwner());
         Account account = Account.builder()
                 .name(accountDto.getName())
                 .id(UUID.randomUUID())
-                .deleted(false)
                 .build();
+        account.generateDisplayName();
         Account createdAccount = repository.create(account);
         Group groupAccountOwner = Group.builder()
                 .account(account)
                 .name(accountDto.getNameGroupAccountOwner())
                 .isInner(true)
                 .isDeprecated(false)
-                .deleted(false)
                 .build();
-        groupService.create(groupAccountOwner);
+        Group createdGroup = groupService.create(groupAccountOwner);
         User user = User.builder()
                 .email(accountDto.getEmailAccountOwner())
                 .password(accountDto.getPasswordAccountOwner())
                 .role(roleService.getAccountOwnerRole())
                 .account(account)
-                .group(groupAccountOwner)
+                .group(createdGroup)
                 .build();
         userService.create(user);
         log.trace(FINISH_CREATE_NEW_ACCOUNT, accountDto);

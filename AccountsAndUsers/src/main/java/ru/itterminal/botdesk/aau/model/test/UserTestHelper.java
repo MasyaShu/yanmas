@@ -23,7 +23,7 @@ public class UserTestHelper extends EntityTestHelperImpl<User, UserDtoRequest, U
         User user = User.builder()
                 .email(fakerEN.bothify("???????##@botdesk.app"))
                 .name(fakerRU.name().firstName())
-                .password(fakerRU.bothify("????##???##"))
+                .password(fakerRU.bothify("????##???##F"))
                 .phone(fakerRU.phoneNumber().phoneNumber())
                 .comment(fakerRU.lorem().paragraph())
                 .emailVerificationStatus(fakerRU.bool().bool())

@@ -6,6 +6,7 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
 @Entity
@@ -25,5 +26,10 @@ public class Account extends BaseEntity {
     @Override
     public void generateDisplayName() {
         setDisplayName(name);
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        setDeleted(false);
     }
 }
