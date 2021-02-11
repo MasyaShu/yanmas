@@ -1,11 +1,6 @@
 package ru.itterminal.botdesk.aau.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -54,7 +49,7 @@ public class User extends BaseEntity {
     @Column(name = "is_archived", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean isArchived;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "group_id", nullable = false)
     private Group group;
 
@@ -74,4 +69,10 @@ public class User extends BaseEntity {
         }
         setDisplayName(name);
     }
+
+    @PrePersist
+    protected void onCreate() {
+        setDeleted(false);
+    }
+
 }

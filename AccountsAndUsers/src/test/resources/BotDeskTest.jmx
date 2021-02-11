@@ -148,10 +148,10 @@
                       <stringProp name="-1004616414">nameAccount_1</stringProp>
                     </collectionProp>
                     <collectionProp name="UserParameters.thread_values">
-                      <collectionProp name="-762910775">
+                      <collectionProp name="1424288842">
                         <stringProp name="2020574634">${__RandomString(6,abcdefDFSSCBRghijk12345)}@gmail.com</stringProp>
                         <stringProp name="2018167194">12345Pw</stringProp>
-                        <stringProp name="-1885204048">Inner group внутренняя группа</stringProp>
+                        <stringProp name="-385456107">Inner group</stringProp>
                         <stringProp name="-1274165485">${__RandomString(7,abcdefghijk12345)}</stringProp>
                       </collectionProp>
                     </collectionProp>
@@ -651,7 +651,7 @@ try {
                     <stringProp name="-325552797">emailUserAdminInnerGroup_1</stringProp>
                   </collectionProp>
                   <collectionProp name="UserParameters.thread_values">
-                    <collectionProp name="-1112325344">
+                    <collectionProp name="685252758">
                       <stringProp name="-1112325375">${__RandomString(8,abcdefgDVGTDhijk12345,myRandom)}@gmail.com</stringProp>
                     </collectionProp>
                   </collectionProp>
@@ -6035,7 +6035,7 @@ idInfo.each{
                     <stringProp name="531170972">outIdGroupAccountOwner</stringProp>
                   </collectionProp>
                   <collectionProp name="UserParameters.thread_values">
-                    <collectionProp name="118040393">
+                    <collectionProp name="681405977">
                       <stringProp name="118040362">${__UUID()}</stringProp>
                     </collectionProp>
                   </collectionProp>
@@ -6612,7 +6612,7 @@ if (failureMessage?.trim()) {
                     <stringProp name="531170972">outIdGroupAccountOwner</stringProp>
                   </collectionProp>
                   <collectionProp name="UserParameters.thread_values">
-                    <collectionProp name="118040393">
+                    <collectionProp name="681405977">
                       <stringProp name="118040362">${__UUID()}</stringProp>
                     </collectionProp>
                   </collectionProp>

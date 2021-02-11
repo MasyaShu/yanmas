@@ -30,7 +30,7 @@ public class AccountOperationValidator extends BasicOperationValidatorImpl<Accou
     public boolean checkUniqueness(String emailAccountOwner) {
         log.trace(CHECK_UNIQUENESS, EMAIL_OF_ACCOUNT_OWNER);
         try {
-            userService.findByEmail(emailAccountOwner);
+            userService.findByEmailForCreateAccount(emailAccountOwner);
             Map<String, List<ValidationError>> errors = new HashMap<>();
             errors.put(EMAIL_OF_ACCOUNT_OWNER, singletonList(new ValidationError(NOT_UNIQUE_CODE,
                     format(NOT_UNIQUE_MESSAGE, emailAccountOwner))));

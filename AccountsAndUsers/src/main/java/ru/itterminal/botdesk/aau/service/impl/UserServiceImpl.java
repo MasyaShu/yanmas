@@ -1,14 +1,8 @@
 package ru.itterminal.botdesk.aau.service.impl;
 
-import static java.lang.String.format;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
-
-import javax.mail.MessagingException;
-import javax.persistence.OptimisticLockException;
-
+import io.jsonwebtoken.JwtException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -16,10 +10,6 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import io.jsonwebtoken.JwtException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.projection.UserUniqueFields;
@@ -33,6 +23,14 @@ import ru.itterminal.botdesk.integration.aws.ses.SenderEmailViaAwsSes;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
 import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
 import software.amazon.awssdk.services.ses.model.SendRawEmailRequest;
+
+import javax.mail.MessagingException;
+import javax.persistence.OptimisticLockException;
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+
+import static java.lang.String.format;
 
 @Slf4j
 @Service
@@ -171,6 +169,16 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
 
     @Transactional(readOnly = true)
     public User findByEmail(String email) {
+        log.trace(START_FIND_USER_BY_EMAIL, email);
+        return repository.getByEmail(email).orElseThrow(
+                () -> new EntityNotExistException(
+                        format(NOT_FOUND_USER_BY_EMAIL, email)
+                )
+        );
+    }
+
+    @Transactional(readOnly = true, noRollbackForClassName = {"EntityNotExistException"})
+    public User findByEmailForCreateAccount(String email) {
         log.trace(START_FIND_USER_BY_EMAIL, email);
         return repository.getByEmail(email).orElseThrow(
                 () -> new EntityNotExistException(

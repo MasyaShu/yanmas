@@ -1,13 +1,6 @@
 package ru.itterminal.botdesk.commons.service.impl;
 
-import static java.lang.String.format;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import javax.persistence.OptimisticLockException;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
@@ -15,18 +8,23 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 import ru.itterminal.botdesk.commons.repository.CustomizedParentEntityRepository;
 import ru.itterminal.botdesk.commons.service.CrudService;
 import ru.itterminal.botdesk.commons.service.validator.OperationValidator;
 
+import javax.persistence.OptimisticLockException;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static java.lang.String.format;
+
 @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
 @Slf4j
 @Service
-@Transactional
+
 public abstract class CrudServiceImpl<E extends BaseEntity,
         V extends OperationValidator<E>,
         R extends CustomizedParentEntityRepository<E>>
@@ -39,6 +37,7 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
     protected V validator;
 
     @Override
+    @Transactional
     public E create(E entity) {
         validator.beforeCreate(entity);
         log.trace(format(CREATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.toString()));
@@ -53,6 +52,7 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
     }
 
     @Override
+    @Transactional
     public E update(E entity) {
         validator.beforeUpdate(entity);
         log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
@@ -66,8 +66,7 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
             E updatedEntity = repository.update(entity);
             log.trace(format(UPDATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), updatedEntity));
             return updatedEntity;
-        }
-        catch (OptimisticLockException ex) {
+        } catch (OptimisticLockException ex) {
             throw new OptimisticLockingFailureException(format(VERSION_INVALID_MESSAGE, entity.getId()));
         }
     }
