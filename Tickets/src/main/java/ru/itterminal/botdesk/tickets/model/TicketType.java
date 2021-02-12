@@ -36,4 +36,9 @@ public class TicketType extends BaseEntity {
     public void generateDisplayName() {
         setDisplayName(name);
     }
+
+    @PrePersist
+    protected void onCreate() {
+        setDeleted(false);
+    }
 }

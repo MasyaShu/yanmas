@@ -1,4 +1,4 @@
-package IT;
+package ru.itterminal.botdesk.IT;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
@@ -41,6 +41,7 @@ public class ITHelper {
     private Map<String, User> authorOuterGroup;
     private Map<String, User> observerInnerGroup;
     private Map<String, User> observerOuterGroup;
+    private Map<String, String> tokens;
 
     private final UserTestHelper userTestHelper = new UserTestHelper();
     private final AccountTestHelper accountTestHelper= new AccountTestHelper();
@@ -94,6 +95,7 @@ public class ITHelper {
                 .build();
 
     }
+
 
 
 }

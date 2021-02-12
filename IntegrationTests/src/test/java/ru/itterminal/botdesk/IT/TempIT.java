@@ -1,21 +1,30 @@
-package IT;
+package ru.itterminal.botdesk.IT;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ContextConfiguration;
+import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
+import ru.itterminal.botdesk.aau.repository.UserRepository;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@ContextConfiguration(classes = {ITTestConfig.class})
 class TempIT {
 
     public static final String CREATE_ACCOUNT = "create-account";
@@ -24,9 +33,15 @@ class TempIT {
     public static final String NOT_EXIST_EMAIL = "notExisEmail@gmail.com";
     public static final String NOT_FOUND_USER_BY_EMAIL = "Not found user by email: ";
     public static final String SIGN_IN = "auth/signin";
-   // public static final String EMAIL_VERIFY = "auth/email-verify";
+    public static final String EMAIL_VERIFY = "auth/email-verify";
+    public static final String USER_GET_BY_FILTER = "user";
+    public static final String ROLE = "role";
     private final UserTestHelper userTestHelper = new UserTestHelper();
     private final AccountTestHelper accountTestHelper = new AccountTestHelper();
+
+    @Autowired
+    private UserRepository userRepository;
+
 
     @BeforeEach
     void setUp() {
@@ -40,6 +55,8 @@ class TempIT {
         var user = userTestHelper.getRandomValidEntity();
         var account = accountTestHelper.getRandomValidEntity();
 
+        ITHelper itHelper = new ITHelper();
+        //itHelper.createAccount();
 
 
         HashMap<String, String> jsonMap = new HashMap<>();
@@ -62,7 +79,7 @@ class TempIT {
                 .log().body()
                 .statusCode(HttpStatus.CREATED.value());
 
-        HashMap<String, String> jsonMapSignIn= new HashMap<>();
+        HashMap<String, String> jsonMapSignIn = new HashMap<>();
         jsonMapSignIn.put("email", user.getEmail());
         jsonMapSignIn.put("password", user.getPassword());
         JSONObject jsonRequestSignIn = new JSONObject(jsonMapSignIn);
@@ -72,21 +89,67 @@ class TempIT {
                 .body(jsonRequestSignIn.toString())
                 .post(SIGN_IN)
                 .then()
+                .log().body()
                 .statusCode(HttpStatus.FORBIDDEN.value());
 
-      //  User userFromDataBase = userRepository.getByEmail(user.getEmail()).get();
-//        var userServiceImpl =
-//                (UserServiceImpl) appContext.getBean("userServiceImpl");
-//        User userFromDataBase = userService.findByEmail(user.getEmail());
-//
-//        given().
-//                when()
-//                .param("token", userFromDataBase.getEmailVerificationToken())
-//                .get(EMAIL_VERIFY)
-//                .then()
-//                .log().body()
-//                .statusCode(HttpStatus.OK.value());
+        User userFromDataBase = userRepository.getByEmail(user.getEmail()).get();
 
+        given().
+                when()
+                .param("token", userFromDataBase.getEmailVerificationToken())
+                .get(EMAIL_VERIFY)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.OK.value());
+
+        Response response = given()
+                .contentType(APPLICATION_JSON)
+                .body(jsonRequestSignIn.toString())
+                .post(SIGN_IN)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .response();
+
+
+
+        String token = response.path("token");
+        Map<String,String> mapToken = new HashMap<>();
+        mapToken.put(user.getEmail(), token);
+        itHelper.setTokens(mapToken);
+
+
+
+
+        HashMap<String, String> jsonMapFindEmail = new HashMap<>();
+        jsonMapFindEmail.put("typeComparison", "text_equals");
+        jsonMapFindEmail.put("value", user.getEmail());
+        JSONObject jsonRequestFindEmail = new JSONObject(jsonMapFindEmail);
+
+        given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + token)
+                .contentType(APPLICATION_JSON)
+                .body("{}")
+                .get(ROLE)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.OK.value());
+
+        given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + token)
+                .contentType(APPLICATION_JSON)
+                .body("{}")
+                .get(USER_GET_BY_FILTER)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.OK.value());
 
     }
 
@@ -114,5 +177,6 @@ class TempIT {
         ITHelper itHelper = new ITHelper();
         itHelper.createAccount();
         assertEquals(0, (int) itHelper.getAccount().getVersion());
+
     }
 }

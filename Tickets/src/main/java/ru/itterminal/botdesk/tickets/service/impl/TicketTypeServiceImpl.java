@@ -20,7 +20,6 @@ import static java.lang.String.format;
 
 @Slf4j
 @Service
-@Transactional
 @AllArgsConstructor
 public class TicketTypeServiceImpl extends
         CrudServiceWithAccountImpl<TicketType, TicketTypeOperationValidator, TicketTypeRepository> implements CompletedVerificationAccount {
@@ -52,6 +51,7 @@ public class TicketTypeServiceImpl extends
     }
 
     @Override
+    @Transactional(noRollbackForClassName = {"EntityNotExistException"})
     public void actionAfterCompletedVerificationAccount(UUID accountId) {
         try {
             findStartedPredefinedTicketTypeForNewTicket(accountId);

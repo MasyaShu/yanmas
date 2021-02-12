@@ -9,6 +9,7 @@ import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
@@ -22,6 +23,7 @@ public class JwtUserDetailsService implements UserDetailsService {
     }
 
     @Override
+    @Transactional
     public UserDetails loadUserByUsername(String email) {
         User user = userServiceImpl.findByEmail(email);
 

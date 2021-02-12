@@ -20,7 +20,6 @@ import static java.lang.String.format;
 
 @Slf4j
 @Service
-@Transactional
 @AllArgsConstructor
 public class TicketStatusServiceImpl extends
         CrudServiceWithAccountImpl<TicketStatus, TicketStatusOperationValidator, TicketStatusRepository>
@@ -94,6 +93,7 @@ public class TicketStatusServiceImpl extends
     }
 
     @Override
+    @Transactional(noRollbackForClassName = {"EntityNotExistException"})
     public void actionAfterCompletedVerificationAccount(UUID accountId) {
         try {
             findStartedPredefinedStatus(accountId);

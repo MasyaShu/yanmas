@@ -48,4 +48,13 @@ public class TicketStatus extends BaseEntity {
     public void generateDisplayName() {
         setDisplayName(name);
     }
+
+    @PrePersist
+    protected void onCreate() {
+        setDeleted(false);
+        setIsStartedPredefined(false);
+        setIsFinishedPredefined(false);
+        setIsReopenedPredefined(false);
+        setIsCanceledPredefined(false);
+    }
 }
