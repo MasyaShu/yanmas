@@ -1,4 +1,4 @@
-package ru.itterminal.botdesk.IT;
+package ru.itterminal.botdesk.IT.util;
 
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;

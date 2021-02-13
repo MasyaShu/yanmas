@@ -10,32 +10,27 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
+import ru.itterminal.botdesk.IT.util.ITHelper;
+import ru.itterminal.botdesk.IT.util.ITTestConfig;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static ru.itterminal.botdesk.IT.util.ITHelper.*;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = {ITTestConfig.class})
 class TempIT {
 
-    public static final String CREATE_ACCOUNT = "create-account";
-    public static final String APPLICATION_JSON = "application/json";
-    public static final String REQUEST_PASSWORD_RESET = "auth/request-password-reset";
-    public static final String NOT_EXIST_EMAIL = "notExisEmail@gmail.com";
-    public static final String NOT_FOUND_USER_BY_EMAIL = "Not found user by email: ";
-    public static final String SIGN_IN = "auth/signin";
-    public static final String EMAIL_VERIFY = "auth/email-verify";
-    public static final String USER_GET_BY_FILTER = "user";
-    public static final String ROLE = "role";
+
     private final UserTestHelper userTestHelper = new UserTestHelper();
     private final AccountTestHelper accountTestHelper = new AccountTestHelper();
 
@@ -174,9 +169,10 @@ class TempIT {
 
     @Test
     void testCreateAccount() {
-        ITHelper itHelper = new ITHelper();
-        itHelper.createAccount();
-        assertEquals(0, (int) itHelper.getAccount().getVersion());
+//        ITHelper itHelper = new ITHelper();
+//        itHelper.createAccountBuilder()
+//                .build();
+//        assertEquals(0, (int) itHelper.getAccount().getVersion());
 
     }
 }
