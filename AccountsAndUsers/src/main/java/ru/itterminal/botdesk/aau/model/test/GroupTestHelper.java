@@ -14,7 +14,7 @@ public class GroupTestHelper extends EntityTestHelperImpl<Group, GroupDto, Group
     @Override
     public Group getRandomValidEntity() {
         Group group = Group.builder()
-                .name(fakerRU.hipster().word())
+                .name(fakerRU.name().fullName())
                 .comment(fakerRU.lorem().paragraph())
                 .isInner(fakerRU.bool().bool())
                 .isDeprecated(fakerRU.bool().bool())

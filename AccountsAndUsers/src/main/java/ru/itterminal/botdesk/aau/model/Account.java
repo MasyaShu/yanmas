@@ -13,7 +13,7 @@ import javax.persistence.Table;
 @Table(name = "accounts")
 @Getter
 @Setter
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
@@ -32,4 +32,5 @@ public class Account extends BaseEntity {
     protected void onCreate() {
         setDeleted(false);
     }
+
 }

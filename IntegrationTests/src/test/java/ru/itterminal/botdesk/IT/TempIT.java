@@ -16,7 +16,6 @@ import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +24,7 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static ru.itterminal.botdesk.IT.util.ITHelper.*;
 
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = {ITTestConfig.class})
@@ -51,7 +51,6 @@ class TempIT {
         var account = accountTestHelper.getRandomValidEntity();
 
         ITHelper itHelper = new ITHelper();
-        //itHelper.createAccount();
 
 
         HashMap<String, String> jsonMap = new HashMap<>();
@@ -114,14 +113,6 @@ class TempIT {
         mapToken.put(user.getEmail(), token);
         itHelper.setTokens(mapToken);
 
-
-
-
-        HashMap<String, String> jsonMapFindEmail = new HashMap<>();
-        jsonMapFindEmail.put("typeComparison", "text_equals");
-        jsonMapFindEmail.put("value", user.getEmail());
-        JSONObject jsonRequestFindEmail = new JSONObject(jsonMapFindEmail);
-
         given().
                 when()
                 .headers(
@@ -167,12 +158,4 @@ class TempIT {
         System.out.print(type);
     }
 
-    @Test
-    void testCreateAccount() {
-//        ITHelper itHelper = new ITHelper();
-//        itHelper.createAccountBuilder()
-//                .build();
-//        assertEquals(0, (int) itHelper.getAccount().getVersion());
-
-    }
 }

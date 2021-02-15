@@ -24,7 +24,7 @@ import static java.lang.String.format;
 public class TicketTypeServiceImpl extends
         CrudServiceWithAccountImpl<TicketType, TicketTypeOperationValidator, TicketTypeRepository> implements CompletedVerificationAccount {
 
-    private static final String DEFAULT_TYPE = "Default type";
+    public static final String DEFAULT_TYPE = "Default type";
     private final AccountServiceImpl accountService;
 
     private static final String START_FIND_TICKET_TYPES_BY_UNIQUE_FIELDS =

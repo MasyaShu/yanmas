@@ -32,10 +32,10 @@ public class TicketStatusServiceImpl extends
             "Start find ticket status by unique fields, name: {} and not id: {} and not account: {}";
     private static final String START_FIND_STATUS_FOR_ACCOUNT = "Start find {} predefined status for account: {}";
     private static final String IS_PREDEFINED_TRUE = "IsPredefinedTrue";
-    private static final String CANCELED = "Canceled";
-    private static final String REOPENED = "Reopened";
-    private static final String FINISHED = "Finished";
-    private static final String STARTED = "Started";
+    public static final String CANCELED = "Canceled";
+    public static final String REOPENED = "Reopened";
+    public static final String FINISHED = "Finished";
+    public static final String STARTED = "Started";
 
     @Transactional(readOnly = true)
     public List<TicketStatusUniqueFields> findByUniqueFields(TicketStatus ticketStatus) {
@@ -100,7 +100,10 @@ public class TicketStatusServiceImpl extends
         } catch (EntityNotExistException e) {
             var startedPredefinedStatus = TicketStatus.builder()
                     .account(accountService.findById(accountId))
-                    .isFinishedPredefined(true)
+                    .isFinishedPredefined(false)
+                    .isCanceledPredefined(false)
+                    .isStartedPredefined(true)
+                    .isReopenedPredefined(false)
                     .name(STARTED)
                     .sortIndex(100)
                     .build();
@@ -112,7 +115,10 @@ public class TicketStatusServiceImpl extends
         } catch (EntityNotExistException e) {
             var reopenedPredefinedStatus = TicketStatus.builder()
                     .account(accountService.findById(accountId))
-                    .isFinishedPredefined(true)
+                    .isFinishedPredefined(false)
+                    .isCanceledPredefined(false)
+                    .isStartedPredefined(false)
+                    .isReopenedPredefined(true)
                     .name(REOPENED)
                     .sortIndex(200)
                     .build();
@@ -125,6 +131,9 @@ public class TicketStatusServiceImpl extends
             var finishedPredefinedStatus = TicketStatus.builder()
                     .account(accountService.findById(accountId))
                     .isFinishedPredefined(true)
+                    .isCanceledPredefined(false)
+                    .isStartedPredefined(false)
+                    .isReopenedPredefined(false)
                     .name(FINISHED)
                     .sortIndex(300)
                     .build();
@@ -136,7 +145,10 @@ public class TicketStatusServiceImpl extends
         } catch (EntityNotExistException e) {
             var canceledPredefinedStatus = TicketStatus.builder()
                     .account(accountService.findById(accountId))
-                    .isFinishedPredefined(true)
+                    .isFinishedPredefined(false)
+                    .isCanceledPredefined(true)
+                    .isStartedPredefined(false)
+                    .isReopenedPredefined(false)
                     .name(CANCELED)
                     .sortIndex(400)
                     .build();
