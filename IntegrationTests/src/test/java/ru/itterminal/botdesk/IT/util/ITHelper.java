@@ -5,13 +5,9 @@ import io.restassured.response.Response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
-import ru.itterminal.botdesk.aau.model.Account;
-import ru.itterminal.botdesk.aau.model.Group;
-import ru.itterminal.botdesk.aau.model.Roles;
-import ru.itterminal.botdesk.aau.model.User;
+import ru.itterminal.botdesk.aau.model.*;
 import ru.itterminal.botdesk.aau.model.dto.*;
 import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.aau.model.test.GroupTestHelper;
@@ -21,17 +17,18 @@ import ru.itterminal.botdesk.tickets.model.TicketStatus;
 import ru.itterminal.botdesk.tickets.model.TicketType;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 
 @SuppressWarnings("deprecation")
-@Slf4j
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class ITHelper {
+    public static final String ADMIN_INNER_GROUP = "adminInnerGroup_";
     private Account account;
     private User accountOwner;
     private Map<String, TicketStatus> ticketStatuses = new HashMap<>();
@@ -62,7 +59,7 @@ public class ITHelper {
     public static final String NOT_FOUND_USER_BY_EMAIL = "Not found user by email: ";
     public static final String SIGN_IN = "auth/signin";
     public static final String EMAIL_VERIFY = "auth/email-verify";
-    public static final String USER_GET_BY_FILTER = "user";
+    public static final String USER = "user";
     public static final String ROLE = "role";
     public static final String INVALID_USERNAME_OR_PASSWORD = "invalid username or password";
     public static final String AUTHENTICATION_FAILED = "authentication failed";
@@ -139,7 +136,7 @@ public class ITHelper {
         return modelMapper.map(user, AuthenticationRequestDto.class);
     }
 
-    public UserDtoRequest createJsonUserDtoRequest(User createdUser, boolean isCreated) {
+    public UserDtoRequest createUserDtoRequest(User createdUser, boolean isCreated) {
         if (isCreated) {
             createdUser.setId(null);
             createdUser.setDeleted(null);
@@ -214,6 +211,86 @@ public class ITHelper {
     public void createInitialInnerAndOuterGroups(int countInnerGroup, int countOuterGroup) {
         createInitialInnerGroups(countInnerGroup);
         createInitialOuterGroups(countOuterGroup);
+    }
+
+    public void createUsersForEachRoleInGroup(Group group, List<Role> roles) {
+        for (Role role : roles) {
+            var newUser = userTestHelper.getRandomValidEntity();
+            var userDtoRequest = createUserDtoRequest(newUser, true);
+            userDtoRequest.setGroup(group.getId());
+            userDtoRequest.setRole(role.getId());
+
+            User createdUser = given()
+                    .headers(
+                            "Authorization",
+                            "Bearer " + tokens.get(accountOwner.getEmail()))
+                    .contentType(APPLICATION_JSON)
+                    .body(userDtoRequest)
+                    .post(USER)
+                    .then()
+                    .log().body()
+                    .statusCode(HttpStatus.CREATED.value())
+                    .extract()
+                    .response().as(User.class);
+            createdUser.setAccount(account);
+            createdUser.setRole(role);
+            createdUser.setGroup(group);
+            createdUser.setPassword(newUser.getPassword());
+            var suffixKey = 1;
+            if (group.getIsInner()) {
+                switch (role.getName()) {
+                    case ("ADMIN") -> {
+                        suffixKey = adminInnerGroup.size() + 1;
+                        adminInnerGroup.put(ADMIN_INNER_GROUP + suffixKey, createdUser);
+                    }
+                    case ("EXECUTOR") -> {
+                        suffixKey = executorInnerGroup.size() + 1;
+                        executorInnerGroup.put("executorInnerGroup_" + suffixKey, createdUser);
+                    }
+                    case ("AUTHOR") -> {
+                        suffixKey = authorInnerGroup.size() + 1;
+                        authorInnerGroup.put("authorInnerGroup_" + suffixKey, createdUser);
+                    }
+                    case ("OBSERVER") -> {
+                        suffixKey = observerInnerGroup.size() + 1;
+                        observerInnerGroup.put("observerInnerGroup_" + suffixKey, createdUser);
+                    }
+                    default -> throw new IllegalStateException("Unexpected value: " + role.getName());
+                }
+            } else {
+                switch (role.getName()) {
+                    case ("ADMIN") -> {
+                        suffixKey = adminOuterGroup.size() + 1;
+                        adminOuterGroup.put("adminOuterGroup_" + suffixKey, createdUser);
+                    }
+                    case ("EXECUTOR") -> {
+                        suffixKey = executorOuterGroup.size() + 1;
+                        executorOuterGroup.put("executorOuterGroup_" + suffixKey, createdUser);
+                    }
+                    case ("AUTHOR") -> {
+                        suffixKey = authorOuterGroup.size() + 1;
+                        authorOuterGroup.put("authorOuterGroup_" + suffixKey, createdUser);
+                    }
+                    case ("OBSERVER") -> {
+                        suffixKey = observerOuterGroup.size() + 1;
+                        observerOuterGroup.put("observerOuterGroup_" + suffixKey, createdUser);
+                    }
+                    default -> throw new IllegalStateException("Unexpected value: " + role.getName());
+                }
+            }
+
+            var jsonSignIn = createAuthenticationRequestDto(createdUser);
+            Response response = given()
+                    .contentType(APPLICATION_JSON)
+                    .body(jsonSignIn)
+                    .post(SIGN_IN)
+                    .then()
+                    .log().body()
+                    .statusCode(HttpStatus.OK.value())
+                    .extract()
+                    .response();
+            tokens.put(createdUser.getEmail(), response.path("token"));
+        }
     }
 }
 

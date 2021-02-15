@@ -13,7 +13,9 @@ import org.springframework.test.context.TestPropertySource;
 import ru.itterminal.botdesk.IT.util.ITHelper;
 import ru.itterminal.botdesk.IT.util.ITTestConfig;
 import ru.itterminal.botdesk.aau.model.Account;
+import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
+import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
 import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
@@ -60,6 +62,8 @@ class AccountIT {
 
     private static ITHelper itHelper;
     private static User anonymousUser;
+
+    private final RoleTestHelper roleTestHelper = new RoleTestHelper();
 
     @BeforeAll
     static void beforeAll() {
@@ -260,28 +264,34 @@ class AccountIT {
         var updatedName = itHelper.getAccount().getName() + "Updated";
         var newVersion = updatedAccount.getVersion() + 1;
         updatedAccount.setName(updatedName);
-        var jsonUpdatedAccount = itHelper.createAccountDto(updatedAccount);
-        given().
+        var accountDto = itHelper.createAccountDto(updatedAccount);
+        var account = given().
                 when()
                 .headers(
                         "Authorization",
                         "Bearer " + itHelper.getTokens().get(itHelper.getAccountOwner().getEmail()))
                 .contentType(APPLICATION_JSON)
-                .body(jsonUpdatedAccount)
+                .body(accountDto)
                 .put(ACCOUNT)
                 .then()
                 .body(NAME, equalTo(updatedName))
                 .body(DISPLAY_NAME, equalTo(updatedName))
                 .body(VERSION, equalTo(newVersion))
                 .log().body()
-                .statusCode(HttpStatus.OK.value());
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .response().as(Account.class);
+        itHelper.setAccount(account);
     }
 
     @Test
     @Order(110)
     void testCreateGroup() {
-        itHelper.createInitialInnerAndOuterGroups(1, 2);
-        itHelper.createInitialInnerAndOuterGroups(0, 4);
+        itHelper.createInitialInnerAndOuterGroups(0, 1);
+        var roles = roleTestHelper.setPredefinedValidEntityList();
+        roles.remove(roleTestHelper.getRoleByName(Roles.ACCOUNT_OWNER.toString()));
+        itHelper.createUsersForEachRoleInGroup(itHelper.getOuterGroup().get(OUTER_GROUP + 1), roles);
+        itHelper.createUsersForEachRoleInGroup(itHelper.getInnerGroup().get(INNER_GROUP + 1), roles);
         itHelper.getOuterGroup().get(OUTER_GROUP + 1);
     }
 }

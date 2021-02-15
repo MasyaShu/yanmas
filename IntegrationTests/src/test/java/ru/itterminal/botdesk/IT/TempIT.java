@@ -132,7 +132,7 @@ class TempIT {
                         "Bearer " + token)
                 .contentType(APPLICATION_JSON)
                 .body("{}")
-                .get(USER_GET_BY_FILTER)
+                .get(USER)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.OK.value());
