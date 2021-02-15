@@ -15,8 +15,12 @@ import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
 
+import javax.persistence.EntityManager;
+
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static ru.itterminal.botdesk.IT.util.ITHelper.*;
 
 @DataJpaTest
@@ -28,6 +32,8 @@ class AccountIT {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private EntityManager entityManager;
     private final UserTestHelper userTestHelper = new UserTestHelper();
     private ITHelper itHelper;
 
@@ -45,8 +51,13 @@ class AccountIT {
 
         /*Creating an account with valid data
          * Создание аккаунта с валидными данными */
-        String jsonCreateAccount = itHelper.createsJsonCreateAccount(user.getAccount().getName(), user.getGroup().getName(),
-                user.getPassword(), user.getEmail());
+
+        String jsonCreateAccount = itHelper.builderJsonCreateAccount()
+                .name(user.getAccount().getName())
+                .emailAccountOwner(user.getEmail())
+                .passwordAccountOwner(user.getPassword())
+                .nameGroupAccountOwner(user.getGroup().getName())
+                .build();
 
         Response response = given().
                 when().
@@ -105,7 +116,7 @@ class AccountIT {
                 .statusCode(HttpStatus.FORBIDDEN.value());
 
         /*An attempt to verify an email with an invalid token
-        * Попытка верифицировать email с невалидным токеном*/
+         * Попытка верифицировать email с невалидным токеном*/
         var userFromDataBase = userRepository.getByEmail(user.getEmail()).get();
 
         given().
@@ -120,7 +131,7 @@ class AccountIT {
                 .statusCode(HttpStatus.BAD_REQUEST.value());
 
         /*Successful account verification
-        * Успешная верификация аккаунта*/
+         * Успешная верификация аккаунта*/
         given().
                 when()
                 .param(TOKEN, userFromDataBase.getEmailVerificationToken())
@@ -129,8 +140,23 @@ class AccountIT {
                 .log().body()
                 .statusCode(HttpStatus.OK.value());
 
-//        var verifyUserFromDataBase = userRepository.getByEmail(userFromDataBase.getEmail()).get();
-//        assertTrue(verifyUserFromDataBase.getEmailVerificationStatus());
-//        assertNull(verifyUserFromDataBase.getEmailVerificationToken());
+        entityManager.clear();
+        var verifyUserFromDataBase = userRepository.getByEmail(user.getEmail()).get();
+        assertTrue(verifyUserFromDataBase.getEmailVerificationStatus());
+        assertNull(verifyUserFromDataBase.getEmailVerificationToken());
+
+        /*
+        Успешный вход*/
+
+        response = given()
+                .contentType(APPLICATION_JSON)
+                .body(jsonSignIn)
+                .post(SIGN_IN)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .response();
+        itHelper.getTokens().put(user.getEmail(), response.path("token"));
     }
 }

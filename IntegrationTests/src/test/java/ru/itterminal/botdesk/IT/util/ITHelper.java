@@ -25,19 +25,19 @@ import java.util.UUID;
 public class ITHelper {
     private Account account;
     private User accountOwner;
-    private Map<String, TicketStatus> ticketStatuses;
-    private Map<String, TicketType> ticketTypes;
-    private Map<String, Group> innerGroup;
-    private Map<String, User> outerGroup;
-    private Map<String, User> adminInnerGroup;
-    private Map<String, User> adminOuterGroup;
-    private Map<String, User> executorInnerGroup;
-    private Map<String, User> executorOuterGroup;
-    private Map<String, User> authorInnerGroup;
-    private Map<String, User> authorOuterGroup;
-    private Map<String, User> observerInnerGroup;
-    private Map<String, User> observerOuterGroup;
-    private Map<String, String> tokens;
+    private Map<String, TicketStatus> ticketStatuses = new HashMap<>();
+    private Map<String, TicketType> ticketTypes = new HashMap<>();
+    private Map<String, Group> innerGroup = new HashMap<>();
+    private Map<String, User> outerGroup = new HashMap<>();
+    private Map<String, User> adminInnerGroup = new HashMap<>();
+    private Map<String, User> adminOuterGroup = new HashMap<>();
+    private Map<String, User> executorInnerGroup = new HashMap<>();
+    private Map<String, User> executorOuterGroup = new HashMap<>();
+    private Map<String, User> authorInnerGroup = new HashMap<>();
+    private Map<String, User> authorOuterGroup = new HashMap<>();
+    private Map<String, User> observerInnerGroup = new HashMap<>();
+    private Map<String, User> observerOuterGroup = new HashMap<>();
+    private Map<String, String> tokens = new HashMap<>();
 
     private final UserTestHelper userTestHelper = new UserTestHelper();
     private final AccountTestHelper accountTestHelper = new AccountTestHelper();
@@ -81,17 +81,9 @@ public class ITHelper {
                 .build();
     }
 
-    @Builder(builderMethodName = "builderJsonSignIn")
-    public String createsJsonSignIn(String email, String password) {
-        HashMap<String, String> jsonMap = new HashMap<>();
-        jsonMap.put("email", email);
-        jsonMap.put("password", password);
-        JSONObject json = new JSONObject(jsonMap);
-        return json.toString();
-    }
 
     @Builder(builderMethodName = "builderJsonCreateAccount")
-    public String createsJsonCreateAccount(String name, String nameGroupAccountOwner,
+    public String createJsonCreateAccount(String name, String nameGroupAccountOwner,
                                            String passwordAccountOwner, String emailAccountOwner) {
         HashMap<String, String> jsonMap = new HashMap<>();
         jsonMap.put("name", name);
@@ -102,5 +94,17 @@ public class ITHelper {
         return json.toString();
     }
 
+    @Builder(builderMethodName = "builderJsonSignIn")
+    public String createJsonSignIn(String email, String password) {
+        HashMap<String, String> jsonMap = new HashMap<>();
+        jsonMap.put("email", email);
+        jsonMap.put("password", password);
+        JSONObject json = new JSONObject(jsonMap);
+        return json.toString();
+    }
 
+    @Builder(builderMethodName = "test")
+    public String testString(String test) {
+        return test;
+    }
 }
