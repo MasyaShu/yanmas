@@ -95,7 +95,7 @@ public class ITHelper {
     public static final String IS_CANCELED_PREDEFINED = "isCanceledPredefined";
 
 
-    public Response getJsonGroupDtoById(UUID groupId, User accountOwner) {
+    public Group getGroupById(UUID groupId, User accountOwner) {
         return given().
                 when()
                 .headers(
@@ -106,10 +106,10 @@ public class ITHelper {
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.OK.value())
-                .extract().response();
+                .extract().response().as(Group.class);
     }
 
-    public GroupDto createJsonGroupDto(Group group, boolean isCreate) {
+    public GroupDto createGroupDto(Group group, boolean isCreate) {
         if (isCreate) {
             group.setId(null);
             group.setDeleted(null);
@@ -120,7 +120,7 @@ public class ITHelper {
         return modelMapper.map(group, GroupDto.class);
     }
 
-    public AccountCreateDto createJsonAccountCreateDto(User anonymousUser) {
+    public AccountCreateDto createAccountCreateDto(User anonymousUser) {
         return AccountCreateDto.builder()
                 .name(anonymousUser.getAccount().getName())
                 .emailAccountOwner(anonymousUser.getEmail())
@@ -129,13 +129,13 @@ public class ITHelper {
                 .build();
     }
 
-    public AccountDto createJsonAccountDto(Account account) {
+    public AccountDto createAccountDto(Account account) {
         var accountDto = modelMapper.map(account, AccountDto.class);
         accountDto.setDisplayName(null);
         return accountDto;
     }
 
-    public AuthenticationRequestDto createJsonAuthenticationRequestDto(User user) {
+    public AuthenticationRequestDto createAuthenticationRequestDto(User user) {
         return modelMapper.map(user, AuthenticationRequestDto.class);
     }
 
@@ -151,7 +151,7 @@ public class ITHelper {
     }
 
     public void activateAccount() {
-        var groupAccountOwner = getJsonGroupDtoById(accountOwner.getGroup().getId(), accountOwner).as(Group.class);
+        var groupAccountOwner = getGroupById(accountOwner.getGroup().getId(), accountOwner);
         groupAccountOwner.setAccount(account);
         var roleAccountOwner = roleTestHelper.getRoleByName(Roles.ACCOUNT_OWNER.toString());
         accountOwner.setGroup(groupAccountOwner);
@@ -167,7 +167,7 @@ public class ITHelper {
             var keyOuterGroup = OUTER_GROUP + suffixKey;
             group.setAccount(account);
             group.setIsInner(false);
-            var jsonGroupDto = createJsonGroupDto(group, true);
+            var jsonGroupDto = createGroupDto(group, true);
             Response response = given().
                     when()
                     .headers(
@@ -193,7 +193,7 @@ public class ITHelper {
             var keyInnerGroup = INNER_GROUP + suffixKey;
             group.setAccount(account);
             group.setIsInner(true);
-            var jsonGroupDto = createJsonGroupDto(group, true);
+            var jsonGroupDto = createGroupDto(group, true);
             Response response = given().
                     when()
                     .headers(

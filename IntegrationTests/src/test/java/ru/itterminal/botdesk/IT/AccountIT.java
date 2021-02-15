@@ -74,7 +74,7 @@ class AccountIT {
     @Test
     @Order(10)
     void successCreatedAccount() {
-        var jsonCreateAccount = itHelper.createJsonAccountCreateDto(anonymousUser);
+        var jsonCreateAccount = itHelper.createAccountCreateDto(anonymousUser);
         var response = given().
                 when().
                 contentType(APPLICATION_JSON).
@@ -95,7 +95,7 @@ class AccountIT {
     @Test
     @Order(20)
     void failedCreateAccount_WhenEmailAlreadyOccupied() {
-        var jsonCreateAccount = itHelper.createJsonAccountCreateDto(anonymousUser);
+        var jsonCreateAccount = itHelper.createAccountCreateDto(anonymousUser);
         RequestSpecBuilder requestSpecBuilder = new RequestSpecBuilder();
         requestSpecBuilder.setBody(anonymousUser);
         given().
@@ -114,7 +114,7 @@ class AccountIT {
     @Test
     @Order(30)
     void AccessDenied_whenAccountIsNotActivated() {
-        var jsonSignIn = itHelper.createJsonAuthenticationRequestDto(anonymousUser);
+        var jsonSignIn = itHelper.createAuthenticationRequestDto(anonymousUser);
         given()
                 .contentType(APPLICATION_JSON)
                 .body(jsonSignIn)
@@ -190,7 +190,7 @@ class AccountIT {
     @Test
     @Order(60)
     void successfulSignInAccountOwner() {
-        var jsonSignIn = itHelper.createJsonAuthenticationRequestDto(anonymousUser);
+        var jsonSignIn = itHelper.createAuthenticationRequestDto(anonymousUser);
         Response response = given()
                 .contentType(APPLICATION_JSON)
                 .body(jsonSignIn)
@@ -207,7 +207,7 @@ class AccountIT {
     @Test
     @Order(70)
     void failedCreateAccount_whenUserIsNotAnonymous() {
-        var jsonCreateAccount = itHelper.createJsonAccountCreateDto(anonymousUser);
+        var jsonCreateAccount = itHelper.createAccountCreateDto(anonymousUser);
         given().
                 when()
                 .headers(
@@ -260,7 +260,7 @@ class AccountIT {
         var updatedName = itHelper.getAccount().getName() + "Updated";
         var newVersion = updatedAccount.getVersion() + 1;
         updatedAccount.setName(updatedName);
-        var jsonUpdatedAccount = itHelper.createJsonAccountDto(updatedAccount);
+        var jsonUpdatedAccount = itHelper.createAccountDto(updatedAccount);
         given().
                 when()
                 .headers(
