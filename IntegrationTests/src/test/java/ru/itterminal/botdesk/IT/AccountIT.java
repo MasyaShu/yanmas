@@ -4,6 +4,9 @@ import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -27,6 +30,7 @@ import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -45,6 +49,7 @@ import static ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl.D
 class AccountIT {
 
 
+    public static final String ACCOUNT_CHECK_ACCESS = "account/check-access";
     @Autowired
     private JwtProvider jwtProvider;
 
@@ -206,6 +211,12 @@ class AccountIT {
                 .response();
         itHelper.getTokens().put(anonymousUser.getEmail(), response.path("token"));
         itHelper.activateAccount();
+
+        itHelper.createInitialInnerAndOuterGroups(0, 1);
+        var roles = roleTestHelper.setPredefinedValidEntityList();
+        roles.remove(roleTestHelper.getRoleByName(Roles.ACCOUNT_OWNER.toString()));
+        itHelper.createUsersForEachRoleInGroup(itHelper.getOuterGroup().get(OUTER_GROUP + 1), roles);
+        itHelper.createUsersForEachRoleInGroup(itHelper.getInnerGroup().get(INNER_GROUP + 1), roles);
     }
 
     @Test
@@ -284,14 +295,63 @@ class AccountIT {
         itHelper.setAccount(account);
     }
 
-    @Test
+    @ParameterizedTest
+    @MethodSource("tokensUsersWhoDoNotHaveRightsToUpdateAccount")
     @Order(110)
-    void testCreateGroup() {
-        itHelper.createInitialInnerAndOuterGroups(0, 1);
-        var roles = roleTestHelper.setPredefinedValidEntityList();
-        roles.remove(roleTestHelper.getRoleByName(Roles.ACCOUNT_OWNER.toString()));
-        itHelper.createUsersForEachRoleInGroup(itHelper.getOuterGroup().get(OUTER_GROUP + 1), roles);
-        itHelper.createUsersForEachRoleInGroup(itHelper.getInnerGroup().get(INNER_GROUP + 1), roles);
-        itHelper.getOuterGroup().get(OUTER_GROUP + 1);
+    void failedUpdateAccount_whenUserNotAccountOwner(String userRole, String token) {
+        var updatedAccount = itHelper.getAccount().toBuilder().build();
+        var updatedName = userRole + itHelper.getAccount().getName();
+        updatedAccount.setName(updatedName);
+        var accountDto = itHelper.createAccountDto(updatedAccount);
+
+        given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + token)
+                .contentType(APPLICATION_JSON)
+                .body(accountDto)
+                .put(ACCOUNT)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.FORBIDDEN.value());
+    }
+
+    @ParameterizedTest
+    @MethodSource("tokensUsersWhoDoNotHaveRightsToUpdateAccount")
+    @Order(120)
+    void failedCheckAccessUpdateAccount_whenUserNotAccountOwner(String userRole, String token) {
+        given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + token)
+                .contentType(APPLICATION_JSON)
+                .put(ACCOUNT_CHECK_ACCESS)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.FORBIDDEN.value());
+    }
+
+    private static Stream<Arguments> tokensUsersWhoDoNotHaveRightsToUpdateAccount() {
+        var emailAdminInnerGroup = itHelper.getAdminInnerGroup().get(ADMIN_INNER_GROUP + 1).getEmail();
+        var emailExecutorInnerGroup =  itHelper.getExecutorInnerGroup().get(EXECUTOR_INNER_GROUP + 1).getEmail();
+        var emailAuthorInnerGroup = itHelper.getAuthorInnerGroup().get(AUTHOR_INNER_GROUP + 1).getEmail();
+        var emailObserverInnerGroup = itHelper.getObserverInnerGroup().get(OBSERVER_INNER_GROUP + 1).getEmail();
+        var emailAdminOuterGroup = itHelper.getAdminOuterGroup().get(ADMIN_OUTER_GROUP + 1).getEmail();
+        var emailExecutorOuterGroup =  itHelper.getExecutorOuterGroup().get(EXECUTOR_OUTER_GROUP + 1).getEmail();
+        var emailAuthorOuterGroup = itHelper.getAuthorOuterGroup().get(AUTHOR_OUTER_GROUP + 1).getEmail();
+        var emailObserverOuterGroup = itHelper.getObserverOuterGroup().get(OBSERVER_OUTER_GROUP + 1).getEmail();
+
+        return Stream.of(
+                Arguments.of(ADMIN_INNER_GROUP, itHelper.getTokens().get(emailAdminInnerGroup)),
+                Arguments.of(EXECUTOR_INNER_GROUP, itHelper.getTokens().get(emailExecutorInnerGroup)),
+                Arguments.of(AUTHOR_INNER_GROUP, itHelper.getTokens().get(emailAuthorInnerGroup)),
+                Arguments.of(OBSERVER_INNER_GROUP, itHelper.getTokens().get(emailObserverInnerGroup)),
+                Arguments.of(ADMIN_OUTER_GROUP, itHelper.getTokens().get(emailAdminOuterGroup)),
+                Arguments.of(EXECUTOR_OUTER_GROUP, itHelper.getTokens().get(emailExecutorOuterGroup)),
+                Arguments.of(AUTHOR_OUTER_GROUP, itHelper.getTokens().get(emailAuthorOuterGroup)),
+                Arguments.of(OBSERVER_OUTER_GROUP, itHelper.getTokens().get(emailObserverOuterGroup))
+        );
     }
 }

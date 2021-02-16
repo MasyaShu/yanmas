@@ -28,7 +28,7 @@ import static io.restassured.RestAssured.given;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ITHelper {
-    public static final String ADMIN_INNER_GROUP = "adminInnerGroup_";
+
     private Account account;
     private User accountOwner;
     private Map<String, TicketStatus> ticketStatuses = new HashMap<>();
@@ -90,6 +90,18 @@ public class ITHelper {
     public static final String IS_FINISHED_PREDEFINED = "isFinishedPredefined";
     public static final String IS_REOPENED_PREDEFINED = "isReopenedPredefined";
     public static final String IS_CANCELED_PREDEFINED = "isCanceledPredefined";
+    public static final String ADMIN_INNER_GROUP = "adminInnerGroup_";
+    public static final String EXECUTOR_INNER_GROUP = "executorInnerGroup_";
+    public static final String AUTHOR_INNER_GROUP = "authorInnerGroup_";
+    public static final String OBSERVER_INNER_GROUP = "observerInnerGroup_";
+    public static final String ADMIN_OUTER_GROUP = "adminOuterGroup_";
+    public static final String EXECUTOR_OUTER_GROUP = "executorOuterGroup_";
+    public static final String AUTHOR_OUTER_GROUP = "authorOuterGroup_";
+    public static final String OBSERVER_OUTER_GROUP = "observerOuterGroup_";
+    public static final String ADMIN = "ADMIN";
+    public static final String EXECUTOR = "EXECUTOR";
+    public static final String AUTHOR = "AUTHOR";
+    public static final String OBSERVER = "OBSERVER";
 
 
     public Group getGroupById(UUID groupId, User accountOwner) {
@@ -239,41 +251,41 @@ public class ITHelper {
             var suffixKey = 1;
             if (group.getIsInner()) {
                 switch (role.getName()) {
-                    case ("ADMIN") -> {
+                    case ADMIN -> {
                         suffixKey = adminInnerGroup.size() + 1;
                         adminInnerGroup.put(ADMIN_INNER_GROUP + suffixKey, createdUser);
                     }
-                    case ("EXECUTOR") -> {
+                    case EXECUTOR -> {
                         suffixKey = executorInnerGroup.size() + 1;
-                        executorInnerGroup.put("executorInnerGroup_" + suffixKey, createdUser);
+                        executorInnerGroup.put(EXECUTOR_INNER_GROUP + suffixKey, createdUser);
                     }
-                    case ("AUTHOR") -> {
+                    case AUTHOR -> {
                         suffixKey = authorInnerGroup.size() + 1;
-                        authorInnerGroup.put("authorInnerGroup_" + suffixKey, createdUser);
+                        authorInnerGroup.put(AUTHOR_INNER_GROUP + suffixKey, createdUser);
                     }
-                    case ("OBSERVER") -> {
+                    case OBSERVER -> {
                         suffixKey = observerInnerGroup.size() + 1;
-                        observerInnerGroup.put("observerInnerGroup_" + suffixKey, createdUser);
+                        observerInnerGroup.put(OBSERVER_INNER_GROUP + suffixKey, createdUser);
                     }
                     default -> throw new IllegalStateException("Unexpected value: " + role.getName());
                 }
             } else {
                 switch (role.getName()) {
-                    case ("ADMIN") -> {
+                    case ADMIN -> {
                         suffixKey = adminOuterGroup.size() + 1;
-                        adminOuterGroup.put("adminOuterGroup_" + suffixKey, createdUser);
+                        adminOuterGroup.put(ADMIN_OUTER_GROUP + suffixKey, createdUser);
                     }
-                    case ("EXECUTOR") -> {
+                    case EXECUTOR -> {
                         suffixKey = executorOuterGroup.size() + 1;
-                        executorOuterGroup.put("executorOuterGroup_" + suffixKey, createdUser);
+                        executorOuterGroup.put(EXECUTOR_OUTER_GROUP + suffixKey, createdUser);
                     }
-                    case ("AUTHOR") -> {
+                    case AUTHOR -> {
                         suffixKey = authorOuterGroup.size() + 1;
-                        authorOuterGroup.put("authorOuterGroup_" + suffixKey, createdUser);
+                        authorOuterGroup.put(AUTHOR_OUTER_GROUP + suffixKey, createdUser);
                     }
-                    case ("OBSERVER") -> {
+                    case OBSERVER -> {
                         suffixKey = observerOuterGroup.size() + 1;
-                        observerOuterGroup.put("observerOuterGroup_" + suffixKey, createdUser);
+                        observerOuterGroup.put(OBSERVER_OUTER_GROUP + suffixKey, createdUser);
                     }
                     default -> throw new IllegalStateException("Unexpected value: " + role.getName());
                 }
