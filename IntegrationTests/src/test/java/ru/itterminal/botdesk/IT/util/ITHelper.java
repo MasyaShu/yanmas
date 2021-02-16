@@ -1,31 +1,14 @@
 package ru.itterminal.botdesk.IT.util;
 
-import static io.restassured.RestAssured.given;
-import static io.restassured.RestAssured.when;
-import static org.hamcrest.Matchers.equalTo;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Stream;
-
-import org.junit.jupiter.params.provider.Arguments;
-import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import groovy.util.MapEntry;
 import io.restassured.response.Response;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.itterminal.botdesk.aau.model.Account;
-import ru.itterminal.botdesk.aau.model.Group;
-import ru.itterminal.botdesk.aau.model.Role;
-import ru.itterminal.botdesk.aau.model.Roles;
-import ru.itterminal.botdesk.aau.model.User;
+import org.junit.jupiter.params.provider.Arguments;
+import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
+import ru.itterminal.botdesk.aau.model.*;
 import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.aau.model.test.GroupTestHelper;
 import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
@@ -33,6 +16,15 @@ import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
 import ru.itterminal.botdesk.tickets.model.TicketStatus;
 import ru.itterminal.botdesk.tickets.model.TicketType;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Stream;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
 
 @Getter
 @Setter
@@ -103,6 +95,7 @@ public class ITHelper {
     public static final String IS_CANCELED_PREDEFINED = "isCanceledPredefined";
     public static final String ADMIN_INNER_GROUP = "adminInnerGroup_";
     public static final String EXECUTOR_INNER_GROUP = "executorInnerGroup_";
+    public static final String ACCOUNT_OWNER_INNER_GROUP = "accountOwnerInnerGroup_";
     public static final String AUTHOR_INNER_GROUP = "authorInnerGroup_";
     public static final String OBSERVER_INNER_GROUP = "observerInnerGroup_";
     public static final String ADMIN_OUTER_GROUP = "adminOuterGroup_";
@@ -138,6 +131,7 @@ public class ITHelper {
         accountOwner.setRole(roleTestHelper.getRoleByName(Roles.ACCOUNT_OWNER.toString()));
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public void verifyEmailOfAccountOwner(UserRepository userRepository) {
         var accountOwnerFromDatabase = userRepository.getByEmail(accountOwner.getEmail()).get();
         given().
@@ -318,7 +312,27 @@ public class ITHelper {
                 .extract().response().as(Group.class);
     }
 
-    public Stream<Arguments> getTokensOfUsersWhoDoNotHaveAccessForUpdateAccount() {
+    public Stream<Arguments> getTokensOfAllUsersWithoutAccountOwner() {
+        var allUsers = getAllUsersWithoutAccountOwner();
+        return allUsers.entrySet().stream()
+                .map(entry -> Arguments.of(entry.getKey(), tokens.get(entry.getValue().getEmail())));
+    }
+
+    public Stream<Arguments> getTokensOfAllUsers() {
+        var allUsers = getAllUsersWithoutAccountOwner();
+        allUsers.put(ACCOUNT_OWNER_INNER_GROUP, accountOwner);
+        return allUsers.entrySet().stream()
+                .map(entry -> Arguments.of(entry.getKey(), tokens.get(entry.getValue().getEmail())));
+    }
+
+    public Stream<Arguments> getAllUsers() {
+        var allUsers = getAllUsersWithoutAccountOwner();
+        allUsers.put(ACCOUNT_OWNER_INNER_GROUP, accountOwner);
+        return allUsers.entrySet().stream()
+                .map(entry -> Arguments.of(entry.getKey(), entry.getValue()));
+    }
+
+    private Map<String, User> getAllUsersWithoutAccountOwner() {
         Map<String, User> allUsers = new HashMap<>();
         allUsers.putAll(adminInnerGroup);
         allUsers.putAll(adminOuterGroup);
@@ -328,8 +342,7 @@ public class ITHelper {
         allUsers.putAll(authorOuterGroup);
         allUsers.putAll(observerInnerGroup);
         allUsers.putAll(observerOuterGroup);
-        return allUsers.entrySet().stream()
-                .map(entry -> Arguments.of(entry.getKey(), tokens.get(entry.getValue().getEmail())));
+        return allUsers;
     }
 
 }
