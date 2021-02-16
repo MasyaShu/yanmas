@@ -3,6 +3,8 @@ package ru.itterminal.botdesk.aau.model.test;
 import java.util.List;
 import java.util.UUID;
 
+import org.modelmapper.ModelMapper;
+
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.dto.GroupDto;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
@@ -10,6 +12,19 @@ import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
 public class GroupTestHelper extends EntityTestHelperImpl<Group, GroupDto, GroupDto> {
 
     private final AccountTestHelper accountHelper = new AccountTestHelper();
+    private final ModelMapper modelMapper = new ModelMapper();
+
+    @SuppressWarnings("deprecation")
+    public GroupDto convertEntityToDtoRequest(Group group, boolean isCreate) {
+        if (isCreate) {
+            group.setId(null);
+            group.setDeleted(null);
+            group.setVersion(null);
+            group.setIsDeprecated(null);
+            group.setDisplayName(null);
+        }
+        return modelMapper.map(group, GroupDto.class);
+    }
 
     @Override
     public Group getRandomValidEntity() {

@@ -1,31 +1,37 @@
 package ru.itterminal.botdesk.IT.util;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.restassured.response.Response;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
-import ru.itterminal.botdesk.aau.model.*;
-import ru.itterminal.botdesk.aau.model.dto.*;
-import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
-import ru.itterminal.botdesk.aau.model.test.GroupTestHelper;
-import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
-import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
-import ru.itterminal.botdesk.tickets.model.TicketStatus;
-import ru.itterminal.botdesk.tickets.model.TicketType;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static io.restassured.RestAssured.given;
+import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 
-@SuppressWarnings("deprecation")
-@Data
-@AllArgsConstructor
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.restassured.response.Response;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import ru.itterminal.botdesk.aau.model.Account;
+import ru.itterminal.botdesk.aau.model.Group;
+import ru.itterminal.botdesk.aau.model.Role;
+import ru.itterminal.botdesk.aau.model.Roles;
+import ru.itterminal.botdesk.aau.model.User;
+import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
+import ru.itterminal.botdesk.aau.model.test.GroupTestHelper;
+import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
+import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
+import ru.itterminal.botdesk.aau.repository.UserRepository;
+import ru.itterminal.botdesk.tickets.model.TicketStatus;
+import ru.itterminal.botdesk.tickets.model.TicketType;
+
+@Getter
+@Setter
 @NoArgsConstructor
 public class ITHelper {
 
@@ -77,7 +83,8 @@ public class ITHelper {
     public static final String INPUT_VALIDATION_FAILED = "Input Validation Failed";
     public static final String TOKEN = "token";
     public static final String TYPE = "type";
-    public static final String ENTITY_NOT_EXIST_EXCEPTION = "ru.itterminal.botdesk.commons.exception.EntityNotExistException";
+    public static final String ENTITY_NOT_EXIST_EXCEPTION =
+            "ru.itterminal.botdesk.commons.exception.EntityNotExistException";
     public static final String INNER_GROUP_1 = "innerGroup_1";
     public static final String COMMENT = "comment";
     public static final String IS_INNER = "isInner";
@@ -103,64 +110,46 @@ public class ITHelper {
     public static final String AUTHOR = "AUTHOR";
     public static final String OBSERVER = "OBSERVER";
 
+    public void createAccount() {
+        var anonymousUser = userTestHelper.getRandomValidEntity();
+        var accountCreateDto = accountTestHelper.convertUserToAccountCreateDto(anonymousUser);
+        var response = given().
+                when().
+                contentType(APPLICATION_JSON).
+                body(accountCreateDto).
+                post(CREATE_ACCOUNT).
+                then()
+                .body(NAME, equalTo(anonymousUser.getAccount().getName()))
+                .body(DELETED, equalTo(false))
+                .body(VERSION, equalTo(0))
+                .log().body()
+                .statusCode(HttpStatus.CREATED.value())
+                .extract()
+                .response();
+        account = response.as(Account.class);
+        accountOwner.setEmail(anonymousUser.getEmail());
+        accountOwner.setName(anonymousUser.getName());
+        accountOwner.setPassword(anonymousUser.getPassword());
+        accountOwner.setAccount(account);
+        accountOwner.setRole(roleTestHelper.getRoleByName(Roles.ACCOUNT_OWNER.toString()));
+    }
 
-    public Group getGroupById(UUID groupId, User accountOwner) {
-        return given().
+    public void verifyEmailOfAccountOwner(UserRepository userRepository) {
+        var accountOwnerFromDatabase = userRepository.getByEmail(accountOwner.getEmail()).get();
+        given().
                 when()
-                .headers(
-                        "Authorization",
-                        "Bearer " + tokens.get(accountOwner.getEmail()))
-                .pathParam(ID, groupId)
-                .get(GROUP + "/{id}")
+                .param(TOKEN, accountOwnerFromDatabase.getEmailVerificationToken())
+                .get(EMAIL_VERIFY)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.OK.value())
-                .extract().response().as(Group.class);
+                .statusCode(HttpStatus.OK.value());
+        accountOwner.setEmailVerificationStatus(true);
+        accountOwner.setEmailVerificationToken(null);
+        accountOwner.setGroup(accountOwnerFromDatabase.getGroup());
     }
 
-    public GroupDto createGroupDto(Group group, boolean isCreate) {
-        if (isCreate) {
-            group.setId(null);
-            group.setDeleted(null);
-            group.setVersion(null);
-            group.setIsDeprecated(null);
-            group.setDisplayName(null);
-        }
-        return modelMapper.map(group, GroupDto.class);
-    }
-
-    public AccountCreateDto createAccountCreateDto(User anonymousUser) {
-        return AccountCreateDto.builder()
-                .name(anonymousUser.getAccount().getName())
-                .emailAccountOwner(anonymousUser.getEmail())
-                .passwordAccountOwner(anonymousUser.getPassword())
-                .nameGroupAccountOwner(anonymousUser.getEmail())
-                .build();
-    }
-
-    public AccountDto createAccountDto(Account account) {
-        var accountDto = modelMapper.map(account, AccountDto.class);
-        accountDto.setDisplayName(null);
-        return accountDto;
-    }
-
-    public AuthenticationRequestDto createAuthenticationRequestDto(User user) {
-        return modelMapper.map(user, AuthenticationRequestDto.class);
-    }
-
-    public UserDtoRequest createUserDtoRequest(User createdUser, boolean isCreated) {
-        if (isCreated) {
-            createdUser.setId(null);
-            createdUser.setDeleted(null);
-            createdUser.setVersion(null);
-            createdUser.setDisplayName(null);
-            createdUser.setIsArchived(null);
-        }
-        return modelMapper.map(createdUser, UserDtoRequest.class);
-    }
-
-    public void activateAccount() {
-        var groupAccountOwner = getGroupById(accountOwner.getGroup().getId(), accountOwner);
+    public void setNestedFieldsInAccountOwner() {
+        var groupAccountOwner = getGroupByIdForActivateAccount(accountOwner.getGroup().getId());
         groupAccountOwner.setAccount(account);
         var roleAccountOwner = roleTestHelper.getRoleByName(Roles.ACCOUNT_OWNER.toString());
         accountOwner.setGroup(groupAccountOwner);
@@ -169,73 +158,78 @@ public class ITHelper {
         innerGroup.put(INNER_GROUP_1, groupAccountOwner);
     }
 
-    private void createInitialOuterGroups(int countGroup) {
-        for (int i = 1; i <= countGroup; i++) {
-            var group = groupTestHelper.getRandomValidEntity();
-            var suffixKey = outerGroup.size() + 1;
-            var keyOuterGroup = OUTER_GROUP + suffixKey;
-            group.setAccount(account);
-            group.setIsInner(false);
-            var jsonGroupDto = createGroupDto(group, true);
-            Response response = given().
-                    when()
-                    .headers(
-                            "Authorization",
-                            "Bearer " + tokens.get(accountOwner.getEmail()))
-                    .contentType(APPLICATION_JSON).
-                            body(jsonGroupDto).
-                            post(GROUP).
-                            then()
-                    .log().body()
-                    .extract().response();
-            var createdGroup = response.as(Group.class);
-            createdGroup.setAccount(account);
-            outerGroup.put(keyOuterGroup, createdGroup);
-
-        }
+    public void signInUser(User user) {
+        var authenticationRequestDto = userTestHelper.convertUserToAuthenticationRequestDto(user);
+        Response response = given()
+                .contentType(APPLICATION_JSON)
+                .body(authenticationRequestDto)
+                .post(SIGN_IN)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.OK.value())
+                .extract().response();
+        tokens.put(user.getEmail(), response.path("token"));
     }
 
-    private void createInitialInnerGroups(int countGroup) {
+    public void createAndVerifyAccount(UserRepository userRepository) {
+        createAccount();
+        verifyEmailOfAccountOwner(userRepository);
+        signInUser(accountOwner);
+        setNestedFieldsInAccountOwner();
+    }
+
+    private void createInitialGroups(int countGroup, boolean isInnerGroup) {
+        String prefix = OUTER_GROUP;
+        if (isInnerGroup) {
+            prefix = INNER_GROUP;
+        }
         for (int i = 1; i <= countGroup; i++) {
             var group = groupTestHelper.getRandomValidEntity();
-            var suffixKey = innerGroup.size() + 1;
-            var keyInnerGroup = INNER_GROUP + suffixKey;
             group.setAccount(account);
-            group.setIsInner(true);
-            var jsonGroupDto = createGroupDto(group, true);
+            group.setIsInner(isInnerGroup);
+            var groupDto = groupTestHelper.convertEntityToDtoRequest(group, true);
             Response response = given().
                     when()
                     .headers(
                             "Authorization",
-                            "Bearer " + tokens.get(accountOwner.getEmail()))
+                            "Bearer " + tokens.get(accountOwner.getEmail())
+                    )
                     .contentType(APPLICATION_JSON).
-                            body(jsonGroupDto).
-                            post(GROUP).
-                            then()
-                    .log().body()
+                            body(groupDto).
+                            post(GROUP)
+                    .then().log().body()
                     .extract().response();
             var createdGroup = response.as(Group.class);
             createdGroup.setAccount(account);
-            innerGroup.put(keyInnerGroup, createdGroup);
+            if (isInnerGroup) {
+                var suffixKey = innerGroup.size() + 1;
+                var keyGroup = prefix + suffixKey;
+                innerGroup.put(keyGroup, createdGroup);
+            } else {
+                var suffixKey = outerGroup.size() + 1;
+                var keyGroup = prefix + suffixKey;
+                outerGroup.put(keyGroup, createdGroup);
+            }
         }
     }
 
     public void createInitialInnerAndOuterGroups(int countInnerGroup, int countOuterGroup) {
-        createInitialInnerGroups(countInnerGroup);
-        createInitialOuterGroups(countOuterGroup);
+        createInitialGroups(countOuterGroup, false);
+        createInitialGroups(countInnerGroup, true);
     }
 
     public void createUsersForEachRoleInGroup(Group group, List<Role> roles) {
         for (Role role : roles) {
             var newUser = userTestHelper.getRandomValidEntity();
-            var userDtoRequest = createUserDtoRequest(newUser, true);
-            userDtoRequest.setGroup(group.getId());
+            var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(newUser, true);
             userDtoRequest.setRole(role.getId());
+            userDtoRequest.setGroup(group.getId());
 
             User createdUser = given()
                     .headers(
                             "Authorization",
-                            "Bearer " + tokens.get(accountOwner.getEmail()))
+                            "Bearer " + tokens.get(accountOwner.getEmail())
+                    )
                     .contentType(APPLICATION_JSON)
                     .body(userDtoRequest)
                     .post(USER)
@@ -291,7 +285,7 @@ public class ITHelper {
                 }
             }
 
-            var jsonSignIn = createAuthenticationRequestDto(createdUser);
+            var jsonSignIn = userTestHelper.convertUserToAuthenticationRequestDto(createdUser);
             Response response = given()
                     .contentType(APPLICATION_JSON)
                     .body(jsonSignIn)
@@ -304,5 +298,22 @@ public class ITHelper {
             tokens.put(createdUser.getEmail(), response.path("token"));
         }
     }
+
+    private Group getGroupByIdForActivateAccount(UUID groupId) {
+        return given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + tokens.get(accountOwner.getEmail())
+                )
+                .pathParam(ID, groupId)
+                .get(GROUP + "/{id}")
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.OK.value())
+                .extract().response().as(Group.class);
+    }
+
+
 }
 

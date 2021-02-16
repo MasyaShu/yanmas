@@ -3,20 +3,25 @@ package ru.itterminal.botdesk.aau.model.test;
 import java.util.List;
 import java.util.UUID;
 
+import org.modelmapper.ModelMapper;
+
 import ru.itterminal.botdesk.aau.model.User;
+import ru.itterminal.botdesk.aau.model.dto.AuthenticationRequestDto;
 import ru.itterminal.botdesk.aau.model.dto.UserDtoRequest;
 import ru.itterminal.botdesk.aau.model.dto.UserDtoResponse;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
 
 public class UserTestHelper extends EntityTestHelperImpl<User, UserDtoRequest, UserDtoResponse> {
 
-    RoleTestHelper roleHelper = new RoleTestHelper();
-    AccountTestHelper accountHelper = new AccountTestHelper();
-    GroupTestHelper groupHelper = new GroupTestHelper();
+    private final RoleTestHelper roleHelper = new RoleTestHelper();
+    private final AccountTestHelper accountHelper = new AccountTestHelper();
+    private final GroupTestHelper groupHelper = new GroupTestHelper();
+    private final ModelMapper modelMapper = new ModelMapper();
 
     private static final String PASSWORD = "$2a$10$ejjUoWxoPs.4vjQOoBnFquybNHJAxIyKz7QIXL6.BSVyHPow8jmxK";
     private static final String PHONE = "211-15-15";
     private static final String COMMENT = "comment comment";
+
 
     @Override
     public User getRandomValidEntity() {
@@ -147,4 +152,25 @@ public class UserTestHelper extends EntityTestHelperImpl<User, UserDtoRequest, U
         );
         return List.of(user1, user2, user3, user4, user5);
     }
+
+    public AuthenticationRequestDto convertUserToAuthenticationRequestDto(User user) {
+        return modelMapper.map(user, AuthenticationRequestDto.class);
+    }
+
+    public UserDtoRequest convertUserToUserDtoRequest(User createdUser, boolean isCreated) {
+        var userDtoRequest = modelMapper.map(createdUser, UserDtoRequest.class);
+        userDtoRequest.setGroup(createdUser.getGroup().getId());
+        userDtoRequest.setRole(createdUser.getRole().getId());
+        if (isCreated) {
+            userDtoRequest.setId(null);
+            userDtoRequest.setDeleted(null);
+            userDtoRequest.setVersion(null);
+            userDtoRequest.setDisplayName(null);
+            userDtoRequest.setIsArchived(null);
+        }
+        return userDtoRequest;
+
+    }
+
+
 }

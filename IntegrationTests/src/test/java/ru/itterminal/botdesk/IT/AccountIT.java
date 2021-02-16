@@ -1,9 +1,65 @@
 package ru.itterminal.botdesk.IT;
 
-import io.restassured.RestAssured;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.response.Response;
-import org.junit.jupiter.api.*;
+import static io.restassured.RestAssured.given;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static ru.itterminal.botdesk.IT.util.ITHelper.ACCOUNT;
+import static ru.itterminal.botdesk.IT.util.ITHelper.ADMIN_INNER_GROUP;
+import static ru.itterminal.botdesk.IT.util.ITHelper.ADMIN_OUTER_GROUP;
+import static ru.itterminal.botdesk.IT.util.ITHelper.APPLICATION_JSON;
+import static ru.itterminal.botdesk.IT.util.ITHelper.AUTHENTICATION_FAILED;
+import static ru.itterminal.botdesk.IT.util.ITHelper.AUTHOR_INNER_GROUP;
+import static ru.itterminal.botdesk.IT.util.ITHelper.AUTHOR_OUTER_GROUP;
+import static ru.itterminal.botdesk.IT.util.ITHelper.CREATE_ACCOUNT;
+import static ru.itterminal.botdesk.IT.util.ITHelper.DELETED;
+import static ru.itterminal.botdesk.IT.util.ITHelper.DETAIL;
+import static ru.itterminal.botdesk.IT.util.ITHelper.DISPLAY_NAME;
+import static ru.itterminal.botdesk.IT.util.ITHelper.EMAIL_VERIFY;
+import static ru.itterminal.botdesk.IT.util.ITHelper.ENTITY_NOT_EXIST_EXCEPTION;
+import static ru.itterminal.botdesk.IT.util.ITHelper.EXECUTOR_INNER_GROUP;
+import static ru.itterminal.botdesk.IT.util.ITHelper.EXECUTOR_OUTER_GROUP;
+import static ru.itterminal.botdesk.IT.util.ITHelper.ID;
+import static ru.itterminal.botdesk.IT.util.ITHelper.INNER_GROUP;
+import static ru.itterminal.botdesk.IT.util.ITHelper.INPUT_VALIDATION_FAILED;
+import static ru.itterminal.botdesk.IT.util.ITHelper.INVALID_USERNAME_OR_PASSWORD;
+import static ru.itterminal.botdesk.IT.util.ITHelper.IS_CANCELED_PREDEFINED;
+import static ru.itterminal.botdesk.IT.util.ITHelper.IS_FINISHED_PREDEFINED;
+import static ru.itterminal.botdesk.IT.util.ITHelper.IS_PREDEFINED_FOR_NEW_TICKET;
+import static ru.itterminal.botdesk.IT.util.ITHelper.IS_REOPENED_PREDEFINED;
+import static ru.itterminal.botdesk.IT.util.ITHelper.IS_STARTED_PREDEFINED;
+import static ru.itterminal.botdesk.IT.util.ITHelper.NAME;
+import static ru.itterminal.botdesk.IT.util.ITHelper.OBSERVER_INNER_GROUP;
+import static ru.itterminal.botdesk.IT.util.ITHelper.OBSERVER_OUTER_GROUP;
+import static ru.itterminal.botdesk.IT.util.ITHelper.OUTER_GROUP;
+import static ru.itterminal.botdesk.IT.util.ITHelper.OUT_ID;
+import static ru.itterminal.botdesk.IT.util.ITHelper.SIGN_IN;
+import static ru.itterminal.botdesk.IT.util.ITHelper.STATUS;
+import static ru.itterminal.botdesk.IT.util.ITHelper.TITLE;
+import static ru.itterminal.botdesk.IT.util.ITHelper.TOKEN;
+import static ru.itterminal.botdesk.IT.util.ITHelper.TYPE;
+import static ru.itterminal.botdesk.IT.util.ITHelper.VALIDATION_FAILED;
+import static ru.itterminal.botdesk.IT.util.ITHelper.VERSION;
+import static ru.itterminal.botdesk.tickets.service.impl.TicketStatusServiceImpl.CANCELED;
+import static ru.itterminal.botdesk.tickets.service.impl.TicketStatusServiceImpl.FINISHED;
+import static ru.itterminal.botdesk.tickets.service.impl.TicketStatusServiceImpl.REOPENED;
+import static ru.itterminal.botdesk.tickets.service.impl.TicketStatusServiceImpl.STARTED;
+import static ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl.DEFAULT_TYPE;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.persistence.EntityManager;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -13,11 +69,16 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+
+import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.response.Response;
 import ru.itterminal.botdesk.IT.util.ITHelper;
 import ru.itterminal.botdesk.IT.util.ITTestConfig;
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
+import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
 import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
@@ -26,20 +87,6 @@ import ru.itterminal.botdesk.tickets.model.TicketStatus;
 import ru.itterminal.botdesk.tickets.repository.TicketStatusRepository;
 import ru.itterminal.botdesk.tickets.repository.TicketTypeRepository;
 
-import javax.persistence.EntityManager;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static io.restassured.RestAssured.given;
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.*;
-import static ru.itterminal.botdesk.IT.util.ITHelper.*;
-import static ru.itterminal.botdesk.tickets.service.impl.TicketStatusServiceImpl.*;
-import static ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl.DEFAULT_TYPE;
-
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -47,7 +94,6 @@ import static ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl.D
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestPropertySource(properties = {"jwt.token.secret=ksedtob", "jwt.token.expired=8640000", "jwt.token.prefix=Bearer"})
 class AccountIT {
-
 
     public static final String ACCOUNT_CHECK_ACCESS = "account/check-access";
     @Autowired
@@ -69,6 +115,8 @@ class AccountIT {
     private static User anonymousUser;
 
     private final RoleTestHelper roleTestHelper = new RoleTestHelper();
+    private final AccountTestHelper accountTestHelper = new AccountTestHelper();
+    private final UserTestHelper userTestHelper = new UserTestHelper();
 
     @BeforeAll
     static void beforeAll() {
@@ -80,16 +128,18 @@ class AccountIT {
         anonymousUser = userTestHelper.getRandomValidEntity();
     }
 
+    // TODO название все методов начинается либо с success либо с failed
     @Test
     @Order(10)
     void successCreatedAccount() {
-        var jsonCreateAccount = itHelper.createAccountCreateDto(anonymousUser);
+        var jsonCreateAccount = accountTestHelper.convertUserToAccountCreateDto(anonymousUser);
         var response = given().
                 when().
                 contentType(APPLICATION_JSON).
-                body(jsonCreateAccount).
-                post(CREATE_ACCOUNT).
-                then()
+                // TODO нужно ли делать акцент в названии переменной на json?
+                        body(jsonCreateAccount).
+                        post(CREATE_ACCOUNT).
+                        then()
                 .body(NAME, equalTo(anonymousUser.getAccount().getName()))
                 .body(DELETED, equalTo(false))
                 .body(VERSION, equalTo(0))
@@ -104,7 +154,8 @@ class AccountIT {
     @Test
     @Order(20)
     void failedCreateAccount_WhenEmailAlreadyOccupied() {
-        var jsonCreateAccount = itHelper.createAccountCreateDto(anonymousUser);
+        var jsonCreateAccount = accountTestHelper.convertUserToAccountCreateDto(anonymousUser);
+        // TODO зачем следующие две строчки?
         RequestSpecBuilder requestSpecBuilder = new RequestSpecBuilder();
         requestSpecBuilder.setBody(anonymousUser);
         given().
@@ -122,8 +173,8 @@ class AccountIT {
 
     @Test
     @Order(30)
-    void AccessDenied_whenAccountIsNotActivated() {
-        var jsonSignIn = itHelper.createAuthenticationRequestDto(anonymousUser);
+    void failedAccess_whenAccountIsNotActivated() {
+        var jsonSignIn = userTestHelper.convertUserToAuthenticationRequestDto(anonymousUser);
         given()
                 .contentType(APPLICATION_JSON)
                 .body(jsonSignIn)
@@ -152,7 +203,7 @@ class AccountIT {
 
     @Test
     @Order(50)
-    void successfulAccountVerification() {
+    void successAccountVerification() {
         var userFromDataBase = userRepository.getByEmail(anonymousUser.getEmail()).get();
         given().
                 when()
@@ -168,10 +219,10 @@ class AccountIT {
 
         itHelper.setAccountOwner(accountOwner);
 
-        var ticketType = ticketTypeRepository.findAllByAccountId(itHelper.getAccount().getId());
-        assertEquals(DEFAULT_TYPE, ticketType.get(0).getName());
-        assertEquals(1, ticketType.size());
-        itHelper.getTicketTypes().put(IS_PREDEFINED_FOR_NEW_TICKET, ticketType.get(0));
+        var expectedTicketType = ticketTypeRepository.findAllByAccountId(itHelper.getAccount().getId());
+        assertEquals(DEFAULT_TYPE, expectedTicketType.get(0).getName());
+        assertEquals(1, expectedTicketType.size());
+        itHelper.getTicketTypes().put(IS_PREDEFINED_FOR_NEW_TICKET, expectedTicketType.get(0));
 
         var ticketStatuses = ticketStatusRepository.findAllByAccountId(itHelper.getAccount().getId());
         var expectedTicketStatusNames = List.of(CANCELED, REOPENED, FINISHED, STARTED);
@@ -180,17 +231,17 @@ class AccountIT {
                 .collect(Collectors.toList());
         assertEquals(4, ticketStatuses.size());
         assertThat(expectedTicketStatusNames).containsExactlyInAnyOrderElementsOf(actualTicketStatusNames);
-        for(TicketStatus ticketStatus: ticketStatuses) {
-            if(ticketStatus.getIsCanceledPredefined()) {
+        for (TicketStatus ticketStatus : ticketStatuses) {
+            if (ticketStatus.getIsCanceledPredefined()) {
                 itHelper.getTicketStatuses().put(IS_CANCELED_PREDEFINED, ticketStatus);
             }
-            if(ticketStatus.getIsFinishedPredefined()) {
+            if (ticketStatus.getIsFinishedPredefined()) {
                 itHelper.getTicketStatuses().put(IS_FINISHED_PREDEFINED, ticketStatus);
             }
-            if(ticketStatus.getIsReopenedPredefined()) {
+            if (ticketStatus.getIsReopenedPredefined()) {
                 itHelper.getTicketStatuses().put(IS_REOPENED_PREDEFINED, ticketStatus);
             }
-            if(ticketStatus.getIsStartedPredefined()) {
+            if (ticketStatus.getIsStartedPredefined()) {
                 itHelper.getTicketStatuses().put(IS_STARTED_PREDEFINED, ticketStatus);
             }
         }
@@ -198,8 +249,8 @@ class AccountIT {
 
     @Test
     @Order(60)
-    void successfulSignInAccountOwner() {
-        var jsonSignIn = itHelper.createAuthenticationRequestDto(anonymousUser);
+    void successSignInAccountOwner() {
+        var jsonSignIn = userTestHelper.convertUserToAuthenticationRequestDto(anonymousUser);
         Response response = given()
                 .contentType(APPLICATION_JSON)
                 .body(jsonSignIn)
@@ -210,7 +261,7 @@ class AccountIT {
                 .extract()
                 .response();
         itHelper.getTokens().put(anonymousUser.getEmail(), response.path("token"));
-        itHelper.activateAccount();
+        itHelper.setNestedFieldsInAccountOwner();
 
         itHelper.createInitialInnerAndOuterGroups(0, 1);
         var roles = roleTestHelper.setPredefinedValidEntityList();
@@ -222,12 +273,13 @@ class AccountIT {
     @Test
     @Order(70)
     void failedCreateAccount_whenUserIsNotAnonymous() {
-        var jsonCreateAccount = itHelper.createAccountCreateDto(anonymousUser);
+        var jsonCreateAccount = accountTestHelper.convertUserToAccountCreateDto(anonymousUser);
         given().
                 when()
                 .headers(
                         "Authorization",
-                        "Bearer " + itHelper.getTokens().get(anonymousUser.getEmail()))
+                        "Bearer " + itHelper.getTokens().get(anonymousUser.getEmail())
+                )
                 .contentType(APPLICATION_JSON)
                 .body(jsonCreateAccount)
                 .post(CREATE_ACCOUNT)
@@ -238,12 +290,13 @@ class AccountIT {
 
     @Test
     @Order(80)
-    void getAccountByAccountOwner() {
+    void successGetAccountByAccountOwner() {
         Response response = given().
                 when()
                 .headers(
                         "Authorization",
-                        "Bearer " + itHelper.getTokens().get(itHelper.getAccountOwner().getEmail()))
+                        "Bearer " + itHelper.getTokens().get(itHelper.getAccountOwner().getEmail())
+                )
                 .get(ACCOUNT)
                 .then()
                 .log().body()
@@ -259,7 +312,7 @@ class AccountIT {
 
     @Test
     @Order(90)
-    void getAccountByAnonymous() {
+    void successGetAccountByAnonymous() {
         given().
                 when()
                 .get(ACCOUNT)
@@ -275,12 +328,13 @@ class AccountIT {
         var updatedName = itHelper.getAccount().getName() + "Updated";
         var newVersion = updatedAccount.getVersion() + 1;
         updatedAccount.setName(updatedName);
-        var accountDto = itHelper.createAccountDto(updatedAccount);
+        var accountDto = accountTestHelper.convertAccountToAccountDto(updatedAccount);
         var account = given().
                 when()
                 .headers(
                         "Authorization",
-                        "Bearer " + itHelper.getTokens().get(itHelper.getAccountOwner().getEmail()))
+                        "Bearer " + itHelper.getTokens().get(itHelper.getAccountOwner().getEmail())
+                )
                 .contentType(APPLICATION_JSON)
                 .body(accountDto)
                 .put(ACCOUNT)
@@ -296,19 +350,20 @@ class AccountIT {
     }
 
     @ParameterizedTest
-    @MethodSource("tokensUsersWhoDoNotHaveRightsToUpdateAccount")
+    @MethodSource("getTokensOfUsersWhoDoNotHaveAccessForUpdateAccount")
     @Order(110)
     void failedUpdateAccount_whenUserNotAccountOwner(String userRole, String token) {
         var updatedAccount = itHelper.getAccount().toBuilder().build();
         var updatedName = userRole + itHelper.getAccount().getName();
         updatedAccount.setName(updatedName);
-        var accountDto = itHelper.createAccountDto(updatedAccount);
+        var accountDto = accountTestHelper.convertAccountToAccountDto(updatedAccount);
 
         given().
                 when()
                 .headers(
                         "Authorization",
-                        "Bearer " + token)
+                        "Bearer " + token
+                )
                 .contentType(APPLICATION_JSON)
                 .body(accountDto)
                 .put(ACCOUNT)
@@ -317,15 +372,17 @@ class AccountIT {
                 .statusCode(HttpStatus.FORBIDDEN.value());
     }
 
+    @SuppressWarnings("unused")
     @ParameterizedTest
-    @MethodSource("tokensUsersWhoDoNotHaveRightsToUpdateAccount")
+    @MethodSource("getTokensOfUsersWhoDoNotHaveAccessForUpdateAccount")
     @Order(120)
     void failedCheckAccessUpdateAccount_whenUserNotAccountOwner(String userRole, String token) {
         given().
                 when()
                 .headers(
                         "Authorization",
-                        "Bearer " + token)
+                        "Bearer " + token
+                )
                 .contentType(APPLICATION_JSON)
                 .put(ACCOUNT_CHECK_ACCESS)
                 .then()
@@ -333,13 +390,13 @@ class AccountIT {
                 .statusCode(HttpStatus.FORBIDDEN.value());
     }
 
-    private static Stream<Arguments> tokensUsersWhoDoNotHaveRightsToUpdateAccount() {
+    private static Stream<Arguments> getTokensOfUsersWhoDoNotHaveAccessForUpdateAccount() {
         var emailAdminInnerGroup = itHelper.getAdminInnerGroup().get(ADMIN_INNER_GROUP + 1).getEmail();
-        var emailExecutorInnerGroup =  itHelper.getExecutorInnerGroup().get(EXECUTOR_INNER_GROUP + 1).getEmail();
+        var emailExecutorInnerGroup = itHelper.getExecutorInnerGroup().get(EXECUTOR_INNER_GROUP + 1).getEmail();
         var emailAuthorInnerGroup = itHelper.getAuthorInnerGroup().get(AUTHOR_INNER_GROUP + 1).getEmail();
         var emailObserverInnerGroup = itHelper.getObserverInnerGroup().get(OBSERVER_INNER_GROUP + 1).getEmail();
         var emailAdminOuterGroup = itHelper.getAdminOuterGroup().get(ADMIN_OUTER_GROUP + 1).getEmail();
-        var emailExecutorOuterGroup =  itHelper.getExecutorOuterGroup().get(EXECUTOR_OUTER_GROUP + 1).getEmail();
+        var emailExecutorOuterGroup = itHelper.getExecutorOuterGroup().get(EXECUTOR_OUTER_GROUP + 1).getEmail();
         var emailAuthorOuterGroup = itHelper.getAuthorOuterGroup().get(AUTHOR_OUTER_GROUP + 1).getEmail();
         var emailObserverOuterGroup = itHelper.getObserverOuterGroup().get(OBSERVER_OUTER_GROUP + 1).getEmail();
 
@@ -354,4 +411,5 @@ class AccountIT {
                 Arguments.of(OBSERVER_OUTER_GROUP, itHelper.getTokens().get(emailObserverOuterGroup))
         );
     }
+
 }

@@ -3,11 +3,17 @@ package ru.itterminal.botdesk.aau.model.test;
 import java.util.List;
 import java.util.UUID;
 
+import org.modelmapper.ModelMapper;
+
 import ru.itterminal.botdesk.aau.model.Account;
+import ru.itterminal.botdesk.aau.model.User;
+import ru.itterminal.botdesk.aau.model.dto.AccountCreateDto;
 import ru.itterminal.botdesk.aau.model.dto.AccountDto;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
 
 public class AccountTestHelper extends EntityTestHelperImpl<Account, AccountDto, AccountDto> {
+
+    private final ModelMapper modelMapper = new ModelMapper();
 
     @Override
     public Account getRandomValidEntity() {
@@ -46,4 +52,18 @@ public class AccountTestHelper extends EntityTestHelperImpl<Account, AccountDto,
         return List.of(account1, account2);
     }
 
+    public AccountCreateDto convertUserToAccountCreateDto(User user) {
+        return AccountCreateDto.builder()
+                .name(user.getAccount().getName())
+                .emailAccountOwner(user.getEmail())
+                .passwordAccountOwner(user.getPassword())
+                .nameGroupAccountOwner(user.getEmail())
+                .build();
+    }
+
+    public AccountDto convertAccountToAccountDto(Account account) {
+        var accountDto = modelMapper.map(account, AccountDto.class);
+        accountDto.setDisplayName(null);
+        return accountDto;
+    }
 }
