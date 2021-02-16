@@ -1,18 +1,22 @@
 package ru.itterminal.botdesk.IT.util;
 
 import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.equalTo;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
+import org.junit.jupiter.params.provider.Arguments;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import groovy.util.MapEntry;
 import io.restassured.response.Response;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -314,6 +318,19 @@ public class ITHelper {
                 .extract().response().as(Group.class);
     }
 
+    public Stream<Arguments> getTokensOfUsersWhoDoNotHaveAccessForUpdateAccount() {
+        Map<String, User> allUsers = new HashMap<>();
+        allUsers.putAll(adminInnerGroup);
+        allUsers.putAll(adminOuterGroup);
+        allUsers.putAll(executorInnerGroup);
+        allUsers.putAll(executorOuterGroup);
+        allUsers.putAll(authorInnerGroup);
+        allUsers.putAll(authorOuterGroup);
+        allUsers.putAll(observerInnerGroup);
+        allUsers.putAll(observerOuterGroup);
+        return allUsers.entrySet().stream()
+                .map(entry -> Arguments.of(entry.getKey(), tokens.get(entry.getValue().getEmail())));
+    }
 
 }
 

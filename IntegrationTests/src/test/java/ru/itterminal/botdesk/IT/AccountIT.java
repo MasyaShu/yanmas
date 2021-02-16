@@ -7,20 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static ru.itterminal.botdesk.IT.util.ITHelper.ACCOUNT;
-import static ru.itterminal.botdesk.IT.util.ITHelper.ADMIN_INNER_GROUP;
-import static ru.itterminal.botdesk.IT.util.ITHelper.ADMIN_OUTER_GROUP;
 import static ru.itterminal.botdesk.IT.util.ITHelper.APPLICATION_JSON;
 import static ru.itterminal.botdesk.IT.util.ITHelper.AUTHENTICATION_FAILED;
-import static ru.itterminal.botdesk.IT.util.ITHelper.AUTHOR_INNER_GROUP;
-import static ru.itterminal.botdesk.IT.util.ITHelper.AUTHOR_OUTER_GROUP;
 import static ru.itterminal.botdesk.IT.util.ITHelper.CREATE_ACCOUNT;
 import static ru.itterminal.botdesk.IT.util.ITHelper.DELETED;
 import static ru.itterminal.botdesk.IT.util.ITHelper.DETAIL;
 import static ru.itterminal.botdesk.IT.util.ITHelper.DISPLAY_NAME;
 import static ru.itterminal.botdesk.IT.util.ITHelper.EMAIL_VERIFY;
 import static ru.itterminal.botdesk.IT.util.ITHelper.ENTITY_NOT_EXIST_EXCEPTION;
-import static ru.itterminal.botdesk.IT.util.ITHelper.EXECUTOR_INNER_GROUP;
-import static ru.itterminal.botdesk.IT.util.ITHelper.EXECUTOR_OUTER_GROUP;
 import static ru.itterminal.botdesk.IT.util.ITHelper.ID;
 import static ru.itterminal.botdesk.IT.util.ITHelper.INNER_GROUP;
 import static ru.itterminal.botdesk.IT.util.ITHelper.INPUT_VALIDATION_FAILED;
@@ -31,8 +25,6 @@ import static ru.itterminal.botdesk.IT.util.ITHelper.IS_PREDEFINED_FOR_NEW_TICKE
 import static ru.itterminal.botdesk.IT.util.ITHelper.IS_REOPENED_PREDEFINED;
 import static ru.itterminal.botdesk.IT.util.ITHelper.IS_STARTED_PREDEFINED;
 import static ru.itterminal.botdesk.IT.util.ITHelper.NAME;
-import static ru.itterminal.botdesk.IT.util.ITHelper.OBSERVER_INNER_GROUP;
-import static ru.itterminal.botdesk.IT.util.ITHelper.OBSERVER_OUTER_GROUP;
 import static ru.itterminal.botdesk.IT.util.ITHelper.OUTER_GROUP;
 import static ru.itterminal.botdesk.IT.util.ITHelper.OUT_ID;
 import static ru.itterminal.botdesk.IT.util.ITHelper.SIGN_IN;
@@ -128,16 +120,14 @@ class AccountIT {
         anonymousUser = userTestHelper.getRandomValidEntity();
     }
 
-    // TODO название все методов начинается либо с success либо с failed
     @Test
     @Order(10)
     void successCreatedAccount() {
-        var jsonCreateAccount = accountTestHelper.convertUserToAccountCreateDto(anonymousUser);
+        var accountCreateDto = accountTestHelper.convertUserToAccountCreateDto(anonymousUser);
         var response = given().
                 when().
                 contentType(APPLICATION_JSON).
-                // TODO нужно ли делать акцент в названии переменной на json?
-                        body(jsonCreateAccount).
+                        body(accountCreateDto).
                         post(CREATE_ACCOUNT).
                         then()
                 .body(NAME, equalTo(anonymousUser.getAccount().getName()))
@@ -155,9 +145,6 @@ class AccountIT {
     @Order(20)
     void failedCreateAccount_WhenEmailAlreadyOccupied() {
         var jsonCreateAccount = accountTestHelper.convertUserToAccountCreateDto(anonymousUser);
-        // TODO зачем следующие две строчки?
-        RequestSpecBuilder requestSpecBuilder = new RequestSpecBuilder();
-        requestSpecBuilder.setBody(anonymousUser);
         given().
                 when().
                 contentType(APPLICATION_JSON).
@@ -173,7 +160,7 @@ class AccountIT {
 
     @Test
     @Order(30)
-    void failedAccess_whenAccountIsNotActivated() {
+    void failedSignIn_whenAccountIsNotActivated() {
         var jsonSignIn = userTestHelper.convertUserToAuthenticationRequestDto(anonymousUser);
         given()
                 .contentType(APPLICATION_JSON)
@@ -270,9 +257,10 @@ class AccountIT {
         itHelper.createUsersForEachRoleInGroup(itHelper.getInnerGroup().get(INNER_GROUP + 1), roles);
     }
 
+
     @Test
     @Order(70)
-    void failedCreateAccount_whenUserIsNotAnonymous() {
+    void failedCreateAccountByAccountOwner_whenUserIsNotAnonymous() {
         var jsonCreateAccount = accountTestHelper.convertUserToAccountCreateDto(anonymousUser);
         given().
                 when()
@@ -287,6 +275,8 @@ class AccountIT {
                 .log().body()
                 .statusCode(HttpStatus.FORBIDDEN.value());
     }
+
+    //TODO  failedCreateAccountByAllUsers_whenUsersAreAuthorized
 
     @Test
     @Order(80)
@@ -312,7 +302,7 @@ class AccountIT {
 
     @Test
     @Order(90)
-    void successGetAccountByAnonymous() {
+    void failedGetAccountByAnonymous() {
         given().
                 when()
                 .get(ACCOUNT)
@@ -390,26 +380,10 @@ class AccountIT {
                 .statusCode(HttpStatus.FORBIDDEN.value());
     }
 
-    private static Stream<Arguments> getTokensOfUsersWhoDoNotHaveAccessForUpdateAccount() {
-        var emailAdminInnerGroup = itHelper.getAdminInnerGroup().get(ADMIN_INNER_GROUP + 1).getEmail();
-        var emailExecutorInnerGroup = itHelper.getExecutorInnerGroup().get(EXECUTOR_INNER_GROUP + 1).getEmail();
-        var emailAuthorInnerGroup = itHelper.getAuthorInnerGroup().get(AUTHOR_INNER_GROUP + 1).getEmail();
-        var emailObserverInnerGroup = itHelper.getObserverInnerGroup().get(OBSERVER_INNER_GROUP + 1).getEmail();
-        var emailAdminOuterGroup = itHelper.getAdminOuterGroup().get(ADMIN_OUTER_GROUP + 1).getEmail();
-        var emailExecutorOuterGroup = itHelper.getExecutorOuterGroup().get(EXECUTOR_OUTER_GROUP + 1).getEmail();
-        var emailAuthorOuterGroup = itHelper.getAuthorOuterGroup().get(AUTHOR_OUTER_GROUP + 1).getEmail();
-        var emailObserverOuterGroup = itHelper.getObserverOuterGroup().get(OBSERVER_OUTER_GROUP + 1).getEmail();
+    // TODO Запрет логирования после пометки на удаление (все пользователи)
 
-        return Stream.of(
-                Arguments.of(ADMIN_INNER_GROUP, itHelper.getTokens().get(emailAdminInnerGroup)),
-                Arguments.of(EXECUTOR_INNER_GROUP, itHelper.getTokens().get(emailExecutorInnerGroup)),
-                Arguments.of(AUTHOR_INNER_GROUP, itHelper.getTokens().get(emailAuthorInnerGroup)),
-                Arguments.of(OBSERVER_INNER_GROUP, itHelper.getTokens().get(emailObserverInnerGroup)),
-                Arguments.of(ADMIN_OUTER_GROUP, itHelper.getTokens().get(emailAdminOuterGroup)),
-                Arguments.of(EXECUTOR_OUTER_GROUP, itHelper.getTokens().get(emailExecutorOuterGroup)),
-                Arguments.of(AUTHOR_OUTER_GROUP, itHelper.getTokens().get(emailAuthorOuterGroup)),
-                Arguments.of(OBSERVER_OUTER_GROUP, itHelper.getTokens().get(emailObserverOuterGroup))
-        );
+    private static Stream<Arguments> getTokensOfUsersWhoDoNotHaveAccessForUpdateAccount() {
+        return itHelper.getTokensOfUsersWhoDoNotHaveAccessForUpdateAccount();
     }
 
 }
