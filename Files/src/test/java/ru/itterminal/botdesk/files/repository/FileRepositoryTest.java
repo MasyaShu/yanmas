@@ -48,11 +48,11 @@ class FileRepositoryTest {
     }
 
     @Test
-    void save_shouldNotUpdateCreatedAt_whenUpdateEntity () {
+    void update_shouldNotUpdateCreatedAt_whenUpdateEntity () {
         File file = repository.findByAccountIdAndAuthorIdAndId(ACCOUNT_ID, AUTHOR_ID, FILE_ID).get();
         var createdAtFromDatabaseBeforeUpdate = file.getCreatedAt();
-        file.setCreatedAt(System.currentTimeMillis());
-        repository.save(file);
+        file.setCreatedAt(null);
+        repository.update(file);
         entityManager.clear();
         file = repository.findByAccountIdAndAuthorIdAndId(ACCOUNT_ID, AUTHOR_ID, FILE_ID).get();
         assertEquals(createdAtFromDatabaseBeforeUpdate, file.getCreatedAt());
