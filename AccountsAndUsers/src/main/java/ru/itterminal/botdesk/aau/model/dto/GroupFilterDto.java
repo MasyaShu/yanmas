@@ -21,10 +21,13 @@ public class GroupFilterDto extends BaseFilterDto {
     @ValidateFilter(min = 1, max = 128)
     private StringFilter name;
 
+    @ValidateFilter
     private StringFilter comment;
 
+    @ValidateFilter
     private BooleanFilter isDeprecated;
 
+    @ValidateFilter
     private BooleanFilter isInner;
 
     @ValidateSortFields(permittedFieldsForSort = "deleted, displayName, name, comment, isDeprecated")
