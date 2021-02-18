@@ -1,8 +1,14 @@
 package ru.itterminal.botdesk.aau.service.impl;
 
-import io.jsonwebtoken.JwtException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import static java.lang.String.format;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+
+import javax.mail.MessagingException;
+import javax.persistence.OptimisticLockException;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -10,6 +16,10 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import io.jsonwebtoken.JwtException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.projection.UserUniqueFields;
@@ -23,14 +33,6 @@ import ru.itterminal.botdesk.integration.aws.ses.SenderEmailViaAwsSes;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
 import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
 import software.amazon.awssdk.services.ses.model.SendRawEmailRequest;
-
-import javax.mail.MessagingException;
-import javax.persistence.OptimisticLockException;
-import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
-
-import static java.lang.String.format;
 
 @Slf4j
 @Service
@@ -76,8 +78,6 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
             "Not found user by email verification token";
     public static final String START_RESET_PASSWORD_BY_TOKEN_AND_NEW_PASSWORD =
             "Start reset password by token: {} and new password {}";
-    public static final String NOT_FOUND_USER_BY_ID_AND_ACCOUNT_ID_AND_OWN_GROUP_ID
-            = "Not found user by id: %s and account id: %s and own group id %s";
     public static final String START_FIND_USER_BY_EMAIL = "Start find user by email: {}";
     public static final String NOT_FOUND_USER_BY_EMAIL = "Not found user by email: %s";
     public static final String START_FIND_USER_BY_UNIQUE_FIELDS =
@@ -290,6 +290,7 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
         log.trace(START_UPDATE_EMAIL_FOR_ACCOUNT_OWNER, newEmail);
         var jwtUser = jwtUserBuilder.getJwtUser();
         var accountOwner = super.findByIdAndAccountId(jwtUser.getId());
+        // TODO Проверка того, что новый email уникален
         var token = jwtProvider.createToken(newEmail);
         accountOwner.setEmailVerificationToken(token);
         repository.save(accountOwner);
@@ -355,6 +356,7 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
         catch (Exception e) {
             throw new JwtException(e.getMessage());
         }
+        // TODO Проверка того, что новый email уникален
         var jwtUser = jwtUserBuilder.getJwtUser();
         var accountOwner = findByIdAndAccountId(jwtUser.getId());
         accountOwner.setEmailVerificationToken(null);
