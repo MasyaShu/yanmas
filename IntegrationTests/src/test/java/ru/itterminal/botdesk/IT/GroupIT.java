@@ -262,7 +262,7 @@ class GroupIT {
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamUsersInnerGroupWithRolesAccountOwnerAndAdmin")
     @Order(100)
-    void successCreateGroupByUsersInnerGroupWithRolesAccountOwnerOrdAdmin(String userKey, User user) {
+    void successCreateAnyGroupByUsersInnerGroupWithRolesAccountOwnerOrAdmin(String userKey, User user) {
         var newGroup = groupTestHelper.getRandomValidEntity();
         var groupDto = groupTestHelper.convertEntityToDtoRequest(newGroup, true);
         var actualGroup = given().
@@ -308,7 +308,7 @@ class GroupIT {
 
     @Test
     @Order(120)
-    void successCreateGroupByUsersWithRolesAccountOwner_nameGroupNotUniqueForInnerAndOuterGroup() {
+    void successCreateGroupByUsersWithRoleAccountOwner_nameOfGroupNotUniqueForInnerAndOuterGroup() {
         var newGroup = itHelper.getInnerGroup().get(INNER_GROUP_1).toBuilder().build();
         newGroup.setIsInner(false);
         var groupDto = groupTestHelper.convertEntityToDtoRequest(newGroup, true);
@@ -337,7 +337,7 @@ class GroupIT {
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamAllUsersOuterGroup")
     @Order(130)
-    void failedCreateGroupByUsersOuterGroupWithAllRoles(String userKey, User user) {
+    void failedCreateGroupByAllUsersOuterGroup(String userKey, User user) {
         var newGroup = groupTestHelper.getRandomValidEntity();
         var groupDto = groupTestHelper.convertEntityToDtoRequest(newGroup, true);
         given().
@@ -379,8 +379,8 @@ class GroupIT {
     @Order(150)
     void successUpdateGroupByUsersInnerGroupWithRolesAccountOwnerOrAdminOrExecutor(String userKey, User user) {
         var allGroupList = itHelper.getAllGroup();
-        for (Group group : allGroupList) {
-            var groupDto = groupTestHelper.convertEntityToDtoRequest(group, false);
+        for (Group expectedGroup : allGroupList) {
+            var groupDto = groupTestHelper.convertEntityToDtoRequest(expectedGroup, false);
             var actualGroup = given().
                     when()
                     .headers(
@@ -393,13 +393,13 @@ class GroupIT {
                     .log().body()
                     .statusCode(HttpStatus.OK.value())
                     .extract().response().as(Group.class);
-            assertEquals(group.getName(), actualGroup.getName());
-            assertEquals(group.getOutId(), actualGroup.getOutId());
-            assertEquals(group.getComment(), actualGroup.getComment());
-            assertEquals(group.getIsInner(), actualGroup.getIsInner());
-            assertEquals(group.getVersion(), actualGroup.getVersion());
-            assertFalse(actualGroup.getIsDeprecated());
-            assertFalse(actualGroup.getDeleted());
+            assertEquals(expectedGroup.getName(), actualGroup.getName());
+            assertEquals(expectedGroup.getOutId(), actualGroup.getOutId());
+            assertEquals(expectedGroup.getComment(), actualGroup.getComment());
+            assertEquals(expectedGroup.getIsInner(), actualGroup.getIsInner());
+            assertEquals(expectedGroup.getVersion(), actualGroup.getVersion());
+            assertEquals(expectedGroup.getIsDeprecated(),actualGroup.getIsDeprecated());
+            assertEquals(expectedGroup.getDeleted(),actualGroup.getDeleted());
         }
     }
 
@@ -453,7 +453,7 @@ class GroupIT {
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamUsersInnerGroupWithRolesAuthorAndObserver")
     @Order(180)
-    void failedUpdateGroupByUsersInnerGroupWithRolesAuthorOrObserver(String userKey, User user) {
+    void failedUpdateGroupByAllUsersInnerGroupWithRolesAuthorOrObserver(String userKey, User user) {
         var allGroupList = itHelper.getAllGroup();
         for (Group group : allGroupList) {
             var groupDto = groupTestHelper.convertEntityToDtoRequest(group, false);
@@ -474,7 +474,7 @@ class GroupIT {
     @SuppressWarnings("unused")
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamAllUsersOuterGroup")
-    @Order(180)
+    @Order(190)
     void failedUpdateGroupByAllUsersOuterGroup(String userKey, User user) {
         var allGroupList = itHelper.getAllGroup();
         for (Group group : allGroupList) {
