@@ -197,7 +197,7 @@ public class TicketControllerV1 extends BaseController {
                     .build();
             Specification<Ticket> additionConditionByGroupOfCurrentUser =
                     specFactory.makeSpecification(Ticket.class, GROUP, filterByGroupOfCurrentUser);
-            spec.and(additionConditionByGroupOfCurrentUser);
+            spec = spec.and(additionConditionByGroupOfCurrentUser);
         }
 
         if (nameOfRoleOfCurrentUser.equals(Roles.AUTHOR.toString())) {
@@ -213,7 +213,7 @@ public class TicketControllerV1 extends BaseController {
                     .build();
             Specification<Ticket> additionConditionByObserversOfTicket =
                     specFactory.makeSpecification(Ticket.class, OBSERVERS, filterByListOfObservers);
-            spec.and(additionConditionByAuthorOfTicket.or(additionConditionByObserversOfTicket));
+            spec = spec.and(additionConditionByAuthorOfTicket.or(additionConditionByObserversOfTicket));
         }
 
         if (nameOfRoleOfCurrentUser.equals(Roles.OBSERVER.toString())) {
@@ -223,7 +223,7 @@ public class TicketControllerV1 extends BaseController {
                     .build();
             Specification<Ticket> additionConditionByObserversOfTicket =
                     specFactory.makeSpecification(Ticket.class, OBSERVERS, filterByListOfObservers);
-            spec.and(additionConditionByObserversOfTicket);
+            spec = spec.and(additionConditionByObserversOfTicket);
         }
     }
 }
