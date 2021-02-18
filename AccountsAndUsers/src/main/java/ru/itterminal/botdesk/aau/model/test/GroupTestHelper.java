@@ -7,7 +7,12 @@ import org.modelmapper.ModelMapper;
 
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.dto.GroupDto;
+import ru.itterminal.botdesk.aau.model.dto.GroupFilterDto;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
+import ru.itterminal.botdesk.commons.model.filter.BooleanFilter;
+import ru.itterminal.botdesk.commons.model.filter.StringFilter;
+
+import static ru.itterminal.botdesk.commons.model.filter.StringFilter.TypeComparisonForStringFilter.TEXT_EQUALS;
 
 public class GroupTestHelper extends EntityTestHelperImpl<Group, GroupDto, GroupDto> {
 
@@ -16,14 +21,17 @@ public class GroupTestHelper extends EntityTestHelperImpl<Group, GroupDto, Group
 
     @SuppressWarnings("deprecation")
     public GroupDto convertEntityToDtoRequest(Group group, boolean isCreate) {
+        var groupDto = modelMapper.map(group, GroupDto.class);
         if (isCreate) {
-            group.setId(null);
-            group.setDeleted(null);
-            group.setVersion(null);
-            group.setIsDeprecated(null);
-            group.setDisplayName(null);
+            groupDto.setId(null);
+            groupDto.setDeleted(null);
+            groupDto.setVersion(null);
+            groupDto.setIsDeprecated(null);
+        } else {
+            groupDto.setIsInner(null);
         }
-        return modelMapper.map(group, GroupDto.class);
+        groupDto.setDisplayName(null);
+        return groupDto;
     }
 
     @Override
@@ -88,5 +96,37 @@ public class GroupTestHelper extends EntityTestHelperImpl<Group, GroupDto, Group
         );
         group3.generateDisplayName();
         return List.of(group1, group2, group3);
+    }
+
+    public GroupFilterDto convertEntityToFilterDto(Group group) {
+        var filterDto = GroupFilterDto.builder()
+                .name(StringFilter.builder()
+                        .typeComparison(TEXT_EQUALS.toString())
+                        .value(group.getName())
+                        .build())
+                .isDeprecated(BooleanFilter.builder()
+                        .value(group.getIsDeprecated())
+                        .build())
+                .isInner(BooleanFilter.builder()
+                        .value(group.getIsInner())
+                        .build())
+                .deleted(BooleanFilter.builder()
+                        .value(group.getDeleted())
+                        .build())
+                .build();
+
+        if (group.getOutId() != null && !group.getOutId().isEmpty()) {
+            filterDto.setOutId(StringFilter.builder()
+                    .value(group.getOutId())
+                    .typeComparison(TEXT_EQUALS.toString())
+                    .build());
+        }
+        if (group.getComment() != null && !group.getComment().isEmpty()) {
+            filterDto.setComment(StringFilter.builder()
+                    .value(group.getComment())
+                    .typeComparison(TEXT_EQUALS.toString())
+                    .build());
+        }
+        return filterDto;
     }
 }

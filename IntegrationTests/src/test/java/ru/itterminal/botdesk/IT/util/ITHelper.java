@@ -17,10 +17,8 @@ import ru.itterminal.botdesk.aau.repository.UserRepository;
 import ru.itterminal.botdesk.tickets.model.TicketStatus;
 import ru.itterminal.botdesk.tickets.model.TicketType;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
@@ -46,6 +44,7 @@ public class ITHelper {
     private Map<String, User> observerInnerGroup = new HashMap<>();
     private Map<String, User> observerOuterGroup = new HashMap<>();
     private Map<String, String> tokens = new HashMap<>();
+
 
     private final UserTestHelper userTestHelper = new UserTestHelper();
     private final AccountTestHelper accountTestHelper = new AccountTestHelper();
@@ -95,7 +94,7 @@ public class ITHelper {
     public static final String IS_CANCELED_PREDEFINED = "isCanceledPredefined";
     public static final String ADMIN_INNER_GROUP = "adminInnerGroup_";
     public static final String EXECUTOR_INNER_GROUP = "executorInnerGroup_";
-    public static final String ACCOUNT_OWNER_INNER_GROUP = "accountOwnerInnerGroup_";
+    public static final String ACCOUNT_OWNER_INNER_GROUP = "accountOwnerInnerGroup";
     public static final String AUTHOR_INNER_GROUP = "authorInnerGroup_";
     public static final String OBSERVER_INNER_GROUP = "observerInnerGroup_";
     public static final String ADMIN_OUTER_GROUP = "adminOuterGroup_";
@@ -106,6 +105,9 @@ public class ITHelper {
     public static final String EXECUTOR = "EXECUTOR";
     public static final String AUTHOR = "AUTHOR";
     public static final String OBSERVER = "OBSERVER";
+    public static final String ACCOUNT_OWNER = "ACCOUNT_OWNER";
+    public static final String EMPTY_BODY = "{}";
+    public static final String GROUP_BY_ID = "group/{id}";
 
     public void createAccount() {
         var anonymousUser = userTestHelper.getRandomValidEntity();
@@ -124,6 +126,7 @@ public class ITHelper {
                 .extract()
                 .response();
         account = response.as(Account.class);
+        accountOwner = new User();
         accountOwner.setEmail(anonymousUser.getEmail());
         accountOwner.setName(anonymousUser.getName());
         accountOwner.setPassword(anonymousUser.getPassword());
@@ -312,27 +315,40 @@ public class ITHelper {
                 .extract().response().as(Group.class);
     }
 
-    public Stream<Arguments> getTokensOfAllUsersWithoutAccountOwner() {
-        var allUsers = getAllUsersWithoutAccountOwner();
+    public Stream<Arguments> getStreamTokensOfUsers(List<Role> roles, Boolean isInnerGroup) {
+        var allUsers = getUser(roles, isInnerGroup);
         return allUsers.entrySet().stream()
                 .map(entry -> Arguments.of(entry.getKey(), tokens.get(entry.getValue().getEmail())));
     }
 
-    public Stream<Arguments> getTokensOfAllUsers() {
-        var allUsers = getAllUsersWithoutAccountOwner();
-        allUsers.put(ACCOUNT_OWNER_INNER_GROUP, accountOwner);
-        return allUsers.entrySet().stream()
-                .map(entry -> Arguments.of(entry.getKey(), tokens.get(entry.getValue().getEmail())));
-    }
 
-    public Stream<Arguments> getAllUsers() {
-        var allUsers = getAllUsersWithoutAccountOwner();
-        allUsers.put(ACCOUNT_OWNER_INNER_GROUP, accountOwner);
+    public Stream<Arguments> getStreamUsers(List<Role> roles, Boolean isInnerGroup) {
+        var allUsers = getUser(roles, isInnerGroup);
         return allUsers.entrySet().stream()
                 .map(entry -> Arguments.of(entry.getKey(), entry.getValue()));
     }
 
-    private Map<String, User> getAllUsersWithoutAccountOwner() {
+    public List<Group> getAllGroup() {
+        List<Group> listAllGroup = new ArrayList<>();
+        listAllGroup.addAll(outerGroup.values());
+        listAllGroup.addAll(innerGroup.values());
+        return listAllGroup;
+    }
+
+    public void putGroup(Group group) {
+        group.setAccount(account);
+        if (group.getIsInner()) {
+            var suffixKey = innerGroup.size() + 1;
+            var nameKey = INNER_GROUP + suffixKey;
+            innerGroup.put(nameKey, group);
+        } else {
+            var suffixKey = outerGroup.size() + 1;
+            var nameKey = OUTER_GROUP + suffixKey;
+            outerGroup.put(nameKey, group);
+        }
+    }
+
+    private Map<String, User> getUser(List<Role> roles, Boolean isInnerGroup) {
         Map<String, User> allUsers = new HashMap<>();
         allUsers.putAll(adminInnerGroup);
         allUsers.putAll(adminOuterGroup);
@@ -342,7 +358,18 @@ public class ITHelper {
         allUsers.putAll(authorOuterGroup);
         allUsers.putAll(observerInnerGroup);
         allUsers.putAll(observerOuterGroup);
-        return allUsers;
+        allUsers.put(ACCOUNT_OWNER_INNER_GROUP, accountOwner);
+
+        return allUsers.entrySet().stream()
+                .filter(entry -> {
+                            if (entry.getValue().getGroup().getIsInner().equals(isInnerGroup)) {
+                                return true;
+                            }
+                            return isInnerGroup == null;
+                        }
+                )
+                .filter(entry -> roles.contains(entry.getValue().getRole()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
 }

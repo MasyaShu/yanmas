@@ -88,9 +88,9 @@ class AccountIT {
         var response = given().
                 when().
                 contentType(APPLICATION_JSON).
-                        body(accountCreateDto).
-                        post(CREATE_ACCOUNT).
-                        then()
+                body(accountCreateDto).
+                post(CREATE_ACCOUNT).
+                then()
                 .body(NAME, equalTo(anonymousUser.getAccount().getName()))
                 .body(DELETED, equalTo(false))
                 .body(VERSION, equalTo(0))
@@ -212,8 +212,13 @@ class AccountIT {
         itHelper.setNestedFieldsInAccountOwner();
 
         itHelper.createInitialInnerAndOuterGroups(0, 1);
-        var roles = roleTestHelper.setPredefinedValidEntityList();
-        roles.remove(roleTestHelper.getRoleByName(Roles.ACCOUNT_OWNER.toString()));
+        var roles = itHelper.getRoleTestHelper().getRolesByNames(
+                List.of(ITHelper.ADMIN,
+                        ITHelper.AUTHOR,
+                        ITHelper.EXECUTOR,
+                        ITHelper.OBSERVER
+                )
+        );
         itHelper.createUsersForEachRoleInGroup(itHelper.getOuterGroup().get(OUTER_GROUP + 1), roles);
         itHelper.createUsersForEachRoleInGroup(itHelper.getInnerGroup().get(INNER_GROUP + 1), roles);
     }
@@ -241,7 +246,7 @@ class AccountIT {
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getTokensOfUsersWhoDoNotHaveAccessForCreateAccount")
     @Order(75)
-    void failedCreateAccountByAllAuthorizedUsers(String userRole, String token) {
+    void failedCreateAccountByAllAuthorizedUsers(String userKey, String token) {
         var jsonCreateAccount = accountTestHelper.convertUserToAccountCreateDto(anonymousUser);
         given().
                 when()
@@ -320,9 +325,9 @@ class AccountIT {
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getTokensOfUsersWhoDoNotHaveAccessForUpdateAccount")
     @Order(110)
-    void failedUpdateAccount_whenUserNotAccountOwner(String userRole, String token) {
+    void failedUpdateAccount_whenUserNotAccountOwner(String userKey, String token) {
         var updatedAccount = itHelper.getAccount().toBuilder().build();
-        var updatedName = userRole + itHelper.getAccount().getName();
+        var updatedName = userKey + itHelper.getAccount().getName();
         updatedAccount.setName(updatedName);
         var accountDto = accountTestHelper.convertAccountToAccountDto(updatedAccount);
 
@@ -344,7 +349,7 @@ class AccountIT {
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getTokensOfUsersWhoDoNotHaveAccessForUpdateAccount")
     @Order(120)
-    void failedCheckAccessUpdateAccount_whenUserNotAccountOwner(String userRole, String token) {
+    void failedCheckAccessUpdateAccount_whenUserNotAccountOwner(String userKey, String token) {
         given().
                 when()
                 .headers(
@@ -386,7 +391,7 @@ class AccountIT {
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getAllUsers")
     @Order(140)
-    void failedSignInAllUsers_whenAccountDeleted(String userRole, User user) {
+    void failedSignInAllUsers_whenAccountDeleted(String userKey, User user) {
         var jsonSignIn = userTestHelper.convertUserToAuthenticationRequestDto(user);
         given()
                 .contentType(APPLICATION_JSON)
@@ -399,15 +404,22 @@ class AccountIT {
     }
 
     private static Stream<Arguments> getTokensOfUsersWhoDoNotHaveAccessForUpdateAccount() {
-        return itHelper.getTokensOfAllUsersWithoutAccountOwner();
+        var roles = itHelper.getRoleTestHelper().getRolesByNames(
+                List.of(ITHelper.ADMIN,
+                        ITHelper.AUTHOR,
+                        ITHelper.EXECUTOR,
+                        ITHelper.OBSERVER
+                )
+        );
+        return itHelper.getStreamTokensOfUsers(roles, null);
     }
 
     private static Stream<Arguments> getTokensOfUsersWhoDoNotHaveAccessForCreateAccount() {
-        return itHelper.getTokensOfAllUsers();
+        return itHelper.getStreamTokensOfUsers(itHelper.getRoleTestHelper().getPredefinedValidEntityList(), null);
     }
 
     private static Stream<Arguments> getAllUsers() {
-        return itHelper.getAllUsers();
+        return itHelper.getStreamUsers(itHelper.getRoleTestHelper().getPredefinedValidEntityList(), null);
     }
 
 }

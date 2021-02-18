@@ -5,8 +5,8 @@ import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 import ru.itterminal.botdesk.commons.model.filter.BooleanFilter;
 import ru.itterminal.botdesk.commons.model.filter.StringFilter;
-import ru.itterminal.botdesk.commons.model.validator.sortfields.ValidateSortFields;
 import ru.itterminal.botdesk.commons.model.validator.filter.ValidateFilter;
+import ru.itterminal.botdesk.commons.model.validator.sortfields.ValidateSortFields;
 
 import java.util.List;
 

@@ -42,12 +42,14 @@ public class ParentEntityRepositoryImpl<T extends BaseEntity>
         return entity;
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     public T update(T entity) {
         isExist(entity);
         entity = entityManager.merge(entity);
         entityManager.flush();
-        return entity;
+        entityManager.detach(entity);
+        return findById(entity.getId()).get();
     }
 
     private void isExist(T entity) {

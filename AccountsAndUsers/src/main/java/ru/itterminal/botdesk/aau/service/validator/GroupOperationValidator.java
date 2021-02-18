@@ -35,6 +35,8 @@ public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> 
     @Override
     public boolean beforeUpdate(Group entity) {
         checkIsInnerGroupForCreateUpdate();
+        var groupFromDataBase = service.findByIdAndAccountId(entity.getId());
+        entity.setIsInner(groupFromDataBase.getIsInner());
         return super.beforeUpdate(entity);
     }
 

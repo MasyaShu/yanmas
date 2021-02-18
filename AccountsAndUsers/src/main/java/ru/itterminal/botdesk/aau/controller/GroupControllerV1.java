@@ -1,17 +1,8 @@
 package ru.itterminal.botdesk.aau.controller;
 
-import static java.lang.String.format;
-
-import java.security.Principal;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -19,17 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.dto.GroupDto;
 import ru.itterminal.botdesk.aau.model.dto.GroupFilterDto;
@@ -37,10 +18,20 @@ import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.aau.service.validator.GroupOperationValidator;
 import ru.itterminal.botdesk.commons.controller.BaseController;
+import ru.itterminal.botdesk.commons.model.filter.StringFilter;
 import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
+import java.security.Principal;
+import java.util.UUID;
+
+import static java.lang.String.format;
+import static ru.itterminal.botdesk.commons.model.filter.StringFilter.TypeComparisonForStringFilter.TEXT_EQUALS;
 
 @Slf4j
 @RestController("GroupControllerV1")
@@ -119,14 +110,15 @@ public class GroupControllerV1 extends BaseController {
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
         var accountId = jwtUser.getAccountId();
         var groupSpecification = specFactory.makeSpecificationFromEntityFilterDto(Group.class, filterDto, accountId);
-        foundGroups = service.findAllByFilter(groupSpecification, pageable);
         if (!jwtUser.isInnerGroup()) {
-            var trimFoundGroups =  foundGroups.stream()
-                    .filter(group -> group.getId().equals(jwtUser.getGroupId()))
-                    .collect(Collectors.toList());
-            foundGroups = new PageImpl<>(trimFoundGroups, pageable, trimFoundGroups.size());
-
+            var filterById = StringFilter.builder()
+                    .typeComparison(TEXT_EQUALS.toString())
+                    .value(jwtUser.getGroupId().toString())
+                    .build();
+            var specificationById = specFactory.makeSpecification(Group.class, "id", filterById);
+            groupSpecification = groupSpecification.and(specificationById);
         }
+        foundGroups = service.findAllByFilter(groupSpecification, pageable);
         returnedGroups = mapPage(foundGroups, GroupDto.class, pageable);
         log.debug(FIND_FINISH_MESSAGE, ENTITY_NAME, foundGroups.getTotalElements());
         return new ResponseEntity<>(returnedGroups, HttpStatus.OK);

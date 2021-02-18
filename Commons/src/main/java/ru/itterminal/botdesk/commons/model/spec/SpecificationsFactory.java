@@ -1,22 +1,17 @@
 package ru.itterminal.botdesk.commons.model.spec;
 
-import static ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Component;
+import ru.itterminal.botdesk.commons.model.BaseEntity;
+import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
+import ru.itterminal.botdesk.commons.model.filter.*;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Component;
-
-import ru.itterminal.botdesk.commons.model.BaseEntity;
-import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
-import ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter;
-import ru.itterminal.botdesk.commons.model.filter.BooleanFilter;
-import ru.itterminal.botdesk.commons.model.filter.ListOfBaseEntityFilter;
-import ru.itterminal.botdesk.commons.model.filter.NumberFilter;
-import ru.itterminal.botdesk.commons.model.filter.StringFilter;
+import static ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
 
 @Component
 public class SpecificationsFactory {

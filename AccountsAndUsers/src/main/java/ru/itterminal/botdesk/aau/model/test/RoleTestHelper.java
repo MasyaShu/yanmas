@@ -3,6 +3,7 @@ package ru.itterminal.botdesk.aau.model.test;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.Roles;
@@ -57,11 +58,18 @@ public class RoleTestHelper extends EntityTestHelperImpl<Role, RoleDto,RoleDto> 
         return roleList;
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public Role getRoleByName(String nameOfRole) {
         return getPredefinedValidEntityList().stream()
                 .filter(role -> role.getName().equals(nameOfRole))
                 .findFirst()
                 .get();
+    }
+
+    public List<Role> getRolesByNames(List<String> namesOfRole) {
+        return getPredefinedValidEntityList().stream()
+                .filter(role -> namesOfRole.contains(role.getName()))
+                .collect(Collectors.toList());
     }
 
 }

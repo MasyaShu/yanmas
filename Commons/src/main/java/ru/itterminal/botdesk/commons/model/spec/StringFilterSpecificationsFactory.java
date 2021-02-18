@@ -10,6 +10,8 @@ import lombok.val;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 import ru.itterminal.botdesk.commons.model.filter.StringFilter;
 
+import java.util.UUID;
+
 public class StringFilterSpecificationsFactory {
 
     private static final String EMPTY_STRING = "";
@@ -79,6 +81,10 @@ public class StringFilterSpecificationsFactory {
     }
 
     private <E extends BaseEntity> Specification<E> textEquals(String field, String value) {
+        if (field.equals("id")) {
+            var valueUUID = UUID.fromString(value);
+            return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get(field), valueUUID);
+        }
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get(field), value);
     }
 }
