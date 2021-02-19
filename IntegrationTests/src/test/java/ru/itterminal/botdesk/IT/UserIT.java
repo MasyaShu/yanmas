@@ -4,18 +4,25 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.path.json.JsonPath.from;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static ru.itterminal.botdesk.IT.util.ITHelper.ACCOUNT;
 import static ru.itterminal.botdesk.IT.util.ITHelper.ACCOUNT_OWNER;
 import static ru.itterminal.botdesk.IT.util.ITHelper.ADMIN;
 import static ru.itterminal.botdesk.IT.util.ITHelper.APPLICATION_JSON;
 import static ru.itterminal.botdesk.IT.util.ITHelper.AUTHOR;
 import static ru.itterminal.botdesk.IT.util.ITHelper.EMPTY_BODY;
 import static ru.itterminal.botdesk.IT.util.ITHelper.EXECUTOR;
+import static ru.itterminal.botdesk.IT.util.ITHelper.GROUP;
+import static ru.itterminal.botdesk.IT.util.ITHelper.ID;
+import static ru.itterminal.botdesk.IT.util.ITHelper.IGNORE_FIELDS_FOR_COMPARE_USERS;
 import static ru.itterminal.botdesk.IT.util.ITHelper.INNER_GROUP;
 import static ru.itterminal.botdesk.IT.util.ITHelper.OBSERVER;
 import static ru.itterminal.botdesk.IT.util.ITHelper.OUTER_GROUP;
+import static ru.itterminal.botdesk.IT.util.ITHelper.ROLE;
 import static ru.itterminal.botdesk.IT.util.ITHelper.SIZE;
 import static ru.itterminal.botdesk.IT.util.ITHelper.USER;
+import static ru.itterminal.botdesk.IT.util.ITHelper.USER_BY_ID;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -23,6 +30,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -52,6 +60,8 @@ import ru.itterminal.botdesk.security.jwt.JwtProvider;
 @TestPropertySource(properties = {"jwt.token.secret=ksedtob", "jwt.token.expired=8640000", "jwt.token.prefix=Bearer"})
 class UserIT {
 
+    public static final String TOTAL_ELEMENTS = "totalElements";
+    public static final String CONTENT = "content";
     @Autowired
     private UserRepository userRepository;
 
@@ -103,18 +113,18 @@ class UserIT {
                 .get(USER)
                 .then()
                 .log().body()
-                .body("totalElements", equalTo(expectedUserList.size()))
+                .body(TOTAL_ELEMENTS, equalTo(expectedUserList.size()))
                 .statusCode(HttpStatus.OK.value())
                 .extract().response().asString();
-        List<User> actualUserList = from(response).getList("content", User.class);
+        List<User> actualUserList = from(response).getList(CONTENT, User.class);
         assertThat(expectedUserList)
-                .usingElementComparatorIgnoringFields("account", "group", "role", "password", "emailVerificationStatus")
+                .usingElementComparatorIgnoringFields(IGNORE_FIELDS_FOR_COMPARE_USERS)
                 .containsExactlyInAnyOrderElementsOf(actualUserList);
-        assertThat(expectedUserList).usingElementComparatorOnFields("account").usingElementComparatorOnFields("id")
+        assertThat(expectedUserList).usingElementComparatorOnFields(ACCOUNT).usingElementComparatorOnFields(ID)
                 .containsExactlyInAnyOrderElementsOf(actualUserList);
-        assertThat(expectedUserList).usingElementComparatorOnFields("group").usingElementComparatorOnFields("id")
+        assertThat(expectedUserList).usingElementComparatorOnFields(GROUP).usingElementComparatorOnFields(ID)
                 .containsExactlyInAnyOrderElementsOf(actualUserList);
-        assertThat(expectedUserList).usingElementComparatorOnFields("role").usingElementComparatorOnFields("id")
+        assertThat(expectedUserList).usingElementComparatorOnFields(ROLE).usingElementComparatorOnFields(ID)
                 .containsExactlyInAnyOrderElementsOf(actualUserList);
     }
 
@@ -135,18 +145,18 @@ class UserIT {
                 .get(USER)
                 .then()
                 .log().body()
-                .body("totalElements", equalTo(expectedUserList.size()))
+                .body(TOTAL_ELEMENTS, equalTo(expectedUserList.size()))
                 .statusCode(HttpStatus.OK.value())
                 .extract().response().asString();
-        List<User> actualUserList = from(response).getList("content", User.class);
+        List<User> actualUserList = from(response).getList(CONTENT, User.class);
         assertThat(expectedUserList)
-                .usingElementComparatorIgnoringFields("account", "group", "role", "password", "emailVerificationStatus")
+                .usingElementComparatorIgnoringFields(IGNORE_FIELDS_FOR_COMPARE_USERS)
                 .containsExactlyInAnyOrderElementsOf(actualUserList);
-        assertThat(expectedUserList).usingElementComparatorOnFields("account").usingElementComparatorOnFields("id")
+        assertThat(expectedUserList).usingElementComparatorOnFields(ACCOUNT).usingElementComparatorOnFields(ID)
                 .containsExactlyInAnyOrderElementsOf(actualUserList);
-        assertThat(expectedUserList).usingElementComparatorOnFields("group").usingElementComparatorOnFields("id")
+        assertThat(expectedUserList).usingElementComparatorOnFields(GROUP).usingElementComparatorOnFields(ID)
                 .containsExactlyInAnyOrderElementsOf(actualUserList);
-        assertThat(expectedUserList).usingElementComparatorOnFields("role").usingElementComparatorOnFields("id")
+        assertThat(expectedUserList).usingElementComparatorOnFields(ROLE).usingElementComparatorOnFields(ID)
                 .containsExactlyInAnyOrderElementsOf(actualUserList);
     }
 
@@ -169,21 +179,122 @@ class UserIT {
                 .get(USER)
                 .then()
                 .log().body()
-                .body("totalElements", equalTo(expectedUserList.size()))
+                .body(TOTAL_ELEMENTS, equalTo(expectedUserList.size()))
                 .statusCode(HttpStatus.OK.value())
                 .extract().response().asString();
-        List<User> actualUserList = from(response).getList("content", User.class);
+        List<User> actualUserList = from(response).getList(CONTENT, User.class);
         assertThat(expectedUserList)
-                .usingElementComparatorIgnoringFields("account", "group", "role", "password", "emailVerificationStatus")
+                .usingElementComparatorIgnoringFields(IGNORE_FIELDS_FOR_COMPARE_USERS)
                 .containsExactlyInAnyOrderElementsOf(actualUserList);
-        assertThat(expectedUserList).usingElementComparatorOnFields("account").usingElementComparatorOnFields("id")
+        assertThat(expectedUserList).usingElementComparatorOnFields(ACCOUNT).usingElementComparatorOnFields(ID)
                 .containsExactlyInAnyOrderElementsOf(actualUserList);
-        assertThat(expectedUserList).usingElementComparatorOnFields("group").usingElementComparatorOnFields("id")
+        assertThat(expectedUserList).usingElementComparatorOnFields(GROUP).usingElementComparatorOnFields(ID)
                 .containsExactlyInAnyOrderElementsOf(actualUserList);
-        assertThat(expectedUserList).usingElementComparatorOnFields("role").usingElementComparatorOnFields("id")
+        assertThat(expectedUserList).usingElementComparatorOnFields(ROLE).usingElementComparatorOnFields(ID)
                 .containsExactlyInAnyOrderElementsOf(actualUserList);
     }
 
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamAllUsers")
+    @Order(40)
+    void successGetByFilterByAllUsersAccordingTheirGroups(String userKey, User user) {
+        var allUsers = itHelper.getAllUsers();
+        for (User one : allUsers) {
+            var userFilterDto = userTestHelper.convertEntityToFilterDto(one);
+            var expectedUserList = List.of(one);
+            if (!user.getGroup().getIsInner() && !user.getGroup().equals(one.getGroup())) {
+                expectedUserList = Collections.emptyList();
+            }
+            var response = given().
+                    when()
+                    .headers(
+                            "Authorization",
+                            "Bearer " + itHelper.getTokens().get(user.getEmail())
+                    )
+                    .contentType(APPLICATION_JSON)
+                    .body(userFilterDto)
+                    .param(SIZE, expectedUserList.size() == 0 ? 1 : expectedUserList.size())
+                    .get(USER)
+                    .then()
+                    .log().body()
+                    .statusCode(HttpStatus.OK.value())
+                    .extract().response().asString();
+            List<User> actualUserList = from(response).getList(CONTENT, User.class);
+            assertThat(expectedUserList)
+                    .usingElementComparatorIgnoringFields(IGNORE_FIELDS_FOR_COMPARE_USERS)
+                    .containsExactlyInAnyOrderElementsOf(actualUserList);
+            assertThat(expectedUserList).usingElementComparatorOnFields(ACCOUNT).usingElementComparatorOnFields(ID)
+                    .containsExactlyInAnyOrderElementsOf(actualUserList);
+            assertThat(expectedUserList).usingElementComparatorOnFields(GROUP).usingElementComparatorOnFields(ID)
+                    .containsExactlyInAnyOrderElementsOf(actualUserList);
+            assertThat(expectedUserList).usingElementComparatorOnFields(ROLE).usingElementComparatorOnFields(ID)
+                    .containsExactlyInAnyOrderElementsOf(actualUserList);
+        }
+    }
+
+    @Test
+    @Order(50)
+    void failedGetByFilterByAnonymousUser() {
+        given().
+                when()
+                .contentType(APPLICATION_JSON)
+                .body(EMPTY_BODY)
+                .get(USER)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.FORBIDDEN.value());
+
+    }
+
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamAllUsersInnerGroup")
+    @Order(60)
+    void successGetByIdByAllUsersFromOuterGroups(String userKey, User user) {
+        var allUsers = itHelper.getAllUsers();
+        for (User one : allUsers) {
+            var expectedUserList = List.of(one);
+            var response = given().
+                    when()
+                    .headers(
+                            "Authorization",
+                            "Bearer " + itHelper.getTokens().get(user.getEmail())
+                    )
+                    .contentType(APPLICATION_JSON)
+                    .param(SIZE, expectedUserList.size() == 0 ? 1 : expectedUserList.size())
+                    .pathParam(ID, one.getId())
+                    .get(USER_BY_ID)
+                    .then()
+                    .body(ID, equalTo(one.getId().toString()))
+                    .log().body()
+                    .statusCode(HttpStatus.OK.value());
+        }
+    }
+
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamAllUsersOuterGroup")
+    @Order(70)
+    void successGetByIdByAllUsersFromInnerGroups(String userKey, User user) {
+        var allUsers = itHelper.getAllUsers();
+        for (User one : allUsers) {
+            if (one.getGroup().equals(user.getGroup())) {
+                var expectedUserList = List.of(one);
+                var response = given().
+                        when()
+                        .headers(
+                                "Authorization",
+                                "Bearer " + itHelper.getTokens().get(user.getEmail())
+                        )
+                        .contentType(APPLICATION_JSON)
+                        .param(SIZE, expectedUserList.size() == 0 ? 1 : expectedUserList.size())
+                        .pathParam(ID, one.getId())
+                        .get(USER_BY_ID)
+                        .then()
+                        .body(ID, equalTo(one.getId().toString()))
+                        .log().body()
+                        .statusCode(HttpStatus.OK.value());
+            }
+        }
+    }
 
     private static Stream<Arguments> getStreamAllUsersInnerGroup() {
         return itHelper.getStreamUsers(itHelper.getRoleTestHelper().getPredefinedValidEntityList(), true);

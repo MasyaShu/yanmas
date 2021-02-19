@@ -70,6 +70,7 @@ public class ITHelper {
     public static final String SIGN_IN = "auth/signin";
     public static final String EMAIL_VERIFY = "auth/email-verify";
     public static final String USER = "user";
+    public static final String USER_BY_ID = "user/{id}";
     public static final String ROLE = "role";
     public static final String INVALID_USERNAME_OR_PASSWORD = "invalid username or password";
     public static final String AUTHENTICATION_FAILED = "authentication failed";
@@ -118,6 +119,11 @@ public class ITHelper {
     public static final String EMPTY_BODY = "{}";
     public static final String GROUP_BY_ID = "group/{id}";
     public static final String SIZE = "size";
+    public static final String TOTAL_ELEMENTS = "totalElements";
+    public static final String CONTENT = "content";
+    public static final String[] IGNORE_FIELDS_FOR_COMPARE_USERS = {"account", "group", "role", "password",
+            "emailVerificationStatus", "passwordResetToken", "emailVerificationToken"};
+
 
     public void createAccount() {
         var anonymousUser = userTestHelper.getRandomValidEntity();
