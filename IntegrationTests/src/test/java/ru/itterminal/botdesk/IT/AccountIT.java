@@ -1,8 +1,57 @@
 package ru.itterminal.botdesk.IT;
 
-import io.restassured.RestAssured;
-import io.restassured.response.Response;
-import org.junit.jupiter.api.*;
+import static io.restassured.RestAssured.given;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static ru.itterminal.botdesk.IT.util.ITHelper.ACCOUNT;
+import static ru.itterminal.botdesk.IT.util.ITHelper.APPLICATION_JSON;
+import static ru.itterminal.botdesk.IT.util.ITHelper.AUTHENTICATION_FAILED;
+import static ru.itterminal.botdesk.IT.util.ITHelper.CREATE_ACCOUNT;
+import static ru.itterminal.botdesk.IT.util.ITHelper.DELETED;
+import static ru.itterminal.botdesk.IT.util.ITHelper.DETAIL;
+import static ru.itterminal.botdesk.IT.util.ITHelper.DISPLAY_NAME;
+import static ru.itterminal.botdesk.IT.util.ITHelper.EMAIL_VERIFY;
+import static ru.itterminal.botdesk.IT.util.ITHelper.ENTITY_NOT_EXIST_EXCEPTION;
+import static ru.itterminal.botdesk.IT.util.ITHelper.ID;
+import static ru.itterminal.botdesk.IT.util.ITHelper.INNER_GROUP;
+import static ru.itterminal.botdesk.IT.util.ITHelper.INPUT_VALIDATION_FAILED;
+import static ru.itterminal.botdesk.IT.util.ITHelper.INVALID_USERNAME_OR_PASSWORD;
+import static ru.itterminal.botdesk.IT.util.ITHelper.IS_CANCELED_PREDEFINED;
+import static ru.itterminal.botdesk.IT.util.ITHelper.IS_FINISHED_PREDEFINED;
+import static ru.itterminal.botdesk.IT.util.ITHelper.IS_PREDEFINED_FOR_NEW_TICKET;
+import static ru.itterminal.botdesk.IT.util.ITHelper.IS_REOPENED_PREDEFINED;
+import static ru.itterminal.botdesk.IT.util.ITHelper.IS_STARTED_PREDEFINED;
+import static ru.itterminal.botdesk.IT.util.ITHelper.NAME;
+import static ru.itterminal.botdesk.IT.util.ITHelper.OUTER_GROUP;
+import static ru.itterminal.botdesk.IT.util.ITHelper.OUT_ID;
+import static ru.itterminal.botdesk.IT.util.ITHelper.SIGN_IN;
+import static ru.itterminal.botdesk.IT.util.ITHelper.STATUS;
+import static ru.itterminal.botdesk.IT.util.ITHelper.TITLE;
+import static ru.itterminal.botdesk.IT.util.ITHelper.TOKEN;
+import static ru.itterminal.botdesk.IT.util.ITHelper.TYPE;
+import static ru.itterminal.botdesk.IT.util.ITHelper.VALIDATION_FAILED;
+import static ru.itterminal.botdesk.IT.util.ITHelper.VERSION;
+import static ru.itterminal.botdesk.tickets.service.impl.TicketStatusServiceImpl.CANCELED;
+import static ru.itterminal.botdesk.tickets.service.impl.TicketStatusServiceImpl.FINISHED;
+import static ru.itterminal.botdesk.tickets.service.impl.TicketStatusServiceImpl.REOPENED;
+import static ru.itterminal.botdesk.tickets.service.impl.TicketStatusServiceImpl.STARTED;
+import static ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl.DEFAULT_TYPE;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.persistence.EntityManager;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -12,33 +61,20 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import ru.itterminal.botdesk.IT.util.ITHelper;
 import ru.itterminal.botdesk.IT.util.ITTestConfig;
 import ru.itterminal.botdesk.aau.model.Account;
-import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
-import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
 import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
 import ru.itterminal.botdesk.tickets.model.TicketStatus;
 import ru.itterminal.botdesk.tickets.repository.TicketStatusRepository;
 import ru.itterminal.botdesk.tickets.repository.TicketTypeRepository;
-
-import javax.persistence.EntityManager;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static io.restassured.RestAssured.given;
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.*;
-import static ru.itterminal.botdesk.IT.util.ITHelper.*;
-import static ru.itterminal.botdesk.tickets.service.impl.TicketStatusServiceImpl.*;
-import static ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl.DEFAULT_TYPE;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @DataJpaTest
@@ -67,7 +103,6 @@ class AccountIT {
     private static ITHelper itHelper;
     private static User anonymousUser;
 
-    private final RoleTestHelper roleTestHelper = new RoleTestHelper();
     private final AccountTestHelper accountTestHelper = new AccountTestHelper();
     private final UserTestHelper userTestHelper = new UserTestHelper();
 
