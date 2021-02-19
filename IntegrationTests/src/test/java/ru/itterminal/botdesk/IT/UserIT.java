@@ -4,7 +4,16 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.path.json.JsonPath.from;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static ru.itterminal.botdesk.IT.util.ITHelper.*;
+import static ru.itterminal.botdesk.IT.util.ITHelper.ACCOUNT_OWNER;
+import static ru.itterminal.botdesk.IT.util.ITHelper.ADMIN;
+import static ru.itterminal.botdesk.IT.util.ITHelper.APPLICATION_JSON;
+import static ru.itterminal.botdesk.IT.util.ITHelper.AUTHOR;
+import static ru.itterminal.botdesk.IT.util.ITHelper.EXECUTOR;
+import static ru.itterminal.botdesk.IT.util.ITHelper.INNER_GROUP;
+import static ru.itterminal.botdesk.IT.util.ITHelper.OBSERVER;
+import static ru.itterminal.botdesk.IT.util.ITHelper.OUTER_GROUP;
+import static ru.itterminal.botdesk.IT.util.ITHelper.SIZE;
+import static ru.itterminal.botdesk.IT.util.ITHelper.USER;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -50,7 +59,6 @@ class UserIT {
     private final GroupTestHelper groupTestHelper = new GroupTestHelper();
     private final UserTestHelper userTestHelper = new UserTestHelper();
 
-
     @BeforeAll
     void beforeAll() {
         RestAssured.useRelaxedHTTPSValidation();
@@ -59,16 +67,21 @@ class UserIT {
         itHelper.createAndVerifyAccount(userRepository);
         itHelper.createInitialInnerAndOuterGroups(1, 2);
         var allRolesWithoutAccountOwner = itHelper.getRoleTestHelper().getRolesByNames(
-                List.of(ITHelper.ADMIN,
+                List.of(
+                        ITHelper.ADMIN,
                         ITHelper.AUTHOR,
                         ITHelper.EXECUTOR,
                         ITHelper.OBSERVER
                 )
         );
-        itHelper.createUsersForEachRoleInGroup(itHelper.getOuterGroup().get(OUTER_GROUP + 1), allRolesWithoutAccountOwner);
-        itHelper.createUsersForEachRoleInGroup(itHelper.getInnerGroup().get(INNER_GROUP + 1), allRolesWithoutAccountOwner);
-        itHelper.createUsersForEachRoleInGroup(itHelper.getOuterGroup().get(OUTER_GROUP + 2), allRolesWithoutAccountOwner);
-        itHelper.createUsersForEachRoleInGroup(itHelper.getInnerGroup().get(INNER_GROUP + 2), allRolesWithoutAccountOwner);
+        itHelper.createUsersForEachRoleInGroup(
+                itHelper.getOuterGroup().get(OUTER_GROUP + 1), allRolesWithoutAccountOwner);
+        itHelper.createUsersForEachRoleInGroup(
+                itHelper.getInnerGroup().get(INNER_GROUP + 1), allRolesWithoutAccountOwner);
+        itHelper.createUsersForEachRoleInGroup(
+                itHelper.getOuterGroup().get(OUTER_GROUP + 2), allRolesWithoutAccountOwner);
+        itHelper.createUsersForEachRoleInGroup(
+                itHelper.getInnerGroup().get(INNER_GROUP + 2), allRolesWithoutAccountOwner);
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
@@ -81,7 +94,8 @@ class UserIT {
                 when()
                 .headers(
                         "Authorization",
-                        "Bearer " + itHelper.getTokens().get(user.getEmail()))
+                        "Bearer " + itHelper.getTokens().get(user.getEmail())
+                )
                 .contentType(APPLICATION_JSON)
                 .body(userFilterDto)
                 .param(SIZE, 1)
@@ -92,10 +106,15 @@ class UserIT {
                 .statusCode(HttpStatus.OK.value())
                 .extract().response().asString();
         List<User> actualUserList = from(response).getList("content", User.class);
-        assertThat(expectedUserList).usingElementComparatorIgnoringFields("account", "group", "role", "password").containsExactlyInAnyOrderElementsOf(actualUserList);
+        assertThat(expectedUserList).usingElementComparatorIgnoringFields("account", "group", "role", "password")
+                .containsExactlyInAnyOrderElementsOf(actualUserList);
+        assertThat(expectedUserList).usingElementComparatorOnFields("account").usingElementComparatorOnFields("id")
+                .containsExactlyInAnyOrderElementsOf(actualUserList);
+        assertThat(expectedUserList).usingElementComparatorOnFields("group").usingElementComparatorOnFields("id")
+                .containsExactlyInAnyOrderElementsOf(actualUserList);
+        assertThat(expectedUserList).usingElementComparatorOnFields("role").usingElementComparatorOnFields("id")
+                .containsExactlyInAnyOrderElementsOf(actualUserList);
     }
-
-
 
     private static Stream<Arguments> getStreamAllUsersInnerGroup() {
         return itHelper.getStreamUsers(itHelper.getRoleTestHelper().getPredefinedValidEntityList(), true);
@@ -111,7 +130,8 @@ class UserIT {
 
     private static Stream<Arguments> getStreamUsersInnerGroupWithRolesAccountOwnerAndAdmin() {
         var roles = itHelper.getRoleTestHelper().getRolesByNames(
-                List.of(ACCOUNT_OWNER,
+                List.of(
+                        ACCOUNT_OWNER,
                         ADMIN
                 )
         );
@@ -120,7 +140,8 @@ class UserIT {
 
     private static Stream<Arguments> getStreamUsersInnerGroupWithRolesExecutorAndAuthorAndObserver() {
         var roles = itHelper.getRoleTestHelper().getRolesByNames(
-                List.of(EXECUTOR,
+                List.of(
+                        EXECUTOR,
                         AUTHOR,
                         OBSERVER
                 )
@@ -130,7 +151,8 @@ class UserIT {
 
     private static Stream<Arguments> getStreamUsersInnerGroupWithRolesAccountOwnerAndAdminAndExecutor() {
         var roles = itHelper.getRoleTestHelper().getRolesByNames(
-                List.of(ACCOUNT_OWNER,
+                List.of(
+                        ACCOUNT_OWNER,
                         ADMIN,
                         EXECUTOR
                 )
@@ -140,7 +162,8 @@ class UserIT {
 
     private static Stream<Arguments> getStreamUsersInnerGroupWithRolesAuthorAndObserver() {
         var roles = itHelper.getRoleTestHelper().getRolesByNames(
-                List.of(AUTHOR,
+                List.of(
+                        AUTHOR,
                         OBSERVER
                 )
         );

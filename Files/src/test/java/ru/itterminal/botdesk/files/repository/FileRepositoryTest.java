@@ -49,7 +49,6 @@ class FileRepositoryTest {
     }
 
     @Test
-    @Transactional
     void update_shouldNotUpdateCreatedAt_whenUpdateEntity () {
         File file = repository.findByAccountIdAndAuthorIdAndId(ACCOUNT_ID, AUTHOR_ID, FILE_ID).get();
         var createdAtFromDatabaseBeforeUpdate = file.getCreatedAt();

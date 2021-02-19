@@ -14,8 +14,6 @@ import java.util.stream.Stream;
 import org.junit.jupiter.params.provider.Arguments;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -163,13 +161,12 @@ public class ITHelper {
         accountOwner.setGroup(accountOwnerFromDatabase.getGroup());
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @SuppressWarnings("deprecation")
     public void setNestedFieldsInAccountOwner() {
         var groupAccountOwner = getGroupByIdForActivateAccount(accountOwner.getGroup().getId());
         groupAccountOwner.setAccount(account);
         var roleAccountOwner = roleTestHelper.getRoleByName(Roles.ACCOUNT_OWNER.toString());
         accountOwner.generateDisplayName();
-        //noinspection deprecation
         accountOwner.setVersion(1);
         accountOwner.setDeleted(false);
         accountOwner.setIsArchived(false);
