@@ -1,14 +1,33 @@
 package ru.itterminal.botdesk.IT.util;
 
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.params.provider.Arguments;
+import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.restassured.response.Response;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.junit.jupiter.params.provider.Arguments;
-import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
-import ru.itterminal.botdesk.aau.model.*;
+import ru.itterminal.botdesk.aau.model.Account;
+import ru.itterminal.botdesk.aau.model.Group;
+import ru.itterminal.botdesk.aau.model.Role;
+import ru.itterminal.botdesk.aau.model.Roles;
+import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.aau.model.test.GroupTestHelper;
 import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
@@ -16,13 +35,6 @@ import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
 import ru.itterminal.botdesk.tickets.model.TicketStatus;
 import ru.itterminal.botdesk.tickets.model.TicketType;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
 
 @Getter
 @Setter
@@ -108,6 +120,7 @@ public class ITHelper {
     public static final String ACCOUNT_OWNER = "ACCOUNT_OWNER";
     public static final String EMPTY_BODY = "{}";
     public static final String GROUP_BY_ID = "group/{id}";
+    public static final String SIZE = "size";
 
     public void createAccount() {
         var anonymousUser = userTestHelper.getRandomValidEntity();
@@ -144,15 +157,22 @@ public class ITHelper {
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.OK.value());
+        accountOwner.setId(accountOwnerFromDatabase.getId());
         accountOwner.setEmailVerificationStatus(true);
         accountOwner.setEmailVerificationToken(null);
         accountOwner.setGroup(accountOwnerFromDatabase.getGroup());
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void setNestedFieldsInAccountOwner() {
         var groupAccountOwner = getGroupByIdForActivateAccount(accountOwner.getGroup().getId());
         groupAccountOwner.setAccount(account);
         var roleAccountOwner = roleTestHelper.getRoleByName(Roles.ACCOUNT_OWNER.toString());
+        accountOwner.generateDisplayName();
+        //noinspection deprecation
+        accountOwner.setVersion(1);
+        accountOwner.setDeleted(false);
+        accountOwner.setIsArchived(false);
         accountOwner.setGroup(groupAccountOwner);
         accountOwner.setAccount(account);
         accountOwner.setRole(roleAccountOwner);

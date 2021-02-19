@@ -1,5 +1,8 @@
 package ru.itterminal.botdesk.aau.model.test;
 
+import static ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
+import static ru.itterminal.botdesk.commons.model.filter.StringFilter.TypeComparisonForStringFilter.TEXT_EQUALS;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -9,7 +12,11 @@ import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.dto.AuthenticationRequestDto;
 import ru.itterminal.botdesk.aau.model.dto.UserDtoRequest;
 import ru.itterminal.botdesk.aau.model.dto.UserDtoResponse;
+import ru.itterminal.botdesk.aau.model.dto.UserFilterDto;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
+import ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter;
+import ru.itterminal.botdesk.commons.model.filter.BooleanFilter;
+import ru.itterminal.botdesk.commons.model.filter.StringFilter;
 
 public class UserTestHelper extends EntityTestHelperImpl<User, UserDtoRequest, UserDtoResponse> {
 
@@ -21,7 +28,6 @@ public class UserTestHelper extends EntityTestHelperImpl<User, UserDtoRequest, U
     private static final String PASSWORD = "$2a$10$ejjUoWxoPs.4vjQOoBnFquybNHJAxIyKz7QIXL6.BSVyHPow8jmxK";
     private static final String PHONE = "211-15-15";
     private static final String COMMENT = "comment comment";
-
 
     @Override
     public User getRandomValidEntity() {
@@ -40,7 +46,6 @@ public class UserTestHelper extends EntityTestHelperImpl<User, UserDtoRequest, U
         setRandomValidPropertiesOfBaseEntity(user);
         return user;
     }
-
 
     @Override
     public List<User> setPredefinedValidEntityList() {
@@ -161,16 +166,63 @@ public class UserTestHelper extends EntityTestHelperImpl<User, UserDtoRequest, U
         var userDtoRequest = modelMapper.map(createdUser, UserDtoRequest.class);
         userDtoRequest.setGroup(createdUser.getGroup().getId());
         userDtoRequest.setRole(createdUser.getRole().getId());
+        userDtoRequest.setDisplayName(null);
         if (isCreated) {
             userDtoRequest.setId(null);
             userDtoRequest.setDeleted(null);
             userDtoRequest.setVersion(null);
-            userDtoRequest.setDisplayName(null);
             userDtoRequest.setIsArchived(null);
         }
         return userDtoRequest;
 
     }
 
+    public UserFilterDto convertEntityToFilterDto(User user) {
+        var filterDto = UserFilterDto.builder()
+                .email(StringFilter.builder()
+                               .typeComparison(TEXT_EQUALS.toString())
+                               .value(user.getEmail())
+                               .build())
+                .group(BaseEntityFilter.builder()
+                               .typeComparison(EXIST_IN.toString())
+                               .listOfIdEntities(List.of(user.getGroup().getId()))
+                               .build())
+                .role(BaseEntityFilter.builder()
+                               .typeComparison(EXIST_IN.toString())
+                               .listOfIdEntities(List.of(user.getRole().getId()))
+                               .build())
+                .isArchived(BooleanFilter.builder()
+                                    .value(user.getIsArchived())
+                                    .build())
+                .deleted(BooleanFilter.builder()
+                                 .value(user.getDeleted())
+                                 .build())
+                .build();
 
+        if (user.getOutId() != null && !user.getOutId().isEmpty()) {
+            filterDto.setOutId(StringFilter.builder()
+                                       .value(user.getOutId())
+                                       .typeComparison(TEXT_EQUALS.toString())
+                                       .build());
+        }
+        if (user.getName() != null && !user.getName().isEmpty()) {
+            filterDto.setName(StringFilter.builder()
+                                         .value(user.getName())
+                                         .typeComparison(TEXT_EQUALS.toString())
+                                         .build());
+        }
+        if (user.getPhone() != null && !user.getPhone().isEmpty()) {
+            filterDto.setPhone(StringFilter.builder()
+                                         .value(user.getPhone())
+                                         .typeComparison(TEXT_EQUALS.toString())
+                                         .build());
+        }
+        if (user.getComment() != null && !user.getComment().isEmpty()) {
+            filterDto.setComment(StringFilter.builder()
+                                         .value(user.getComment())
+                                         .typeComparison(TEXT_EQUALS.toString())
+                                         .build());
+        }
+        return filterDto;
+    }
 }

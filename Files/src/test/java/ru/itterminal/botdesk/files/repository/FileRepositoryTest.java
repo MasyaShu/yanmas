@@ -17,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
@@ -48,6 +49,7 @@ class FileRepositoryTest {
     }
 
     @Test
+    @Transactional
     void update_shouldNotUpdateCreatedAt_whenUpdateEntity () {
         File file = repository.findByAccountIdAndAuthorIdAndId(ACCOUNT_ID, AUTHOR_ID, FILE_ID).get();
         var createdAtFromDatabaseBeforeUpdate = file.getCreatedAt();
