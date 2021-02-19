@@ -52,7 +52,7 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
             "Account must have user with role ACCOUNT_OWNER";
     public static final String ACCESS_IS_DENIED_FOR_SEARCHING_BY_PASSED_ID =
             "Access is denied for searching by passed Id";
-    private static final String EMAIL = "email";
+    public static final String EMAIL = "email";
 
     @Override
     public boolean beforeCreate(User entity) {

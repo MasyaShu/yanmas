@@ -161,11 +161,11 @@ public class UserTestHelper extends EntityTestHelperImpl<User, UserDtoRequest, U
         var userDtoRequest = modelMapper.map(createdUser, UserDtoRequest.class);
         userDtoRequest.setGroup(createdUser.getGroup().getId());
         userDtoRequest.setRole(createdUser.getRole().getId());
+        userDtoRequest.setDisplayName(null);
         if (isCreated) {
             userDtoRequest.setId(null);
             userDtoRequest.setDeleted(null);
             userDtoRequest.setVersion(null);
-            userDtoRequest.setDisplayName(null);
             userDtoRequest.setIsArchived(null);
         }
         return userDtoRequest;
