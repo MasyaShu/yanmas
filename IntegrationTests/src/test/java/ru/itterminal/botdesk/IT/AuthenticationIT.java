@@ -251,7 +251,7 @@ class AuthenticationIT {
 
     @Test
     @Order(130)
-    void successRequestEmailUpdateByAccountOwnerWhen() {
+    void successRequestEmailUpdateByAccountOwner() {
         newEmailAccountOwner = userTestHelper.getRandomValidEntity().getEmail();
         given()
                 .headers(
@@ -268,7 +268,7 @@ class AuthenticationIT {
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
     @Order(140)
-    void successRepeatedRequestEmailUpdateByAccountOwnerWhen() {
+    void successRepeatedRequestEmailUpdateByAccountOwner() {
         var emailAccountOwner = itHelper.getAccountOwner().getEmail();
         newEmailAccountOwner = userTestHelper.getRandomValidEntity().getEmail();
         given()
