@@ -497,6 +497,7 @@ class UserServiceImplTest {
     @Test
     void updateEmailOfAccountOwner_shouldUpdateEmailOfAccountOwner_whenPassedValidToken() {
         var token = jwtProvider.createToken(EMAIL_1);
+        user.setEmailVerificationToken(token);
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findByIdAndAccountId(any(),any())).thenReturn(Optional.of(user));
         when(userRepository.save(any())).thenReturn(userFromDatabase);
