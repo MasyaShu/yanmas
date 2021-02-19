@@ -317,6 +317,24 @@ public class ITHelper {
         }
     }
 
+    @SuppressWarnings("deprecation")
+    public void updateUser(User user) {
+        var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(user, false);
+        var userResponse = given()
+                .headers(
+                        "Authorization",
+                        "Bearer " + tokens.get(accountOwner.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(userDtoRequest)
+                .put(USER)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.OK.value())
+                .extract().response().as(User.class);
+        user.setVersion(userResponse.getVersion());
+    }
+
     private Group getGroupByIdForActivateAccount(UUID groupId) {
         return given().
                 when()
