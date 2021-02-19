@@ -277,10 +277,8 @@ class GroupIT {
                 .log().body()
                 .statusCode(HttpStatus.CREATED.value())
                 .extract().response().as(Group.class);
-        assertEquals(newGroup.getName(), actualGroup.getName());
-        assertEquals(newGroup.getOutId(), actualGroup.getOutId());
-        assertEquals(newGroup.getComment(), actualGroup.getComment());
-        assertEquals(newGroup.getIsInner(), actualGroup.getIsInner());
+        assertThat(List.of(newGroup)).usingElementComparatorOnFields("name", "outId", "comment", "isInner")
+                .containsExactlyInAnyOrderElementsOf(List.of(actualGroup));
         assertFalse(actualGroup.getIsDeprecated());
         assertFalse(actualGroup.getDeleted());
         itHelper.putGroup(actualGroup);
@@ -324,10 +322,8 @@ class GroupIT {
                 .log().body()
                 .statusCode(HttpStatus.CREATED.value())
                 .extract().response().as(Group.class);
-        assertEquals(newGroup.getName(), actualGroup.getName());
-        assertEquals(newGroup.getOutId(), actualGroup.getOutId());
-        assertEquals(newGroup.getComment(), actualGroup.getComment());
-        assertEquals(newGroup.getIsInner(), actualGroup.getIsInner());
+        assertThat(List.of(newGroup)).usingElementComparatorOnFields("name", "outId", "comment", "isInner")
+                .containsExactlyInAnyOrderElementsOf(List.of(actualGroup));
         assertFalse(actualGroup.getIsDeprecated());
         assertFalse(actualGroup.getDeleted());
         itHelper.putGroup(actualGroup);
@@ -393,13 +389,8 @@ class GroupIT {
                     .log().body()
                     .statusCode(HttpStatus.OK.value())
                     .extract().response().as(Group.class);
-            assertEquals(expectedGroup.getName(), actualGroup.getName());
-            assertEquals(expectedGroup.getOutId(), actualGroup.getOutId());
-            assertEquals(expectedGroup.getComment(), actualGroup.getComment());
-            assertEquals(expectedGroup.getIsInner(), actualGroup.getIsInner());
-            assertEquals(expectedGroup.getVersion(), actualGroup.getVersion());
-            assertEquals(expectedGroup.getIsDeprecated(),actualGroup.getIsDeprecated());
-            assertEquals(expectedGroup.getDeleted(),actualGroup.getDeleted());
+            assertThat(List.of(expectedGroup)).usingElementComparatorOnFields("name", "outId", "comment", "isInner", "isDeprecated", "deleted")
+                    .containsExactlyInAnyOrderElementsOf(List.of(actualGroup));
         }
     }
 
