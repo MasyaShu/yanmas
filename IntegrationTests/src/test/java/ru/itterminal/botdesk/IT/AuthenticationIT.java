@@ -357,7 +357,7 @@ class AuthenticationIT {
         var userForUpdate = itHelper.getAdminInnerGroup().get(ADMIN_INNER_GROUP + 1);
         var oldEmailUserForUpdate = userForUpdate.getEmail();
         userForUpdate.setEmail(newEmailAccountOwner);
-        updateUser(userForUpdate);
+        itHelper.updateUser(userForUpdate);
         given()
                 .headers(
                         "Authorization",
@@ -369,7 +369,7 @@ class AuthenticationIT {
                 .log().body()
                 .statusCode(HttpStatus.CONFLICT.value());
         userForUpdate.setEmail(oldEmailUserForUpdate);
-        updateUser(userForUpdate);
+        itHelper.updateUser(userForUpdate);
     }
 
     @Test
@@ -452,22 +452,5 @@ class AuthenticationIT {
                 .statusCode(HttpStatus.OK.value())
                 .extract().response();
         itHelper.getTokens().put(userAccountOwner.getEmail(), response.path("token"));
-    }
-
-    @SuppressWarnings("deprecation")
-    private void updateUser(User user) {
-        var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(user, false);
-        given()
-                .headers(
-                        "Authorization",
-                        "Bearer " + itHelper.getTokens().get(itHelper.getAccountOwner().getEmail())
-                )
-                .contentType(APPLICATION_JSON)
-                .body(userDtoRequest)
-                .put(USER)
-                .then()
-                .log().body()
-                .statusCode(HttpStatus.OK.value());
-        user.setVersion(user.getVersion() + 1);
     }
 }
