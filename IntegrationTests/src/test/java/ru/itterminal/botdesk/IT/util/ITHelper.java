@@ -55,7 +55,6 @@ public class ITHelper {
     private Map<String, User> observerOuterGroup = new HashMap<>();
     private Map<String, String> tokens = new HashMap<>();
 
-
     private final UserTestHelper userTestHelper = new UserTestHelper();
     private final AccountTestHelper accountTestHelper = new AccountTestHelper();
     private final RoleTestHelper roleTestHelper = new RoleTestHelper();
@@ -194,6 +193,7 @@ public class ITHelper {
         verifyEmailOfAccountOwner(userRepository);
         signInUser(accountOwner);
         setNestedFieldsInAccountOwner();
+        updateUser(accountOwner);
     }
 
     private void createInitialGroups(int countGroup, boolean isInnerGroup) {
@@ -356,7 +356,6 @@ public class ITHelper {
                 .map(entry -> Arguments.of(entry.getKey(), tokens.get(entry.getValue().getEmail())));
     }
 
-
     public Stream<Arguments> getStreamUsers(List<Role> roles, Boolean isInnerGroup) {
         var allUsers = getUser(roles, isInnerGroup);
         return allUsers.entrySet().stream()
@@ -381,6 +380,10 @@ public class ITHelper {
             var nameKey = OUTER_GROUP + suffixKey;
             outerGroup.put(nameKey, group);
         }
+    }
+
+    public List<User> getAllUsers() {
+        return new ArrayList<>(getUser(roleTestHelper.getPredefinedValidEntityList(), null).values());
     }
 
     private Map<String, User> getUser(List<Role> roles, Boolean isInnerGroup) {
