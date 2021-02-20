@@ -30,7 +30,6 @@ import static org.hamcrest.Matchers.equalTo;
 @NoArgsConstructor
 public class ITHelper {
 
-
     private Account account;
     private User accountOwner;
     private Map<String, TicketStatus> ticketStatuses = new HashMap<>();
@@ -379,7 +378,7 @@ public class ITHelper {
         }
     }
 
-    public User createUserByGivenUserForGivenRoleAndGroup(Group group, Role role, User currentUser) {
+    public User createUserByGivenUserForGivenRoleAndGroupWithSaveInMaps(Group group, Role role, User currentUser) {
         var newUser = userTestHelper.getRandomValidEntity();
         var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(newUser, true);
         userDtoRequest.setRole(role.getId());
@@ -402,67 +401,93 @@ public class ITHelper {
         createdUser.setRole(role);
         createdUser.setGroup(group);
         createdUser.setPassword(newUser.getPassword());
-        var suffixKey = 1;
-        if (group.getIsInner()) {
-            switch (role.getName()) {
-                case ADMIN -> {
-                    suffixKey = adminInnerGroup.size() + 1;
-                    adminInnerGroup.put(ADMIN_INNER_GROUP + suffixKey, createdUser);
-                }
-                case EXECUTOR -> {
-                    suffixKey = executorInnerGroup.size() + 1;
-                    executorInnerGroup.put(EXECUTOR_INNER_GROUP + suffixKey, createdUser);
-                }
-                case AUTHOR -> {
-                    suffixKey = authorInnerGroup.size() + 1;
-                    authorInnerGroup.put(AUTHOR_INNER_GROUP + suffixKey, createdUser);
-                }
-                case OBSERVER -> {
-                    suffixKey = observerInnerGroup.size() + 1;
-                    observerInnerGroup.put(OBSERVER_INNER_GROUP + suffixKey, createdUser);
-                }
-                default -> throw new IllegalStateException("Unexpected value: " + role.getName());
-            }
-        } else {
-            switch (role.getName()) {
-                case ADMIN -> {
-                    suffixKey = adminOuterGroup.size() + 1;
-                    adminOuterGroup.put(ADMIN_OUTER_GROUP + suffixKey, createdUser);
-                }
-                case EXECUTOR -> {
-                    suffixKey = executorOuterGroup.size() + 1;
-                    executorOuterGroup.put(EXECUTOR_OUTER_GROUP + suffixKey, createdUser);
-                }
-                case AUTHOR -> {
-                    suffixKey = authorOuterGroup.size() + 1;
-                    authorOuterGroup.put(AUTHOR_OUTER_GROUP + suffixKey, createdUser);
-                }
-                case OBSERVER -> {
-                    suffixKey = observerOuterGroup.size() + 1;
-                    observerOuterGroup.put(OBSERVER_OUTER_GROUP + suffixKey, createdUser);
-                }
-                default -> throw new IllegalStateException("Unexpected value: " + role.getName());
-            }
-        }
-        var authenticationRequestDto = userTestHelper.convertUserToAuthenticationRequestDto(createdUser);
-        Response response = given()
-                .contentType(APPLICATION_JSON)
-                .body(authenticationRequestDto)
-                .post(SIGN_IN)
-                .then()
-                .log().body()
-                .statusCode(HttpStatus.OK.value())
-                .extract()
-                .response();
-        tokens.put(createdUser.getEmail(), response.path("token"));
-
+                    var suffixKey = 1;
+                    if (group.getIsInner()) {
+                        switch (role.getName()) {
+                            case ADMIN -> {
+                                suffixKey = adminInnerGroup.size() + 1;
+                                adminInnerGroup.put(ADMIN_INNER_GROUP + suffixKey, createdUser);
+                            }
+                            case EXECUTOR -> {
+                                suffixKey = executorInnerGroup.size() + 1;
+                                executorInnerGroup.put(EXECUTOR_INNER_GROUP + suffixKey, createdUser);
+                            }
+                            case AUTHOR -> {
+                                suffixKey = authorInnerGroup.size() + 1;
+                                authorInnerGroup.put(AUTHOR_INNER_GROUP + suffixKey, createdUser);
+                            }
+                            case OBSERVER -> {
+                                suffixKey = observerInnerGroup.size() + 1;
+                                observerInnerGroup.put(OBSERVER_INNER_GROUP + suffixKey, createdUser);
+                            }
+                            default -> throw new IllegalStateException("Unexpected value: " + role.getName());
+                        }
+                    } else {
+                        switch (role.getName()) {
+                            case ADMIN -> {
+                                suffixKey = adminOuterGroup.size() + 1;
+                                adminOuterGroup.put(ADMIN_OUTER_GROUP + suffixKey, createdUser);
+                            }
+                            case EXECUTOR -> {
+                                suffixKey = executorOuterGroup.size() + 1;
+                                executorOuterGroup.put(EXECUTOR_OUTER_GROUP + suffixKey, createdUser);
+                            }
+                            case AUTHOR -> {
+                                suffixKey = authorOuterGroup.size() + 1;
+                                authorOuterGroup.put(AUTHOR_OUTER_GROUP + suffixKey, createdUser);
+                            }
+                            case OBSERVER -> {
+                                suffixKey = observerOuterGroup.size() + 1;
+                                observerOuterGroup.put(OBSERVER_OUTER_GROUP + suffixKey, createdUser);
+                            }
+                            default -> throw new IllegalStateException("Unexpected value: " + role.getName());
+                        }
+                    }
+                    var authenticationRequestDto = userTestHelper.convertUserToAuthenticationRequestDto(createdUser);
+                    Response response = given()
+                            .contentType(APPLICATION_JSON)
+                            .body(authenticationRequestDto)
+                            .post(SIGN_IN)
+                            .then()
+                            .log().body()
+                            .statusCode(HttpStatus.OK.value())
+                            .extract()
+                            .response();
+                    tokens.put(createdUser.getEmail(), response.path("token"));
         return createdUser;
+    }
+
+    public User createUserByGivenUserForGivenRoleAndGroupWithoutSaveInMaps(Group group, Role role, User currentUser) {
+            var newUser = userTestHelper.getRandomValidEntity();
+            var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(newUser, true);
+            userDtoRequest.setRole(role.getId());
+            userDtoRequest.setGroup(group.getId());
+
+            User createdUser = given()
+                    .headers(
+                            "Authorization",
+                            "Bearer " + tokens.get(currentUser.getEmail())
+                    )
+                    .contentType(APPLICATION_JSON)
+                    .body(userDtoRequest)
+                    .post(USER)
+                    .then()
+                    .log().body()
+                    .statusCode(HttpStatus.CREATED.value())
+                    .extract()
+                    .response().as(User.class);
+            createdUser.setAccount(account);
+            createdUser.setRole(role);
+            createdUser.setGroup(group);
+            createdUser.setPassword(newUser.getPassword());
+
+            return createdUser;
     }
 
     @SuppressWarnings("deprecation")
     public void updateUser(User user) {
         var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(user, false);
-        var userResponse = given()
+        var updatedUser = given()
                 .headers(
                         "Authorization",
                         "Bearer " + tokens.get(accountOwner.getEmail())
@@ -474,7 +499,7 @@ public class ITHelper {
                 .log().body()
                 .statusCode(HttpStatus.OK.value())
                 .extract().response().as(User.class);
-        user.setVersion(userResponse.getVersion());
+        user.setVersion(updatedUser.getVersion());
     }
 
     private Group getGroupByIdForActivateAccount(UUID groupId) {

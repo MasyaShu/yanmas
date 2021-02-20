@@ -51,11 +51,11 @@ import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
-import ru.itterminal.botdesk.aau.model.test.GroupTestHelper;
 import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
 
+@SuppressWarnings("unused")
 @DataJpaTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -71,7 +71,6 @@ class UserIT {
 
     private static final ITHelper itHelper = new ITHelper();
 
-    private final GroupTestHelper groupTestHelper = new GroupTestHelper();
     private final UserTestHelper userTestHelper = new UserTestHelper();
 
     @BeforeAll
@@ -264,7 +263,7 @@ class UserIT {
                             "Bearer " + itHelper.getTokens().get(user.getEmail())
                     )
                     .contentType(APPLICATION_JSON)
-                    .param(SIZE, expectedUserList.size() == 0 ? 1 : expectedUserList.size())
+                    .param(SIZE, expectedUserList.size())
                     .pathParam(ID, one.getId())
                     .get(USER_BY_ID)
                     .then()
@@ -289,7 +288,7 @@ class UserIT {
                                 "Bearer " + itHelper.getTokens().get(user.getEmail())
                         )
                         .contentType(APPLICATION_JSON)
-                        .param(SIZE, expectedUserList.size() == 0 ? 1 : expectedUserList.size())
+                        .param(SIZE, expectedUserList.size())
                         .pathParam(ID, one.getId())
                         .get(USER_BY_ID)
                         .then()
@@ -345,7 +344,9 @@ class UserIT {
             for (Role oneRole : allRoles) {
                 if (user.getRole().getWeight() >= oneRole.getWeight()
                         && !oneRole.getName().equals(Roles.ACCOUNT_OWNER.toString())) {
-                    var newUser = itHelper.createUserByGivenUserForGivenRoleAndGroup(oneGroup, oneRole, user);
+                    var newUser = itHelper.createUserByGivenUserForGivenRoleAndGroupWithoutSaveInMaps(oneGroup, oneRole,
+                                                                                                      user
+                    );
                     var expectedUserList = List.of(newUser);
                     var response = given().
                             when()
@@ -375,6 +376,384 @@ class UserIT {
                 }
             }
         }
+    }
+
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamUsersFromOuterGroupsWithRoleAdmin")
+    @Order(110)
+    void successCreateByUsersFromOuterGroupsWithRoleAdmin(String userKey, User user) {
+        var allGroups = itHelper.getAllGroup();
+        var allRoles = itHelper.getRoleTestHelper().getPredefinedValidEntityList();
+        for (Group oneGroup : allGroups) {
+            if (user.getGroup().equals(oneGroup)) {
+                for (Role oneRole : allRoles) {
+                    if (user.getRole().getWeight() >= oneRole.getWeight()) {
+                        var newUser =
+                                itHelper.createUserByGivenUserForGivenRoleAndGroupWithoutSaveInMaps(oneGroup, oneRole,
+                                                                                                    user
+                                );
+                        var expectedUserList = List.of(newUser);
+                        var response = given().
+                                when()
+                                .headers(
+                                        "Authorization",
+                                        "Bearer " + itHelper.getTokens().get(user.getEmail())
+                                )
+                                .contentType(APPLICATION_JSON)
+                                .pathParam(ID, newUser.getId())
+                                .get(USER_BY_ID)
+                                .then()
+                                .log().body()
+                                .statusCode(HttpStatus.OK.value())
+                                .extract().response().asString();
+                        List<User> actualUserList = List.of(from(response).getObject("$", User.class));
+                        assertThat(expectedUserList)
+                                .usingElementComparatorIgnoringFields(IGNORE_FIELDS_FOR_COMPARE_USERS)
+                                .containsExactlyInAnyOrderElementsOf(actualUserList);
+                        assertThat(expectedUserList).usingElementComparatorOnFields(ACCOUNT)
+                                .usingElementComparatorOnFields(ID)
+                                .containsExactlyInAnyOrderElementsOf(actualUserList);
+                        assertThat(expectedUserList).usingElementComparatorOnFields(GROUP)
+                                .usingElementComparatorOnFields(ID)
+                                .containsExactlyInAnyOrderElementsOf(actualUserList);
+                        assertThat(expectedUserList).usingElementComparatorOnFields(ROLE)
+                                .usingElementComparatorOnFields(ID)
+                                .containsExactlyInAnyOrderElementsOf(actualUserList);
+                    }
+                }
+            }
+        }
+    }
+
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamUsersFromOuterGroupsWithRoleAdmin")
+    @Order(120)
+    void failedCreateByUsersFromOuterGroupsWithRoleAdmin(String userKey, User user) {
+        var allGroups = itHelper.getAllGroup();
+        var allRoles = itHelper.getRoleTestHelper().getPredefinedValidEntityList();
+        for (Group oneGroup : allGroups) {
+            if (!user.getGroup().equals(oneGroup)) {
+                for (Role oneRole : allRoles) {
+                    if (user.getRole().getWeight() >= oneRole.getWeight()) {
+                        var newUser = userTestHelper.getRandomValidEntity();
+                        var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(newUser, true);
+                        userDtoRequest.setRole(oneRole.getId());
+                        userDtoRequest.setGroup(oneGroup.getId());
+                        given()
+                                .headers(
+                                        "Authorization",
+                                        "Bearer " + itHelper.getTokens().get(user.getEmail())
+                                )
+                                .contentType(APPLICATION_JSON)
+                                .body(userDtoRequest)
+                                .post(USER)
+                                .then()
+                                .log().body()
+                                .statusCode(HttpStatus.FORBIDDEN.value());
+                    }
+                }
+            }
+        }
+    }
+
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamUsersInnerGroupWithRolesAccountOwnerAndAdmin")
+    @Order(130)
+    void failedCreateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin(String userKey, User user) {
+        var allGroups = itHelper.getAllGroup();
+        var allRoles = itHelper.getRoleTestHelper().getPredefinedValidEntityList();
+        for (Group oneGroup : allGroups) {
+            for (Role oneRole : allRoles) {
+                if (oneRole.getName().equals(Roles.ACCOUNT_OWNER.toString())) {
+                    var newUser = userTestHelper.getRandomValidEntity();
+                    var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(newUser, true);
+                    userDtoRequest.setRole(oneRole.getId());
+                    userDtoRequest.setGroup(oneGroup.getId());
+                    given()
+                            .headers(
+                                    "Authorization",
+                                    "Bearer " + itHelper.getTokens().get(user.getEmail())
+                            )
+                            .contentType(APPLICATION_JSON)
+                            .body(userDtoRequest)
+                            .post(USER)
+                            .then()
+                            .log().body()
+                            .statusCode(user.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString())
+                                                ? HttpStatus.CONFLICT.value()
+                                                : HttpStatus.FORBIDDEN.value()
+                            );
+                }
+            }
+        }
+    }
+
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamUsersFromAnyGroupsWithRolesExecutorAndAuthorAndObserver")
+    @Order(140)
+    void failedCreateByUsersFromAnyGroupsWithRolesExecutorOrAuthorOrObserver(String userKey, User user) {
+        var allGroups = itHelper.getAllGroup();
+        var allRoles = itHelper.getRoleTestHelper().getPredefinedValidEntityList();
+        for (Group oneGroup : allGroups) {
+            for (Role oneRole : allRoles) {
+                var newUser = userTestHelper.getRandomValidEntity();
+                var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(newUser, true);
+                userDtoRequest.setRole(oneRole.getId());
+                userDtoRequest.setGroup(oneGroup.getId());
+                given()
+                        .headers(
+                                "Authorization",
+                                "Bearer " + itHelper.getTokens().get(user.getEmail())
+                        )
+                        .contentType(APPLICATION_JSON)
+                        .body(userDtoRequest)
+                        .post(USER)
+                        .then()
+                        .log().body()
+                        .statusCode(HttpStatus.FORBIDDEN.value());
+            }
+        }
+    }
+
+    @Test
+    @Order(150)
+    void failedCreateByAnonymousUser() {
+        given()
+                .contentType(APPLICATION_JSON)
+                .body(EMPTY_BODY)
+                .post(USER)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.FORBIDDEN.value());
+    }
+
+    @SuppressWarnings("deprecation")
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamUsersInnerGroupWithRolesAccountOwnerAndAdminAndExecutor")
+    @Order(160)
+    void successUpdateByUsersFromInnerGroupsWithRolesAccountOwnerOrAdminOrExecutor(String userKey, User user) {
+        var allUsers = itHelper.getAllUsers();
+        for (User oneUser : allUsers) {
+            if (user.getRole().getWeight() >= oneUser.getRole().getWeight()) {
+                var nameOfOneUser = oneUser.getName();
+                oneUser.setName(nameOfOneUser + "Updated");
+                oneUser.generateDisplayName();
+                var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(oneUser, false);
+                var updatedUser = given()
+                        .headers(
+                                "Authorization",
+                                "Bearer " + itHelper.getTokens().get(user.getEmail())
+                        )
+                        .contentType(APPLICATION_JSON)
+                        .body(userDtoRequest)
+                        .put(USER)
+                        .then()
+                        .log().headers()
+                        .log().body()
+                        .statusCode(HttpStatus.OK.value())
+                        .extract().response().as(User.class);
+                oneUser.setVersion(updatedUser.getVersion());
+                var expectedUserList = List.of(oneUser);
+                var receivedUserById = given().
+                        when()
+                        .headers(
+                                "Authorization",
+                                "Bearer " + itHelper.getTokens().get(user.getEmail())
+                        )
+                        .contentType(APPLICATION_JSON)
+                        .pathParam(ID, oneUser.getId())
+                        .get(USER_BY_ID)
+                        .then()
+                        .log().headers()
+                        .log().body()
+                        .statusCode(HttpStatus.OK.value())
+                        .extract().response().as(User.class);
+                List<User> actualUserList = List.of(receivedUserById);
+                assertThat(expectedUserList)
+                        .usingElementComparatorIgnoringFields(IGNORE_FIELDS_FOR_COMPARE_USERS)
+                        .containsExactlyInAnyOrderElementsOf(actualUserList);
+                assertThat(expectedUserList).usingElementComparatorOnFields(ACCOUNT)
+                        .usingElementComparatorOnFields(ID)
+                        .containsExactlyInAnyOrderElementsOf(actualUserList);
+                assertThat(expectedUserList).usingElementComparatorOnFields(GROUP)
+                        .usingElementComparatorOnFields(ID)
+                        .containsExactlyInAnyOrderElementsOf(actualUserList);
+                assertThat(expectedUserList).usingElementComparatorOnFields(ROLE)
+                        .usingElementComparatorOnFields(ID)
+                        .containsExactlyInAnyOrderElementsOf(actualUserList);
+            }
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamUsersFromOuterGroupsWithRolesAdminAndExecutor")
+    @Order(170)
+    void successUpdateByUsersFromOuterGroupsWithRolesAdminOrExecutor(String userKey, User user) {
+        var allUsers = itHelper.getAllUsers();
+        for (User oneUser : allUsers) {
+            if (user.getGroup().equals(oneUser.getGroup())
+                    && user.getRole().getWeight() >= oneUser.getRole().getWeight()) {
+                var nameOfOneUser = oneUser.getName();
+                oneUser.setName(nameOfOneUser + "Updated");
+                oneUser.generateDisplayName();
+                var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(oneUser, false);
+                var updatedUser = given()
+                        .headers(
+                                "Authorization",
+                                "Bearer " + itHelper.getTokens().get(user.getEmail())
+                        )
+                        .contentType(APPLICATION_JSON)
+                        .body(userDtoRequest)
+                        .put(USER)
+                        .then()
+                        .log().headers()
+                        .log().body()
+                        .statusCode(HttpStatus.OK.value())
+                        .extract().response().as(User.class);
+                oneUser.setVersion(updatedUser.getVersion());
+                var expectedUserList = List.of(oneUser);
+                var receivedUserById = given().
+                        when()
+                        .headers(
+                                "Authorization",
+                                "Bearer " + itHelper.getTokens().get(user.getEmail())
+                        )
+                        .contentType(APPLICATION_JSON)
+                        .pathParam(ID, oneUser.getId())
+                        .get(USER_BY_ID)
+                        .then()
+                        .log().headers()
+                        .log().body()
+                        .statusCode(HttpStatus.OK.value())
+                        .extract().response().as(User.class);
+                List<User> actualUserList = List.of(receivedUserById);
+                assertThat(expectedUserList)
+                        .usingElementComparatorIgnoringFields(IGNORE_FIELDS_FOR_COMPARE_USERS)
+                        .containsExactlyInAnyOrderElementsOf(actualUserList);
+                assertThat(expectedUserList).usingElementComparatorOnFields(ACCOUNT)
+                        .usingElementComparatorOnFields(ID)
+                        .containsExactlyInAnyOrderElementsOf(actualUserList);
+                assertThat(expectedUserList).usingElementComparatorOnFields(GROUP)
+                        .usingElementComparatorOnFields(ID)
+                        .containsExactlyInAnyOrderElementsOf(actualUserList);
+                assertThat(expectedUserList).usingElementComparatorOnFields(ROLE)
+                        .usingElementComparatorOnFields(ID)
+                        .containsExactlyInAnyOrderElementsOf(actualUserList);
+            }
+        }
+    }
+
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamUsersFromOuterGroupsWithRolesAdminAndExecutor")
+    @Order(180)
+    void failedUpdateByUsersFromOuterGroupsWithRolesAdminOrExecutor(String userKey, User user) {
+        var allUsers = itHelper.getAllUsers();
+        for (User oneUser : allUsers) {
+            if (!user.getGroup().equals(oneUser.getGroup())
+                    && user.getRole().getWeight() >= oneUser.getRole().getWeight()) {
+                var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(oneUser, false);
+                given()
+                        .headers(
+                                "Authorization",
+                                "Bearer " + itHelper.getTokens().get(user.getEmail())
+                        )
+                        .contentType(APPLICATION_JSON)
+                        .body(userDtoRequest)
+                        .put(USER)
+                        .then()
+                        .log().headers()
+                        .log().body()
+                        .statusCode(HttpStatus.FORBIDDEN.value());
+            }
+        }
+    }
+
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamUsersInnerGroupWithRolesAccountOwnerAndAdminAndExecutor")
+    @Order(190)
+    void failedUpdateByUsersFromInnerGroupsWithRolesAccountOwnerOrAdminOrExecutor(String userKey, User user) {
+        var allUsers = itHelper.getAllUsers();
+        for (User oneUser : allUsers) {
+            if (user.getRole().getWeight() < oneUser.getRole().getWeight()) {
+                var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(oneUser, false);
+                given()
+                        .headers(
+                                "Authorization",
+                                "Bearer " + itHelper.getTokens().get(user.getEmail())
+                        )
+                        .contentType(APPLICATION_JSON)
+                        .body(userDtoRequest)
+                        .put(USER)
+                        .then()
+                        .log().headers()
+                        .log().body()
+                        .statusCode(user.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString())
+                                            ? HttpStatus.CONFLICT.value()
+                                            : HttpStatus.FORBIDDEN.value());
+            }
+        }
+    }
+
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamUsersFromOuterGroupsWithRolesAdminAndExecutor")
+    @Order(200)
+    void failedUpdateByUsersFromOuterGroupsWithRolesAdminOrExecutorForReasonOfWeight(String userKey, User user) {
+        var allUsers = itHelper.getAllUsers();
+        for (User oneUser : allUsers) {
+            if (user.getGroup().equals(oneUser.getGroup())
+                    && user.getRole().getWeight() < oneUser.getRole().getWeight()) {
+                var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(oneUser, false);
+                given()
+                        .headers(
+                                "Authorization",
+                                "Bearer " + itHelper.getTokens().get(user.getEmail())
+                        )
+                        .contentType(APPLICATION_JSON)
+                        .body(userDtoRequest)
+                        .put(USER)
+                        .then()
+                        .log().headers()
+                        .log().body()
+                        .statusCode(HttpStatus.FORBIDDEN.value());
+            }
+        }
+    }
+
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamUsersFormAnyGroupWithRolesAuthorAndObserver")
+    @Order(210)
+    void failedUpdateByUsersFromAnyGroupsWithRolesAuthorOrObserver(String userKey, User user) {
+        var allUsers = itHelper.getAllUsers();
+        for (User oneUser : allUsers) {
+                var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(oneUser, false);
+                given()
+                        .headers(
+                                "Authorization",
+                                "Bearer " + itHelper.getTokens().get(user.getEmail())
+                        )
+                        .contentType(APPLICATION_JSON)
+                        .body(userDtoRequest)
+                        .put(USER)
+                        .then()
+                        .log().headers()
+                        .log().body()
+                        .statusCode(HttpStatus.FORBIDDEN.value());
+        }
+    }
+
+    @Test
+    @Order(220)
+    void failedUpdateByAnonymousUser() {
+        given().
+                when()
+                .contentType(APPLICATION_JSON)
+                .body(EMPTY_BODY)
+                .put(USER)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.FORBIDDEN.value());
+
     }
 
     private static Stream<Arguments> getStreamAllUsersInnerGroup() {
@@ -410,6 +789,27 @@ class UserIT {
         return itHelper.getStreamUsers(roles, true);
     }
 
+    private static Stream<Arguments> getStreamUsersFromAnyGroupsWithRolesExecutorAndAuthorAndObserver() {
+        var roles = itHelper.getRoleTestHelper().getRolesByNames(
+                List.of(
+                        EXECUTOR,
+                        AUTHOR,
+                        OBSERVER
+                )
+        );
+        return itHelper.getStreamUsers(roles, null);
+    }
+
+    private static Stream<Arguments> getStreamUsersFromOuterGroupsWithRolesAdminAndExecutor() {
+        var roles = itHelper.getRoleTestHelper().getRolesByNames(
+                List.of(
+                        ADMIN,
+                        EXECUTOR
+                )
+        );
+        return itHelper.getStreamUsers(roles, false);
+    }
+
     private static Stream<Arguments> getStreamUsersInnerGroupWithRolesAccountOwnerAndAdminAndExecutor() {
         var roles = itHelper.getRoleTestHelper().getRolesByNames(
                 List.of(
@@ -429,5 +829,20 @@ class UserIT {
                 )
         );
         return itHelper.getStreamUsers(roles, true);
+    }
+
+    private static Stream<Arguments> getStreamUsersFormAnyGroupWithRolesAuthorAndObserver() {
+        var roles = itHelper.getRoleTestHelper().getRolesByNames(
+                List.of(
+                        AUTHOR,
+                        OBSERVER
+                )
+        );
+        return itHelper.getStreamUsers(roles, null);
+    }
+
+    private static Stream<Arguments> getStreamUsersFromOuterGroupsWithRoleAdmin() {
+        var roles = itHelper.getRoleTestHelper().getRolesByNames(List.of(ADMIN));
+        return itHelper.getStreamUsers(roles, false);
     }
 }
