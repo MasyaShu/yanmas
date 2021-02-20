@@ -69,19 +69,13 @@ public class UserControllerV1 extends BaseController {
     public ResponseEntity<UserDtoResponse> create(Principal principal,
                                                   @Validated(Create.class) @RequestBody UserDtoRequest request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
-
-        User user = modelMapper.map(request, User.class);
-
-        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
+        var user = modelMapper.map(request, User.class);
+        var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
         user.setAccount(accountService.findById(jwtUser.getAccountId()));
-
         user.setRole(roleService.findById(request.getRole()));
         user.setGroup(groupService.findByIdAndAccountId(request.getGroup()));
-
-        User createdUser = userService.create(user);
-
-        UserDtoResponse returnedUser = modelMapper.map(createdUser, UserDtoResponse.class);
-
+        var createdUser = userService.create(user);
+        var returnedUser = modelMapper.map(createdUser, UserDtoResponse.class);
         log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdUser);
         return new ResponseEntity<>(returnedUser, HttpStatus.CREATED);
     }
@@ -99,17 +93,13 @@ public class UserControllerV1 extends BaseController {
     public ResponseEntity<UserDtoResponse> update(Principal principal,
                                                   @Validated(Update.class) @RequestBody UserDtoRequest request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
-        User user = modelMapper.map(request, User.class);
-
-        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
+        var user = modelMapper.map(request, User.class);
+        var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
         user.setAccount(accountService.findById(jwtUser.getAccountId()));
-
         user.setRole(roleService.findById(request.getRole()));
         user.setGroup(groupService.findByIdAndAccountId(request.getGroup()));
-
-        User updatedUser = userService.update(user);
-        UserDtoResponse returnedUser =
-                modelMapper.map(updatedUser, UserDtoResponse.class);
+        var updatedUser = userService.update(user);
+        var returnedUser = modelMapper.map(updatedUser, UserDtoResponse.class);
         log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedUser);
         return new ResponseEntity<>(returnedUser, HttpStatus.OK);
     }
