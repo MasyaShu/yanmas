@@ -1,16 +1,18 @@
 package ru.itterminal.botdesk.tickets.model.test;
 
-import java.util.List;
-import java.util.UUID;
-
+import org.modelmapper.ModelMapper;
 import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
 import ru.itterminal.botdesk.tickets.model.TicketType;
 import ru.itterminal.botdesk.tickets.model.dto.TicketTypeDto;
 
+import java.util.List;
+import java.util.UUID;
+
 public class TicketTypeTestHelper extends EntityTestHelperImpl<TicketType, TicketTypeDto, TicketTypeDto> {
 
     private final AccountTestHelper accountTestHelper = new AccountTestHelper();
+    private final ModelMapper modelMapper = new ModelMapper();
 
     @Override
     public TicketType getRandomValidEntity() {
@@ -67,5 +69,17 @@ public class TicketTypeTestHelper extends EntityTestHelperImpl<TicketType, Ticke
         setPropertiesOfBaseEntity(ticketType5, UUID.fromString("6dc9c0de-2143-40ce-ac65-5be97e3019fc"),
                                   0, false, null);
         return List.of(ticketType1, ticketType2, ticketType3, ticketType4, ticketType5);
+    }
+
+    public TicketTypeDto convertEntityToDtoRequest(TicketType ticketType, boolean isCreate) {
+        var ticketTypeDto = modelMapper.map(ticketType, TicketTypeDto.class);
+        if (isCreate) {
+            ticketTypeDto.setId(null);
+            ticketTypeDto.setDeleted(null);
+            ticketTypeDto.setVersion(null);
+        }
+        ticketTypeDto.setIsPredefinedForNewTicket(null);
+        ticketTypeDto.setDisplayName(null);
+        return ticketTypeDto;
     }
 }

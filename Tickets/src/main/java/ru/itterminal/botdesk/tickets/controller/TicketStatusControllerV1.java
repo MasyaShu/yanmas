@@ -59,6 +59,10 @@ public class TicketStatusControllerV1 extends BaseController {
         ticketType.setDeleted(false);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
         ticketType.setAccount(accountService.findById(jwtUser.getAccountId()));
+        ticketType.setIsCanceledPredefined(false);
+        ticketType.setIsStartedPredefined(false);
+        ticketType.setIsFinishedPredefined(false);
+        ticketType.setIsReopenedPredefined(false);
         TicketStatus createdTicketStatus = service.create(ticketType);
         TicketStatusDto returnedTicketStatus =
                 modelMapper.map(createdTicketStatus, TicketStatusDto.class);

@@ -1,16 +1,18 @@
 package ru.itterminal.botdesk.tickets.model.test;
 
-import java.util.List;
-import java.util.UUID;
-
+import org.modelmapper.ModelMapper;
 import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
 import ru.itterminal.botdesk.tickets.model.TicketStatus;
 import ru.itterminal.botdesk.tickets.model.dto.TicketStatusDto;
 
+import java.util.List;
+import java.util.UUID;
+
 public class TicketStatusTestHelper extends EntityTestHelperImpl<TicketStatus, TicketStatusDto, TicketStatusDto> {
 
     private final AccountTestHelper accountTestHelper = new AccountTestHelper();
+    private final ModelMapper modelMapper = new ModelMapper();
 
     @Override
     public TicketStatus getRandomValidEntity() {
@@ -87,4 +89,20 @@ public class TicketStatusTestHelper extends EntityTestHelperImpl<TicketStatus, T
                                   0, false, null);
         return List.of(ticketStatus1, ticketStatus2, ticketStatus3, ticketStatus4, ticketStatus5);
     }
+
+    public TicketStatusDto convertEntityToDtoRequest(TicketStatus ticketStatus, boolean isCreate) {
+        var ticketStatusDto = modelMapper.map(ticketStatus, TicketStatusDto.class);
+        if (isCreate) {
+            ticketStatusDto.setId(null);
+            ticketStatusDto.setDeleted(null);
+            ticketStatusDto.setVersion(null);
+        }
+        ticketStatusDto.setIsStartedPredefined(null);
+        ticketStatusDto.setIsReopenedPredefined(null);
+        ticketStatusDto.setIsCanceledPredefined(null);
+        ticketStatusDto.setIsFinishedPredefined(null);
+        ticketStatusDto.setDisplayName(null);
+        return ticketStatusDto;
+    }
+
 }

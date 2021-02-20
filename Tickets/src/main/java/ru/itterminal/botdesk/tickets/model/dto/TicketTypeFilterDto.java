@@ -4,9 +4,9 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 import ru.itterminal.botdesk.commons.model.filter.StringFilter;
+import ru.itterminal.botdesk.commons.model.validator.filter.ValidateFilter;
 import ru.itterminal.botdesk.commons.model.validator.sortfields.ValidateSortFields;
 
-import javax.validation.constraints.Size;
 import java.util.List;
 
 @Getter
@@ -17,9 +17,10 @@ import java.util.List;
 @ToString
 public class TicketTypeFilterDto extends BaseFilterDto {
 
-    @Size(min = 1, max = 128)
+    @ValidateFilter(min = 1, max = 128)
     private StringFilter name;
 
+    @ValidateFilter
     private StringFilter comment;
 
     @ValidateSortFields(permittedFieldsForSort = "deleted, displayName, name, comment")

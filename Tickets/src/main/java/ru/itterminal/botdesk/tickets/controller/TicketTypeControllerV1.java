@@ -57,6 +57,7 @@ public class TicketTypeControllerV1 extends BaseController {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
         TicketType ticketType = modelMapper.map(request, TicketType.class);
         ticketType.setDeleted(false);
+        ticketType.setIsPredefinedForNewTicket(false);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
         ticketType.setAccount(accountService.findById(jwtUser.getAccountId()));
         TicketType createdTicketType = service.create(ticketType);
