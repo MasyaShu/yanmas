@@ -14,8 +14,6 @@ import java.util.stream.Stream;
 import org.junit.jupiter.params.provider.Arguments;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -57,7 +55,6 @@ public class ITHelper {
     private Map<String, User> observerOuterGroup = new HashMap<>();
     private Map<String, String> tokens = new HashMap<>();
 
-
     private final UserTestHelper userTestHelper = new UserTestHelper();
     private final AccountTestHelper accountTestHelper = new AccountTestHelper();
     private final RoleTestHelper roleTestHelper = new RoleTestHelper();
@@ -73,6 +70,7 @@ public class ITHelper {
     public static final String SIGN_IN = "auth/signin";
     public static final String EMAIL_VERIFY = "auth/email-verify";
     public static final String USER = "user";
+    public static final String USER_BY_ID = "user/{id}";
     public static final String ROLE = "role";
     public static final String INVALID_USERNAME_OR_PASSWORD = "invalid username or password";
     public static final String AUTHENTICATION_FAILED = "authentication failed";
@@ -121,6 +119,11 @@ public class ITHelper {
     public static final String EMPTY_BODY = "{}";
     public static final String GROUP_BY_ID = "group/{id}";
     public static final String SIZE = "size";
+    public static final String TOTAL_ELEMENTS = "totalElements";
+    public static final String CONTENT = "content";
+    public static final String[] IGNORE_FIELDS_FOR_COMPARE_USERS = {"account", "group", "role", "password",
+            "emailVerificationStatus", "passwordResetToken", "emailVerificationToken"};
+
 
     public void createAccount() {
         var anonymousUser = userTestHelper.getRandomValidEntity();
@@ -163,13 +166,12 @@ public class ITHelper {
         accountOwner.setGroup(accountOwnerFromDatabase.getGroup());
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @SuppressWarnings("deprecation")
     public void setNestedFieldsInAccountOwner() {
         var groupAccountOwner = getGroupByIdForActivateAccount(accountOwner.getGroup().getId());
         groupAccountOwner.setAccount(account);
         var roleAccountOwner = roleTestHelper.getRoleByName(Roles.ACCOUNT_OWNER.toString());
         accountOwner.generateDisplayName();
-        //noinspection deprecation
         accountOwner.setVersion(1);
         accountOwner.setDeleted(false);
         accountOwner.setIsArchived(false);
@@ -197,6 +199,7 @@ public class ITHelper {
         verifyEmailOfAccountOwner(userRepository);
         signInUser(accountOwner);
         setNestedFieldsInAccountOwner();
+        updateUser(accountOwner);
     }
 
     private void createInitialGroups(int countGroup, boolean isInnerGroup) {
@@ -306,10 +309,10 @@ public class ITHelper {
                 }
             }
 
-            var jsonSignIn = userTestHelper.convertUserToAuthenticationRequestDto(createdUser);
+            var authenticationRequestDto = userTestHelper.convertUserToAuthenticationRequestDto(createdUser);
             Response response = given()
                     .contentType(APPLICATION_JSON)
-                    .body(jsonSignIn)
+                    .body(authenticationRequestDto)
                     .post(SIGN_IN)
                     .then()
                     .log().body()
@@ -318,6 +321,86 @@ public class ITHelper {
                     .response();
             tokens.put(createdUser.getEmail(), response.path("token"));
         }
+    }
+
+    public User createUserByGivenUserForGivenRoleAndGroup(Group group, Role role, User currentUser) {
+            var newUser = userTestHelper.getRandomValidEntity();
+            var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(newUser, true);
+            userDtoRequest.setRole(role.getId());
+            userDtoRequest.setGroup(group.getId());
+
+            User createdUser = given()
+                    .headers(
+                            "Authorization",
+                            "Bearer " + tokens.get(currentUser.getEmail())
+                    )
+                    .contentType(APPLICATION_JSON)
+                    .body(userDtoRequest)
+                    .post(USER)
+                    .then()
+                    .log().body()
+                    .statusCode(HttpStatus.CREATED.value())
+                    .extract()
+                    .response().as(User.class);
+            createdUser.setAccount(account);
+            createdUser.setRole(role);
+            createdUser.setGroup(group);
+            createdUser.setPassword(newUser.getPassword());
+            var suffixKey = 1;
+            if (group.getIsInner()) {
+                switch (role.getName()) {
+                    case ADMIN -> {
+                        suffixKey = adminInnerGroup.size() + 1;
+                        adminInnerGroup.put(ADMIN_INNER_GROUP + suffixKey, createdUser);
+                    }
+                    case EXECUTOR -> {
+                        suffixKey = executorInnerGroup.size() + 1;
+                        executorInnerGroup.put(EXECUTOR_INNER_GROUP + suffixKey, createdUser);
+                    }
+                    case AUTHOR -> {
+                        suffixKey = authorInnerGroup.size() + 1;
+                        authorInnerGroup.put(AUTHOR_INNER_GROUP + suffixKey, createdUser);
+                    }
+                    case OBSERVER -> {
+                        suffixKey = observerInnerGroup.size() + 1;
+                        observerInnerGroup.put(OBSERVER_INNER_GROUP + suffixKey, createdUser);
+                    }
+                    default -> throw new IllegalStateException("Unexpected value: " + role.getName());
+                }
+            } else {
+                switch (role.getName()) {
+                    case ADMIN -> {
+                        suffixKey = adminOuterGroup.size() + 1;
+                        adminOuterGroup.put(ADMIN_OUTER_GROUP + suffixKey, createdUser);
+                    }
+                    case EXECUTOR -> {
+                        suffixKey = executorOuterGroup.size() + 1;
+                        executorOuterGroup.put(EXECUTOR_OUTER_GROUP + suffixKey, createdUser);
+                    }
+                    case AUTHOR -> {
+                        suffixKey = authorOuterGroup.size() + 1;
+                        authorOuterGroup.put(AUTHOR_OUTER_GROUP + suffixKey, createdUser);
+                    }
+                    case OBSERVER -> {
+                        suffixKey = observerOuterGroup.size() + 1;
+                        observerOuterGroup.put(OBSERVER_OUTER_GROUP + suffixKey, createdUser);
+                    }
+                    default -> throw new IllegalStateException("Unexpected value: " + role.getName());
+                }
+            }
+            var authenticationRequestDto = userTestHelper.convertUserToAuthenticationRequestDto(createdUser);
+            Response response = given()
+                    .contentType(APPLICATION_JSON)
+                    .body(authenticationRequestDto)
+                    .post(SIGN_IN)
+                    .then()
+                    .log().body()
+                    .statusCode(HttpStatus.OK.value())
+                    .extract()
+                    .response();
+            tokens.put(createdUser.getEmail(), response.path("token"));
+
+            return createdUser;
     }
 
     @SuppressWarnings("deprecation")
@@ -359,7 +442,6 @@ public class ITHelper {
                 .map(entry -> Arguments.of(entry.getKey(), tokens.get(entry.getValue().getEmail())));
     }
 
-
     public Stream<Arguments> getStreamUsers(List<Role> roles, Boolean isInnerGroup) {
         var allUsers = getUser(roles, isInnerGroup);
         return allUsers.entrySet().stream()
@@ -384,6 +466,10 @@ public class ITHelper {
             var nameKey = OUTER_GROUP + suffixKey;
             outerGroup.put(nameKey, group);
         }
+    }
+
+    public List<User> getAllUsers() {
+        return new ArrayList<>(getUser(roleTestHelper.getPredefinedValidEntityList(), null).values());
     }
 
     private Map<String, User> getUser(List<Role> roles, Boolean isInnerGroup) {
