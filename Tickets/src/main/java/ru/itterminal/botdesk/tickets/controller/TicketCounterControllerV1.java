@@ -32,7 +32,6 @@ import ru.itterminal.botdesk.tickets.service.impl.TicketCounterServiceImpl;
 public class TicketCounterControllerV1 extends BaseController {
 
     private final TicketCounterServiceImpl service;
-
     private final String ENTITY_NAME = TicketCounter.class.getSimpleName();
 
     @PutMapping()
