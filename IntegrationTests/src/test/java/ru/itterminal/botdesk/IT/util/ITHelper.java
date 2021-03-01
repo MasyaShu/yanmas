@@ -323,6 +323,7 @@ public class ITHelper {
         }
     }
 
+    @SuppressWarnings("unused")
     public User createUserByGivenUserForGivenRoleAndGroupWithSaveInMaps(Group group, Role role, User currentUser) {
         var newUser = userTestHelper.getRandomValidEntity();
         var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(newUser, true);

@@ -108,7 +108,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
         ticket.setId(UUID.randomUUID());
         ticket.generateDisplayName();
         ticket.setGroup(ticket.getAuthor().getGroup());
-        ticket.setNumber(ticketCounterService.getTicketNumber(ticket.getAccount().getId()));
+        ticket.setNumber(ticketCounterService.getNextTicketNumber(ticket.getAccount().getId()));
         if ((currentUser.getRole().getWeight() <= Roles.ADMIN.getWeight() && !currentUser.getGroup().getIsInner())
                 || currentUser.getRole().getWeight() <= Roles.AUTHOR.getWeight()) {
             var ticketSetting = ticketSettingService.getSettingOrPredefinedValuesForTicket(

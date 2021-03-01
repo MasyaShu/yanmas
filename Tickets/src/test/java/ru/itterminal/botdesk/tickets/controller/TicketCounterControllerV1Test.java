@@ -101,11 +101,11 @@ class TicketCounterControllerV1Test {
                 .currentNumber(15L)
                 .deleted(false)
                 .build();
-        when(service.findById(any())).thenReturn(foundTicketCounter);
+        when(service.getTicketCounter(any())).thenReturn(foundTicketCounter);
         mockMvc.perform(get(HOST + PORT + API ))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.currentNumber").value(15L));
-        verify(service, times(1)).findById(any());
+        verify(service, times(1)).getTicketCounter(any());
     }
 }

@@ -61,7 +61,7 @@ public class TicketCounterControllerV1 extends BaseController {
     public ResponseEntity<TicketCounterDto> getByAccountId(Principal user) {
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, jwtUser.getAccountId());
-        var foundTicketCounter = service.findById(jwtUser.getAccountId());
+        var foundTicketCounter = service.getTicketCounter(jwtUser.getAccountId());
         var returnedTicketCounter  = modelMapper.map(foundTicketCounter, TicketCounterDto.class);
         log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundTicketCounter);
         return new ResponseEntity<>(returnedTicketCounter, HttpStatus.OK);

@@ -91,13 +91,13 @@ class TicketServiceImplTest {
         when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any(), any()))
                 .thenReturn(new TicketSetting());
         when(repository.create(any())).thenReturn(ticket);
-        when(counterService.getTicketNumber(any())).thenReturn(ticket.getNumber());
+        when(counterService.getNextTicketNumber(any())).thenReturn(ticket.getNumber());
         var createdTicket = service.create(ticket, ticket.getAuthor());
         assertEquals(ticket, createdTicket);
         verify(validator, times(1)).beforeCreate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(repository, times(1)).create(any());
-        verify(counterService, times(1)).getTicketNumber(any());
+        verify(counterService, times(1)).getNextTicketNumber(any());
     }
 
     @Test
@@ -112,7 +112,7 @@ class TicketServiceImplTest {
         verify(repository, times(1)).existsById(any());
         verify(repository, times(1)).findByIdAndAccountId(any(), any());
         verify(repository, times(1)).update(any());
-        verify(counterService, times(0)).getTicketNumber(any());
+        verify(counterService, times(0)).getNextTicketNumber(any());
     }
 
     @ParameterizedTest
@@ -124,7 +124,7 @@ class TicketServiceImplTest {
         when(validator.beforeCreate(any())).thenReturn(true);
         when(validator.checkUniqueness(any())).thenReturn(true);
         when(repository.create(any())).thenReturn(ticket);
-        when(counterService.getTicketNumber(any())).thenReturn(number);
+        when(counterService.getNextTicketNumber(any())).thenReturn(number);
         when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any(), any())).thenReturn(ticketSetting);
         currentUser.setRole(roleTestHelper.getRoleByName(nameOfRole));
         var createdTicket = service.create(ticket, currentUser);
@@ -132,7 +132,7 @@ class TicketServiceImplTest {
         verify(validator, times(1)).beforeCreate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(repository, times(1)).create(any());
-        verify(counterService, times(1)).getTicketNumber(any());
+        verify(counterService, times(1)).getNextTicketNumber(any());
         verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
         assertEquals(ticket.getTicketStatus(), ticketSetting.getTicketStatusForNew());
         assertEquals(ticket.getTicketType(), ticketSetting.getTicketTypeForNew());
@@ -151,7 +151,7 @@ class TicketServiceImplTest {
         when(validator.beforeCreate(any())).thenReturn(true);
         when(validator.checkUniqueness(any())).thenReturn(true);
         when(repository.create(any())).thenReturn(ticket);
-        when(counterService.getTicketNumber(any())).thenReturn(number);
+        when(counterService.getNextTicketNumber(any())).thenReturn(number);
         when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any(), any())).thenReturn(ticketSetting);
         currentUser.setRole(roleTestHelper.getRoleByName(nameOfRole));
         var createdTicket = service.create(ticket, currentUser);
@@ -159,7 +159,7 @@ class TicketServiceImplTest {
         verify(validator, times(1)).beforeCreate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(repository, times(1)).create(any());
-        verify(counterService, times(1)).getTicketNumber(any());
+        verify(counterService, times(1)).getNextTicketNumber(any());
         verify(ticketSettingService, times(0)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
         assertEquals(ticket.getGroup(), ticket.getAuthor().getGroup());
         assertEquals(ticket.getNumber(), number);
@@ -182,7 +182,7 @@ class TicketServiceImplTest {
         verify(repository, times(1)).existsById(any());
         verify(repository, times(1)).findByIdAndAccountId(any(), any());
         verify(repository, times(1)).update(any());
-        verify(counterService, times(0)).getTicketNumber(any());
+        verify(counterService, times(0)).getNextTicketNumber(any());
         assertEquals(updatedTicket.getNumber(), ticketFromDataBase.getNumber());
         assertEquals(updatedTicket.getCreatedAt(), ticketFromDataBase.getCreatedAt());
         assertEquals(updatedTicket.getFiles(), ticketFromDataBase.getFiles());
@@ -209,7 +209,7 @@ class TicketServiceImplTest {
         verify(repository, times(1)).existsById(any());
         verify(repository, times(1)).findByIdAndAccountId(any(), any());
         verify(repository, times(1)).update(any());
-        verify(counterService, times(0)).getTicketNumber(any());
+        verify(counterService, times(0)).getNextTicketNumber(any());
         assertEquals(updatedTicket.getNumber(), ticketFromDataBase.getNumber());
         assertEquals(updatedTicket.getCreatedAt(), ticketFromDataBase.getCreatedAt());
         assertEquals(updatedTicket.getFiles(), ticketFromDataBase.getFiles());
