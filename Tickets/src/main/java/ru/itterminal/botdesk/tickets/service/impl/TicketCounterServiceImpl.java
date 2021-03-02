@@ -1,5 +1,7 @@
 package ru.itterminal.botdesk.tickets.service.impl;
 
+import static java.lang.String.format;
+
 import java.util.UUID;
 
 import javax.persistence.OptimisticLockException;
@@ -7,8 +9,10 @@ import javax.persistence.OptimisticLockException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
+import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
 import ru.itterminal.botdesk.tickets.model.TicketCounter;
 import ru.itterminal.botdesk.tickets.repository.TicketCounterRepository;
 import ru.itterminal.botdesk.tickets.service.validator.TicketCounterOperationValidator;
@@ -16,6 +20,7 @@ import ru.itterminal.botdesk.tickets.service.validator.TicketCounterOperationVal
 @Slf4j
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class TicketCounterServiceImpl
         extends CrudServiceImpl<TicketCounter, TicketCounterOperationValidator, TicketCounterRepository> {
 
@@ -27,6 +32,21 @@ public class TicketCounterServiceImpl
             "Start get current number for ticket by account id: {}";
     public static final String FINISH_CURRENT =
             "Finish get current number for ticket by account id: {}";
+
+    private final JwtUserBuilder jwtUserBuilder;
+
+    @Override
+    @Transactional
+    public TicketCounter create(TicketCounter entity) {
+        validator.beforeCreate(entity);
+        log.trace(format(CREATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.toString()));
+        entity.setId(jwtUserBuilder.getJwtUser().getAccountId());
+        entity.generateDisplayName();
+        validator.checkUniqueness(entity);
+        var createdEntity = repository.create(entity);
+        log.trace(format(CREATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), createdEntity.toString()));
+        return createdEntity;
+    }
 
     public Long getNextTicketNumber(UUID accountId) {
         log.debug(START_NEXT, accountId);

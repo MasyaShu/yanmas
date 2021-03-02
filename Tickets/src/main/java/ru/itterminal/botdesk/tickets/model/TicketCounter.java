@@ -2,6 +2,7 @@ package ru.itterminal.botdesk.tickets.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -30,5 +31,10 @@ public class TicketCounter extends BaseEntity {
     @Override
     public void generateDisplayName() {
         setDisplayName(getId().toString());
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        setDeleted(false);
     }
 }

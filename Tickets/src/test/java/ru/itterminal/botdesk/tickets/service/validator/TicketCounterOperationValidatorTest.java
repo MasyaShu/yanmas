@@ -38,6 +38,10 @@ class TicketCounterOperationValidatorTest {
 
     @Test
     void beforeUpdate_shouldGetTrue_whenCurrentNumberFromDatabaseLessThanPassedValue() {
+        var returnedJwtUser = JwtUser.builder()
+                .isInnerGroup(true)
+                .build();
+        when(jwtUserBuilder.getJwtUser()).thenReturn(returnedJwtUser);
         var ticketCounterFromDatabase = TicketCounter.builder()
                 .currentNumber(10L)
                 .build();
@@ -47,10 +51,15 @@ class TicketCounterOperationValidatorTest {
                 .build();
         assertTrue(validator.beforeUpdate(newCounterFromDatabase));
         verify(service, times(1)).findById(any());
+        verify(jwtUserBuilder, times(1)).getJwtUser();
     }
 
     @Test
     void beforeUpdate_shouldGetLogicalValidationException_whenCurrentNumberFromDatabaseMoreThanPassedValue() {
+        var returnedJwtUser = JwtUser.builder()
+                .isInnerGroup(true)
+                .build();
+        when(jwtUserBuilder.getJwtUser()).thenReturn(returnedJwtUser);
         var ticketCounterFromDatabase = TicketCounter.builder()
                 .currentNumber(10L)
                 .build();
@@ -62,6 +71,7 @@ class TicketCounterOperationValidatorTest {
                 assertThrows(LogicalValidationException.class, () -> validator.beforeUpdate(newCounterFromDatabase));
         assertEquals(NEW_VALUE_MUST_NOT, actualException.getFieldErrors().get(CURRENT_TICKET_NUMBER).get(0).getMessage());
         verify(service, times(1)).findById(any());
+        verify(jwtUserBuilder, times(1)).getJwtUser();
     }
 
     @Test
