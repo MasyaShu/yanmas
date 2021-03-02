@@ -1,35 +1,48 @@
 package ru.itterminal.botdesk.IT.util;
 
+import static io.restassured.RestAssured.given;
+import static io.restassured.path.json.JsonPath.from;
+import static org.hamcrest.Matchers.equalTo;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.params.provider.Arguments;
+import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.restassured.response.Response;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.junit.jupiter.params.provider.Arguments;
-import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
-import ru.itterminal.botdesk.aau.model.*;
+import ru.itterminal.botdesk.aau.model.Account;
+import ru.itterminal.botdesk.aau.model.Group;
+import ru.itterminal.botdesk.aau.model.Role;
+import ru.itterminal.botdesk.aau.model.Roles;
+import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.aau.model.test.GroupTestHelper;
 import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
 import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
+import ru.itterminal.botdesk.tickets.model.TicketSetting;
 import ru.itterminal.botdesk.tickets.model.TicketStatus;
 import ru.itterminal.botdesk.tickets.model.TicketType;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static io.restassured.RestAssured.given;
-import static io.restassured.path.json.JsonPath.from;
-import static org.hamcrest.Matchers.equalTo;
+import ru.itterminal.botdesk.tickets.model.test.TicketSettingTestHelper;
 
 @Getter
 @Setter
 @NoArgsConstructor
 public class ITHelper {
 
+    public static final String TICKET_SETTING = "ticket-setting";
     private Account account;
     private User accountOwner;
     private Map<String, TicketStatus> ticketStatuses = new HashMap<>();
@@ -45,13 +58,24 @@ public class ITHelper {
     private Map<String, User> observerInnerGroup = new HashMap<>();
     private Map<String, User> observerOuterGroup = new HashMap<>();
     private Map<String, String> tokens = new HashMap<>();
+    private Map<String, TicketSetting> ticketSettings = new HashMap<>();
 
     private final UserTestHelper userTestHelper = new UserTestHelper();
     private final AccountTestHelper accountTestHelper = new AccountTestHelper();
     private final RoleTestHelper roleTestHelper = new RoleTestHelper();
     private final GroupTestHelper groupTestHelper = new GroupTestHelper();
+    private final TicketSettingTestHelper ticketSettingTestHelper = new TicketSettingTestHelper();
     protected final ModelMapper modelMapper = new ModelMapper();
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private final  List<Role> allRolesWithoutAccountOwner = roleTestHelper.getRolesByNames(
+            List.of(
+                    ITHelper.ADMIN,
+                    ITHelper.AUTHOR,
+                    ITHelper.EXECUTOR,
+                    ITHelper.OBSERVER
+            )
+    );
 
     public static final String CREATE_ACCOUNT = "create-account";
     public static final String APPLICATION_JSON = "application/json";
@@ -119,7 +143,6 @@ public class ITHelper {
     public static final String ERRORS = "errors";
     public static final String TICKET_TYPE = "ticket-type";
     public static final String TICKET_TYPE_BY_ID = "ticket-type/{id}";
-
 
     public void createAccount() {
         var anonymousUser = userTestHelper.getRandomValidEntity();
@@ -292,6 +315,58 @@ public class ITHelper {
         }
     }
 
+    public void createInitialUsers() {
+        createUsersForEachRoleInGroup(outerGroup.get(OUTER_GROUP + 1), allRolesWithoutAccountOwner);
+        createUsersForEachRoleInGroup(innerGroup.get(INNER_GROUP + 1), allRolesWithoutAccountOwner);
+        createUsersForEachRoleInGroup(outerGroup.get(OUTER_GROUP + 2), allRolesWithoutAccountOwner);
+        createUsersForEachRoleInGroup(innerGroup.get(INNER_GROUP + 2), allRolesWithoutAccountOwner);
+    }
+
+    public void createInitialTicketSettings() {
+        createInitialTicketSetting(innerGroup.get(INNER_GROUP+"1"));
+        createInitialTicketSetting(outerGroup.get(OUTER_GROUP+"1"));
+    }
+
+    private void createInitialTicketSetting(Group group) {
+        var executors =
+                getUser(
+                        List.of(roleTestHelper.getRoleByName(Roles.EXECUTOR.toString())),
+                        group.getIsInner()
+                ).values().stream()
+                        .filter(user -> user.getGroup().equals(group))
+                        .collect(Collectors.toList());
+        var observers =
+                getUser(
+                        List.of(roleTestHelper.getRoleByName(Roles.OBSERVER.toString())),
+                        group.getIsInner()
+                ).values().stream()
+                        .filter(user -> user.getGroup().equals(group))
+                        .collect(Collectors.toList());
+        var ticketSetting = TicketSetting.builder()
+                .account(account)
+                .group(group)
+                .executors(executors)
+                .observers(observers)
+                .build();
+        var ticketSettingDtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(ticketSetting);
+        var createdTicketSetting = given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + tokens.get(accountOwner.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(ticketSettingDtoRequest)
+                .post(TICKET_SETTING)
+                .then()
+                .log().body()
+                .extract().response().as(TicketSetting.class);
+        var key = group.getIsInner()
+                ? "InnerGroup_1"
+                : "OuterGroup_1";
+        ticketSettings.put(key, createdTicketSetting);
+    }
+
     public void createInitialInnerAndOuterGroups(int countInnerGroup, int countOuterGroup) {
         createInitialGroups(countOuterGroup, false);
         createInitialGroups(countInnerGroup, true);
@@ -402,87 +477,87 @@ public class ITHelper {
         createdUser.setRole(role);
         createdUser.setGroup(group);
         createdUser.setPassword(newUser.getPassword());
-                    var suffixKey = 1;
-                    if (group.getIsInner()) {
-                        switch (role.getName()) {
-                            case ADMIN -> {
-                                suffixKey = adminInnerGroup.size() + 1;
-                                adminInnerGroup.put(ADMIN_INNER_GROUP + suffixKey, createdUser);
-                            }
-                            case EXECUTOR -> {
-                                suffixKey = executorInnerGroup.size() + 1;
-                                executorInnerGroup.put(EXECUTOR_INNER_GROUP + suffixKey, createdUser);
-                            }
-                            case AUTHOR -> {
-                                suffixKey = authorInnerGroup.size() + 1;
-                                authorInnerGroup.put(AUTHOR_INNER_GROUP + suffixKey, createdUser);
-                            }
-                            case OBSERVER -> {
-                                suffixKey = observerInnerGroup.size() + 1;
-                                observerInnerGroup.put(OBSERVER_INNER_GROUP + suffixKey, createdUser);
-                            }
-                            default -> throw new IllegalStateException("Unexpected value: " + role.getName());
-                        }
-                    } else {
-                        switch (role.getName()) {
-                            case ADMIN -> {
-                                suffixKey = adminOuterGroup.size() + 1;
-                                adminOuterGroup.put(ADMIN_OUTER_GROUP + suffixKey, createdUser);
-                            }
-                            case EXECUTOR -> {
-                                suffixKey = executorOuterGroup.size() + 1;
-                                executorOuterGroup.put(EXECUTOR_OUTER_GROUP + suffixKey, createdUser);
-                            }
-                            case AUTHOR -> {
-                                suffixKey = authorOuterGroup.size() + 1;
-                                authorOuterGroup.put(AUTHOR_OUTER_GROUP + suffixKey, createdUser);
-                            }
-                            case OBSERVER -> {
-                                suffixKey = observerOuterGroup.size() + 1;
-                                observerOuterGroup.put(OBSERVER_OUTER_GROUP + suffixKey, createdUser);
-                            }
-                            default -> throw new IllegalStateException("Unexpected value: " + role.getName());
-                        }
-                    }
-                    var authenticationRequestDto = userTestHelper.convertUserToAuthenticationRequestDto(createdUser);
-                    Response response = given()
-                            .contentType(APPLICATION_JSON)
-                            .body(authenticationRequestDto)
-                            .post(SIGN_IN)
-                            .then()
-                            .log().body()
-                            .statusCode(HttpStatus.OK.value())
-                            .extract()
-                            .response();
-                    tokens.put(createdUser.getEmail(), response.path("token"));
+        var suffixKey = 1;
+        if (group.getIsInner()) {
+            switch (role.getName()) {
+                case ADMIN -> {
+                    suffixKey = adminInnerGroup.size() + 1;
+                    adminInnerGroup.put(ADMIN_INNER_GROUP + suffixKey, createdUser);
+                }
+                case EXECUTOR -> {
+                    suffixKey = executorInnerGroup.size() + 1;
+                    executorInnerGroup.put(EXECUTOR_INNER_GROUP + suffixKey, createdUser);
+                }
+                case AUTHOR -> {
+                    suffixKey = authorInnerGroup.size() + 1;
+                    authorInnerGroup.put(AUTHOR_INNER_GROUP + suffixKey, createdUser);
+                }
+                case OBSERVER -> {
+                    suffixKey = observerInnerGroup.size() + 1;
+                    observerInnerGroup.put(OBSERVER_INNER_GROUP + suffixKey, createdUser);
+                }
+                default -> throw new IllegalStateException("Unexpected value: " + role.getName());
+            }
+        } else {
+            switch (role.getName()) {
+                case ADMIN -> {
+                    suffixKey = adminOuterGroup.size() + 1;
+                    adminOuterGroup.put(ADMIN_OUTER_GROUP + suffixKey, createdUser);
+                }
+                case EXECUTOR -> {
+                    suffixKey = executorOuterGroup.size() + 1;
+                    executorOuterGroup.put(EXECUTOR_OUTER_GROUP + suffixKey, createdUser);
+                }
+                case AUTHOR -> {
+                    suffixKey = authorOuterGroup.size() + 1;
+                    authorOuterGroup.put(AUTHOR_OUTER_GROUP + suffixKey, createdUser);
+                }
+                case OBSERVER -> {
+                    suffixKey = observerOuterGroup.size() + 1;
+                    observerOuterGroup.put(OBSERVER_OUTER_GROUP + suffixKey, createdUser);
+                }
+                default -> throw new IllegalStateException("Unexpected value: " + role.getName());
+            }
+        }
+        var authenticationRequestDto = userTestHelper.convertUserToAuthenticationRequestDto(createdUser);
+        Response response = given()
+                .contentType(APPLICATION_JSON)
+                .body(authenticationRequestDto)
+                .post(SIGN_IN)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .response();
+        tokens.put(createdUser.getEmail(), response.path("token"));
         return createdUser;
     }
 
     public User createUserByGivenUserForGivenRoleAndGroupWithoutSaveInMaps(Group group, Role role, User currentUser) {
-            var newUser = userTestHelper.getRandomValidEntity();
-            var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(newUser, true);
-            userDtoRequest.setRole(role.getId());
-            userDtoRequest.setGroup(group.getId());
+        var newUser = userTestHelper.getRandomValidEntity();
+        var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(newUser, true);
+        userDtoRequest.setRole(role.getId());
+        userDtoRequest.setGroup(group.getId());
 
-            User createdUser = given()
-                    .headers(
-                            "Authorization",
-                            "Bearer " + tokens.get(currentUser.getEmail())
-                    )
-                    .contentType(APPLICATION_JSON)
-                    .body(userDtoRequest)
-                    .post(USER)
-                    .then()
-                    .log().body()
-                    .statusCode(HttpStatus.CREATED.value())
-                    .extract()
-                    .response().as(User.class);
-            createdUser.setAccount(account);
-            createdUser.setRole(role);
-            createdUser.setGroup(group);
-            createdUser.setPassword(newUser.getPassword());
+        User createdUser = given()
+                .headers(
+                        "Authorization",
+                        "Bearer " + tokens.get(currentUser.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(userDtoRequest)
+                .post(USER)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.CREATED.value())
+                .extract()
+                .response().as(User.class);
+        createdUser.setAccount(account);
+        createdUser.setRole(role);
+        createdUser.setGroup(group);
+        createdUser.setPassword(newUser.getPassword());
 
-            return createdUser;
+        return createdUser;
     }
 
     @SuppressWarnings("deprecation")

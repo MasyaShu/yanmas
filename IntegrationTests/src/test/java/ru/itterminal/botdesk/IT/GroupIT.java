@@ -56,17 +56,7 @@ class GroupIT {
         itHelper = new ITHelper();
         itHelper.createAndVerifyAccount(userRepository);
         itHelper.createInitialInnerAndOuterGroups(1, 2);
-        var allRolesWithoutAccountOwner = itHelper.getRoleTestHelper().getRolesByNames(
-                List.of(ITHelper.ADMIN,
-                        ITHelper.AUTHOR,
-                        ITHelper.EXECUTOR,
-                        ITHelper.OBSERVER
-                )
-        );
-        itHelper.createUsersForEachRoleInGroup(itHelper.getOuterGroup().get(OUTER_GROUP + 1), allRolesWithoutAccountOwner);
-        itHelper.createUsersForEachRoleInGroup(itHelper.getInnerGroup().get(INNER_GROUP + 1), allRolesWithoutAccountOwner);
-        itHelper.createUsersForEachRoleInGroup(itHelper.getOuterGroup().get(OUTER_GROUP + 2), allRolesWithoutAccountOwner);
-        itHelper.createUsersForEachRoleInGroup(itHelper.getInnerGroup().get(INNER_GROUP + 2), allRolesWithoutAccountOwner);
+        itHelper.createInitialUsers();
     }
 
     @SuppressWarnings("unused")

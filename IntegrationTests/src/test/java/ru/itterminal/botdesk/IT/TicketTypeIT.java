@@ -54,19 +54,8 @@ class TicketTypeIT {
         RestAssured.baseURI = "https://localhost:8080";
         RestAssured.basePath = "/api/v1/";
         itHelper.createAndVerifyAccount(userRepository);
-        itHelper.createInitialInnerAndOuterGroups(0, 1);
-        var allRolesWithoutAccountOwner = itHelper.getRoleTestHelper().getRolesByNames(
-                List.of(
-                        ITHelper.ADMIN,
-                        ITHelper.AUTHOR,
-                        ITHelper.EXECUTOR,
-                        ITHelper.OBSERVER
-                )
-        );
-        itHelper.createUsersForEachRoleInGroup(
-                itHelper.getOuterGroup().get(OUTER_GROUP + 1), allRolesWithoutAccountOwner);
-        itHelper.createUsersForEachRoleInGroup(
-                itHelper.getInnerGroup().get(INNER_GROUP + 1), allRolesWithoutAccountOwner);
+        itHelper.createInitialInnerAndOuterGroups(1, 2);
+        itHelper.createInitialUsers();
     }
 
     @SuppressWarnings("unused")

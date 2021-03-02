@@ -14,9 +14,7 @@ import static ru.itterminal.botdesk.IT.util.ITHelper.EXECUTOR;
 import static ru.itterminal.botdesk.IT.util.ITHelper.GROUP;
 import static ru.itterminal.botdesk.IT.util.ITHelper.ID;
 import static ru.itterminal.botdesk.IT.util.ITHelper.IGNORE_FIELDS_FOR_COMPARE_USERS;
-import static ru.itterminal.botdesk.IT.util.ITHelper.INNER_GROUP;
 import static ru.itterminal.botdesk.IT.util.ITHelper.OBSERVER;
-import static ru.itterminal.botdesk.IT.util.ITHelper.OUTER_GROUP;
 import static ru.itterminal.botdesk.IT.util.ITHelper.ROLE;
 import static ru.itterminal.botdesk.IT.util.ITHelper.SIZE;
 import static ru.itterminal.botdesk.IT.util.ITHelper.USER;
@@ -80,22 +78,7 @@ class UserIT {
         RestAssured.basePath = "/api/v1/";
         itHelper.createAndVerifyAccount(userRepository);
         itHelper.createInitialInnerAndOuterGroups(1, 2);
-        var allRolesWithoutAccountOwner = itHelper.getRoleTestHelper().getRolesByNames(
-                List.of(
-                        ITHelper.ADMIN,
-                        ITHelper.AUTHOR,
-                        ITHelper.EXECUTOR,
-                        ITHelper.OBSERVER
-                )
-        );
-        itHelper.createUsersForEachRoleInGroup(
-                itHelper.getOuterGroup().get(OUTER_GROUP + 1), allRolesWithoutAccountOwner);
-        itHelper.createUsersForEachRoleInGroup(
-                itHelper.getInnerGroup().get(INNER_GROUP + 1), allRolesWithoutAccountOwner);
-        itHelper.createUsersForEachRoleInGroup(
-                itHelper.getOuterGroup().get(OUTER_GROUP + 2), allRolesWithoutAccountOwner);
-        itHelper.createUsersForEachRoleInGroup(
-                itHelper.getInnerGroup().get(INNER_GROUP + 2), allRolesWithoutAccountOwner);
+        itHelper.createInitialUsers();
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
