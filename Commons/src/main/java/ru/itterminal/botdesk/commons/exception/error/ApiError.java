@@ -33,7 +33,7 @@ public class ApiError {
         this.timestamp = new Date().getTime();
     }
 
-    public ApiError(HttpStatus status, String title, Exception cause/*, Web*/) {
+    public ApiError(HttpStatus status, String title, Exception cause) {
         this(status, title, cause.getMessage(), cause.getClass().getName());
     }
 

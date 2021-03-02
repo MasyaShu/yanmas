@@ -9,13 +9,17 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketCounterOperationValidator.CURRENT_TICKET_NUMBER;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketCounterOperationValidator.NEW_VALUE_MUST_NOT;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketCounterOperationValidator.USER_FROM_OUTER_GROUP_CANT_UPDATE_TICKET_COUNTER;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
+import ru.itterminal.botdesk.security.jwt.JwtUser;
+import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
 import ru.itterminal.botdesk.tickets.model.TicketCounter;
 import ru.itterminal.botdesk.tickets.service.impl.TicketCounterServiceImpl;
 
@@ -23,13 +27,21 @@ import ru.itterminal.botdesk.tickets.service.impl.TicketCounterServiceImpl;
 class TicketCounterOperationValidatorTest {
 
     @Autowired
-    TicketCounterOperationValidator validator;
+    private TicketCounterOperationValidator validator;
 
     @MockBean
-    TicketCounterServiceImpl service;
+    private TicketCounterServiceImpl service;
+
+    @SuppressWarnings("unused")
+    @MockBean
+    private JwtUserBuilder jwtUserBuilder;
 
     @Test
     void beforeUpdate_shouldGetTrue_whenCurrentNumberFromDatabaseLessThanPassedValue() {
+        var returnedJwtUser = JwtUser.builder()
+                .isInnerGroup(true)
+                .build();
+        when(jwtUserBuilder.getJwtUser()).thenReturn(returnedJwtUser);
         var ticketCounterFromDatabase = TicketCounter.builder()
                 .currentNumber(10L)
                 .build();
@@ -39,10 +51,15 @@ class TicketCounterOperationValidatorTest {
                 .build();
         assertTrue(validator.beforeUpdate(newCounterFromDatabase));
         verify(service, times(1)).findById(any());
+        verify(jwtUserBuilder, times(1)).getJwtUser();
     }
 
     @Test
     void beforeUpdate_shouldGetLogicalValidationException_whenCurrentNumberFromDatabaseMoreThanPassedValue() {
+        var returnedJwtUser = JwtUser.builder()
+                .isInnerGroup(true)
+                .build();
+        when(jwtUserBuilder.getJwtUser()).thenReturn(returnedJwtUser);
         var ticketCounterFromDatabase = TicketCounter.builder()
                 .currentNumber(10L)
                 .build();
@@ -54,6 +71,24 @@ class TicketCounterOperationValidatorTest {
                 assertThrows(LogicalValidationException.class, () -> validator.beforeUpdate(newCounterFromDatabase));
         assertEquals(NEW_VALUE_MUST_NOT, actualException.getFieldErrors().get(CURRENT_TICKET_NUMBER).get(0).getMessage());
         verify(service, times(1)).findById(any());
+        verify(jwtUserBuilder, times(1)).getJwtUser();
     }
+
+    @Test
+    void beforeUpdate_shouldGetAccessDeniedException_whenUserFromOuterGroup() {
+        var returnedJwtUser = JwtUser.builder()
+                .isInnerGroup(false)
+                .build();
+        when(jwtUserBuilder.getJwtUser()).thenReturn(returnedJwtUser);
+        var ticketCounterForUpdate = TicketCounter.builder()
+                .currentNumber(100L)
+                .build();
+        var actualException =
+                assertThrows(AccessDeniedException.class, () -> validator.beforeUpdate(ticketCounterForUpdate));
+        assertEquals(USER_FROM_OUTER_GROUP_CANT_UPDATE_TICKET_COUNTER, actualException.getMessage());
+        verify(service, times(0)).findById(any());
+        verify(service, times(0)).update(any());
+    }
+
 
 }

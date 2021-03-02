@@ -43,6 +43,7 @@ public abstract class BaseEntity {
      *
      * @param version of entity in database
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public void setVersion(Integer version) {
         this.version = version;

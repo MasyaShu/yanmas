@@ -32,13 +32,12 @@ import ru.itterminal.botdesk.tickets.service.impl.TicketCounterServiceImpl;
 public class TicketCounterControllerV1 extends BaseController {
 
     private final TicketCounterServiceImpl service;
-
     private final String ENTITY_NAME = TicketCounter.class.getSimpleName();
 
     @PutMapping()
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
-    public ResponseEntity<TicketCounterDto>
-    update(Principal principal, @Validated(Update.class) @RequestBody TicketCounterDto request) {
+    public ResponseEntity<TicketCounterDto> update(Principal principal,
+                                                   @Validated(Update.class) @RequestBody TicketCounterDto request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
         var ticketCounter = modelMapper.map(request, TicketCounter.class);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
@@ -61,8 +60,8 @@ public class TicketCounterControllerV1 extends BaseController {
     public ResponseEntity<TicketCounterDto> getByAccountId(Principal user) {
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, jwtUser.getAccountId());
-        var foundTicketCounter = service.findById(jwtUser.getAccountId());
-        var returnedTicketCounter  = modelMapper.map(foundTicketCounter, TicketCounterDto.class);
+        var foundTicketCounter = service.getTicketCounter(jwtUser.getAccountId());
+        var returnedTicketCounter = modelMapper.map(foundTicketCounter, TicketCounterDto.class);
         log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundTicketCounter);
         return new ResponseEntity<>(returnedTicketCounter, HttpStatus.OK);
     }
