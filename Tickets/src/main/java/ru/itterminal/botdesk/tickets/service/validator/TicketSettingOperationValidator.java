@@ -20,7 +20,6 @@ import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 import ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
 import ru.itterminal.botdesk.tickets.model.TicketSetting;
-import ru.itterminal.botdesk.tickets.model.projection.TicketSettingUniqueFields;
 import ru.itterminal.botdesk.tickets.service.impl.TicketSettingServiceImpl;
 
 @Slf4j
@@ -60,7 +59,7 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
     public boolean checkUniqueness(TicketSetting entity) {
         log.trace(CHECK_UNIQUENESS, entity);
         var errors = createMapForLogicalErrors();
-        List<TicketSettingUniqueFields> foundTicketSetting = service.findByUniqueFields(entity);
+        List<TicketSetting> foundTicketSetting = service.findByUniqueFields(entity);
         if (foundTicketSetting.isEmpty()) {
             log.trace(FIELDS_UNIQUE, entity);
             return true;
@@ -76,7 +75,6 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
     private boolean checkBeforeCreateUpdate(TicketSetting entity) {
         var isTicketSettingIsEmpty = true;
         var errors = createMapForLogicalErrors();
-
 
         if (entity.getAuthor() != null) {
             Group groupOfEntity = entity.getGroup();
@@ -126,9 +124,9 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
     }
 
     private void checkIsInnerGroupForCreateUpdate() {
-            JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            if (!jwtUser.isInnerGroup()) {
-                throw new AccessDeniedException(A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_SETTING);
-            }
+        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!jwtUser.isInnerGroup()) {
+            throw new AccessDeniedException(A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_SETTING);
+        }
     }
 }

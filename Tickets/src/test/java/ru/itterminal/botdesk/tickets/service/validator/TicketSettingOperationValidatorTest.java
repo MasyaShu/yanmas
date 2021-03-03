@@ -13,14 +13,16 @@ import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperatio
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_MESSAGE;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
-import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.*;
-import static ru.itterminal.botdesk.tickets.service.validator.TicketTypeOperationValidator.A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TYPE;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_SETTING;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.GROUPS_ARENT_EQUAL;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.GROUPS_ARENT_EQUAL_MESSAGE;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.TICKET_SETTING_IS_EMPTY;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.TICKET_SETTING_UNIQUE_FIELDS;
 
 import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -33,7 +35,6 @@ import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 import ru.itterminal.botdesk.tickets.model.TicketSetting;
-import ru.itterminal.botdesk.tickets.model.projection.TicketSettingUniqueFields;
 import ru.itterminal.botdesk.tickets.model.test.TicketSettingTestHelper;
 import ru.itterminal.botdesk.tickets.service.impl.TicketSettingServiceImpl;
 
@@ -45,9 +46,6 @@ class TicketSettingOperationValidatorTest {
     public static final String WRONG_NAME = "Wrong name";
     @MockBean
     private TicketSettingServiceImpl service;
-
-    @Mock
-    private TicketSettingUniqueFields ticketSettingUniqueFields;
 
     @Autowired
     private final TicketSettingOperationValidator validator = new TicketSettingOperationValidator(service);
@@ -64,7 +62,7 @@ class TicketSettingOperationValidatorTest {
 
     @Test
     void checkUniqueness_shouldGetLogicalValidationException_whenPassedDataNotUnique() {
-        when(service.findByUniqueFields(any())).thenReturn(List.of(ticketSettingUniqueFields));
+        when(service.findByUniqueFields(any())).thenReturn(List.of(new TicketSetting()));
         var expectedErrors = createMapForLogicalErrors();
         expectedErrors.put(
                 TICKET_SETTING_UNIQUE_FIELDS,

@@ -157,12 +157,13 @@ class TicketSettingControllerV1Test {
         assertEquals(expectedTicketSettingDtoResponse, actualTicketSettingDtoResponse);
 
         verify(accountService, times(1)).findById(any());
-        if (ticketSetting.getAuthor() == null) {
-            verify(groupService, times(1)).findByIdAndAccountId(any());
-        } else {
+        if (requestDto.getAuthor() != null) {
+            verify(userService, times(1)).findByIdAndAccountId(any());
             verify(groupService, times(0)).findByIdAndAccountId(any());
+        } else {
+            verify(groupService, times(1)).findByIdAndAccountId(any());
+            verify(userService, times(0)).findByIdAndAccountId(any());
         }
-        verify(userService, times(1)).findByIdAndAccountId(any());
         verify(ticketTypeService, times(1)).findByIdAndAccountId(any());
         verify(ticketStatusService, times(4)).findByIdAndAccountId(any());
         verify(ticketSettingService, times(1)).create(any());
@@ -283,7 +284,7 @@ class TicketSettingControllerV1Test {
         assertEquals(expectedTicketSettingDtoResponse, actualTicketSettingDtoResponse);
 
         verify(accountService, times(1)).findById(any());
-        if (ticketSetting.getAuthor() == null) {
+        if (requestDto.getAuthor() == null) {
             verify(groupService, times(1)).findByIdAndAccountId(any());
         } else {
             verify(groupService, times(0)).findByIdAndAccountId(any());

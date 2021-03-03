@@ -35,6 +35,7 @@ import ru.itterminal.botdesk.aau.repository.UserRepository;
 import ru.itterminal.botdesk.tickets.model.TicketSetting;
 import ru.itterminal.botdesk.tickets.model.TicketStatus;
 import ru.itterminal.botdesk.tickets.model.TicketType;
+import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoResponse;
 import ru.itterminal.botdesk.tickets.model.test.TicketSettingTestHelper;
 
 @Getter
@@ -42,7 +43,7 @@ import ru.itterminal.botdesk.tickets.model.test.TicketSettingTestHelper;
 @NoArgsConstructor
 public class ITHelper {
 
-    public static final String TICKET_SETTING = "ticket-setting";
+
     private Account account;
     private User accountOwner;
     private Map<String, TicketStatus> ticketStatuses = new HashMap<>();
@@ -77,6 +78,7 @@ public class ITHelper {
             )
     );
 
+    public static final String TICKET_SETTING = "ticket-setting";
     public static final String CREATE_ACCOUNT = "create-account";
     public static final String APPLICATION_JSON = "application/json";
     public static final String REQUEST_PASSWORD_RESET = "auth/request-password-reset";
@@ -349,7 +351,7 @@ public class ITHelper {
                 .observers(observers)
                 .build();
         var ticketSettingDtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(ticketSetting);
-        var createdTicketSetting = given().
+        var ticketSettingDtoResponse = given().
                 when()
                 .headers(
                         "Authorization",
@@ -360,10 +362,11 @@ public class ITHelper {
                 .post(TICKET_SETTING)
                 .then()
                 .log().body()
-                .extract().response().as(TicketSetting.class);
+                .extract().response().as(TicketSettingDtoResponse.class);
         var key = group.getIsInner()
                 ? "InnerGroup_1"
                 : "OuterGroup_1";
+        var createdTicketSetting = modelMapper.map(ticketSettingDtoResponse, TicketSetting.class);
         ticketSettings.put(key, createdTicketSetting);
     }
 
