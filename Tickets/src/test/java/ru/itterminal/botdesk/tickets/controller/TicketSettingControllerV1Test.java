@@ -357,7 +357,7 @@ class TicketSettingControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void getByAuthorId_shouldGetTicketSetting_whenPassedValidAuthorId() throws Exception {
+    void getSettingOrPredefinedValuesForTicket_shouldGetTicketSetting_whenPassedValidAuthorId() throws Exception {
         when(userService.findByIdAndAccountId(any())).thenReturn(ticketSetting.getAuthor());
         when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any(), any())).thenReturn(ticketSetting);
 
@@ -368,7 +368,7 @@ class TicketSettingControllerV1Test {
                 );
 
         MockHttpServletRequestBuilder request =
-                get(HOST + PORT + API + "/" + ticketSetting.getAuthor().getId())
+                get(HOST + PORT + API + "/by-author/" + ticketSetting.getAuthor().getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON);
 

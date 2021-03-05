@@ -28,7 +28,7 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @Table(name = "ticket_settings")
 @Getter
 @Setter
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)

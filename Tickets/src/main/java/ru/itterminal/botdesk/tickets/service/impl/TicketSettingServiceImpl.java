@@ -40,40 +40,22 @@ public class TicketSettingServiceImpl extends CrudServiceWithAccountImpl<TicketS
     }
 
     @Transactional(readOnly = true)
-    public TicketSetting getSettingOrPredefinedValuesForTicket(@NotNull UUID accountId, @NotNull UUID groupId,
+    public TicketSetting getSettingOrPredefinedValuesForTicket(@NotNull UUID accountId,
+                                                               @NotNull UUID groupId,
                                                                @NotNull UUID authorId) {
         var ticketSetting = repository
-                .getByAccount_IdAndGroup_IdAndAuthor_IdAndIdNotAndDeleted(
-                        accountId,
-                        groupId,
-                        authorId,
-                        null,
-                        false
-                );
+                .getByAccount_IdAndGroup_IdAndAuthor_IdAndDeletedIsFalse(accountId, groupId, authorId);
         if (ticketSetting == null) {
             ticketSetting = repository
-                    .getByAccount_IdAndGroup_IdAndAuthor_IdAndIdNotAndDeleted(
-                            accountId,
-                            groupId,
-                            null,
-                            null,
-                            false
-                    );
+                    .getByAccount_IdAndGroup_IdAndAuthorIsNullAndDeletedIsFalse(accountId, groupId);
         }
         if (ticketSetting == null) {
             ticketSetting = repository
-                    .getByAccount_IdAndGroup_IdAndAuthor_IdAndIdNotAndDeleted(
-                            accountId,
-                            null,
-                            null,
-                            null,
-                            false
-                    );
+                    .getByAccount_IdAndGroupIsNullAndAuthorIsNullAndDeletedIsFalse(accountId);
         }
         if (ticketSetting == null) {
             ticketSetting = new TicketSetting();
         }
-
         if (ticketSetting.getTicketTypeForNew() == null) {
             var predefinedTicketTypeForNew =
                     ticketTypeService
@@ -104,7 +86,6 @@ public class TicketSettingServiceImpl extends CrudServiceWithAccountImpl<TicketS
                             .findCanceledPredefinedStatus(accountId);
             ticketSetting.setTicketStatusForCancel(predefinedTicketStatusForCancel);
         }
-        // TODO нужно засетить все lazy вложенные поля через их вызов?
         return ticketSetting;
     }
 

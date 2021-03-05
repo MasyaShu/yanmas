@@ -11,12 +11,11 @@ import ru.itterminal.botdesk.tickets.model.TicketSetting;
 @Repository
 public interface TicketSettingRepository extends EntityRepositoryWithAccount<TicketSetting> {
 
-    TicketSetting getByAccount_IdAndGroup_IdAndAuthor_IdAndIdNotAndDeleted(
-            UUID accountId,
-            UUID groupId,
-            UUID authorId,
-            UUID id,
-            Boolean deleted);
+    TicketSetting getByAccount_IdAndGroupIsNullAndAuthorIsNullAndDeletedIsFalse(UUID accountId);
+
+    TicketSetting getByAccount_IdAndGroup_IdAndAuthorIsNullAndDeletedIsFalse(UUID accountId, UUID groupId);
+
+    TicketSetting getByAccount_IdAndGroup_IdAndAuthor_IdAndDeletedIsFalse(UUID accountId, UUID groupId, UUID authorId);
 
     List<TicketSetting> findAllByAccount_IdAndGroup_IdAndAuthor_IdAndIdNot(
             UUID accountId,

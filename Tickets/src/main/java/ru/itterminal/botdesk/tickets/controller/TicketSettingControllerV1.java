@@ -68,7 +68,7 @@ public class TicketSettingControllerV1 extends BaseController {
     public ResponseEntity<TicketSettingDtoResponse> create(Principal principal,
                                                            @Validated(Create.class) @RequestBody TicketSettingDtoRequest request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
-        TicketSetting ticketSetting = modelMapper.map(request, TicketSetting.class);
+        TicketSetting ticketSetting = new TicketSetting();
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
         setNestedObjectsIntoEntityFromEntityDtoRequest(ticketSetting, request, jwtUser.getAccountId());
         var createdTicketSetting = ticketSettingService.create(ticketSetting);
@@ -107,6 +107,16 @@ public class TicketSettingControllerV1 extends BaseController {
         return ResponseEntity.ok(message);
     }
 
+
+    @GetMapping("/{id}")
+    public ResponseEntity<TicketSettingDtoResponse> getById(@PathVariable UUID id) {
+        log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
+        var foundTicketSetting = ticketSettingService.findByIdAndAccountId(id);
+        var returnedTicketSetting = modelMapper.map(foundTicketSetting, TicketSettingDtoResponse.class);
+        log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundTicketSetting);
+        return new ResponseEntity<>(returnedTicketSetting, HttpStatus.OK);
+    }
+
     @GetMapping()
     public ResponseEntity<Page<TicketSettingDtoResponse>> getByFilter(
             Principal user,
@@ -125,7 +135,7 @@ public class TicketSettingControllerV1 extends BaseController {
         return new ResponseEntity<>(returnedTicketSetting, HttpStatus.OK);
     }
 
-    @GetMapping("/{authorId}")
+    @GetMapping("/by-author/{authorId}")
     public ResponseEntity<TicketSettingDtoResponse> getSettingOrPredefinedValuesForTicket
             (Principal user, @PathVariable UUID authorId) {
         log.debug(FIND_BY_AUTHOR_ID_INIT_MESSAGE, ENTITY_NAME, authorId);
@@ -151,7 +161,7 @@ public class TicketSettingControllerV1 extends BaseController {
             ticketSetting.setGroup(groupService.findByIdAndAccountId(request.getGroup()));
         }
         ticketSetting.setObservers(userService.findAllByAccountIdAndListId(request.getObservers()));
-        ticketSetting.setObservers(userService.findAllByAccountIdAndListId(request.getExecutors()));
+        ticketSetting.setExecutors(userService.findAllByAccountIdAndListId(request.getExecutors()));
         if (request.getTicketTypeForNew() != null) {
             ticketSetting.setTicketTypeForNew(ticketTypeService.findByIdAndAccountId(request.getTicketTypeForNew()));
         }

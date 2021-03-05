@@ -2,7 +2,6 @@ package ru.itterminal.botdesk.tickets.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
@@ -66,18 +65,6 @@ class TicketSettingRepositoryTest {
         assertTrue(ticketSettingUniqueFields.isEmpty());
     }
 
-    @Test
-    void findAllByAccount_IdAndGroup_IdAndAuthor_IdAndIdNotAndDeleted_whenCombinationOfFieldsIsUnique() {
-        TicketSetting ticketSetting =
-                repository.getByAccount_IdAndGroup_IdAndAuthor_IdAndIdNotAndDeleted(
-                        ACCOUNT_1_ID,
-                        GROUP_1_ID,
-                        USER_2_ID,
-                        UUID.randomUUID(),
-                        false
-                );
-        assertNull(ticketSetting);
-    }
 
     @Test
     void findAllByAccount_IdAndGroup_IdAndAuthor_IdAndIdNot_shouldGetEmptyList_whenCombinationOfFieldsIsUniqueForPassedId() {
@@ -89,32 +76,6 @@ class TicketSettingRepositoryTest {
                         TICKET_SETTING_1_ID
                 );
         assertTrue(ticketSettingUniqueFields.isEmpty());
-    }
-
-    @Test
-    void findAllByAccount_IdAndGroup_IdAndAuthor_IdAndIdNotAndDeleted_shouldGetOne_whenCombinationOfFieldsIsUniqueForPassedId() {
-        var ticketSetting =
-                repository.getByAccount_IdAndGroup_IdAndAuthor_IdAndIdNotAndDeleted(
-                        ACCOUNT_1_ID,
-                        GROUP_1_ID,
-                        USER_1_ID,
-                        TICKET_SETTING_1_ID,
-                        true
-                );
-        assertNull(ticketSetting);
-    }
-
-    @Test
-    void findAllByAccount_IdAndGroup_IdAndAuthor_IdAndIdNotAndDeleted_shouldGetEmptyList_whenCombinationOfFieldsIsUniqueForPassedId() {
-        TicketSetting ticketSetting =
-                repository.getByAccount_IdAndGroup_IdAndAuthor_IdAndIdNotAndDeleted(
-                        ACCOUNT_1_ID,
-                        GROUP_1_ID,
-                        USER_1_ID,
-                        TICKET_SETTING_1_ID,
-                        false
-                );
-        assertNull(ticketSetting);
     }
 
     @Test

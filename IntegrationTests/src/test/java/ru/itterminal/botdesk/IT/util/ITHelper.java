@@ -32,17 +32,18 @@ import ru.itterminal.botdesk.aau.model.test.GroupTestHelper;
 import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
 import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
+import ru.itterminal.botdesk.commons.model.BaseEntity;
 import ru.itterminal.botdesk.tickets.model.TicketSetting;
 import ru.itterminal.botdesk.tickets.model.TicketStatus;
 import ru.itterminal.botdesk.tickets.model.TicketType;
 import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoResponse;
 import ru.itterminal.botdesk.tickets.model.test.TicketSettingTestHelper;
 
+@SuppressWarnings("deprecation")
 @Getter
 @Setter
 @NoArgsConstructor
 public class ITHelper {
-
 
     private Account account;
     private User accountOwner;
@@ -69,7 +70,7 @@ public class ITHelper {
     protected final ModelMapper modelMapper = new ModelMapper();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final  List<Role> allRolesWithoutAccountOwner = roleTestHelper.getRolesByNames(
+    private final List<Role> allRolesWithoutAccountOwner = roleTestHelper.getRolesByNames(
             List.of(
                     ITHelper.ADMIN,
                     ITHelper.AUTHOR,
@@ -78,7 +79,20 @@ public class ITHelper {
             )
     );
 
+    private final List<Role> allRoles = roleTestHelper.getRolesByNames(
+            List.of(
+                    ITHelper.ACCOUNT_OWNER,
+                    ITHelper.ADMIN,
+                    ITHelper.AUTHOR,
+                    ITHelper.EXECUTOR,
+                    ITHelper.OBSERVER
+            )
+    );
+
     public static final String TICKET_SETTING = "ticket-setting";
+    public static final String TICKET_SETTING_BY_ID = "ticket-setting/{id}";
+    public static final String TICKET_SETTING_BY_AUTHOR = "ticket-setting/by-author/{authorId}";
+    public static final String AUTHOR_ID = "authorId";
     public static final String CREATE_ACCOUNT = "create-account";
     public static final String APPLICATION_JSON = "application/json";
     public static final String REQUEST_PASSWORD_RESET = "auth/request-password-reset";
@@ -138,8 +152,13 @@ public class ITHelper {
     public static final String SIZE = "size";
     public static final String TOTAL_ELEMENTS = "totalElements";
     public static final String CONTENT = "content";
+    public static final String[] IGNORE_FIELDS_OF_BASE_ENTITY_FOR_COMPARE = {"deleted", "version", "outId",
+            "id", "displayName"};
     public static final String[] IGNORE_FIELDS_FOR_COMPARE_USERS = {"account", "group", "role", "password",
             "emailVerificationStatus", "passwordResetToken", "emailVerificationToken"};
+    public static final String[] IGNORE_FIELDS_FOR_COMPARE_TICKET_SETTING =
+            {"account", "group", "author", "observers", "executors", "ticketTypeForNew",
+                    "ticketStatusForNew", "ticketStatusForReopen", "ticketStatusForClose", "ticketStatusForCancel"};
     public static final String TICKET_STATUS = "ticket-status";
     public static final String TICKET_STATUS_BY_ID = "ticket-status/{id}";
     public static final String ERRORS = "errors";
@@ -325,8 +344,8 @@ public class ITHelper {
     }
 
     public void createInitialTicketSettings() {
-        createInitialTicketSetting(innerGroup.get(INNER_GROUP+"1"));
-        createInitialTicketSetting(outerGroup.get(OUTER_GROUP+"1"));
+        createInitialTicketSetting(innerGroup.get(INNER_GROUP + "1"));
+        createInitialTicketSetting(outerGroup.get(OUTER_GROUP + "1"));
     }
 
     private void createInitialTicketSetting(Group group) {
@@ -364,10 +383,11 @@ public class ITHelper {
                 .log().body()
                 .extract().response().as(TicketSettingDtoResponse.class);
         var key = group.getIsInner()
-                ? "InnerGroup_1"
-                : "OuterGroup_1";
+                ? INNER_GROUP + "1"
+                : OUTER_GROUP + "1";
         var createdTicketSetting = modelMapper.map(ticketSettingDtoResponse, TicketSetting.class);
-        ticketSettings.put(key, createdTicketSetting);
+        copyPropertiesAsBaseEntity(createdTicketSetting, ticketSetting);
+        ticketSettings.put(key, ticketSetting);
     }
 
     public void createInitialInnerAndOuterGroups(int countInnerGroup, int countOuterGroup) {
@@ -608,6 +628,13 @@ public class ITHelper {
                 .map(entry -> Arguments.of(entry.getKey(), entry.getValue()));
     }
 
+    public Stream<Arguments> getStreamAllUsersFromGroups(List<Group> groups) {
+        var allUsers = getUser(allRoles, null);
+        return allUsers.entrySet().stream()
+                .filter(entry -> groups.contains(entry.getValue().getGroup()))
+                .map(entry -> Arguments.of(entry.getKey(), entry.getValue()));
+    }
+
     public List<Group> getAllGroup() {
         List<Group> listAllGroup = new ArrayList<>();
         listAllGroup.addAll(outerGroup.values());
@@ -654,6 +681,15 @@ public class ITHelper {
                 )
                 .filter(entry -> roles.contains(entry.getValue().getRole()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private void copyPropertiesAsBaseEntity(BaseEntity source, BaseEntity destination) {
+        destination.setDeleted(source.getDeleted());
+        destination.setId(source.getId());
+        destination.setVersion(source.getVersion());
+        destination.setDisplayName(source.getDisplayName());
+        destination.setOutId(source.getOutId());
+
     }
 
 }
