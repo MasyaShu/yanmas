@@ -31,24 +31,18 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.Roles;
-import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter;
 import ru.itterminal.botdesk.commons.model.filter.ListOfBaseEntityFilter;
 import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
-import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
-import ru.itterminal.botdesk.files.service.FileServiceImpl;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
 import ru.itterminal.botdesk.tickets.model.Ticket;
 import ru.itterminal.botdesk.tickets.model.dto.TicketDtoRequest;
 import ru.itterminal.botdesk.tickets.model.dto.TicketDtoResponse;
 import ru.itterminal.botdesk.tickets.model.dto.TicketFilterDto;
 import ru.itterminal.botdesk.tickets.service.impl.TicketServiceImpl;
-import ru.itterminal.botdesk.tickets.service.impl.TicketSettingServiceImpl;
-import ru.itterminal.botdesk.tickets.service.impl.TicketStatusServiceImpl;
-import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
 
 @Slf4j
 @RestController("TicketControllerV1")
@@ -62,12 +56,7 @@ public class TicketControllerV1 extends BaseController {
     public static final String OBSERVERS = "observers";
 
     private final TicketServiceImpl ticketService;
-    private final AccountServiceImpl accountService;
     private final UserServiceImpl userService;
-    private final TicketTypeServiceImpl ticketTypeService;
-    private final TicketStatusServiceImpl ticketStatusService;
-    private final FileServiceImpl fileService;
-    private final TicketSettingServiceImpl ticketSettingService;
     private final SpecificationsFactory specFactory;
 
     private final String ENTITY_NAME = Ticket.class.getSimpleName();
@@ -79,9 +68,7 @@ public class TicketControllerV1 extends BaseController {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, ticketDtoRequest);
         var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
         var currentUser = userService.findByEmail(jwtUser.getUsername());
-        var accountId = currentUser.getAccount().getId();
-        var ticket = modelMapper.map(ticketDtoRequest, Ticket.class);
-        setNestedObjectsIntoEntityFromEntityDtoRequest(ticket, ticketDtoRequest, accountId);
+        var ticket = Ticket.convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(ticketDtoRequest, jwtUser.getAccountId());
         var createdTicket = ticketService.create(ticket, currentUser);
         var returnedTicket = modelMapper.map(createdTicket, TicketDtoResponse.class);
         log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdTicket);
@@ -94,22 +81,6 @@ public class TicketControllerV1 extends BaseController {
         String message = format(SUCCESSFUL_CHECK_ACCESS, WORD_CREATE, ENTITY_NAME);
         log.trace(message);
         return ResponseEntity.ok(message);
-    }
-
-    @PutMapping()
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR', 'AUTHOR')")
-    public ResponseEntity<TicketDtoResponse> update
-            (Principal principal, @Validated(Update.class) @RequestBody TicketDtoRequest ticketDtoRequest) {
-        log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, ticketDtoRequest);
-        var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        var ticket = modelMapper.map(ticketDtoRequest, Ticket.class);
-        var accountId = jwtUser.getAccountId();
-        var currentUser = userService.findByEmail(jwtUser.getUsername());
-        setNestedObjectsIntoEntityFromEntityDtoRequest(ticket, ticketDtoRequest, accountId);
-        var updatedTicket = ticketService.update(ticket, currentUser);
-        var returnedTicket = modelMapper.map(updatedTicket, TicketDtoResponse.class);
-        log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedTicket);
-        return new ResponseEntity<>(returnedTicket, HttpStatus.OK);
     }
 
     @PutMapping("/check-access")
@@ -146,39 +117,6 @@ public class TicketControllerV1 extends BaseController {
         var returnedTicket = modelMapper.map(foundTicket, TicketDtoResponse.class);
         log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundTicket);
         return new ResponseEntity<>(returnedTicket, HttpStatus.OK);
-    }
-
-    private void setNestedObjectsIntoEntityFromEntityDtoRequest(Ticket ticket, TicketDtoRequest request,
-                                                                UUID accountId) {
-
-        ticket.setAccount(accountService.findById(accountId));
-        ticket.setAuthor(userService.findByIdAndAccountId(request.getAuthor()));
-        ticket.setGroup(ticket.getAuthor().getGroup());
-
-        var valuesForTicketPredefinedOrFromSettings =
-                ticketSettingService.getSettingOrPredefinedValuesForTicket(
-                        accountId,
-                        ticket.getGroup().getId(),
-                        ticket.getAuthor().getId()
-                );
-
-        if (request.getTicketType() != null) {
-            var ticketTypeId = request.getTicketType();
-            ticket.setTicketType(ticketTypeService.findByIdAndAccountId(ticketTypeId));
-        } else {
-            ticket.setTicketType(valuesForTicketPredefinedOrFromSettings.getTicketTypeForNew());
-        }
-
-        if (request.getTicketStatus() != null) {
-            var ticketStatusId = request.getTicketStatus();
-            ticket.setTicketStatus(ticketStatusService.findByIdAndAccountId(ticketStatusId));
-        } else {
-            ticket.setTicketStatus(valuesForTicketPredefinedOrFromSettings.getTicketStatusForNew());
-        }
-
-        ticket.setObservers(userService.findAllByAccountIdAndListId(request.getObservers()));
-        ticket.setExecutors(userService.findAllByAccountIdAndListId(request.getExecutors()));
-        ticket.setFiles(fileService.findAllByAccountIdAndListId(request.getFiles()));
     }
 
     private void setAdditionalConditionsIntoSpecAccordingPermissionOfCurrentUser
@@ -223,6 +161,7 @@ public class TicketControllerV1 extends BaseController {
                     .build();
             Specification<Ticket> additionConditionByObserversOfTicket =
                     specFactory.makeSpecification(Ticket.class, OBSERVERS, filterByListOfObservers);
+            //noinspection UnusedAssignment
             spec = spec.and(additionConditionByObserversOfTicket);
         }
     }

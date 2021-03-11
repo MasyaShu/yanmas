@@ -1,40 +1,44 @@
 package ru.itterminal.botdesk.tickets.service.impl;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.OptimisticLockingFailureException;
+import static java.lang.String.format;
+import static ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
+import static ru.itterminal.botdesk.commons.model.filter.ListOfBaseEntityFilter.TypeComparisonForListOfBaseEntityFilter.CONTAINS_ALL_OF_LIST;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
+import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.CrudServiceWithAccountImpl;
+import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
+import ru.itterminal.botdesk.commons.model.BaseEntity;
 import ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter;
 import ru.itterminal.botdesk.commons.model.filter.ListOfBaseEntityFilter;
 import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.botdesk.files.model.File;
 import ru.itterminal.botdesk.files.service.FileServiceImpl;
 import ru.itterminal.botdesk.integration.across_modules.RequestsFromModuleAccountAndUsers;
+import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
 import ru.itterminal.botdesk.tickets.model.Ticket;
 import ru.itterminal.botdesk.tickets.repository.TicketRepository;
 import ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator;
-
-import javax.persistence.OptimisticLockException;
-import java.util.List;
-import java.util.UUID;
-
-import static java.lang.String.format;
-import static ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
-import static ru.itterminal.botdesk.commons.model.filter.ListOfBaseEntityFilter.TypeComparisonForListOfBaseEntityFilter.CONTAINS_ALL_OF_LIST;
 
 @SuppressWarnings("unused")
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, TicketOperationValidator, TicketRepository> implements RequestsFromModuleAccountAndUsers {
+public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, TicketOperationValidator, TicketRepository>
+        implements RequestsFromModuleAccountAndUsers {
 
     public static final String YOU_MUST_USE_ANOTHER_METHOD_CREATE =
             "You must use method create(Ticket entity, User currentUser)";
@@ -49,7 +53,11 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
     private final TicketSettingServiceImpl ticketSettingService;
     private final FileServiceImpl fileService;
     private final SpecificationsFactory specFactory;
-
+    private final TicketTypeServiceImpl ticketTypeService;
+    private final TicketStatusServiceImpl ticketStatusService;
+    private final UserServiceImpl userService;
+    private final AccountServiceImpl accountService;
+    private final JwtUserBuilder jwtUserBuilder;
 
     @Override
     @Deprecated
@@ -65,11 +73,15 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
 
     @Transactional
     public Ticket create(Ticket entity, User currentUser) {
+        log.trace(
+                format(
+                        CREATE_INIT_MESSAGE,
+                        entity.getClass().getSimpleName(),
+                        entity.toString() + BY_USER + currentUser.getEmail()
+                )
+        );
+        setNestedObjectsOfTicketBeforeCreate(entity, currentUser);
         validator.beforeCreate(entity);
-        log.trace(format(CREATE_INIT_MESSAGE, entity.getClass().getSimpleName(),
-                         entity.toString() + BY_USER + currentUser.getEmail()
-        ));
-        setPropertiesOfTicketFromSettingsBeforeCreate(entity, currentUser);
         validator.checkUniqueness(entity);
         var createdEntity = repository.create(entity);
         if (createdEntity.getFiles() != null && !createdEntity.getFiles().isEmpty()) {
@@ -82,56 +94,65 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
         return createdEntity;
     }
 
-    public Ticket update(Ticket entity, User currentUser) {
-        log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(),
-                         entity.toString() + BY_USER + currentUser.toString()
-        ));
-        validator.beforeUpdate(entity);
-        setPropertiesOfTicketFromDatabaseBeforeUpdate(entity, currentUser);
-        try {
-            entity.generateDisplayName();
-            var updatedEntity = repository.update(entity);
-            log.trace(format(UPDATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), updatedEntity));
-            return updatedEntity;
-        }
-        catch (OptimisticLockException | ObjectOptimisticLockingFailureException ex) {
-            throw new OptimisticLockingFailureException(format(VERSION_INVALID_MESSAGE, entity.getId()));
-        }
-    }
-
     @SuppressWarnings("UnusedReturnValue")
     public boolean checkAccessForRead(Ticket ticket) {
         return validator.checkAccessForRead(ticket);
     }
 
-    private void setPropertiesOfTicketFromSettingsBeforeCreate(Ticket ticket, User currentUser) {
+    private void setNestedObjectsOfTicketBeforeCreate(Ticket ticket, User currentUser) {
+        ticket.setAccount(accountService.findById(jwtUserBuilder.getJwtUser().getAccountId()));
+        ticket.setAuthor(userService.findByIdAndAccountId(ticket.getAuthor().getId()));
+        ticket.setGroup(ticket.getAuthor().getGroup());
         ticket.setId(UUID.randomUUID());
         ticket.generateDisplayName();
-        ticket.setGroup(ticket.getAuthor().getGroup());
         ticket.setNumber(ticketCounterService.getNextTicketNumber(ticket.getAccount().getId()));
-        if ((currentUser.getRole().getWeight() <= Roles.ADMIN.getWeight() && !currentUser.getGroup().getIsInner())
-                || currentUser.getRole().getWeight() <= Roles.AUTHOR.getWeight()) {
-            var ticketSetting = ticketSettingService.getSettingOrPredefinedValuesForTicket(
-                    ticket.getAccount().getId(), ticket.getGroup().getId(), ticket.getAuthor().getId()
-            );
+        var ticketSetting = ticketSettingService.getSettingOrPredefinedValuesForTicket(
+                ticket.getAccount().getId(),
+                ticket.getGroup().getId(),
+                ticket.getAuthor().getId()
+        );
+        // ticket.status
+        boolean isCurrentUserFromInnerGroup = currentUser.getGroup().getIsInner();
+        var isTicketFinished = ticket.getIsFinished();
+        var ticketStatus = ticket.getTicketStatus();
+        var weightOfRoleOfCurrentUser = currentUser.getRole().getWeight();
+        if (Boolean.TRUE.equals(isTicketFinished) && (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight())) {
+            ticket.setTicketStatus(ticketSetting.getTicketStatusForClose());
+        } else if (ticketStatus != null && Boolean.FALSE.equals(isTicketFinished) && isCurrentUserFromInnerGroup
+                && (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight())) {
+            ticket.setTicketStatus(ticketStatusService.findByIdAndAccountId(ticketStatus.getId()));
+        } else if ((Boolean.FALSE.equals(isTicketFinished) && ticket.getTicketStatus() == null)
+                || (Boolean.FALSE.equals(isTicketFinished) && !isCurrentUserFromInnerGroup)
+                || (Boolean.FALSE.equals(isTicketFinished) && weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight())) {
             ticket.setTicketStatus(ticketSetting.getTicketStatusForNew());
-            ticket.setTicketType(ticketSetting.getTicketTypeForNew());
-            ticket.setExecutors(ticketSetting.getExecutors());
-            ticket.setObservers(ticketSetting.getObservers());
         }
-    }
-
-    private void setPropertiesOfTicketFromDatabaseBeforeUpdate(Ticket ticket, User currentUser) {
-        var ticketFromDatabase = super.findByIdAndAccountId(ticket.getId());
-        ticket.setNumber(ticketFromDatabase.getNumber());
-        ticket.setCreatedAt(ticketFromDatabase.getCreatedAt());
-        ticket.setFiles(ticketFromDatabase.getFiles());
-        ticket.setTicketTemplate(ticketFromDatabase.getTicketTemplate());
-        ticket.setGroup(ticket.getAuthor().getGroup());
-        if ((currentUser.getRole().getWeight() <= Roles.ADMIN.getWeight() && !currentUser.getGroup().getIsInner())
-                || currentUser.getRole().getWeight() <= Roles.AUTHOR.getWeight()) {
-            ticket.setExecutors(ticketFromDatabase.getExecutors());
-            ticket.setObservers(ticketFromDatabase.getObservers());
+        // ticket.ticketType
+        var ticketType = ticket.getTicketType();
+        if (ticketType == null || !isCurrentUserFromInnerGroup
+                || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
+            ticket.setTicketType(ticketSetting.getTicketTypeForNew());
+        } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
+            ticket.setTicketType(ticketTypeService.findByIdAndAccountId(ticketType.getId()));
+        }
+        // ticket.observers
+        if (ticket.getObservers() == null || !isCurrentUserFromInnerGroup
+                || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
+            ticket.setObservers(ticketSetting.getObservers());
+        } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
+            var listObserversId = ticket.getObservers().stream()
+                    .map(BaseEntity::getId)
+                    .collect(Collectors.toList());
+            ticket.setObservers(userService.findAllByAccountIdAndListId(listObserversId));
+        }
+        // ticket.executors
+        if (ticket.getExecutors() == null || !isCurrentUserFromInnerGroup
+                || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
+            ticket.setExecutors(ticketSetting.getExecutors());
+        } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
+            var listExecutorsId = ticket.getExecutors().stream()
+                    .map(BaseEntity::getId)
+                    .collect(Collectors.toList());
+            ticket.setExecutors(userService.findAllByAccountIdAndListId(listExecutorsId));
         }
     }
 
@@ -152,10 +173,12 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
         Specification<Ticket> additionConditionByExecutorsOfTicket =
                 specFactory.makeSpecification(Ticket.class, EXECUTORS, filterByListOfObserversAndExecutors);
 
-        additionConditionByAuthorOfTicket.or(additionConditionByObserversOfTicket).or(additionConditionByExecutorsOfTicket);
+        additionConditionByAuthorOfTicket.or(additionConditionByObserversOfTicket)
+                .or(additionConditionByExecutorsOfTicket);
 
         var pageable = PageRequest.of(1, 25, Sort.by(Sort.Direction.fromString("ASC"), "displayName"));
         var foundTickets = findAllByFilter(additionConditionByAuthorOfTicket, pageable);
         return foundTickets.getTotalElements();
     }
+
 }
