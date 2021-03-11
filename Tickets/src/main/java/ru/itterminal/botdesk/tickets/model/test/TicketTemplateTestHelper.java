@@ -1,5 +1,6 @@
 package ru.itterminal.botdesk.tickets.model.test;
 
+import org.modelmapper.ModelMapper;
 import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
@@ -37,6 +38,7 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
     private final AccountTestHelper accountTestHelper = new AccountTestHelper();
     private final UserTestHelper userTestHelper = new UserTestHelper();
     private final TicketTypeTestHelper ticketTypeTestHelper = new TicketTypeTestHelper();
+    private final ModelMapper modelMapper = new ModelMapper();
 
     @Override
     public TicketTemplate getRandomValidEntity() {
@@ -204,6 +206,17 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
                 .authorId(entity.getAuthor() == null ? null : entity.getAuthor().getId())
                 .ticketTypeId(entity.getTicketType() == null ? null : entity.getTicketType().getId())
                 .build();
+    }
+
+    public TicketTemplateDtoRequest convertEntityToDtoRequest(TicketTemplate ticketTemplate, boolean isCreate) {
+        var ticketTemplateDtoRequest = modelMapper.map(ticketTemplate, TicketTemplateDtoRequest.class);
+        if (isCreate) {
+            ticketTemplateDtoRequest.setId(null);
+            ticketTemplateDtoRequest.setDeleted(null);
+            ticketTemplateDtoRequest.setVersion(null);
+        }
+        ticketTemplateDtoRequest.setDisplayName(null);
+        return ticketTemplateDtoRequest;
     }
 
 

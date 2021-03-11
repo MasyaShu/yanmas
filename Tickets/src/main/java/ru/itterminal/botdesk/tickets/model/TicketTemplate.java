@@ -55,7 +55,7 @@ public class TicketTemplate extends BaseEntity {
     private User author;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ticket_type_id", insertable = false)
+    @JoinColumn(name = "ticket_type_id")
     private TicketType ticketType;
 
     @Override

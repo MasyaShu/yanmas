@@ -1,32 +1,14 @@
 package ru.itterminal.botdesk.IT.util;
 
-import static io.restassured.RestAssured.given;
-import static io.restassured.path.json.JsonPath.from;
-import static org.hamcrest.Matchers.equalTo;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.junit.jupiter.params.provider.Arguments;
-import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.restassured.response.Response;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.itterminal.botdesk.aau.model.Account;
-import ru.itterminal.botdesk.aau.model.Group;
-import ru.itterminal.botdesk.aau.model.Role;
-import ru.itterminal.botdesk.aau.model.Roles;
-import ru.itterminal.botdesk.aau.model.User;
+import org.junit.jupiter.params.provider.Arguments;
+import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
+import ru.itterminal.botdesk.aau.model.*;
 import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.aau.model.test.GroupTestHelper;
 import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
@@ -35,9 +17,20 @@ import ru.itterminal.botdesk.aau.repository.UserRepository;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 import ru.itterminal.botdesk.tickets.model.TicketSetting;
 import ru.itterminal.botdesk.tickets.model.TicketStatus;
+import ru.itterminal.botdesk.tickets.model.TicketTemplate;
 import ru.itterminal.botdesk.tickets.model.TicketType;
 import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoResponse;
+import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateDtoResponse;
 import ru.itterminal.botdesk.tickets.model.test.TicketSettingTestHelper;
+import ru.itterminal.botdesk.tickets.model.test.TicketTemplateTestHelper;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static io.restassured.RestAssured.given;
+import static io.restassured.path.json.JsonPath.from;
+import static org.hamcrest.Matchers.equalTo;
 
 @SuppressWarnings("deprecation")
 @Getter
@@ -45,6 +38,7 @@ import ru.itterminal.botdesk.tickets.model.test.TicketSettingTestHelper;
 @NoArgsConstructor
 public class ITHelper {
 
+    public static final String TICKET_TEMPLATE_KEY = "ticketTemplate_";
     private Account account;
     private User accountOwner;
     private Map<String, TicketStatus> ticketStatuses = new HashMap<>();
@@ -61,12 +55,14 @@ public class ITHelper {
     private Map<String, User> observerOuterGroup = new HashMap<>();
     private Map<String, String> tokens = new HashMap<>();
     private Map<String, TicketSetting> ticketSettings = new HashMap<>();
+    private Map<String, TicketTemplate> ticketTemplates = new HashMap<>();
 
     private final UserTestHelper userTestHelper = new UserTestHelper();
     private final AccountTestHelper accountTestHelper = new AccountTestHelper();
     private final RoleTestHelper roleTestHelper = new RoleTestHelper();
     private final GroupTestHelper groupTestHelper = new GroupTestHelper();
     private final TicketSettingTestHelper ticketSettingTestHelper = new TicketSettingTestHelper();
+    private final TicketTemplateTestHelper ticketTemplateTestHelper = new TicketTemplateTestHelper();
     protected final ModelMapper modelMapper = new ModelMapper();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -89,6 +85,8 @@ public class ITHelper {
             )
     );
 
+    public static final String TICKET_TEMPLATE = "ticket-template";
+    public static final String TICKET_TEMPLATE_BY_ID = "ticket-template/{id}";
     public static final String TICKET_SETTING = "ticket-setting";
     public static final String TICKET_SETTING_BY_ID = "ticket-setting/{id}";
     public static final String TICKET_SETTING_BY_AUTHOR = "ticket-setting/by-author/{authorId}";
@@ -159,6 +157,8 @@ public class ITHelper {
     public static final String[] IGNORE_FIELDS_FOR_COMPARE_TICKET_SETTING =
             {"account", "group", "author", "observers", "executors", "ticketTypeForNew",
                     "ticketStatusForNew", "ticketStatusForReopen", "ticketStatusForClose", "ticketStatusForCancel"};
+    public static final String[] IGNORE_FIELDS_FOR_COMPARE_TICKET_TEMPLATE =
+            {"account", "author", "observers", "ticketType"};
     public static final String TICKET_STATUS = "ticket-status";
     public static final String TICKET_STATUS_BY_ID = "ticket-status/{id}";
     public static final String ERRORS = "errors";
@@ -343,9 +343,38 @@ public class ITHelper {
         createUsersForEachRoleInGroup(innerGroup.get(INNER_GROUP + 2), allRolesWithoutAccountOwner);
     }
 
+    public void createInitialTicketTemplates() {
+        var listTicketTemplates = ticketTemplateTestHelper.setPredefinedValidEntityList();
+        int i = 1;
+        for (TicketTemplate template : listTicketTemplates) {
+            var newTicketTemplate = createInitialTicketTemplates(template);
+            ticketTemplates.put(TICKET_TEMPLATE_KEY + i, newTicketTemplate);
+            i++;
+        }
+    }
+
     public void createInitialTicketSettings() {
         createInitialTicketSetting(innerGroup.get(INNER_GROUP + "1"));
         createInitialTicketSetting(outerGroup.get(OUTER_GROUP + "1"));
+    }
+
+    private TicketTemplate createInitialTicketTemplates(TicketTemplate ticketTemplate) {
+        var ticketTemplateDtoRequest = ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate, true);
+        ticketTemplateDtoRequest.setTicketTypeId(ticketTypes.get(IS_PREDEFINED_FOR_NEW_TICKET).getId());
+        ticketTemplateDtoRequest.setAuthorId(authorOuterGroup.get(AUTHOR_OUTER_GROUP + 1).getId());
+        var ticketTemplateDtoResponse = given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + tokens.get(accountOwner.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(ticketTemplateDtoRequest)
+                .post(TICKET_TEMPLATE)
+                .then()
+                .log().body()
+                .extract().response().as(TicketTemplateDtoResponse.class);
+        return modelMapper.map(ticketTemplateDtoResponse, TicketTemplate.class);
     }
 
     private void createInitialTicketSetting(Group group) {

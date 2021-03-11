@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Table(name = "ticket_types")
 @Getter
 @Setter
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
