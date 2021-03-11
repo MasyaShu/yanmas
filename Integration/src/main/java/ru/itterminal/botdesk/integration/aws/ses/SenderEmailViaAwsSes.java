@@ -21,9 +21,12 @@ import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.RawMessage;
 import software.amazon.awssdk.services.ses.model.SendRawEmailRequest;
 
+@SuppressWarnings("unused")
 @Component
 public class SenderEmailViaAwsSes {
 
+    public static final String MOCK_SEND_ID = "mockSendID";
+    @SuppressWarnings("FieldCanBeLocal")
     private final SesClient sesClient;
     private final Session mailSession;
 
@@ -33,7 +36,9 @@ public class SenderEmailViaAwsSes {
     }
 
     public String sendEmail(SendRawEmailRequest rawEmailRequest) {
-        return sesClient.sendRawEmail(rawEmailRequest).messageId();
+        // TODO Разрешить отправку для production
+        // return sesClient.sendRawEmail(rawEmailRequest).messageId();
+        return MOCK_SEND_ID;
     }
 
     public SendRawEmailRequest createEmail(String sender,

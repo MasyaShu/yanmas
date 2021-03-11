@@ -1,18 +1,19 @@
 package ru.itterminal.botdesk.tickets.service.impl;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import ru.itterminal.botdesk.aau.service.impl.CrudServiceWithAccountImpl;
-import ru.itterminal.botdesk.tickets.model.TicketSetting;
-import ru.itterminal.botdesk.tickets.model.projection.TicketSettingUniqueFields;
-import ru.itterminal.botdesk.tickets.repository.TicketSettingRepository;
-import ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator;
-
-import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;
+
+import javax.validation.constraints.NotNull;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import ru.itterminal.botdesk.aau.service.impl.CrudServiceWithAccountImpl;
+import ru.itterminal.botdesk.tickets.model.TicketSetting;
+import ru.itterminal.botdesk.tickets.repository.TicketSettingRepository;
+import ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator;
 
 @Slf4j
 @Service
@@ -28,9 +29,9 @@ public class TicketSettingServiceImpl extends CrudServiceWithAccountImpl<TicketS
     private final TicketStatusServiceImpl ticketStatusService;
 
     @Transactional(readOnly = true)
-    public List<TicketSettingUniqueFields> findByUniqueFields(TicketSetting ticketSetting) {
+    public List<TicketSetting> findByUniqueFields(TicketSetting ticketSetting) {
         log.trace(START_FIND, ticketSetting.getAccount(), ticketSetting.getGroup(), ticketSetting.getAuthor());
-        return repository.findByUniqueFields(
+        return repository.findAllByAccount_IdAndGroup_IdAndAuthor_IdAndIdNot(
                 ticketSetting.getAccount().getId(),
                 ticketSetting.getGroup() == null ? null : ticketSetting.getGroup().getId(),
                 ticketSetting.getAuthor() == null ? null : ticketSetting.getAuthor().getId(),
@@ -39,48 +40,53 @@ public class TicketSettingServiceImpl extends CrudServiceWithAccountImpl<TicketS
     }
 
     @Transactional(readOnly = true)
-    public TicketSetting getSettingOrPredefinedValuesForTicket(@NotNull UUID accountId, @NotNull UUID groupId,
+    public TicketSetting getSettingOrPredefinedValuesForTicket(@NotNull UUID accountId,
+                                                               @NotNull UUID groupId,
                                                                @NotNull UUID authorId) {
-        var ticketSettingProjection = repository.findByUniqueFieldsWithoutDeleted(accountId, groupId, authorId, null);
-        if (ticketSettingProjection.isEmpty()) {
-            ticketSettingProjection = repository.findByUniqueFieldsWithoutDeleted(accountId, groupId, null, null);
+        var ticketSetting = repository
+                .getByAccount_IdAndGroup_IdAndAuthor_IdAndDeletedIsFalse(accountId, groupId, authorId);
+        if (ticketSetting == null) {
+            ticketSetting = repository
+                    .getByAccount_IdAndGroup_IdAndAuthorIsNullAndDeletedIsFalse(accountId, groupId);
         }
-        if (ticketSettingProjection.isEmpty()) {
-            ticketSettingProjection = repository.findByUniqueFieldsWithoutDeleted(accountId, null, null, null);
+        if (ticketSetting == null) {
+            ticketSetting = repository
+                    .getByAccount_IdAndGroupIsNullAndAuthorIsNullAndDeletedIsFalse(accountId);
         }
-        var valuesForTicket =
-                ticketSettingProjection.isEmpty() ? new TicketSetting() : repository.findById(ticketSettingProjection.get(0).getId()).get();
-        if (valuesForTicket.getTicketTypeForNew() == null) {
+        if (ticketSetting == null) {
+            ticketSetting = new TicketSetting();
+        }
+        if (ticketSetting.getTicketTypeForNew() == null) {
             var predefinedTicketTypeForNew =
                     ticketTypeService
                             .findStartedPredefinedTicketTypeForNewTicket(accountId);
-            valuesForTicket.setTicketTypeForNew(predefinedTicketTypeForNew);
+            ticketSetting.setTicketTypeForNew(predefinedTicketTypeForNew);
         }
-        if (valuesForTicket.getTicketStatusForNew() == null) {
+        if (ticketSetting.getTicketStatusForNew() == null) {
             var predefinedTicketStatusForNew =
                     ticketStatusService
                             .findStartedPredefinedStatus(accountId);
-            valuesForTicket.setTicketStatusForNew(predefinedTicketStatusForNew);
+            ticketSetting.setTicketStatusForNew(predefinedTicketStatusForNew);
         }
-        if (valuesForTicket.getTicketStatusForReopen() == null) {
+        if (ticketSetting.getTicketStatusForReopen() == null) {
             var predefinedTicketStatusForReopen =
                     ticketStatusService
                             .findReopenedPredefinedStatus(accountId);
-            valuesForTicket.setTicketStatusForReopen(predefinedTicketStatusForReopen);
+            ticketSetting.setTicketStatusForReopen(predefinedTicketStatusForReopen);
         }
-        if (valuesForTicket.getTicketStatusForClose() == null) {
+        if (ticketSetting.getTicketStatusForClose() == null) {
             var predefinedTicketStatusForClose =
                     ticketStatusService
                             .findFinishedPredefinedStatus(accountId);
-            valuesForTicket.setTicketStatusForClose(predefinedTicketStatusForClose);
+            ticketSetting.setTicketStatusForClose(predefinedTicketStatusForClose);
         }
-        if (valuesForTicket.getTicketStatusForCancel() == null) {
+        if (ticketSetting.getTicketStatusForCancel() == null) {
             var predefinedTicketStatusForCancel =
                     ticketStatusService
                             .findCanceledPredefinedStatus(accountId);
-            valuesForTicket.setTicketStatusForCancel(predefinedTicketStatusForCancel);
+            ticketSetting.setTicketStatusForCancel(predefinedTicketStatusForCancel);
         }
-        return valuesForTicket;
+        return ticketSetting;
     }
 
 }

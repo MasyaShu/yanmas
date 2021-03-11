@@ -8,9 +8,7 @@ import static ru.itterminal.botdesk.IT.util.ITHelper.APPLICATION_JSON;
 import static ru.itterminal.botdesk.IT.util.ITHelper.AUTHOR;
 import static ru.itterminal.botdesk.IT.util.ITHelper.EMPTY_BODY;
 import static ru.itterminal.botdesk.IT.util.ITHelper.EXECUTOR;
-import static ru.itterminal.botdesk.IT.util.ITHelper.INNER_GROUP;
 import static ru.itterminal.botdesk.IT.util.ITHelper.OBSERVER;
-import static ru.itterminal.botdesk.IT.util.ITHelper.OUTER_GROUP;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -173,6 +171,10 @@ class TicketCounterIT {
     @MethodSource("getStreamAllUsers")
     @Order(50)
     void failedUpdateTicketCounter_whenUserIsNotInnerGroupAndNotHaveRoleAccountOwnerOrAdmin(String userKey, User user) {
+        if (user.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString()) ||
+                (user.getRole().getName().equals(Roles.ADMIN.toString()) && user.getGroup().getIsInner())) {
+            return;
+        }
         var ticketCounterForUpdate = given().
                 when()
                 .headers(
@@ -187,11 +189,6 @@ class TicketCounterIT {
         var newCurrentNumber = ticketCounterForUpdate.getCurrentNumber() + 1;
         ticketCounterForUpdate.setCurrentNumber(newCurrentNumber);
         ticketCounterForUpdate.setDisplayName(null);
-        var expectedStatusCode = HttpStatus.FORBIDDEN.value();
-        if (user.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString()) ||
-                (user.getRole().getName().equals(Roles.ADMIN.toString()) && user.getGroup().getIsInner())) {
-            expectedStatusCode = HttpStatus.OK.value();
-        }
         given().
                 when()
                 .headers(
@@ -203,7 +200,7 @@ class TicketCounterIT {
                 .put(TICKET_COUNTER)
                 .then()
                 .log().body()
-                .statusCode(expectedStatusCode);
+                .statusCode(HttpStatus.FORBIDDEN.value());
     }
 
     private static Stream<Arguments> getStreamAllUsersInnerGroup() {

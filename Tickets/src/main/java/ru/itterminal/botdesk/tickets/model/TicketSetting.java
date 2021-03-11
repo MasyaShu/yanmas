@@ -9,6 +9,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -27,7 +28,7 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @Table(name = "ticket_settings")
 @Getter
 @Setter
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
@@ -105,4 +106,10 @@ public class TicketSetting extends BaseEntity {
         }
 
     }
+
+    @PrePersist
+    protected void onCreate() {
+        setDeleted(false);
+    }
+
 }

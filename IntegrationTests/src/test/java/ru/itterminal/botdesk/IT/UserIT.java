@@ -86,7 +86,6 @@ class UserIT {
     @Order(10)
     void successGetByFilterByAllUsersViaFilterFromYourself(String userKey, User user) {
         var userFilterDto = userTestHelper.convertEntityToFilterDto(user);
-        var expectedUserList = List.of(user);
         var response = given().
                 when()
                 .headers(
@@ -95,23 +94,19 @@ class UserIT {
                 )
                 .contentType(APPLICATION_JSON)
                 .body(userFilterDto)
-                .param(SIZE, expectedUserList.size())
+                .param(SIZE, 1)
                 .get(USER)
                 .then()
                 .log().body()
-                .body(TOTAL_ELEMENTS, equalTo(expectedUserList.size()))
+                .body(TOTAL_ELEMENTS, equalTo(1))
                 .statusCode(HttpStatus.OK.value())
                 .extract().response().asString();
         List<User> actualUserList = from(response).getList(CONTENT, User.class);
-        assertThat(expectedUserList)
-                .usingElementComparatorIgnoringFields(IGNORE_FIELDS_FOR_COMPARE_USERS)
-                .containsExactlyInAnyOrderElementsOf(actualUserList);
-        assertThat(expectedUserList).usingElementComparatorOnFields(ACCOUNT).usingElementComparatorOnFields(ID)
-                .containsExactlyInAnyOrderElementsOf(actualUserList);
-        assertThat(expectedUserList).usingElementComparatorOnFields(GROUP).usingElementComparatorOnFields(ID)
-                .containsExactlyInAnyOrderElementsOf(actualUserList);
-        assertThat(expectedUserList).usingElementComparatorOnFields(ROLE).usingElementComparatorOnFields(ID)
-                .containsExactlyInAnyOrderElementsOf(actualUserList);
+        var actualUser = actualUserList.get(0);
+        assertThat(actualUser).usingRecursiveComparison()
+                .ignoringFields("role.weight")
+                .ignoringActualNullFields()
+                .isEqualTo(user);
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
@@ -327,9 +322,12 @@ class UserIT {
             for (Role oneRole : allRoles) {
                 if (user.getRole().getWeight() >= oneRole.getWeight()
                         && !oneRole.getName().equals(Roles.ACCOUNT_OWNER.toString())) {
-                    var newUser = itHelper.createUserByGivenUserForGivenRoleAndGroupWithoutSaveInMaps(oneGroup, oneRole,
-                                                                                                      user
-                    );
+                    var newUser = itHelper
+                            .createUserByGivenUserForGivenRoleAndGroupWithoutSaveInMaps(
+                                    oneGroup,
+                                    oneRole,
+                                    user
+                            );
                     var expectedUserList = List.of(newUser);
                     var response = given().
                             when()
@@ -709,19 +707,19 @@ class UserIT {
     void failedUpdateByUsersFromAnyGroupsWithRolesAuthorOrObserver(String userKey, User user) {
         var allUsers = itHelper.getAllUsers();
         for (User oneUser : allUsers) {
-                var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(oneUser, false);
-                given()
-                        .headers(
-                                "Authorization",
-                                "Bearer " + itHelper.getTokens().get(user.getEmail())
-                        )
-                        .contentType(APPLICATION_JSON)
-                        .body(userDtoRequest)
-                        .put(USER)
-                        .then()
-                        .log().headers()
-                        .log().body()
-                        .statusCode(HttpStatus.FORBIDDEN.value());
+            var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(oneUser, false);
+            given()
+                    .headers(
+                            "Authorization",
+                            "Bearer " + itHelper.getTokens().get(user.getEmail())
+                    )
+                    .contentType(APPLICATION_JSON)
+                    .body(userDtoRequest)
+                    .put(USER)
+                    .then()
+                    .log().headers()
+                    .log().body()
+                    .statusCode(HttpStatus.FORBIDDEN.value());
         }
     }
 

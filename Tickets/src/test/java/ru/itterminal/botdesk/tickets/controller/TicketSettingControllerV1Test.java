@@ -157,12 +157,13 @@ class TicketSettingControllerV1Test {
         assertEquals(expectedTicketSettingDtoResponse, actualTicketSettingDtoResponse);
 
         verify(accountService, times(1)).findById(any());
-        if (ticketSetting.getAuthor() == null) {
-            verify(groupService, times(1)).findByIdAndAccountId(any());
-        } else {
+        if (requestDto.getAuthor() != null) {
+            verify(userService, times(1)).findByIdAndAccountId(any());
             verify(groupService, times(0)).findByIdAndAccountId(any());
+        } else {
+            verify(groupService, times(1)).findByIdAndAccountId(any());
+            verify(userService, times(0)).findByIdAndAccountId(any());
         }
-        verify(userService, times(1)).findByIdAndAccountId(any());
         verify(ticketTypeService, times(1)).findByIdAndAccountId(any());
         verify(ticketStatusService, times(4)).findByIdAndAccountId(any());
         verify(ticketSettingService, times(1)).create(any());
@@ -283,7 +284,7 @@ class TicketSettingControllerV1Test {
         assertEquals(expectedTicketSettingDtoResponse, actualTicketSettingDtoResponse);
 
         verify(accountService, times(1)).findById(any());
-        if (ticketSetting.getAuthor() == null) {
+        if (requestDto.getAuthor() == null) {
             verify(groupService, times(1)).findByIdAndAccountId(any());
         } else {
             verify(groupService, times(0)).findByIdAndAccountId(any());
@@ -356,7 +357,7 @@ class TicketSettingControllerV1Test {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void getByAuthorId_shouldGetTicketSetting_whenPassedValidAuthorId() throws Exception {
+    void getSettingOrPredefinedValuesForTicket_shouldGetTicketSetting_whenPassedValidAuthorId() throws Exception {
         when(userService.findByIdAndAccountId(any())).thenReturn(ticketSetting.getAuthor());
         when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any(), any())).thenReturn(ticketSetting);
 
@@ -367,7 +368,7 @@ class TicketSettingControllerV1Test {
                 );
 
         MockHttpServletRequestBuilder request =
-                get(HOST + PORT + API + "/" + ticketSetting.getAuthor().getId())
+                get(HOST + PORT + API + "/by-author/" + ticketSetting.getAuthor().getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON);
 
