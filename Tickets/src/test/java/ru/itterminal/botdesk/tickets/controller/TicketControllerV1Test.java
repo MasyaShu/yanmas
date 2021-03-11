@@ -6,13 +6,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.itterminal.botdesk.security.config.TestSecurityConfig.ACCOUNT_1_ID;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -39,21 +36,16 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 
-import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
 import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.botdesk.commons.util.CommonConstants;
-import ru.itterminal.botdesk.files.service.FileServiceImpl;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 import ru.itterminal.botdesk.tickets.model.Ticket;
 import ru.itterminal.botdesk.tickets.model.dto.TicketDtoRequest;
 import ru.itterminal.botdesk.tickets.model.dto.TicketDtoResponse;
 import ru.itterminal.botdesk.tickets.model.test.TicketTestHelper;
 import ru.itterminal.botdesk.tickets.service.impl.TicketServiceImpl;
-import ru.itterminal.botdesk.tickets.service.impl.TicketSettingServiceImpl;
-import ru.itterminal.botdesk.tickets.service.impl.TicketStatusServiceImpl;
-import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
 
 @SuppressWarnings("unused")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -68,21 +60,6 @@ class TicketControllerV1Test {
 
     @MockBean
     private TicketServiceImpl ticketService;
-
-    @MockBean
-    private AccountServiceImpl accountService;
-
-    @MockBean
-    private TicketTypeServiceImpl ticketTypeService;
-
-    @MockBean
-    private TicketStatusServiceImpl ticketStatusService;
-
-    @MockBean
-    private FileServiceImpl fileService;
-
-    @MockBean
-    private TicketSettingServiceImpl ticketSettingService;
 
     @MockBean
     private SpecificationsFactory specFactory;
@@ -131,11 +108,7 @@ class TicketControllerV1Test {
         requestDto.setVersion(null);
         requestDto.setDisplayName(null);
         UUID accountId = ticket.getAccount().getId();
-        when(accountService.findById(any())).thenReturn(ticket.getAccount());
-        when(userService.findByIdAndAccountId(any())).thenReturn(ticket.getAuthor());
         when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
-        when(ticketTypeService.findByIdAndAccountId(any())).thenReturn(ticket.getTicketType());
-        when(ticketStatusService.findByIdAndAccountId(any())).thenReturn(ticket.getTicketStatus());
         if (requestDto.getObservers() != null && !requestDto.getObservers().isEmpty()) {
             when(userService.findAllByAccountIdAndListId(requestDto.getObservers()))
                     .thenReturn(ticket.getObservers());
@@ -145,14 +118,6 @@ class TicketControllerV1Test {
         if (requestDto.getExecutors() != null && !requestDto.getExecutors().isEmpty()) {
             when(userService.findAllByAccountIdAndListId(requestDto.getExecutors()))
                     .thenReturn(ticket.getExecutors());
-        } else {
-            when(userService.findAllByAccountIdAndListId(Collections.emptyList())).thenReturn(null);
-        }
-        if (requestDto.getFiles() != null && !requestDto.getFiles().isEmpty()) {
-            when(fileService.findAllByAccountIdAndListId(requestDto.getFiles()))
-                    .thenReturn(ticket.getFiles());
-        } else {
-            when(fileService.findAllByAccountIdAndListId(Collections.emptyList())).thenReturn(null);
         }
         when(ticketService.create(any(), any())).thenReturn(ticket);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
@@ -166,20 +131,12 @@ class TicketControllerV1Test {
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-
         var actualTicketDtoResponse = objectMapper.readValue(requestResult, TicketDtoResponse.class);
         var expectedTicketDtoResponse = mapper.map(ticket, TicketDtoResponse.class);
-
         assertEquals(expectedTicketDtoResponse, actualTicketDtoResponse);
-
-        verify(accountService, times(1)).findById(any());
-        verify(userService, times(1)).findByIdAndAccountId(any());
+        verify(userService, times(0)).findByIdAndAccountId(any());
+        verify(userService, times(0)).findAllByAccountIdAndListId(any());
         verify(userService, times(1)).findByEmail(any());
-        verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
-        verify(ticketTypeService, times(1)).findByIdAndAccountId(any());
-        verify(ticketStatusService, times(1)).findByIdAndAccountId(any());
-        verify(userService, times(2)).findAllByAccountIdAndListId(any());
-        verify(fileService, times(1)).findAllByAccountIdAndListId(requestDto.getFiles());
         verify(ticketService, times(1)).create(any(), any());
     }
 
@@ -211,100 +168,4 @@ class TicketControllerV1Test {
                                            CommonConstants.SIZE_MUST_BE_BETWEEN
                                    ).exists());
     }
-
-    @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void update_shouldUpdate_whenValidDataPassed() throws Exception {
-        ticket.getAccount().setId(UUID.fromString(ACCOUNT_1_ID));
-        requestDto = ticketTestHelper.convertEntityToDtoRequest(ticket);
-        requestDto.setDisplayName(null);
-        requestDto.setFiles(null);
-        UUID accountId = ticket.getAccount().getId();
-        when(accountService.findById(any())).thenReturn(ticket.getAccount());
-        when(userService.findByIdAndAccountId(any())).thenReturn(ticket.getAuthor());
-        when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
-        when(ticketTypeService.findByIdAndAccountId(any())).thenReturn(ticket.getTicketType());
-        when(ticketStatusService.findByIdAndAccountId(any())).thenReturn(ticket.getTicketStatus());
-        if (requestDto.getObservers() != null && !requestDto.getObservers().isEmpty()) {
-            when(userService.findAllByAccountIdAndListId(requestDto.getObservers()))
-                    .thenReturn(ticket.getObservers());
-        } else {
-            when(userService.findAllByAccountIdAndListId(Collections.emptyList())).thenReturn(null);
-        }
-        if (requestDto.getExecutors() != null && !requestDto.getExecutors().isEmpty()) {
-            when(userService.findAllByAccountIdAndListId(requestDto.getExecutors()))
-                    .thenReturn(ticket.getExecutors());
-        } else {
-            when(userService.findAllByAccountIdAndListId(Collections.emptyList())).thenReturn(null);
-        }
-        if (requestDto.getFiles() != null && !requestDto.getFiles().isEmpty()) {
-            when(fileService.findAllByAccountIdAndListId(requestDto.getFiles()))
-                    .thenReturn(ticket.getFiles());
-        } else {
-            when(fileService.findAllByAccountIdAndListId(Collections.emptyList())).thenReturn(null);
-        }
-        when(ticketService.update(any(), any())).thenReturn(ticket);
-        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requestDto));
-
-        var requestResult = mockMvc.perform(request)
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        var actualTicketDtoResponse = objectMapper.readValue(requestResult, TicketDtoResponse.class);
-        var expectedTicketDtoResponse = mapper.map(ticket, TicketDtoResponse.class);
-
-        assertEquals(expectedTicketDtoResponse, actualTicketDtoResponse);
-
-        verify(accountService, times(1)).findById(any());
-        verify(userService, times(1)).findByIdAndAccountId(any());
-        verify(userService, times(1)).findByEmail(any());
-        verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
-        verify(ticketTypeService, times(1)).findByIdAndAccountId(any());
-        verify(ticketStatusService, times(1)).findByIdAndAccountId(any());
-        verify(userService, times(2)).findAllByAccountIdAndListId(any());
-        verify(fileService, times(1)).findAllByAccountIdAndListId(requestDto.getFiles());
-        verify(ticketService, times(1)).update(any(), any());
-    }
-
-    @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenPassedDataIsInvalid() throws Exception {
-        requestDto.setId(null);
-        requestDto.setDeleted(null);
-        requestDto.setVersion(null);
-        requestDto.setDisplayName(null);
-        requestDto.setAuthor(null);
-        requestDto.setSubject(fakerRU.lorem().sentence(256));
-        requestDto.setFiles(List.of(UUID.randomUUID()));
-        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requestDto));
-
-        mockMvc.perform(request)
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(MockMvcResultMatchers
-                                   .jsonPath(
-                                           "$.errors.author[?(@.message == '%s')]",
-                                           CommonConstants.MUST_NOT_BE_NULL
-                                   ).exists())
-                .andExpect(MockMvcResultMatchers
-                                   .jsonPath(
-                                           "$.errors.subject[?(@.message =~ /%s.*/)]",
-                                           CommonConstants.SIZE_MUST_BE_BETWEEN
-                                   ).exists())
-                .andExpect(MockMvcResultMatchers
-                                   .jsonPath(
-                                           "$.errors.files[?(@.message == '%s')]",
-                                           CommonConstants.MUST_BE_NULL
-                                   ).exists());
-    }
-
 }
