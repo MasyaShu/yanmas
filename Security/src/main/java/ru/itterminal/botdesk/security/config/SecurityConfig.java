@@ -19,7 +19,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import ru.itterminal.botdesk.security.jwt.JwtFilter;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
 
-@EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 @EnableWebSecurity
 @ComponentScan(basePackages = "ru.itterminal.botdesk")
 public class SecurityConfig extends WebSecurityConfigurerAdapter {

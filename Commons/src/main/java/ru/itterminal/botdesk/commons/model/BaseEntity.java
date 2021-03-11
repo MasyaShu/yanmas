@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
 
 @Getter
 @Setter
@@ -38,10 +39,9 @@ public abstract class BaseEntity {
     private String displayName;
 
     /**
+     * @param version of entity in database
      * @deprecated for manual changes {@link BaseEntity#version}!
      * Only for Dto->Entity mapping.
-     *
-     * @param version of entity in database
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
@@ -50,4 +50,21 @@ public abstract class BaseEntity {
     }
 
     public abstract void generateDisplayName();
+
+    public static <E extends BaseEntity, R extends BaseEntityDto> void setBaseEntityPropertiesFromRequestDtoIntoEntity(
+            R request,
+            E entity) {
+        if (request.getId() != null) {
+            entity.setId(request.getId());
+        }
+        if (request.getOutId() != null) {
+            entity.setOutId(request.getOutId());
+        }
+        if (request.getDeleted() != null) {
+            entity.setDeleted(request.getDeleted());
+        }
+        if (request.getVersion() != null) {
+            entity.setVersion(request.getVersion());
+        }
+    }
 }
