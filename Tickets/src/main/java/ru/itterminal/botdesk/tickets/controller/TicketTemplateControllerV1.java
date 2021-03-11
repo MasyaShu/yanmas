@@ -12,8 +12,10 @@ import javax.validation.constraints.PositiveOrZero;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,6 +48,7 @@ import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
 @RequiredArgsConstructor
 public class TicketTemplateControllerV1 extends BaseController {
 
+    public static final String ACCESS_IS_DENIED = "Access is denied";
     private final AccountServiceImpl accountService;
     private final TicketTemplateServiceImpl templateService;
     private final SpecificationsFactory specFactory;
@@ -102,7 +105,12 @@ public class TicketTemplateControllerV1 extends BaseController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')")
     public ResponseEntity<TicketTemplateDtoResponse> getById(@PathVariable UUID id) {
+        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!jwtUser.isInnerGroup()) {
+            throw new AccessDeniedException(ACCESS_IS_DENIED);
+        }
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
         var foundTicketTemplate = templateService.findByIdAndAccountId(id);
         var returnedTemplateStatus = modelMapper.map(foundTicketTemplate, TicketTemplateDtoResponse.class);
@@ -111,14 +119,18 @@ public class TicketTemplateControllerV1 extends BaseController {
     }
 
     @GetMapping()
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')")
     public ResponseEntity<Page<TicketTemplateDtoResponse>> getByFilter(
             Principal user,
             @Valid @RequestBody TicketTemplateFilterDto filterDto,
             @RequestParam(defaultValue = PAGE_DEFAULT_VALUE) @PositiveOrZero int page,
             @RequestParam(defaultValue = SIZE_DEFAULT_VALUE) @Positive int size) {
+        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
+        if (!jwtUser.isInnerGroup()) {
+            throw new AccessDeniedException(ACCESS_IS_DENIED);
+        }
         log.debug(FIND_INIT_MESSAGE, ENTITY_NAME, page, size, filterDto);
         var pageable = createPageable(size, page, filterDto.getSortByFields(), filterDto.getSortDirection());
-        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
         var accountId = jwtUser.getAccountId();
         var ticketTemplateSpecification = specFactory.makeSpecificationFromEntityFilterDto(TicketTemplate.class, filterDto, accountId);
         var foundTicketTemplate = templateService.findAllByFilter(ticketTemplateSpecification, pageable);
