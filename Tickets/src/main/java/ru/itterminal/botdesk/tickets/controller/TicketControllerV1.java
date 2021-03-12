@@ -50,7 +50,6 @@ import ru.itterminal.botdesk.tickets.service.impl.TicketServiceImpl;
 @RequestMapping("api/v1/ticket")
 @RequiredArgsConstructor
 public class TicketControllerV1 extends BaseController {
-
     public static final String GROUP = "group";
     public static final String AUTHOR = "author";
     public static final String OBSERVERS = "observers";
@@ -68,8 +67,14 @@ public class TicketControllerV1 extends BaseController {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, ticketDtoRequest);
         var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
         var currentUser = userService.findByEmail(jwtUser.getUsername());
-        var ticket = Ticket.convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(ticketDtoRequest, jwtUser.getAccountId());
-        var createdTicket = ticketService.create(ticket, currentUser);
+        var createdTicket = ticketService.create(
+                ticketService
+                        .convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(
+                                ticketDtoRequest,
+                                jwtUser.getAccountId()
+                        ),
+                currentUser
+        );
         var returnedTicket = modelMapper.map(createdTicket, TicketDtoResponse.class);
         log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdTicket);
         return new ResponseEntity<>(returnedTicket, HttpStatus.CREATED);
