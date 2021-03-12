@@ -362,9 +362,6 @@ class TicketTemplateIT {
                 .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
-
-    ////////
-
     @SuppressWarnings({"unused", "deprecation"})
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamUsersInnerGroupWithRolesAccountOwnerAdminExecutor")
