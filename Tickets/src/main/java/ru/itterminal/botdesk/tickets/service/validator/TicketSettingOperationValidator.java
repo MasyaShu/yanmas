@@ -7,6 +7,7 @@ import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.crea
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.ifErrorsNotEmptyThrowLogicalValidationException;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,7 +29,9 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
     public static final String TICKET_SETTING_IS_EMPTY = "Ticket setting is empty";
     public static final String TICKET_SETTING_MUST_NOT_BE_EMPTY = "Ticket setting mustn't be empty";
     public static final String A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_SETTING =
-            "A user from not inner group cannot create or update ticket setting";
+            "A user from outer group cannot create or update ticket setting";
+    public static final String A_USER_CANNOT_GET_SETTING_OR_PREDEFINED_VALUES_FOR_TICKET =
+            "A user cannot get setting or predefined values for ticket if his group is not equal group of author from request";
 
     private final TicketSettingServiceImpl service;
 
@@ -39,14 +42,14 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
     @Override
     public boolean beforeCreate(TicketSetting entity) {
         super.beforeCreate(entity);
-        checkIsInnerGroupForCreateUpdate();
+        checkAccessForCreateUpdate();
         return checkBeforeCreateUpdate(entity);
     }
 
     @Override
     public boolean beforeUpdate(TicketSetting entity) {
         super.beforeUpdate(entity);
-        checkIsInnerGroupForCreateUpdate();
+        checkAccessForCreateUpdate();
         return checkBeforeCreateUpdate(entity);
     }
 
@@ -107,10 +110,17 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
         return true;
     }
 
-    private void checkIsInnerGroupForCreateUpdate() {
+    private void checkAccessForCreateUpdate() {
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (!jwtUser.isInnerGroup()) {
             throw new AccessDeniedException(A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_SETTING);
+        }
+    }
+
+    public void checkAccessForGetSettingOrPredefinedValuesForTicket(UUID groupIdOfAuthor) {
+        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!jwtUser.getGroupId().equals(groupIdOfAuthor)) {
+            throw new AccessDeniedException(A_USER_CANNOT_GET_SETTING_OR_PREDEFINED_VALUES_FOR_TICKET);
         }
     }
 }

@@ -78,6 +78,7 @@ class TicketSettingIT {
     public static final String TICKET_SETTING_IS_EMPTY = "Ticket setting is empty";
     public static final String ACCOUNT_GROUP_AUTHOR_IS_OCCUPIED = "Account, Group, Author is occupied";
     public static final String ACCOUNT_GROUP_AUTHOR = "Account, Group, Author";
+    public static final String ADMIN_INNER_GROUP_1 = "adminInnerGroup_1";
     @Autowired
     private UserRepository userRepository;
 
@@ -96,9 +97,9 @@ class TicketSettingIT {
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamAllUsers")
+    @MethodSource("getStreamAllUsersWithoutRoleObserver")
     @Order(10)
-    void successGetByFilterByAllUsersWithEmptyFilter(String userKey, User user) {
+    void successGetByFilterByAllUsersWithoutRoleObserverWithEmptyFilter(String userKey, User user) {
         @SuppressWarnings("SimplifyStreamApiCallChains")
         var expectedTicketSettingList = itHelper.getTicketSettings().values().stream().collect(Collectors.toList());
         var response = given().
@@ -126,9 +127,9 @@ class TicketSettingIT {
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamAllUsers")
+    @MethodSource("getStreamAllUsersWithoutRoleObserver")
     @Order(20)
-    void successGetByFilterByAllUsersWithFilterFromGroupOfTicketSetting(String userKey, User user) {
+    void successGetByFilterByAllUsersWithoutRoleObserverWithFilterFromGroupOfTicketSetting(String userKey, User user) {
         for (TicketSetting expectedTicketSetting : itHelper.getTicketSettings().values()) {
             var groupFilter = BaseEntityFilter.builder()
                     .typeComparison(EXIST_IN.toString())
@@ -159,6 +160,24 @@ class TicketSettingIT {
         }
     }
 
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamAllUsersWithRoleObserver")
+    @Order(25)
+    void failedGetByFilterByAllUserWithRoleObserver(String userKey, User user) {
+        given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(user.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(new TicketSettingFilterDto())
+                .get(TICKET_SETTING)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.FORBIDDEN.value());
+    }
+
     @Test
     @Order(30)
     void failedGetByFilterByAnonymousUser() {
@@ -173,9 +192,9 @@ class TicketSettingIT {
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamAllUsers")
+    @MethodSource("getStreamAllUsersWithoutRoleObserver")
     @Order(40)
-    void successGetByIdByAllUsers(String userKey, User user) {
+    void successGetByIdByAllUsersWithoutRoleObserver(String userKey, User user) {
         for (TicketSetting expectedTicketSetting : itHelper.getTicketSettings().values()) {
             var actualTicketSetting = given().
                     when().
@@ -196,6 +215,24 @@ class TicketSettingIT {
         }
     }
 
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamAllUsersWithRoleObserver")
+    @Order(45)
+    void failedGetByIdByAllUserWithRoleObserver(String userKey, User user) {
+        given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(user.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .pathParam(ID, UUID.randomUUID().toString())
+                .get(TICKET_SETTING_BY_ID)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.FORBIDDEN.value());
+    }
+
     @Test
     @Order(50)
     void failedGetByIdByAnonymousUser() {
@@ -212,57 +249,98 @@ class TicketSettingIT {
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamAllUsersFromInnerGroup_1AndFromOuterGroup_1")
     @Order(60)
-    void successGetByAuthorByAllUsersFromInnerGroup_1AndFromOuterGroup_1(String userKey, User user) {
-        var expectedTicketSetting = user.getGroup().getIsInner()
-                ? itHelper.getTicketSettings().get(INNER_GROUP + "1")
-                : itHelper.getTicketSettings().get(OUTER_GROUP + "1");
-        var actualTicketSetting = given().
-                when().
-                headers(
-                        "Authorization",
-                        "Bearer " + itHelper.getTokens().get(user.getEmail())
-                )
-                .contentType(APPLICATION_JSON)
-                .pathParam(AUTHOR_ID, user.getId())
-                .get(TICKET_SETTING_BY_AUTHOR)
-                .then()
-                .log().body()
-                .body(ID, equalTo(expectedTicketSetting.getId().toString()))
-                .statusCode(HttpStatus.OK.value())
-                .extract().response().as(TicketSetting.class);
-        assertThat(actualTicketSetting).usingRecursiveComparison()
-                .ignoringActualNullFields()
-                .ignoringFields("ticketStatusForCancel", "ticketStatusForClose", "ticketStatusForNew",
-                                "ticketStatusForReopen", "ticketTypeForNew"
-                )
-                .isEqualTo(expectedTicketSetting);
+    void successGetByAuthorByAllUsersFromInnerGroup_1AndFromOuterGroup_1WithoutRoleObserver(String userKey, User user) {
+        if (!user.getRole().getName().equals(Roles.OBSERVER.toString())) {
+            var expectedTicketSetting = user.getGroup().getIsInner()
+                    ? itHelper.getTicketSettings().get(INNER_GROUP + "1")
+                    : itHelper.getTicketSettings().get(OUTER_GROUP + "1");
+            var actualTicketSetting = given().
+                    when().
+                    headers(
+                            "Authorization",
+                            "Bearer " + itHelper.getTokens().get(user.getEmail())
+                    )
+                    .contentType(APPLICATION_JSON)
+                    .pathParam(AUTHOR_ID, user.getId())
+                    .get(TICKET_SETTING_BY_AUTHOR)
+                    .then()
+                    .log().body()
+                    .body(ID, equalTo(expectedTicketSetting.getId().toString()))
+                    .statusCode(HttpStatus.OK.value())
+                    .extract().response().as(TicketSetting.class);
+            assertThat(actualTicketSetting).usingRecursiveComparison()
+                    .ignoringActualNullFields()
+                    .ignoringFields("ticketStatusForCancel", "ticketStatusForClose", "ticketStatusForNew",
+                                    "ticketStatusForReopen", "ticketTypeForNew"
+                    )
+                    .isEqualTo(expectedTicketSetting);
+        }
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamAllUsersFromInnerGroup_2AndFromOuterGroup_2")
     @Order(70)
-    void successGetByAuthorByAllUsersFromInnerGroup_2AndFromOuterGroup_2(String userKey, User user) {
-        var actualTicketSetting = given().
+    void successGetByAuthorByAllUsersFromInnerGroup_2AndFromOuterGroup_2WithoutRoleObserver(String userKey, User user) {
+        if (!user.getRole().getName().equals(Roles.OBSERVER.toString())) {
+            var actualTicketSetting = given().
+                    when().
+                    headers(
+                            "Authorization",
+                            "Bearer " + itHelper.getTokens().get(user.getEmail())
+                    )
+                    .contentType(APPLICATION_JSON)
+                    .pathParam(AUTHOR_ID, user.getId())
+                    .get(TICKET_SETTING_BY_AUTHOR)
+                    .then()
+                    .log().body()
+                    .statusCode(HttpStatus.OK.value())
+                    .extract().response().as(TicketSetting.class);
+            assertNull(actualTicketSetting.getId());
+            assertTrue(actualTicketSetting.getObservers().isEmpty());
+            assertTrue(actualTicketSetting.getExecutors().isEmpty());
+            assertNotNull(actualTicketSetting.getTicketTypeForNew());
+            assertNotNull(actualTicketSetting.getTicketStatusForNew());
+            assertNotNull(actualTicketSetting.getTicketStatusForClose());
+            assertNotNull(actualTicketSetting.getTicketStatusForCancel());
+            assertNotNull(actualTicketSetting.getTicketStatusForReopen());
+        }
+    }
+
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamAllUsersFromOuterGroupsWithoutRoleObserver")
+    @Order(73)
+    void failedGetByAuthorByAllUsersFromOuterGroupsWithoutRoleObserverButNotEqualGroups(String userKey, User user) {
+
+        given().
                 when().
                 headers(
                         "Authorization",
                         "Bearer " + itHelper.getTokens().get(user.getEmail())
                 )
                 .contentType(APPLICATION_JSON)
-                .pathParam(AUTHOR_ID, user.getId())
+                .pathParam(AUTHOR_ID, itHelper.getAdminInnerGroup().get(ADMIN_INNER_GROUP_1).getId())
                 .get(TICKET_SETTING_BY_AUTHOR)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.OK.value())
-                .extract().response().as(TicketSetting.class);
-        assertNull(actualTicketSetting.getId());
-        assertTrue(actualTicketSetting.getObservers().isEmpty());
-        assertTrue(actualTicketSetting.getExecutors().isEmpty());
-        assertNotNull(actualTicketSetting.getTicketTypeForNew());
-        assertNotNull(actualTicketSetting.getTicketStatusForNew());
-        assertNotNull(actualTicketSetting.getTicketStatusForClose());
-        assertNotNull(actualTicketSetting.getTicketStatusForCancel());
-        assertNotNull(actualTicketSetting.getTicketStatusForReopen());
+                .statusCode(HttpStatus.FORBIDDEN.value());
+    }
+
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamAllUsersWithRoleObserver")
+    @Order(75)
+    void failedGetByAuthorByAllUsersWithRoleObserver(String userKey, User user) {
+        given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(user.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .pathParam(AUTHOR_ID, UUID.randomUUID().toString())
+                .get(TICKET_SETTING_BY_AUTHOR)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.FORBIDDEN.value());
     }
 
     @Test
@@ -456,7 +534,8 @@ class TicketSettingIT {
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamUsersInnerGroupWithRolesAccountOwnerAndAdmin")
     @Order(150)
-    void failedUpdateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenAfterUpdateTicketSettingWillBeEmpty(String userKey, User user) {
+    void failedUpdateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenAfterUpdateTicketSettingWillBeEmpty(
+            String userKey, User user) {
         var expectedTicketSetting = itHelper.getTicketSettings().get(INNER_GROUP + "1").toBuilder()
                 .observers(null)
                 .executors(null)
@@ -485,7 +564,8 @@ class TicketSettingIT {
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamUsersInnerGroupWithRolesAccountOwnerAndAdmin")
     @Order(160)
-    void failedUpdateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenAfterUpdateTicketSettingWillBeNotUnique(String userKey, User user) {
+    void failedUpdateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenAfterUpdateTicketSettingWillBeNotUnique(
+            String userKey, User user) {
         var expectedTicketSetting = itHelper.getTicketSettings().get(INNER_GROUP + "1").toBuilder()
                 .group(itHelper.getTicketSettings().get(OUTER_GROUP + "1").getGroup())
                 .displayName(null)
@@ -631,6 +711,34 @@ class TicketSettingIT {
                 )
         );
         return itHelper.getStreamUsers(roles, true);
+    }
+
+    private static Stream<Arguments> getStreamAllUsersWithoutRoleObserver() {
+        var roles = itHelper.getRoleTestHelper().getRolesByNames(
+                List.of(
+                        ACCOUNT_OWNER,
+                        ADMIN,
+                        EXECUTOR,
+                        AUTHOR
+                )
+        );
+        return itHelper.getStreamUsers(roles, null);
+    }
+
+    private static Stream<Arguments> getStreamAllUsersFromOuterGroupsWithoutRoleObserver() {
+        var roles = itHelper.getRoleTestHelper().getRolesByNames(
+                List.of(
+                        ADMIN,
+                        EXECUTOR,
+                        AUTHOR
+                )
+        );
+        return itHelper.getStreamUsers(roles, false);
+    }
+
+    private static Stream<Arguments> getStreamAllUsersWithRoleObserver() {
+        var roles = itHelper.getRoleTestHelper().getRolesByNames(List.of(OBSERVER));
+        return itHelper.getStreamUsers(roles, null);
     }
 
     private static Stream<Arguments> getStreamUsersInnerGroupWithRolesAuthorAndObserver() {
