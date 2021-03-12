@@ -112,7 +112,7 @@ class TicketServiceImplTest {
         var createdTicket = service.create(ticket, ticket.getAuthor());
         assertEquals(ticket, createdTicket);
         verify(accountService, times(1)).findById(any());
-        verify(userService, times(1)).findByIdAndAccountId(any());
+        verify(userService, times(2)).findByIdAndAccountId(any());
         verify(validator, times(1)).beforeCreate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(repository, times(1)).create(any());
@@ -138,7 +138,7 @@ class TicketServiceImplTest {
         var createdTicket = service.create(ticket, currentUser);
         assertEquals(ticket, createdTicket);
         verify(accountService, times(1)).findById(any());
-        verify(userService, times(1)).findByIdAndAccountId(any());
+        verify(userService, times(2)).findByIdAndAccountId(any());
         verify(validator, times(1)).beforeCreate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(repository, times(1)).create(any());
@@ -163,7 +163,7 @@ class TicketServiceImplTest {
         ticket.setExecutors(List.of(currentUser));
         ticket.setObservers(List.of(ticket.getAuthor()));
         when(accountService.findById(any())).thenReturn(ticket.getAccount());
-        when(userService.findByIdAndAccountId(any())).thenReturn(ticket.getAuthor());
+        when(userService.findByIdAndAccountId(any())).thenReturn(currentUser);
         when(validator.beforeCreate(any())).thenReturn(true);
         when(validator.checkUniqueness(any())).thenReturn(true);
         when(repository.create(any())).thenReturn(ticket);
@@ -172,7 +172,7 @@ class TicketServiceImplTest {
         var createdTicket = service.create(ticket, currentUser);
         assertEquals(ticket, createdTicket);
         verify(accountService, times(1)).findById(any());
-        verify(userService, times(1)).findByIdAndAccountId(any());
+        verify(userService, times(2)).findByIdAndAccountId(any());
         verify(validator, times(1)).beforeCreate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(repository, times(1)).create(any());
@@ -205,7 +205,7 @@ class TicketServiceImplTest {
         var createdTicket = service.create(ticket, currentUser);
         assertEquals(ticket, createdTicket);
         verify(accountService, times(1)).findById(any());
-        verify(userService, times(1)).findByIdAndAccountId(any());
+        verify(userService, times(2)).findByIdAndAccountId(any());
         verify(validator, times(1)).beforeCreate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(repository, times(1)).create(any());

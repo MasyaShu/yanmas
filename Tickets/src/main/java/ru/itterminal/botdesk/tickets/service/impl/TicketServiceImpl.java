@@ -85,7 +85,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
                         entity.toString() + BY_USER + currentUser.getEmail()
                 )
         );
-        setNestedObjectsOfEntityBeforeCreate(entity, currentUser);
+        setNestedObjectsOfEntityBeforeCreate(entity);
         validator.beforeCreate(entity);
         validator.checkUniqueness(entity);
         var createdEntity = repository.create(entity);
@@ -105,7 +105,8 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
     }
 
     @Override
-    protected void setNestedObjectsOfEntityBeforeCreate(Ticket ticket, User currentUser) {
+    protected void setNestedObjectsOfEntityBeforeCreate(Ticket ticket) {
+        var currentUser = userService.findByIdAndAccountId(jwtUserBuilder.getJwtUser().getId());
         ticket.setAccount(accountService.findById(jwtUserBuilder.getJwtUser().getAccountId()));
         ticket.setAuthor(userService.findByIdAndAccountId(ticket.getAuthor().getId()));
         ticket.setGroup(ticket.getAuthor().getGroup());

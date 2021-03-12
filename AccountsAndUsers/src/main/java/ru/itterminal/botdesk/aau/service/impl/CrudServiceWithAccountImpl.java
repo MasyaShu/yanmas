@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.service.CrudServiceWithAccount;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
@@ -30,6 +29,7 @@ import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
  * @param <V> extends OperationValidate
  * @param <R> extends CustomizedParentEntityRepository
  */
+@SuppressWarnings({"unused", "DuplicatedCode"})
 @Slf4j
 @Service
 @Transactional
@@ -80,12 +80,27 @@ public abstract class CrudServiceWithAccountImpl<
         }
     }
 
-    //TODO rewrite create
+    @Override
+    @Transactional
+    public E create(E entity) {
+        setNestedObjectsOfEntityBeforeCreate(entity);
+        validator.beforeCreate(entity);
+        log.trace(format(CREATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.toString()));
+        UUID id = UUID.randomUUID();
+        entity.setId(id);
+        entity.generateDisplayName();
+        validator.checkUniqueness(entity);
+        E createdEntity;
+        createdEntity = repository.create(entity);
+        log.trace(format(CREATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), createdEntity.toString()));
+        return createdEntity;
+    }
 
     @SuppressWarnings("DuplicatedCode")
     @Transactional
     @Override
     public E update(E entity) {
+        setNestedObjectsOfEntityBeforeUpdate(entity);
         validator.beforeUpdate(entity);
         log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
         var accountId = jwtUserBuilder.getJwtUser().getAccountId();
@@ -101,7 +116,7 @@ public abstract class CrudServiceWithAccountImpl<
         }
     }
 
-    protected void setNestedObjectsOfEntityBeforeCreate(E entity, User currentUser) {}
-    @SuppressWarnings("unused")
-    protected void setNestedObjectsOfEntityBeforeUpdate(E entity, User currentUser) {}
+    protected void setNestedObjectsOfEntityBeforeCreate(E entity) {}
+
+    protected void setNestedObjectsOfEntityBeforeUpdate(E entity) {}
 }
