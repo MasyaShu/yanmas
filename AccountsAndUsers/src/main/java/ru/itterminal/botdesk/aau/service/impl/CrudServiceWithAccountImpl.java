@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.service.CrudServiceWithAccount;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
@@ -99,4 +100,8 @@ public abstract class CrudServiceWithAccountImpl<
             throw new OptimisticLockingFailureException(format(VERSION_INVALID_MESSAGE, entity.getId()));
         }
     }
+
+    protected void setNestedObjectsOfEntityBeforeCreate(E entity, User currentUser) {}
+    @SuppressWarnings("unused")
+    protected void setNestedObjectsOfEntityBeforeUpdate(E entity, User currentUser) {}
 }

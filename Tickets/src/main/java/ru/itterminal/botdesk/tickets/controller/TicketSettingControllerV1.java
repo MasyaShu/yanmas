@@ -109,6 +109,7 @@ public class TicketSettingControllerV1 extends BaseController {
 
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR', 'AUTHOR')")
     public ResponseEntity<TicketSettingDtoResponse> getById(@PathVariable UUID id) {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
         var foundTicketSetting = ticketSettingService.findByIdAndAccountId(id);
@@ -118,6 +119,7 @@ public class TicketSettingControllerV1 extends BaseController {
     }
 
     @GetMapping()
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR', 'AUTHOR')")
     public ResponseEntity<Page<TicketSettingDtoResponse>> getByFilter(
             Principal user,
             @Valid @RequestBody TicketSettingFilterDto filterDto,
@@ -136,6 +138,7 @@ public class TicketSettingControllerV1 extends BaseController {
     }
 
     @GetMapping("/by-author/{authorId}")
+    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR', 'AUTHOR')")
     public ResponseEntity<TicketSettingDtoResponse> getSettingOrPredefinedValuesForTicket
             (Principal user, @PathVariable UUID authorId) {
         log.debug(FIND_BY_AUTHOR_ID_INIT_MESSAGE, ENTITY_NAME, authorId);

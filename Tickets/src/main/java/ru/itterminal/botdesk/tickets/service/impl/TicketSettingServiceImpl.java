@@ -43,6 +43,7 @@ public class TicketSettingServiceImpl extends CrudServiceWithAccountImpl<TicketS
     public TicketSetting getSettingOrPredefinedValuesForTicket(@NotNull UUID accountId,
                                                                @NotNull UUID groupId,
                                                                @NotNull UUID authorId) {
+        validator.checkAccessForGetSettingOrPredefinedValuesForTicket(groupId);
         var ticketSetting = repository
                 .getByAccount_IdAndGroup_IdAndAuthor_IdAndDeletedIsFalse(accountId, groupId, authorId);
         if (ticketSetting == null) {
