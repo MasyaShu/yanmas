@@ -387,4 +387,33 @@ class TicketSettingControllerV1Test {
         verify(userService, times(1)).findByIdAndAccountId(any());
         verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
     }
+
+    @Test
+    @WithUserDetails("OBSERVER_ACCOUNT_1_IS_INNER_GROUP")
+    void getSettingOrPredefinedValuesForTicket_shouldGetStatusForbidden_whenUserHasRoleObserver() throws Exception {
+        MockHttpServletRequestBuilder request =
+                get(HOST + PORT + API + "/by-author/" + ticketSetting.getAuthor().getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isForbidden());
+        verify(userService, times(0)).findByIdAndAccountId(any());
+        verify(ticketSettingService, times(0)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
+    }
+
+    @Test
+    @WithUserDetails("OBSERVER_ACCOUNT_1_IS_INNER_GROUP")
+    void getById_shouldGetStatusForbidden_whenUserHasRoleObserver() throws Exception {
+        MockHttpServletRequestBuilder request =
+                get(HOST + PORT + API + "/" + ticketSetting.getAuthor().getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isForbidden());
+        verify(ticketSettingService, times(0)).findByIdAndAccountId(any());
+    }
 }
