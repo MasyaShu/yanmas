@@ -213,7 +213,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
                                                .map(id -> File.builder().id(id).build())
                                                .collect(Collectors.toList()))
                         .build();
-                BaseEntity.setBaseEntityPropertiesFromRequestDtoIntoEntity(request, ticket);
+                setBaseEntityPropertiesFromRequestDtoIntoEntity(request, ticket);
                 return ticket;
     }
 }
