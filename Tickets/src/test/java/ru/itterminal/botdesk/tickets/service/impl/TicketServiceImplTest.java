@@ -182,7 +182,6 @@ class TicketServiceImplTest {
         assertEquals(ticket.getNumber(), number);
     }
 
-
     @ParameterizedTest
     @MethodSource("getStreamOfUsersFromInnerGroupsWithRolesAccountOwnerOrAdminOrExecutor")
     void create_shouldCreateTicketWithTicketStatusForClose_whenIsFinishedIsTrueAndUsersFromInnerGroupsWithRolesAccountOwnerOrAdminOrExecutor
@@ -213,6 +212,20 @@ class TicketServiceImplTest {
         verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
         assertEquals(ticket.getGroup(), ticket.getAuthor().getGroup());
         assertEquals(ticket.getNumber(), number);
+    }
+
+    @Test
+    void convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId_shouldConvert_whenPassedValidData() {
+        var expectedTicket = ticketTestHelper.getRandomValidEntity();
+        var ticketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(expectedTicket);
+        var actualTicket = service
+                .convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(
+                        ticketDtoRequest,
+                        expectedTicket.getAccount().getId()
+                );
+        assertEquals(expectedTicket.getAuthor().getId(), actualTicket.getAuthor().getId());
+        assertEquals(expectedTicket.getTicketType().getId(), actualTicket.getTicketType().getId());
+        assertEquals(expectedTicket.getTicketStatus().getId(), actualTicket.getTicketStatus().getId());
     }
 
     private static Stream<Arguments> getStreamOfUsersFromInnerGroupsWithRolesAccountOwnerOrAdminOrExecutor() {

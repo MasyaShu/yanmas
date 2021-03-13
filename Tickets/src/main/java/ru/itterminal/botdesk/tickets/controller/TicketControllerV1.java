@@ -68,11 +68,10 @@ public class TicketControllerV1 extends BaseController {
         var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
         var currentUser = userService.findByEmail(jwtUser.getUsername());
         var createdTicket = ticketService.create(
-                ticketService
-                        .convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(
-                                ticketDtoRequest,
-                                jwtUser.getAccountId()
-                        ),
+                ticketService.convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(
+                        ticketDtoRequest,
+                        jwtUser.getAccountId()
+                ),
                 currentUser
         );
         var returnedTicket = modelMapper.map(createdTicket, TicketDtoResponse.class);

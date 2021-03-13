@@ -32,8 +32,6 @@ import ru.itterminal.botdesk.files.service.FileServiceImpl;
 import ru.itterminal.botdesk.integration.across_modules.RequestsFromModuleAccountAndUsers;
 import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
 import ru.itterminal.botdesk.tickets.model.Ticket;
-import ru.itterminal.botdesk.tickets.model.TicketStatus;
-import ru.itterminal.botdesk.tickets.model.TicketType;
 import ru.itterminal.botdesk.tickets.model.dto.TicketDtoRequest;
 import ru.itterminal.botdesk.tickets.repository.TicketRepository;
 import ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator;
@@ -190,31 +188,32 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
 
     @Override
     public Ticket convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(TicketDtoRequest request, UUID accountId) {
-                var ticket = Ticket.builder()
-                        .account(Account.builder().id(accountId).build())
-                        .author(request.getAuthor() == null ? null : User.builder().id(request.getAuthor()).build())
-                        .subject(request.getSubject() == null ? null : request.getSubject())
-                        .description(request.getDescription() == null ? null : request.getDescription())
-                        .deadline(request.getDeadline() == null ? null : request.getDeadline())
-                        .isFinished(request.getIsFinished() == null ? null : request.getIsFinished())
-                        .ticketType(request.getTicketType() == null ? null
-                                            : TicketType.builder().id(request.getTicketType()).build())
-                        .ticketStatus(request.getTicketStatus() == null ? null
-                                              : TicketStatus.builder().id(request.getTicketStatus()).build())
-                        .observers(request.getObservers() == null ? null
-                                           : request.getObservers().stream()
-                                                   .map(id -> User.builder().id(id).build())
-                                                   .collect(Collectors.toList()))
-                        .executors(request.getExecutors() == null ? null
-                                           : request.getExecutors().stream()
-                                                   .map(id -> User.builder().id(id).build())
-                                                   .collect(Collectors.toList()))
-                        .files(request.getFiles() == null ? null
-                                       : request.getFiles().stream()
-                                               .map(id -> File.builder().id(id).build())
-                                               .collect(Collectors.toList()))
-                        .build();
-                setBaseEntityPropertiesFromRequestDtoIntoEntity(request, ticket);
-                return ticket;
+        var ticket = modelMapper.map(request, Ticket.class);
+        ticket.setAccount(Account.builder().id(accountId).build());
+        ticket.setObservers(
+                (request.getObservers() == null
+                        ? null
+                        : request.getObservers().stream()
+                                .map(id -> User.builder().id(id).build())
+                                .collect(Collectors.toList())
+                )
+        );
+        ticket.setExecutors(
+                (request.getExecutors() == null
+                        ? null
+                        : request.getExecutors().stream()
+                                .map(id -> User.builder().id(id).build())
+                                .collect(Collectors.toList())
+                )
+        );
+        ticket.setFiles(
+                (request.getFiles() == null
+                        ? null
+                        : request.getFiles().stream()
+                                .map(id -> File.builder().id(id).build())
+                                .collect(Collectors.toList())
+                )
+        );
+        return ticket;
     }
 }

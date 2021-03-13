@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import javax.persistence.OptimisticLockException;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,8 @@ public abstract class CrudServiceWithAccountImpl<
         R extends EntityRepositoryWithAccount<E>>
         extends CrudServiceImpl<E, V, R>
         implements CrudServiceWithAccount<E> {
+
+    protected final ModelMapper modelMapper = new ModelMapper();
 
     @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
     @Autowired
