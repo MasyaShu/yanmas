@@ -4,11 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
-import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.aau.service.impl.CrudServiceWithAccountImpl;
+import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
+import ru.itterminal.botdesk.commons.model.EntityConverter;
 import ru.itterminal.botdesk.integration.across_modules.CompletedVerificationAccount;
 import ru.itterminal.botdesk.tickets.model.TicketStatus;
+import ru.itterminal.botdesk.tickets.model.dto.TicketStatusDto;
 import ru.itterminal.botdesk.tickets.model.projection.TicketStatusUniqueFields;
 import ru.itterminal.botdesk.tickets.repository.TicketStatusRepository;
 import ru.itterminal.botdesk.tickets.service.validator.TicketStatusOperationValidator;
@@ -23,7 +26,7 @@ import static java.lang.String.format;
 @AllArgsConstructor
 public class TicketStatusServiceImpl extends
         CrudServiceWithAccountImpl<TicketStatus, TicketStatusOperationValidator, TicketStatusRepository>
-        implements CompletedVerificationAccount {
+        implements CompletedVerificationAccount, EntityConverter<TicketStatus, TicketStatusDto> {
 
 
     private final AccountServiceImpl accountService;
@@ -154,5 +157,33 @@ public class TicketStatusServiceImpl extends
                     .build();
             create(canceledPredefinedStatus);
         }
+    }
+
+    @Override
+    public TicketStatus convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(TicketStatusDto request, UUID accountId) {
+        TicketStatus ticketStatus = modelMapper.map(request, TicketStatus.class);
+        ticketStatus.setAccount(Account.builder().id(accountId).build());
+        return ticketStatus;
+    }
+
+    @Override
+    protected void setNestedObjectsOfEntityBeforeCreate(TicketStatus entity) {
+        super.setNestedObjectsOfEntityBeforeCreate(entity);
+        setNestedObjectsOfEntity(entity);
+        entity.setIsCanceledPredefined(false);
+        entity.setIsStartedPredefined(false);
+        entity.setIsFinishedPredefined(false);
+        entity.setIsReopenedPredefined(false);
+        entity.setDeleted(false);
+    }
+
+    @Override
+    protected void setNestedObjectsOfEntityBeforeUpdate(TicketStatus entity) {
+        super.setNestedObjectsOfEntityBeforeUpdate(entity);
+        setNestedObjectsOfEntity(entity);
+    }
+
+    private void setNestedObjectsOfEntity(TicketStatus entity) {
+        entity.setAccount(accountService.findById(entity.getAccount().getId()));
     }
 }

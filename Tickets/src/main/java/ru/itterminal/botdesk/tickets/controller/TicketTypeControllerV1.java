@@ -1,32 +1,14 @@
 package ru.itterminal.botdesk.tickets.controller;
 
-import static java.lang.String.format;
-
-import java.security.Principal;
-import java.util.UUID;
-
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
+import org.springframework.web.bind.annotation.*;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
@@ -37,6 +19,14 @@ import ru.itterminal.botdesk.tickets.model.dto.TicketTypeDto;
 import ru.itterminal.botdesk.tickets.model.dto.TicketTypeFilterDto;
 import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
+import java.security.Principal;
+import java.util.UUID;
+
+import static java.lang.String.format;
+
 @Slf4j
 @RestController("TicketTypeControllerV1")
 @Validated
@@ -44,8 +34,7 @@ import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
 @RequiredArgsConstructor
 public class TicketTypeControllerV1 extends BaseController {
 
-    private final TicketTypeServiceImpl service;
-    private final AccountServiceImpl accountService;
+    private final TicketTypeServiceImpl typeService;
     private final SpecificationsFactory specFactory;
 
     private final String ENTITY_NAME = TicketType.class.getSimpleName();
@@ -55,14 +44,10 @@ public class TicketTypeControllerV1 extends BaseController {
     public ResponseEntity<TicketTypeDto> create(Principal principal,
                                                 @Validated(Create.class) @RequestBody TicketTypeDto request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
-        TicketType ticketType = modelMapper.map(request, TicketType.class);
-        ticketType.setDeleted(false);
-        ticketType.setIsPredefinedForNewTicket(false);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        ticketType.setAccount(accountService.findById(jwtUser.getAccountId()));
-        TicketType createdTicketType = service.create(ticketType);
-        TicketTypeDto returnedTicketTypes =
-                modelMapper.map(createdTicketType, TicketTypeDto.class);
+        TicketType ticketType = typeService.convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(request, jwtUser.getAccountId());
+        TicketType createdTicketType = typeService.create(ticketType);
+        TicketTypeDto returnedTicketTypes = modelMapper.map(createdTicketType, TicketTypeDto.class);
         log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdTicketType);
         return new ResponseEntity<>(returnedTicketTypes, HttpStatus.CREATED);
     }
@@ -80,12 +65,10 @@ public class TicketTypeControllerV1 extends BaseController {
     public ResponseEntity<TicketTypeDto> update(Principal principal,
                                                 @Validated(Update.class) @RequestBody TicketTypeDto request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
-        TicketType ticketType = modelMapper.map(request, TicketType.class);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        ticketType.setAccount(accountService.findById(jwtUser.getAccountId()));
-        TicketType updatedTicketType = service.update(ticketType);
-        TicketTypeDto returnedTicketTypes =
-                modelMapper.map(updatedTicketType, TicketTypeDto.class);
+        TicketType ticketType = typeService.convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(request, jwtUser.getAccountId());
+        TicketType updatedTicketType = typeService.update(ticketType);
+        TicketTypeDto returnedTicketTypes = modelMapper.map(updatedTicketType, TicketTypeDto.class);
         log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedTicketType);
         return new ResponseEntity<>(returnedTicketTypes, HttpStatus.OK);
     }
@@ -111,7 +94,7 @@ public class TicketTypeControllerV1 extends BaseController {
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
         var accountId = jwtUser.getAccountId();
         var ticketTypesSpecification = specFactory.makeSpecificationFromEntityFilterDto(TicketType.class, filterDto, accountId);
-        foundTicketTypes = service.findAllByFilter(ticketTypesSpecification, pageable);
+        foundTicketTypes = typeService.findAllByFilter(ticketTypesSpecification, pageable);
         returnedTicketTypes = mapPage(foundTicketTypes, TicketTypeDto.class, pageable);
         log.debug(FIND_FINISH_MESSAGE, ENTITY_NAME, foundTicketTypes.getTotalElements());
         return new ResponseEntity<>(returnedTicketTypes, HttpStatus.OK);
@@ -120,7 +103,7 @@ public class TicketTypeControllerV1 extends BaseController {
     @GetMapping("/{id}")
     public ResponseEntity<TicketTypeDto> getById(@PathVariable UUID id) {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
-        var foundTicketType = service.findByIdAndAccountId(id);
+        var foundTicketType = typeService.findByIdAndAccountId(id);
         TicketTypeDto returnedTicketTypes = modelMapper.map(foundTicketType, TicketTypeDto.class);
         log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundTicketType);
         return new ResponseEntity<>(returnedTicketTypes, HttpStatus.OK);
