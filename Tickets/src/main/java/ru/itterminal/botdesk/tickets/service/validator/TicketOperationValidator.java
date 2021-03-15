@@ -414,7 +414,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
 
     @SuppressWarnings("DuplicatedCode")
     @Override
-    public boolean checkAccessForRead(Ticket ticket) {
+    public void checkAccessForRead(Ticket ticket) {
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         var currentUser = userService.findByEmail(jwtUser.getUsername());
         var nameOfRoleOfCurrentUser = currentUser.getRole().getName();
@@ -541,7 +541,6 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
             throw new AccessDeniedException
                     (CURRENT_USER_WITH_ROLE_OBSERVER_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_IN_OBSERVERS);
         }
-        return true;
     }
 
 }

@@ -69,13 +69,15 @@ public abstract class CrudServiceWithAccountImpl<
         var accountId = jwtUserBuilder.getJwtUser().getAccountId();
         log.trace(format(FIND_INIT_MESSAGE_WITH_ACCOUNT, searchParameter, id, accountId));
         if (repository.existsById(id)) {
-            return repository.findByIdAndAccountId(id, accountId).orElseThrow(
+            var foundEntity  = repository.findByIdAndAccountId(id, accountId).orElseThrow(
                     () -> {
                         String errorMessage = format(FIND_INVALID_MESSAGE_WITH_ACCOUNT, searchParameter, id, accountId);
                         log.error(errorMessage);
                         throw new EntityNotExistException(errorMessage);
                     }
             );
+            validator.checkAccessForRead(foundEntity);
+            return foundEntity;
         } else {
             String errorMessage = format(FIND_INVALID_MESSAGE_WITH_ACCOUNT, searchParameter, id, accountId);
             log.error(errorMessage);
@@ -87,6 +89,7 @@ public abstract class CrudServiceWithAccountImpl<
     @Transactional
     public E create(E entity) {
         setNestedObjectsOfEntityBeforeCreate(entity);
+        validator.checkAccessForCreate(entity);
         validator.beforeCreate(entity);
         log.trace(format(CREATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.toString()));
         UUID id = UUID.randomUUID();
@@ -104,6 +107,7 @@ public abstract class CrudServiceWithAccountImpl<
     @Override
     public E update(E entity) {
         setNestedObjectsOfEntityBeforeUpdate(entity);
+        validator.checkAccessForUpdate(entity);
         validator.beforeUpdate(entity);
         log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
         var accountId = jwtUserBuilder.getJwtUser().getAccountId();

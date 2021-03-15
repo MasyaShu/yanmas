@@ -2,6 +2,7 @@ package ru.itterminal.botdesk.commons.service.validator;
 
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 
+@SuppressWarnings("unused")
 public interface OperationValidator<E extends BaseEntity> {
 
     String INVALID_ENTITY_MESSAGE = "Expected entity, but received null";
@@ -12,7 +13,11 @@ public interface OperationValidator<E extends BaseEntity> {
 
     boolean beforeUpdate(E entity);
 
-    boolean checkAccessForRead(E entity);
+    default void checkAccessForRead(E entity) {}
+
+    default void checkAccessForCreate(E entity) {}
+
+    default void checkAccessForUpdate(E entity) {}
 
 
 }

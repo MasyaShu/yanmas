@@ -102,9 +102,9 @@ class GroupOperationValidatorTest {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void checkAccessForRead_shouldGetTrue_whenUserInnerGroup() {
-        Group group = groupTestHelper.getRandomValidEntity();
-        assertTrue(validator.checkAccessForRead(group));
+    void checkAccessForRead_shouldNotGetException_whenUserInnerGroup() {
+        var group = groupTestHelper.getRandomValidEntity();
+        validator.checkAccessForRead(group);
     }
 
     @Test
@@ -118,9 +118,9 @@ class GroupOperationValidatorTest {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
-    void checkAccessForRead_shouldGetTrue_whenUserNotInnerGroupAndGroupUserEqualsEntity() {
-        Group group = groupTestHelper.getRandomValidEntity();
+    void checkAccessForRead_shouldNotGetException_whenUserNotInnerGroupAndGroupUserEqualsEntity() {
+        var group = groupTestHelper.getRandomValidEntity();
         group.setId(UUID.fromString(NOT_INNER_GROUP_ID));
-        assertTrue(validator.checkAccessForRead(group));
+        validator.checkAccessForRead(group);
     }
 }

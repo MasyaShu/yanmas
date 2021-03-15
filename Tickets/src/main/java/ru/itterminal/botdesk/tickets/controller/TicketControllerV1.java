@@ -117,7 +117,6 @@ public class TicketControllerV1 extends BaseController {
     public ResponseEntity<TicketDtoResponse> getById(@PathVariable UUID id) {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
         var foundTicket = ticketService.findByIdAndAccountId(id);
-        ticketService.checkAccessForRead(foundTicket);
         var returnedTicket = modelMapper.map(foundTicket, TicketDtoResponse.class);
         log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundTicket);
         return new ResponseEntity<>(returnedTicket, HttpStatus.OK);

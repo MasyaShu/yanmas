@@ -98,8 +98,8 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
     }
 
     @SuppressWarnings("UnusedReturnValue")
-    public boolean checkAccessForRead(Ticket ticket) {
-        return validator.checkAccessForRead(ticket);
+    public void checkAccessForRead(Ticket ticket) {
+        validator.checkAccessForRead(ticket);
     }
 
     @Override

@@ -17,7 +17,7 @@ public class TicketTypeTestHelper extends EntityTestHelperImpl<TicketType, Ticke
     @Override
     public TicketType getRandomValidEntity() {
         TicketType ticketType = TicketType.builder()
-                .name(fakerRU.hipster().word())
+                .name(fakerRU.name().firstName())
                 .comment(fakerRU.lorem().paragraph())
                 .isPredefinedForNewTicket(fakerRU.bool().bool())
                 .account(accountTestHelper.getRandomValidEntity())

@@ -38,7 +38,6 @@ import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.RoleServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
-import ru.itterminal.botdesk.aau.service.validator.UserOperationValidator;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter;
 import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
@@ -55,7 +54,6 @@ import ru.itterminal.botdesk.security.jwt.JwtUser;
 public class UserControllerV1 extends BaseController {
 
     private final UserServiceImpl userService;
-    private final UserOperationValidator validator;
     private final AccountServiceImpl accountService;
     private final RoleServiceImpl roleService;
     private final GroupServiceImpl groupService;
@@ -116,7 +114,6 @@ public class UserControllerV1 extends BaseController {
     public ResponseEntity<UserDtoResponse> getById(@PathVariable UUID id) {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
         var foundUser = userService.findByIdAndAccountId(id);
-        validator.checkAccessForRead(foundUser);
         var returnedUser = modelMapper.map(foundUser, UserDtoResponse.class);
         log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundUser);
         return new ResponseEntity<>(returnedUser, HttpStatus.OK);

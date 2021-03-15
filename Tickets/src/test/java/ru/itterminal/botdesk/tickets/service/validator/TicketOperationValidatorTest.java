@@ -832,7 +832,7 @@ class TicketOperationValidatorTest {
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     @ParameterizedTest(name = "{index} - id of TestDataCrudTicketPermission ")
     @MethodSource("getTestDataForCheckAccessForReadWhenAccessIsAllowed")
-    void checkAccessForRead_ShouldGetTrue_whenAccessIsAllowed
+    void checkAccessForRead_ShouldNotGetException_whenAccessIsAllowed
             (TestDataCrudTicketPermission testData) {
         var ticket = ticketTestHelper.getRandomValidEntity();
         var currentUser = ticket.getAuthor().toBuilder().build();
@@ -857,7 +857,7 @@ class TicketOperationValidatorTest {
             ticket.setExecutors(List.of(currentUser));
         }
         when(userService.findByEmail(any())).thenReturn(currentUser);
-        assertTrue(validator.checkAccessForRead(ticket));
+        validator.checkAccessForRead(ticket);
         verify(userService, times(1)).findByEmail(any());
     }
 

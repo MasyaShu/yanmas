@@ -194,9 +194,9 @@ class UserOperationValidatorTest {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
-    void checkAccessForRead_shouldGetTrue_whenCurrentUserFromNotInnerGroupAndCurrentUserGroupEqualsEntityGroup() {
+    void checkAccessForRead_shouldNotGetException_whenCurrentUserFromNotInnerGroupAndCurrentUserGroupEqualsEntityGroup() {
         user.getGroup().setId(UUID.fromString(NOT_INNER_GROUP_ID));
-        assertTrue(validator.checkAccessForRead(user));
+        validator.checkAccessForRead(user);
     }
 
     @ParameterizedTest
