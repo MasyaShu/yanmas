@@ -37,8 +37,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
-import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
 import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
@@ -49,8 +47,6 @@ import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoRequest;
 import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoResponse;
 import ru.itterminal.botdesk.tickets.model.test.TicketSettingTestHelper;
 import ru.itterminal.botdesk.tickets.service.impl.TicketSettingServiceImpl;
-import ru.itterminal.botdesk.tickets.service.impl.TicketStatusServiceImpl;
-import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {TicketSettingControllerV1.class, FilterChainProxy.class})
@@ -65,18 +61,6 @@ class TicketSettingControllerV1Test {
     @SuppressWarnings("unused")
     @MockBean
     private SpecificationsFactory specFactory;
-
-    @MockBean
-    private AccountServiceImpl accountService;
-
-    @MockBean
-    private GroupServiceImpl groupService;
-
-    @MockBean
-    private TicketTypeServiceImpl ticketTypeService;
-
-    @MockBean
-    private TicketStatusServiceImpl ticketStatusService;
 
     @MockBean
     private TicketSettingServiceImpl ticketSettingService;
@@ -119,53 +103,25 @@ class TicketSettingControllerV1Test {
         requestDto.setId(null);
         requestDto.setDeleted(null);
         requestDto.setVersion(null);
-        when(accountService.findById(any())).thenReturn(ticketSetting.getAccount());
-        when(groupService.findByIdAndAccountId(any())).thenReturn(ticketSetting.getGroup());
-        when(userService.findByIdAndAccountId(any())).thenReturn(ticketSetting.getAuthor());
-        when(ticketTypeService.findByIdAndAccountId(any())).thenReturn(ticketSetting.getTicketTypeForNew());
-        when(ticketStatusService.findByIdAndAccountId(ticketSetting.getTicketStatusForNew().getId())).
-                thenReturn(ticketSetting.getTicketStatusForNew());
-        when(ticketStatusService.findByIdAndAccountId(ticketSetting.getTicketStatusForReopen().getId())).
-                thenReturn(ticketSetting.getTicketStatusForReopen());
-        when(ticketStatusService.findByIdAndAccountId(ticketSetting.getTicketStatusForClose().getId())).
-                thenReturn(ticketSetting.getTicketStatusForClose());
-        when(ticketStatusService.findByIdAndAccountId(ticketSetting.getTicketStatusForCancel().getId())).
-                thenReturn(ticketSetting.getTicketStatusForCancel());
         when(ticketSettingService.create(any())).thenReturn(ticketSetting);
-
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDto));
-
         var requestResult = mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-
         TicketSettingDtoResponse actualTicketSettingDtoResponse =
                 objectMapper.readValue(requestResult, TicketSettingDtoResponse.class);
-
         TicketSettingDtoResponse expectedTicketSettingDtoResponse =
                 mapper.map(
                         ticketSetting,
                         TicketSettingDtoResponse.class
                 );
-
         assertEquals(expectedTicketSettingDtoResponse, actualTicketSettingDtoResponse);
-
-        verify(accountService, times(1)).findById(any());
-        if (requestDto.getAuthor() != null) {
-            verify(userService, times(1)).findByIdAndAccountId(any());
-            verify(groupService, times(0)).findByIdAndAccountId(any());
-        } else {
-            verify(groupService, times(1)).findByIdAndAccountId(any());
-            verify(userService, times(0)).findByIdAndAccountId(any());
-        }
-        verify(ticketTypeService, times(1)).findByIdAndAccountId(any());
-        verify(ticketStatusService, times(4)).findByIdAndAccountId(any());
         verify(ticketSettingService, times(1)).create(any());
     }
 
@@ -180,11 +136,7 @@ class TicketSettingControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
-        verify(accountService, times(0)).findById(any());
-        verify(groupService, times(0)).findByIdAndAccountId(any());
         verify(userService, times(0)).findByIdAndAccountId(any());
-        verify(ticketTypeService, times(0)).findByIdAndAccountId(any());
-        verify(ticketStatusService, times(0)).findByIdAndAccountId(any());
         verify(ticketSettingService, times(0)).create(any());
     }
 
@@ -201,11 +153,7 @@ class TicketSettingControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
-        verify(accountService, times(0)).findById(any());
-        verify(groupService, times(0)).findByIdAndAccountId(any());
         verify(userService, times(0)).findByIdAndAccountId(any());
-        verify(ticketTypeService, times(0)).findByIdAndAccountId(any());
-        verify(ticketStatusService, times(0)).findByIdAndAccountId(any());
         verify(ticketSettingService, times(0)).create(any());
     }
 
@@ -234,11 +182,7 @@ class TicketSettingControllerV1Test {
                                         "$.errors.version[?(@.message == '%s')]",
                                         CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY
                                 ).exists());
-        verify(accountService, times(0)).findById(any());
-        verify(groupService, times(0)).findByIdAndAccountId(any());
         verify(userService, times(0)).findByIdAndAccountId(any());
-        verify(ticketTypeService, times(0)).findByIdAndAccountId(any());
-        verify(ticketStatusService, times(0)).findByIdAndAccountId(any());
         verify(ticketSettingService, times(0)).create(any());
     }
 
@@ -246,52 +190,25 @@ class TicketSettingControllerV1Test {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void update_shouldUpdate_whenValidDataPassed() throws Exception {
         requestDto.setDeleted(false);
-        when(accountService.findById(any())).thenReturn(ticketSetting.getAccount());
-        when(groupService.findByIdAndAccountId(any())).thenReturn(ticketSetting.getGroup());
-        when(userService.findByIdAndAccountId(any())).thenReturn(ticketSetting.getAuthor());
-        when(ticketTypeService.findByIdAndAccountId(any())).thenReturn(ticketSetting.getTicketTypeForNew());
-        when(ticketStatusService.findByIdAndAccountId(ticketSetting.getTicketStatusForNew().getId())).
-                thenReturn(ticketSetting.getTicketStatusForNew());
-        when(ticketStatusService.findByIdAndAccountId(ticketSetting.getTicketStatusForReopen().getId())).
-                thenReturn(ticketSetting.getTicketStatusForReopen());
-        when(ticketStatusService.findByIdAndAccountId(ticketSetting.getTicketStatusForClose().getId())).
-                thenReturn(ticketSetting.getTicketStatusForClose());
-        when(ticketStatusService.findByIdAndAccountId(ticketSetting.getTicketStatusForCancel().getId())).
-                thenReturn(ticketSetting.getTicketStatusForCancel());
         when(ticketSettingService.update(any())).thenReturn(ticketSetting);
-
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDto));
-
         var requestResult = mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-
         TicketSettingDtoResponse actualTicketSettingDtoResponse =
                 objectMapper.readValue(requestResult, TicketSettingDtoResponse.class);
-
         TicketSettingDtoResponse expectedTicketSettingDtoResponse =
                 mapper.map(
                         ticketSetting,
                         TicketSettingDtoResponse.class
                 );
-
         assertEquals(expectedTicketSettingDtoResponse, actualTicketSettingDtoResponse);
-
-        verify(accountService, times(1)).findById(any());
-        if (requestDto.getAuthor() == null) {
-            verify(groupService, times(1)).findByIdAndAccountId(any());
-        } else {
-            verify(groupService, times(0)).findByIdAndAccountId(any());
-        }
-        verify(userService, times(1)).findByIdAndAccountId(any());
-        verify(ticketTypeService, times(1)).findByIdAndAccountId(any());
-        verify(ticketStatusService, times(4)).findByIdAndAccountId(any());
         verify(ticketSettingService, times(1)).update(any());
     }
 
@@ -305,11 +222,7 @@ class TicketSettingControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
-        verify(accountService, times(0)).findById(any());
-        verify(groupService, times(0)).findByIdAndAccountId(any());
         verify(userService, times(0)).findByIdAndAccountId(any());
-        verify(ticketTypeService, times(0)).findByIdAndAccountId(any());
-        verify(ticketStatusService, times(0)).findByIdAndAccountId(any());
         verify(ticketSettingService, times(0)).update(any());
     }
 
@@ -323,11 +236,7 @@ class TicketSettingControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
-        verify(accountService, times(0)).findById(any());
-        verify(groupService, times(0)).findByIdAndAccountId(any());
         verify(userService, times(0)).findByIdAndAccountId(any());
-        verify(ticketTypeService, times(0)).findByIdAndAccountId(any());
-        verify(ticketStatusService, times(0)).findByIdAndAccountId(any());
         verify(ticketSettingService, times(0)).update(any());
     }
 
@@ -347,11 +256,7 @@ class TicketSettingControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value(CommonConstants.MESSAGE_NOT_READABLE));
-        verify(accountService, times(0)).findById(any());
-        verify(groupService, times(0)).findByIdAndAccountId(any());
         verify(userService, times(0)).findByIdAndAccountId(any());
-        verify(ticketTypeService, times(0)).findByIdAndAccountId(any());
-        verify(ticketStatusService, times(0)).findByIdAndAccountId(any());
         verify(ticketSettingService, times(0)).update(any());
     }
 

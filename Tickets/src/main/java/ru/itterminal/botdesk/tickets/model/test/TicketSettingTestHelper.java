@@ -146,27 +146,27 @@ public class TicketSettingTestHelper extends EntityTestHelperImpl<TicketSetting,
                 .deleted(entity.getDeleted())
                 .version(entity.getVersion())
                 .displayName(entity.getDisplayName())
-                .group(entity.getGroup() == null
+                .groupId(entity.getGroup() == null
                                ? null
                                : entity.getGroup().getId())
-                .author(entity.getAuthor() == null
+                .authorId(entity.getAuthor() == null
                                 ? null
                                 : entity.getAuthor().getId())
                 .observers(observersIdList)
                 .executors(executorsIdList)
-                .ticketTypeForNew(entity.getTicketTypeForNew() == null
+                .ticketTypeForNewId(entity.getTicketTypeForNew() == null
                                           ? null
                                           : entity.getTicketTypeForNew().getId())
-                .ticketStatusForNew(entity.getTicketStatusForNew() == null
+                .ticketStatusForNewId(entity.getTicketStatusForNew() == null
                                             ? null
                                             : entity.getTicketStatusForNew().getId())
-                .ticketStatusForReopen(entity.getTicketStatusForReopen() == null
+                .ticketStatusForReopenId(entity.getTicketStatusForReopen() == null
                                                ? null
                                                : entity.getTicketStatusForReopen().getId())
-                .ticketStatusForCancel(entity.getTicketStatusForCancel() == null
+                .ticketStatusForCancelId(entity.getTicketStatusForCancel() == null
                                                ? null
                                                : entity.getTicketStatusForCancel().getId())
-                .ticketStatusForClose(entity.getTicketStatusForClose() == null
+                .ticketStatusForCloseId(entity.getTicketStatusForClose() == null
                                               ? null
                                               : entity.getTicketStatusForClose().getId())
                 .build();

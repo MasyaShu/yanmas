@@ -21,21 +21,21 @@ import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
 @EqualsAndHashCode(callSuper = true)
 public class TicketSettingDtoRequest extends BaseEntityDto {
 
-    private UUID author;
+    private UUID authorId;
 
-    private UUID group;
+    private UUID groupId;
 
     List<UUID> observers;
 
     List<UUID> executors;
 
-    private UUID ticketTypeForNew;
+    private UUID ticketTypeForNewId;
 
-    private UUID ticketStatusForNew;
+    private UUID ticketStatusForNewId;
 
-    private UUID ticketStatusForReopen;
+    private UUID ticketStatusForReopenId;
 
-    private UUID ticketStatusForClose;
+    private UUID ticketStatusForCloseId;
 
-    private UUID ticketStatusForCancel;
+    private UUID ticketStatusForCancelId;
 }
