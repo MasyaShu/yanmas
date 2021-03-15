@@ -46,6 +46,7 @@ public class Group extends BaseEntity {
 
     @PrePersist
     protected void onCreate() {
+        setIsDeprecated(false);
         setDeleted(false);
     }
 }

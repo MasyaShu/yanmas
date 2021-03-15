@@ -68,11 +68,10 @@ public class TicketControllerV1 extends BaseController {
         var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
         var currentUser = userService.findByEmail(jwtUser.getUsername());
         var createdTicket = ticketService.create(
-                ticketService
-                        .convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(
-                                ticketDtoRequest,
-                                jwtUser.getAccountId()
-                        ),
+                ticketService.convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(
+                        ticketDtoRequest,
+                        jwtUser.getAccountId()
+                ),
                 currentUser
         );
         var returnedTicket = modelMapper.map(createdTicket, TicketDtoResponse.class);
@@ -118,7 +117,6 @@ public class TicketControllerV1 extends BaseController {
     public ResponseEntity<TicketDtoResponse> getById(@PathVariable UUID id) {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
         var foundTicket = ticketService.findByIdAndAccountId(id);
-        ticketService.checkAccessForRead(foundTicket);
         var returnedTicket = modelMapper.map(foundTicket, TicketDtoResponse.class);
         log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundTicket);
         return new ResponseEntity<>(returnedTicket, HttpStatus.OK);

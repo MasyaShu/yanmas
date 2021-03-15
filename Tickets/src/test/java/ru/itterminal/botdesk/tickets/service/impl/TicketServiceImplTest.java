@@ -112,7 +112,7 @@ class TicketServiceImplTest {
         var createdTicket = service.create(ticket, ticket.getAuthor());
         assertEquals(ticket, createdTicket);
         verify(accountService, times(1)).findById(any());
-        verify(userService, times(1)).findByIdAndAccountId(any());
+        verify(userService, times(2)).findByIdAndAccountId(any());
         verify(validator, times(1)).beforeCreate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(repository, times(1)).create(any());
@@ -138,7 +138,7 @@ class TicketServiceImplTest {
         var createdTicket = service.create(ticket, currentUser);
         assertEquals(ticket, createdTicket);
         verify(accountService, times(1)).findById(any());
-        verify(userService, times(1)).findByIdAndAccountId(any());
+        verify(userService, times(2)).findByIdAndAccountId(any());
         verify(validator, times(1)).beforeCreate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(repository, times(1)).create(any());
@@ -163,7 +163,7 @@ class TicketServiceImplTest {
         ticket.setExecutors(List.of(currentUser));
         ticket.setObservers(List.of(ticket.getAuthor()));
         when(accountService.findById(any())).thenReturn(ticket.getAccount());
-        when(userService.findByIdAndAccountId(any())).thenReturn(ticket.getAuthor());
+        when(userService.findByIdAndAccountId(any())).thenReturn(currentUser);
         when(validator.beforeCreate(any())).thenReturn(true);
         when(validator.checkUniqueness(any())).thenReturn(true);
         when(repository.create(any())).thenReturn(ticket);
@@ -172,7 +172,7 @@ class TicketServiceImplTest {
         var createdTicket = service.create(ticket, currentUser);
         assertEquals(ticket, createdTicket);
         verify(accountService, times(1)).findById(any());
-        verify(userService, times(1)).findByIdAndAccountId(any());
+        verify(userService, times(2)).findByIdAndAccountId(any());
         verify(validator, times(1)).beforeCreate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(repository, times(1)).create(any());
@@ -181,7 +181,6 @@ class TicketServiceImplTest {
         assertEquals(ticket.getGroup(), ticket.getAuthor().getGroup());
         assertEquals(ticket.getNumber(), number);
     }
-
 
     @ParameterizedTest
     @MethodSource("getStreamOfUsersFromInnerGroupsWithRolesAccountOwnerOrAdminOrExecutor")
@@ -205,7 +204,7 @@ class TicketServiceImplTest {
         var createdTicket = service.create(ticket, currentUser);
         assertEquals(ticket, createdTicket);
         verify(accountService, times(1)).findById(any());
-        verify(userService, times(1)).findByIdAndAccountId(any());
+        verify(userService, times(2)).findByIdAndAccountId(any());
         verify(validator, times(1)).beforeCreate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(repository, times(1)).create(any());
@@ -213,6 +212,20 @@ class TicketServiceImplTest {
         verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
         assertEquals(ticket.getGroup(), ticket.getAuthor().getGroup());
         assertEquals(ticket.getNumber(), number);
+    }
+
+    @Test
+    void convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId_shouldConvert_whenPassedValidData() {
+        var expectedTicket = ticketTestHelper.getRandomValidEntity();
+        var ticketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(expectedTicket);
+        var actualTicket = service
+                .convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(
+                        ticketDtoRequest,
+                        expectedTicket.getAccount().getId()
+                );
+        assertEquals(expectedTicket.getAuthor().getId(), actualTicket.getAuthor().getId());
+        assertEquals(expectedTicket.getTicketType().getId(), actualTicket.getTicketType().getId());
+        assertEquals(expectedTicket.getTicketStatus().getId(), actualTicket.getTicketStatus().getId());
     }
 
     private static Stream<Arguments> getStreamOfUsersFromInnerGroupsWithRolesAccountOwnerOrAdminOrExecutor() {

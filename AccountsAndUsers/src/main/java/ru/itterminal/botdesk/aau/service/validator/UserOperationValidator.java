@@ -55,20 +55,29 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
     public static final String EMAIL = "email";
 
     @Override
-    public boolean beforeCreate(User entity) {
-        super.beforeCreate(entity);
-        if (!SecurityContextHolder.getContext().getAuthentication().getName().contains("anonymous")) {
+    public void checkAccessBeforeCreate(User entity) {
+        if (!SecurityContextHolder.getContext().getAuthentication().getName().contains(ANONYMOUS)) {
             checkAccessCreateUpdate(entity, null);
         }
+    }
+
+    @Override
+    public boolean beforeCreate(User entity) {
+        super.beforeCreate(entity);
         checkAccountOwnerNotExist(entity);
         return true;
     }
 
     @Override
+    public void checkAccessBeforeUpdate(User entity) {
+        var userFromDatabase = service.findById(entity.getId());
+        checkAccessCreateUpdate(entity, userFromDatabase);
+    }
+
+    @Override
     public boolean beforeUpdate(User entity) {
         super.beforeUpdate(entity);
-        User userFromDatabase = service.findById(entity.getId());
-        checkAccessCreateUpdate(entity, userFromDatabase);
+        var userFromDatabase = service.findById(entity.getId());
         if (!entity.getGroup().equals(userFromDatabase.getGroup())) {
             checkPossibilityOfChangingUserGroup(entity);
         }
@@ -99,12 +108,12 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
     }
 
     @Override
-    public boolean checkAccessForRead(User entity) {
-        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (jwtUser.isInnerGroup() || jwtUser.getGroupId().equals(entity.getGroup().getId())) {
-            return true;
-        } else {
-            throw new AccessDeniedException(ACCESS_IS_DENIED_FOR_SEARCHING_BY_PASSED_ID);
+    public void checkAccessBeforeRead(User entity) {
+        if (!SecurityContextHolder.getContext().getAuthentication().getName().contains(ANONYMOUS)) {
+            JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (!(jwtUser.isInnerGroup() || jwtUser.getGroupId().equals(entity.getGroup().getId()))) {
+                throw new AccessDeniedException(ACCESS_IS_DENIED_FOR_SEARCHING_BY_PASSED_ID);
+            }
         }
     }
 

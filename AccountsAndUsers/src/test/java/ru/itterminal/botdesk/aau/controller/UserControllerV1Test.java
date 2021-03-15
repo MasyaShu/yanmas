@@ -57,7 +57,6 @@ import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.RoleServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
-import ru.itterminal.botdesk.aau.service.validator.UserOperationValidator;
 import ru.itterminal.botdesk.aau.util.AAUConstants;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
@@ -78,9 +77,6 @@ class UserControllerV1Test {
 
     @MockBean
     private UserServiceImpl service;
-
-    @MockBean
-    private UserOperationValidator validator;
 
     @SuppressWarnings("unused")
     @MockBean
@@ -696,7 +692,6 @@ class UserControllerV1Test {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
     void getById_shouldFindOneUser_whenUserExistInDatabaseByPassedIdAndHeIsNotInInnerGroup() throws Exception {
         when(service.findByIdAndAccountId(any())).thenReturn(user_1);
-        when(validator.checkAccessForRead(any())).thenReturn(true);
         mockMvc.perform(get(HOST + PORT + API + USER_1_ID))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -707,7 +702,6 @@ class UserControllerV1Test {
                 .andExpect(jsonPath("$.group.outId").value(user_1.getGroup().getOutId()))
                 .andExpect(jsonPath("$.group.displayName").value(user_1.getGroup().getDisplayName()));
         verify(service, times(1)).findByIdAndAccountId(any());
-        verify(validator, times(1)).checkAccessForRead(any());
     }
 
     @Test

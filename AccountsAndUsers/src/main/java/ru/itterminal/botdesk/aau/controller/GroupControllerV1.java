@@ -1,7 +1,15 @@
 package ru.itterminal.botdesk.aau.controller;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import static java.lang.String.format;
+import static ru.itterminal.botdesk.commons.model.filter.StringFilter.TypeComparisonForStringFilter.TEXT_EQUALS;
+
+import java.security.Principal;
+import java.util.UUID;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
+
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +18,17 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.dto.GroupDto;
 import ru.itterminal.botdesk.aau.model.dto.GroupFilterDto;
@@ -24,15 +42,6 @@ import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
-import java.security.Principal;
-import java.util.UUID;
-
-import static java.lang.String.format;
-import static ru.itterminal.botdesk.commons.model.filter.StringFilter.TypeComparisonForStringFilter.TEXT_EQUALS;
-
 @Slf4j
 @RestController("GroupControllerV1")
 @Validated
@@ -40,9 +49,9 @@ import static ru.itterminal.botdesk.commons.model.filter.StringFilter.TypeCompar
 @RequiredArgsConstructor
 public class GroupControllerV1 extends BaseController {
 
+    private final AccountServiceImpl accountService;
     private final GroupServiceImpl service;
     private final GroupOperationValidator validator;
-    private final AccountServiceImpl accountService;
     private final SpecificationsFactory specFactory;
 
     private final String ENTITY_NAME = Group.class.getSimpleName();
@@ -52,14 +61,10 @@ public class GroupControllerV1 extends BaseController {
     public ResponseEntity<GroupDto> create(Principal principal,
                                            @Validated(Create.class) @RequestBody GroupDto request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
-        Group group = modelMapper.map(request, Group.class);
-        group.setDeleted(false);
-        group.setIsDeprecated(false);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        group.setAccount(accountService.findById(jwtUser.getAccountId()));
-        Group createdGroup = service.create(group);
-        GroupDto returnedGroup =
-                modelMapper.map(createdGroup, GroupDto.class);
+        var group = convertRequestDtoIntoEntity(request, jwtUser.getAccountId());
+        var createdGroup = service.create(group);
+        var returnedGroup = modelMapper.map(createdGroup, GroupDto.class);
         log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdGroup);
         return new ResponseEntity<>(returnedGroup, HttpStatus.CREATED);
     }
@@ -78,12 +83,10 @@ public class GroupControllerV1 extends BaseController {
     public ResponseEntity<GroupDto> update(Principal principal,
                                            @Validated(Update.class) @RequestBody GroupDto request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
-        Group group = modelMapper.map(request, Group.class);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        group.setAccount(accountService.findById(jwtUser.getAccountId()));
-        Group updatedGroup = service.update(group);
-        GroupDto returnedGroup =
-                modelMapper.map(updatedGroup, GroupDto.class);
+        var group = convertRequestDtoIntoEntity(request, jwtUser.getAccountId());
+        var updatedGroup = service.update(group);
+        var returnedGroup = modelMapper.map(updatedGroup, GroupDto.class);
         log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedGroup);
         return new ResponseEntity<>(returnedGroup, HttpStatus.OK);
     }
@@ -128,7 +131,7 @@ public class GroupControllerV1 extends BaseController {
     public ResponseEntity<GroupDto> getById(@PathVariable UUID id) {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
         var foundGroup = service.findByIdAndAccountId(id);
-        validator.checkAccessForRead(foundGroup);
+        validator.checkAccessBeforeRead(foundGroup);
         var returnedGroup = modelMapper.map(foundGroup, GroupDto.class);
         log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundGroup);
         return new ResponseEntity<>(returnedGroup, HttpStatus.OK);
@@ -139,5 +142,12 @@ public class GroupControllerV1 extends BaseController {
         if (!jwtUser.isInnerGroup()) {
             throw new AccessDeniedException("access is denied");
         }
+    }
+
+    private Group convertRequestDtoIntoEntity(GroupDto request, UUID accountId) {
+        var group = modelMapper.map(request, Group.class);
+        // !!! setting is here because it is not possible into service layer (cycle dependency with AccountServiceImpl)
+        group.setAccount(accountService.findById(accountId));
+        return group;
     }
 }

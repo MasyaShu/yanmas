@@ -147,7 +147,7 @@ class TicketControllerV1Test {
         requestDto.setDeleted(null);
         requestDto.setVersion(null);
         requestDto.setDisplayName(null);
-        requestDto.setAuthor(null);
+        requestDto.setAuthorId(null);
         requestDto.setSubject(fakerRU.lorem().sentence(256));
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -159,7 +159,7 @@ class TicketControllerV1Test {
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers
                                    .jsonPath(
-                                           "$.errors.author[?(@.message == '%s')]",
+                                           "$.errors.authorId[?(@.message == '%s')]",
                                            CommonConstants.MUST_NOT_BE_NULL
                                    ).exists())
                 .andExpect(MockMvcResultMatchers

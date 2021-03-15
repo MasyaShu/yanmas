@@ -27,7 +27,7 @@ import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 @EqualsAndHashCode(callSuper = true)
 public class TicketDtoRequest extends BaseEntityDto {
     @NotNull(groups = {Create.class, Update.class})
-    private UUID author;
+    private UUID authorId;
 
     @Size(max = 256, groups = {Create.class, Update.class})
     private String subject;
@@ -35,8 +35,8 @@ public class TicketDtoRequest extends BaseEntityDto {
     private String description;
     private Long deadline;
     private Boolean isFinished;
-    private UUID ticketType;
-    private UUID ticketStatus;
+    private UUID ticketTypeId;
+    private UUID ticketStatusId;
     private List<UUID> observers;
     private List<UUID> executors;
 

@@ -88,7 +88,7 @@ class TicketOperationValidatorTest {
         when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
         var actualResult = validator.beforeCreate(ticket);
         assertTrue(actualResult);
-        verify(userService, times(1)).findByEmail(any());
+        verify(userService, times(0)).findByEmail(any());
     }
 
     @Test
@@ -119,7 +119,7 @@ class TicketOperationValidatorTest {
                 expectedException.getFieldErrors().get(EMPTY_TICKET).get(0),
                 actualException.getFieldErrors().get(EMPTY_TICKET).get(0)
         );
-        verify(userService, times(1)).findByEmail(any());
+        verify(userService, times(0)).findByEmail(any());
     }
 
     @Test
@@ -153,7 +153,7 @@ class TicketOperationValidatorTest {
                 expectedException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR).get(0),
                 actualException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR).get(0)
         );
-        verify(userService, times(1)).findByEmail(any());
+        verify(userService, times(0)).findByEmail(any());
     }
 
     @Test
@@ -189,7 +189,7 @@ class TicketOperationValidatorTest {
                 expectedException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS).get(0),
                 actualException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS).get(0)
         );
-        verify(userService, times(1)).findByEmail(any());
+        verify(userService, times(0)).findByEmail(any());
     }
 
     @Test
@@ -225,7 +225,7 @@ class TicketOperationValidatorTest {
                 expectedException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS).get(0),
                 actualException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS).get(0)
         );
-        verify(userService, times(1)).findByEmail(any());
+        verify(userService, times(0)).findByEmail(any());
     }
 
     @Test
@@ -260,7 +260,7 @@ class TicketOperationValidatorTest {
                 expectedException.getFieldErrors().get(FILE_IS_INVALID).get(0),
                 actualException.getFieldErrors().get(FILE_IS_INVALID).get(0)
         );
-        verify(userService, times(1)).findByEmail(any());
+        verify(userService, times(0)).findByEmail(any());
     }
 
     @Test
@@ -295,7 +295,7 @@ class TicketOperationValidatorTest {
                 expectedException.getFieldErrors().get(FILE_IS_INVALID).get(0),
                 actualException.getFieldErrors().get(FILE_IS_INVALID).get(0)
         );
-        verify(userService, times(1)).findByEmail(any());
+        verify(userService, times(0)).findByEmail(any());
     }
 
     @Test
@@ -330,7 +330,7 @@ class TicketOperationValidatorTest {
                 expectedException.getFieldErrors().get(FILE_IS_INVALID).get(0),
                 actualException.getFieldErrors().get(FILE_IS_INVALID).get(0)
         );
-        verify(userService, times(1)).findByEmail(any());
+        verify(userService, times(0)).findByEmail(any());
     }
 
     @Test
@@ -361,7 +361,7 @@ class TicketOperationValidatorTest {
                 expectedException.getFieldErrors().get(EMPTY_TICKET).get(0),
                 actualException.getFieldErrors().get(EMPTY_TICKET).get(0)
         );
-        verify(userService, times(1)).findByEmail(any());
+        verify(userService, times(0)).findByEmail(any());
     }
 
     @Test
@@ -371,7 +371,7 @@ class TicketOperationValidatorTest {
         when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
         var actualResult = validator.beforeUpdate(ticket);
         assertTrue(actualResult);
-        verify(userService, times(1)).findByEmail(any());
+        verify(userService, times(0)).findByEmail(any());
     }
 
     @Test
@@ -405,7 +405,7 @@ class TicketOperationValidatorTest {
                 expectedException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR).get(0),
                 actualException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR).get(0)
         );
-        verify(userService, times(1)).findByEmail(any());
+        verify(userService, times(0)).findByEmail(any());
     }
 
     @Test
@@ -441,7 +441,7 @@ class TicketOperationValidatorTest {
                 expectedException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS).get(0),
                 actualException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS).get(0)
         );
-        verify(userService, times(1)).findByEmail(any());
+        verify(userService, times(0)).findByEmail(any());
     }
 
     @Test
@@ -477,7 +477,7 @@ class TicketOperationValidatorTest {
                 expectedException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS).get(0),
                 actualException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS).get(0)
         );
-        verify(userService, times(1)).findByEmail(any());
+        verify(userService, times(0)).findByEmail(any());
     }
 
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
@@ -512,7 +512,7 @@ class TicketOperationValidatorTest {
         AccessDeniedException actualException =
                 assertThrows(
                         AccessDeniedException.class,
-                        () -> validator.beforeCreate(ticket)
+                        () -> validator.checkAccessBeforeCreate(ticket)
                 );
         assertEquals(expectedExceptionMessage, actualException.getMessage());
         verify(userService, times(1)).findByEmail(any());
@@ -550,7 +550,7 @@ class TicketOperationValidatorTest {
         AccessDeniedException actualException =
                 assertThrows(
                         AccessDeniedException.class,
-                        () -> validator.checkAccessForRead(ticket)
+                        () -> validator.checkAccessBeforeRead(ticket)
                 );
         assertEquals(expectedExceptionMessage, actualException.getMessage());
         verify(userService, times(1)).findByEmail(any());
@@ -832,7 +832,7 @@ class TicketOperationValidatorTest {
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     @ParameterizedTest(name = "{index} - id of TestDataCrudTicketPermission ")
     @MethodSource("getTestDataForCheckAccessForReadWhenAccessIsAllowed")
-    void checkAccessForRead_ShouldGetTrue_whenAccessIsAllowed
+    void checkAccessForRead_ShouldNotGetException_whenAccessIsAllowed
             (TestDataCrudTicketPermission testData) {
         var ticket = ticketTestHelper.getRandomValidEntity();
         var currentUser = ticket.getAuthor().toBuilder().build();
@@ -857,7 +857,7 @@ class TicketOperationValidatorTest {
             ticket.setExecutors(List.of(currentUser));
         }
         when(userService.findByEmail(any())).thenReturn(currentUser);
-        assertTrue(validator.checkAccessForRead(ticket));
+        validator.checkAccessBeforeRead(ticket);
         verify(userService, times(1)).findByEmail(any());
     }
 

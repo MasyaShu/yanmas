@@ -153,9 +153,13 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
     private final UserServiceImpl userService;
 
     @Override
+    public void checkAccessBeforeCreate(Ticket entity) {
+        checkAccessForCreateAndUpdate(entity);
+    }
+
+    @Override
     public boolean beforeCreate(Ticket entity) {
         var result = super.beforeCreate(entity);
-        checkAccessForCreateAndUpdate(entity);
         var errors = createMapForLogicalErrors();
         IsEmptySubjectDescriptionAndFiles(entity, errors);
         checkAuthorExecutorsAndObserversForWeightOfRoles(entity, errors);
@@ -194,9 +198,13 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
     }
 
     @Override
+    public void checkAccessBeforeUpdate(Ticket entity) {
+        checkAccessForCreateAndUpdate(entity);
+    }
+
+    @Override
     public boolean beforeUpdate(Ticket entity) {
         var result = super.beforeUpdate(entity);
-        checkAccessForCreateAndUpdate(entity);
         var errors = createMapForLogicalErrors();
         IsEmptySubjectDescriptionAndFiles(entity, errors);
         checkAuthorExecutorsAndObserversForWeightOfRoles(entity, errors);
@@ -414,7 +422,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
 
     @SuppressWarnings("DuplicatedCode")
     @Override
-    public boolean checkAccessForRead(Ticket ticket) {
+    public void checkAccessBeforeRead(Ticket ticket) {
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         var currentUser = userService.findByEmail(jwtUser.getUsername());
         var nameOfRoleOfCurrentUser = currentUser.getRole().getName();
@@ -541,7 +549,6 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
             throw new AccessDeniedException
                     (CURRENT_USER_WITH_ROLE_OBSERVER_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_IN_OBSERVERS);
         }
-        return true;
     }
 
 }

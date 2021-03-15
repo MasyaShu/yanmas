@@ -24,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
@@ -45,11 +44,10 @@ public class FileControllerV1 extends BaseController {
             "Done request for get data for fileId: {}, size of data is {}";
     public static final String GET_REQUEST_FOR_SAVE_DATA_FOR_FILE_ID = "Get request for save data for fileId: {}";
     public static final String DONE_REQUEST_FOR_SAVE_DATA_FOR_FILE_ID = "Done request for save data for fileId: {}";
+    private final String ENTITY_NAME = File.class.getSimpleName();
 
     private final FileServiceImpl fileService;
-    private final AccountServiceImpl accountService;
 
-    private final String ENTITY_NAME = File.class.getSimpleName();
 
     @PostMapping()
     public ResponseEntity<FileDto> create
@@ -57,8 +55,7 @@ public class FileControllerV1 extends BaseController {
              @Validated(Create.class) @RequestBody FileDto fileDto) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, fileDto);
         var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        var file = modelMapper.map(fileDto, File.class);
-        setNestedObjectsIntoEntityFromEntityDtoRequest(file, jwtUser.getAccountId());
+        var file = fileService.convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(fileDto, jwtUser.getAccountId());
         var createdFile = fileService.create(file);
         var returnedFile = modelMapper.map(createdFile, FileDto.class);
         log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdFile);
@@ -71,8 +68,7 @@ public class FileControllerV1 extends BaseController {
              @Validated(Update.class) @RequestBody FileDto fileDto) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, fileDto);
         var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        var file = modelMapper.map(fileDto, File.class);
-        setNestedObjectsIntoEntityFromEntityDtoRequest(file, jwtUser.getAccountId());
+        var file = fileService.convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(fileDto, jwtUser.getAccountId());
         var updatedFile = fileService.update(file);
         var returnedFile = modelMapper.map(updatedFile, FileDto.class);
         log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedFile);
@@ -116,9 +112,4 @@ public class FileControllerV1 extends BaseController {
         log.debug(DONE_REQUEST_FOR_SAVE_DATA_FOR_FILE_ID, fileId);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
-
-    private void setNestedObjectsIntoEntityFromEntityDtoRequest(File file, UUID accountId) {
-        file.setAccount(accountService.findById(accountId));
-    }
-
 }

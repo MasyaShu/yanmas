@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.projection.GroupUniqueFields;
@@ -14,6 +15,7 @@ import ru.itterminal.botdesk.aau.service.validator.GroupOperationValidator;
 @Slf4j
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class GroupServiceImpl extends CrudServiceWithAccountImpl<Group, GroupOperationValidator, GroupRepository> {
 
     private static final String START_FIND_GROUP_BY_UNIQUE_FIELDS =
@@ -21,7 +23,12 @@ public class GroupServiceImpl extends CrudServiceWithAccountImpl<Group, GroupOpe
 
     @Transactional(readOnly = true)
     public List<GroupUniqueFields> findByUniqueFields(Group group) {
-        log.trace(START_FIND_GROUP_BY_UNIQUE_FIELDS, group.getName(), group.getId(), group.getAccount(), group.getIsInner());
-        return repository.getByNameAndIsInnerAndAccount_IdAndIdNot(group.getName(), group.getIsInner(), group.getAccount().getId(), group.getId());
+        log.trace(
+                START_FIND_GROUP_BY_UNIQUE_FIELDS, group.getName(), group.getId(), group.getAccount(),
+                group.getIsInner()
+        );
+        return repository.getByNameAndIsInnerAndAccount_IdAndIdNot(group.getName(), group.getIsInner(),
+                                                                   group.getAccount().getId(), group.getId()
+        );
     }
 }

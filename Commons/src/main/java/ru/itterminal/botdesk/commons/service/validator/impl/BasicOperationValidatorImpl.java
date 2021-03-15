@@ -26,11 +26,7 @@ public class BasicOperationValidatorImpl<E extends BaseEntity> implements Operat
     public static final String NOT_UNIQUE_MESSAGE = "%s is occupied";
     public static final String VALIDATION_FAILED = "Validation failed";
     public static final String FIELDS_ARE_NOT_VALID = "Fields are not valid: {}";
-
-    @Override
-    public boolean checkAccessForRead(E entity) {
-        return true;
-    }
+    public static final String ANONYMOUS = "anonymous";
 
     @Override
     public boolean beforeCreate(E entity) {

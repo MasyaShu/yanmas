@@ -1,6 +1,12 @@
 package ru.itterminal.botdesk.commons.service.impl;
 
-import lombok.extern.slf4j.Slf4j;
+import static java.lang.String.format;
+
+import java.util.List;
+import java.util.UUID;
+
+import javax.persistence.OptimisticLockException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
@@ -8,23 +14,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 import ru.itterminal.botdesk.commons.repository.CustomizedParentEntityRepository;
 import ru.itterminal.botdesk.commons.service.CrudService;
 import ru.itterminal.botdesk.commons.service.validator.OperationValidator;
 
-import javax.persistence.OptimisticLockException;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static java.lang.String.format;
-
-@SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
+@SuppressWarnings({"SpringJavaAutowiredFieldsWarningInspection", "DuplicatedCode"})
 @Slf4j
 @Service
-
 public abstract class CrudServiceImpl<E extends BaseEntity,
         V extends OperationValidator<E>,
         R extends CustomizedParentEntityRepository<E>>
@@ -39,6 +39,7 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
     @Override
     @Transactional
     public E create(E entity) {
+        validator.checkAccessBeforeCreate(entity);
         validator.beforeCreate(entity);
         log.trace(format(CREATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.toString()));
         UUID id = UUID.randomUUID();
@@ -54,6 +55,7 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
     @Override
     @Transactional
     public E update(E entity) {
+        validator.checkAccessBeforeUpdate(entity);
         validator.beforeUpdate(entity);
         log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
         if (!repository.existsById(entity.getId())) {
@@ -77,9 +79,10 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
         String searchParameter = "id";
         log.trace(format(FIND_INIT_MESSAGE, searchParameter, id));
         if (repository.existsById(id)) {
-            Optional<E> baseEntity = repository.findById(id);
-            log.trace(format(FIND_FINISH_MESSAGE, searchParameter, id, baseEntity.get()));
-            return baseEntity.get();
+            var foundEntity = repository.findById(id).get();
+            validator.checkAccessBeforeRead(foundEntity);
+            log.trace(format(FIND_FINISH_MESSAGE, searchParameter, id, foundEntity));
+            return foundEntity;
         } else {
             String errorMessage = format(FIND_INVALID_MESSAGE, searchParameter, id);
             log.error(errorMessage);

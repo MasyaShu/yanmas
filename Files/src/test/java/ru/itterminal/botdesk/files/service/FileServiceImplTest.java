@@ -27,6 +27,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import ru.itterminal.botdesk.aau.model.Account;
+import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.files.model.File;
@@ -55,6 +56,10 @@ class FileServiceImplTest {
     @SuppressWarnings("unused")
     @MockBean
     private FileOperationValidator validator;
+
+    @SuppressWarnings("unused")
+    @MockBean
+    private AccountServiceImpl accountService;
 
     @MockBean
     private AwsS3ObjectOperations awsS3ObjectOperations;

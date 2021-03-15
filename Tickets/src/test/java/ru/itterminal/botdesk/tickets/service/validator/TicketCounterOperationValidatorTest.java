@@ -51,7 +51,6 @@ class TicketCounterOperationValidatorTest {
                 .build();
         assertTrue(validator.beforeUpdate(newCounterFromDatabase));
         verify(service, times(1)).findById(any());
-        verify(jwtUserBuilder, times(1)).getJwtUser();
     }
 
     @Test
@@ -71,7 +70,6 @@ class TicketCounterOperationValidatorTest {
                 assertThrows(LogicalValidationException.class, () -> validator.beforeUpdate(newCounterFromDatabase));
         assertEquals(NEW_VALUE_MUST_NOT, actualException.getFieldErrors().get(CURRENT_TICKET_NUMBER).get(0).getMessage());
         verify(service, times(1)).findById(any());
-        verify(jwtUserBuilder, times(1)).getJwtUser();
     }
 
     @Test
@@ -84,7 +82,7 @@ class TicketCounterOperationValidatorTest {
                 .currentNumber(100L)
                 .build();
         var actualException =
-                assertThrows(AccessDeniedException.class, () -> validator.beforeUpdate(ticketCounterForUpdate));
+                assertThrows(AccessDeniedException.class, () -> validator.checkAccessBeforeUpdate(ticketCounterForUpdate));
         assertEquals(USER_FROM_OUTER_GROUP_CANT_UPDATE_TICKET_COUNTER, actualException.getMessage());
         verify(service, times(0)).findById(any());
         verify(service, times(0)).update(any());

@@ -8,13 +8,13 @@ import java.util.UUID;
 
 import javax.persistence.OptimisticLockException;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.service.CrudServiceWithAccount;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
@@ -30,6 +30,7 @@ import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
  * @param <V> extends OperationValidate
  * @param <R> extends CustomizedParentEntityRepository
  */
+@SuppressWarnings({"unused", "DuplicatedCode"})
 @Slf4j
 @Service
 @Transactional
@@ -39,6 +40,8 @@ public abstract class CrudServiceWithAccountImpl<
         R extends EntityRepositoryWithAccount<E>>
         extends CrudServiceImpl<E, V, R>
         implements CrudServiceWithAccount<E> {
+
+    protected final ModelMapper modelMapper = new ModelMapper();
 
     @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
     @Autowired
@@ -66,13 +69,15 @@ public abstract class CrudServiceWithAccountImpl<
         var accountId = jwtUserBuilder.getJwtUser().getAccountId();
         log.trace(format(FIND_INIT_MESSAGE_WITH_ACCOUNT, searchParameter, id, accountId));
         if (repository.existsById(id)) {
-            return repository.findByIdAndAccountId(id, accountId).orElseThrow(
+            var foundEntity  = repository.findByIdAndAccountId(id, accountId).orElseThrow(
                     () -> {
                         String errorMessage = format(FIND_INVALID_MESSAGE_WITH_ACCOUNT, searchParameter, id, accountId);
                         log.error(errorMessage);
                         throw new EntityNotExistException(errorMessage);
                     }
             );
+            validator.checkAccessBeforeRead(foundEntity);
+            return foundEntity;
         } else {
             String errorMessage = format(FIND_INVALID_MESSAGE_WITH_ACCOUNT, searchParameter, id, accountId);
             log.error(errorMessage);
@@ -80,12 +85,29 @@ public abstract class CrudServiceWithAccountImpl<
         }
     }
 
-    //TODO rewrite create
+    @Override
+    @Transactional
+    public E create(E entity) {
+        setNestedObjectsOfEntityBeforeCreate(entity);
+        validator.checkAccessBeforeCreate(entity);
+        validator.beforeCreate(entity);
+        log.trace(format(CREATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.toString()));
+        UUID id = UUID.randomUUID();
+        entity.setId(id);
+        entity.generateDisplayName();
+        validator.checkUniqueness(entity);
+        E createdEntity;
+        createdEntity = repository.create(entity);
+        log.trace(format(CREATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), createdEntity.toString()));
+        return createdEntity;
+    }
 
     @SuppressWarnings("DuplicatedCode")
     @Transactional
     @Override
     public E update(E entity) {
+        setNestedObjectsOfEntityBeforeUpdate(entity);
+        validator.checkAccessBeforeUpdate(entity);
         validator.beforeUpdate(entity);
         log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
         var accountId = jwtUserBuilder.getJwtUser().getAccountId();
@@ -101,7 +123,7 @@ public abstract class CrudServiceWithAccountImpl<
         }
     }
 
-    protected void setNestedObjectsOfEntityBeforeCreate(E entity, User currentUser) {}
-    @SuppressWarnings("unused")
-    protected void setNestedObjectsOfEntityBeforeUpdate(E entity, User currentUser) {}
+    protected void setNestedObjectsOfEntityBeforeCreate(E entity) {}
+
+    protected void setNestedObjectsOfEntityBeforeUpdate(E entity) {}
 }

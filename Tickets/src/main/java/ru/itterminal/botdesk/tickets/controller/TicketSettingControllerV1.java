@@ -27,8 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.User;
-import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
-import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
@@ -40,8 +38,6 @@ import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoRequest;
 import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoResponse;
 import ru.itterminal.botdesk.tickets.model.dto.TicketSettingFilterDto;
 import ru.itterminal.botdesk.tickets.service.impl.TicketSettingServiceImpl;
-import ru.itterminal.botdesk.tickets.service.impl.TicketStatusServiceImpl;
-import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
 
 @SuppressWarnings("DuplicatedCode")
 @Slf4j
@@ -51,11 +47,7 @@ import ru.itterminal.botdesk.tickets.service.impl.TicketTypeServiceImpl;
 @RequiredArgsConstructor
 public class TicketSettingControllerV1 extends BaseController {
 
-    private final AccountServiceImpl accountService;
-    private final GroupServiceImpl groupService;
     private final UserServiceImpl userService;
-    private final TicketStatusServiceImpl ticketStatusService;
-    private final TicketTypeServiceImpl ticketTypeService;
     private final TicketSettingServiceImpl ticketSettingService;
     private final SpecificationsFactory specFactory;
     public static final String FIND_BY_AUTHOR_ID_INIT_MESSAGE = "Get request for find {} by authorId: {}";
@@ -68,10 +60,10 @@ public class TicketSettingControllerV1 extends BaseController {
     public ResponseEntity<TicketSettingDtoResponse> create(Principal principal,
                                                            @Validated(Create.class) @RequestBody TicketSettingDtoRequest request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
-        TicketSetting ticketSetting = new TicketSetting();
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        setNestedObjectsIntoEntityFromEntityDtoRequest(ticketSetting, request, jwtUser.getAccountId());
-        var createdTicketSetting = ticketSettingService.create(ticketSetting);
+        var createdTicketSetting = ticketSettingService.create(
+                ticketSettingService.convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(request, jwtUser.getAccountId())
+        );
         var returnedTicketSetting = modelMapper.map(createdTicketSetting, TicketSettingDtoResponse.class);
         log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdTicketSetting);
         return new ResponseEntity<>(returnedTicketSetting, HttpStatus.CREATED);
@@ -90,10 +82,10 @@ public class TicketSettingControllerV1 extends BaseController {
     public ResponseEntity<TicketSettingDtoResponse> update(Principal principal,
                                                            @Validated(Update.class) @RequestBody TicketSettingDtoRequest request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
-        TicketSetting ticketSetting = modelMapper.map(request, TicketSetting.class);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        setNestedObjectsIntoEntityFromEntityDtoRequest(ticketSetting, request, jwtUser.getAccountId());
-        var updatedTicketSetting = ticketSettingService.update(ticketSetting);
+        var updatedTicketSetting = ticketSettingService.update(
+                ticketSettingService.convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(request, jwtUser.getAccountId())
+        );
         var returnedTicketSetting = modelMapper.map(updatedTicketSetting, TicketSettingDtoResponse.class);
         log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedTicketSetting);
         return new ResponseEntity<>(returnedTicketSetting, HttpStatus.OK);
@@ -154,34 +146,5 @@ public class TicketSettingControllerV1 extends BaseController {
         return new ResponseEntity<>(returnedTicketSetting, HttpStatus.OK);
     }
 
-    private void setNestedObjectsIntoEntityFromEntityDtoRequest
-            (TicketSetting ticketSetting, TicketSettingDtoRequest request, UUID accountId) {
-        ticketSetting.setAccount(accountService.findById(accountId));
-        if (request.getAuthor() != null) {
-            ticketSetting.setAuthor(userService.findByIdAndAccountId(request.getAuthor()));
-            ticketSetting.setGroup(ticketSetting.getAuthor().getGroup());
-        } else {
-            ticketSetting.setGroup(groupService.findByIdAndAccountId(request.getGroup()));
-        }
-        ticketSetting.setObservers(userService.findAllByAccountIdAndListId(request.getObservers()));
-        ticketSetting.setExecutors(userService.findAllByAccountIdAndListId(request.getExecutors()));
-        if (request.getTicketTypeForNew() != null) {
-            ticketSetting.setTicketTypeForNew(ticketTypeService.findByIdAndAccountId(request.getTicketTypeForNew()));
-        }
-        if (request.getTicketStatusForNew() != null) {
-            ticketSetting.setTicketStatusForNew(ticketStatusService.findByIdAndAccountId(request.getTicketStatusForNew()));
-        }
-        if (request.getTicketStatusForReopen() != null) {
-            ticketSetting
-                    .setTicketStatusForReopen(ticketStatusService.findByIdAndAccountId(request.getTicketStatusForReopen()));
-        }
-        if (request.getTicketStatusForClose() != null) {
-            ticketSetting
-                    .setTicketStatusForClose(ticketStatusService.findByIdAndAccountId(request.getTicketStatusForClose()));
-        }
-        if (request.getTicketStatusForCancel() != null) {
-            ticketSetting
-                    .setTicketStatusForCancel(ticketStatusService.findByIdAndAccountId(request.getTicketStatusForCancel()));
-        }
-    }
+
 }

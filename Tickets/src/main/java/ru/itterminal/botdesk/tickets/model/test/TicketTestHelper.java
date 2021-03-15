@@ -114,17 +114,17 @@ public class TicketTestHelper extends EntityTestHelperImpl<Ticket, TicketDtoRequ
                 .deleted(entity.getDeleted())
                 .version(entity.getVersion())
                 .displayName(entity.getDisplayName())
-                .author(entity.getAuthor() == null
+                .authorId(entity.getAuthor() == null
                                 ? null
                                 : entity.getAuthor().getId())
                 .subject(entity.getSubject())
                 .description(entity.getDescription())
                 .deadline(entity.getDeadline())
                 .isFinished(entity.getIsFinished())
-                .ticketType(entity.getTicketType() == null
+                .ticketTypeId(entity.getTicketType() == null
                                 ? null
                                 : entity.getTicketType().getId())
-                .ticketStatus(entity.getTicketStatus() == null
+                .ticketStatusId(entity.getTicketStatus() == null
                                     ? null
                                     : entity.getTicketStatus().getId())
                 .observers(observersIdList)

@@ -43,7 +43,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ru.itterminal.botdesk.aau.model.Account;
-import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
 import ru.itterminal.botdesk.commons.util.CommonConstants;
 import ru.itterminal.botdesk.files.model.File;
@@ -60,10 +59,6 @@ class FileControllerV1Test {
 
     @MockBean
     private FileServiceImpl fileService;
-
-    @SuppressWarnings("unused")
-    @MockBean
-    private AccountServiceImpl accountService;
 
     @Autowired
     private FileControllerV1 controller;
@@ -95,7 +90,6 @@ class FileControllerV1Test {
 
     private File file;
     private FileDto fileDto;
-    private Account account;
 
     @BeforeAll
     void setUpBeforeAll() {
@@ -109,7 +103,7 @@ class FileControllerV1Test {
                 .build();
         new Random().nextBytes(fileData);
         mockMultipartFile = new MockMultipartFile("file", fileData);
-        account = Account.builder()
+        Account account = Account.builder()
                 .id(ACCOUNT_ID)
                 .name(ACCOUNT_NAME)
                 .build();
@@ -131,7 +125,6 @@ class FileControllerV1Test {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void create_shouldCreate_whenValidDataPassed() throws Exception {
         fileDto.setSize(null);
-        when(accountService.findById(any())).thenReturn(account);
         when(fileService.create(any())).thenReturn(file);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -146,7 +139,6 @@ class FileControllerV1Test {
         var actualTicketDtoResponse = objectMapper.readValue(requestResult, FileDto.class);
         var expectedTicketDtoResponse = mapper.map(file, FileDto.class);
         assertEquals(expectedTicketDtoResponse, actualTicketDtoResponse);
-        verify(accountService, times(1)).findById(any());
         verify(fileService, times(1)).create(any());
     }
 
@@ -172,7 +164,6 @@ class FileControllerV1Test {
                                            "$.errors.size[?(@.message == '%s')]",
                                            CommonConstants.MUST_BE_NULL
                                    ).exists());
-        verify(accountService, times(0)).findById(any());
         verify(fileService, times(0)).create(any());
 
     }
@@ -185,7 +176,6 @@ class FileControllerV1Test {
         fileDto.setDeleted(false);
         fileDto.setFileName(null);
         fileDto.setSize(null);
-        when(accountService.findById(any())).thenReturn(account);
         when(fileService.update(any())).thenReturn(file);
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -200,7 +190,6 @@ class FileControllerV1Test {
         var actualTicketDtoResponse = objectMapper.readValue(requestResult, FileDto.class);
         var expectedTicketDtoResponse = mapper.map(file, FileDto.class);
         assertEquals(expectedTicketDtoResponse, actualTicketDtoResponse);
-        verify(accountService, times(1)).findById(any());
         verify(fileService, times(1)).update(any());
     }
 
@@ -229,7 +218,6 @@ class FileControllerV1Test {
                                            "$.errors.size[?(@.message == '%s')]",
                                            CommonConstants.MUST_BE_NULL
                                    ).exists());
-        verify(accountService, times(0)).findById(any());
         verify(fileService, times(0)).update(any());
 
     }
