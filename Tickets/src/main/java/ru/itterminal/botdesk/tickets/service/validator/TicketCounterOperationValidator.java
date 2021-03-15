@@ -26,12 +26,16 @@ public class TicketCounterOperationValidator extends BasicOperationValidatorImpl
     private final JwtUserBuilder jwtUserBuilder;
 
     @Override
-    public boolean beforeUpdate(TicketCounter entity) {
-        super.beforeUpdate(entity);
+    public void checkAccessBeforeUpdate(TicketCounter entity) {
         var jwtUser = jwtUserBuilder.getJwtUser();
         if (!jwtUser.isInnerGroup()) {
             throw new AccessDeniedException(USER_FROM_OUTER_GROUP_CANT_UPDATE_TICKET_COUNTER);
         }
+    }
+
+    @Override
+    public boolean beforeUpdate(TicketCounter entity) {
+        super.beforeUpdate(entity);
         var ticketCounterFromDatabase = service.findById(entity.getId());
         if (entity.getCurrentNumber() <= ticketCounterFromDatabase.getCurrentNumber()) {
             throw createExpectedLogicalValidationException(CURRENT_TICKET_NUMBER, NEW_VALUE_MUST_NOT);

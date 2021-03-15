@@ -55,20 +55,29 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
     public static final String EMAIL = "email";
 
     @Override
-    public boolean beforeCreate(User entity) {
-        super.beforeCreate(entity);
-        if (!SecurityContextHolder.getContext().getAuthentication().getName().contains("anonymous")) {
+    public void checkAccessBeforeCreate(User entity) {
+        if (!SecurityContextHolder.getContext().getAuthentication().getName().contains(ANONYMOUS)) {
             checkAccessCreateUpdate(entity, null);
         }
+    }
+
+    @Override
+    public boolean beforeCreate(User entity) {
+        super.beforeCreate(entity);
         checkAccountOwnerNotExist(entity);
         return true;
     }
 
     @Override
+    public void checkAccessBeforeUpdate(User entity) {
+        var userFromDatabase = service.findById(entity.getId());
+        checkAccessCreateUpdate(entity, userFromDatabase);
+    }
+
+    @Override
     public boolean beforeUpdate(User entity) {
         super.beforeUpdate(entity);
-        User userFromDatabase = service.findById(entity.getId());
-        checkAccessCreateUpdate(entity, userFromDatabase);
+        var userFromDatabase = service.findById(entity.getId());
         if (!entity.getGroup().equals(userFromDatabase.getGroup())) {
             checkPossibilityOfChangingUserGroup(entity);
         }
@@ -99,7 +108,7 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
     }
 
     @Override
-    public void checkAccessForRead(User entity) {
+    public void checkAccessBeforeRead(User entity) {
         if (!SecurityContextHolder.getContext().getAuthentication().getName().contains(ANONYMOUS)) {
             JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             if (!(jwtUser.isInnerGroup() || jwtUser.getGroupId().equals(entity.getGroup().getId()))) {

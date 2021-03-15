@@ -66,7 +66,7 @@ public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> 
     }
 
     @Override
-    public void checkAccessForRead(Group entity) {
+    public void checkAccessBeforeRead(Group entity) {
         if (!SecurityContextHolder.getContext().getAuthentication().getName().contains(ANONYMOUS)) {
             JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             if (!(jwtUser.isInnerGroup() || jwtUser.getGroupId().equals(entity.getId()))) {

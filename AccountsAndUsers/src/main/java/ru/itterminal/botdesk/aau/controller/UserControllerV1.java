@@ -69,6 +69,7 @@ public class UserControllerV1 extends BaseController {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
         var user = modelMapper.map(request, User.class);
         var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
+        // !!! setting is here because it is not possible into service layer (cycle dependency with AccountServiceImpl)
         user.setAccount(accountService.findById(jwtUser.getAccountId()));
         user.setRole(roleService.findById(request.getRole()));
         user.setGroup(groupService.findByIdAndAccountId(request.getGroup()));

@@ -131,7 +131,7 @@ public class GroupControllerV1 extends BaseController {
     public ResponseEntity<GroupDto> getById(@PathVariable UUID id) {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
         var foundGroup = service.findByIdAndAccountId(id);
-        validator.checkAccessForRead(foundGroup);
+        validator.checkAccessBeforeRead(foundGroup);
         var returnedGroup = modelMapper.map(foundGroup, GroupDto.class);
         log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundGroup);
         return new ResponseEntity<>(returnedGroup, HttpStatus.OK);
@@ -146,6 +146,7 @@ public class GroupControllerV1 extends BaseController {
 
     private Group convertRequestDtoIntoEntity(GroupDto request, UUID accountId) {
         var group = modelMapper.map(request, Group.class);
+        // !!! setting is here because it is not possible into service layer (cycle dependency with AccountServiceImpl)
         group.setAccount(accountService.findById(accountId));
         return group;
     }

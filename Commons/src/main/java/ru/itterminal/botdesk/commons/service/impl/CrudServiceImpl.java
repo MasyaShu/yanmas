@@ -39,7 +39,7 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
     @Override
     @Transactional
     public E create(E entity) {
-        validator.checkAccessForCreate(entity);
+        validator.checkAccessBeforeCreate(entity);
         validator.beforeCreate(entity);
         log.trace(format(CREATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.toString()));
         UUID id = UUID.randomUUID();
@@ -55,7 +55,7 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
     @Override
     @Transactional
     public E update(E entity) {
-        validator.checkAccessForUpdate(entity);
+        validator.checkAccessBeforeUpdate(entity);
         validator.beforeUpdate(entity);
         log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
         if (!repository.existsById(entity.getId())) {
@@ -80,7 +80,7 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
         log.trace(format(FIND_INIT_MESSAGE, searchParameter, id));
         if (repository.existsById(id)) {
             var foundEntity = repository.findById(id).get();
-            validator.checkAccessForRead(foundEntity);
+            validator.checkAccessBeforeRead(foundEntity);
             log.trace(format(FIND_FINISH_MESSAGE, searchParameter, id, foundEntity));
             return foundEntity;
         } else {

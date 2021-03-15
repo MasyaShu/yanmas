@@ -40,16 +40,24 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
     }
 
     @Override
+    public void checkAccessBeforeCreate(TicketSetting entity) {
+        checkAccessForCreateUpdate();
+    }
+
+    @Override
     public boolean beforeCreate(TicketSetting entity) {
         super.beforeCreate(entity);
-        checkAccessForCreateUpdate();
         return checkBeforeCreateUpdate(entity);
+    }
+
+    @Override
+    public void checkAccessBeforeUpdate(TicketSetting entity) {
+        checkAccessForCreateUpdate();
     }
 
     @Override
     public boolean beforeUpdate(TicketSetting entity) {
         super.beforeUpdate(entity);
-        checkAccessForCreateUpdate();
         return checkBeforeCreateUpdate(entity);
     }
 

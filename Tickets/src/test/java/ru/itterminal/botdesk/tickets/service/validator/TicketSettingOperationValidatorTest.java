@@ -130,20 +130,20 @@ class TicketSettingOperationValidatorTest {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
-    void beforeCreate_shouldGetAccessDeniedException_whenCurrentUserFromNotInnerGroup() {
+    void checkAccessBeforeCreate_shouldGetAccessDeniedException_whenCurrentUserFromNotInnerGroup() {
         var ticketSetting = ticketSettingTestHelper.getPredefinedValidEntityList().get(0);
         AccessDeniedException thrown = assertThrows(AccessDeniedException.class,
-                () -> validator.beforeCreate(ticketSetting));
+                () -> validator.checkAccessBeforeCreate(ticketSetting));
         assertEquals(A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_SETTING,
                 thrown.getMessage());
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
-    void beforeUpdate_shouldGetAccessDeniedException_whenCurrentUserFromNotInnerGroup() {
+    void checkAccessBeforeUpdate_shouldGetAccessDeniedException_whenCurrentUserFromNotInnerGroup() {
         var ticketSetting = ticketSettingTestHelper.getPredefinedValidEntityList().get(0);
         AccessDeniedException thrown = assertThrows(AccessDeniedException.class,
-                () -> validator.beforeUpdate(ticketSetting));
+                () -> validator.checkAccessBeforeUpdate(ticketSetting));
         assertEquals(A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_SETTING,
                 thrown.getMessage());
     }

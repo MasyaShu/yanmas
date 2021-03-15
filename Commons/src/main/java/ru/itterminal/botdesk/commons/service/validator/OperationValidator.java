@@ -13,11 +13,11 @@ public interface OperationValidator<E extends BaseEntity> {
 
     boolean beforeUpdate(E entity);
 
-    default void checkAccessForRead(E entity) {}
+    default void checkAccessBeforeRead(E entity) {}
 
-    default void checkAccessForCreate(E entity) {}
+    default void checkAccessBeforeCreate(E entity) {}
 
-    default void checkAccessForUpdate(E entity) {}
+    default void checkAccessBeforeUpdate(E entity) {}
 
 
 }

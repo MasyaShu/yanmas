@@ -96,6 +96,7 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
     @Override
     @Transactional
     public User create(User entity) {
+        validator.checkAccessBeforeCreate(entity);
         validator.beforeCreate(entity);
         log.trace(format(CREATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.toString()));
         UUID id = UUID.randomUUID();
@@ -141,6 +142,7 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
     @Override
     @Transactional
     public User update(User entity) {
+        validator.checkAccessBeforeUpdate(entity);
         validator.beforeUpdate(entity);
         log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
         User entityFromDatabase = super.findByIdAndAccountId(entity.getId());

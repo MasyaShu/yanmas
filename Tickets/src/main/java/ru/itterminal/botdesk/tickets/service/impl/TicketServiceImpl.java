@@ -84,6 +84,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
                 )
         );
         setNestedObjectsOfEntityBeforeCreate(entity);
+        validator.checkAccessBeforeCreate(entity);
         validator.beforeCreate(entity);
         validator.checkUniqueness(entity);
         var createdEntity = repository.create(entity);
@@ -95,11 +96,6 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
         }
         log.trace(format(CREATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), createdEntity.toString()));
         return createdEntity;
-    }
-
-    @SuppressWarnings("UnusedReturnValue")
-    public void checkAccessForRead(Ticket ticket) {
-        validator.checkAccessForRead(ticket);
     }
 
     @Override
@@ -186,6 +182,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
         return foundTickets.getTotalElements();
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @Override
     public Ticket convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(TicketDtoRequest request, UUID accountId) {
         var ticket = modelMapper.map(request, Ticket.class);

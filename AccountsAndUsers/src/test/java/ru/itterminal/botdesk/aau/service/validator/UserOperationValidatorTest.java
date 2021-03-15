@@ -155,14 +155,14 @@ class UserOperationValidatorTest {
 
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    void beforeUpdate_shouldGetAccessDeniedException_whenCurrentUserRoleIsLessThanUpdatedUserRole() {
+    void checkAccessForUpdate_shouldGetAccessDeniedException_whenCurrentUserRoleIsLessThanUpdatedUserRole() {
         newUser.setRole(roleAuthor);
         userFromDatabase.setRole(roleExecutor);
         when(service.findById(newUser.getId())).thenReturn(userFromDatabase);
         when(roleService.getAccountOwnerRole()).thenReturn(roleAccountOwner);
         AccessDeniedException thrown = assertThrows(
                 AccessDeniedException.class,
-                () -> validator.beforeUpdate(newUser)
+                () -> validator.checkAccessBeforeUpdate(newUser)
         );
         assertEquals(
                 format(
@@ -187,7 +187,7 @@ class UserOperationValidatorTest {
         user.getGroup().setId(UUID.fromString(INNER_GROUP_ID));
         AccessDeniedException thrown = assertThrows(
                 AccessDeniedException.class,
-                () -> validator.checkAccessForRead(user)
+                () -> validator.checkAccessBeforeRead(user)
         );
         assertEquals(ACCESS_IS_DENIED_FOR_SEARCHING_BY_PASSED_ID, thrown.getMessage());
     }
@@ -196,7 +196,7 @@ class UserOperationValidatorTest {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
     void checkAccessForRead_shouldNotGetException_whenCurrentUserFromNotInnerGroupAndCurrentUserGroupEqualsEntityGroup() {
         user.getGroup().setId(UUID.fromString(NOT_INNER_GROUP_ID));
-        validator.checkAccessForRead(user);
+        validator.checkAccessBeforeRead(user);
     }
 
     @ParameterizedTest
@@ -344,7 +344,7 @@ class UserOperationValidatorTest {
     @ParameterizedTest
     @MethodSource("getUserRolesThatAnExecutorInnerGroupNotCanCreateAndUpdate")
     @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_INNER_GROUP")
-    void beforeCreate_shouldLogicalValidationException_whenCurrentUserFromInnerGroupAndExecutorRoleNotAllowsYouToCreateUsersWithPassedRoles(
+    void checkAccessForCreate_shouldLogicalValidationException_whenCurrentUserFromInnerGroupAndExecutorRoleNotAllowsYouToCreateUsersWithPassedRoles(
             Role role, String idGroup) {
         user.setRole(role);
         user.getGroup().setId(UUID.fromString(idGroup));
@@ -352,14 +352,14 @@ class UserOperationValidatorTest {
                 .thenReturn(roleAccountOwner);
         assertThrows(
                 AccessDeniedException.class,
-                () -> validator.beforeCreate(user)
+                () -> validator.checkAccessBeforeCreate(user)
         );
     }
 
     @ParameterizedTest
     @MethodSource("getUserRolesThatAnExecutorInnerGroupNotCanCreateAndUpdate")
     @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_INNER_GROUP")
-    void beforeUpdate_shouldLogicalValidationException_whenCurrentUserFromInnerGroupAndExecutorRoleNotAllowsYouToUpdateUsersWithPassedRoles(
+    void checkAccessForUpdate_shouldLogicalValidationException_whenCurrentUserFromInnerGroupAndExecutorRoleNotAllowsYouToUpdateUsersWithPassedRoles(
             Role role, String idGroup) {
         newUser.setRole(role);
         user.getGroup().setId(UUID.fromString(idGroup));
@@ -370,14 +370,14 @@ class UserOperationValidatorTest {
         when(roleService.getAccountOwnerRole()).thenReturn(roleAccountOwner);
         assertThrows(
                 AccessDeniedException.class,
-                () -> validator.beforeUpdate(newUser)
+                () -> validator.checkAccessBeforeUpdate(newUser)
         );
     }
 
     @ParameterizedTest
     @MethodSource("getUserRolesThatAnExecutorNotInnerGroupNotCanCreateAndUpdate")
     @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_NOT_INNER_GROUP")
-    void beforeCreate_shouldGetLogicalValidationException_whenCurrentUserFromNotInnerGroupAndExecutorRoleNotAllowsYouToCreateUsersWithPassedRoles(
+    void checkAccessForCreate_shouldGetLogicalValidationException_whenCurrentUserFromNotInnerGroupAndExecutorRoleNotAllowsYouToCreateUsersWithPassedRoles(
             Role role, String idGroup) {
         user.setRole(role);
         user.getGroup().setId(UUID.fromString(idGroup));
@@ -385,14 +385,14 @@ class UserOperationValidatorTest {
                 .thenReturn(roleAccountOwner);
         assertThrows(
                 AccessDeniedException.class,
-                () -> validator.beforeCreate(user)
+                () -> validator.checkAccessBeforeCreate(user)
         );
     }
 
     @ParameterizedTest
     @MethodSource("getUserRolesThatAnExecutorNotInnerGroupNotCanCreateAndUpdate")
     @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_NOT_INNER_GROUP")
-    void beforeUpdate_shouldLogicalValidationException_whenCurrentUserFromNotInnerGroupAndExecutorRoleNotAllowsYouToUpdateUsersWithPassedRoles(
+    void checkAccessForUpdate_shouldLogicalValidationException_whenCurrentUserFromNotInnerGroupAndExecutorRoleNotAllowsYouToUpdateUsersWithPassedRoles(
             Role role, String idGroup) {
         newUser.setRole(role);
         user.getGroup().setId(UUID.fromString(idGroup));
@@ -403,7 +403,7 @@ class UserOperationValidatorTest {
         when(roleService.getAccountOwnerRole()).thenReturn(roleAccountOwner);
         assertThrows(
                 AccessDeniedException.class,
-                () -> validator.beforeUpdate(newUser)
+                () -> validator.checkAccessBeforeUpdate(newUser)
         );
     }
 
