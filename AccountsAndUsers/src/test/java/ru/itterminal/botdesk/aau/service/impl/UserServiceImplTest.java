@@ -15,6 +15,7 @@ import static ru.itterminal.botdesk.security.config.TestSecurityConfig.EMAIL_1;
 import static ru.itterminal.botdesk.security.config.TestSecurityConfig.INNER_GROUP_ID;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,6 +27,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -36,6 +38,7 @@ import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.Role;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
+import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
 import ru.itterminal.botdesk.aau.service.validator.UserOperationValidator;
 import ru.itterminal.botdesk.commons.exception.AwsSesException;
@@ -80,9 +83,6 @@ class UserServiceImplTest {
     @MockBean
     private JwtUserBuilder jwtUserBuilder;
 
-    @MockBean
-    private JwtUser jwtUser;
-
     @Autowired
     private BCryptPasswordEncoder encoder;
 
@@ -95,15 +95,19 @@ class UserServiceImplTest {
     private static final UUID USER_ID = UUID.fromString("41ca3b9a-8e94-42a0-acbd-a2d3756af379");
     private User user;
     private User userFromDatabase;
+    private JwtUser jwtUser;
     private final Role roleAdmin = new Role(Roles.ADMIN.toString(), Roles.ADMIN.getWeight());
     private final Role roleAccountOwner = new Role(Roles.ACCOUNT_OWNER.toString(), Roles.ACCOUNT_OWNER.getWeight());
+    private final UserTestHelper userTestHelper = new UserTestHelper();
 
     @BeforeEach
     void setUpBeforeEach() {
         Account account = new Account();
         account.setId(UUID.fromString(ACCOUNT_1_ID));
-        Group group = new Group();
-        group.setId(UUID.fromString(INNER_GROUP_ID));
+        Group group = Group.builder()
+                .id(UUID.fromString(INNER_GROUP_ID))
+                .isInner(true)
+                .build();
         String PASSWORD = "12345";
         String SOME_TEST_TOKEN = "5423198156154519813598481";
         user = User
@@ -127,8 +131,18 @@ class UserServiceImplTest {
                 .role(roleAdmin)
                 .build();
         userFromDatabase.setId(USER_ID);
+        jwtUser = JwtUser.builder()
+                .id(user.getId())
+                .accountId(user.getAccount().getId())
+                .groupId(user.getGroup().getId())
+                .isInnerGroup(user.getGroup().getIsInner())
+                .weightRole(user.getRole().getWeight())
+                .username(user.getEmail())
+                .password(user.getPassword())
+                .authorities(List.of(new SimpleGrantedAuthority(user.getRole().getName())))
+                .enabled(true)
+                .build();
         when(jwtUserBuilder.getJwtUser()).thenReturn(jwtUser);
-        when(jwtUser.getAccountId()).thenReturn(user.getAccount().getId());
     }
 
     @Test
@@ -252,7 +266,7 @@ class UserServiceImplTest {
 
     @Test
     void verifyEmailToken_shouldUpdateEmailVerificationStatus_whenTokenIsValid() {
-        String token = jwtProvider.createToken(USER_ID);
+        String token = jwtProvider.createTokenWithUserId(USER_ID);
         user.setEmailVerificationToken(token);
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
@@ -269,7 +283,7 @@ class UserServiceImplTest {
 
     @Test
     void verifyEmailToken_shouldGetJwtException_whenEmailVerificationTokenInDatabaseIsNull() {
-        String token = jwtProvider.createToken(USER_ID);
+        String token = jwtProvider.createTokenWithUserId(USER_ID);
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
         user.setEmailVerificationStatus(true);
@@ -285,8 +299,8 @@ class UserServiceImplTest {
 
     @Test
     void verifyEmailToken_shouldGetJwtException_whenEmailVerificationTokenInDatabaseIsNotEqualPassedToken() {
-        String token = jwtProvider.createToken(USER_ID);
-        String emailVerificationToken = jwtProvider.createToken(UUID.randomUUID());
+        String token = jwtProvider.createTokenWithUserId(USER_ID);
+        String emailVerificationToken = jwtProvider.createTokenWithUserId(UUID.randomUUID());
         user.setEmailVerificationToken(emailVerificationToken);
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
@@ -301,7 +315,7 @@ class UserServiceImplTest {
 
     @Test
     void verifyEmailToken_shouldGetFailedSaveEntityException_whenFailedSaveAfterVerifyEmailToken() {
-        String token = jwtProvider.createToken(USER_ID);
+        String token = jwtProvider.createTokenWithUserId(USER_ID);
         user.setEmailVerificationToken(token);
         when(userRepository.existsById(any())).thenReturn(true);
         user.setEmailVerificationStatus(true);
@@ -376,7 +390,7 @@ class UserServiceImplTest {
     @Test
     void resetPassword_shouldResetPassword_whenPassedDataIsValid() {
         String newPassword = "newPassword";
-        String token = jwtProvider.createToken(USER_ID);
+        String token = jwtProvider.createTokenWithUserId(USER_ID);
         user.setPasswordResetToken(token);
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
@@ -394,8 +408,8 @@ class UserServiceImplTest {
     @Test
     void resetPassword_shouldGetJwtException_whenNotFoundUserByResetPasswordToken() {
         String newPassword = "newPassword";
-        String token = jwtProvider.createToken(USER_ID);
-        String tokenFromDatabase = jwtProvider.createToken(UUID.randomUUID());
+        String token = jwtProvider.createTokenWithUserId(USER_ID);
+        String tokenFromDatabase = jwtProvider.createTokenWithUserId(UUID.randomUUID());
         user.setPasswordResetToken(tokenFromDatabase);
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
@@ -409,7 +423,7 @@ class UserServiceImplTest {
     @Test
     void resetPassword_shouldGetJwtException_whenPasswordTokenInDatabaseIsNull() {
         String newPassword = "newPassword";
-        String token = jwtProvider.createToken(USER_ID);
+        String token = jwtProvider.createTokenWithUserId(USER_ID);
         user.setPasswordResetToken(null);
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
@@ -423,7 +437,7 @@ class UserServiceImplTest {
     @Test
     void resetPassword_shouldGetFailedSaveEntityException_whenFailedSaveAfterResetPassword() {
         String newPassword = "newPassword";
-        String token = jwtProvider.createToken(USER_ID);
+        String token = jwtProvider.createTokenWithUserId(USER_ID);
         user.setPasswordResetToken(token);
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
@@ -496,7 +510,8 @@ class UserServiceImplTest {
 
     @Test
     void updateEmailOfAccountOwner_shouldUpdateEmailOfAccountOwner_whenPassedValidToken() {
-        var token = jwtProvider.createToken(EMAIL_1);
+        var user = userTestHelper.getRandomValidEntity();
+        var token = jwtProvider.createTokenWithJwtUser(EMAIL_1, jwtUser);
         user.setEmailVerificationToken(token);
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findByIdAndAccountId(any(),any())).thenReturn(Optional.of(user));
