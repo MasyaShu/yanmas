@@ -162,7 +162,6 @@ class TicketTemplateControllerV1Test {
         ticketTemplateDtoRequest.setId(null);
         ticketTemplateDtoRequest.setDeleted(null);
         when(templateService.create(any())).thenReturn(ticketTemplate);
-        when(accountService.findById(any())).thenReturn(ticketTemplate.getAccount());
         when(userService.findByIdAndAccountId(any())).thenReturn(ticketTemplate.getAuthor());
         when(ticketTypeService.findByIdAndAccountId(any())).thenReturn(ticketTemplate.getTicketType());
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
@@ -185,7 +184,6 @@ class TicketTemplateControllerV1Test {
 
         assertEquals(expectedTicketTemplateDtoResponse, actualTicketTemplateDtoResponse);
 
-        verify(accountService, times(1)).findById(any());
         verify(templateService, times(1)).create(any());
     }
 
@@ -343,7 +341,6 @@ class TicketTemplateControllerV1Test {
         TicketTemplateDtoRequest ticketTemplateDtoRequest =
                 ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate);
         when(templateService.update(any())).thenReturn(ticketTemplate);
-        when(accountService.findById(any())).thenReturn(ticketTemplate.getAccount());
         when(userService.findByIdAndAccountId(any())).thenReturn(ticketTemplate.getAuthor());
         when(ticketTypeService.findByIdAndAccountId(any())).thenReturn(ticketTemplate.getTicketType());
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
@@ -367,7 +364,6 @@ class TicketTemplateControllerV1Test {
 
         assertEquals(expectedTicketTemplateDtoResponse, actualTicketTemplateDtoResponse);
 
-        verify(accountService, times(1)).findById(any());
         verify(templateService, times(1)).update(any());
     }
 
@@ -387,7 +383,6 @@ class TicketTemplateControllerV1Test {
         ticketTemplateDtoRequest.setVersion(null);
         ticketTemplateDtoRequest.setDeleted(null);
         when(templateService.update(any())).thenReturn(ticketTemplate);
-        when(accountService.findById(any())).thenReturn(ticketTemplate.getAccount());
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -426,7 +421,6 @@ class TicketTemplateControllerV1Test {
                                            CommonConstants.MUST_NOT_BE_NULL
                                    ).exists());
 
-        verify(accountService, times(0)).findById(any());
         verify(templateService, times(0)).update(any());
     }
 
