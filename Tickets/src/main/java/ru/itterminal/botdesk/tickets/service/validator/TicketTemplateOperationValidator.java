@@ -19,29 +19,36 @@ public class TicketTemplateOperationValidator extends BasicOperationValidatorImp
 
     @Override
     public boolean beforeCreate(TicketTemplate entity) {
-        checkIsInnerGroupForCreateUpdate();
         checkDateStartAfterDateEnd(entity);
         return super.beforeCreate(entity);
     }
 
     @Override
     public boolean beforeUpdate(TicketTemplate entity) {
-        checkIsInnerGroupForCreateUpdate();
         checkDateStartAfterDateEnd(entity);
         return super.beforeUpdate(entity);
     }
 
     private void checkDateStartAfterDateEnd(TicketTemplate entity) {
-        if(entity.getDateStart() != null && entity.getDateEnd() != null && entity.getDateEnd() < entity.getDateStart()) {
+        if (entity.getDateStart() != null && entity.getDateEnd() != null && entity.getDateEnd() < entity.getDateStart()) {
             throw CommonMethodsForValidation.createExpectedLogicalValidationException(VALIDATION_FAILED, THAN_DATE_END);
         }
     }
 
     private void checkIsInnerGroupForCreateUpdate() {
-      JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            if (!jwtUser.isInnerGroup()) {
-                throw new AccessDeniedException(A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TEMPLATE);
-            }
+        JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!jwtUser.isInnerGroup()) {
+            throw new AccessDeniedException(A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TEMPLATE);
+        }
     }
 
+    @Override
+    public void checkAccessBeforeCreate(TicketTemplate entity) {
+        checkIsInnerGroupForCreateUpdate();
+    }
+
+    @Override
+    public void checkAccessBeforeUpdate(TicketTemplate entity) {
+        checkIsInnerGroupForCreateUpdate();
+    }
 }

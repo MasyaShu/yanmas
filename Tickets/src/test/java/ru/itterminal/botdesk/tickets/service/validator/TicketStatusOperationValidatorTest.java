@@ -2,7 +2,6 @@ package ru.itterminal.botdesk.tickets.service.validator;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -25,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketStatusOperationValidator.A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_STATUS;
-import static ru.itterminal.botdesk.tickets.service.validator.TicketTypeOperationValidator.A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TYPE;
 
 @SpringJUnitConfig(value = {TicketStatusOperationValidator.class})
 @Import(TestSecurityConfig.class)
@@ -34,7 +32,7 @@ class TicketStatusOperationValidatorTest {
     @MockBean
     private TicketStatusServiceImpl service;
 
-    @Mock
+    @MockBean
     private TicketStatusUniqueFields ticketStatusUniqueFields;
 
     @Autowired
@@ -43,7 +41,6 @@ class TicketStatusOperationValidatorTest {
     private static final String EXIST_NAME = "ticketStatuss1";
     private static final String VALIDATED_FIELDS = "name";
     private static final Map<String, List<ValidationError>> errors = new HashMap<>();
-    private static LogicalValidationException logicalValidationException;
     private static TicketStatus ticketStatus;
 
     @BeforeAll
@@ -69,7 +66,7 @@ class TicketStatusOperationValidatorTest {
         when(service.findByUniqueFields(any())).thenReturn(List.of(ticketStatusUniqueFields));
         when(ticketStatusUniqueFields.getName()).thenReturn(EXIST_NAME);
         errors.put(VALIDATED_FIELDS, singletonList(new ValidationError(VALIDATED_FIELDS, "name is occupied")));
-        logicalValidationException = new LogicalValidationException(VALIDATED_FIELDS, errors);
+        LogicalValidationException logicalValidationException = new LogicalValidationException(VALIDATED_FIELDS, errors);
         LogicalValidationException thrown = assertThrows(LogicalValidationException.class,
                 () -> validator.checkUniqueness(ticketStatus));
         assertEquals(logicalValidationException.getFieldErrors().get("name").get(0),
@@ -80,7 +77,7 @@ class TicketStatusOperationValidatorTest {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
     void beforeCreate_shouldGetAccessDeniedException_whenCurrentUserFromNotInnerGroup() {
         AccessDeniedException thrown = assertThrows(AccessDeniedException.class,
-                () -> validator.beforeCreate(ticketStatus));
+                () -> validator.checkAccessBeforeCreate(ticketStatus));
         assertEquals(A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_STATUS,
                 thrown.getMessage());
     }
@@ -89,7 +86,7 @@ class TicketStatusOperationValidatorTest {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
     void beforeUpdate_shouldGetAccessDeniedException_whenCurrentUserFromNotInnerGroup() {
         AccessDeniedException thrown = assertThrows(AccessDeniedException.class,
-                () -> validator.beforeUpdate(ticketStatus));
+                () -> validator.checkAccessBeforeUpdate(ticketStatus));
         assertEquals(A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_STATUS,
                 thrown.getMessage());
     }

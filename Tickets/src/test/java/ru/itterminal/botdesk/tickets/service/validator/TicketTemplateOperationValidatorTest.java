@@ -70,7 +70,7 @@ class TicketTemplateOperationValidatorTest {
     void beforeCreate_shouldGetAccessDeniedException_whenCurrentUserFromNotInnerGroup() {
         TicketTemplate ticketTemplate = templateTestHelper.getRandomValidEntity();
         AccessDeniedException thrown = assertThrows(AccessDeniedException.class,
-                () -> validator.beforeCreate(ticketTemplate));
+                () -> validator.checkAccessBeforeCreate(ticketTemplate));
         assertEquals(A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TEMPLATE,
                 thrown.getMessage());
     }
@@ -80,7 +80,7 @@ class TicketTemplateOperationValidatorTest {
     void beforeUpdate_shouldGetAccessDeniedException_whenCurrentUserFromNotInnerGroup() {
         TicketTemplate ticketTemplate = templateTestHelper.getRandomValidEntity();
         AccessDeniedException thrown = assertThrows(AccessDeniedException.class,
-                () -> validator.beforeUpdate(ticketTemplate));
+                () -> validator.checkAccessBeforeUpdate(ticketTemplate));
         assertEquals(A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TEMPLATE,
                 thrown.getMessage());
     }

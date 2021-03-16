@@ -26,20 +26,6 @@ public class TicketTypeOperationValidator extends BasicOperationValidatorImpl<Ti
     private final TicketTypeServiceImpl service;
 
     @Override
-    public boolean beforeCreate(TicketType entity) {
-        super.beforeCreate(entity);
-        checkIsInnerGroupForCreateUpdate();
-        return true;
-    }
-
-    @Override
-    public boolean beforeUpdate(TicketType entity) {
-        super.beforeUpdate(entity);
-        checkIsInnerGroupForCreateUpdate();
-        return true;
-    }
-
-    @Override
     public boolean checkUniqueness(TicketType entity) {
         log.trace(CHECK_UNIQUENESS, entity);
         List<TicketTypeUniqueFields> foundTicketTypes = service.findByUniqueFields(entity);
@@ -59,5 +45,15 @@ public class TicketTypeOperationValidator extends BasicOperationValidatorImpl<Ti
                 throw new AccessDeniedException(A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TYPE);
             }
         }
+    }
+
+    @Override
+    public void checkAccessBeforeCreate(TicketType entity) {
+        checkIsInnerGroupForCreateUpdate();
+    }
+
+    @Override
+    public void checkAccessBeforeUpdate(TicketType entity) {
+        checkIsInnerGroupForCreateUpdate();
     }
 }

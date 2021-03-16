@@ -2,7 +2,6 @@ package ru.itterminal.botdesk.tickets.service.validator;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -24,7 +23,6 @@ import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static ru.itterminal.botdesk.tickets.service.validator.TicketStatusOperationValidator.A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_STATUS;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketTypeOperationValidator.A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TYPE;
 
 @SpringJUnitConfig(value = {TicketTypeOperationValidator.class})
@@ -35,7 +33,7 @@ class TicketTypeOperationValidatorTest {
     @MockBean
     private TicketTypeServiceImpl service;
 
-    @Mock
+    @MockBean
     private TicketTypeUniqueFields ticketTypeUniqueFields;
 
     @Autowired
@@ -44,7 +42,6 @@ class TicketTypeOperationValidatorTest {
     private static final String EXIST_NAME = "ticketTypes1";
     private static final String VALIDATED_FIELDS = "name";
     private static final Map<String, List<ValidationError>> errors = new HashMap<>();
-    private static LogicalValidationException logicalValidationException;
     private static TicketType ticketType;
 
     @BeforeAll
@@ -70,7 +67,7 @@ class TicketTypeOperationValidatorTest {
         when(service.findByUniqueFields(any())).thenReturn(List.of(ticketTypeUniqueFields));
         when(ticketTypeUniqueFields.getName()).thenReturn(EXIST_NAME);
         errors.put(VALIDATED_FIELDS, singletonList(new ValidationError(VALIDATED_FIELDS, "name is occupied")));
-        logicalValidationException = new LogicalValidationException(VALIDATED_FIELDS, errors);
+        LogicalValidationException logicalValidationException = new LogicalValidationException(VALIDATED_FIELDS, errors);
         LogicalValidationException thrown = assertThrows(LogicalValidationException.class,
                 () -> validator.checkUniqueness(ticketType));
         assertEquals(logicalValidationException.getFieldErrors().get("name").get(0),
@@ -81,7 +78,7 @@ class TicketTypeOperationValidatorTest {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
     void beforeCreate_shouldGetAccessDeniedException_whenCurrentUserFromNotInnerGroup() {
         AccessDeniedException thrown = assertThrows(AccessDeniedException.class,
-                () -> validator.beforeCreate(ticketType));
+                () -> validator.checkAccessBeforeCreate(ticketType));
         assertEquals(A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TYPE,
                 thrown.getMessage());
     }
@@ -90,7 +87,7 @@ class TicketTypeOperationValidatorTest {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
     void beforeUpdate_shouldGetAccessDeniedException_whenCurrentUserFromNotInnerGroup() {
         AccessDeniedException thrown = assertThrows(AccessDeniedException.class,
-                () -> validator.beforeUpdate(ticketType));
+                () -> validator.checkAccessBeforeUpdate(ticketType));
         assertEquals(A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TYPE,
                 thrown.getMessage());
     }

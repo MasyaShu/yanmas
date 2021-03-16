@@ -29,14 +29,7 @@ public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> 
             "A user from not inner group cannot create or update groups";
 
     @Override
-    public boolean beforeCreate(Group entity) {
-        checkIsInnerGroupForCreateUpdate();
-        return super.beforeCreate(entity);
-    }
-
-    @Override
     public boolean beforeUpdate(Group entity) {
-        checkIsInnerGroupForCreateUpdate();
         var groupFromDataBase = service.findByIdAndAccountId(entity.getId());
         entity.setIsInner(groupFromDataBase.getIsInner());
         return super.beforeUpdate(entity);
@@ -49,7 +42,7 @@ public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> 
         if (!foundGroup.isEmpty()) {
             String validatedField = "name";
             checkStringForEquals(entity.getName(), foundGroup.get(0).getName(),
-                                 "name", format(NOT_UNIQUE_MESSAGE, validatedField)
+                    "name", format(NOT_UNIQUE_MESSAGE, validatedField)
             );
         }
         log.trace(FIELDS_UNIQUE, entity);
@@ -63,6 +56,16 @@ public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> 
                 throw new AccessDeniedException(USER_FROM_AN_INNER_GROUP_CANNOT_CREATE_UPDATE_GROUPS);
             }
         }
+    }
+
+    @Override
+    public void checkAccessBeforeCreate(Group entity) {
+        checkIsInnerGroupForCreateUpdate();
+    }
+
+    @Override
+    public void checkAccessBeforeUpdate(Group entity) {
+        checkIsInnerGroupForCreateUpdate();
     }
 
     @Override

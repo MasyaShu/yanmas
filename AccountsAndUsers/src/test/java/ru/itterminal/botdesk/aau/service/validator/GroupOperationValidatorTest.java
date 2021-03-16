@@ -1,7 +1,6 @@
 package ru.itterminal.botdesk.aau.service.validator;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -35,7 +34,7 @@ class GroupOperationValidatorTest {
     @MockBean
     private GroupServiceImpl service;
 
-    @Mock
+    @MockBean
     private GroupUniqueFields userUniqueFields;
 
     @Autowired
@@ -87,7 +86,7 @@ class GroupOperationValidatorTest {
         errors.put(INNER_GROUP, singletonList(new ValidationError(LOGIC_CONSTRAINT_CODE,
                 USER_FROM_AN_INNER_GROUP_CANNOT_CREATE_UPDATE_GROUPS)));
         AccessDeniedException thrown = assertThrows(AccessDeniedException.class,
-                () -> validator.beforeCreate(group));
+                () -> validator.checkAccessBeforeCreate(group));
         assertEquals(USER_FROM_AN_INNER_GROUP_CANNOT_CREATE_UPDATE_GROUPS,
                 thrown.getMessage());
     }

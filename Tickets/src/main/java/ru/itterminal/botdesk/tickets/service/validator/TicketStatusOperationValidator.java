@@ -39,20 +39,6 @@ public class TicketStatusOperationValidator extends BasicOperationValidatorImpl<
         return true;
     }
 
-    @Override
-    public boolean beforeCreate(TicketStatus entity) {
-        super.beforeCreate(entity);
-        checkIsInnerGroupForCreateUpdate();
-        return true;
-    }
-
-    @Override
-    public boolean beforeUpdate(TicketStatus entity) {
-        super.beforeUpdate(entity);
-        checkIsInnerGroupForCreateUpdate();
-        return true;
-    }
-
     private void checkIsInnerGroupForCreateUpdate() {
         if (!SecurityContextHolder.getContext().getAuthentication().getName().contains("anonymous")) {
             JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -60,5 +46,15 @@ public class TicketStatusOperationValidator extends BasicOperationValidatorImpl<
                 throw new AccessDeniedException(A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_STATUS);
             }
         }
+    }
+
+    @Override
+    public void checkAccessBeforeCreate(TicketStatus entity) {
+        checkIsInnerGroupForCreateUpdate();
+    }
+
+    @Override
+    public void checkAccessBeforeUpdate(TicketStatus entity) {
+        checkIsInnerGroupForCreateUpdate();
     }
 }
