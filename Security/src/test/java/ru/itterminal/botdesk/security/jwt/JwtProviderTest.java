@@ -1,26 +1,7 @@
 package ru.itterminal.botdesk.security.jwt;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static ru.itterminal.botdesk.security.config.TestSecurityConfig.EMAIL_1;
-import static ru.itterminal.botdesk.security.jwt.JwtProvider.CANT_CREATE_TOKEN_BECAUSE;
-import static ru.itterminal.botdesk.security.jwt.JwtProvider.CANT_CREATE_TOKEN_IF_USER_ID_IS_NULL;
-import static ru.itterminal.botdesk.security.jwt.JwtProvider.CANT_GET_EMAIL_FROM_TOKEN_BECAUSE;
-import static ru.itterminal.botdesk.security.jwt.JwtProvider.CANT_GET_USER_ID_FROM_TOKEN_BECAUSE;
-import static ru.itterminal.botdesk.security.jwt.JwtProvider.EMAIL_IS_EMPTY;
-import static ru.itterminal.botdesk.security.jwt.JwtProvider.EMAIL_IS_NULL;
-import static ru.itterminal.botdesk.security.jwt.JwtProvider.TOKEN_IS_NULL;
-
-import java.util.List;
-import java.util.UUID;
-
-import javax.servlet.http.HttpServletRequest;
-
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.SignatureException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -33,12 +14,19 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.SignatureException;
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static ru.itterminal.botdesk.security.config.TestSecurityConfig.EMAIL_1;
+import static ru.itterminal.botdesk.security.jwt.JwtProvider.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {JwtProvider.class})
-@TestPropertySource(properties = {"jwt.token.secret=ksedtob", "jwt.token.expired=8640000", "jwt.token.prefix=Bearer"})
+@TestPropertySource(properties = {"jwt.token.secret=ksedtob", "jwt.token.expired=360000", "jwt.token.prefix=Bearer"})
 class JwtProviderTest {
 
     @Autowired
@@ -164,5 +152,12 @@ class JwtProviderTest {
     void validateTokens_shouldGetSignatureException_whenPassedInvalidToken() {
         String token = jwtProvider.createToken(EMAIL_1);
         assertThrows(SignatureException.class, () -> jwtProvider.validateToken(token + "abracadabra"));
+    }
+
+    @Test
+    void getTimeAfterTokenExpiration_shouldGetTime_whenPassedValidToken() {
+        String token = jwtProvider.createToken(EMAIL_1);
+        var timeAfterToken = jwtProvider.getTimeAfterTokenExpiration(token);
+        assertTrue(timeAfterToken);
     }
 }

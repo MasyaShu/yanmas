@@ -116,4 +116,9 @@ public class JwtProvider {
         Jws<Claims> claims = Jwts.parser().setSigningKey(secretToken).parseClaimsJws(token);
         return !claims.getBody().getExpiration().before(new Date());
     }
+
+    public boolean getTimeAfterTokenExpiration(String token) {
+        Jws<Claims> claims = Jwts.parser().setSigningKey(secretToken).parseClaimsJws(token);
+        return claims.getBody().getExpiration().getTime() > validityInMillisecondsToken;
+    }
 }

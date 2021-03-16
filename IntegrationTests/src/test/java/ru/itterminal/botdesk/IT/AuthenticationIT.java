@@ -36,6 +36,7 @@ import static ru.itterminal.botdesk.IT.util.ITHelper.*;
 class AuthenticationIT {
     public static final String REQUEST_EMAIL_UPDATE = "auth/request-email-update";
     public static final String EMAIL_UPDATE = "auth/email-update";
+    public static final String TOKEN_REFRESH = "auth/token-refresh";
     @Autowired
     private JwtProvider jwtProvider;
 
@@ -412,6 +413,37 @@ class AuthenticationIT {
     void successSignInByUserAccountOwnerWithNewEmail() {
         itHelper.getAccountOwner().setEmail(newEmailAccountOwner);
         successSignInAccountOwner();
+    }
+
+
+    @SuppressWarnings("unused")
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getTokensOfAllUsersNotAccountOwner")
+    @Order(250)
+    void failedTokenRefreshByAllUserNotAnonymousUser(String userKey, String token) {
+        given()
+                .headers(
+                        "Authorization",
+                        "Bearer " + token
+                )
+                .param(TOKEN, token)
+                .get(TOKEN_REFRESH)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.FORBIDDEN.value());
+    }
+
+    @SuppressWarnings("unused")
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getTokensOfAllUsersNotAccountOwner")
+    @Order(260)
+    void successTokenRefreshByAllUserAnonymousUser(String userKey, String token) {
+        given()
+                .param(TOKEN, token)
+                .get(TOKEN_REFRESH)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.OK.value());
     }
 
 

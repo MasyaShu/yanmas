@@ -39,7 +39,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/v1/auth/signin",
             "/api/v1/auth/email-verify",
             "/api/v1/auth/request-password-reset",
-            "/api/v1/auth/password-reset"
+            "/api/v1/auth/password-reset",
+            "/api/v1/auth/token-refresh"
     };
 
     @SuppressWarnings("EmptyMethod")

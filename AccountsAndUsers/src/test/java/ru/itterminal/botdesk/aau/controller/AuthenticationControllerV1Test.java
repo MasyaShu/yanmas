@@ -63,6 +63,7 @@ import ru.itterminal.botdesk.security.jwt.JwtProvider;
 class AuthenticationControllerV1Test {
 
     public static final String MUST_NOT_BE_EMPTY = "must not be empty";
+    public static final String EMAIL = "email";
     @MockBean
     private UserServiceImpl userService;
 
@@ -226,7 +227,7 @@ class AuthenticationControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath("$.errors.password[?(@.message == '%s')]", INVALID_PASSWORD).exists());
+                        .jsonPath("$.errors.password[?(@.message == '%s')]", INVALID_PASSWORD).exists());
         verify(userService, times(0)).resetPassword(mockResetPasswordToken, PASSWORD_INVALID);
     }
 
@@ -244,10 +245,10 @@ class AuthenticationControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath("$.errors.token[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
+                        .jsonPath("$.errors.token[?(@.message == '%s')]", MUST_NOT_BE_NULL).exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath("$.errors.password[?(@.message == '%s')]", MUST_NOT_BE_NULL)
-                                   .exists());
+                        .jsonPath("$.errors.password[?(@.message == '%s')]", MUST_NOT_BE_NULL)
+                        .exists());
         verify(userService, times(0)).resetPassword(anyString(), anyString());
     }
 
@@ -297,7 +298,7 @@ class AuthenticationControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath("$.detail", INVALID_EMAIL).exists());
+                        .jsonPath("$.detail", INVALID_EMAIL).exists());
         verify(userService, times(0)).requestUpdateEmailOfAccountOwner(anyString());
     }
 
@@ -310,9 +311,9 @@ class AuthenticationControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath("$.detail")
-                                   .value(Matchers.containsString(
-                                           MUST_NOT_BE_EMPTY)));
+                        .jsonPath("$.detail")
+                        .value(Matchers.containsString(
+                                MUST_NOT_BE_EMPTY)));
         verify(userService, times(0)).requestUpdateEmailOfAccountOwner(anyString());
     }
 
@@ -348,9 +349,49 @@ class AuthenticationControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath("$.detail")
-                                   .value(Matchers.containsString(
-                                           MUST_NOT_BE_EMPTY)));
+                        .jsonPath("$.detail")
+                        .value(Matchers.containsString(
+                                MUST_NOT_BE_EMPTY)));
         verify(userService, times(0)).updateEmailOfAccountOwner(anyString());
+    }
+
+    @Test
+    @WithAnonymousUser
+    void tokenRefresh_shouldIsForbidden_whenTokenHasExpired() throws Exception {
+        when(jwtProvider.getTimeAfterTokenExpiration(any())).thenReturn(false);
+        MockHttpServletRequestBuilder request =
+                get(HOST + PORT + API + "token-refresh?token=" + mockEmailVerificationToken);
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isForbidden());
+        verify(jwtProvider, times(1)).getTimeAfterTokenExpiration(any());
+    }
+
+    @Test
+    @WithAnonymousUser
+    void tokenRefresh_shouldNewToken_whenTokenHasNotExpired() throws Exception {
+        when(jwtProvider.getTimeAfterTokenExpiration(any())).thenReturn(true);
+        when(jwtProvider.getEmail(any())).thenReturn(EMAIL);
+        when(jwtProvider.createToken(EMAIL)).thenReturn(mockEmailVerificationToken);
+        MockHttpServletRequestBuilder request =
+                get(HOST + PORT + API + "token-refresh?token=" + mockEmailVerificationToken);
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").exists());
+        verify(jwtProvider, times(1)).getEmail(any());
+        verify(jwtProvider, times(1)).createToken(EMAIL);
+        verify(jwtProvider, times(1)).getTimeAfterTokenExpiration(any());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
+    void tokenRefresh_shouldIsForbidden_whenNotAnonymousUser() throws Exception {
+        MockHttpServletRequestBuilder request =
+                get(HOST + PORT + API + "token-refresh?token=" + mockEmailVerificationToken);
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isForbidden());
+        verify(jwtProvider, times(0)).getTimeAfterTokenExpiration(any());
     }
 }

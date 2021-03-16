@@ -36,7 +36,7 @@ import static ru.itterminal.botdesk.IT.util.ITHelper.*;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = {ITTestConfig.class, JwtProvider.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@TestPropertySource(properties = {"jwt.token.secret=ksedtob", "jwt.token.expired=8640000", "jwt.token.prefix=Bearer"})
+@TestPropertySource(properties = {"jwt.token.secret=ksedtob", "jwt.token.expired=360000", "jwt.token.prefix=Bearer"})
 class TicketTypeIT {
 
     @Autowired

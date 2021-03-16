@@ -1,32 +1,25 @@
 package ru.itterminal.botdesk.aau.controller;
 
-import static ru.itterminal.botdesk.aau.util.AAUConstants.EMAIL_PATTERN;
-import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_EMAIL;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 import ru.itterminal.botdesk.aau.model.dto.AuthenticationRequestDto;
 import ru.itterminal.botdesk.aau.model.dto.ResetPasswordDto;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.JwtAuthenticationException;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
+import java.util.HashMap;
+import java.util.Map;
+
+import static ru.itterminal.botdesk.aau.util.AAUConstants.EMAIL_PATTERN;
+import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_EMAIL;
 
 @RestController
 @RequestMapping(value = "/api/v1/auth")
@@ -36,6 +29,7 @@ public class AuthenticationControllerV1 {
     public static final String TOKEN_FOR_UPDATE_EMAIL_WAS_SENT_TO_NEW_EMAIL =
             "token for update email was sent to new email";
     public static final String EMAIL_WAS_SUCCESSFULLY_UPDATED = "email was successfully updated";
+    public static final String THE_TOKEN_HAS_EXPIRED = "the token has expired";
     private final AuthenticationManager authenticationManager;
 
     private final JwtProvider jwtProvider;
@@ -65,9 +59,20 @@ public class AuthenticationControllerV1 {
             Map<Object, Object> response = new HashMap<>();
             response.put("token", jwtProvider.createToken(email));
             return ResponseEntity.ok(response);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new JwtAuthenticationException(INVALID_USERNAME_OR_PASSWORD);
+        }
+    }
+
+    @GetMapping(path = "/token-refresh")
+    public ResponseEntity<Map<Object, Object>> tokenRefresh(@RequestParam(value = "token") @NotEmpty String token) {
+        if (jwtProvider.getTimeAfterTokenExpiration(token)) {
+            var email = jwtProvider.getEmail(token);
+            Map<Object, Object> response = new HashMap<>();
+            response.put("token", jwtProvider.createToken(email));
+            return ResponseEntity.ok(response);
+        } else {
+            throw new JwtAuthenticationException(THE_TOKEN_HAS_EXPIRED);
         }
     }
 
