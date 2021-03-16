@@ -81,7 +81,6 @@ public class TicketTypeServiceImpl extends
         super.setNestedObjectsOfEntityBeforeCreate(entity);
         setNestedObjectsOfEntity(entity);
         entity.setDeleted(false);
-        entity.setIsPredefinedForNewTicket(false);
     }
 
     @Override

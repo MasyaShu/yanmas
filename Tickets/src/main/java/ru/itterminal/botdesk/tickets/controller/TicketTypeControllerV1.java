@@ -46,6 +46,7 @@ public class TicketTypeControllerV1 extends BaseController {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
         TicketType ticketType = typeService.convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(request, jwtUser.getAccountId());
+        ticketType.setIsPredefinedForNewTicket(false);
         TicketType createdTicketType = typeService.create(ticketType);
         TicketTypeDto returnedTicketTypes = modelMapper.map(createdTicketType, TicketTypeDto.class);
         log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdTicketType);

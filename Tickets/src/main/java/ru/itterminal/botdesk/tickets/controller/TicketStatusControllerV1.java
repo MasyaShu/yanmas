@@ -47,6 +47,10 @@ public class TicketStatusControllerV1 extends BaseController {
 
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
         var ticketStatus = ticketStatusService.convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(request, jwtUser.getAccountId());
+        ticketStatus.setIsCanceledPredefined(false);
+        ticketStatus.setIsStartedPredefined(false);
+        ticketStatus.setIsFinishedPredefined(false);
+        ticketStatus.setIsReopenedPredefined(false);
         TicketStatus createdTicketStatus = ticketStatusService.create(ticketStatus);
         TicketStatusDto returnedTicketStatus =
                 modelMapper.map(createdTicketStatus, TicketStatusDto.class);

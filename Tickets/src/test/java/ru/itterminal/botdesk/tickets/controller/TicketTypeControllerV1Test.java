@@ -135,6 +135,7 @@ class TicketTypeControllerV1Test {
     void create_shouldCreate_whenValidDataPassed() throws Exception {
         ticketTypeDto.setDeleted(null);
         when(service.create(any())).thenReturn(ticketType_1);
+        when(service.convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(any(),any())).thenReturn(ticketType_1);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)

@@ -180,7 +180,7 @@ class JwtProviderTest {
 
     @Test
     void getTimeAfterTokenExpiration_shouldGetTime_whenPassedValidToken() {
-        String token = jwtProvider.createToken(EMAIL_1);
+        String token = jwtProvider.createTokenWithUserEmail(EMAIL_1);
         var timeAfterToken = jwtProvider.getTimeAfterTokenExpiration(token);
         assertTrue(timeAfterToken);
     }

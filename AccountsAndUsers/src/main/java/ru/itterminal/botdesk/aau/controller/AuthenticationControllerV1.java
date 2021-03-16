@@ -1,27 +1,12 @@
 package ru.itterminal.botdesk.aau.controller;
 
-import static ru.itterminal.botdesk.aau.util.AAUConstants.EMAIL_PATTERN;
-import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_EMAIL;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
 import ru.itterminal.botdesk.aau.model.dto.AuthenticationRequestDto;
 import ru.itterminal.botdesk.aau.model.dto.ResetPasswordDto;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
@@ -47,11 +32,6 @@ public class AuthenticationControllerV1 {
             "token for update email was sent to new email";
     public static final String EMAIL_WAS_SUCCESSFULLY_UPDATED = "email was successfully updated";
     public static final String THE_TOKEN_HAS_EXPIRED = "the token has expired";
-    private final AuthenticationManager authenticationManager;
-
-    private final JwtProvider jwtProvider;
-
-    private final UserServiceImpl userService;
 
     public static final String INVALID_USERNAME_OR_PASSWORD = "invalid username or password";
     public static final String EMAIL_IS_VERIFIED = "email is verified";
@@ -84,7 +64,7 @@ public class AuthenticationControllerV1 {
         if (jwtProvider.getTimeAfterTokenExpiration(token)) {
             var email = jwtProvider.getEmail(token);
             Map<Object, Object> response = new HashMap<>();
-            response.put("token", jwtProvider.createToken(email));
+            response.put("token", jwtProvider.createTokenWithUserEmail(email));
             return ResponseEntity.ok(response);
         } else {
             throw new JwtAuthenticationException(THE_TOKEN_HAS_EXPIRED);

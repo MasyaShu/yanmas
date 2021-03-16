@@ -34,14 +34,12 @@ public class TicketTemplateServiceImpl extends CrudServiceWithAccountImpl<Ticket
 
     @Override
     public TicketTemplate create(TicketTemplate entity) {
-        validator.beforeCreate(entity);
         setNextExecutionTime(entity);
         return super.create(entity);
     }
 
     @Override
     public TicketTemplate update(TicketTemplate entity) {
-        validator.beforeUpdate(entity);
         setNextExecutionTime(entity);
         return super.update(entity);
     }
@@ -84,7 +82,7 @@ public class TicketTemplateServiceImpl extends CrudServiceWithAccountImpl<Ticket
 
     private void setNestedObjectsOfEntity(TicketTemplate entity) {
         entity.setAccount(accountService.findById(entity.getAccount().getId()));
-        entity.setAuthor(userService.findByIdAndAccountId(entity.getAccount().getId()));
+        entity.setAuthor(userService.findByIdAndAccountId(entity.getAuthor().getId()));
         entity.setTicketType(ticketTypeService.findByIdAndAccountId(entity.getTicketType().getId()));
     }
 }

@@ -372,7 +372,7 @@ class AuthenticationControllerV1Test {
     void tokenRefresh_shouldNewToken_whenTokenHasNotExpired() throws Exception {
         when(jwtProvider.getTimeAfterTokenExpiration(any())).thenReturn(true);
         when(jwtProvider.getEmail(any())).thenReturn(EMAIL);
-        when(jwtProvider.createToken(EMAIL)).thenReturn(mockEmailVerificationToken);
+        when(jwtProvider.createTokenWithUserEmail(EMAIL)).thenReturn(mockEmailVerificationToken);
         MockHttpServletRequestBuilder request =
                 get(HOST + PORT + API + "token-refresh?token=" + mockEmailVerificationToken);
         mockMvc.perform(request)
@@ -380,7 +380,7 @@ class AuthenticationControllerV1Test {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").exists());
         verify(jwtProvider, times(1)).getEmail(any());
-        verify(jwtProvider, times(1)).createToken(EMAIL);
+        verify(jwtProvider, times(1)).createTokenWithUserEmail(EMAIL);
         verify(jwtProvider, times(1)).getTimeAfterTokenExpiration(any());
     }
 

@@ -170,10 +170,6 @@ public class TicketStatusServiceImpl extends
     protected void setNestedObjectsOfEntityBeforeCreate(TicketStatus entity) {
         super.setNestedObjectsOfEntityBeforeCreate(entity);
         setNestedObjectsOfEntity(entity);
-        entity.setIsCanceledPredefined(false);
-        entity.setIsStartedPredefined(false);
-        entity.setIsFinishedPredefined(false);
-        entity.setIsReopenedPredefined(false);
         entity.setDeleted(false);
     }
 
