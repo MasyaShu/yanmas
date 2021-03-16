@@ -122,7 +122,7 @@ class AuthenticationIT {
     @Order(50)
     void failedPasswordResetWhenTokenIsNotValid() {
         var userAccountOwner = itHelper.getAccountOwner();
-        var notValidToken = jwtProvider.createToken(UUID.randomUUID());
+        var notValidToken = jwtProvider.createTokenWithUserId(UUID.randomUUID());
         ResetPasswordDto resetPasswordDto = ResetPasswordDto.builder()
                 .token(notValidToken)
                 .password(userAccountOwner.getPassword())
@@ -299,7 +299,7 @@ class AuthenticationIT {
     @Test
     @Order(170)
     void failedEmailUpdateWhenTokenIsNotValid() {
-        var notValidToken = jwtProvider.createToken(UUID.randomUUID());
+        var notValidToken = jwtProvider.createTokenWithUserId(UUID.randomUUID());
         given()
                 .headers(
                         "Authorization",
@@ -315,7 +315,7 @@ class AuthenticationIT {
     @Test
     @Order(180)
     void failedEmailUpdateWhenAnonymousUser() {
-        var notValidToken = jwtProvider.createToken(UUID.randomUUID());
+        var notValidToken = jwtProvider.createTokenWithUserId(UUID.randomUUID());
         given()
                 .param(TOKEN, notValidToken)
                 .get(EMAIL_UPDATE)
@@ -380,7 +380,7 @@ class AuthenticationIT {
 
     @Test
     @Order(220)
-    void failedRequestEmailUpdateByAccountOwnerWhenOldAuthenticationToken() {
+    void successRequestEmailUpdateByAccountOwnerWhenOldAuthenticationToken() {
         var randomEmail = userTestHelper.getRandomValidEntity().getEmail();
         given()
                 .headers(
@@ -391,7 +391,7 @@ class AuthenticationIT {
                 .get(REQUEST_EMAIL_UPDATE)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.FORBIDDEN.value());
+                .statusCode(HttpStatus.OK.value());
     }
 
     @Test

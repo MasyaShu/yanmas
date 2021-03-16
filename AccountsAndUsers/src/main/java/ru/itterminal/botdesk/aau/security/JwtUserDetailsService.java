@@ -12,7 +12,7 @@ import ru.itterminal.botdesk.security.jwt.JwtUser;
 import javax.transaction.Transactional;
 import java.util.List;
 
-@Service
+@Service("jwtUserDetailsService")
 @Slf4j
 public class JwtUserDetailsService implements UserDetailsService {
 
@@ -26,9 +26,12 @@ public class JwtUserDetailsService implements UserDetailsService {
     @Transactional
     public UserDetails loadUserByUsername(String email) {
         User user = userServiceImpl.findByEmail(email);
+        log.info("in loadUserByUsername - user with username: {} successfully loaded", email);
+        return convertUserIntoJwtUser(user);
+    }
 
-        JwtUser jwtUser = JwtUser
-                .builder()
+    public JwtUser convertUserIntoJwtUser(User user) {
+        return JwtUser.builder()
                 .id(user.getId())
                 .accountId(user.getAccount().getId())
                 .groupId(user.getGroup().getId())
@@ -39,8 +42,5 @@ public class JwtUserDetailsService implements UserDetailsService {
                 .authorities(List.of(new SimpleGrantedAuthority(user.getRole().getName())))
                 .enabled(user.getEmailVerificationStatus() && !user.getIsArchived() && !user.getAccount().getDeleted())
                 .build();
-
-        log.info("in loadUserByUsername - user with username: {} successfully loaded", email);
-        return jwtUser;
     }
 }

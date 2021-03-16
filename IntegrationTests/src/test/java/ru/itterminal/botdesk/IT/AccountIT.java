@@ -173,7 +173,7 @@ class AccountIT {
     @Test
     @Order(40)
     void failedVerifyEmail_whenTokenIsNotValid() {
-        var notValidToken = jwtProvider.createToken(UUID.randomUUID());
+        var notValidToken = jwtProvider.createTokenWithUserId(UUID.randomUUID());
         given().
                 when()
                 .param(TOKEN, notValidToken)

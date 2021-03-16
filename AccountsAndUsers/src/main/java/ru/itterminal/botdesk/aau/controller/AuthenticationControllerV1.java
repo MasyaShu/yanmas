@@ -1,17 +1,33 @@
 package ru.itterminal.botdesk.aau.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import static ru.itterminal.botdesk.aau.util.AAUConstants.EMAIL_PATTERN;
+import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_EMAIL;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import lombok.RequiredArgsConstructor;
 import ru.itterminal.botdesk.aau.model.dto.AuthenticationRequestDto;
 import ru.itterminal.botdesk.aau.model.dto.ResetPasswordDto;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.exception.JwtAuthenticationException;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
+import ru.itterminal.botdesk.security.jwt.JwtUser;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
@@ -24,6 +40,7 @@ import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_EMAIL;
 @RestController
 @RequestMapping(value = "/api/v1/auth")
 @Validated
+@RequiredArgsConstructor
 public class AuthenticationControllerV1 {
 
     public static final String TOKEN_FOR_UPDATE_EMAIL_WAS_SENT_TO_NEW_EMAIL =
@@ -42,24 +59,22 @@ public class AuthenticationControllerV1 {
             "token for reset password was sent to email";
     public static final String PASSWORD_WAS_RESET_SUCCESSFULLY = "password was reset successfully";
 
-    @Autowired
-    public AuthenticationControllerV1(AuthenticationManager authenticationManager, JwtProvider jwtProvider,
-                                      UserServiceImpl userService) {
-        this.authenticationManager = authenticationManager;
-        this.jwtProvider = jwtProvider;
-        this.userService = userService;
-    }
+    private final AuthenticationManager authenticationManager;
+    private final JwtProvider jwtProvider;
+    private final UserServiceImpl userService;
 
     @PostMapping("/signin")
     public ResponseEntity<Map<Object, Object>> signIn(@RequestBody AuthenticationRequestDto requestDto) {
         try {
             String email = requestDto.getEmail();
             String password = requestDto.getPassword();
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+            var authenticate =  authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+            var jwtUser = (JwtUser) authenticate.getPrincipal();
             Map<Object, Object> response = new HashMap<>();
-            response.put("token", jwtProvider.createToken(email));
+            response.put("token", jwtProvider.createTokenWithJwtUser(email, jwtUser));
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new JwtAuthenticationException(INVALID_USERNAME_OR_PASSWORD);
         }
     }

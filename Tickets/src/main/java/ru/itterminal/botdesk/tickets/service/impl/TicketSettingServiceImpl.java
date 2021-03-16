@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.CrudServiceWithAccountImpl;
@@ -106,7 +107,7 @@ public class TicketSettingServiceImpl extends CrudServiceWithAccountImpl<TicketS
     public TicketSetting convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(TicketSettingDtoRequest request,
                                                                                 UUID accountId) {
         var ticketSetting = modelMapper.map(request, TicketSetting.class);
-        ticketSetting.setAccount(accountService.findById(accountId));
+        ticketSetting.setAccount(Account.builder().id(accountId).build());
         ticketSetting.setObservers(
                 (request.getObservers() == null
                         ? null

@@ -2,6 +2,26 @@ package ru.itterminal.botdesk.security.jwt;
 
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.SignatureException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
+import static ru.itterminal.botdesk.security.config.TestSecurityConfig.EMAIL_1;
+import static ru.itterminal.botdesk.security.jwt.JwtProvider.CANT_CREATE_TOKEN_BECAUSE;
+import static ru.itterminal.botdesk.security.jwt.JwtProvider.CANT_CREATE_TOKEN_IF_USER_ID_IS_NULL;
+import static ru.itterminal.botdesk.security.jwt.JwtProvider.CANT_GET_EMAIL_FROM_TOKEN_BECAUSE;
+import static ru.itterminal.botdesk.security.jwt.JwtProvider.CANT_GET_USER_ID_FROM_TOKEN_BECAUSE;
+import static ru.itterminal.botdesk.security.jwt.JwtProvider.EMAIL_IS_EMPTY;
+import static ru.itterminal.botdesk.security.jwt.JwtProvider.EMAIL_IS_NULL;
+import static ru.itterminal.botdesk.security.jwt.JwtProvider.TOKEN_IS_NULL;
+
+import java.util.List;
+import java.util.UUID;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -48,6 +68,9 @@ class JwtProviderTest {
     void setUpBeforeEach() {
         jwtUser = JwtUser
                 .builder()
+                .id(UUID.randomUUID())
+                .groupId(UUID.randomUUID())
+                .accountId(UUID.randomUUID())
                 .enabled(true)
                 .authorities(List.of(new SimpleGrantedAuthority(role)))
                 .username(EMAIL_1)
@@ -58,39 +81,41 @@ class JwtProviderTest {
 
     @Test
     void createToken_shouldCreateToken_whenPassedEmailRoleWeightRoleAndAccountId() {
-        String token = jwtProvider.createToken(EMAIL_1);
+        String token = jwtProvider.createTokenWithJwtUser(EMAIL_1, jwtUser);
         assertFalse(token.isEmpty());
     }
 
     @Test
     void createToken_shouldGetJwtException_whenSomePassedDataIsNull() {
-        Throwable throwable = assertThrows(JwtException.class, () -> jwtProvider.createToken((String) null));
+        Throwable throwable =
+                assertThrows(JwtException.class, () -> jwtProvider.createTokenWithJwtUser(null, jwtUser));
         assertTrue(throwable.getMessage().startsWith(CANT_CREATE_TOKEN_BECAUSE));
         assertTrue(throwable.getMessage().contains(EMAIL_IS_NULL));
     }
 
     @Test
     void createToken_shouldGetJwtException_whenSomePassedDataIsEmpty() {
-        Throwable throwable = assertThrows(JwtException.class, () -> jwtProvider.createToken(""));
+        Throwable throwable =
+                assertThrows(JwtException.class, () -> jwtProvider.createTokenWithJwtUser("", jwtUser));
         assertTrue(throwable.getMessage().startsWith(CANT_CREATE_TOKEN_BECAUSE));
         assertTrue(throwable.getMessage().contains(EMAIL_IS_EMPTY));
     }
 
     @Test
     void createToken_shouldCreateToken_whenPassedValidUserId() {
-        String token = jwtProvider.createToken(USER_ID);
+        String token = jwtProvider.createTokenWithUserId(USER_ID);
         assertFalse(token.isEmpty());
     }
 
     @Test
     void createToken_shouldGetJwtException_whenUserIdIsNull() {
-        Throwable throwable = assertThrows(JwtException.class, () -> jwtProvider.createToken((UUID) null));
+        Throwable throwable = assertThrows(JwtException.class, () -> jwtProvider.createTokenWithUserId(null));
         assertEquals(CANT_CREATE_TOKEN_IF_USER_ID_IS_NULL, throwable.getMessage());
     }
 
     @Test
     void getUserId_shouldGetUserId_whenPassedValidToken() {
-        String token = jwtProvider.createToken(USER_ID);
+        String token = jwtProvider.createTokenWithUserId(USER_ID);
         UUID userIdFromToken = jwtProvider.getUserId(token);
         assertEquals(USER_ID, userIdFromToken);
     }
@@ -104,7 +129,7 @@ class JwtProviderTest {
 
     @Test
     void getEmail_shouldGetEmail_whenPassedValidToken() {
-        String token = jwtProvider.createToken(EMAIL_1);
+        String token = jwtProvider.createTokenWithJwtUser(EMAIL_1, jwtUser);
         String email = jwtProvider.getEmail(token);
         assertEquals(EMAIL_1, email);
     }
@@ -118,15 +143,14 @@ class JwtProviderTest {
 
     @Test
     void getAuthentication_shouldGetAuthentication_whenPassedValidData() {
-        String token = jwtProvider.createToken(EMAIL_1);
-        when(userDetailsService.loadUserByUsername(any())).thenReturn(jwtUser);
-        Authentication authentication = jwtProvider.getAuthentication(token);
+        var token = jwtProvider.createTokenWithJwtUser(EMAIL_1, jwtUser);
+        var authentication = jwtProvider.getAuthentication(token);
         assertEquals(jwtUser.getUsername(), ((JwtUser) authentication.getPrincipal()).getUsername());
     }
 
     @Test
     void resolveToken_shouldGetResolvedToken_whenPassedValidData() {
-        String token = jwtProvider.createToken(EMAIL_1);
+        String token = jwtProvider.createTokenWithJwtUser(EMAIL_1, jwtUser);
         String bearerToken = "Bearer " + token;
         when(httpServletRequest.getHeader("Authorization")).thenReturn(bearerToken);
         String resolvedToken = jwtProvider.resolveToken(httpServletRequest);
@@ -135,7 +159,7 @@ class JwtProviderTest {
 
     @Test
     void resolveToken_shouldGetNull_whenPassedInvalidData() {
-        String token = jwtProvider.createToken(EMAIL_1);
+        String token = jwtProvider.createTokenWithJwtUser(EMAIL_1, jwtUser);
         when(httpServletRequest.getHeader("Authorization")).thenReturn(token);
         String resolvedToken = jwtProvider.resolveToken(httpServletRequest);
         assertNull(resolvedToken);
@@ -143,14 +167,14 @@ class JwtProviderTest {
 
     @Test
     void validateTokens_shouldGetTrue_whenPassedValidToken() {
-        String token = jwtProvider.createToken(EMAIL_1);
+        String token = jwtProvider.createTokenWithJwtUser(EMAIL_1, jwtUser);
         boolean result = jwtProvider.validateToken(token);
         assertTrue(result);
     }
 
     @Test
     void validateTokens_shouldGetSignatureException_whenPassedInvalidToken() {
-        String token = jwtProvider.createToken(EMAIL_1);
+        String token = jwtProvider.createTokenWithJwtUser(EMAIL_1, jwtUser);
         assertThrows(SignatureException.class, () -> jwtProvider.validateToken(token + "abracadabra"));
     }
 
