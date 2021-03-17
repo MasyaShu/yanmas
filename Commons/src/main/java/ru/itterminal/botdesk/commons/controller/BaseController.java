@@ -30,7 +30,6 @@ public abstract class BaseController {
     public static final String SUCCESSFUL_CHECK_ACCESS = "Successful check access for %s %s";
     public static final String WORD_CREATE = "create";
     public static final String WORD_UPDATE = "update";
-    // TODO можно убрать так как все конвертации проходят ну уровне сервиса
     protected final ModelMapper modelMapper = new ModelMapper();
 
     public <S, T> Page<T> mapPage(Page<S> source, Class<T> targetClass, Pageable pageable) {
