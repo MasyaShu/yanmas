@@ -288,36 +288,4 @@ class AccountControllerV1Test {
                 .andExpect(status().isForbidden());
         verify(service, times(0)).findById(any());
     }
-
-    @Test
-    @WithAnonymousUser
-    void updateCheckAccess_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + "account/" + BaseController.CHECK_ACCESS))
-                .andDo(print())
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void updateCheckAccess_shouldGetStatusForbidden_whenUserWithRoleAdmin() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + "account/" + BaseController.CHECK_ACCESS))
-                .andDo(print())
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @WithUserDetails("OWNER_ACCOUNT_2_IS_INNER_GROUP")
-    void updateCheckAccess_shouldGetStatusOk_whenUserWithRoleAccountOwner() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + "account/"+ BaseController.CHECK_ACCESS))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    void updateCheckAccess_shouldGetStatusForbidden_whenUserWithRoleAuthor() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + "account/"+ BaseController.CHECK_ACCESS))
-                .andDo(print())
-                .andExpect(status().isForbidden());
-    }
 }

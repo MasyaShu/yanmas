@@ -2,6 +2,7 @@ package ru.itterminal.botdesk.security.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -15,7 +16,9 @@ import ru.itterminal.botdesk.security.jwt.JwtUser;
 import java.util.List;
 import java.util.UUID;
 
-@EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
+import static ru.itterminal.botdesk.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_METHOD_PUT;
+import static ru.itterminal.botdesk.security.config.SecurityConfig.AUTH_WHITELIST_AUTHENTICATED_METHOD_GET;
+
 @EnableWebSecurity
 @Profile("Test")
 public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -64,6 +67,8 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers(SecurityConfig.AUTH_WHITELIST_PERMIT_ALL).permitAll()
                 .antMatchers(SecurityConfig.AUTH_WHITELIST_ANONYMOUS).anonymous()
+                .antMatchers(HttpMethod.GET, AUTH_WHITELIST_AUTHENTICATED_METHOD_GET).authenticated()
+                .antMatchers(HttpMethod.PUT, AUTH_WHITELIST_ACCOUNT_OWNER_METHOD_PUT).hasRole("ROLE_ADMIN")
                 .anyRequest().authenticated().and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.headers().frameOptions().disable();

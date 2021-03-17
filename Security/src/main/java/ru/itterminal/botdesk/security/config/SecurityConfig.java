@@ -5,7 +5,9 @@ import java.util.Collections;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -19,7 +21,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import ru.itterminal.botdesk.security.jwt.JwtFilter;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
 
-@EnableGlobalMethodSecurity(prePostEnabled = true)
 @EnableWebSecurity
 @ComponentScan(basePackages = "ru.itterminal.botdesk")
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
@@ -43,6 +44,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/v1/auth/token-refresh"
     };
 
+    static final String[] AUTH_WHITELIST_AUTHENTICATED_METHOD_GET = {
+            "/api/v1/account"
+    };
+
+    static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_METHOD_PUT = {
+            "/api/v1/account"
+    };
+
     @SuppressWarnings("EmptyMethod")
     @Bean
     @Override
@@ -58,8 +67,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers(AUTH_WHITELIST_PERMIT_ALL).permitAll()
+                .antMatchers(HttpMethod.GET, AUTH_WHITELIST_AUTHENTICATED_METHOD_GET).authenticated()
+                .antMatchers(HttpMethod.PUT, AUTH_WHITELIST_ACCOUNT_OWNER_METHOD_PUT).hasAuthority("ACCOUNT_OWNER")
                 .antMatchers(AUTH_WHITELIST_ANONYMOUS).anonymous()
-                .anyRequest().authenticated().and()
+                .anyRequest().authenticated()
+                .and()
                 .addFilterBefore(new JwtFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.headers().frameOptions().disable();
