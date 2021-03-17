@@ -94,7 +94,7 @@ class TicketStatusIT {
                 .get(TICKET_STATUS)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.FORBIDDEN.value());
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
 
     }
 
@@ -130,7 +130,7 @@ class TicketStatusIT {
                     .get(TICKET_STATUS_BY_ID)
                     .then()
                     .log().body()
-                    .statusCode(HttpStatus.FORBIDDEN.value());
+                    .statusCode(HttpStatus.UNAUTHORIZED.value());
         }
 
     }
@@ -271,7 +271,7 @@ class TicketStatusIT {
                 .post(TICKET_STATUS)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.FORBIDDEN.value());
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
 
 
@@ -414,7 +414,7 @@ class TicketStatusIT {
                 .put(TICKET_STATUS)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.FORBIDDEN.value());
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
 
     private static Stream<Arguments> getStreamAllUsers() {

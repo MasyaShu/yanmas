@@ -240,7 +240,7 @@ class FileControllerV1Test {
     void getFileData_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
         mockMvc.perform(get(HOST + PORT + API + "/" + FILE_ID + "/data"))
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
         verify(fileService, times(0)).getFileData(any(), any());
     }
 
@@ -272,7 +272,7 @@ class FileControllerV1Test {
     void putFileData_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
         mockMvc.perform(post(HOST + PORT + API + "/" + FILE_ID + "/data"))
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
         verify(fileService, times(0)).putFileData(any(), any(), any(), any());
     }
 

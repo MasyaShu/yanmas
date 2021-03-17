@@ -223,7 +223,7 @@ class UserIT {
                 .get(USER)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.FORBIDDEN.value());
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
 
     }
 
@@ -308,7 +308,7 @@ class UserIT {
                 .get(USER_BY_ID)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.FORBIDDEN.value());
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
 
     }
 
@@ -505,7 +505,7 @@ class UserIT {
                 .post(USER)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.FORBIDDEN.value());
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
 
     @SuppressWarnings("deprecation")
@@ -733,7 +733,7 @@ class UserIT {
                 .put(USER)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.FORBIDDEN.value());
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
 
     }
 

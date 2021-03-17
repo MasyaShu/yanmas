@@ -24,7 +24,7 @@ import static java.lang.String.format;
 @Slf4j
 @RestController("AccountControllerV1")
 @Validated
-@RequestMapping("api/v1/")
+@RequestMapping("api/v1/account")
 @RequiredArgsConstructor
 public class AccountControllerV1 extends BaseController {
 
@@ -36,7 +36,7 @@ public class AccountControllerV1 extends BaseController {
     private static final String DONE_GET_ACCOUNT_FROM_AUTHENTICATED_USER =
             "Done get account from authenticated user: {}";
 
-    @PostMapping("create-account")
+    @PostMapping()
     public ResponseEntity<AccountDto> create(
             @Validated(Create.class) @RequestBody AccountCreateDto request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
@@ -46,7 +46,7 @@ public class AccountControllerV1 extends BaseController {
         return new ResponseEntity<>(returnedAccount, HttpStatus.CREATED);
     }
 
-    @PutMapping("account")
+    @PutMapping()
     @PreAuthorize("hasAuthority('ACCOUNT_OWNER')")
     public ResponseEntity<AccountDto> update(Principal user,
             @Validated(Update.class) @RequestBody AccountDto request) {
@@ -60,7 +60,7 @@ public class AccountControllerV1 extends BaseController {
         return new ResponseEntity<>(returnedAccount, HttpStatus.OK);
     }
 
-    @PutMapping("account/check-access")
+    @PutMapping("/check-access")
     @PreAuthorize("hasAuthority('ACCOUNT_OWNER')")
     public ResponseEntity<String> updateCheckAccess() {
         String message = format(SUCCESSFUL_CHECK_ACCESS, WORD_UPDATE, ENTITY_NAME);
@@ -68,7 +68,7 @@ public class AccountControllerV1 extends BaseController {
         return ResponseEntity.ok(message);
     }
 
-    @GetMapping("account")
+    @GetMapping()
     public ResponseEntity<AccountDto> get(Principal user) {
         log.debug(START_GET_ACCOUNT_FROM_AUTHENTICATED_USER, user);
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());

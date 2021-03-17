@@ -11,19 +11,22 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ApiError {
+
     private int status;
     private String title;
-
     private String detail;
     private long timestamp;
     private String path;
-
     private String type;
     private Map<String, List<ValidationError>> errors = new HashMap<>();
 

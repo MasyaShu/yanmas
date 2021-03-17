@@ -1,6 +1,7 @@
 package ru.itterminal.botdesk.commons.exception;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,6 +35,7 @@ import ru.itterminal.botdesk.commons.exception.error.ValidationError;
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final String INPUT_VALIDATION_FAILED = "Input Validation Failed";
+    public static final String ACCESS_IS_DENIED = "Access is denied";
 
     @ExceptionHandler(OptimisticLockingFailureException.class)
     public ResponseEntity<?> handleOptimisticLockingFailureException(OptimisticLockingFailureException ex, HttpServletRequest request) {
@@ -152,7 +154,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiError> handleAccessDeniedException(AccessDeniedException ex, HttpServletRequest request) {
-        var apiError = new ApiError(HttpStatus.FORBIDDEN, "access is denied", ex).withRequest(request);
+        var apiError = ApiError.builder()
+                .status(HttpStatus.FORBIDDEN.value())
+                .title(ACCESS_IS_DENIED)
+                .detail(ex.getMessage())
+                .type(ex.getClass().getCanonicalName())
+                .path("(" + request.getMethod() + ") " + request.getRequestURI())
+                .timestamp(new Date().getTime())
+                .build();
         return new ResponseEntity<>(apiError, null, HttpStatus.FORBIDDEN);
     }
 

@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static ru.itterminal.botdesk.IT.util.ITHelper.ACCOUNT;
 import static ru.itterminal.botdesk.IT.util.ITHelper.APPLICATION_JSON;
 import static ru.itterminal.botdesk.IT.util.ITHelper.AUTHENTICATION_FAILED;
-import static ru.itterminal.botdesk.IT.util.ITHelper.CREATE_ACCOUNT;
 import static ru.itterminal.botdesk.IT.util.ITHelper.DELETED;
 import static ru.itterminal.botdesk.IT.util.ITHelper.DETAIL;
 import static ru.itterminal.botdesk.IT.util.ITHelper.DISPLAY_NAME;
@@ -124,12 +123,12 @@ class AccountIT {
                 when().
                 contentType(APPLICATION_JSON).
                 body(accountCreateDto).
-                post(CREATE_ACCOUNT).
+                post(ACCOUNT).
                 then()
+                .log().body()
                 .body(NAME, equalTo(anonymousUser.getAccount().getName()))
                 .body(DELETED, equalTo(false))
                 .body(VERSION, equalTo(0))
-                .log().body()
                 .statusCode(HttpStatus.CREATED.value())
                 .extract()
                 .response();
@@ -145,7 +144,7 @@ class AccountIT {
                 when().
                 contentType(APPLICATION_JSON).
                 body(jsonCreateAccount).
-                post(CREATE_ACCOUNT).
+                post(ACCOUNT).
                 then()
                 .body(STATUS, equalTo(409))
                 .body(TITLE, equalTo(VALIDATION_FAILED))
@@ -271,7 +270,7 @@ class AccountIT {
                 )
                 .contentType(APPLICATION_JSON)
                 .body(jsonCreateAccount)
-                .post(CREATE_ACCOUNT)
+                .post(ACCOUNT)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.FORBIDDEN.value());
@@ -290,7 +289,7 @@ class AccountIT {
                         "Bearer " + token)
                 .contentType(APPLICATION_JSON)
                 .body(jsonCreateAccount)
-                .post(CREATE_ACCOUNT)
+                .post(ACCOUNT)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.FORBIDDEN.value());
@@ -326,7 +325,7 @@ class AccountIT {
                 .get(ACCOUNT)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.FORBIDDEN.value());
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
 
     @Test

@@ -224,7 +224,7 @@ class UserControllerV1Test {
                 .content(objectMapper.writeValueAsString(userDtoRequestFromAccount_1));
         mockMvc.perform(request)
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
         verify(service, times(0)).create(any());
         verify(accountService, times(0)).findById(any());
         verify(roleService, times(0)).findById(any());
@@ -447,7 +447,7 @@ class UserControllerV1Test {
                 .content(objectMapper.writeValueAsString(userDtoRequestFromAccount_1));
         mockMvc.perform(request)
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
         verify(service, times(0)).update(any());
     }
 
@@ -710,7 +710,7 @@ class UserControllerV1Test {
         when(service.findByIdAndAccountId(any())).thenReturn(user_1);
         mockMvc.perform(get(HOST + PORT + API + USER_1_ID))
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -748,7 +748,7 @@ class UserControllerV1Test {
                 .content(objectMapper.writeValueAsString(userFilterDto));
         mockMvc.perform(request)
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
         verify(service, times(0)).findAllByFilter(any(), any());
     }
 
@@ -848,7 +848,7 @@ class UserControllerV1Test {
     void createCheckAccess_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
         mockMvc.perform(post(HOST + PORT + API + BaseController.CHECK_ACCESS))
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -880,7 +880,7 @@ class UserControllerV1Test {
     void updateCheckAccess_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
         mockMvc.perform(put(HOST + PORT + API + BaseController.CHECK_ACCESS))
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

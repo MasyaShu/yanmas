@@ -135,7 +135,7 @@ class TicketSettingControllerV1Test {
 
         mockMvc.perform(request)
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
         verify(userService, times(0)).findByIdAndAccountId(any());
         verify(ticketSettingService, times(0)).create(any());
     }
@@ -221,7 +221,7 @@ class TicketSettingControllerV1Test {
                 .content(objectMapper.writeValueAsString(requestDto));
         mockMvc.perform(request)
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
         verify(userService, times(0)).findByIdAndAccountId(any());
         verify(ticketSettingService, times(0)).update(any());
     }

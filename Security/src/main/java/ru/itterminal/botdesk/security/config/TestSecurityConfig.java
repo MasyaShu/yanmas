@@ -1,7 +1,12 @@
 package ru.itterminal.botdesk.security.config;
 
+import static ru.itterminal.botdesk.security.config.SecurityConfig.AUTH_WHITELIST_ANONYMOUS_FOR_ANY_HTTP_METHODS;
+import static ru.itterminal.botdesk.security.config.SecurityConfig.AUTH_WHITELIST_ANONYMOUS_FOR_POST_HTTP_METHOD;
+import static ru.itterminal.botdesk.security.config.SecurityConfig.AUTH_WHITELIST_PERMIT_ALL;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -10,6 +15,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.cors.CorsConfigurationSource;
+
+import ru.itterminal.botdesk.security.jwt.CustomAccessDeniedHandler;
+import ru.itterminal.botdesk.security.jwt.CustomAuthenticationEntryPoint;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
 
 import java.util.List;
@@ -55,15 +63,21 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
     public static final String OBSERVER_ACCOUNT_2_IS_INNER_GROUP_ID = "664e8df9-cdb0-48f2-9d1a-61a81646bc55";
 
 
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint = new CustomAuthenticationEntryPoint();
+    private final CustomAccessDeniedHandler accessDeniedHandler = new CustomAccessDeniedHandler();
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .httpBasic().disable()
                 .cors().and()
                 .csrf().disable()
+                .exceptionHandling().authenticationEntryPoint(customAuthenticationEntryPoint).and()
+                .exceptionHandling().accessDeniedHandler(accessDeniedHandler).and()
                 .authorizeRequests()
-                .antMatchers(SecurityConfig.AUTH_WHITELIST_PERMIT_ALL).permitAll()
-                .antMatchers(SecurityConfig.AUTH_WHITELIST_ANONYMOUS).anonymous()
+                .antMatchers(AUTH_WHITELIST_PERMIT_ALL).permitAll()
+                .antMatchers(AUTH_WHITELIST_ANONYMOUS_FOR_ANY_HTTP_METHODS).anonymous()
+                .antMatchers(HttpMethod.POST, AUTH_WHITELIST_ANONYMOUS_FOR_POST_HTTP_METHOD).anonymous()
                 .anyRequest().authenticated().and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.headers().frameOptions().disable();

@@ -1,6 +1,18 @@
 package ru.itterminal.botdesk.aau.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +34,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.dto.AccountCreateDto;
 import ru.itterminal.botdesk.aau.model.dto.AccountDto;
@@ -31,15 +46,6 @@ import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
 import ru.itterminal.botdesk.commons.util.CommonConstants;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
-
-import java.util.UUID;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {AccountControllerV1.class, FilterChainProxy.class})
@@ -72,7 +78,7 @@ class AccountControllerV1Test {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String HOST = "http://localhost";
     private static final String PORT = ":8081";
-    private static final String API = "api/v1/";
+    private static final String API = "api/v1/account";
     private static final String ACCOUNT_NAME = "Name of account";
     private Account account;
     private AccountDto accountDto;
@@ -106,7 +112,7 @@ class AccountControllerV1Test {
     @WithAnonymousUser
     void create_shouldCreateAccount_whenPassedValidData() throws Exception {
         when(service.create((AccountCreateDto) any())).thenReturn(account);
-        MockHttpServletRequestBuilder request = post(HOST + PORT + API + "create-account")
+        MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(accountCreateDto));
@@ -119,10 +125,9 @@ class AccountControllerV1Test {
     }
 
     @Test
-    @WithMockUser(authorities ={"ADMIN", "EXECUTOR", "AUTHOR", "OBSERVER", "ACCOUNT_OWNER"})
+    @WithMockUser(authorities = {"ADMIN", "EXECUTOR", "AUTHOR", "OBSERVER", "ACCOUNT_OWNER"})
     void create_shouldGetForbiddenStatus_whenAuthenticatedUserHasNotAnonymousUser() throws Exception {
-        when(service.create((AccountCreateDto) any())).thenReturn(account);
-        MockHttpServletRequestBuilder request = post(HOST + PORT + API + "create-account")
+        MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(accountCreateDto));
@@ -140,7 +145,7 @@ class AccountControllerV1Test {
         accountCreateDto.setEmailAccountOwner("12");
         accountCreateDto.setPasswordAccountOwner("123");
         when(service.create((AccountCreateDto) any())).thenReturn(account);
-        MockHttpServletRequestBuilder request = post(HOST + PORT + API + "create-account")
+        MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(accountCreateDto));
@@ -148,14 +153,26 @@ class AccountControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.name[?(@.message =~ /%s.*/)]", CommonConstants.SIZE_MUST_BE_BETWEEN).exists())
+                                   .jsonPath(
+                                           "$.errors.name[?(@.message =~ /%s.*/)]",
+                                           CommonConstants.SIZE_MUST_BE_BETWEEN
+                                   ).exists())
                 .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.nameGroupAccountOwner[?(@.message =~ /%s.*/)]", CommonConstants.SIZE_MUST_BE_BETWEEN)
-                        .exists())
+                                   .jsonPath(
+                                           "$.errors.nameGroupAccountOwner[?(@.message =~ /%s.*/)]",
+                                           CommonConstants.SIZE_MUST_BE_BETWEEN
+                                   )
+                                   .exists())
                 .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.emailAccountOwner[?(@.message == '%s')]", AAUConstants.INVALID_EMAIL).exists())
+                                   .jsonPath(
+                                           "$.errors.emailAccountOwner[?(@.message == '%s')]",
+                                           AAUConstants.INVALID_EMAIL
+                                   ).exists())
                 .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.passwordAccountOwner[?(@.message == '%s')]", AAUConstants.INVALID_PASSWORD).exists());
+                                   .jsonPath(
+                                           "$.errors.passwordAccountOwner[?(@.message == '%s')]",
+                                           AAUConstants.INVALID_PASSWORD
+                                   ).exists());
         verify(service, times(0)).create((AccountCreateDto) any());
     }
 
@@ -167,7 +184,7 @@ class AccountControllerV1Test {
         accountCreateDto.setEmailAccountOwner(null);
         accountCreateDto.setPasswordAccountOwner(null);
         when(service.create((AccountCreateDto) any())).thenReturn(account);
-        MockHttpServletRequestBuilder request = post(HOST + PORT + API + "create-account")
+        MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(accountCreateDto));
@@ -175,14 +192,24 @@ class AccountControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.name[?(@.message =~ /%s.*/)]", CommonConstants.MUST_NOT_BE_NULL).exists())
+                                   .jsonPath("$.errors.name[?(@.message =~ /%s.*/)]", CommonConstants.MUST_NOT_BE_NULL)
+                                   .exists())
                 .andExpect(
                         MockMvcResultMatchers
-                                .jsonPath("$.errors.nameGroupAccountOwner[?(@.message =~ /%s.*/)]", CommonConstants.MUST_NOT_BE_NULL).exists())
+                                .jsonPath(
+                                        "$.errors.nameGroupAccountOwner[?(@.message =~ /%s.*/)]",
+                                        CommonConstants.MUST_NOT_BE_NULL
+                                ).exists())
                 .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.emailAccountOwner[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists())
+                                   .jsonPath(
+                                           "$.errors.emailAccountOwner[?(@.message == '%s')]",
+                                           CommonConstants.MUST_NOT_BE_NULL
+                                   ).exists())
                 .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.passwordAccountOwner[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists());
+                                   .jsonPath(
+                                           "$.errors.passwordAccountOwner[?(@.message == '%s')]",
+                                           CommonConstants.MUST_NOT_BE_NULL
+                                   ).exists());
         verify(service, times(0)).create((AccountCreateDto) any());
     }
 
@@ -192,7 +219,7 @@ class AccountControllerV1Test {
         accountDto.setDeleted(false);
         accountDto.setVersion(0);
         when(service.update(any())).thenReturn(account);
-        MockHttpServletRequestBuilder request = put(HOST + PORT + API + "account")
+        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(accountDto));
@@ -203,12 +230,12 @@ class AccountControllerV1Test {
     }
 
     @Test
-    @WithMockUser(authorities ={"ADMIN", "EXECUTOR", "AUTHOR", "OBSERVER"})
+    @WithMockUser(authorities = {"ADMIN", "EXECUTOR", "AUTHOR", "OBSERVER"})
     void update_shouldGetStatusForbidden_whenAuthenticatedUserHasNotRoleAccountOwner() throws Exception {
         accountDto.setDeleted(false);
         accountDto.setVersion(0);
         when(service.update(any())).thenReturn(account);
-        MockHttpServletRequestBuilder request = put(HOST + PORT + API + "account")
+        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(accountDto));
@@ -225,7 +252,7 @@ class AccountControllerV1Test {
         accountDto.setName("");
         accountDto.setVersion(0);
         accountDto.setDeleted(false);
-        MockHttpServletRequestBuilder request = put(HOST + PORT + API + "account")
+        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(accountDto));
@@ -233,7 +260,10 @@ class AccountControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.name[?(@.message =~ /%s.*/)]", CommonConstants.SIZE_MUST_BE_BETWEEN).exists());
+                                   .jsonPath(
+                                           "$.errors.name[?(@.message =~ /%s.*/)]",
+                                           CommonConstants.SIZE_MUST_BE_BETWEEN
+                                   ).exists());
         verify(service, times(0)).update(any());
     }
 
@@ -244,7 +274,7 @@ class AccountControllerV1Test {
         accountDto.setVersion(null);
         accountDto.setDeleted(null);
         accountDto.setId(null);
-        MockHttpServletRequestBuilder request = put(HOST + PORT + API + "account")
+        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(accountDto));
@@ -252,13 +282,17 @@ class AccountControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.id[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists())
+                                   .jsonPath("$.errors.id[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                                   .exists())
                 .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.name[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists())
+                                   .jsonPath("$.errors.name[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                                   .exists())
                 .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.version[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists())
+                                   .jsonPath("$.errors.version[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                                   .exists())
                 .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.deleted[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL).exists());
+                                   .jsonPath("$.errors.deleted[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                                   .exists());
         verify(service, times(0)).update(any());
     }
 
@@ -266,7 +300,7 @@ class AccountControllerV1Test {
     @WithUserDetails("OWNER_ACCOUNT_1_IS_INNER_GROUP")
     void get_shouldGetAccount_whenPassedValidData() throws Exception {
         when(service.findById(any())).thenReturn(account);
-        MockHttpServletRequestBuilder request = get(HOST + PORT + API + "account")
+        MockHttpServletRequestBuilder request = get(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON);
         mockMvc.perform(request)
@@ -280,27 +314,27 @@ class AccountControllerV1Test {
     @Test
     @WithAnonymousUser
     void get_shouldGetStatusForbidden_whenUserIsNotAuthenticated() throws Exception {
-        MockHttpServletRequestBuilder request = get(HOST + PORT + API + "account")
+        MockHttpServletRequestBuilder request = get(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON);
         mockMvc.perform(request)
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
         verify(service, times(0)).findById(any());
     }
 
     @Test
     @WithAnonymousUser
     void updateCheckAccess_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + "account/" + BaseController.CHECK_ACCESS))
+        mockMvc.perform(put(HOST + PORT + API + "/" + BaseController.CHECK_ACCESS))
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void updateCheckAccess_shouldGetStatusForbidden_whenUserWithRoleAdmin() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + "account/" + BaseController.CHECK_ACCESS))
+        mockMvc.perform(put(HOST + PORT + API + "/" + BaseController.CHECK_ACCESS))
                 .andDo(print())
                 .andExpect(status().isForbidden());
     }
@@ -308,7 +342,7 @@ class AccountControllerV1Test {
     @Test
     @WithUserDetails("OWNER_ACCOUNT_2_IS_INNER_GROUP")
     void updateCheckAccess_shouldGetStatusOk_whenUserWithRoleAccountOwner() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + "account/"+ BaseController.CHECK_ACCESS))
+        mockMvc.perform(put(HOST + PORT + API + "/" + BaseController.CHECK_ACCESS))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
@@ -316,7 +350,7 @@ class AccountControllerV1Test {
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     void updateCheckAccess_shouldGetStatusForbidden_whenUserWithRoleAuthor() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + "account/"+ BaseController.CHECK_ACCESS))
+        mockMvc.perform(put(HOST + PORT + API + "/" + BaseController.CHECK_ACCESS))
                 .andDo(print())
                 .andExpect(status().isForbidden());
     }
