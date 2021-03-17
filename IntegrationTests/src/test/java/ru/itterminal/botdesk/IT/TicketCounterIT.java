@@ -97,7 +97,7 @@ class TicketCounterIT {
                 .put(TICKET_COUNTER)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.FORBIDDEN.value());
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
 
     }
 

@@ -203,7 +203,7 @@ class AuthenticationIT {
                 .post(REQUEST_EMAIL_UPDATE)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.FORBIDDEN.value());
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
 
     @SuppressWarnings("unused")
@@ -321,7 +321,7 @@ class AuthenticationIT {
                 .get(EMAIL_UPDATE)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.FORBIDDEN.value());
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
 
     @SuppressWarnings("unused")

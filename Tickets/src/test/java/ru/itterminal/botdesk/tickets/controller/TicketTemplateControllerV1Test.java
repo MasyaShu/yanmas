@@ -442,7 +442,7 @@ class TicketTemplateControllerV1Test {
     void getById_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
         mockMvc.perform(get(HOST + PORT + API + UUID.randomUUID()))
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
         verify(templateService, times(0)).findByIdAndAccountId(any());
 
     }

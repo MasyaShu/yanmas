@@ -230,7 +230,7 @@ class TicketTypeControllerV1Test {
                 .content(objectMapper.writeValueAsString(ticketTypeDto));
         mockMvc.perform(request)
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
         verify(service, times(0)).create(any());
     }
 
@@ -263,7 +263,7 @@ class TicketTypeControllerV1Test {
                 .content(objectMapper.writeValueAsString(ticketTypeDto));
         mockMvc.perform(request)
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
         verify(service, times(0)).update(any());
     }
 
@@ -346,7 +346,7 @@ class TicketTypeControllerV1Test {
         when(service.findByIdAndAccountId(any())).thenReturn(ticketType_1);
         mockMvc.perform(get(HOST + PORT + API + TICKET_TYPES_ID_1))
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -383,7 +383,7 @@ class TicketTypeControllerV1Test {
                 .content(objectMapper.writeValueAsString(ticketTypeFilterDto));
         mockMvc.perform(request)
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
         verify(service, times(0)).findAllByFilter(any(), any());
     }
 
@@ -392,7 +392,7 @@ class TicketTypeControllerV1Test {
     void createCheckAccess_shouldGetStatusForbidden_whenCurrentUserAnonymousUser() throws Exception {
         mockMvc.perform(post(HOST + PORT + API + BaseController.CHECK_ACCESS))
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -424,7 +424,7 @@ class TicketTypeControllerV1Test {
     void updateCheckAccess_shouldGetStatusForbidden_whenCurrentUserAnonymousUser() throws Exception {
         mockMvc.perform(put(HOST + PORT + API + BaseController.CHECK_ACCESS))
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

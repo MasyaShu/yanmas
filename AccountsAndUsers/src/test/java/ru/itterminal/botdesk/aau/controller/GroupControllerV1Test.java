@@ -238,7 +238,7 @@ class GroupControllerV1Test {
                 .content(objectMapper.writeValueAsString(groupDtoFromAccount_1));
         mockMvc.perform(request)
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
         verify(service, times(0)).create(any());
     }
 
@@ -306,7 +306,7 @@ class GroupControllerV1Test {
                 .content(objectMapper.writeValueAsString(groupDtoFromAccount_1));
         mockMvc.perform(request)
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
         verify(service, times(0)).update(any());
     }
 
@@ -420,7 +420,7 @@ class GroupControllerV1Test {
         when(service.findByIdAndAccountId(any())).thenReturn(group_1);
         mockMvc.perform(get(HOST + PORT + API + GROUP_1_ID))
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -473,7 +473,7 @@ class GroupControllerV1Test {
                 .content(objectMapper.writeValueAsString(groupFilterDto));
         mockMvc.perform(request)
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
         verify(service, times(0)).findAllByFilter(any(), any());
     }
 
@@ -548,7 +548,7 @@ class GroupControllerV1Test {
     void createCheckAccess_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
         mockMvc.perform(post(HOST + PORT + API + BaseController.CHECK_ACCESS))
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -580,7 +580,7 @@ class GroupControllerV1Test {
     void updateCheckAccess_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
         mockMvc.perform(put(HOST + PORT + API + BaseController.CHECK_ACCESS))
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

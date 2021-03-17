@@ -91,7 +91,6 @@ public class ITHelper {
     public static final String TICKET_SETTING_BY_ID = "ticket-setting/{id}";
     public static final String TICKET_SETTING_BY_AUTHOR = "ticket-setting/by-author/{authorId}";
     public static final String AUTHOR_ID = "authorId";
-    public static final String CREATE_ACCOUNT = "create-account";
     public static final String APPLICATION_JSON = "application/json";
     public static final String REQUEST_PASSWORD_RESET = "auth/request-password-reset";
     public static final String NOT_EXIST_EMAIL = "notExisEmail@gmail.com";
@@ -172,12 +171,12 @@ public class ITHelper {
                 when().
                 contentType(APPLICATION_JSON).
                 body(accountCreateDto).
-                post(CREATE_ACCOUNT).
+                post(ACCOUNT).
                 then()
+                .log().body()
                 .body(NAME, equalTo(anonymousUser.getAccount().getName()))
                 .body(DELETED, equalTo(false))
                 .body(VERSION, equalTo(0))
-                .log().body()
                 .statusCode(HttpStatus.CREATED.value())
                 .extract()
                 .response();

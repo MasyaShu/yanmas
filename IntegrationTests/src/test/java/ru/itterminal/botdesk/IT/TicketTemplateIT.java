@@ -137,7 +137,7 @@ class TicketTemplateIT {
                 .get(TICKET_TEMPLATE)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.FORBIDDEN.value());
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
 
     @SuppressWarnings("unused")
@@ -217,7 +217,7 @@ class TicketTemplateIT {
                     .get(TICKET_TEMPLATE_BY_ID)
                     .then()
                     .log().body()
-                    .statusCode(HttpStatus.FORBIDDEN.value());
+                    .statusCode(HttpStatus.UNAUTHORIZED.value());
         }
     }
 
@@ -309,7 +309,7 @@ class TicketTemplateIT {
                 .post(TICKET_TEMPLATE)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.FORBIDDEN.value());
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
 
     @Test
@@ -451,7 +451,7 @@ class TicketTemplateIT {
                 .put(TICKET_TEMPLATE)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.FORBIDDEN.value());
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
 
     @Test

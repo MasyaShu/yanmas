@@ -21,6 +21,9 @@ import io.jsonwebtoken.JwtException;
 import ru.itterminal.botdesk.commons.exception.error.ApiError;
 
 public class JwtFilter extends GenericFilterBean {
+    public static final String APPLICATION_JSON = "application/json";
+    public static final String UNAUTHORISED = "Unauthorised";
+    public static final String JWT = "JWT";
     private final JwtProvider jwtProvider;
     private static final String REQUEST_IS_REJECTED_BECAUSE_THE_USER_IS_DISABLED =
             "Request is rejected because the user is disabled";
@@ -39,13 +42,15 @@ public class JwtFilter extends GenericFilterBean {
                 validateToken = jwtProvider.validateToken(token);
             }
             catch (Exception e) {
+                HttpServletRequest request = (HttpServletRequest) req;
                 HttpServletResponse httpServletResponse = (HttpServletResponse) res;
-                httpServletResponse.setContentType("application/json");
+                httpServletResponse.setContentType(APPLICATION_JSON);
                 httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
-                ApiError response = new ApiError(HttpStatus.UNAUTHORIZED, "Unauthorised", e);
+                var apiError = new ApiError(HttpStatus.UNAUTHORIZED, UNAUTHORISED, e);
+                apiError.setPath("(" + request.getMethod() + ") "+request.getRequestURI());
                 OutputStream out = httpServletResponse.getOutputStream();
                 ObjectMapper mapper = new ObjectMapper();
-                mapper.writeValue(out, response);
+                mapper.writeValue(out, apiError);
                 out.flush();
                 return;
             }
@@ -58,13 +63,15 @@ public class JwtFilter extends GenericFilterBean {
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
                 catch (Throwable e) {
+                    HttpServletRequest request = (HttpServletRequest) req;
                     HttpServletResponse httpServletResponse = (HttpServletResponse) res;
                     httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
                     res.setContentType("application/json");
-                    ApiError response = new ApiError(HttpStatus.FORBIDDEN, "JWT", new JwtException(e.getMessage()));
+                    var apiError = new ApiError(HttpStatus.FORBIDDEN, JWT, new JwtException(e.getMessage()));
+                    apiError.setPath("(" + request.getMethod() + ") "+request.getRequestURI());
                     OutputStream out = httpServletResponse.getOutputStream();
                     ObjectMapper mapper = new ObjectMapper();
-                    mapper.writeValue(out, response);
+                    mapper.writeValue(out, apiError);
                     out.flush();
                     return;
                 }

@@ -117,7 +117,7 @@ class GroupIT {
                 .get(GROUP)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.FORBIDDEN.value());
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
 
     }
 
@@ -191,7 +191,7 @@ class GroupIT {
                 .get(GROUP_BY_ID)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.FORBIDDEN.value());
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
 
     }
 

@@ -188,7 +188,7 @@ class TicketSettingIT {
                 .get(TICKET_SETTING)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.FORBIDDEN.value());
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
@@ -243,7 +243,7 @@ class TicketSettingIT {
                 .get(TICKET_SETTING_BY_ID)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.FORBIDDEN.value());
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
@@ -353,7 +353,7 @@ class TicketSettingIT {
                 .get(TICKET_SETTING_BY_AUTHOR)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.FORBIDDEN.value());
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
@@ -497,7 +497,7 @@ class TicketSettingIT {
                 .post(TICKET_SETTING)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.FORBIDDEN.value());
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
@@ -627,7 +627,7 @@ class TicketSettingIT {
                 .put(TICKET_SETTING)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.FORBIDDEN.value());
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
 
     private static Stream<Arguments> getStreamAllUsersFromInnerGroup_2AndFromOuterGroup_2() {
