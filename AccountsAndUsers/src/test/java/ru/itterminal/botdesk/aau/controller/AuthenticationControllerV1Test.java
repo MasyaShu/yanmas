@@ -394,4 +394,18 @@ class AuthenticationControllerV1Test {
                 .andExpect(status().isForbidden());
         verify(jwtProvider, times(0)).getTimeAfterTokenExpiration(any());
     }
+
+    @Test
+    @WithAnonymousUser
+    void tokenRefresh_shouldNewToken_whenTokenHasExpired() throws Exception {
+        when(jwtProvider.getTimeAfterTokenExpiration(any())).thenReturn(false);
+        MockHttpServletRequestBuilder request =
+                get(HOST + PORT + API + "token-refresh?token=" + mockEmailVerificationToken);
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isForbidden());
+        verify(jwtProvider, times(0)).getEmail(any());
+        verify(jwtProvider, times(0)).createTokenWithUserEmail(EMAIL);
+        verify(jwtProvider, times(1)).getTimeAfterTokenExpiration(any());
+    }
 }
