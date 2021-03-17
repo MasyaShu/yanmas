@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_CODE;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_MESSAGE;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_SETTING;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.TICKET_SETTING_IS_EMPTY;
@@ -38,7 +39,7 @@ import ru.itterminal.botdesk.tickets.service.impl.TicketSettingServiceImpl;
 
 @SpringJUnitConfig(value = {TicketSettingOperationValidator.class})
 @Import(TestSecurityConfig.class)
-@ActiveProfiles("Test")
+@ActiveProfiles(SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS)
 class TicketSettingOperationValidatorTest {
 
     @MockBean

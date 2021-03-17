@@ -1,5 +1,6 @@
 package ru.itterminal.botdesk.integration.aws.ses;
 
+import static ru.itterminal.botdesk.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_PRODUCTION;
 import static ru.itterminal.botdesk.integration.util.IntegrationConstants.NO_REPLY_BOTDESK_APP;
 
 import java.io.ByteArrayOutputStream;
@@ -14,8 +15,10 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import lombok.RequiredArgsConstructor;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.RawMessage;
@@ -23,22 +26,22 @@ import software.amazon.awssdk.services.ses.model.SendRawEmailRequest;
 
 @SuppressWarnings("unused")
 @Component
+@RequiredArgsConstructor
 public class SenderEmailViaAwsSes {
 
     public static final String MOCK_SEND_ID = "mockSendID";
-    @SuppressWarnings("FieldCanBeLocal")
     private final SesClient sesClient;
     private final Session mailSession;
 
-    public SenderEmailViaAwsSes(SesClient sesClient, Session mailSession) {
-        this.sesClient = sesClient;
-        this.mailSession = mailSession;
-    }
+    @Value("${spring.profiles.active:}")
+    private String activeProfiles;
 
     public String sendEmail(SendRawEmailRequest rawEmailRequest) {
-        // TODO Разрешить отправку для production
-        // return sesClient.sendRawEmail(rawEmailRequest).messageId();
-        return MOCK_SEND_ID;
+        String result = MOCK_SEND_ID;
+        if (activeProfiles.equals(SPRING_ACTIVE_PROFILE_FOR_PRODUCTION)) {
+            result = sesClient.sendRawEmail(rawEmailRequest).messageId();
+        }
+        return result;
     }
 
     public SendRawEmailRequest createEmail(String sender,
@@ -98,7 +101,7 @@ public class SenderEmailViaAwsSes {
 
         SdkBytes data = SdkBytes.fromByteArray(arr);
 
-        RawMessage rawMessage =  RawMessage.builder()
+        RawMessage rawMessage = RawMessage.builder()
                 .data(data)
                 .build();
 

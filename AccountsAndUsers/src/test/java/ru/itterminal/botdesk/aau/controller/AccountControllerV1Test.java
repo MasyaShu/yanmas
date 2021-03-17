@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
 
 import java.util.UUID;
 
@@ -51,8 +52,9 @@ import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 @SpringJUnitConfig(value = {AccountControllerV1.class, FilterChainProxy.class})
 @Import(TestSecurityConfig.class)
 @WebMvcTest
-@ActiveProfiles("Test")
+@ActiveProfiles(SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS)
 class AccountControllerV1Test {
+
     @MockBean
     private AccountServiceImpl service;
 

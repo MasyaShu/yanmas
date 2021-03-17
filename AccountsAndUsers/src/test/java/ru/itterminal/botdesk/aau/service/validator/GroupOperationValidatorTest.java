@@ -24,11 +24,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.LOGIC_CONSTRAINT_CODE;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
 import static ru.itterminal.botdesk.security.config.TestSecurityConfig.NOT_INNER_GROUP_ID;
 
 @SpringJUnitConfig(value = {GroupOperationValidator.class})
 @Import(TestSecurityConfig.class)
-@ActiveProfiles("Test")
+@ActiveProfiles(SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS)
 class GroupOperationValidatorTest {
 
     @MockBean

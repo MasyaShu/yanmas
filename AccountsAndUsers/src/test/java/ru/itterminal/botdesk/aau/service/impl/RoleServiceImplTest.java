@@ -15,11 +15,11 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
-
+import static ru.itterminal.botdesk.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {RoleServiceImpl.class})
-@ActiveProfiles("Test")
+@ActiveProfiles(SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS)
 class RoleServiceImplTest {
 
     private final RoleTestHelper roleTestHelper = new RoleTestHelper();

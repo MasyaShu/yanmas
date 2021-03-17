@@ -20,13 +20,14 @@ import java.util.Map;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.*;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketTemplateOperationValidator.A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TEMPLATE;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketTemplateOperationValidator.THAN_DATE_END;
 
 
 @SpringJUnitConfig(value = {TicketTemplateOperationValidator.class})
 @Import(TestSecurityConfig.class)
-@ActiveProfiles("Test")
+@ActiveProfiles(SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS)
 class TicketTemplateOperationValidatorTest {
 
     @Autowired

@@ -56,12 +56,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.itterminal.botdesk.commons.model.validator.zoneid.ValidateZoneId.ZONE_ID_NOT_VALID;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.INVALID_TYPE_COMPARISON_FOR_VALUE_GIVEN;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {TicketTemplateControllerV1.class, FilterChainProxy.class})
 @Import({TestSecurityConfig.class, HttpEncodingAutoConfiguration.class})
 @WebMvcTest
-@ActiveProfiles("Test")
+@ActiveProfiles(SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS)
 class TicketTemplateControllerV1Test {
 
     public static final String INVALID_VALUE_FOR = "Invalid value for";
