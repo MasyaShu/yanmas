@@ -14,12 +14,9 @@ import static ru.itterminal.botdesk.security.config.TestSecurityConfig.ACCOUNT_1
 import static ru.itterminal.botdesk.security.config.TestSecurityConfig.EMAIL_1;
 import static ru.itterminal.botdesk.security.config.TestSecurityConfig.INNER_GROUP_ID;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import javax.mail.MessagingException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,12 +38,11 @@ import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
 import ru.itterminal.botdesk.aau.service.validator.UserOperationValidator;
-import ru.itterminal.botdesk.commons.exception.AwsSesException;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.FailedSaveEntityException;
 import ru.itterminal.botdesk.commons.service.CrudService;
 import ru.itterminal.botdesk.integration.across_modules.CompletedVerificationAccount;
-import ru.itterminal.botdesk.integration.aws.ses.SenderEmailViaAwsSes;
+import ru.itterminal.botdesk.integration.email.SenderEmailViaSMTPServer;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
 import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
@@ -55,8 +51,6 @@ import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
 @SpringJUnitConfig(value = {JwtProvider.class, UserServiceImpl.class, BCryptPasswordEncoder.class})
 @TestPropertySource(properties = {"jwt.token.secret=ksedtob", "jwt.token.expired=8640000", "jwt.token.prefix=Bearer"})
 class UserServiceImplTest {
-
-    public static final String AWS_SES_EXCEPTION = "AWS SES Exception";
 
     private interface MockCompletedVerificationAccount extends CompletedVerificationAccount {
     }
@@ -70,9 +64,8 @@ class UserServiceImplTest {
     @MockBean
     private UserOperationValidator validator;
 
-    @SuppressWarnings("unused")
     @MockBean
-    private SenderEmailViaAwsSes senderEmailViaAwsSes;
+    private SenderEmailViaSMTPServer senderEmailViaSMTPServer;
 
     @MockBean(name = "ticketTypeServiceImpl")
     private CompletedVerificationAccount ticketTypeServiceImpl;
@@ -170,37 +163,6 @@ class UserServiceImplTest {
         verify(validator, times(1)).beforeCreate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(userRepository, times(1)).create(any());
-    }
-
-    @Test
-    void create_shouldGetAwsSesException_whenWasErrorWhenCreateEmail() throws IOException, MessagingException {
-        when(validator.beforeCreate(any())).thenReturn(true);
-        when(validator.checkUniqueness(any())).thenReturn(true);
-        when(userRepository.create(any())).thenReturn(user);
-        when(roleService.getAccountOwnerRole()).thenReturn(roleAccountOwner);
-        when(senderEmailViaAwsSes.createEmail(any(), any(), any(), any(), any()))
-                .thenThrow(new MessagingException(AWS_SES_EXCEPTION));
-        Throwable throwable = assertThrows(AwsSesException.class, () -> service.create(user));
-        assertEquals(AWS_SES_EXCEPTION, throwable.getMessage());
-        verify(validator, times(1)).beforeCreate(any());
-        verify(validator, times(1)).checkUniqueness(any());
-        verify(userRepository, times(1)).create(any());
-        verify(senderEmailViaAwsSes, times(1)).createEmail(any(), any(), any(), any(), any());
-    }
-
-    @Test
-    void create_shouldGetAwsSesException_whenWasErrorWhenSendEmail() {
-        when(validator.beforeCreate(any())).thenReturn(true);
-        when(validator.checkUniqueness(any())).thenReturn(true);
-        when(userRepository.create(any())).thenReturn(user);
-        when(roleService.getAccountOwnerRole()).thenReturn(roleAccountOwner);
-        when(senderEmailViaAwsSes.sendEmail(any())).thenThrow(new RuntimeException(AWS_SES_EXCEPTION));
-        Throwable throwable = assertThrows(RuntimeException.class, () -> service.create(user));
-        assertEquals(AWS_SES_EXCEPTION, throwable.getMessage());
-        verify(validator, times(1)).beforeCreate(any());
-        verify(validator, times(1)).checkUniqueness(any());
-        verify(userRepository, times(1)).create(any());
-        verify(senderEmailViaAwsSes, times(1)).sendEmail(any());
     }
 
     @Test
@@ -358,36 +320,6 @@ class UserServiceImplTest {
     }
 
     @Test
-    void requestPasswordReset_shouldGetAwsSesException_whenWasErrorWhenCreateEmail()
-            throws IOException, MessagingException {
-        when(userRepository.getByEmail(any())).thenReturn(Optional.of(user));
-        when(senderEmailViaAwsSes.createEmail(any(), any(), any(), any(), any()))
-                .thenThrow(new MessagingException(AWS_SES_EXCEPTION));
-        var exception = assertThrows(
-                AwsSesException.class,
-                () -> service.requestPasswordReset(EMAIL_1)
-        );
-        assertEquals(AWS_SES_EXCEPTION, exception.getMessage());
-        verify(userRepository, times(1)).getByEmail(any());
-        verify(userRepository, times(1)).save(any());
-        verify(senderEmailViaAwsSes, times(1)).createEmail(any(), any(), any(), any(), any());
-    }
-
-    @Test
-    void requestPasswordReset_shouldGetAwsSesException_whenWasErrorWhenSendEmail() {
-        when(userRepository.getByEmail(any())).thenReturn(Optional.of(user));
-        when(senderEmailViaAwsSes.sendEmail(any())).thenThrow(new RuntimeException(AWS_SES_EXCEPTION));
-        var exception = assertThrows(
-                RuntimeException.class,
-                () -> service.requestPasswordReset(EMAIL_1)
-        );
-        assertEquals(AWS_SES_EXCEPTION, exception.getMessage());
-        verify(userRepository, times(1)).getByEmail(any());
-        verify(userRepository, times(1)).save(any());
-        verify(senderEmailViaAwsSes, times(1)).sendEmail(any());
-    }
-
-    @Test
     void resetPassword_shouldResetPassword_whenPassedDataIsValid() {
         String newPassword = "newPassword";
         String token = jwtProvider.createTokenWithUserId(USER_ID);
@@ -451,8 +383,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void requestUpdateEmailOfAccountOwner_shouldUpdateEmailVerificationToken_whenNewEmailIsValid()
-            throws IOException, MessagingException {
+    void requestUpdateEmailOfAccountOwner_shouldUpdateEmailVerificationToken_whenNewEmailIsValid() {
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(user));
         when(userRepository.getByEmail(any())).thenReturn(Optional.of(user));
@@ -461,51 +392,8 @@ class UserServiceImplTest {
         verify(userRepository, times(1)).save(any());
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(1)).findByIdAndAccountId(any(), any());
-        verify(senderEmailViaAwsSes, times(1)).createEmail(any(), any(), any(), any(), any());
-        verify(senderEmailViaAwsSes, times(1)).sendEmail(any());
-    }
-
-    @Test
-    void requestUpdateEmailOfAccountOwner_shouldGetAwsSesException_whenWasErrorWhenCreateEmail()
-            throws IOException, MessagingException {
-        when(userRepository.existsById(any())).thenReturn(true);
-        when(userRepository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(user));
-        when(userRepository.getByEmail(any())).thenReturn(Optional.of(user));
-        when(senderEmailViaAwsSes.createEmail(any(), any(), any(), any(), any()))
-                .thenThrow(new MessagingException(AWS_SES_EXCEPTION));
-        var exception =
-                assertThrows(
-                        AwsSesException.class,
-                        () -> service.requestUpdateEmailOfAccountOwner(EMAIL_1)
-                );
-        assertEquals(AWS_SES_EXCEPTION, exception.getMessage());
-        verify(jwtUserBuilder, times(2)).getJwtUser();
-        verify(userRepository, times(1)).save(any());
-        verify(userRepository, times(1)).existsById(any());
-        verify(userRepository, times(1)).findByIdAndAccountId(any(), any());
-        verify(senderEmailViaAwsSes, times(1)).createEmail(any(), any(), any(), any(), any());
-        verify(senderEmailViaAwsSes, times(0)).sendEmail(any());
-    }
-
-    @Test
-    void requestUpdateEmailOfAccountOwner_shouldGetAwsSesException_whenWasErrorWhenSendEmail()
-            throws IOException, MessagingException {
-        when(userRepository.existsById(any())).thenReturn(true);
-        when(userRepository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(user));
-        when(userRepository.getByEmail(any())).thenReturn(Optional.of(user));
-        when(senderEmailViaAwsSes.sendEmail(any())).thenThrow(new RuntimeException(AWS_SES_EXCEPTION));
-        var exception =
-                assertThrows(
-                        RuntimeException.class,
-                        () -> service.requestUpdateEmailOfAccountOwner(EMAIL_1)
-                );
-        assertEquals(AWS_SES_EXCEPTION, exception.getMessage());
-        verify(jwtUserBuilder, times(2)).getJwtUser();
-        verify(userRepository, times(1)).save(any());
-        verify(userRepository, times(1)).existsById(any());
-        verify(userRepository, times(1)).findByIdAndAccountId(any(), any());
-        verify(senderEmailViaAwsSes, times(1)).createEmail(any(), any(), any(), any(), any());
-        verify(senderEmailViaAwsSes, times(1)).sendEmail(any());
+        verify(senderEmailViaSMTPServer, times(1)).createEmail(any(), any(), any());
+        verify(senderEmailViaSMTPServer, times(1)).sendEmail(any());
     }
 
     @Test
@@ -514,7 +402,7 @@ class UserServiceImplTest {
         var token = jwtProvider.createTokenWithJwtUser(EMAIL_1, jwtUser);
         user.setEmailVerificationToken(token);
         when(userRepository.existsById(any())).thenReturn(true);
-        when(userRepository.findByIdAndAccountId(any(),any())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(user));
         when(userRepository.save(any())).thenReturn(userFromDatabase);
         service.updateEmailOfAccountOwner(token);
         assertNull(user.getEmailVerificationToken());
@@ -524,6 +412,5 @@ class UserServiceImplTest {
         verify(userRepository, times(1)).findByIdAndAccountId(any(), any());
         verify(userRepository, times(1)).save(any());
     }
-
 
 }
