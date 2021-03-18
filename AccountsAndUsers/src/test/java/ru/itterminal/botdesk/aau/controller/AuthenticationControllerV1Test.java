@@ -21,6 +21,7 @@ import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_PASSWORD;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_NOT_BE_NULL;
 import static ru.itterminal.botdesk.security.config.TestSecurityConfig.EMAIL_1;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -358,29 +359,28 @@ class AuthenticationControllerV1Test {
     @Test
     @WithAnonymousUser
     void tokenRefresh_shouldIsForbidden_whenTokenHasExpired() throws Exception {
-        when(jwtProvider.getTimeAfterTokenExpiration(any())).thenReturn(false);
+        when(jwtProvider.getTimeAfterTokenExpiration(any())).thenThrow(ExpiredJwtException.class);
         MockHttpServletRequestBuilder request =
                 get(HOST + PORT + API + "token-refresh?token=" + mockEmailVerificationToken);
         mockMvc.perform(request)
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isBadRequest());
         verify(jwtProvider, times(1)).getTimeAfterTokenExpiration(any());
     }
 
     @Test
     @WithAnonymousUser
     void tokenRefresh_shouldNewToken_whenTokenHasNotExpired() throws Exception {
-        when(jwtProvider.getTimeAfterTokenExpiration(any())).thenReturn(true);
-        when(jwtProvider.getEmail(any())).thenReturn(EMAIL);
-        when(jwtProvider.createTokenWithUserEmail(EMAIL)).thenReturn(mockEmailVerificationToken);
+        when(jwtProvider.getTimeAfterTokenExpiration(any())).thenReturn(EMAIL);
+        when(jwtProvider.getTimeAfterTokenExpiration(any())).thenReturn(EMAIL);
+        when(jwtProvider.createTokenWithJwtUser(any(), any())).thenReturn(mockEmailVerificationToken);
         MockHttpServletRequestBuilder request =
                 get(HOST + PORT + API + "token-refresh?token=" + mockEmailVerificationToken);
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").exists());
-        verify(jwtProvider, times(1)).getEmail(any());
-        verify(jwtProvider, times(1)).createTokenWithUserEmail(EMAIL);
+        verify(jwtProvider, times(1)).createTokenWithJwtUser(any(), any());
         verify(jwtProvider, times(1)).getTimeAfterTokenExpiration(any());
     }
 
@@ -398,13 +398,12 @@ class AuthenticationControllerV1Test {
     @Test
     @WithAnonymousUser
     void tokenRefresh_shouldNewToken_whenTokenHasExpired() throws Exception {
-        when(jwtProvider.getTimeAfterTokenExpiration(any())).thenReturn(false);
+        when(jwtProvider.getTimeAfterTokenExpiration(any())).thenThrow(ExpiredJwtException.class);
         MockHttpServletRequestBuilder request =
                 get(HOST + PORT + API + "token-refresh?token=" + mockEmailVerificationToken);
         mockMvc.perform(request)
                 .andDo(print())
-                .andExpect(status().isForbidden());
-        verify(jwtProvider, times(0)).getEmail(any());
+                .andExpect(status().isBadRequest());
         verify(jwtProvider, times(0)).createTokenWithUserEmail(EMAIL);
         verify(jwtProvider, times(1)).getTimeAfterTokenExpiration(any());
     }

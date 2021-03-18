@@ -50,12 +50,30 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/v1/account"
     };
 
-    static final String[] AUTH_WHITELIST_AUTHENTICATED_METHOD_GET = {
+    static final String[] AUTH_WHITELIST_AUTHENTICATED_FOR_GET_HTTP_METHOD = {
+            "/api/v1/account/*",
+            "/api/v1/group/*",
+            "api/v1/role/*",
+            "api/v1/user/*"
+    };
+
+    static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_FOR_GET_HTTP_METHOD = {
+            "/api/v1/auth/request-email-update",
+            "/api/v1/auth/email-update"
+    };
+
+    static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_FOR_PUT_HTTP_METHOD = {
             "/api/v1/account"
     };
 
-    static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_METHOD_PUT = {
-            "/api/v1/account"
+    static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_POST_HTTP_METHOD = {
+            "/api/v1/group",
+            "/api/v1/user"
+    };
+
+    static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_PUT_HTTP_METHOD = {
+            "/api/v1/group",
+            "/api/v1/user"
     };
 
     @SuppressWarnings("EmptyMethod")
@@ -76,13 +94,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers(AUTH_WHITELIST_PERMIT_ALL).permitAll()
                 .antMatchers(AUTH_WHITELIST_ANONYMOUS_FOR_ANY_HTTP_METHODS).anonymous()
+                .antMatchers(HttpMethod.GET, AUTH_WHITELIST_AUTHENTICATED_FOR_GET_HTTP_METHOD).authenticated()
                 .antMatchers(HttpMethod.POST, AUTH_WHITELIST_ANONYMOUS_FOR_POST_HTTP_METHOD).anonymous()
+                .antMatchers(HttpMethod.PUT, AUTH_WHITELIST_ACCOUNT_OWNER_FOR_PUT_HTTP_METHOD).hasAuthority("ACCOUNT_OWNER")
+                .antMatchers(HttpMethod.GET, AUTH_WHITELIST_ACCOUNT_OWNER_FOR_GET_HTTP_METHOD).hasAuthority("ACCOUNT_OWNER")
+                .antMatchers(HttpMethod.POST, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_POST_HTTP_METHOD).hasAnyAuthority("ACCOUNT_OWNER", "ADMIN")
+                .antMatchers(HttpMethod.PUT, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_PUT_HTTP_METHOD).hasAnyAuthority("ACCOUNT_OWNER", "ADMIN", "EXECUTOR")
                 .anyRequest().authenticated().and()
-                .antMatchers(HttpMethod.GET, AUTH_WHITELIST_AUTHENTICATED_METHOD_GET).authenticated()
-                .antMatchers(HttpMethod.PUT, AUTH_WHITELIST_ACCOUNT_OWNER_METHOD_PUT).hasAuthority("ACCOUNT_OWNER")
-                .antMatchers(AUTH_WHITELIST_ANONYMOUS).anonymous()
-                .anyRequest().authenticated()
-                .and()
                 .addFilterBefore(new JwtFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.headers().frameOptions().disable();

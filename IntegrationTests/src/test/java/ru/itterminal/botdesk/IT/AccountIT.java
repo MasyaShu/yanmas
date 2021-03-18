@@ -379,24 +379,6 @@ class AccountIT {
                 .statusCode(HttpStatus.FORBIDDEN.value());
     }
 
-    @SuppressWarnings("unused")
-    @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getTokensOfUsersWhoDoNotHaveAccessForUpdateAccount")
-    @Order(120)
-    void failedCheckAccessUpdateAccount_whenUserNotAccountOwner(String userKey, String token) {
-        given().
-                when()
-                .headers(
-                        "Authorization",
-                        "Bearer " + token
-                )
-                .contentType(APPLICATION_JSON)
-                .put(ACCOUNT_CHECK_ACCESS)
-                .then()
-                .log().body()
-                .statusCode(HttpStatus.FORBIDDEN.value());
-    }
-
     @Test
     @Order(130)
     void successSetDeletedAccountByAccountOwner() {

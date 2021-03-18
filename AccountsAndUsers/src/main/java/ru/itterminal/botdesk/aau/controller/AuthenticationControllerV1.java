@@ -2,7 +2,6 @@ package ru.itterminal.botdesk.aau.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
@@ -61,14 +60,12 @@ public class AuthenticationControllerV1 {
 
     @GetMapping(path = "/token-refresh")
     public ResponseEntity<Map<Object, Object>> tokenRefresh(@RequestParam(value = "token") @NotEmpty String token) {
-        if (jwtProvider.getTimeAfterTokenExpiration(token)) {
-            var email = jwtProvider.getEmail(token);
-            Map<Object, Object> response = new HashMap<>();
-            response.put("token", jwtProvider.createTokenWithUserEmail(email));
-            return ResponseEntity.ok(response);
-        } else {
-            throw new JwtAuthenticationException(THE_TOKEN_HAS_EXPIRED);
-        }
+        String email = jwtProvider.getTimeAfterTokenExpiration(token);
+        var user = userService.findByEmail(email);
+        var jwtUser = userService.convertUserToJwtUser(user);
+        Map<Object, Object> response = new HashMap<>();
+        response.put("token", jwtProvider.createTokenWithJwtUser(email, jwtUser));
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping(path = "/email-verify")
@@ -77,7 +74,6 @@ public class AuthenticationControllerV1 {
         return ResponseEntity.ok(EMAIL_IS_VERIFIED);
     }
 
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER')")
     @GetMapping(path = "/request-email-update")
     public ResponseEntity<String> requestEmailUpdate(
             @Pattern(regexp = EMAIL_PATTERN, message = INVALID_EMAIL)
@@ -100,7 +96,6 @@ public class AuthenticationControllerV1 {
         return ResponseEntity.ok(PASSWORD_WAS_RESET_SUCCESSFULLY);
     }
 
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER')")
     @GetMapping(path = "/email-update")
     public ResponseEntity<String> emailUpdate(@RequestParam(value = "token") @NotEmpty String token) {
         userService.updateEmailOfAccountOwner(token);

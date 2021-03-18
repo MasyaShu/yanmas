@@ -1,15 +1,6 @@
 package ru.itterminal.botdesk.security.jwt;
 
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekStringForNullOrEmpty;
-
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
-
+import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -17,11 +8,14 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Base64;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chekStringForNullOrEmpty;
 
 @Component
 public class JwtProvider {
@@ -142,12 +136,26 @@ public class JwtProvider {
     }
 
     public boolean validateToken(String token) {
-        Jws<Claims> claims = Jwts.parser().setSigningKey(secretToken).parseClaimsJws(token);
-        return !claims.getBody().getExpiration().before(new Date());
+        Jwts.parser().setSigningKey(secretToken).parseClaimsJws(token);
+        return true;
     }
 
-    public boolean getTimeAfterTokenExpiration(String token) {
-        Jws<Claims> claims = Jwts.parser().setSigningKey(secretToken).parseClaimsJws(token);
-        return claims.getBody().getExpiration().getTime() > validityInMillisecondsToken;
+    public String getTimeAfterTokenExpiration(String token) {
+        var validityInSecondsToken = validityInMillisecondsToken/1000;
+        Jws<Claims> claims = Jwts.parser().setAllowedClockSkewSeconds(validityInSecondsToken).setSigningKey(secretToken).parseClaimsJws(token);
+        return claims.getBody().getSubject();
+    }
+
+    @Deprecated
+    public String createExpiredTokenWithUserEmail(String email, long milliseconds) {
+        chekStringForNullOrEmpty(email, EMAIL_IS_NULL, EMAIL_IS_EMPTY, JwtException.class, CANT_CREATE_TOKEN_BECAUSE);
+        Date now = new Date(new Date().getTime()- milliseconds);
+        Date validity = new Date(now.getTime() + validityInMillisecondsToken);
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(now)
+                .setExpiration(validity)
+                .signWith(SignatureAlgorithm.HS256, secretToken)
+                .compact();
     }
 }

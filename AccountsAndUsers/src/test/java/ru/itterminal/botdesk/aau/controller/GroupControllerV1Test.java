@@ -103,7 +103,7 @@ class GroupControllerV1Test {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String HOST = "http://localhost";
     private static final String PORT = ":8081";
-    private static final String API = "api/v1/group/";
+    private static final String API = "api/v1/group";
 
     private Group group_1;
     private Group group_2;
@@ -182,24 +182,24 @@ class GroupControllerV1Test {
                                 .jsonPath("$.errors.isInner[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
                                 .exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath("$.errors.name[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
-                                   .exists())
+                        .jsonPath("$.errors.name[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                        .exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath(
-                                           "$.errors.isDeprecated[?(@.message == '%s')]",
-                                           CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY
-                                   )
-                                   .exists())
+                        .jsonPath(
+                                "$.errors.isDeprecated[?(@.message == '%s')]",
+                                CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY
+                        )
+                        .exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath(
-                                           "$.errors.id[?(@.message == '%s')]",
-                                           CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY
-                                   ).exists())
+                        .jsonPath(
+                                "$.errors.id[?(@.message == '%s')]",
+                                CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY
+                        ).exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath(
-                                           "$.errors.version[?(@.message == '%s')]",
-                                           CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY
-                                   ).exists())
+                        .jsonPath(
+                                "$.errors.version[?(@.message == '%s')]",
+                                CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY
+                        ).exists())
                 .andExpect(
                         MockMvcResultMatchers
                                 .jsonPath(
@@ -344,22 +344,22 @@ class GroupControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath("$.errors.name[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
-                                   .exists())
+                        .jsonPath("$.errors.name[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                        .exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath(
-                                           "$.errors.isDeprecated[?(@.message == '%s')]",
-                                           CommonConstants.MUST_NOT_BE_NULL
-                                   ).exists())
+                        .jsonPath(
+                                "$.errors.isDeprecated[?(@.message == '%s')]",
+                                CommonConstants.MUST_NOT_BE_NULL
+                        ).exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath("$.errors.id[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
-                                   .exists())
+                        .jsonPath("$.errors.id[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                        .exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath("$.errors.version[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
-                                   .exists())
+                        .jsonPath("$.errors.version[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                        .exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath("$.errors.deleted[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
-                                   .exists());
+                        .jsonPath("$.errors.deleted[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                        .exists());
         verify(service, times(0)).create(any());
     }
 
@@ -406,7 +406,7 @@ class GroupControllerV1Test {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getById_shouldFindOneGroup_whenGroupExistInDatabaseByPassedId() throws Exception {
         when(service.findByIdAndAccountId(any())).thenReturn(group_1);
-        mockMvc.perform(get(HOST + PORT + API + GROUP_1_ID))
+        mockMvc.perform(get(HOST + PORT + API + "/" + GROUP_1_ID))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value(GROUP_NAME_1))
@@ -418,7 +418,7 @@ class GroupControllerV1Test {
     @WithAnonymousUser
     void getById_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
         when(service.findByIdAndAccountId(any())).thenReturn(group_1);
-        mockMvc.perform(get(HOST + PORT + API + GROUP_1_ID))
+        mockMvc.perform(get(HOST + PORT + API + "/" + GROUP_1_ID))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
     }
@@ -427,7 +427,7 @@ class GroupControllerV1Test {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getById_shouldReturnNotFound_whenUserIsInInnerGroupAndFindIdForOtherGroup() throws Exception {
         when(service.findByIdAndAccountId(any())).thenReturn(group_1);
-        mockMvc.perform(get(HOST + PORT + API + GROUP_1_ID))
+        mockMvc.perform(get(HOST + PORT + API + "/" + GROUP_1_ID))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value(GROUP_NAME_1))
@@ -441,7 +441,7 @@ class GroupControllerV1Test {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getById_shouldRespondNotFound_whenPassedIdNotExist() throws Exception {
         when(service.findByIdAndAccountId(any())).thenThrow(EntityNotExistException.class);
-        mockMvc.perform(get(HOST + PORT + API + GROUP_1_ID))
+        mockMvc.perform(get(HOST + PORT + API + "/" + GROUP_1_ID))
                 .andDo(print())
                 .andExpect(status().isNotFound());
         verify(service, times(1)).findByIdAndAccountId(any());
@@ -450,7 +450,7 @@ class GroupControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getById_shouldGetStatusBadRequest_whenIdIsInvalid() throws Exception {
-        mockMvc.perform(get(HOST + PORT + API + "Abracadabra"))
+        mockMvc.perform(get(HOST + PORT + API + "/" + "Abracadabra"))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
         verify(service, times(0)).findById(any());
@@ -462,7 +462,7 @@ class GroupControllerV1Test {
         Pageable pageable =
                 PageRequest.of(Integer.parseInt(BaseController.PAGE_DEFAULT_VALUE), Integer.parseInt(
                         BaseController.SIZE_DEFAULT_VALUE),
-                               Sort.by("name").ascending()
+                        Sort.by("name").ascending()
                 );
         Page<Group> groupPageExpected = new PageImpl<>(List.of(group_1, group_2), pageable, 2);
         when(service.findAllByFilter(any(), any())).thenReturn(groupPageExpected);
@@ -483,7 +483,7 @@ class GroupControllerV1Test {
         Pageable pageable =
                 PageRequest.of(Integer.parseInt(BaseController.PAGE_DEFAULT_VALUE), Integer.parseInt(
                         BaseController.SIZE_DEFAULT_VALUE),
-                               Sort.by("name").ascending()
+                        Sort.by("name").ascending()
                 );
         Page<Group> groupPageExpected = new PageImpl<>(List.of(group_1, group_2), pageable, 2);
         when(service.findAllByFilter(any(), any())).thenReturn(groupPageExpected);
@@ -526,100 +526,20 @@ class GroupControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath(
-                                           "$.errors.name[?(@.message =~ /%s.*/)]",
-                                           "Value must not be null or empty for comparison"
-                                   ).exists())
+                        .jsonPath(
+                                "$.errors.name[?(@.message =~ /%s.*/)]",
+                                "Value must not be null or empty for comparison"
+                        ).exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath(
-                                           "$.errors.deleted[?(@.message == '%s')]",
-                                           CommonConstants.VALUE_MUST_NOT_BE_NULL
-                                   ).exists())
+                        .jsonPath(
+                                "$.errors.deleted[?(@.message == '%s')]",
+                                CommonConstants.VALUE_MUST_NOT_BE_NULL
+                        ).exists())
                 .andExpect(MockMvcResultMatchers
-                                   .jsonPath(
-                                           "$.errors.sortDirection[?(@.message == '%s')]",
-                                           CommonConstants.MUST_BE_ANY_OF_ASC_DESC
-                                   ).exists());
+                        .jsonPath(
+                                "$.errors.sortDirection[?(@.message == '%s')]",
+                                CommonConstants.MUST_BE_ANY_OF_ASC_DESC
+                        ).exists());
         verify(service, times(0)).findAllByFilter(any(), any());
-    }
-
-    @Test
-    @WithAnonymousUser
-    void createCheckAccess_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
-        mockMvc.perform(post(HOST + PORT + API + BaseController.CHECK_ACCESS))
-                .andDo(print())
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void createCheckAccess_shouldGetStatusOk_whenUserWithRoleAdmin() throws Exception {
-        mockMvc.perform(post(HOST + PORT + API + BaseController.CHECK_ACCESS))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithUserDetails("OWNER_ACCOUNT_2_IS_INNER_GROUP")
-    void createCheckAccess_shouldGetStatusOk_whenUserWithRoleAccountOwner() throws Exception {
-        mockMvc.perform(post(HOST + PORT + API + BaseController.CHECK_ACCESS))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    void createCheckAccess_shouldGetStatusForbidden_whenUserWithRoleAuthor() throws Exception {
-        mockMvc.perform(post(HOST + PORT + API + BaseController.CHECK_ACCESS))
-                .andDo(print())
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @WithAnonymousUser
-    void updateCheckAccess_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + BaseController.CHECK_ACCESS))
-                .andDo(print())
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void updateCheckAccess_shouldGetStatusOk_whenUserWithRoleAdmin() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + BaseController.CHECK_ACCESS))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithUserDetails("OWNER_ACCOUNT_2_IS_INNER_GROUP")
-    void updateCheckAccess_shouldGetStatusOk_whenUserWithRoleAccountOwner() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + BaseController.CHECK_ACCESS))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    void updateCheckAccess_shouldGetStatusForbidden_whenUserWithRoleAuthor() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + BaseController.CHECK_ACCESS))
-                .andDo(print())
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_NOT_INNER_GROUP")
-    void updateCheckAccess_shouldGetStatusForbidden_whenUserWithRoleExecutorNotInnerGroup() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + BaseController.CHECK_ACCESS))
-                .andDo(print())
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_INNER_GROUP")
-    void updateCheckAccess_shouldGetStatusOk_whenUserWithRoleExecutorInnerGroup() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + BaseController.CHECK_ACCESS))
-                .andDo(print())
-                .andExpect(status().isOk());
     }
 }

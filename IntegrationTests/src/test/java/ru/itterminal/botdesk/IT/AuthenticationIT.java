@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
@@ -32,11 +33,18 @@ import static ru.itterminal.botdesk.IT.util.ITHelper.*;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = {ITTestConfig.class, JwtProvider.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@TestPropertySource(properties = {"jwt.token.secret=ksedtob", "jwt.token.expired=8640000", "jwt.token.prefix=Bearer"})
+@TestPropertySource(properties = {"jwt.token.secret=ksedtob", "jwt.token.expired=3600000", "jwt.token.prefix=Bearer"})
 class AuthenticationIT {
     public static final String REQUEST_EMAIL_UPDATE = "auth/request-email-update";
     public static final String EMAIL_UPDATE = "auth/email-update";
     public static final String TOKEN_REFRESH = "auth/token-refresh";
+    public static final int TWO_HOUR_IN_MILLISECONDS = 7200000;
+    public static final int ONE_HOUR_IN_MILLISECONDS = 3600000;
+
+    @Value("${jwt.token.secret}")
+    private String secretToken;
+
+
     @Autowired
     private JwtProvider jwtProvider;
 
@@ -418,9 +426,9 @@ class AuthenticationIT {
 
     @SuppressWarnings("unused")
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getTokensOfAllUsersNotAccountOwner")
+    @MethodSource("getTokensOfAllUsers")
     @Order(250)
-    void failedTokenRefreshByAllUserNotAnonymousUser(String userKey, String token) {
+    void failedTokenRefreshByAllUser(String userKey, String token) {
         given()
                 .headers(
                         "Authorization",
@@ -435,12 +443,56 @@ class AuthenticationIT {
 
     @SuppressWarnings("unused")
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getTokensOfAllUsersNotAccountOwner")
+    @MethodSource("getTokensOfAllUsers")
     @Order(260)
-    void successTokenRefreshByAllUserAnonymousUser(String userKey, String token) {
+    void successTokenRefreshByAllUserAnonymousRequest(String userKey, String token) {
         given()
                 .param(TOKEN, token)
                 .get(TOKEN_REFRESH)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.OK.value());
+    }
+
+    @Test
+    @Order(270)
+    void failedTokenRefreshByTokenAccountOwnerExpiredOneHourAgo() {
+        @SuppressWarnings("deprecation")
+        var token = jwtProvider.createExpiredTokenWithUserEmail(itHelper.getAccountOwner().getEmail(), TWO_HOUR_IN_MILLISECONDS);
+        given()
+                .param(TOKEN, token)
+                .get(TOKEN_REFRESH)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
+    @Order(280)
+    void failedTokenRefreshByTokenAccountOwnerExpiredNow() {
+        @SuppressWarnings("deprecation")
+        var token = jwtProvider.createExpiredTokenWithUserEmail(itHelper.getAccountOwner().getEmail(), ONE_HOUR_IN_MILLISECONDS);
+        var response = given()
+                .param(TOKEN, token)
+                .get(TOKEN_REFRESH)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.OK.value())
+                .extract().response();
+        itHelper.getTokens().put(itHelper.getAccountOwner().getEmail(), response.path("token"));
+    }
+
+    @Test
+    @Order(290)
+    void successRequestEmailUpdateByUserAccountOwnerNewToken() {
+        var randomEmail = userTestHelper.getRandomValidEntity().getEmail();
+        given()
+                .headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(itHelper.getAccountOwner().getEmail())
+                )
+                .param("newEmail", randomEmail)
+                .get(REQUEST_EMAIL_UPDATE)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.OK.value());
@@ -460,6 +512,10 @@ class AuthenticationIT {
                 )
         );
         return itHelper.getStreamTokensOfUsers(roles, null);
+    }
+
+    private static Stream<Arguments> getTokensOfAllUsers() {
+        return itHelper.getStreamTokensOfUsers(itHelper.getRoleTestHelper().getPredefinedValidEntityList(), null);
     }
 
     private void successSignInAccountOwner() {
