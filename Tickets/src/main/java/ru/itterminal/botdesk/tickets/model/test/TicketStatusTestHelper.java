@@ -90,9 +90,10 @@ public class TicketStatusTestHelper extends EntityTestHelperImpl<TicketStatus, T
         return List.of(ticketStatus1, ticketStatus2, ticketStatus3, ticketStatus4, ticketStatus5);
     }
 
-    public TicketStatusDto convertEntityToDtoRequest(TicketStatus ticketStatus, boolean isCreate) {
+    @Override
+    public TicketStatusDto convertEntityToDtoRequest(TicketStatus ticketStatus, boolean isDtoForCreate) {
         var ticketStatusDto = modelMapper.map(ticketStatus, TicketStatusDto.class);
-        if (isCreate) {
+        if (isDtoForCreate) {
             ticketStatusDto.setId(null);
             ticketStatusDto.setDeleted(null);
             ticketStatusDto.setVersion(null);

@@ -217,7 +217,7 @@ class TicketServiceImplTest {
     @Test
     void convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId_shouldConvert_whenPassedValidData() {
         var expectedTicket = ticketTestHelper.getRandomValidEntity();
-        var ticketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(expectedTicket);
+        var ticketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(expectedTicket, true);
         var actualTicket = service
                 .convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(
                         ticketDtoRequest,

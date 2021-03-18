@@ -98,7 +98,7 @@ class TicketControllerV1Test {
 
     @BeforeEach
     void setupBeforeEach() {
-        requestDto = ticketTestHelper.convertEntityToDtoRequest(ticket);
+        requestDto = ticketTestHelper.convertEntityToDtoRequest(ticket, true);
     }
 
     @Test

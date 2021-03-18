@@ -158,7 +158,7 @@ class TicketTemplateControllerV1Test {
     void create_shouldCreate_whenValidDataPassed() throws Exception {
         TicketTemplate ticketTemplate = templateTestHelper.getRandomValidEntity();
         TicketTemplateDtoRequest ticketTemplateDtoRequest =
-                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate);
+                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate, true);
         ticketTemplateDtoRequest.setVersion(null);
         ticketTemplateDtoRequest.setId(null);
         ticketTemplateDtoRequest.setDeleted(null);
@@ -193,7 +193,7 @@ class TicketTemplateControllerV1Test {
     void create_shouldBadRequestWithErrorsDescriptions_whenInvalidData() throws Exception {
         TicketTemplate ticketTemplate = templateTestHelper.getRandomValidEntity();
         TicketTemplateDtoRequest ticketTemplateDtoRequest =
-                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate);
+                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate, false);
         ticketTemplateDtoRequest.setZoneId(null);
         ticketTemplateDtoRequest.setExpressionSchedule(null);
         ticketTemplateDtoRequest.setAuthorId(null);
@@ -255,7 +255,7 @@ class TicketTemplateControllerV1Test {
     void create_shouldBadRequestWithErrorsDescriptions_whenInvalidZoneId() throws Exception {
         TicketTemplate ticketTemplate = templateTestHelper.getRandomValidEntity();
         TicketTemplateDtoRequest ticketTemplateDtoRequest =
-                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate);
+                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate, true);
         ticketTemplateDtoRequest.setId(null);
         ticketTemplateDtoRequest.setVersion(null);
         ticketTemplateDtoRequest.setDeleted(null);
@@ -282,7 +282,7 @@ class TicketTemplateControllerV1Test {
     void create_shouldBadRequestWithErrorsDescriptions_whenMustConsistExpressionSchedule() throws Exception {
         TicketTemplate ticketTemplate = templateTestHelper.getRandomValidEntity();
         TicketTemplateDtoRequest ticketTemplateDtoRequest =
-                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate);
+                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate, true);
         ticketTemplateDtoRequest.setId(null);
         ticketTemplateDtoRequest.setVersion(null);
         ticketTemplateDtoRequest.setDeleted(null);
@@ -312,7 +312,7 @@ class TicketTemplateControllerV1Test {
     void create_shouldBadRequestWithErrorsDescriptions_whenInvalidValueExpressionSchedule() throws Exception {
         TicketTemplate ticketTemplate = templateTestHelper.getRandomValidEntity();
         TicketTemplateDtoRequest ticketTemplateDtoRequest =
-                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate);
+                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate, true);
         ticketTemplateDtoRequest.setId(null);
         ticketTemplateDtoRequest.setVersion(null);
         ticketTemplateDtoRequest.setDeleted(null);
@@ -340,7 +340,7 @@ class TicketTemplateControllerV1Test {
     void update_shouldCreate_whenValidDataPassed() throws Exception {
         TicketTemplate ticketTemplate = templateTestHelper.getRandomValidEntity();
         TicketTemplateDtoRequest ticketTemplateDtoRequest =
-                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate);
+                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate, false);
         when(templateService.update(any())).thenReturn(ticketTemplate);
         when(userService.findByIdAndAccountId(any())).thenReturn(ticketTemplate.getAuthor());
         when(ticketTypeService.findByIdAndAccountId(any())).thenReturn(ticketTemplate.getTicketType());
@@ -373,7 +373,7 @@ class TicketTemplateControllerV1Test {
     void update_shouldBadRequestWithErrorsDescriptions_whenInvalidData() throws Exception {
         TicketTemplate ticketTemplate = templateTestHelper.getRandomValidEntity();
         TicketTemplateDtoRequest ticketTemplateDtoRequest =
-                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate);
+                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate, false);
         ticketTemplateDtoRequest.setZoneId(null);
         ticketTemplateDtoRequest.setExpressionSchedule(null);
         ticketTemplateDtoRequest.setAuthorId(null);

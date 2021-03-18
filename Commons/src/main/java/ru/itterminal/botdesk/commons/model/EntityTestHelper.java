@@ -18,7 +18,7 @@ public interface EntityTestHelper<E extends BaseEntity, DtoRequest extends BaseE
     E getEntityFromPredefinedValidEntityByEntityId(String entityId);
 
     // EntityDtoRequest
-    DtoRequest convertEntityToDtoRequest(E entity);
+    DtoRequest convertEntityToDtoRequest(E entity, boolean isDtoForCreate);
 
     // EntityDtoResponse
     DtoResponse convertEntityToDtoResponse(E entity);

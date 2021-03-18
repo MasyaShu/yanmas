@@ -54,7 +54,7 @@ public abstract class EntityTestHelperImpl<E extends BaseEntity, DtoRequest exte
     // EntityDto
 
     @Override
-    public DtoRequest convertEntityToDtoRequest(E entity) {
+    public DtoRequest convertEntityToDtoRequest(E entity, boolean isDtoForCreate) {
         return null;
     }
 

@@ -19,10 +19,10 @@ public class GroupTestHelper extends EntityTestHelperImpl<Group, GroupDto, Group
     private final AccountTestHelper accountHelper = new AccountTestHelper();
     private final ModelMapper modelMapper = new ModelMapper();
 
-    @SuppressWarnings("deprecation")
-    public GroupDto convertEntityToDtoRequest(Group group, boolean isCreate) {
+    @Override
+    public GroupDto convertEntityToDtoRequest(Group group, boolean isDtoForCreate) {
         var groupDto = modelMapper.map(group, GroupDto.class);
-        if (isCreate) {
+        if (isDtoForCreate) {
             groupDto.setId(null);
             groupDto.setDeleted(null);
             groupDto.setVersion(null);

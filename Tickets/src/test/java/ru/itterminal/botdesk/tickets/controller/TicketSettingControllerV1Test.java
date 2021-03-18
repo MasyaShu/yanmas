@@ -94,7 +94,7 @@ class TicketSettingControllerV1Test {
 
     @BeforeEach
     void setupBeforeEach() {
-        requestDto = helper.convertEntityToDtoRequest(ticketSetting);
+        requestDto = helper.convertEntityToDtoRequest(ticketSetting, true);
         requestDto.setDisplayName(null);
     }
 
@@ -161,7 +161,7 @@ class TicketSettingControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenVersionNotNull() throws Exception {
-        TicketSettingDtoRequest dtoRequest = helper.convertEntityToDtoRequest(helper.getRandomValidEntity());
+        TicketSettingDtoRequest dtoRequest = helper.convertEntityToDtoRequest(helper.getRandomValidEntity(), true);
         dtoRequest.setVersion(15);
         dtoRequest.setId(UUID.randomUUID());
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
