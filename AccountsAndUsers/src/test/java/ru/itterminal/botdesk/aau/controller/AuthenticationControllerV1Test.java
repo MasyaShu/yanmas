@@ -19,6 +19,7 @@ import static ru.itterminal.botdesk.aau.controller.AuthenticationControllerV1.TO
 import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_EMAIL;
 import static ru.itterminal.botdesk.aau.util.AAUConstants.INVALID_PASSWORD;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.MUST_NOT_BE_NULL;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
 import static ru.itterminal.botdesk.security.config.TestSecurityConfig.EMAIL_1;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -60,11 +61,12 @@ import ru.itterminal.botdesk.security.jwt.JwtProvider;
 @SpringJUnitConfig(value = {AuthenticationControllerV1.class, FilterChainProxy.class})
 @Import(TestSecurityConfig.class)
 @WebMvcTest
-@ActiveProfiles("Test")
+@ActiveProfiles(SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS)
 class AuthenticationControllerV1Test {
 
     public static final String MUST_NOT_BE_EMPTY = "must not be empty";
     public static final String EMAIL = "email";
+
     @MockBean
     private UserServiceImpl userService;
 

@@ -368,7 +368,7 @@ class TicketSettingIT {
                 .id(null)
                 .version(null)
                 .build();
-        var dtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(expectedTicketSetting);
+        var dtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(expectedTicketSetting, true);
         var actualTicketSetting = given().
                 when().
                 headers(
@@ -406,7 +406,7 @@ class TicketSettingIT {
                 .id(null)
                 .version(null)
                 .build();
-        var dtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(newTicketSetting);
+        var dtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(newTicketSetting, true);
         var apiError = given().
                 when().
                 headers(
@@ -437,7 +437,7 @@ class TicketSettingIT {
                 .id(null)
                 .version(null)
                 .build();
-        var dtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(newTicketSetting);
+        var dtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(newTicketSetting, true);
         var apiError = given().
                 when().
                 headers(
@@ -472,7 +472,7 @@ class TicketSettingIT {
                 .id(null)
                 .version(null)
                 .build();
-        var dtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(newTicketSetting);
+        var dtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(newTicketSetting, true);
         given().
                 when().
                 headers(
@@ -507,7 +507,7 @@ class TicketSettingIT {
         var expectedTicketSetting = itHelper.getTicketSettings().get(INNER_GROUP + "1").toBuilder()
                 .displayName(null)
                 .build();
-        var dtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(expectedTicketSetting);
+        var dtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(expectedTicketSetting, false);
         var actualTicketSetting = given().
                 when().
                 headers(
@@ -541,7 +541,7 @@ class TicketSettingIT {
                 .executors(null)
                 .displayName(null)
                 .build();
-        var dtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(expectedTicketSetting);
+        var dtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(expectedTicketSetting, false);
         var apiError = given().
                 when().
                 headers(
@@ -570,7 +570,7 @@ class TicketSettingIT {
                 .group(itHelper.getTicketSettings().get(OUTER_GROUP + "1").getGroup())
                 .displayName(null)
                 .build();
-        var dtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(expectedTicketSetting);
+        var dtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(expectedTicketSetting, false);
         var apiError = given().
                 when().
                 headers(
@@ -602,7 +602,7 @@ class TicketSettingIT {
         var expectedTicketSetting = itHelper.getTicketSettings().get(INNER_GROUP + "1").toBuilder()
                 .displayName(null)
                 .build();
-        var dtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(expectedTicketSetting);
+        var dtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(expectedTicketSetting, false);
         given().
                 when().
                 headers(

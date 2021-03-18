@@ -83,7 +83,7 @@ public class TicketTestHelper extends EntityTestHelperImpl<Ticket, TicketDtoRequ
 
     @Override
     @SuppressWarnings("DuplicatedCode")
-    public TicketDtoRequest convertEntityToDtoRequest(Ticket entity) {
+    public TicketDtoRequest convertEntityToDtoRequest(Ticket entity, boolean isDtoForCreate) {
         List<UUID> observersIdList = new ArrayList<>();
         if (entity.getObservers() != null) {
             observersIdList = entity.getObservers()

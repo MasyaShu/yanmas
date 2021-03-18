@@ -397,7 +397,7 @@ public class ITHelper {
                 .executors(executors)
                 .observers(observers)
                 .build();
-        var ticketSettingDtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(ticketSetting);
+        var ticketSettingDtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(ticketSetting, true);
         var ticketSettingDtoResponse = given().
                 when()
                 .headers(

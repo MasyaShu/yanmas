@@ -23,11 +23,12 @@ import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketStatusOperationValidator.A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_STATUS;
 
 @SpringJUnitConfig(value = {TicketStatusOperationValidator.class})
 @Import(TestSecurityConfig.class)
-@ActiveProfiles("Test")
+@ActiveProfiles(SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS)
 class TicketStatusOperationValidatorTest {
     @MockBean
     private TicketStatusServiceImpl service;

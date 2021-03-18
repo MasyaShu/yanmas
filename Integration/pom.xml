@@ -13,17 +13,16 @@
 
     <dependencies>
 
+        <dependency>
+            <groupId>ru.it-terminal.botdesk</groupId>
+            <artifactId>Commons</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
         <!-- Spring Integration-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-integration</artifactId>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/software.amazon.awssdk/ses -->
-        <dependency>
-            <groupId>software.amazon.awssdk</groupId>
-            <artifactId>ses</artifactId>
-            <version>2.15.31</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/software.amazon.awssdk/s3 -->
@@ -33,21 +32,11 @@
             <version>2.15.31</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.awaitility/awaitility -->
         <dependency>
-            <groupId>org.awaitility</groupId>
-            <artifactId>awaitility</artifactId>
-            <version>4.0.3</version>
-            <scope>test</scope>
+            <groupId>org.simplejavamail</groupId>
+            <artifactId>simple-java-mail</artifactId>
+            <version>6.5.0</version>
         </dependency>
-
-        <dependency>
-            <groupId>com.sun.mail</groupId>
-            <artifactId>javax.mail</artifactId>
-            <version>1.6.2</version>
-        </dependency>
-
-
 
     </dependencies>
 </project>

@@ -10,6 +10,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
 import static ru.itterminal.botdesk.security.config.TestSecurityConfig.AUTHOR_ACCOUNT_1_IS_INNER_GROUP_ID;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator.CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP;
@@ -69,7 +70,7 @@ import ru.itterminal.botdesk.tickets.model.test.TicketTestHelper;
 
 @SpringJUnitConfig(value = {TicketOperationValidator.class})
 @Import(TestSecurityConfig.class)
-@ActiveProfiles("Test")
+@ActiveProfiles(SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS)
 class TicketOperationValidatorTest {
 
     @MockBean

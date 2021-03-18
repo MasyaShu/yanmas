@@ -1,5 +1,10 @@
 package ru.itterminal.botdesk.security.config;
 
+import static ru.itterminal.botdesk.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
+import static ru.itterminal.botdesk.security.config.SecurityConfig.AUTH_WHITELIST_ANONYMOUS_FOR_ANY_HTTP_METHODS;
+import static ru.itterminal.botdesk.security.config.SecurityConfig.AUTH_WHITELIST_ANONYMOUS_FOR_POST_HTTP_METHOD;
+import static ru.itterminal.botdesk.security.config.SecurityConfig.AUTH_WHITELIST_PERMIT_ALL;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
@@ -23,7 +28,7 @@ import static ru.itterminal.botdesk.security.config.SecurityConfig.*;
 
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 @EnableWebSecurity
-@Profile("Test")
+@Profile(SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS)
 public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
 
     public static final String ACCOUNT_1_ID = "cdfa6483-0769-4628-ba32-efd338a716de";

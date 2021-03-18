@@ -56,12 +56,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.itterminal.botdesk.commons.model.validator.zoneid.ValidateZoneId.ZONE_ID_NOT_VALID;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.INVALID_TYPE_COMPARISON_FOR_VALUE_GIVEN;
+import static ru.itterminal.botdesk.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {TicketTemplateControllerV1.class, FilterChainProxy.class})
 @Import({TestSecurityConfig.class, HttpEncodingAutoConfiguration.class})
 @WebMvcTest
-@ActiveProfiles("Test")
+@ActiveProfiles(SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS)
 class TicketTemplateControllerV1Test {
 
     public static final String INVALID_VALUE_FOR = "Invalid value for";
@@ -157,7 +158,7 @@ class TicketTemplateControllerV1Test {
     void create_shouldCreate_whenValidDataPassed() throws Exception {
         TicketTemplate ticketTemplate = templateTestHelper.getRandomValidEntity();
         TicketTemplateDtoRequest ticketTemplateDtoRequest =
-                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate);
+                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate, true);
         ticketTemplateDtoRequest.setVersion(null);
         ticketTemplateDtoRequest.setId(null);
         ticketTemplateDtoRequest.setDeleted(null);
@@ -192,7 +193,7 @@ class TicketTemplateControllerV1Test {
     void create_shouldBadRequestWithErrorsDescriptions_whenInvalidData() throws Exception {
         TicketTemplate ticketTemplate = templateTestHelper.getRandomValidEntity();
         TicketTemplateDtoRequest ticketTemplateDtoRequest =
-                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate);
+                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate, false);
         ticketTemplateDtoRequest.setZoneId(null);
         ticketTemplateDtoRequest.setExpressionSchedule(null);
         ticketTemplateDtoRequest.setAuthorId(null);
@@ -254,7 +255,7 @@ class TicketTemplateControllerV1Test {
     void create_shouldBadRequestWithErrorsDescriptions_whenInvalidZoneId() throws Exception {
         TicketTemplate ticketTemplate = templateTestHelper.getRandomValidEntity();
         TicketTemplateDtoRequest ticketTemplateDtoRequest =
-                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate);
+                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate, true);
         ticketTemplateDtoRequest.setId(null);
         ticketTemplateDtoRequest.setVersion(null);
         ticketTemplateDtoRequest.setDeleted(null);
@@ -281,7 +282,7 @@ class TicketTemplateControllerV1Test {
     void create_shouldBadRequestWithErrorsDescriptions_whenMustConsistExpressionSchedule() throws Exception {
         TicketTemplate ticketTemplate = templateTestHelper.getRandomValidEntity();
         TicketTemplateDtoRequest ticketTemplateDtoRequest =
-                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate);
+                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate, true);
         ticketTemplateDtoRequest.setId(null);
         ticketTemplateDtoRequest.setVersion(null);
         ticketTemplateDtoRequest.setDeleted(null);
@@ -311,7 +312,7 @@ class TicketTemplateControllerV1Test {
     void create_shouldBadRequestWithErrorsDescriptions_whenInvalidValueExpressionSchedule() throws Exception {
         TicketTemplate ticketTemplate = templateTestHelper.getRandomValidEntity();
         TicketTemplateDtoRequest ticketTemplateDtoRequest =
-                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate);
+                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate, true);
         ticketTemplateDtoRequest.setId(null);
         ticketTemplateDtoRequest.setVersion(null);
         ticketTemplateDtoRequest.setDeleted(null);
@@ -339,7 +340,7 @@ class TicketTemplateControllerV1Test {
     void update_shouldCreate_whenValidDataPassed() throws Exception {
         TicketTemplate ticketTemplate = templateTestHelper.getRandomValidEntity();
         TicketTemplateDtoRequest ticketTemplateDtoRequest =
-                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate);
+                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate, false);
         when(templateService.update(any())).thenReturn(ticketTemplate);
         when(userService.findByIdAndAccountId(any())).thenReturn(ticketTemplate.getAuthor());
         when(ticketTypeService.findByIdAndAccountId(any())).thenReturn(ticketTemplate.getTicketType());
@@ -372,7 +373,7 @@ class TicketTemplateControllerV1Test {
     void update_shouldBadRequestWithErrorsDescriptions_whenInvalidData() throws Exception {
         TicketTemplate ticketTemplate = templateTestHelper.getRandomValidEntity();
         TicketTemplateDtoRequest ticketTemplateDtoRequest =
-                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate);
+                ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate, false);
         ticketTemplateDtoRequest.setZoneId(null);
         ticketTemplateDtoRequest.setExpressionSchedule(null);
         ticketTemplateDtoRequest.setAuthorId(null);

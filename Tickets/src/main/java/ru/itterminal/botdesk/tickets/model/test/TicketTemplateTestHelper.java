@@ -189,28 +189,9 @@ public class TicketTemplateTestHelper extends EntityTestHelperImpl<TicketTemplat
     }
 
     @Override
-    public TicketTemplateDtoRequest convertEntityToDtoRequest(TicketTemplate entity) {
-        return TicketTemplateDtoRequest.builder()
-                .dateEnd(entity.getDateEnd())
-                .dateStart(entity.getDateStart())
-                .description(entity.getDescription())
-                .expressionSchedule(entity.getExpressionSchedule())
-                .isActive(entity.getIsActive())
-                .subject(entity.getSubject())
-                .zoneId(entity.getZoneId())
-                .id(entity.getId())
-                .version(entity.getVersion())
-                .deleted(entity.getDeleted())
-                .isOnlyOneTicketInWork(entity.getIsOnlyOneTicketInWork())
-                .outId(entity.getOutId())
-                .authorId(entity.getAuthor() == null ? null : entity.getAuthor().getId())
-                .ticketTypeId(entity.getTicketType() == null ? null : entity.getTicketType().getId())
-                .build();
-    }
-
-    public TicketTemplateDtoRequest convertEntityToDtoRequest(TicketTemplate ticketTemplate, boolean isCreate) {
+    public TicketTemplateDtoRequest convertEntityToDtoRequest(TicketTemplate ticketTemplate, boolean isDtoForCreate) {
         var ticketTemplateDtoRequest = modelMapper.map(ticketTemplate, TicketTemplateDtoRequest.class);
-        if (isCreate) {
+        if (isDtoForCreate) {
             ticketTemplateDtoRequest.setId(null);
             ticketTemplateDtoRequest.setDeleted(null);
             ticketTemplateDtoRequest.setVersion(null);

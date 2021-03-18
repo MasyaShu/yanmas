@@ -19,6 +19,7 @@ import ru.itterminal.botdesk.tickets.model.TicketType;
 import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoRequest;
 import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoResponse;
 
+@SuppressWarnings("DuplicatedCode")
 public class TicketSettingTestHelper extends EntityTestHelperImpl<TicketSetting, TicketSettingDtoRequest,
         TicketSettingDtoResponse> {
 
@@ -122,7 +123,7 @@ public class TicketSettingTestHelper extends EntityTestHelperImpl<TicketSetting,
     }
 
     @Override
-    public TicketSettingDtoRequest convertEntityToDtoRequest(TicketSetting entity) {
+    public TicketSettingDtoRequest convertEntityToDtoRequest(TicketSetting entity, boolean isDtoForCreate) {
 
         List<UUID> observersIdList = new ArrayList<>();
         if (entity.getObservers() != null) {
