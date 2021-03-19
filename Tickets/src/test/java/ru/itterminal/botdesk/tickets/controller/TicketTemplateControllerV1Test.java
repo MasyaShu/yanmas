@@ -149,7 +149,7 @@ class TicketTemplateControllerV1Test {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String HOST = "http://localhost";
     private static final String PORT = ":8081";
-    private static final String API = "api/v1/ticket-template/";
+    private static final String API = "api/v1/ticket-template";
     private final TicketTemplateTestHelper templateTestHelper = new TicketTemplateTestHelper();
     private final ModelMapper mapper = new ModelMapper();
 
@@ -430,7 +430,7 @@ class TicketTemplateControllerV1Test {
     void getById_shouldFindOneEntity_whenIdExistInDatabaseByPassedId() throws Exception {
         var ticketTemplate = ticketTemplateTestHelper.getRandomValidEntity();
         when(templateService.findByIdAndAccountId(any())).thenReturn(ticketTemplate);
-        mockMvc.perform(get(HOST + PORT + API + ticketTemplate.getId()))
+        mockMvc.perform(get(HOST + PORT + API + "/" + ticketTemplate.getId()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.subject").value(ticketTemplate.getSubject()))
@@ -441,7 +441,7 @@ class TicketTemplateControllerV1Test {
     @Test
     @WithAnonymousUser
     void getById_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
-        mockMvc.perform(get(HOST + PORT + API + UUID.randomUUID()))
+        mockMvc.perform(get(HOST + PORT + API + "/" + UUID.randomUUID()))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
         verify(templateService, times(0)).findByIdAndAccountId(any());
@@ -452,7 +452,7 @@ class TicketTemplateControllerV1Test {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getById_shouldRespondNotFound_whenPassedIdNotExist() throws Exception {
         when(templateService.findByIdAndAccountId(any())).thenThrow(EntityNotExistException.class);
-        mockMvc.perform(get(HOST + PORT + API + UUID.randomUUID()))
+        mockMvc.perform(get(HOST + PORT + API + "/" + UUID.randomUUID()))
                 .andDo(print())
                 .andExpect(status().isNotFound());
         verify(templateService, times(1)).findByIdAndAccountId(any());
@@ -461,7 +461,7 @@ class TicketTemplateControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getById_shouldGetStatusBadRequest_whenIdIsInvalid() throws Exception {
-        mockMvc.perform(get(HOST + PORT + API + "Abracadabra"))
+        mockMvc.perform(get(HOST + PORT + API + "/" + "Abracadabra"))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
         verify(templateService, times(0)).findById(any());

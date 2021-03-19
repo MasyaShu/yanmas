@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -25,8 +24,6 @@ import javax.validation.constraints.PositiveOrZero;
 import java.security.Principal;
 import java.util.UUID;
 
-import static java.lang.String.format;
-
 @Slf4j
 @RestController("TicketStatusControllerV1")
 @Validated
@@ -40,7 +37,6 @@ public class TicketStatusControllerV1 extends BaseController {
     private final String ENTITY_NAME = TicketStatus.class.getSimpleName();
 
     @PostMapping()
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
     public ResponseEntity<TicketStatusDto> create(Principal principal,
                                                   @Validated(Create.class) @RequestBody TicketStatusDto request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
@@ -58,16 +54,7 @@ public class TicketStatusControllerV1 extends BaseController {
         return new ResponseEntity<>(returnedTicketStatus, HttpStatus.CREATED);
     }
 
-    @PostMapping("/check-access")
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
-    public ResponseEntity<String> createCheckAccess() {
-        String message = format(SUCCESSFUL_CHECK_ACCESS, WORD_CREATE, ENTITY_NAME);
-        log.trace(message);
-        return ResponseEntity.ok(message);
-    }
-
     @PutMapping()
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
     public ResponseEntity<TicketStatusDto> update(Principal principal,
                                                   @Validated(Update.class) @RequestBody TicketStatusDto request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
@@ -77,14 +64,6 @@ public class TicketStatusControllerV1 extends BaseController {
         TicketStatusDto returnedTicketStatus = modelMapper.map(updatedTicketStatus, TicketStatusDto.class);
         log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedTicketStatus);
         return new ResponseEntity<>(returnedTicketStatus, HttpStatus.OK);
-    }
-
-    @PutMapping("/check-access")
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
-    public ResponseEntity<String> updateCheckAccess() {
-        String message = format(SUCCESSFUL_CHECK_ACCESS, WORD_UPDATE, ENTITY_NAME);
-        log.trace(message);
-        return ResponseEntity.ok(message);
     }
 
     @GetMapping()

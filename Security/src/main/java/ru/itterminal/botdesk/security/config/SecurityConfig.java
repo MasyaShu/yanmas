@@ -34,6 +34,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAccessDeniedHandler accessDeniedHandler;
 
+
+    static final String[] ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR = {"ACCOUNT_OWNER", "ADMIN", "EXECUTOR", "AUTHOR"};
+    static final String[] ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR = {"ACCOUNT_OWNER", "ADMIN", "EXECUTOR"};
+    static final String[] ROLE_ACCOUNT_OWNER_ADMIN = {"ACCOUNT_OWNER", "ADMIN"};
+    static final String ROLE_ACCOUNT_OWNER = "ACCOUNT_OWNER";
+
     static final String[] AUTH_WHITELIST_PERMIT_ALL = {
             "/swagger-ui.html",
     };
@@ -51,15 +57,34 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     };
 
     static final String[] AUTH_WHITELIST_AUTHENTICATED_FOR_GET_HTTP_METHOD = {
-            "/api/v1/account/*",
-            "/api/v1/group/*",
-            "api/v1/role/*",
-            "api/v1/user/*"
+            "/api/v1/account/**",
+            "/api/v1/group/**",
+            "/api/v1/role/**",
+            "/api/v1/user/**",
+            "/api/v1/ticket/**",
+            "/api/v1/ticket-counter/**",
+            "/api/v1/ticket-status/**",
+            "/api/v1/ticket-type/**"
+
+    };
+
+    static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_GET_HTTP_METHOD = {
+            "/api/v1/ticket-setting/**"
+
+    };
+
+    static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_GET_HTTP_METHOD = {
+            "/api/v1/ticket-template/**"
+
     };
 
     static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_FOR_GET_HTTP_METHOD = {
             "/api/v1/auth/request-email-update",
             "/api/v1/auth/email-update"
+    };
+
+    static final String[] AUTH_WHITELIST_AUTHENTICATED_FOR_ANY_HTTP_METHOD = {
+            "/api/v1/file/**"
     };
 
     static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_FOR_PUT_HTTP_METHOD = {
@@ -68,12 +93,32 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_POST_HTTP_METHOD = {
             "/api/v1/group",
-            "/api/v1/user"
+            "/api/v1/user",
+            "/api/v1/ticket-setting",
+            "/api/v1/ticket-status",
+            "/api/v1/ticket-type"
     };
 
     static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_PUT_HTTP_METHOD = {
             "/api/v1/group",
-            "/api/v1/user"
+            "/api/v1/user",
+            "/api/v1/ticket-template"
+    };
+
+    static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_POST_HTTP_METHOD = {
+            "/api/v1/ticket-template"
+    };
+
+    static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_PUT_HTTP_METHOD = {
+            "/api/v1/ticket-counter",
+            "/api/v1/ticket-setting",
+            "/api/v1/ticket-status",
+            "/api/v1/ticket-type"
+    };
+
+    static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_POST_HTTP_METHOD = {
+            "/api/v1/ticket"
+
     };
 
     @SuppressWarnings("EmptyMethod")
@@ -94,13 +139,28 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers(AUTH_WHITELIST_PERMIT_ALL).permitAll()
                 .antMatchers(AUTH_WHITELIST_ANONYMOUS_FOR_ANY_HTTP_METHODS).anonymous()
+                .antMatchers(AUTH_WHITELIST_AUTHENTICATED_FOR_ANY_HTTP_METHOD).authenticated()
                 .antMatchers(HttpMethod.GET, AUTH_WHITELIST_AUTHENTICATED_FOR_GET_HTTP_METHOD).authenticated()
                 .antMatchers(HttpMethod.POST, AUTH_WHITELIST_ANONYMOUS_FOR_POST_HTTP_METHOD).anonymous()
-                .antMatchers(HttpMethod.PUT, AUTH_WHITELIST_ACCOUNT_OWNER_FOR_PUT_HTTP_METHOD).hasAuthority("ACCOUNT_OWNER")
-                .antMatchers(HttpMethod.GET, AUTH_WHITELIST_ACCOUNT_OWNER_FOR_GET_HTTP_METHOD).hasAuthority("ACCOUNT_OWNER")
-                .antMatchers(HttpMethod.POST, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_POST_HTTP_METHOD).hasAnyAuthority("ACCOUNT_OWNER", "ADMIN")
-                .antMatchers(HttpMethod.PUT, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_PUT_HTTP_METHOD).hasAnyAuthority("ACCOUNT_OWNER", "ADMIN", "EXECUTOR")
-                .anyRequest().authenticated().and()
+                .antMatchers(HttpMethod.PUT, AUTH_WHITELIST_ACCOUNT_OWNER_FOR_PUT_HTTP_METHOD)
+                .hasAuthority(ROLE_ACCOUNT_OWNER)
+                .antMatchers(HttpMethod.GET, AUTH_WHITELIST_ACCOUNT_OWNER_FOR_GET_HTTP_METHOD)
+                .hasAuthority(ROLE_ACCOUNT_OWNER)
+                .antMatchers(HttpMethod.POST, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_POST_HTTP_METHOD)
+                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN)
+                .antMatchers(HttpMethod.PUT, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_PUT_HTTP_METHOD)
+                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR)
+                .antMatchers(HttpMethod.POST, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_POST_HTTP_METHOD)
+                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR)
+                .antMatchers(HttpMethod.PUT, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_PUT_HTTP_METHOD)
+                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN)
+                .antMatchers(HttpMethod.GET, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_GET_HTTP_METHOD)
+                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR)
+                .antMatchers(HttpMethod.POST, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_POST_HTTP_METHOD)
+                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR)
+                .antMatchers(HttpMethod.GET, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_GET_HTTP_METHOD)
+                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR)
+                .antMatchers("/**").denyAll().and()
                 .addFilterBefore(new JwtFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.headers().frameOptions().disable();

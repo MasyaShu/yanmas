@@ -1,31 +1,14 @@
 package ru.itterminal.botdesk.tickets.controller;
 
-import static java.lang.String.format;
-
-import java.security.Principal;
-import java.util.UUID;
-
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.controller.BaseController;
@@ -38,6 +21,12 @@ import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoRequest;
 import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoResponse;
 import ru.itterminal.botdesk.tickets.model.dto.TicketSettingFilterDto;
 import ru.itterminal.botdesk.tickets.service.impl.TicketSettingServiceImpl;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
+import java.security.Principal;
+import java.util.UUID;
 
 @SuppressWarnings("DuplicatedCode")
 @Slf4j
@@ -56,7 +45,6 @@ public class TicketSettingControllerV1 extends BaseController {
     private final String ENTITY_NAME = TicketSetting.class.getSimpleName();
 
     @PostMapping()
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
     public ResponseEntity<TicketSettingDtoResponse> create(Principal principal,
                                                            @Validated(Create.class) @RequestBody TicketSettingDtoRequest request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
@@ -69,16 +57,7 @@ public class TicketSettingControllerV1 extends BaseController {
         return new ResponseEntity<>(returnedTicketSetting, HttpStatus.CREATED);
     }
 
-    @PostMapping("/check-access")
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
-    public ResponseEntity<String> createCheckAccess() {
-        String message = format(SUCCESSFUL_CHECK_ACCESS, WORD_CREATE, ENTITY_NAME);
-        log.trace(message);
-        return ResponseEntity.ok(message);
-    }
-
     @PutMapping()
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
     public ResponseEntity<TicketSettingDtoResponse> update(Principal principal,
                                                            @Validated(Update.class) @RequestBody TicketSettingDtoRequest request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
@@ -91,17 +70,7 @@ public class TicketSettingControllerV1 extends BaseController {
         return new ResponseEntity<>(returnedTicketSetting, HttpStatus.OK);
     }
 
-    @PutMapping("/check-access")
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
-    public ResponseEntity<String> updateCheckAccess() {
-        String message = format(SUCCESSFUL_CHECK_ACCESS, WORD_UPDATE, ENTITY_NAME);
-        log.trace(message);
-        return ResponseEntity.ok(message);
-    }
-
-
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR', 'AUTHOR')")
     public ResponseEntity<TicketSettingDtoResponse> getById(@PathVariable UUID id) {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
         var foundTicketSetting = ticketSettingService.findByIdAndAccountId(id);
@@ -111,7 +80,6 @@ public class TicketSettingControllerV1 extends BaseController {
     }
 
     @GetMapping()
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR', 'AUTHOR')")
     public ResponseEntity<Page<TicketSettingDtoResponse>> getByFilter(
             Principal user,
             @Valid @RequestBody TicketSettingFilterDto filterDto,

@@ -84,7 +84,7 @@ class TicketStatusControllerV1Test {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String HOST = "http://localhost";
     private static final String PORT = ":8081";
-    private static final String API = "api/v1/ticket-status/";
+    private static final String API = "api/v1/ticket-status";
 
     private TicketStatus ticketStatus_1;
     private TicketStatus ticketStatus_2;
@@ -323,7 +323,7 @@ class TicketStatusControllerV1Test {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getById_shouldFindOneGroup_whenGroupExistInDatabaseByPassedId() throws Exception {
         when(service.findByIdAndAccountId(any())).thenReturn(ticketStatus_1);
-        mockMvc.perform(get(HOST + PORT + API + TICKET_STATUS_ID_1))
+        mockMvc.perform(get(HOST + PORT + API + "/" + TICKET_STATUS_ID_1))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value(TICKET_STATUS_NAME_1))
@@ -335,7 +335,7 @@ class TicketStatusControllerV1Test {
     @WithAnonymousUser
     void getById_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
         when(service.findByIdAndAccountId(any())).thenReturn(ticketStatus_1);
-        mockMvc.perform(get(HOST + PORT + API + TICKET_STATUS_ID_1))
+        mockMvc.perform(get(HOST + PORT + API + "/" + TICKET_STATUS_ID_1))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
     }
@@ -344,7 +344,7 @@ class TicketStatusControllerV1Test {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getById_shouldRespondNotFound_whenPassedIdNotExist() throws Exception {
         when(service.findByIdAndAccountId(any())).thenThrow(EntityNotExistException.class);
-        mockMvc.perform(get(HOST + PORT + API + TICKET_STATUS_ID_1))
+        mockMvc.perform(get(HOST + PORT + API + "/" + TICKET_STATUS_ID_1))
                 .andDo(print())
                 .andExpect(status().isNotFound());
         verify(service, times(1)).findByIdAndAccountId(any());
@@ -353,7 +353,7 @@ class TicketStatusControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getById_shouldGetStatusBadRequest_whenIdIsInvalid() throws Exception {
-        mockMvc.perform(get(HOST + PORT + API + "Abracadabra"))
+        mockMvc.perform(get(HOST + PORT + API + "/" + "Abracadabra"))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
         verify(service, times(0)).findById(any());
@@ -377,77 +377,4 @@ class TicketStatusControllerV1Test {
                 .andExpect(status().isUnauthorized());
         verify(service, times(0)).findAllByFilter(any(), any());
     }
-
-    @Test
-    @WithAnonymousUser
-    void createCheckAccess_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
-        mockMvc.perform(post(HOST + PORT + API + BaseController.CHECK_ACCESS))
-                .andDo(print())
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void createCheckAccess_shouldGetStatusOk_whenUserWithRoleAdmin() throws Exception {
-        mockMvc.perform(post(HOST + PORT + API + BaseController.CHECK_ACCESS))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithUserDetails("OWNER_ACCOUNT_2_IS_INNER_GROUP")
-    void createCheckAccess_shouldGetStatusOk_whenUserWithRoleAccountOwner() throws Exception {
-        mockMvc.perform(post(HOST + PORT + API + BaseController.CHECK_ACCESS))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    void createCheckAccess_shouldGetStatusForbidden_whenUserWithRoleAuthor() throws Exception {
-        mockMvc.perform(post(HOST + PORT + API + BaseController.CHECK_ACCESS))
-                .andDo(print())
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @WithAnonymousUser
-    void updateCheckAccess_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + BaseController.CHECK_ACCESS))
-                .andDo(print())
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void updateCheckAccess_shouldGetStatusOk_whenUserWithRoleAdmin() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + BaseController.CHECK_ACCESS))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithUserDetails("OWNER_ACCOUNT_2_IS_INNER_GROUP")
-    void updateCheckAccess_shouldGetStatusOk_whenUserWithRoleAccountOwner() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + BaseController.CHECK_ACCESS))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    void updateCheckAccess_shouldGetStatusForbidden_whenUserWithRoleAuthor() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + BaseController.CHECK_ACCESS))
-                .andDo(print())
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @WithUserDetails("EXECUTOR_ACCOUNT_1_IS_NOT_INNER_GROUP")
-    void updateCheckAccess_shouldGetStatusIsOk_whenUserWithRoleExecutorNotInnerGroup() throws Exception {
-        mockMvc.perform(put(HOST + PORT + API + BaseController.CHECK_ACCESS))
-                .andDo(print())
-                .andExpect(status().isForbidden());
-    }
-
 }

@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
@@ -28,8 +27,6 @@ import javax.validation.constraints.PositiveOrZero;
 import java.security.Principal;
 import java.util.UUID;
 
-import static java.lang.String.format;
-
 @Slf4j
 @RestController("TicketTemplateControllerV1")
 @RequestMapping("api/v1/ticket-template")
@@ -43,7 +40,6 @@ public class TicketTemplateControllerV1 extends BaseController {
     private final String ENTITY_NAME = TicketTemplate.class.getSimpleName();
 
     @PostMapping()
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')")
     public ResponseEntity<TicketTemplateDtoResponse> create(Principal principal,
                                                             @Validated(Create.class) @RequestBody TicketTemplateDtoRequest request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
@@ -56,16 +52,7 @@ public class TicketTemplateControllerV1 extends BaseController {
         return new ResponseEntity<>(returnedTicketTemplate, HttpStatus.CREATED);
     }
 
-    @PostMapping("/check-access")
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')")
-    public ResponseEntity<String> createCheckAccess() {
-        String message = format(SUCCESSFUL_CHECK_ACCESS, WORD_CREATE, ENTITY_NAME);
-        log.trace(message);
-        return ResponseEntity.ok(message);
-    }
-
     @PutMapping()
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')")
     public ResponseEntity<TicketTemplateDtoResponse> update(Principal principal,
                                                             @Validated(Update.class) @RequestBody TicketTemplateDtoRequest request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
@@ -78,16 +65,7 @@ public class TicketTemplateControllerV1 extends BaseController {
         return new ResponseEntity<>(returnedTicketTemplate, HttpStatus.OK);
     }
 
-    @PutMapping("/check-access")
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')")
-    public ResponseEntity<String> updateCheckAccess() {
-        String message = format(SUCCESSFUL_CHECK_ACCESS, WORD_UPDATE, ENTITY_NAME);
-        log.trace(message);
-        return ResponseEntity.ok(message);
-    }
-
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')")
     public ResponseEntity<TicketTemplateDtoResponse> getById(@PathVariable UUID id) {
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (!jwtUser.isInnerGroup()) {
@@ -101,7 +79,6 @@ public class TicketTemplateControllerV1 extends BaseController {
     }
 
     @GetMapping()
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR')")
     public ResponseEntity<Page<TicketTemplateDtoResponse>> getByFilter(
             Principal user,
             @Valid @RequestBody TicketTemplateFilterDto filterDto,

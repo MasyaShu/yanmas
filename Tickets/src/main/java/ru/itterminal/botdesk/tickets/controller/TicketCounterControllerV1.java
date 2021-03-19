@@ -1,28 +1,20 @@
 package ru.itterminal.botdesk.tickets.controller;
 
-import static java.lang.String.format;
-
-import java.security.Principal;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
 import ru.itterminal.botdesk.tickets.model.TicketCounter;
 import ru.itterminal.botdesk.tickets.model.dto.TicketCounterDto;
 import ru.itterminal.botdesk.tickets.service.impl.TicketCounterServiceImpl;
+
+import java.security.Principal;
 
 @Slf4j
 @RestController("TicketCounterControllerV1")
@@ -35,7 +27,6 @@ public class TicketCounterControllerV1 extends BaseController {
     private final String ENTITY_NAME = TicketCounter.class.getSimpleName();
 
     @PutMapping()
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
     public ResponseEntity<TicketCounterDto> update(Principal principal,
                                                    @Validated(Update.class) @RequestBody TicketCounterDto request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
@@ -46,14 +37,6 @@ public class TicketCounterControllerV1 extends BaseController {
         var returnedTicketCounter = modelMapper.map(updatedTicketCounter, TicketCounterDto.class);
         log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, request);
         return new ResponseEntity<>(returnedTicketCounter, HttpStatus.OK);
-    }
-
-    @PutMapping("/check-access")
-    @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN')")
-    public ResponseEntity<String> updateCheckAccess() {
-        String message = format(SUCCESSFUL_CHECK_ACCESS, WORD_UPDATE, ENTITY_NAME);
-        log.trace(message);
-        return ResponseEntity.ok(message);
     }
 
     @GetMapping()
