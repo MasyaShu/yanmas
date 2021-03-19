@@ -1,9 +1,30 @@
 package ru.itterminal.botdesk.security.config;
 
+import static ru.itterminal.botdesk.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
+import static ru.itterminal.botdesk.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_GET_HTTP_METHOD;
+import static ru.itterminal.botdesk.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_POST_HTTP_METHOD;
+import static ru.itterminal.botdesk.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_GET_HTTP_METHOD;
+import static ru.itterminal.botdesk.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_POST_HTTP_METHOD;
+import static ru.itterminal.botdesk.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_PUT_HTTP_METHOD;
+import static ru.itterminal.botdesk.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_POST_HTTP_METHOD;
+import static ru.itterminal.botdesk.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_PUT_HTTP_METHOD;
+import static ru.itterminal.botdesk.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_FOR_GET_HTTP_METHOD;
+import static ru.itterminal.botdesk.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_FOR_PUT_HTTP_METHOD;
+import static ru.itterminal.botdesk.security.config.SecurityConfig.AUTH_WHITELIST_ANONYMOUS_FOR_ANY_HTTP_METHODS;
+import static ru.itterminal.botdesk.security.config.SecurityConfig.AUTH_WHITELIST_ANONYMOUS_FOR_POST_HTTP_METHOD;
+import static ru.itterminal.botdesk.security.config.SecurityConfig.AUTH_WHITELIST_AUTHENTICATED_FOR_ANY_HTTP_METHOD;
+import static ru.itterminal.botdesk.security.config.SecurityConfig.AUTH_WHITELIST_AUTHENTICATED_FOR_GET_HTTP_METHOD;
+import static ru.itterminal.botdesk.security.config.SecurityConfig.AUTH_WHITELIST_PERMIT_ALL;
+import static ru.itterminal.botdesk.security.config.SecurityConfig.ROLE_ACCOUNT_OWNER_ADMIN;
+import static ru.itterminal.botdesk.security.config.SecurityConfig.ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR;
+import static ru.itterminal.botdesk.security.config.SecurityConfig.ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR;
+
+import java.util.List;
+import java.util.UUID;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -11,17 +32,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.cors.CorsConfigurationSource;
+
 import ru.itterminal.botdesk.security.jwt.CustomAccessDeniedHandler;
 import ru.itterminal.botdesk.security.jwt.CustomAuthenticationEntryPoint;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
 
-import java.util.List;
-import java.util.UUID;
-
-import static ru.itterminal.botdesk.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
-import static ru.itterminal.botdesk.security.config.SecurityConfig.*;
-
-@EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
+@SuppressWarnings("DuplicatedCode")
 @EnableWebSecurity
 @Profile(SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS)
 public class TestSecurityConfig extends WebSecurityConfigurerAdapter {

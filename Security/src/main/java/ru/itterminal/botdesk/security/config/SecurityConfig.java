@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -24,7 +23,7 @@ import ru.itterminal.botdesk.security.jwt.CustomAuthenticationEntryPoint;
 import ru.itterminal.botdesk.security.jwt.JwtFilter;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
 
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@SuppressWarnings("DuplicatedCode")
 @EnableWebSecurity
 @ComponentScan(basePackages = "ru.itterminal.botdesk")
 @RequiredArgsConstructor
