@@ -2,17 +2,16 @@ package ru.itterminal.botdesk.aau.service.impl;
 
 import static java.lang.String.format;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
-import javax.mail.MessagingException;
 import javax.persistence.OptimisticLockException;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,18 +27,10 @@ import ru.itterminal.botdesk.aau.service.validator.UserOperationValidator;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.FailedSaveEntityException;
 import ru.itterminal.botdesk.integration.across_modules.CompletedVerificationAccount;
-import ru.itterminal.botdesk.integration.aws.ses.SenderEmailViaAwsSes;
+import ru.itterminal.botdesk.integration.email.SenderEmailViaSMTPServer;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
 import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
-
-import javax.mail.MessagingException;
-import javax.persistence.OptimisticLockException;
-import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
-
-import static java.lang.String.format;
 
 @Slf4j
 @Service
@@ -74,7 +65,7 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
     private final JwtProvider jwtProvider;
     private final JwtUserBuilder jwtUserBuilder;
     private final RoleServiceImpl roleService;
-    private final SenderEmailViaAwsSes senderEmailViaAwsSes;
+    private final SenderEmailViaSMTPServer senderEmailViaSMTPServer;
     private final ApplicationContext appContext;
 
     public static final String START_REQUEST_PASSWORD_RESET_BY_EMAIL = "Start request password reset by email: {}";
