@@ -2,6 +2,9 @@ package ru.itterminal.botdesk.aau.service.impl;
 
 import static java.lang.String.format;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
@@ -60,6 +63,9 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
 
     @Value("${email.PasswordResetToken.textBody}")
     private String emailPasswordResetTokenTextBody;
+
+    @Value("${dir.uploaded.files}")
+    private String dirUploadedFiles;
 
     private final BCryptPasswordEncoder encoder;
     private final JwtProvider jwtProvider;
@@ -199,7 +205,7 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
     }
 
     @Transactional
-    public void verifyEmailToken(String token) {
+    public void verifyEmailTokenOfAccountOwner(String token) throws IOException {
         log.trace(START_VERIFY_EMAIL_TOKEN, token);
         UUID userId = null;
         try {
@@ -221,13 +227,17 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
                 || !savedUser.getEmailVerificationStatus()) {
             throw new FailedSaveEntityException(FAILED_SAVE_USER_AFTER_VERIFY_EMAIL_TOKEN);
         }
-        var ticketTypeServiceImpl =
-                (CompletedVerificationAccount) appContext.getBean(TICKET_TYPE_SERVICE_IMPL);
-        ticketTypeServiceImpl.actionAfterCompletedVerificationAccount(user.getAccount().getId());
+        var folderForUploadFilesForThisAccount = Paths.get(dirUploadedFiles, user.getAccount().getId().toString());
+        if (Files.notExists(folderForUploadFilesForThisAccount)) {
+            var ticketTypeServiceImpl =
+                    (CompletedVerificationAccount) appContext.getBean(TICKET_TYPE_SERVICE_IMPL);
+            ticketTypeServiceImpl.actionAfterCompletedVerificationAccount(user.getAccount().getId());
 
-        var ticketStatusServiceImpl =
-                (CompletedVerificationAccount) appContext.getBean(TICKET_STATUS_SERVICE_IMPL);
-        ticketStatusServiceImpl.actionAfterCompletedVerificationAccount(user.getAccount().getId());
+            var ticketStatusServiceImpl =
+                    (CompletedVerificationAccount) appContext.getBean(TICKET_STATUS_SERVICE_IMPL);
+            ticketStatusServiceImpl.actionAfterCompletedVerificationAccount(user.getAccount().getId());
+            Files.createDirectories(folderForUploadFilesForThisAccount);
+        }
     }
 
     @SuppressWarnings("DuplicatedCode")

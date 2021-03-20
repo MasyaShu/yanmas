@@ -3,19 +3,21 @@ package ru.itterminal.botdesk.files.service;
 import static java.lang.String.format;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createExpectedLogicalValidationException;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
-import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.aau.service.impl.CrudServiceWithAccountImpl;
+import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.model.EntityConverter;
 import ru.itterminal.botdesk.files.model.File;
 import ru.itterminal.botdesk.files.model.dto.FileDto;
@@ -25,7 +27,6 @@ import ru.itterminal.botdesk.integration.aws.s3.AwsS3ObjectOperations;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperationValidator, FileRepository> implements
         EntityConverter<File, FileDto> {
 
@@ -43,6 +44,14 @@ public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperat
 
     private final AwsS3ObjectOperations awsS3ObjectOperations;
     private final AccountServiceImpl accountService;
+
+    public FileServiceImpl(AwsS3ObjectOperations awsS3ObjectOperations,
+                           AccountServiceImpl accountService,
+                           @Value("${dir.uploaded.files}") String dirUploadedFiles) throws IOException {
+        this.awsS3ObjectOperations = awsS3ObjectOperations;
+        this.accountService = accountService;
+        Files.createDirectories(Paths.get(dirUploadedFiles));
+    }
 
     @Transactional(readOnly = true)
     public byte[] getFileData(UUID accountId, UUID fileId) {

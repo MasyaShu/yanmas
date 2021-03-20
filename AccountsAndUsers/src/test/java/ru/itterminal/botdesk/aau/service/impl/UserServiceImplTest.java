@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -14,6 +15,7 @@ import static ru.itterminal.botdesk.security.config.TestSecurityConfig.ACCOUNT_1
 import static ru.itterminal.botdesk.security.config.TestSecurityConfig.EMAIL_1;
 import static ru.itterminal.botdesk.security.config.TestSecurityConfig.INNER_GROUP_ID;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -227,20 +229,20 @@ class UserServiceImplTest {
     }
 
     @Test
-    void verifyEmailToken_shouldUpdateEmailVerificationStatus_whenTokenIsValid() {
+    void verifyEmailToken_shouldUpdateEmailVerificationStatus_whenTokenIsValid() throws IOException {
         String token = jwtProvider.createTokenWithUserId(USER_ID);
         user.setEmailVerificationToken(token);
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
         user.setEmailVerificationStatus(true);
         when(userRepository.save(any())).thenReturn(user);
-        service.verifyEmailToken(token);
+        service.verifyEmailTokenOfAccountOwner(token);
         assertTrue(user.getEmailVerificationStatus());
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(1)).findById(any());
         verify(userRepository, times(1)).save(any());
-        verify(ticketTypeServiceImpl, times(1)).actionAfterCompletedVerificationAccount(any());
-        verify(ticketStatusServiceImpl, times(1)).actionAfterCompletedVerificationAccount(any());
+        verify(ticketTypeServiceImpl, atMost(1)).actionAfterCompletedVerificationAccount(any());
+        verify(ticketStatusServiceImpl, atMost(1)).actionAfterCompletedVerificationAccount(any());
     }
 
     @Test
@@ -250,7 +252,7 @@ class UserServiceImplTest {
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
         user.setEmailVerificationStatus(true);
         when(userRepository.save(any())).thenReturn(user);
-        Throwable throwable = assertThrows(JwtException.class, () -> service.verifyEmailToken(token));
+        Throwable throwable = assertThrows(JwtException.class, () -> service.verifyEmailTokenOfAccountOwner(token));
         assertEquals(UserServiceImpl.NOT_FOUND_USER_BY_EMAIL_VERIFICATION_TOKEN, throwable.getMessage());
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(1)).findById(any());
@@ -266,7 +268,7 @@ class UserServiceImplTest {
         user.setEmailVerificationToken(emailVerificationToken);
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
-        Throwable throwable = assertThrows(JwtException.class, () -> service.verifyEmailToken(token));
+        Throwable throwable = assertThrows(JwtException.class, () -> service.verifyEmailTokenOfAccountOwner(token));
         assertEquals(UserServiceImpl.NOT_FOUND_USER_BY_EMAIL_VERIFICATION_TOKEN, throwable.getMessage());
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(1)).findById(any());
@@ -283,7 +285,7 @@ class UserServiceImplTest {
         user.setEmailVerificationStatus(true);
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
         when(userRepository.save(any())).thenReturn(User.builder().emailVerificationStatus(false).build());
-        Throwable throwable = assertThrows(FailedSaveEntityException.class, () -> service.verifyEmailToken(token));
+        Throwable throwable = assertThrows(FailedSaveEntityException.class, () -> service.verifyEmailTokenOfAccountOwner(token));
         assertEquals(UserServiceImpl.FAILED_SAVE_USER_AFTER_VERIFY_EMAIL_TOKEN, throwable.getMessage());
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(1)).findById(any());
@@ -294,7 +296,7 @@ class UserServiceImplTest {
 
     @Test
     void verifyEmailToken_shouldGetJwtException_whenTokenIsNull() {
-        Throwable throwable = assertThrows(JwtException.class, () -> service.verifyEmailToken(null));
+        Throwable throwable = assertThrows(JwtException.class, () -> service.verifyEmailTokenOfAccountOwner(null));
         assertEquals("JWT String argument cannot be null or empty.", throwable.getMessage());
         verify(userRepository, times(0)).existsById(any());
         verify(userRepository, times(0)).findById(any());

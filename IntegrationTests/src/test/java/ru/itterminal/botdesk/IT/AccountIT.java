@@ -83,7 +83,6 @@ import ru.itterminal.botdesk.tickets.repository.TicketTypeRepository;
 @TestPropertySource(properties = {"jwt.token.secret=ksedtob", "jwt.token.expired=8640000", "jwt.token.prefix=Bearer"})
 class AccountIT {
 
-    public static final String ACCOUNT_CHECK_ACCESS = "account/check-access";
     @Autowired
     private JwtProvider jwtProvider;
 

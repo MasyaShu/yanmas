@@ -165,7 +165,7 @@ class AuthenticationControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").value(EMAIL_IS_VERIFIED));
-        verify(userService, times(1)).verifyEmailToken(mockEmailVerificationToken);
+        verify(userService, times(1)).verifyEmailTokenOfAccountOwner(mockEmailVerificationToken);
     }
 
     @Test
@@ -176,7 +176,7 @@ class AuthenticationControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
-        verify(userService, times(0)).verifyEmailToken(anyString());
+        verify(userService, times(0)).verifyEmailTokenOfAccountOwner(anyString());
     }
 
     @Test

@@ -15,6 +15,8 @@ import ru.itterminal.botdesk.security.jwt.JwtUser;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
+
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,8 +32,6 @@ public class AuthenticationControllerV1 {
     public static final String TOKEN_FOR_UPDATE_EMAIL_WAS_SENT_TO_NEW_EMAIL =
             "token for update email was sent to new email";
     public static final String EMAIL_WAS_SUCCESSFULLY_UPDATED = "email was successfully updated";
-    public static final String THE_TOKEN_HAS_EXPIRED = "the token has expired";
-
     public static final String INVALID_USERNAME_OR_PASSWORD = "invalid username or password";
     public static final String EMAIL_IS_VERIFIED = "email is verified";
     public static final String TOKEN_FOR_RESET_PASSWORD_WAS_SENT_TO_EMAIL =
@@ -69,8 +69,9 @@ public class AuthenticationControllerV1 {
     }
 
     @GetMapping(path = "/email-verify")
-    public ResponseEntity<String> verifyEmailToken(@RequestParam(value = "token") @NotEmpty String token) {
-        userService.verifyEmailToken(token);
+    public ResponseEntity<String> verifyEmailToken(@RequestParam(value = "token") @NotEmpty String token)
+            throws IOException {
+        userService.verifyEmailTokenOfAccountOwner(token);
         return ResponseEntity.ok(EMAIL_IS_VERIFIED);
     }
 
