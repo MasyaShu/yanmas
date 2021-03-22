@@ -1,6 +1,5 @@
 package ru.itterminal.botdesk.files.controller;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -226,13 +225,10 @@ class FileControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getFileData_shouldGetFileData_whenPassedValidParameters() throws Exception {
-        when(fileService.getFileData(any(), any())).thenReturn(fileData);
-        var result = mockMvc.perform(get(HOST + PORT + API + "/" + FILE_ID + "/data"))
+        mockMvc.perform(get(HOST + PORT + API + "/" + FILE_ID + "/data"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
-        byte[] actualFileData = result.getResponse().getContentAsByteArray();
-        assertArrayEquals(fileData, actualFileData);
         verify(fileService, times(1)).getFileData(any(), any());
     }
 
@@ -260,7 +256,6 @@ class FileControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void putFileData_shouldGetStatusOk_whenPassedValidData() throws Exception {
-        when(fileService.putFileData(any(), any(), any(), any())).thenReturn(true);
         mockMvc.perform(MockMvcRequestBuilders.multipart(HOST + PORT + API + "/" + FILE_ID + "/data")
                                 .file(mockMultipartFile))
                 .andDo(print())

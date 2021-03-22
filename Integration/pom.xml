@@ -25,13 +25,6 @@
             <artifactId>spring-boot-starter-integration</artifactId>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/software.amazon.awssdk/s3 -->
-        <dependency>
-            <groupId>software.amazon.awssdk</groupId>
-            <artifactId>s3</artifactId>
-            <version>2.15.31</version>
-        </dependency>
-
         <dependency>
             <groupId>org.simplejavamail</groupId>
             <artifactId>simple-java-mail</artifactId>

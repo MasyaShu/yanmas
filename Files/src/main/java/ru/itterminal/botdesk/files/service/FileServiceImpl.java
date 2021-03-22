@@ -4,12 +4,12 @@ import static java.lang.String.format;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createExpectedLogicalValidationException;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,8 +22,8 @@ import ru.itterminal.botdesk.commons.model.EntityConverter;
 import ru.itterminal.botdesk.files.model.File;
 import ru.itterminal.botdesk.files.model.dto.FileDto;
 import ru.itterminal.botdesk.files.repository.FileRepository;
+import ru.itterminal.botdesk.files.repository.FileSystemRepository;
 import ru.itterminal.botdesk.files.service.validator.FileOperationValidator;
-import ru.itterminal.botdesk.integration.aws.s3.AwsS3ObjectOperations;
 
 @Slf4j
 @Service
@@ -41,20 +41,22 @@ public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperat
 
     @Value("${maxSizeOfFile}")
     private Long maxSizeOfFile;
+    private final String dirUploadedFiles;
 
-    private final AwsS3ObjectOperations awsS3ObjectOperations;
+    private final FileSystemRepository fileSystemRepository;
     private final AccountServiceImpl accountService;
 
-    public FileServiceImpl(AwsS3ObjectOperations awsS3ObjectOperations,
+    public FileServiceImpl(FileSystemRepository fileSystemRepository,
                            AccountServiceImpl accountService,
                            @Value("${dir.uploaded.files}") String dirUploadedFiles) throws IOException {
-        this.awsS3ObjectOperations = awsS3ObjectOperations;
+        this.fileSystemRepository = fileSystemRepository;
         this.accountService = accountService;
+        this.dirUploadedFiles = dirUploadedFiles;
         Files.createDirectories(Paths.get(dirUploadedFiles));
     }
 
     @Transactional(readOnly = true)
-    public byte[] getFileData(UUID accountId, UUID fileId) {
+    public FileSystemResource getFileData(UUID accountId, UUID fileId) {
         if (fileId == null) {
             throw createExpectedLogicalValidationException(FILE_ID, FILE_ID_IS_NULL);
         }
@@ -62,11 +64,17 @@ public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperat
         if (Boolean.FALSE.equals(file.getIsUploaded())) {
             throw createExpectedLogicalValidationException(FILE, FILE_WAS_NOT_UPLOAD);
         }
-        return awsS3ObjectOperations.getObject(accountId, fileId);
+        return fileSystemRepository.findInFileSystem(
+                Paths.get(
+                        dirUploadedFiles,
+                        accountId.toString(),
+                        fileId.toString()
+                )
+        );
     }
 
     @Transactional
-    public boolean putFileData(UUID accountId, UUID authorId, UUID fileId, byte[] bytes) {
+    public void putFileData(UUID accountId, UUID authorId, UUID fileId, byte[] bytes) throws IOException {
         if (fileId == null) {
             throw createExpectedLogicalValidationException(FILE_ID, FILE_ID_IS_NULL);
         }
@@ -80,13 +88,17 @@ public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperat
                     throw new EntityNotExistException(errorMessage);
                 }
         );
-        var isFileUploaded = awsS3ObjectOperations.putObject(accountId, fileId, ByteBuffer.wrap(bytes));
-        if (isFileUploaded) {
-            file.setIsUploaded(true);
-            file.setSize(bytes.length);
-            repository.update(file);
-        }
-        return isFileUploaded;
+        fileSystemRepository.save(
+                bytes,
+                Paths.get(
+                        dirUploadedFiles,
+                        accountId.toString(),
+                        fileId.toString()
+                )
+        );
+        file.setIsUploaded(true);
+        file.setSize(bytes.length);
+        repository.update(file);
     }
 
     @Override

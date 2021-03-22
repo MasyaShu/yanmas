@@ -4,10 +4,8 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.UUID;
 
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
@@ -40,14 +38,11 @@ import ru.itterminal.botdesk.security.jwt.JwtUser;
 public class FileControllerV1 extends BaseController {
 
     public static final String GET_REQUEST_FOR_GET_DATA_FOR_FILE_ID = "Get request for get data for fileId: {}";
-    public static final String DONE_REQUEST_FOR_GET_DATA_FOR_FILE_ID_SIZE_OF_DATA_IS =
-            "Done request for get data for fileId: {}, size of data is {}";
     public static final String GET_REQUEST_FOR_SAVE_DATA_FOR_FILE_ID = "Get request for save data for fileId: {}";
     public static final String DONE_REQUEST_FOR_SAVE_DATA_FOR_FILE_ID = "Done request for save data for fileId: {}";
     private final String ENTITY_NAME = File.class.getSimpleName();
 
     private final FileServiceImpl fileService;
-
 
     @PostMapping()
     public ResponseEntity<FileDto> create
@@ -76,20 +71,10 @@ public class FileControllerV1 extends BaseController {
     }
 
     @GetMapping("/{fileId}/data")
-    public ResponseEntity<Resource> getFileData(
-            Principal principal,
-            @PathVariable("fileId") UUID fileId
-    ) {
+    public FileSystemResource getFileData(Principal principal, @PathVariable("fileId") UUID fileId) {
         log.debug(GET_REQUEST_FOR_GET_DATA_FOR_FILE_ID, fileId);
         var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        byte[] fileData = fileService.getFileData(jwtUser.getAccountId(), fileId);
-        ByteArrayResource resource = new ByteArrayResource(fileData);
-        log.debug(DONE_REQUEST_FOR_GET_DATA_FOR_FILE_ID_SIZE_OF_DATA_IS, fileId, fileData.length);
-        return ResponseEntity.ok()
-                .contentLength(fileData.length)
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(resource);
-
+        return fileService.getFileData(jwtUser.getAccountId(), fileId);
     }
 
     @PostMapping("/{fileId}/data")
@@ -97,7 +82,7 @@ public class FileControllerV1 extends BaseController {
     public ResponseEntity<Boolean> putFileData(Principal principal,
                                                @PathVariable("fileId") UUID fileId,
                                                @RequestParam("file") MultipartFile file
-    ) {
+    ) throws IOException {
         log.debug(GET_REQUEST_FOR_SAVE_DATA_FOR_FILE_ID, fileId);
         var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
         byte[] bytesOfFile;
@@ -108,8 +93,8 @@ public class FileControllerV1 extends BaseController {
             log.error(e.getMessage());
             return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
         }
-        var result = fileService.putFileData(jwtUser.getAccountId(), jwtUser.getId(), fileId, bytesOfFile);
+        fileService.putFileData(jwtUser.getAccountId(), jwtUser.getId(), fileId, bytesOfFile);
         log.debug(DONE_REQUEST_FOR_SAVE_DATA_FOR_FILE_ID, fileId);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return new ResponseEntity<>(true, HttpStatus.OK);
     }
 }

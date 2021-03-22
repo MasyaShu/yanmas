@@ -3,7 +3,6 @@ package ru.itterminal.botdesk.files.service;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -14,6 +13,7 @@ import static ru.itterminal.botdesk.files.service.FileServiceImpl.FILE_ID_IS_NUL
 import static ru.itterminal.botdesk.files.service.FileServiceImpl.MAX_SIZE;
 import static ru.itterminal.botdesk.files.service.FileServiceImpl.SIZE_FILE;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -32,8 +32,8 @@ import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.files.model.File;
 import ru.itterminal.botdesk.files.repository.FileRepository;
+import ru.itterminal.botdesk.files.repository.FileSystemRepository;
 import ru.itterminal.botdesk.files.service.validator.FileOperationValidator;
-import ru.itterminal.botdesk.integration.aws.s3.AwsS3ObjectOperations;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
 import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
 
@@ -62,7 +62,7 @@ class FileServiceImplTest {
     private AccountServiceImpl accountService;
 
     @MockBean
-    private AwsS3ObjectOperations awsS3ObjectOperations;
+    private FileSystemRepository fileSystemRepository;
 
     @Autowired
     private FileServiceImpl service;
@@ -93,29 +93,25 @@ class FileServiceImplTest {
         when(jwtUser.getAccountId()).thenReturn(UUID.randomUUID());
         when(repository.existsById(any())).thenReturn(true);
         when(repository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(file));
-        when(awsS3ObjectOperations.getObject(any(), any())).thenReturn(fileData);
-        byte[] actualBytesOfFile = service.getFileData(UUID.randomUUID(), UUID.randomUUID());
-        assertEquals(fileData, actualBytesOfFile);
-        verify(awsS3ObjectOperations, times(1)).getObject(any(), any());
+        service.getFileData(UUID.randomUUID(), UUID.randomUUID());
+        verify(fileSystemRepository, times(1)).findInFileSystem(any());
         verify(repository, times(1)).findByIdAndAccountId(any(), any());
         verify(repository, times(1)).existsById(any());
     }
 
     @Test
-    void putFileData_shouldGetStatusTrue_whenAccordingWithPlannedBehavior() {
+    void putFileData_shouldGetStatusTrue_whenAccordingWithPlannedBehavior() throws IOException {
         when(repository.findByAccountIdAndAuthorIdAndId(any(), any(), any())).thenReturn(Optional.of(file));
         when(repository.update(any())).thenReturn(file);
-        when(awsS3ObjectOperations.putObject(any(), any(), any())).thenReturn(true);
-        boolean actualStatus = service.putFileData(account.getId(),file.getAuthorId(), file.getId(), fileData);
-        assertTrue(actualStatus);
+        service.putFileData(account.getId(), file.getAuthorId(), file.getId(), fileData);
         verify(repository, times(0)).existsById(any());
         verify(repository, times(1)).findByAccountIdAndAuthorIdAndId(any(), any(), any());
         verify(repository, times(1)).update(any());
-        verify(awsS3ObjectOperations, times(1)).putObject(any(), any(), any());
+        verify(fileSystemRepository, times(1)).save(any(), any());
     }
 
     @Test
-    void putFileData_shouldGetLogicalValidationException_whenFileIdIsNull() {
+    void putFileData_shouldGetLogicalValidationException_whenFileIdIsNull() throws IOException {
         LogicalValidationException expectedException = createExpectedLogicalValidationException(
                 FILE_ID,
                 FILE_ID_IS_NULL
@@ -131,11 +127,11 @@ class FileServiceImplTest {
         );
         verify(repository, times(0)).findByAccountIdAndAuthorIdAndId(any(), any(), any());
         verify(repository, times(0)).save(any());
-        verify(awsS3ObjectOperations, times(0)).putObject(any(), any(), any());
+        verify(fileSystemRepository, times(0)).save(any(), any());
     }
 
     @Test
-    void putFileData_shouldGetEntityNotExistException_whenCantFindEntityByPassedParameters() {
+    void putFileData_shouldGetEntityNotExistException_whenCantFindEntityByPassedParameters() throws IOException {
         when(repository.findByAccountIdAndAuthorIdAndId(any(), any(), any())).thenReturn(Optional.empty());
         UUID fileId = UUID.randomUUID();
         UUID authorId = UUID.randomUUID();
@@ -147,7 +143,7 @@ class FileServiceImplTest {
         verify(repository, times(1)).findByAccountIdAndAuthorIdAndId(any(), any(), any());
         verify(repository, times(0)).findByIdAndAccountId(any(), any());
         verify(repository, times(0)).save(any());
-        verify(awsS3ObjectOperations, times(0)).putObject(any(), any(), any());
+        verify(fileSystemRepository, times(0)).save(any(), any());
     }
 
     @Test
