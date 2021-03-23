@@ -153,3 +153,48 @@ create TABLE IF NOT EXISTS ticket_observers
     FOREIGN KEY (ticket_id) REFERENCES tickets (id),
     FOREIGN KEY (observer_id) REFERENCES users (id)
 );
+
+create TABLE IF NOT EXISTS ticket_events
+(
+    out_id             varchar(128),
+    display_name       varchar(256)    DEFAULT (NULL),
+    deleted            bool   NOT NULL DEFAULT 'false',
+    version            int4   NOT NULL DEFAULT (0),
+    id                 uuid   NOT NULL,
+    comment        text,
+    is_auto_comment            bool,
+    account_id         uuid   NOT NULL,
+    new_group_id           uuid   NOT NULL,
+    new_author_id          uuid   NOT NULL,
+    created_at         bigint NOT NULL,
+    created_by         bigint NOT NULL,
+    new_subject            varchar(256),
+    new_description        text,
+    new_deadline           bigint,
+    new_is_finished        bool   NOT NULL DEFAULT 'false',
+    new_ticket_type_id     uuid   NOT NULL,
+    new_ticket_status_id   uuid   NOT NULL,
+    new_ticket_template_id uuid,
+    PRIMARY KEY (id),
+    FOREIGN KEY (account_id) REFERENCES accounts (id),
+    FOREIGN KEY (new_author_id) REFERENCES users (id),
+    FOREIGN KEY (new_group_id) REFERENCES group_users (id),
+    FOREIGN KEY (new_ticket_type_id) REFERENCES ticket_types (id),
+    FOREIGN KEY (new_ticket_status_id) REFERENCES ticket_statuses (id)
+);
+
+create TABLE IF NOT EXISTS ticket_event_executors
+(
+    ticket_id   uuid NOT NULL,
+    executor_id uuid NOT NULL,
+    FOREIGN KEY (ticket_id) REFERENCES ticket_events (id),
+    FOREIGN KEY (executor_id) REFERENCES users (id)
+);
+
+create TABLE IF NOT EXISTS ticket_event_observers
+(
+    ticket_id   uuid NOT NULL,
+    observer_id uuid NOT NULL,
+    FOREIGN KEY (ticket_id) REFERENCES ticket_events (id),
+    FOREIGN KEY (observer_id) REFERENCES users (id)
+);
