@@ -1,15 +1,28 @@
 package ru.itterminal.botdesk.tickets.model;
 
+import java.util.List;
+import java.util.UUID;
 
-import lombok.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.aau.model.Account;
-import ru.itterminal.botdesk.aau.model.Group;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
-
-import javax.persistence.*;
-import java.util.List;
+import ru.itterminal.botdesk.files.model.File;
 
 @Entity
 @Table(name = "ticket_events")
@@ -26,29 +39,29 @@ public class TicketEvent extends BaseEntity {
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
+    @JoinColumn(name = "ticket_id")
+    private UUID ticketId;
+
     @Column
     private String comment;
 
-    @Column(name = "is_auto_comment")
-    private Boolean isAutoComment;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ticket_id")
-    private Ticket ticket;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "new_group_id")
-    private Group newGroup;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "new_author_id")
-    private User newAuthor;
+    @Column(name = "auto_comment")
+    private String autoComment;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Long createdAt;
 
     @Column(name = "created_by", nullable = false, updatable = false)
     private Long createdBy;
+
+    @SuppressWarnings("JpaDataSourceORMInspection")
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "entity_id")
+    private List<File> files;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "new_author_id")
+    private User newAuthor;
 
     @Column(name = "new_subject")
     private String newSubject;
@@ -73,7 +86,7 @@ public class TicketEvent extends BaseEntity {
     @OneToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "ticket_event_observers",
-            joinColumns = @JoinColumn(name = "ticket_id"),
+            joinColumns = @JoinColumn(name = "ticket_event_id"),
             inverseJoinColumns = @JoinColumn(name = "observer_id")
     )
     private List<User> newObservers;
@@ -81,7 +94,7 @@ public class TicketEvent extends BaseEntity {
     @OneToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "ticket_event_executors",
-            joinColumns = @JoinColumn(name = "ticket_id"),
+            joinColumns = @JoinColumn(name = "ticket_event_id"),
             inverseJoinColumns = @JoinColumn(name = "executor_id")
     )
     private List<User> newExecutors;

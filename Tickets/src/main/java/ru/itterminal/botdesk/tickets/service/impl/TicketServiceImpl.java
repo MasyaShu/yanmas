@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -163,22 +162,19 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
                 .typeComparison(EXIST_IN.toString())
                 .listOfIdEntities(List.of(uuid))
                 .build();
-        Specification<Ticket> additionConditionByAuthorOfTicket =
-                specFactory.makeSpecification(Ticket.class, AUTHOR, filterByAuthorOfTicket);
+        var specForSearch = specFactory.makeSpecification(Ticket.class, AUTHOR, filterByAuthorOfTicket);
         var filterByListOfObserversAndExecutors = ListOfBaseEntityFilter.builder()
                 .typeComparison(CONTAINS_ALL_OF_LIST.toString())
                 .listOfIdEntities(List.of(uuid))
                 .build();
-        Specification<Ticket> additionConditionByObserversOfTicket =
-                specFactory.makeSpecification(Ticket.class, OBSERVERS, filterByListOfObserversAndExecutors);
-        Specification<Ticket> additionConditionByExecutorsOfTicket =
-                specFactory.makeSpecification(Ticket.class, EXECUTORS, filterByListOfObserversAndExecutors);
-
-        additionConditionByAuthorOfTicket.or(additionConditionByObserversOfTicket)
-                .or(additionConditionByExecutorsOfTicket);
-
+        specForSearch = specForSearch.or(
+                specFactory.makeSpecification(Ticket.class, OBSERVERS, filterByListOfObserversAndExecutors)
+        );
+        specForSearch = specForSearch.or(
+                specFactory.makeSpecification(Ticket.class, EXECUTORS, filterByListOfObserversAndExecutors)
+        );
         var pageable = PageRequest.of(1, 25, Sort.by(Sort.Direction.fromString("ASC"), "displayName"));
-        var foundTickets = findAllByFilter(additionConditionByAuthorOfTicket, pageable);
+        var foundTickets = findAllByFilter(specForSearch, pageable);
         return foundTickets.getTotalElements();
     }
 

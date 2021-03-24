@@ -1,5 +1,10 @@
 package ru.itterminal.botdesk.tickets.model.test;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.aau.model.test.GroupTestHelper;
@@ -11,11 +16,7 @@ import ru.itterminal.botdesk.tickets.model.TicketEvent;
 import ru.itterminal.botdesk.tickets.model.dto.TicketEventDtoRequest;
 import ru.itterminal.botdesk.tickets.model.dto.TicketEventDtoResponse;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
+@SuppressWarnings({"unused", "DuplicatedCode"})
 public class TicketEventTestHelper extends EntityTestHelperImpl<TicketEvent, TicketEventDtoRequest, TicketEventDtoResponse> {
 
     private final AccountTestHelper accountTestHelper = new AccountTestHelper();
@@ -27,6 +28,7 @@ public class TicketEventTestHelper extends EntityTestHelperImpl<TicketEvent, Tic
     private final RoleTestHelper roleTestHelper = new RoleTestHelper();
     private final TicketTestHelper ticketTestHelper = new TicketTestHelper();
 
+    @Deprecated(since = "Must check before use!!!")
     @Override
     public TicketEvent getRandomValidEntity() {
         var account = accountTestHelper.getRandomValidEntity();
@@ -51,12 +53,11 @@ public class TicketEventTestHelper extends EntityTestHelperImpl<TicketEvent, Tic
                 .createdBy(fakerRU.date().birthday().getTime())
                 .newIsFinished(fakerRU.bool().bool())
                 .newDeadline(null)
-                .newGroup(group)
                 .newObservers(null)
                 .newExecutors(null)
                 .newTicketType(ticketType)
                 .newTicketStatus(ticketStatus)
-                .ticket(ticketTestHelper.getRandomValidEntity())
+                .ticketId(ticketTestHelper.getRandomValidEntity().getId())
                 .build();
         setRandomValidPropertiesOfBaseEntity(ticketEvent);
         if (fakerRU.bool().bool()) {
