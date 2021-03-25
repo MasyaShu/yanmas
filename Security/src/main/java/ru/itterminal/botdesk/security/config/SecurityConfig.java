@@ -63,7 +63,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/v1/ticket/**",
             "/api/v1/ticket-counter/**",
             "/api/v1/ticket-status/**",
-            "/api/v1/ticket-type/**"
+            "/api/v1/ticket-type/**",
+            "/api/v1/group-ticket-types/**"
 
     };
 
@@ -95,7 +96,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/v1/user",
             "/api/v1/ticket-setting",
             "/api/v1/ticket-status",
-            "/api/v1/ticket-type"
+            "/api/v1/ticket-type",
+            "/api/v1/group-ticket-types"
     };
 
     static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_PUT_HTTP_METHOD = {
@@ -112,7 +114,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/v1/ticket-counter",
             "/api/v1/ticket-setting",
             "/api/v1/ticket-status",
-            "/api/v1/ticket-type"
+            "/api/v1/ticket-type",
+            "/api/v1/group-ticket-types"
     };
 
     static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_POST_HTTP_METHOD = {

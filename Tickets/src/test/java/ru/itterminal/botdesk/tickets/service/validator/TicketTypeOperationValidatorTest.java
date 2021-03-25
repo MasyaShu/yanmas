@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
-import static ru.itterminal.botdesk.tickets.service.validator.TicketTypeOperationValidator.A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TYPE;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketTypeOperationValidator.USER_FROM_OUTER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TYPE;
 
 @SpringJUnitConfig(value = {TicketTypeOperationValidator.class})
 @Import(TestSecurityConfig.class)
@@ -80,7 +80,8 @@ class TicketTypeOperationValidatorTest {
     void beforeCreate_shouldGetAccessDeniedException_whenCurrentUserFromNotInnerGroup() {
         AccessDeniedException thrown = assertThrows(AccessDeniedException.class,
                 () -> validator.checkAccessBeforeCreate(ticketType));
-        assertEquals(A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TYPE,
+        assertEquals(
+                USER_FROM_OUTER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TYPE,
                 thrown.getMessage());
     }
 
@@ -89,7 +90,8 @@ class TicketTypeOperationValidatorTest {
     void beforeUpdate_shouldGetAccessDeniedException_whenCurrentUserFromNotInnerGroup() {
         AccessDeniedException thrown = assertThrows(AccessDeniedException.class,
                 () -> validator.checkAccessBeforeUpdate(ticketType));
-        assertEquals(A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TYPE,
+        assertEquals(
+                USER_FROM_OUTER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TYPE,
                 thrown.getMessage());
     }
 

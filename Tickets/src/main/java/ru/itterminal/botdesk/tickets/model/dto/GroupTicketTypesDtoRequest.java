@@ -1,6 +1,6 @@
 package ru.itterminal.botdesk.tickets.model.dto;
 
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 import javax.validation.constraints.NotNull;
@@ -31,5 +31,5 @@ public class GroupTicketTypesDtoRequest extends BaseEntityDto {
     private String name;
 
     @NotNull(groups = {Create.class, Update.class})
-    private Set<UUID> ticketTypes;
+    private List<UUID> ticketTypes;
 }

@@ -1,6 +1,6 @@
 package ru.itterminal.botdesk.tickets.model;
 
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -46,7 +46,7 @@ public class GroupTicketTypes extends BaseEntity {
             joinColumns = @JoinColumn(name = "group_of_ticket_types_id"),
             inverseJoinColumns = @JoinColumn(name = "ticket_type_id")
     )
-    private Set<TicketType> ticketTypes;
+    private List<TicketType> ticketTypes;
 
     @Override
     public void generateDisplayName() {

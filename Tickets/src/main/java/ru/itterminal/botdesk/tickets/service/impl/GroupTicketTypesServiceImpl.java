@@ -1,6 +1,5 @@
 package ru.itterminal.botdesk.tickets.service.impl;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -57,7 +56,7 @@ public class GroupTicketTypesServiceImpl extends
         groupTicketTypes.setTicketTypes(
                 request.getTicketTypes().stream()
                         .map(id -> TicketType.builder().id(id).build())
-                        .collect(Collectors.toSet())
+                        .collect(Collectors.toList())
         );
         return groupTicketTypes;
     }
@@ -66,12 +65,10 @@ public class GroupTicketTypesServiceImpl extends
     protected void setNestedObjectsOfEntityBeforeCreate(GroupTicketTypes entity) {
         entity.setAccount(accountService.findById(entity.getAccount().getId()));
         entity.setTicketTypes(
-                new HashSet<>(
-                        ticketTypeService.findAllByAccountIdAndListId(
-                                entity.getTicketTypes().stream()
-                                        .map(BaseEntity::getId)
-                                        .collect(Collectors.toList())
-                        )
+                ticketTypeService.findAllByAccountIdAndListId(
+                        entity.getTicketTypes().stream()
+                                .map(BaseEntity::getId)
+                                .collect(Collectors.toList())
                 )
         );
     }

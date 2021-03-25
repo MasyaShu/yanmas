@@ -1,6 +1,6 @@
 package ru.itterminal.botdesk.tickets.model.dto;
 
-import java.util.Set;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -20,5 +20,5 @@ import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
 @EqualsAndHashCode(callSuper = true)
 public class GroupTicketTypesDtoResponse extends BaseEntityDto {
     private String name;
-    private Set<BaseEntityDto> ticketTypes;
+    private List<BaseEntityDto> ticketTypes;
 }
