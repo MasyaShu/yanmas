@@ -1,7 +1,9 @@
 package ru.itterminal.botdesk.tickets.model.dto;
 
+import java.util.Set;
+import java.util.UUID;
+
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
 
 import lombok.AllArgsConstructor;
@@ -19,28 +21,15 @@ import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 @Setter
 @SuperBuilder
 @AllArgsConstructor
-//@NoArgsConstructor
+@NoArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class GroupTicketTypesDto extends BaseEntityDto {
+public class GroupTicketTypesDtoRequest extends BaseEntityDto {
 
     @NotNull(groups = {Create.class, Update.class})
     @Size(min = 1, max = 256, groups = {Create.class, Update.class})
     private String name;
 
-//    @NotNull(groups = {Create.class, Update.class})
-//    private Integer sortIndex;
-//
-//    @Null(groups = {Create.class, Update.class})
-//    private Boolean isStartedPredefined;
-//
-//    @Null(groups = {Create.class, Update.class})
-//    private Boolean isFinishedPredefined;
-//
-//    @Null(groups = {Create.class, Update.class})
-//    private Boolean isReopenedPredefined;
-//
-//    @Null(groups = {Create.class, Update.class})
-//    private Boolean isCanceledPredefined;
-
+    @NotNull(groups = {Create.class, Update.class})
+    private Set<UUID> ticketTypes;
 }

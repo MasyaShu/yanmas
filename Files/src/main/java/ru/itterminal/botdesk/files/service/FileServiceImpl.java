@@ -1,7 +1,7 @@
 package ru.itterminal.botdesk.files.service;
 
 import static java.lang.String.format;
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createExpectedLogicalValidationException;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createLogicalValidationException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -58,11 +58,11 @@ public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperat
     @Transactional(readOnly = true)
     public FileSystemResource getFileData(UUID accountId, UUID fileId) {
         if (fileId == null) {
-            throw createExpectedLogicalValidationException(FILE_ID, FILE_ID_IS_NULL);
+            throw createLogicalValidationException(FILE_ID, FILE_ID_IS_NULL);
         }
         var file = super.findByIdAndAccountId(fileId);
         if (Boolean.FALSE.equals(file.getIsUploaded())) {
-            throw createExpectedLogicalValidationException(FILE, FILE_WAS_NOT_UPLOAD);
+            throw createLogicalValidationException(FILE, FILE_WAS_NOT_UPLOAD);
         }
         return fileSystemRepository.findInFileSystem(
                 Paths.get(
@@ -76,10 +76,10 @@ public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperat
     @Transactional
     public void putFileData(UUID accountId, UUID authorId, UUID fileId, byte[] bytes) throws IOException {
         if (fileId == null) {
-            throw createExpectedLogicalValidationException(FILE_ID, FILE_ID_IS_NULL);
+            throw createLogicalValidationException(FILE_ID, FILE_ID_IS_NULL);
         }
         if (bytes.length > maxSizeOfFile) {
-            throw createExpectedLogicalValidationException(SIZE_FILE, format(MAX_SIZE, maxSizeOfFile));
+            throw createLogicalValidationException(SIZE_FILE, format(MAX_SIZE, maxSizeOfFile));
         }
         File file = repository.findByAccountIdAndAuthorIdAndId(accountId, authorId, fileId).orElseThrow(
                 () -> {

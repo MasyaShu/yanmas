@@ -7,7 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createExpectedLogicalValidationException;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createLogicalValidationException;
 import static ru.itterminal.botdesk.files.service.FileServiceImpl.FILE_ID;
 import static ru.itterminal.botdesk.files.service.FileServiceImpl.FILE_ID_IS_NULL;
 import static ru.itterminal.botdesk.files.service.FileServiceImpl.MAX_SIZE;
@@ -112,7 +112,7 @@ class FileServiceImplTest {
 
     @Test
     void putFileData_shouldGetLogicalValidationException_whenFileIdIsNull() throws IOException {
-        LogicalValidationException expectedException = createExpectedLogicalValidationException(
+        LogicalValidationException expectedException = createLogicalValidationException(
                 FILE_ID,
                 FILE_ID_IS_NULL
         );
@@ -148,7 +148,7 @@ class FileServiceImplTest {
 
     @Test
     void putFileData_shouldGetLogicalValidationException_whenSizeOfFileMoreThan25Mb() {
-        var expectedException = createExpectedLogicalValidationException(SIZE_FILE, format(MAX_SIZE, MAX_SIZE_OF_FILE));
+        var expectedException = createLogicalValidationException(SIZE_FILE, format(MAX_SIZE, MAX_SIZE_OF_FILE));
         UUID fileId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
         UUID authorId = UUID.randomUUID();

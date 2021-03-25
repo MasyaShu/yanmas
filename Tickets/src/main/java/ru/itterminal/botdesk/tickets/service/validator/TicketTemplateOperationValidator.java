@@ -31,7 +31,7 @@ public class TicketTemplateOperationValidator extends BasicOperationValidatorImp
 
     private void checkDateStartAfterDateEnd(TicketTemplate entity) {
         if (entity.getDateStart() != null && entity.getDateEnd() != null && entity.getDateEnd() < entity.getDateStart()) {
-            throw CommonMethodsForValidation.createExpectedLogicalValidationException(VALIDATION_FAILED, THAN_DATE_END);
+            throw CommonMethodsForValidation.createLogicalValidationException(VALIDATION_FAILED, THAN_DATE_END);
         }
     }
 

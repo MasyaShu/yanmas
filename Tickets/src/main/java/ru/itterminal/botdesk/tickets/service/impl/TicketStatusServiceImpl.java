@@ -168,14 +168,12 @@ public class TicketStatusServiceImpl extends
 
     @Override
     protected void setNestedObjectsOfEntityBeforeCreate(TicketStatus entity) {
-        super.setNestedObjectsOfEntityBeforeCreate(entity);
         setNestedObjectsOfEntity(entity);
         entity.setDeleted(false);
     }
 
     @Override
     protected void setNestedObjectsOfEntityBeforeUpdate(TicketStatus entity) {
-        super.setNestedObjectsOfEntityBeforeUpdate(entity);
         setNestedObjectsOfEntity(entity);
     }
 

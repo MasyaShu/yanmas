@@ -3,7 +3,7 @@ package ru.itterminal.botdesk.files.service.validator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createExpectedLogicalValidationException;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createLogicalValidationException;
 import static ru.itterminal.botdesk.files.service.validator.FileOperationValidator.CREATED_AT;
 import static ru.itterminal.botdesk.files.service.validator.FileOperationValidator.CREATED_AT_NULL;
 import static ru.itterminal.botdesk.files.service.validator.FileOperationValidator.CREATED_AT_ZERO;
@@ -41,7 +41,7 @@ class FileOperationValidatorTest {
 
     @Test
     void beforeCreate_shouldGetLogicalValidationException_whenFilenameIsNull() {
-        LogicalValidationException expectedException = createExpectedLogicalValidationException(FILE_NAME, FILE_NAME_NULL);
+        LogicalValidationException expectedException = createLogicalValidationException(FILE_NAME, FILE_NAME_NULL);
         File file = File.builder()
                 .size(1000)
                 .fileName(null)
@@ -58,7 +58,7 @@ class FileOperationValidatorTest {
 
     @Test
     void beforeCreate_shouldGetLogicalValidationException_whenFilenameIsEmpty() {
-        LogicalValidationException expectedException = createExpectedLogicalValidationException(FILE_NAME, FILE_NAME_EMPTY);
+        LogicalValidationException expectedException = createLogicalValidationException(FILE_NAME, FILE_NAME_EMPTY);
         File file = File.builder()
                 .size(1000)
                 .fileName("")
@@ -75,7 +75,7 @@ class FileOperationValidatorTest {
 
     @Test
     void beforeCreate_shouldGetLogicalValidationException_whenCreatedAtIsNull() {
-        LogicalValidationException expectedException = createExpectedLogicalValidationException(CREATED_AT, CREATED_AT_NULL);
+        LogicalValidationException expectedException = createLogicalValidationException(CREATED_AT, CREATED_AT_NULL);
         File file = File.builder()
                 .size(1000)
                 .fileName(FILE_NAME)
@@ -93,7 +93,7 @@ class FileOperationValidatorTest {
 
     @Test
     void beforeCreate_shouldGetLogicalValidationException_whenCreatedAtIsZero() {
-        LogicalValidationException expectedException = createExpectedLogicalValidationException(CREATED_AT, CREATED_AT_ZERO);
+        LogicalValidationException expectedException = createLogicalValidationException(CREATED_AT, CREATED_AT_ZERO);
         File file = File.builder()
                 .size(1000)
                 .fileName(FILE_NAME)
