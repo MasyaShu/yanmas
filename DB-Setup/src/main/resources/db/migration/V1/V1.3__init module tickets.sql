@@ -197,3 +197,39 @@ create TABLE IF NOT EXISTS ticket_event_observers
     FOREIGN KEY (ticket_event_id) REFERENCES ticket_events (id),
     FOREIGN KEY (observer_id) REFERENCES users (id)
 );
+create TABLE IF NOT EXISTS group_ticket_types
+(
+    out_id       varchar(128),
+    display_name varchar(256)          DEFAULT (NULL),
+    deleted      bool         NOT NULL DEFAULT 'false',
+    version      int4         NOT NULL DEFAULT (0),
+    id           uuid         NOT NULL,
+    account_id   uuid         NOT NULL,
+    name         varchar(256) NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (account_id) REFERENCES accounts (id)
+);
+create TABLE IF NOT EXISTS ticket_types_in_group
+(
+    group_of_ticket_types_id uuid NOT NULL,
+    ticket_type_id           uuid NOT NULL,
+    FOREIGN KEY (group_of_ticket_types_id) REFERENCES group_ticket_types (id),
+    FOREIGN KEY (ticket_type_id) REFERENCES ticket_types (id)
+);
+create TABLE IF NOT EXISTS settings_access_to_ticket_via_ticket_types
+(
+    out_id                   varchar(128),
+    display_name             varchar(256)  DEFAULT (NULL),
+    deleted                  bool NOT NULL DEFAULT 'false',
+    version                  int4 NOT NULL DEFAULT (0),
+    id                       uuid NOT NULL,
+    account_id               uuid NOT NULL,
+    group_id                 uuid NOT NULL,
+    user_id                  uuid NOT NULL,
+    group_of_ticket_types_id uuid NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (account_id) REFERENCES accounts (id),
+    FOREIGN KEY (group_id) REFERENCES group_users (id),
+    FOREIGN KEY (user_id) REFERENCES users (id),
+    FOREIGN KEY (group_of_ticket_types_id) REFERENCES group_ticket_types (id)
+);
