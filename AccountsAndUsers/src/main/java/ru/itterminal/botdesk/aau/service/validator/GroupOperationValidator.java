@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.model.Group;
+import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.projection.GroupUniqueFields;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl;
@@ -72,7 +73,8 @@ public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> 
     public void checkAccessBeforeRead(Group entity) {
         if (!SecurityContextHolder.getContext().getAuthentication().getName().contains(ANONYMOUS)) {
             JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            if (!(jwtUser.isInnerGroup() || jwtUser.getGroupId().equals(entity.getId()))) {
+            if (!((jwtUser.isInnerGroup() && jwtUser.getWeightRole() > Roles.AUTHOR.getWeight())
+                    || jwtUser.getGroupId().equals(entity.getId()))) {
                 throw new AccessDeniedException(ACCESS_IS_DENIED_FOR_SEARCHING_BY_PASSED_GROUP_ID);
             }
         }

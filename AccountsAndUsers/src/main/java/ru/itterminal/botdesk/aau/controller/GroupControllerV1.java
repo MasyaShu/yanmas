@@ -9,6 +9,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.itterminal.botdesk.aau.model.Group;
+import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.dto.GroupDto;
 import ru.itterminal.botdesk.aau.model.dto.GroupFilterDto;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
@@ -80,7 +81,7 @@ public class GroupControllerV1 extends BaseController {
         JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
         var accountId = jwtUser.getAccountId();
         var groupSpecification = specFactory.makeSpecificationFromEntityFilterDto(Group.class, filterDto, accountId);
-        if (!jwtUser.isInnerGroup()) {
+        if (jwtUser.getWeightRole() <= Roles.AUTHOR.getWeight() || !jwtUser.isInnerGroup()) {
             var filterById = StringFilter.builder()
                     .typeComparison(TEXT_EQUALS.toString())
                     .value(jwtUser.getGroupId().toString())

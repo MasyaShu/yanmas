@@ -14,6 +14,7 @@ import org.springframework.test.context.TestPropertySource;
 import ru.itterminal.botdesk.IT.util.ITHelper;
 import ru.itterminal.botdesk.IT.util.ITTestConfig;
 import ru.itterminal.botdesk.aau.model.Group;
+import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.test.GroupTestHelper;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
@@ -61,9 +62,9 @@ class GroupIT {
 
     @SuppressWarnings("unused")
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamAllUsersInnerGroup")
+    @MethodSource("getStreamUsersInnerGroupWithRolesAccountOwnerAndAdminAndExecutor")
     @Order(10)
-    void successGetByFilterAllGroupsByAllUsersInnerGroup(String userKey, User user) {
+    void successGetByFilterAllGroupsByUsersUsersInnerGroupWithRolesAccountOwnerAndAdminAndExecutor(String userKey, User user) {
         var expectedGroupList = itHelper.getAllGroup();
         int expectedCountGroup = expectedGroupList.size();
         var response = given().
@@ -88,7 +89,30 @@ class GroupIT {
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamAllUsersOuterGroup")
     @Order(20)
-    void successGetByFilterAllOuterGroupByAllUsersOuterGroup(String userKey, User user) {
+    void successGetByFilterYourGroupByAllUsersOuterGroup(String userKey, User user) {
+        var expectedGroup = List.of(user.getGroup());
+        var response = given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(user.getEmail()))
+                .contentType(APPLICATION_JSON)
+                .body(EMPTY_BODY)
+                .get(GROUP)
+                .then()
+                .log().body()
+                .body("totalElements", equalTo(1))
+                .statusCode(HttpStatus.OK.value())
+                .extract().response().asString();
+        var actualGroup = from(response).getList("content", Group.class);
+        assertThat(expectedGroup).usingElementComparatorIgnoringFields("account").containsExactlyInAnyOrderElementsOf(actualGroup);
+    }
+
+    @SuppressWarnings("unused")
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamUsersInnerGroupWithRolesAuthorAndObserver")
+    @Order(25)
+    void successGetByFilterYourGroupByUsersAuthorOrObserverInnerGroup(String userKey, User user) {
         var expectedGroup = List.of(user.getGroup());
         var response = given().
                 when()
@@ -123,9 +147,9 @@ class GroupIT {
 
     @SuppressWarnings("unused")
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamAllUsersInnerGroup")
+    @MethodSource("getStreamUsersInnerGroupWithRolesAccountOwnerAndAdminAndExecutor")
     @Order(40)
-    void successGetByIdByAllUsersInnerGroup(String userKey, User user) {
+    void successGetByIdByUsersInnerGroupWithRolesAccountOwnerAndAdminAndExecutor(String userKey, User user) {
         var groupList = itHelper.getAllGroup();
         for (Group group : groupList) {
             given().
@@ -162,9 +186,49 @@ class GroupIT {
 
     @SuppressWarnings("unused")
     @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamUsersInnerGroupWithRolesAuthorAndObserver")
+    @Order(55)
+    void successGetByIdOwnGroupByUsersInnerGroupWithRolesAuthorAndObserver(String userKey, User user) {
+        given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(user.getEmail()))
+                .pathParam(ID, user.getGroup().getId())
+                .get(GROUP_BY_ID)
+                .then()
+                .body(ID, equalTo(user.getGroup().getId().toString()))
+                .log().body()
+                .statusCode(HttpStatus.OK.value());
+    }
+
+    @SuppressWarnings("unused")
+    @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamAllUsersOuterGroup")
     @Order(60)
     void failedGetByIdNotOwnGroupByAllUsersOuterGroup(String userKey, User user) {
+        var allGroupList = itHelper.getAllGroup();
+        for (Group group : allGroupList) {
+            if (!group.equals(user.getGroup())) {
+                given().
+                        when()
+                        .headers(
+                                "Authorization",
+                                "Bearer " + itHelper.getTokens().get(user.getEmail()))
+                        .pathParam(ID, group.getId())
+                        .get(GROUP_BY_ID)
+                        .then()
+                        .log().body()
+                        .statusCode(HttpStatus.FORBIDDEN.value());
+            }
+        }
+    }
+
+    @SuppressWarnings("unused")
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamUsersInnerGroupWithRolesAuthorAndObserver")
+    @Order(65)
+    void failedGetByIdNotOwnGroupByAllUsersInnerGroupWithRolesAuthorAndObserver(String userKey, User user) {
         var allGroupList = itHelper.getAllGroup();
         for (Group group : allGroupList) {
             if (!group.equals(user.getGroup())) {
@@ -240,7 +304,8 @@ class GroupIT {
                     .statusCode(HttpStatus.OK.value())
                     .extract().response().asString();
             var actualGroup = from(response).getList("content", Group.class);
-            if (user.getGroup().getIsInner() || user.getGroup().equals(group)) {
+            if ((user.getGroup().getIsInner() && user.getRole().getWeight() >= Roles.EXECUTOR.getWeight())
+                    || user.getGroup().equals(group)) {
                 assertThat(List.of(group)).usingElementComparatorIgnoringFields("account").containsExactlyInAnyOrderElementsOf(actualGroup);
             } else {
                 assertEquals(0, actualGroup.size());
@@ -472,10 +537,6 @@ class GroupIT {
                     .log().body()
                     .statusCode(HttpStatus.FORBIDDEN.value());
         }
-    }
-
-    private static Stream<Arguments> getStreamAllUsersInnerGroup() {
-        return itHelper.getStreamUsers(itHelper.getRoleTestHelper().getPredefinedValidEntityList(), true);
     }
 
     private static Stream<Arguments> getStreamAllUsersOuterGroup() {
