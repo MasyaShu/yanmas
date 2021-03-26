@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_CODE;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_MESSAGE;
@@ -19,6 +21,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
+import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
 import ru.itterminal.botdesk.tickets.model.GroupTicketTypes;
 import ru.itterminal.botdesk.tickets.model.projection.GroupTicketTypesUniqueFields;
 import ru.itterminal.botdesk.tickets.service.impl.GroupTicketTypesServiceImpl;
@@ -27,10 +30,13 @@ import ru.itterminal.botdesk.tickets.service.impl.GroupTicketTypesServiceImpl;
 class GroupTicketTypesOperationValidatorTest {
 
     @Autowired
-    GroupTicketTypesOperationValidator validator;
+    private GroupTicketTypesOperationValidator validator;
 
     @MockBean
-    GroupTicketTypesServiceImpl service;
+    private GroupTicketTypesServiceImpl service;
+
+    @MockBean
+    private JwtUserBuilder jwtUserBuilder;
 
     @MockBean
     GroupTicketTypesUniqueFields groupTicketTypesUniqueFields;
@@ -42,6 +48,7 @@ class GroupTicketTypesOperationValidatorTest {
     void checkUniqueness_shouldGetTrue_whenPassedDataIsUnique() {
         when(service.findByUniqueFields(any())).thenReturn(Collections.emptyList());
         assertTrue(validator.checkUniqueness(new GroupTicketTypes()));
+        verify(service, times(1)).findByUniqueFields(any());
     }
 
     @Test
@@ -57,5 +64,6 @@ class GroupTicketTypesOperationValidatorTest {
                 expectedLogicalValidationException.getFieldErrors().get(NOT_UNIQUE_CODE).get(0),
                 actualLogicalValidationException.getFieldErrors().get(NOT_UNIQUE_CODE).get(0)
         );
+        verify(service, times(1)).findByUniqueFields(any());
     }
 }

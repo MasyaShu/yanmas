@@ -130,10 +130,10 @@ public class TicketSettingServiceImpl extends CrudServiceWithAccountImpl<TicketS
     @Override
     protected void setNestedObjectsOfEntityBeforeCreate(TicketSetting entity) {
         entity.setAccount(accountService.findById(entity.getAccount().getId()));
-        if (entity.getAuthor()!=null && entity.getAuthor().getId() != null) {
+        if (entity.getAuthor() != null && entity.getAuthor().getId() != null) {
             entity.setAuthor(userService.findByIdAndAccountId(entity.getAuthor().getId()));
             entity.setGroup(entity.getAuthor().getGroup());
-        } else {
+        } else if (entity.getGroup() != null && entity.getGroup().getId() != null) {
             entity.setGroup(groupService.findByIdAndAccountId(entity.getGroup().getId()));
         }
         entity.setObservers(
@@ -150,7 +150,7 @@ public class TicketSettingServiceImpl extends CrudServiceWithAccountImpl<TicketS
                                 .collect(Collectors.toList())
                 )
         );
-        if (entity.getTicketTypeForNew()!=null && entity.getTicketTypeForNew().getId() != null) {
+        if (entity.getTicketTypeForNew() != null && entity.getTicketTypeForNew().getId() != null) {
             entity.setTicketTypeForNew(ticketTypeService.findByIdAndAccountId(entity.getTicketTypeForNew().getId()));
         }
         if (entity.getTicketStatusForNew() != null && entity.getTicketStatusForNew().getId() != null) {

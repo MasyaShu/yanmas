@@ -2,6 +2,7 @@ package ru.itterminal.botdesk.IT;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.path.json.JsonPath.from;
+import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,7 +30,10 @@ import static ru.itterminal.botdesk.IT.util.ITHelper.TICKET_SETTING;
 import static ru.itterminal.botdesk.IT.util.ITHelper.TICKET_SETTING_BY_AUTHOR;
 import static ru.itterminal.botdesk.IT.util.ITHelper.TICKET_SETTING_BY_ID;
 import static ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
+import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_CODE;
+import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_MESSAGE;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.TICKET_SETTING_MUST_NOT_BE_EMPTY;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.TICKET_SETTING_UNIQUE_FIELDS;
 
 import java.util.List;
 import java.util.UUID;
@@ -452,8 +456,8 @@ class TicketSettingIT {
                 .body(STATUS, equalTo(HttpStatus.CONFLICT.value()))
                 .extract().response().as(ApiError.class);
         assertEquals(
-                ACCOUNT_GROUP_AUTHOR_IS_OCCUPIED,
-                apiError.getErrors().get(ACCOUNT_GROUP_AUTHOR).get(0).getMessage()
+                format(NOT_UNIQUE_MESSAGE, TICKET_SETTING_UNIQUE_FIELDS),
+                apiError.getErrors().get(NOT_UNIQUE_CODE).get(0).getMessage()
         );
     }
 
@@ -585,8 +589,8 @@ class TicketSettingIT {
                 .statusCode(HttpStatus.CONFLICT.value())
                 .extract().response().as(ApiError.class);
         assertEquals(
-                ACCOUNT_GROUP_AUTHOR_IS_OCCUPIED,
-                apiError.getErrors().get(ACCOUNT_GROUP_AUTHOR).get(0).getMessage()
+                format(NOT_UNIQUE_MESSAGE, TICKET_SETTING_UNIQUE_FIELDS),
+                apiError.getErrors().get(NOT_UNIQUE_CODE).get(0).getMessage()
         );
     }
 

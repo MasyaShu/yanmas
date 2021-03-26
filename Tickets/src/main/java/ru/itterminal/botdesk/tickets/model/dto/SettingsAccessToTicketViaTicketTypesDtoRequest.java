@@ -1,7 +1,8 @@
 package ru.itterminal.botdesk.tickets.model.dto;
 
-import java.util.List;
 import java.util.UUID;
+
+import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -11,31 +12,19 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
+import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
+import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 
 @Getter
 @Setter
 @SuperBuilder
 @AllArgsConstructor
-//@NoArgsConstructor
+@NoArgsConstructor
 @ToString
 @EqualsAndHashCode(callSuper = true)
 public class SettingsAccessToTicketViaTicketTypesDtoRequest extends BaseEntityDto {
-
-//    private UUID authorId;
-//
-//    private UUID groupId;
-//
-//    List<UUID> observers;
-//
-//    List<UUID> executors;
-//
-//    private UUID ticketTypeForNewId;
-//
-//    private UUID ticketStatusForNewId;
-//
-//    private UUID ticketStatusForReopenId;
-//
-//    private UUID ticketStatusForCloseId;
-//
-//    private UUID ticketStatusForCancelId;
+    private UUID groupId;
+    private UUID userId;
+    @NotNull(groups = {Create.class, Update.class})
+    private UUID groupTicketTypesId;
 }

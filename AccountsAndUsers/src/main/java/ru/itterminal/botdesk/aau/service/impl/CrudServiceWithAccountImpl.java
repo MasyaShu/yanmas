@@ -33,7 +33,6 @@ import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
 @SuppressWarnings({"unused", "DuplicatedCode"})
 @Slf4j
 @Service
-@Transactional
 public abstract class CrudServiceWithAccountImpl<
         E extends BaseEntity,
         V extends OperationValidator<E>,
