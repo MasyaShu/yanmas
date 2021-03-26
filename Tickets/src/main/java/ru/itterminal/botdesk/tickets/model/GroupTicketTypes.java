@@ -26,7 +26,7 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @Table(name = "group_ticket_types")
 @Getter
 @Setter
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)

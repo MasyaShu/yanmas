@@ -3,6 +3,7 @@ package ru.itterminal.botdesk.tickets.model.dto;
 import java.util.List;
 import java.util.UUID;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -30,6 +31,6 @@ public class GroupTicketTypesDtoRequest extends BaseEntityDto {
     @Size(min = 1, max = 256, groups = {Create.class, Update.class})
     private String name;
 
-    @NotNull(groups = {Create.class, Update.class})
+    @NotEmpty(groups = {Create.class, Update.class})
     private List<UUID> ticketTypes;
 }

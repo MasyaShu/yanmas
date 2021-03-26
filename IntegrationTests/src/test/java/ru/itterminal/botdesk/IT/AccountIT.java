@@ -20,7 +20,7 @@ import static ru.itterminal.botdesk.IT.util.ITHelper.INPUT_VALIDATION_FAILED;
 import static ru.itterminal.botdesk.IT.util.ITHelper.INVALID_USERNAME_OR_PASSWORD;
 import static ru.itterminal.botdesk.IT.util.ITHelper.IS_CANCELED_PREDEFINED;
 import static ru.itterminal.botdesk.IT.util.ITHelper.IS_FINISHED_PREDEFINED;
-import static ru.itterminal.botdesk.IT.util.ITHelper.IS_PREDEFINED_FOR_NEW_TICKET;
+import static ru.itterminal.botdesk.IT.util.ITHelper.IT_IS_PREDEFINED_FOR_NEW_TICKET;
 import static ru.itterminal.botdesk.IT.util.ITHelper.IS_REOPENED_PREDEFINED;
 import static ru.itterminal.botdesk.IT.util.ITHelper.IS_STARTED_PREDEFINED;
 import static ru.itterminal.botdesk.IT.util.ITHelper.NAME;
@@ -203,7 +203,7 @@ class AccountIT {
         var expectedTicketType = ticketTypeRepository.findAllByAccountId(itHelper.getAccount().getId());
         assertEquals(DEFAULT_TYPE, expectedTicketType.get(0).getName());
         assertEquals(1, expectedTicketType.size());
-        itHelper.getTicketTypes().put(IS_PREDEFINED_FOR_NEW_TICKET, expectedTicketType.get(0));
+        itHelper.getTicketTypes().put(IT_IS_PREDEFINED_FOR_NEW_TICKET, expectedTicketType.get(0));
 
         var ticketStatuses = ticketStatusRepository.findAllByAccountId(itHelper.getAccount().getId());
         var expectedTicketStatusNames = List.of(CANCELED, REOPENED, FINISHED, STARTED);
