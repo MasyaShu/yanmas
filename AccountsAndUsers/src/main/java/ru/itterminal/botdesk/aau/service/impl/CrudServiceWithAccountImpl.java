@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.service.CrudServiceWithAccount;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
+import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
 import ru.itterminal.botdesk.commons.repository.EntityRepositoryWithAccount;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
 import ru.itterminal.botdesk.commons.service.validator.OperationValidator;
@@ -125,4 +126,5 @@ public abstract class CrudServiceWithAccountImpl<
     protected void setNestedObjectsOfEntityBeforeCreate(E entity) {}
 
     protected void setNestedObjectsOfEntityBeforeUpdate(E entity) {}
+
 }

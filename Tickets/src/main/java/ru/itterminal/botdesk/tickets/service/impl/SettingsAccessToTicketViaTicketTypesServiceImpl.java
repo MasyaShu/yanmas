@@ -9,26 +9,22 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
-import ru.itterminal.botdesk.commons.model.EntityConverter;
 import ru.itterminal.botdesk.tickets.model.SettingsAccessToTicketViaTicketTypes;
 import ru.itterminal.botdesk.tickets.model.TicketType;
-import ru.itterminal.botdesk.tickets.model.dto.SettingsAccessToTicketViaTicketTypesDtoRequest;
 import ru.itterminal.botdesk.tickets.repository.SettingsAccessToTicketViaTicketTypesRepository;
 import ru.itterminal.botdesk.tickets.service.validator.SettingsAccessToTicketViaTicketTypesOperationValidator;
 
+@SuppressWarnings("unused")
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class SettingsAccessToTicketViaTicketTypesServiceImpl extends
-        CrudServiceWithAccountImpl<SettingsAccessToTicketViaTicketTypes, SettingsAccessToTicketViaTicketTypesOperationValidator,
-                SettingsAccessToTicketViaTicketTypesRepository> implements
-        EntityConverter<SettingsAccessToTicketViaTicketTypes, SettingsAccessToTicketViaTicketTypesDtoRequest> {
+        CrudServiceWithAccountImpl<SettingsAccessToTicketViaTicketTypes, SettingsAccessToTicketViaTicketTypesOperationValidator, SettingsAccessToTicketViaTicketTypesRepository> {
 
     public static final String WHERE = "SettingsAccessToTicketViaTicketTypesServiceImpl.findByUniqueFields: ";
     public static final String START_FIND = "Start " + WHERE + "{} , {}, {}";
@@ -91,14 +87,6 @@ public class SettingsAccessToTicketViaTicketTypesServiceImpl extends
                 settingsAccess.getUser() == null ? null : settingsAccess.getUser().getId(),
                 settingsAccess.getId()
         );
-    }
-
-    @Override
-    public SettingsAccessToTicketViaTicketTypes convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(
-            SettingsAccessToTicketViaTicketTypesDtoRequest request, UUID accountId) {
-        var entityWithNestedObjectsWithOnlyId = modelMapper.map(request, SettingsAccessToTicketViaTicketTypes.class);
-        entityWithNestedObjectsWithOnlyId.setAccount(Account.builder().id(accountId).build());
-        return entityWithNestedObjectsWithOnlyId;
     }
 
     @Override

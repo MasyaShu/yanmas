@@ -10,6 +10,7 @@ import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
 import ru.itterminal.botdesk.tickets.model.GroupTicketTypes;
 import ru.itterminal.botdesk.tickets.model.dto.GroupTicketTypesDtoRequest;
 import ru.itterminal.botdesk.tickets.model.dto.GroupTicketTypesDtoResponse;
+@SuppressWarnings("DuplicatedCode")
 public class GroupTicketTypesTestHelper extends EntityTestHelperImpl<GroupTicketTypes, GroupTicketTypesDtoRequest,
         GroupTicketTypesDtoResponse> {
 

@@ -34,6 +34,11 @@ public class SettingsAccessToTicketViaTicketTypesOperationValidator
         jwtUserBuilder.throwAccessDeniedExceptionIfCurrentUserFromOuterGroup();
     }
 
+    @Override
+    public void checkAccessBeforeRead(SettingsAccessToTicketViaTicketTypes entity) {
+        jwtUserBuilder.throwAccessDeniedExceptionIfCurrentUserFromOuterGroup();
+    }
+
     @SuppressWarnings("DuplicatedCode")
     @Override
     public boolean checkUniqueness(SettingsAccessToTicketViaTicketTypes entity) {

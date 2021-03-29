@@ -65,7 +65,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/v1/ticket-status/**",
             "/api/v1/ticket-type/**",
             "/api/v1/group-ticket-types/**"
-
     };
 
     static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_GET_HTTP_METHOD = {
@@ -75,6 +74,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_GET_HTTP_METHOD = {
             "/api/v1/ticket-template/**"
+
+    };
+
+    static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_GET_HTTP_METHOD = {
+            "/api/v1/ticket/setting-access-via-ticket-types/**"
 
     };
 
@@ -97,7 +101,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/v1/ticket-setting",
             "/api/v1/ticket-status",
             "/api/v1/ticket-type",
-            "/api/v1/group-ticket-types"
+            "/api/v1/group-ticket-types",
+            "/api/v1/ticket/setting-access-via-ticket-types"
     };
 
     static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_PUT_HTTP_METHOD = {
@@ -115,7 +120,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/v1/ticket-setting",
             "/api/v1/ticket-status",
             "/api/v1/ticket-type",
-            "/api/v1/group-ticket-types"
+            "/api/v1/group-ticket-types",
+            "/api/v1/ticket/setting-access-via-ticket-types"
     };
 
     static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_POST_HTTP_METHOD = {
@@ -139,29 +145,36 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .exceptionHandling().authenticationEntryPoint(customAuthenticationEntryPoint).and()
                 .exceptionHandling().accessDeniedHandler(accessDeniedHandler).and()
                 .authorizeRequests()
+                // Account owner
+                .antMatchers(HttpMethod.PUT, AUTH_WHITELIST_ACCOUNT_OWNER_FOR_PUT_HTTP_METHOD)
+                .hasAuthority(ROLE_ACCOUNT_OWNER)
+                .antMatchers(HttpMethod.GET, AUTH_WHITELIST_ACCOUNT_OWNER_FOR_GET_HTTP_METHOD)
+                .hasAuthority(ROLE_ACCOUNT_OWNER)
+                // Account owner + admin
+                .antMatchers(HttpMethod.POST, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_POST_HTTP_METHOD)
+                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN)
+                .antMatchers(HttpMethod.PUT, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_PUT_HTTP_METHOD)
+                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN)
+                .antMatchers(HttpMethod.GET, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_GET_HTTP_METHOD)
+                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN)
+                // Account owner + admin + executor
+                .antMatchers(HttpMethod.POST, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_POST_HTTP_METHOD)
+                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR)
+                .antMatchers(HttpMethod.PUT, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_PUT_HTTP_METHOD)
+                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR)
+                .antMatchers(HttpMethod.GET, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_GET_HTTP_METHOD)
+                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR)
+                // Account owner + admin + executor + author
+                .antMatchers(HttpMethod.POST, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_POST_HTTP_METHOD)
+                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR)
+                .antMatchers(HttpMethod.GET, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_GET_HTTP_METHOD)
+                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR)
+                // other
                 .antMatchers(AUTH_WHITELIST_PERMIT_ALL).permitAll()
                 .antMatchers(AUTH_WHITELIST_ANONYMOUS_FOR_ANY_HTTP_METHODS).anonymous()
                 .antMatchers(AUTH_WHITELIST_AUTHENTICATED_FOR_ANY_HTTP_METHOD).authenticated()
                 .antMatchers(HttpMethod.GET, AUTH_WHITELIST_AUTHENTICATED_FOR_GET_HTTP_METHOD).authenticated()
                 .antMatchers(HttpMethod.POST, AUTH_WHITELIST_ANONYMOUS_FOR_POST_HTTP_METHOD).anonymous()
-                .antMatchers(HttpMethod.PUT, AUTH_WHITELIST_ACCOUNT_OWNER_FOR_PUT_HTTP_METHOD)
-                .hasAuthority(ROLE_ACCOUNT_OWNER)
-                .antMatchers(HttpMethod.GET, AUTH_WHITELIST_ACCOUNT_OWNER_FOR_GET_HTTP_METHOD)
-                .hasAuthority(ROLE_ACCOUNT_OWNER)
-                .antMatchers(HttpMethod.POST, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_POST_HTTP_METHOD)
-                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN)
-                .antMatchers(HttpMethod.PUT, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_PUT_HTTP_METHOD)
-                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR)
-                .antMatchers(HttpMethod.POST, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_POST_HTTP_METHOD)
-                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR)
-                .antMatchers(HttpMethod.PUT, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_PUT_HTTP_METHOD)
-                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN)
-                .antMatchers(HttpMethod.GET, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_GET_HTTP_METHOD)
-                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR)
-                .antMatchers(HttpMethod.POST, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_POST_HTTP_METHOD)
-                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR)
-                .antMatchers(HttpMethod.GET, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_GET_HTTP_METHOD)
-                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR)
                 .antMatchers("/**").denyAll().and()
                 .addFilterBefore(new JwtFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);

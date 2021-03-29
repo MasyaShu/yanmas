@@ -23,7 +23,7 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @Table(name = "settings_access_to_ticket_via_ticket_types")
 @Getter
 @Setter
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
