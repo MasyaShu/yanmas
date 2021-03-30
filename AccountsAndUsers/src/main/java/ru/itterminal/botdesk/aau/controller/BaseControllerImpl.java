@@ -8,11 +8,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.service.impl.CrudServiceWithAccountImpl;
+import ru.itterminal.botdesk.aau.util.ReflectionHelper;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
-import ru.itterminal.botdesk.commons.model.EntityConverter;
 import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
 import ru.itterminal.botdesk.commons.model.dto.BaseFilterDto;
 import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
@@ -27,8 +28,7 @@ public abstract class BaseControllerImpl<
         Request extends BaseEntityDto,
         Response extends BaseEntityDto,
         Filter extends BaseFilterDto>
-        extends BaseController
-        implements EntityConverter<Entity, Request> {
+        extends BaseController {
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
@@ -40,12 +40,18 @@ public abstract class BaseControllerImpl<
     @Autowired
     protected SpecificationsFactory specFactory;
 
+    @Autowired
+    ReflectionHelper reflectionHelper;
+
+    @SneakyThrows
     protected ResponseEntity<Response> baseCreate(Request request, Class<Entity> entityClass,
                                                   Class<Response> responseClass) {
         log.debug(CREATE_INIT_MESSAGE, entityClass.getSimpleName(), request);
-        var jwtUser = jwtUserBuilder.getJwtUser();
         var createdEntity = service.create(
-                convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(request, jwtUser.getAccountId())
+                reflectionHelper.convertRequestDtoIntoEntityWhereNestedObjectsWithOnlyValidId(
+                        request,
+                        entityClass
+                )
         );
         var returnedEntity = modelMapper.map(createdEntity, responseClass);
         log.info(CREATE_FINISH_MESSAGE, entityClass.getSimpleName(), createdEntity);
@@ -55,9 +61,11 @@ public abstract class BaseControllerImpl<
     protected ResponseEntity<Response> baseUpdate(Request request, Class<Entity> entityClass,
                                                   Class<Response> responseClass) {
         log.debug(UPDATE_INIT_MESSAGE, entityClass.getSimpleName(), request);
-        var jwtUser = jwtUserBuilder.getJwtUser();
         var updatedEntity = service.update(
-                convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(request, jwtUser.getAccountId())
+                reflectionHelper.convertRequestDtoIntoEntityWhereNestedObjectsWithOnlyValidId(
+                        request,
+                        entityClass
+                )
         );
         var returnedEntity = modelMapper.map(updatedEntity, responseClass);
         log.info(UPDATE_FINISH_MESSAGE, entityClass.getSimpleName(), updatedEntity);
@@ -88,6 +96,5 @@ public abstract class BaseControllerImpl<
         log.debug(FIND_FINISH_MESSAGE, entityClass.getSimpleName(), foundEntities.getTotalElements());
         return new ResponseEntity<>(returnedEntities, HttpStatus.OK);
     }
-
 
 }

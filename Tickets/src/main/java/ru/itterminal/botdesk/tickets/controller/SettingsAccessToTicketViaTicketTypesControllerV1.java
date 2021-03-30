@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.controller.BaseControllerImpl;
-import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
@@ -70,13 +69,5 @@ public class SettingsAccessToTicketViaTicketTypesControllerV1
                 @RequestParam(defaultValue = SIZE_DEFAULT_VALUE) @Positive int size) {
         jwtUserBuilder.throwAccessDeniedExceptionIfCurrentUserFromOuterGroup();
         return baseGetByFilter(filter, page, size, entityClazz, responseClazz);
-    }
-
-    @Override
-    public SettingsAccessToTicketViaTicketTypes convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(
-            SettingsAccessToTicketViaTicketTypesDtoRequest request, UUID accountId) {
-        var entityWithNestedObjectsWithOnlyId = modelMapper.map(request, SettingsAccessToTicketViaTicketTypes.class);
-        entityWithNestedObjectsWithOnlyId.setAccount(Account.builder().id(accountId).build());
-        return entityWithNestedObjectsWithOnlyId;
     }
 }
