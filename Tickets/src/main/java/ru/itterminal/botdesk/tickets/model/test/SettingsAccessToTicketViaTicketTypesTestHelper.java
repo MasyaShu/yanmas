@@ -18,7 +18,7 @@ public class SettingsAccessToTicketViaTicketTypesTestHelper extends EntityTestHe
 
     @Override
     public SettingsAccessToTicketViaTicketTypes getRandomValidEntity() {
-        var groupTicketTypes  = groupTicketTypesTestHelper.getRandomValidEntity();
+        var groupTicketTypes = groupTicketTypesTestHelper.getRandomValidEntity();
         var account = groupTicketTypes.getAccount();
         var group = groupTestHelper.getRandomValidEntity();
         group.setAccount(account);
@@ -48,12 +48,25 @@ public class SettingsAccessToTicketViaTicketTypesTestHelper extends EntityTestHe
         return null;
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @Override
     public SettingsAccessToTicketViaTicketTypesDtoRequest convertEntityToDtoRequest(SettingsAccessToTicketViaTicketTypes entity, boolean isDtoForCreate) {
         var dtoRequest = SettingsAccessToTicketViaTicketTypesDtoRequest.builder()
-                .groupId(entity.getGroup().getId())
-                .userId(entity.getUser().getId())
-                .groupTicketTypesId(entity.getGroupTicketTypes().getId())
+                .groupId(
+                        entity.getGroup() == null
+                                ? null
+                                : entity.getGroup().getId()
+                )
+                .userId(
+                        entity.getUser() == null
+                                ? null
+                                : entity.getUser().getId()
+                )
+                .groupTicketTypesId(
+                        entity.getGroupTicketTypes() == null
+                                ? null
+                                : entity.getGroupTicketTypes().getId()
+                )
                 .displayName(null)
                 .build();
         if (isDtoForCreate) {
@@ -61,9 +74,9 @@ public class SettingsAccessToTicketViaTicketTypesTestHelper extends EntityTestHe
             dtoRequest.setDeleted(null);
             dtoRequest.setVersion(null);
         } else {
-            dtoRequest.setId(dtoRequest.getId());
-            dtoRequest.setDeleted(dtoRequest.getDeleted());
-            dtoRequest.setVersion(dtoRequest.getVersion());
+            dtoRequest.setId(entity.getId());
+            dtoRequest.setDeleted(entity.getDeleted());
+            dtoRequest.setVersion(entity.getVersion());
         }
         return dtoRequest;
     }
