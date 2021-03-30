@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
+import ru.itterminal.botdesk.aau.util.ReflectionHelper;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
@@ -75,8 +76,13 @@ class TicketTemplateControllerV1Test {
     private static final String RANDOM_UUID = "f38b1ec1-d0f1-4e00-b594-647134fdc807";
     private static final String IS_BETWEEN_EXCLUSION = "is_between_exclusion";
     private static final String NONAME = "noname";
+
     @MockBean
     private AccountServiceImpl accountService;
+
+    @SuppressWarnings("unused")
+    @MockBean
+    private ReflectionHelper reflectionHelper;
 
     @MockBean
     TicketTemplateServiceImpl templateService;

@@ -23,6 +23,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
+import ru.itterminal.botdesk.aau.util.ReflectionHelper;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
@@ -44,6 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
 
+@SuppressWarnings("unused")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {TicketStatusControllerV1.class, FilterChainProxy.class})
 @Import(TestSecurityConfig.class)
@@ -54,11 +56,12 @@ class TicketStatusControllerV1Test {
     @MockBean
     private TicketStatusServiceImpl service;
 
-    @SuppressWarnings("unused")
+    @MockBean
+    private ReflectionHelper reflectionHelper;
+
     @MockBean
     private SpecificationsFactory specFactory;
 
-    @SuppressWarnings("unused")
     @MockBean
     private AccountServiceImpl accountService;
 
@@ -126,7 +129,7 @@ class TicketStatusControllerV1Test {
     void create_shouldCreate_whenValidDataPassed() throws Exception {
         ticketStatusDto.setDeleted(null);
         when(service.create(any())).thenReturn(ticketStatus_1);
-        when(service.convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(any(),any())).thenReturn(ticketStatus_1);
+        when(reflectionHelper.convertRequestDtoIntoEntityWhereNestedObjectsWithOnlyValidId(any(), any())).thenReturn(ticketStatus_1);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -137,6 +140,7 @@ class TicketStatusControllerV1Test {
                 .andExpect(jsonPath("$.id").value(TICKET_STATUS_ID_1))
                 .andExpect(jsonPath("$.name").value(TICKET_STATUS_NAME_1));
         verify(service, times(1)).create(any());
+        verify(reflectionHelper, times(1)).convertRequestDtoIntoEntityWhereNestedObjectsWithOnlyValidId(any(), any());
     }
 
     @Test

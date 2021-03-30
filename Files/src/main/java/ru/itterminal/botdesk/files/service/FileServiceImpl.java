@@ -14,21 +14,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
-import ru.itterminal.botdesk.commons.model.EntityConverter;
 import ru.itterminal.botdesk.files.model.File;
-import ru.itterminal.botdesk.files.model.dto.FileDto;
 import ru.itterminal.botdesk.files.repository.FileRepository;
 import ru.itterminal.botdesk.files.repository.FileSystemRepository;
 import ru.itterminal.botdesk.files.service.validator.FileOperationValidator;
 
 @Slf4j
 @Service
-public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperationValidator, FileRepository> implements
-        EntityConverter<File, FileDto> {
+public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperationValidator, FileRepository> {
 
     public static final String FILE_ID = "File id";
     public static final String FILE_ID_IS_NULL = "File id is null";
@@ -99,13 +95,6 @@ public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperat
         file.setIsUploaded(true);
         file.setSize(bytes.length);
         repository.update(file);
-    }
-
-    @Override
-    public File convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(FileDto request, UUID accountId) {
-        var file = modelMapper.map(request, File.class);
-        file.setAccount(Account.builder().id(accountId).build());
-        return file;
     }
 
     @Override

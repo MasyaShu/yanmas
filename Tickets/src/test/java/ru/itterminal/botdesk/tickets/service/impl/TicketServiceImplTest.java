@@ -214,20 +214,6 @@ class TicketServiceImplTest {
         assertEquals(ticket.getNumber(), number);
     }
 
-    @Test
-    void convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId_shouldConvert_whenPassedValidData() {
-        var expectedTicket = ticketTestHelper.getRandomValidEntity();
-        var ticketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(expectedTicket, true);
-        var actualTicket = service
-                .convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(
-                        ticketDtoRequest,
-                        expectedTicket.getAccount().getId()
-                );
-        assertEquals(expectedTicket.getAuthor().getId(), actualTicket.getAuthor().getId());
-        assertEquals(expectedTicket.getTicketType().getId(), actualTicket.getTicketType().getId());
-        assertEquals(expectedTicket.getTicketStatus().getId(), actualTicket.getTicketStatus().getId());
-    }
-
     private static Stream<Arguments> getStreamOfUsersFromInnerGroupsWithRolesAccountOwnerOrAdminOrExecutor() {
         return Stream.of(
                 Arguments.of(Roles.ACCOUNT_OWNER.toString(), true),

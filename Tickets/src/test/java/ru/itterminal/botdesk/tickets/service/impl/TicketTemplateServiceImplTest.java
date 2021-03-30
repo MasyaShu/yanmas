@@ -23,6 +23,7 @@ import ru.itterminal.botdesk.tickets.model.test.TicketTemplateTestHelper;
 import ru.itterminal.botdesk.tickets.repository.TicketTemplateRepository;
 import ru.itterminal.botdesk.tickets.service.validator.TicketTemplateOperationValidator;
 
+@SuppressWarnings("unused")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {TicketTemplateServiceImpl.class})
 class TicketTemplateServiceImplTest {

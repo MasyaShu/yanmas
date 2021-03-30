@@ -39,6 +39,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
+import ru.itterminal.botdesk.aau.util.ReflectionHelper;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
 import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
@@ -62,6 +63,10 @@ class GroupTicketTypesControllerV1Test {
     @SuppressWarnings("unused")
     @MockBean
     private SpecificationsFactory specFactory;
+
+    @SuppressWarnings("unused")
+    @MockBean
+    private ReflectionHelper reflectionHelper;
 
     @SuppressWarnings("unused")
     @MockBean
@@ -101,8 +106,6 @@ class GroupTicketTypesControllerV1Test {
     void create_shouldCreate_whenValidDataPassed() throws Exception {
         var groupTicketTypesDtoRequest = testHelper.convertEntityToDtoRequest(groupTicketTypes, true);
         when(service.create(any())).thenReturn(groupTicketTypes);
-        when(service.convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(any(), any()))
-                .thenReturn(groupTicketTypes);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -113,7 +116,6 @@ class GroupTicketTypesControllerV1Test {
                 .andExpect(jsonPath("$.id").value(groupTicketTypes.getId().toString()))
                 .andExpect(jsonPath("$.name").value(groupTicketTypes.getName()));
         verify(service, times(1)).create(any());
-        verify(service, times(1)).convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(any(), any());
     }
 
     @Test
@@ -128,7 +130,6 @@ class GroupTicketTypesControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isForbidden());
         verify(service, times(0)).create(any());
-        verify(service, times(0)).convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(any(), any());
     }
 
     @Test
@@ -164,7 +165,6 @@ class GroupTicketTypesControllerV1Test {
                                         MUST_BE_NULL_FOR_THE_NEW_ENTITY
                                 ).exists());
         verify(service, times(0)).create(any());
-        verify(service, times(0)).convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(any(), any());
     }
 
     @Test
@@ -184,7 +184,6 @@ class GroupTicketTypesControllerV1Test {
                                 .jsonPath("$.errors.name[?(@.message =~ /%s.*/)]", CommonConstants.SIZE_MUST_BE_BETWEEN)
                                 .exists());
         verify(service, times(0)).create(any());
-        verify(service, times(0)).convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(any(), any());
     }
 
     @Test
@@ -199,7 +198,6 @@ class GroupTicketTypesControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
         verify(service, times(0)).create(any());
-        verify(service, times(0)).convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(any(), any());
     }
 
     @Test
@@ -217,7 +215,6 @@ class GroupTicketTypesControllerV1Test {
                 .andExpect(jsonPath("$.name").value(groupTicketTypes.getName()))
                 .andExpect(jsonPath("$.id").value(groupTicketTypes.getId().toString()));
         verify(service, times(1)).update(any());
-        verify(service, times(1)).convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(any(), any());
     }
 
     @Test
@@ -232,7 +229,6 @@ class GroupTicketTypesControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
         verify(service, times(0)).update(any());
-        verify(service, times(0)).convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(any(), any());
     }
 
     @Test
@@ -260,7 +256,6 @@ class GroupTicketTypesControllerV1Test {
                                    .jsonPath("$.errors.deleted[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
                                    .exists());
         verify(service, times(0)).update(any());
-        verify(service, times(0)).convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(any(), any());
     }
 
     @Test
@@ -283,7 +278,6 @@ class GroupTicketTypesControllerV1Test {
                                 )
                                 .exists());
         verify(service, times(0)).update(any());
-        verify(service, times(0)).convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(any(), any());
     }
 
     @Test

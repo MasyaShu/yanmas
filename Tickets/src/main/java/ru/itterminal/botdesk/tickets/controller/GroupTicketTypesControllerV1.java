@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import ru.itterminal.botdesk.aau.util.ReflectionHelper;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
@@ -43,32 +44,33 @@ public class GroupTicketTypesControllerV1 extends BaseController {
 
     private final GroupTicketTypesServiceImpl service;
     private final SpecificationsFactory specFactory;
+    private final ReflectionHelper reflectionHelper;
 
     private final String ENTITY_NAME = GroupTicketTypes.class.getSimpleName();
 
     @PostMapping()
-    public ResponseEntity<GroupTicketTypesDtoResponse> create(
-            Principal principal,
-            @Validated(Create.class) @RequestBody GroupTicketTypesDtoRequest request) {
+    public ResponseEntity<GroupTicketTypesDtoResponse> create(@Validated(Create.class) @RequestBody GroupTicketTypesDtoRequest request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
-        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        var groupTicketTypes = service
-                .convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(request, jwtUser.getAccountId());
-        var createdGroupTicketTypes = service.create(groupTicketTypes);
+        var createdGroupTicketTypes = service.create(
+                (GroupTicketTypes) reflectionHelper.convertRequestDtoIntoEntityWhereNestedObjectsWithOnlyValidId(
+                        request,
+                        GroupTicketTypes.class
+                )
+        );
         var returnedGroupTicketTypes = modelMapper.map(createdGroupTicketTypes, GroupTicketTypesDtoResponse.class);
         log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdGroupTicketTypes);
         return new ResponseEntity<>(returnedGroupTicketTypes, HttpStatus.CREATED);
     }
 
     @PutMapping()
-    public ResponseEntity<GroupTicketTypesDtoResponse> update(
-            Principal principal,
-            @Validated(Update.class) @RequestBody GroupTicketTypesDtoRequest request) {
+    public ResponseEntity<GroupTicketTypesDtoResponse> update(@Validated(Update.class) @RequestBody GroupTicketTypesDtoRequest request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
-        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        var groupTicketTypes =
-                service.convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(request, jwtUser.getAccountId());
-        var updatedGroupTicketTypes = service.update(groupTicketTypes);
+        var updatedGroupTicketTypes = service.update(
+                (GroupTicketTypes) reflectionHelper.convertRequestDtoIntoEntityWhereNestedObjectsWithOnlyValidId(
+                        request,
+                        GroupTicketTypes.class
+                )
+        );
         var returnedGroupTicketTypes = modelMapper.map(updatedGroupTicketTypes, GroupTicketTypesDtoResponse.class);
         log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedGroupTicketTypes);
         return new ResponseEntity<>(returnedGroupTicketTypes, HttpStatus.OK);

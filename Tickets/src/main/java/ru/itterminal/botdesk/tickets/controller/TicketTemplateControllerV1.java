@@ -1,7 +1,12 @@
 package ru.itterminal.botdesk.tickets.controller;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.security.Principal;
+import java.util.UUID;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
+
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +14,18 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import ru.itterminal.botdesk.aau.util.ReflectionHelper;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
@@ -21,12 +37,6 @@ import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateDtoResponse;
 import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateFilterDto;
 import ru.itterminal.botdesk.tickets.service.impl.TicketTemplateServiceImpl;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
-import java.security.Principal;
-import java.util.UUID;
-
 @Slf4j
 @RestController("TicketTemplateControllerV1")
 @RequestMapping("api/v1/ticket-template")
@@ -34,18 +44,23 @@ import java.util.UUID;
 public class TicketTemplateControllerV1 extends BaseController {
 
     public static final String ACCESS_IS_DENIED = "Access is denied";
+
     private final TicketTemplateServiceImpl templateService;
     private final SpecificationsFactory specFactory;
+    private final ReflectionHelper reflectionHelper;
 
     private final String ENTITY_NAME = TicketTemplate.class.getSimpleName();
 
     @PostMapping()
-    public ResponseEntity<TicketTemplateDtoResponse> create(Principal principal,
-                                                            @Validated(Create.class) @RequestBody TicketTemplateDtoRequest request) {
+    public ResponseEntity<TicketTemplateDtoResponse> create(
+            @Validated(Create.class) @RequestBody TicketTemplateDtoRequest request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
-        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        var ticketTemplate = templateService.convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(request, jwtUser.getAccountId());
-        TicketTemplate createdTicketTemplate = templateService.create(ticketTemplate);
+        TicketTemplate createdTicketTemplate = templateService.create(
+                (TicketTemplate) reflectionHelper.convertRequestDtoIntoEntityWhereNestedObjectsWithOnlyValidId(
+                        request,
+                        TicketTemplate.class
+                )
+        );
         TicketTemplateDtoResponse returnedTicketTemplate =
                 modelMapper.map(createdTicketTemplate, TicketTemplateDtoResponse.class);
         log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, request);
@@ -53,12 +68,15 @@ public class TicketTemplateControllerV1 extends BaseController {
     }
 
     @PutMapping()
-    public ResponseEntity<TicketTemplateDtoResponse> update(Principal principal,
-                                                            @Validated(Update.class) @RequestBody TicketTemplateDtoRequest request) {
+    public ResponseEntity<TicketTemplateDtoResponse> update(
+            @Validated(Update.class) @RequestBody TicketTemplateDtoRequest request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
-        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        var ticketTemplate = templateService.convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(request, jwtUser.getAccountId());
-        TicketTemplate updatedTicketStatus = templateService.update(ticketTemplate);
+        TicketTemplate updatedTicketStatus = templateService.update(
+                (TicketTemplate) reflectionHelper.convertRequestDtoIntoEntityWhereNestedObjectsWithOnlyValidId(
+                        request,
+                        TicketTemplate.class
+                )
+        );
         TicketTemplateDtoResponse returnedTicketTemplate =
                 modelMapper.map(updatedTicketStatus, TicketTemplateDtoResponse.class);
         log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedTicketStatus);
@@ -91,7 +109,8 @@ public class TicketTemplateControllerV1 extends BaseController {
         log.debug(FIND_INIT_MESSAGE, ENTITY_NAME, page, size, filterDto);
         var pageable = createPageable(size, page, filterDto.getSortByFields(), filterDto.getSortDirection());
         var accountId = jwtUser.getAccountId();
-        var ticketTemplateSpecification = specFactory.makeSpecificationFromEntityFilterDto(TicketTemplate.class, filterDto, accountId);
+        var ticketTemplateSpecification =
+                specFactory.makeSpecificationFromEntityFilterDto(TicketTemplate.class, filterDto, accountId);
         var foundTicketTemplate = templateService.findAllByFilter(ticketTemplateSpecification, pageable);
         var returnedTicketTemplate = mapPage(foundTicketTemplate, TicketTemplateDtoResponse.class, pageable);
         log.debug(FIND_FINISH_MESSAGE, ENTITY_NAME, foundTicketTemplate.getTotalElements());

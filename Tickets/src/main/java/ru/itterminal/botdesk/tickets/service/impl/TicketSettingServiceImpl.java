@@ -11,16 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ru.itterminal.botdesk.aau.model.Account;
-import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
-import ru.itterminal.botdesk.commons.model.EntityConverter;
 import ru.itterminal.botdesk.tickets.model.TicketSetting;
-import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoRequest;
 import ru.itterminal.botdesk.tickets.repository.TicketSettingRepository;
 import ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator;
 
@@ -29,7 +25,7 @@ import ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationVal
 @Transactional
 @RequiredArgsConstructor
 public class TicketSettingServiceImpl extends CrudServiceWithAccountImpl<TicketSetting, TicketSettingOperationValidator,
-        TicketSettingRepository> implements EntityConverter<TicketSetting, TicketSettingDtoRequest> {
+        TicketSettingRepository> {
 
     public static final String WHERE = "TicketSettingServiceImpl.findByUniqueFields: ";
     public static final String START_FIND = "Start " + WHERE + "{} , {}, {}";
@@ -102,31 +98,6 @@ public class TicketSettingServiceImpl extends CrudServiceWithAccountImpl<TicketS
         );
     }
 
-    @SuppressWarnings("DuplicatedCode")
-    @Override
-    public TicketSetting convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(TicketSettingDtoRequest request,
-                                                                                UUID accountId) {
-        var ticketSetting = modelMapper.map(request, TicketSetting.class);
-        ticketSetting.setAccount(Account.builder().id(accountId).build());
-        ticketSetting.setObservers(
-                (request.getObservers() == null
-                        ? null
-                        : request.getObservers().stream()
-                                .map(id -> User.builder().id(id).build())
-                                .collect(Collectors.toList())
-                )
-        );
-        ticketSetting.setExecutors(
-                (request.getExecutors() == null
-                        ? null
-                        : request.getExecutors().stream()
-                                .map(id -> User.builder().id(id).build())
-                                .collect(Collectors.toList())
-                )
-        );
-        return ticketSetting;
-    }
-
     @Override
     protected void setNestedObjectsOfEntityBeforeCreate(TicketSetting entity) {
         entity.setAccount(accountService.findById(entity.getAccount().getId()));
@@ -136,20 +107,24 @@ public class TicketSettingServiceImpl extends CrudServiceWithAccountImpl<TicketS
         } else if (entity.getGroup() != null && entity.getGroup().getId() != null) {
             entity.setGroup(groupService.findByIdAndAccountId(entity.getGroup().getId()));
         }
-        entity.setObservers(
-                userService.findAllByAccountIdAndListId(
-                        entity.getObservers().stream()
-                                .map(BaseEntity::getId)
-                                .collect(Collectors.toList())
-                )
-        );
-        entity.setExecutors(
-                userService.findAllByAccountIdAndListId(
-                        entity.getExecutors().stream()
-                                .map(BaseEntity::getId)
-                                .collect(Collectors.toList())
-                )
-        );
+        if (entity.getObservers() != null) {
+            entity.setObservers(
+                    userService.findAllByAccountIdAndListId(
+                            entity.getObservers().stream()
+                                    .map(BaseEntity::getId)
+                                    .collect(Collectors.toList())
+                    )
+            );
+        }
+        if (entity.getExecutors() != null) {
+            entity.setExecutors(
+                    userService.findAllByAccountIdAndListId(
+                            entity.getExecutors().stream()
+                                    .map(BaseEntity::getId)
+                                    .collect(Collectors.toList())
+                    )
+            );
+        }
         if (entity.getTicketTypeForNew() != null && entity.getTicketTypeForNew().getId() != null) {
             entity.setTicketTypeForNew(ticketTypeService.findByIdAndAccountId(entity.getTicketTypeForNew().getId()));
         }

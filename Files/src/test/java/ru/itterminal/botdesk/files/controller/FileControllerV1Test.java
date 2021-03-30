@@ -43,6 +43,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ru.itterminal.botdesk.aau.model.Account;
+import ru.itterminal.botdesk.aau.util.ReflectionHelper;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
 import ru.itterminal.botdesk.commons.util.CommonConstants;
 import ru.itterminal.botdesk.files.model.File;
@@ -59,6 +60,10 @@ class FileControllerV1Test {
 
     @MockBean
     private FileServiceImpl fileService;
+
+    @SuppressWarnings("unused")
+    @MockBean
+    private ReflectionHelper reflectionHelper;
 
     @Autowired
     private FileControllerV1 controller;

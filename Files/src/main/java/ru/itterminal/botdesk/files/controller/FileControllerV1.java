@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import ru.itterminal.botdesk.aau.util.ReflectionHelper;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
@@ -43,28 +44,31 @@ public class FileControllerV1 extends BaseController {
     private final String ENTITY_NAME = File.class.getSimpleName();
 
     private final FileServiceImpl fileService;
+    private final ReflectionHelper reflectionHelper;
 
     @PostMapping()
-    public ResponseEntity<FileDto> create
-            (Principal principal,
-             @Validated(Create.class) @RequestBody FileDto fileDto) {
+    public ResponseEntity<FileDto> create (@Validated(Create.class) @RequestBody FileDto fileDto) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, fileDto);
-        var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        var file = fileService.convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(fileDto, jwtUser.getAccountId());
-        var createdFile = fileService.create(file);
+        var createdFile = fileService.create(
+                (File) reflectionHelper.convertRequestDtoIntoEntityWhereNestedObjectsWithOnlyValidId(
+                        fileDto,
+                        File.class
+                )
+        );
         var returnedFile = modelMapper.map(createdFile, FileDto.class);
         log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdFile);
         return new ResponseEntity<>(returnedFile, HttpStatus.CREATED);
     }
 
     @PutMapping()
-    public ResponseEntity<FileDto> update
-            (Principal principal,
-             @Validated(Update.class) @RequestBody FileDto fileDto) {
+    public ResponseEntity<FileDto> update (@Validated(Update.class) @RequestBody FileDto fileDto) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, fileDto);
-        var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        var file = fileService.convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(fileDto, jwtUser.getAccountId());
-        var updatedFile = fileService.update(file);
+        var updatedFile = fileService.update(
+                (File) reflectionHelper.convertRequestDtoIntoEntityWhereNestedObjectsWithOnlyValidId(
+                        fileDto,
+                        File.class
+                )
+        );
         var returnedFile = modelMapper.map(updatedFile, FileDto.class);
         log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedFile);
         return new ResponseEntity<>(returnedFile, HttpStatus.OK);

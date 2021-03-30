@@ -1,32 +1,30 @@
 package ru.itterminal.botdesk.tickets.service.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import ru.itterminal.botdesk.aau.model.Account;
-import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
-import ru.itterminal.botdesk.aau.service.impl.CrudServiceWithAccountImpl;
-import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
-import ru.itterminal.botdesk.commons.model.EntityConverter;
-import ru.itterminal.botdesk.integration.across_modules.CompletedVerificationAccount;
-import ru.itterminal.botdesk.tickets.model.TicketStatus;
-import ru.itterminal.botdesk.tickets.model.dto.TicketStatusDto;
-import ru.itterminal.botdesk.tickets.model.projection.TicketStatusUniqueFields;
-import ru.itterminal.botdesk.tickets.repository.TicketStatusRepository;
-import ru.itterminal.botdesk.tickets.service.validator.TicketStatusOperationValidator;
+import static java.lang.String.format;
 
 import java.util.List;
 import java.util.UUID;
 
-import static java.lang.String.format;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
+import ru.itterminal.botdesk.aau.service.impl.CrudServiceWithAccountImpl;
+import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
+import ru.itterminal.botdesk.integration.across_modules.CompletedVerificationAccount;
+import ru.itterminal.botdesk.tickets.model.TicketStatus;
+import ru.itterminal.botdesk.tickets.model.projection.TicketStatusUniqueFields;
+import ru.itterminal.botdesk.tickets.repository.TicketStatusRepository;
+import ru.itterminal.botdesk.tickets.service.validator.TicketStatusOperationValidator;
 
 @Slf4j
 @Service
 @AllArgsConstructor
 public class TicketStatusServiceImpl extends
         CrudServiceWithAccountImpl<TicketStatus, TicketStatusOperationValidator, TicketStatusRepository>
-        implements CompletedVerificationAccount, EntityConverter<TicketStatus, TicketStatusDto> {
+        implements CompletedVerificationAccount {
 
 
     private final AccountServiceImpl accountService;
@@ -157,13 +155,6 @@ public class TicketStatusServiceImpl extends
                     .build();
             create(canceledPredefinedStatus);
         }
-    }
-
-    @Override
-    public TicketStatus convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(TicketStatusDto request, UUID accountId) {
-        TicketStatus ticketStatus = modelMapper.map(request, TicketStatus.class);
-        ticketStatus.setAccount(Account.builder().id(accountId).build());
-        return ticketStatus;
     }
 
     @Override
