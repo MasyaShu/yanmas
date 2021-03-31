@@ -106,8 +106,7 @@ public class ITHelper {
     public static final String GROUP_TICKET_TYPES = "group-ticket-types";
     public static final String SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES = "ticket/type/setting-access";
     public static final String INITIAL_GROUP_TICKET_TYPES = "InitialGroupTicketTypes";
-    public static final String INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES =
-            "InitialSettingsAccessToTicketViaTicketTypes";
+    public static final String INITIAL_SETTINGS_ACCESS_TO_TICKET_TYPES = "InitialSettingsAccessToTicketViaTicketTypes";
     public static final String TICKET_TEMPLATE = "ticket-template";
     public static final String TICKET_TYPE = "ticket-type";
     public static final String TICKET_TEMPLATE_BY_ID = "ticket-template/{id}";
@@ -151,8 +150,8 @@ public class ITHelper {
     public static final String OUTER_GROUP = "outerGroup_";
     public static final String GROUP = "group";
     public static final String INNER_GROUP = "innerGroup_";
-    public static final String IT_IS_PREDEFINED_FOR_NEW_TICKET = "itIsPredefinedForNewTicket";
-    public static final String IT_IS_NEW_FOR_NEW_TICKET = "itIsNewForNewTicket";
+    public static final String IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET = "itIsPredefinedTicketTypeForNewTicket";
+    public static final String IT_IS_NEW_TICKET_TYPE_FOR_NEW_TICKET = "itIsNewTicketTypeForNewTicket";
     public static final String IS_STARTED_PREDEFINED = "isStartedPredefined";
     public static final String IS_FINISHED_PREDEFINED = "isFinishedPredefined";
     public static final String IS_REOPENED_PREDEFINED = "isReopenedPredefined";
@@ -291,7 +290,7 @@ public class ITHelper {
         for (TicketType ticketType : ticketTypesList) {
             ticketType.setAccount(account);
             if (ticketType.getIsPredefinedForNewTicket()) {
-                ticketTypes.put(IT_IS_PREDEFINED_FOR_NEW_TICKET, ticketType);
+                ticketTypes.put(IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET, ticketType);
             }
         }
     }
@@ -383,7 +382,7 @@ public class ITHelper {
 
     public void createInitialTicketType() {
         var newTicketType = TicketType.builder()
-                .name(IT_IS_NEW_FOR_NEW_TICKET)
+                .name(IT_IS_NEW_TICKET_TYPE_FOR_NEW_TICKET)
                 .build();
         var createdNewTicketType = given().
                 when()
@@ -398,17 +397,13 @@ public class ITHelper {
                 .log().body()
                 .extract().response().as(TicketType.class);
         createdNewTicketType.setAccount(account);
-        ticketTypes.put(IT_IS_NEW_FOR_NEW_TICKET, createdNewTicketType);
+        ticketTypes.put(IT_IS_NEW_TICKET_TYPE_FOR_NEW_TICKET, createdNewTicketType);
     }
 
     public void createInitialGroupTicketTypes() {
         var request = GroupTicketTypesDtoRequest.builder()
                 .name(INITIAL_GROUP_TICKET_TYPES)
-                .ticketTypes(
-                        ticketTypes.values().stream()
-                                .map(BaseEntity::getId)
-                                .collect(Collectors.toList())
-                )
+                .ticketTypes(List.of(ticketTypes.get(IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET).getId()))
                 .build();
         var createdGroupTicketTypes = given().
                 when()
@@ -426,7 +421,7 @@ public class ITHelper {
         groupTicketTypes.put(INITIAL_GROUP_TICKET_TYPES, createdGroupTicketTypes);
     }
 
-    public void createInitialSettingsAccessToTicketTypes_IT() {
+    public void createInitialSettingsAccessToTicketTypes() {
         var group = innerGroup.get(INNER_GROUP_1);
         var user = authorInnerGroup.get(AUTHOR_INNER_GROUP + "1");
         var groupOfTicketTypes = groupTicketTypes.get(INITIAL_GROUP_TICKET_TYPES);
@@ -451,7 +446,7 @@ public class ITHelper {
         createdSettings.setGroup(group);
         createdSettings.setUser(user);
         createdSettings.setGroupTicketTypes(groupOfTicketTypes);
-        settingsAccessToTicketTypes.put(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES, createdSettings);
+        settingsAccessToTicketTypes.put(INITIAL_SETTINGS_ACCESS_TO_TICKET_TYPES, createdSettings);
     }
 
     public void createInitialTicketSettings() {
@@ -461,7 +456,7 @@ public class ITHelper {
 
     private TicketTemplate createInitialTicketTemplates(TicketTemplate ticketTemplate) {
         var ticketTemplateDtoRequest = ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate, true);
-        ticketTemplateDtoRequest.setTicketTypeId(ticketTypes.get(IT_IS_PREDEFINED_FOR_NEW_TICKET).getId());
+        ticketTemplateDtoRequest.setTicketTypeId(ticketTypes.get(IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET).getId());
         ticketTemplateDtoRequest.setAuthorId(authorOuterGroup.get(AUTHOR_OUTER_GROUP + 1).getId());
         var ticketTemplateDtoResponse = given().
                 when()
@@ -498,6 +493,7 @@ public class ITHelper {
                 .group(group)
                 .executors(executors)
                 .observers(observers)
+                .ticketTypeForNew(ticketTypes.get(IT_IS_NEW_TICKET_TYPE_FOR_NEW_TICKET))
                 .build();
         var ticketSettingDtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(ticketSetting, true);
         var ticketSettingDtoResponse = given().

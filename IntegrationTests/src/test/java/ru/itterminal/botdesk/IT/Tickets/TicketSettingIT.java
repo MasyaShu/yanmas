@@ -6,6 +6,7 @@ import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -14,6 +15,7 @@ import static ru.itterminal.botdesk.IT.util.ITHelper.ADMIN;
 import static ru.itterminal.botdesk.IT.util.ITHelper.APPLICATION_JSON;
 import static ru.itterminal.botdesk.IT.util.ITHelper.AUTHOR;
 import static ru.itterminal.botdesk.IT.util.ITHelper.AUTHOR_ID;
+import static ru.itterminal.botdesk.IT.util.ITHelper.AUTHOR_INNER_GROUP;
 import static ru.itterminal.botdesk.IT.util.ITHelper.CONTENT;
 import static ru.itterminal.botdesk.IT.util.ITHelper.EMPTY_BODY;
 import static ru.itterminal.botdesk.IT.util.ITHelper.EXECUTOR;
@@ -21,6 +23,7 @@ import static ru.itterminal.botdesk.IT.util.ITHelper.ID;
 import static ru.itterminal.botdesk.IT.util.ITHelper.IGNORE_FIELDS_FOR_COMPARE_TICKET_SETTING;
 import static ru.itterminal.botdesk.IT.util.ITHelper.IGNORE_FIELDS_OF_BASE_ENTITY_FOR_COMPARE;
 import static ru.itterminal.botdesk.IT.util.ITHelper.INNER_GROUP;
+import static ru.itterminal.botdesk.IT.util.ITHelper.IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET;
 import static ru.itterminal.botdesk.IT.util.ITHelper.OBSERVER;
 import static ru.itterminal.botdesk.IT.util.ITHelper.OUTER_GROUP;
 import static ru.itterminal.botdesk.IT.util.ITHelper.SIZE;
@@ -97,7 +100,10 @@ class TicketSettingIT {
         itHelper.createAndVerifyAccount(userRepository);
         itHelper.createInitialInnerAndOuterGroups(1, 2);
         itHelper.createInitialUsers();
+        itHelper.createInitialTicketType();
         itHelper.createInitialTicketSettings();
+        itHelper.createInitialGroupTicketTypes();
+        itHelper.createInitialSettingsAccessToTicketTypes();
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
@@ -281,6 +287,39 @@ class TicketSettingIT {
         }
     }
 
+    @Test
+    @Order(65)
+    void successGetByAuthor_whereValueOfTicketTypeIsPredefined_ifAuthorOfTicketHasNotPermittedToTicketTypeFromTicketSettings() {
+        var expectedTicketSetting =  itHelper.getTicketSettings().get(INNER_GROUP + "1");
+        var author = itHelper.getAuthorInnerGroup().get(AUTHOR_INNER_GROUP + "1");
+        var authorId = author.getId();
+        var actualTicketSetting = given().
+                when().
+                headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(author.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .pathParam(AUTHOR_ID, authorId)
+                .get(TICKET_SETTING_BY_AUTHOR)
+                .then()
+                .log().body()
+                .body(ID, equalTo(expectedTicketSetting.getId().toString()))
+                .statusCode(HttpStatus.OK.value())
+                .extract().response().as(TicketSetting.class);
+        assertThat(actualTicketSetting).usingRecursiveComparison()
+                .ignoringActualNullFields()
+                .ignoringFields("ticketStatusForCancel", "ticketStatusForClose", "ticketStatusForNew",
+                                "ticketStatusForReopen", "ticketTypeForNew"
+                )
+                .isEqualTo(expectedTicketSetting);
+        var predefinedTicketType = itHelper.getTicketTypes().get(IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET);
+        assertEquals(predefinedTicketType.getId(), actualTicketSetting.getTicketTypeForNew().getId());
+        assertNotEquals(expectedTicketSetting.getTicketTypeForNew().getId(),
+                        actualTicketSetting.getTicketTypeForNew().getId()
+        );
+    }
+
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamAllUsersFromInnerGroup_2AndFromOuterGroup_2")
     @Order(70)
@@ -361,7 +400,7 @@ class TicketSettingIT {
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamUsersInnerGroupWithRolesAccountOwnerAndAdmin")
+    @MethodSource("getStreamUsersFromInnerGroupWithRolesAccountOwnerAndAdmin")
     @Order(90)
     void successCreateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin(String userKey, User user) {
         var expectedTicketSetting = itHelper.getTicketSettings().get(INNER_GROUP + "1").toBuilder()
@@ -396,13 +435,14 @@ class TicketSettingIT {
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamUsersInnerGroupWithRolesAccountOwnerAndAdmin")
+    @MethodSource("getStreamUsersFromInnerGroupWithRolesAccountOwnerAndAdmin")
     @Order(100)
     void failedCreateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenTicketSettingIsEmpty
             (String userKey, User user) {
         var newTicketSetting = itHelper.getTicketSettings().get(INNER_GROUP + "1").toBuilder()
                 .group(user.getGroup())
                 .author(user)
+                .ticketTypeForNew(null)
                 .observers(null)
                 .executors(null)
                 .deleted(null)
@@ -431,7 +471,7 @@ class TicketSettingIT {
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamUsersInnerGroupWithRolesAccountOwnerAndAdmin")
+    @MethodSource("getStreamUsersFromInnerGroupWithRolesAccountOwnerAndAdmin")
     @Order(110)
     void failedCreateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenTicketSettingIsNotUnique
             (String userKey, User user) {
@@ -505,7 +545,7 @@ class TicketSettingIT {
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamUsersInnerGroupWithRolesAccountOwnerAndAdmin")
+    @MethodSource("getStreamUsersFromInnerGroupWithRolesAccountOwnerAndAdmin")
     @Order(140)
     void successUpdateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin(String userKey, User user) {
         var expectedTicketSetting = itHelper.getTicketSettings().get(INNER_GROUP + "1").toBuilder()
@@ -536,11 +576,12 @@ class TicketSettingIT {
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamUsersInnerGroupWithRolesAccountOwnerAndAdmin")
+    @MethodSource("getStreamUsersFromInnerGroupWithRolesAccountOwnerAndAdmin")
     @Order(150)
     void failedUpdateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenAfterUpdateTicketSettingWillBeEmpty(
             String userKey, User user) {
         var expectedTicketSetting = itHelper.getTicketSettings().get(INNER_GROUP + "1").toBuilder()
+                .ticketTypeForNew(null)
                 .observers(null)
                 .executors(null)
                 .displayName(null)
@@ -566,7 +607,7 @@ class TicketSettingIT {
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamUsersInnerGroupWithRolesAccountOwnerAndAdmin")
+    @MethodSource("getStreamUsersFromInnerGroupWithRolesAccountOwnerAndAdmin")
     @Order(160)
     void failedUpdateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenAfterUpdateTicketSettingWillBeNotUnique(
             String userKey, User user) {
@@ -664,7 +705,7 @@ class TicketSettingIT {
         return itHelper.getStreamUsers(itHelper.getRoleTestHelper().getPredefinedValidEntityList(), null);
     }
 
-    private static Stream<Arguments> getStreamUsersInnerGroupWithRolesAccountOwnerAndAdmin() {
+    private static Stream<Arguments> getStreamUsersFromInnerGroupWithRolesAccountOwnerAndAdmin() {
         var roles = itHelper.getRoleTestHelper().getRolesByNames(
                 List.of(
                         ACCOUNT_OWNER,

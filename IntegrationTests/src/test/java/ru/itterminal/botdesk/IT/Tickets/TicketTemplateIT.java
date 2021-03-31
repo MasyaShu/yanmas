@@ -227,7 +227,7 @@ class TicketTemplateIT {
     @Order(90)
     void successCreateByUsersInnerGroupWithRolesAccountOwnerAdminExecutor(String userKey, User user) {
         var expectedTicketTemplate = ticketTemplateTestHelper.getRandomValidEntity();
-        expectedTicketTemplate.setTicketType(itHelper.getTicketTypes().get(IT_IS_PREDEFINED_FOR_NEW_TICKET));
+        expectedTicketTemplate.setTicketType(itHelper.getTicketTypes().get(IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET));
         expectedTicketTemplate.setAuthor(itHelper.getAuthorOuterGroup().get(AUTHOR_OUTER_GROUP + 1));
         var ticketTemplateDtoRequest = ticketTemplateTestHelper.convertEntityToDtoRequest(expectedTicketTemplate, true);
         var actualTicketTemplate = given().
@@ -256,7 +256,8 @@ class TicketTemplateIT {
     void failedCreateByUsersInnerGroupWithRolesAuthorObserver(String userKey, User user) {
         var expectedTicketTemplate = ticketTemplateTestHelper.getRandomValidEntity();
         var ticketTemplateDtoRequest = ticketTemplateTestHelper.convertEntityToDtoRequest(expectedTicketTemplate, true);
-        ticketTemplateDtoRequest.setTicketTypeId(itHelper.getTicketTypes().get(IT_IS_PREDEFINED_FOR_NEW_TICKET).getId());
+        ticketTemplateDtoRequest.setTicketTypeId(itHelper.getTicketTypes().get(
+                IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET).getId());
         ticketTemplateDtoRequest.setAuthorId(itHelper.getAuthorOuterGroup().get(AUTHOR_OUTER_GROUP + 1).getId());
         var actualTicketTemplate = given().
                 when()
@@ -279,7 +280,8 @@ class TicketTemplateIT {
     void failedCreateByUsersOuterGroup(String userKey, User user) {
         var expectedTicketTemplate = ticketTemplateTestHelper.getRandomValidEntity();
         var ticketTemplateDtoRequest = ticketTemplateTestHelper.convertEntityToDtoRequest(expectedTicketTemplate, true);
-        ticketTemplateDtoRequest.setTicketTypeId(itHelper.getTicketTypes().get(IT_IS_PREDEFINED_FOR_NEW_TICKET).getId());
+        ticketTemplateDtoRequest.setTicketTypeId(itHelper.getTicketTypes().get(
+                IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET).getId());
         ticketTemplateDtoRequest.setAuthorId(itHelper.getAuthorOuterGroup().get(AUTHOR_OUTER_GROUP + 1).getId());
         var actualTicketTemplate = given().
                 when()
@@ -300,7 +302,8 @@ class TicketTemplateIT {
     void failedCreateByByAnonymousUser() {
         var expectedTicketTemplate = ticketTemplateTestHelper.getRandomValidEntity();
         var ticketTemplateDtoRequest = ticketTemplateTestHelper.convertEntityToDtoRequest(expectedTicketTemplate, true);
-        ticketTemplateDtoRequest.setTicketTypeId(itHelper.getTicketTypes().get(IT_IS_PREDEFINED_FOR_NEW_TICKET).getId());
+        ticketTemplateDtoRequest.setTicketTypeId(itHelper.getTicketTypes().get(
+                IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET).getId());
         ticketTemplateDtoRequest.setAuthorId(itHelper.getAuthorOuterGroup().get(AUTHOR_OUTER_GROUP + 1).getId());
         given().
                 when()
@@ -316,7 +319,7 @@ class TicketTemplateIT {
     @Order(130)
     void failedCreateWhenExpressionScheduleAndZoneIdNotFormat() {
         var expectedTicketTemplate = ticketTemplateTestHelper.getRandomValidEntity();
-        expectedTicketTemplate.setTicketType(itHelper.getTicketTypes().get(IT_IS_PREDEFINED_FOR_NEW_TICKET));
+        expectedTicketTemplate.setTicketType(itHelper.getTicketTypes().get(IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET));
         expectedTicketTemplate.setAuthor(itHelper.getAuthorOuterGroup().get(AUTHOR_OUTER_GROUP + 1));
         expectedTicketTemplate.setExpressionSchedule("2565322*");
         expectedTicketTemplate.setZoneId("+7");
@@ -342,7 +345,7 @@ class TicketTemplateIT {
     @Order(130)
     void failedCreateWhenExpressionScheduleNotValid() {
         var expectedTicketTemplate = ticketTemplateTestHelper.getRandomValidEntity();
-        expectedTicketTemplate.setTicketType(itHelper.getTicketTypes().get(IT_IS_PREDEFINED_FOR_NEW_TICKET));
+        expectedTicketTemplate.setTicketType(itHelper.getTicketTypes().get(IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET));
         expectedTicketTemplate.setAuthor(itHelper.getAuthorOuterGroup().get(AUTHOR_OUTER_GROUP + 1));
         expectedTicketTemplate.setExpressionSchedule("25 6 5 32 2 *");
         var ticketTemplateDtoRequest = ticketTemplateTestHelper.convertEntityToDtoRequest(expectedTicketTemplate, true);
@@ -398,7 +401,8 @@ class TicketTemplateIT {
     void failedUpdateByUsersInnerGroupWithRolesAuthorObserver(String userKey, User user) {
         var expectedTicketTemplate = ticketTemplateTestHelper.getRandomValidEntity();
         var ticketTemplateDtoRequest = ticketTemplateTestHelper.convertEntityToDtoRequest(expectedTicketTemplate, false);
-        ticketTemplateDtoRequest.setTicketTypeId(itHelper.getTicketTypes().get(IT_IS_PREDEFINED_FOR_NEW_TICKET).getId());
+        ticketTemplateDtoRequest.setTicketTypeId(itHelper.getTicketTypes().get(
+                IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET).getId());
         ticketTemplateDtoRequest.setAuthorId(itHelper.getAuthorOuterGroup().get(AUTHOR_OUTER_GROUP + 1).getId());
         var actualTicketTemplate = given().
                 when()
@@ -421,7 +425,8 @@ class TicketTemplateIT {
     void failedUpdateByUsersOuterGroup(String userKey, User user) {
         var expectedTicketTemplate = ticketTemplateTestHelper.getRandomValidEntity();
         var ticketTemplateDtoRequest = ticketTemplateTestHelper.convertEntityToDtoRequest(expectedTicketTemplate, false);
-        ticketTemplateDtoRequest.setTicketTypeId(itHelper.getTicketTypes().get(IT_IS_PREDEFINED_FOR_NEW_TICKET).getId());
+        ticketTemplateDtoRequest.setTicketTypeId(itHelper.getTicketTypes().get(
+                IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET).getId());
         ticketTemplateDtoRequest.setAuthorId(itHelper.getAuthorOuterGroup().get(AUTHOR_OUTER_GROUP + 1).getId());
         var actualTicketTemplate = given().
                 when()
@@ -442,7 +447,8 @@ class TicketTemplateIT {
     void failedUpdateByByAnonymousUser() {
         var expectedTicketTemplate = ticketTemplateTestHelper.getRandomValidEntity();
         var ticketTemplateDtoRequest = ticketTemplateTestHelper.convertEntityToDtoRequest(expectedTicketTemplate, false);
-        ticketTemplateDtoRequest.setTicketTypeId(itHelper.getTicketTypes().get(IT_IS_PREDEFINED_FOR_NEW_TICKET).getId());
+        ticketTemplateDtoRequest.setTicketTypeId(itHelper.getTicketTypes().get(
+                IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET).getId());
         ticketTemplateDtoRequest.setAuthorId(itHelper.getAuthorOuterGroup().get(AUTHOR_OUTER_GROUP + 1).getId());
         given().
                 when()
@@ -458,7 +464,7 @@ class TicketTemplateIT {
     @Order(180)
     void failedUpdateWhenExpressionScheduleAndZoneIdNotFormat() {
         var expectedTicketTemplate = ticketTemplateTestHelper.getRandomValidEntity();
-        expectedTicketTemplate.setTicketType(itHelper.getTicketTypes().get(IT_IS_PREDEFINED_FOR_NEW_TICKET));
+        expectedTicketTemplate.setTicketType(itHelper.getTicketTypes().get(IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET));
         expectedTicketTemplate.setAuthor(itHelper.getAuthorOuterGroup().get(AUTHOR_OUTER_GROUP + 1));
         expectedTicketTemplate.setExpressionSchedule("2565322*");
         expectedTicketTemplate.setZoneId("+7");
@@ -484,7 +490,7 @@ class TicketTemplateIT {
     @Order(190)
     void failedUpdateWhenExpressionScheduleNotValid() {
         var expectedTicketTemplate = ticketTemplateTestHelper.getRandomValidEntity();
-        expectedTicketTemplate.setTicketType(itHelper.getTicketTypes().get(IT_IS_PREDEFINED_FOR_NEW_TICKET));
+        expectedTicketTemplate.setTicketType(itHelper.getTicketTypes().get(IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET));
         expectedTicketTemplate.setAuthor(itHelper.getAuthorOuterGroup().get(AUTHOR_OUTER_GROUP + 1));
         expectedTicketTemplate.setExpressionSchedule("25 6 5 32 2 *");
         var ticketTemplateDtoRequest = ticketTemplateTestHelper.convertEntityToDtoRequest(expectedTicketTemplate, true);

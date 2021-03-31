@@ -172,7 +172,7 @@ class TicketTypeIT {
     void failedCreateByUsersInnerGroupWithRolesAccountOwnerOrAdminWhenNameIsNotUnique(String userKey, User user) {
         var ticketType = ticketTypeTestHelper.getRandomValidEntity();
         var ticketTypeDto = ticketTypeTestHelper.convertEntityToDtoRequest(ticketType, true);
-        ticketTypeDto.setName(itHelper.getTicketTypes().get(IT_IS_PREDEFINED_FOR_NEW_TICKET).getName());
+        ticketTypeDto.setName(itHelper.getTicketTypes().get(IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET).getName());
         given().
                 when()
                 .headers(
@@ -275,7 +275,7 @@ class TicketTypeIT {
     @MethodSource("getStreamUsersInnerGroupWithRolesAccountOwnerAndAdmin")
     @Order(100)
     void successUpdateByUsersInnerGroupWithRolesAccountOwnerOrAdmin(String userKey, User user) {
-        var ticketType = itHelper.getTicketTypes().get(IT_IS_PREDEFINED_FOR_NEW_TICKET);
+        var ticketType = itHelper.getTicketTypes().get(IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET);
         ticketType.setName(ticketType.getName() + "_update");
         var ticketTypeDto = ticketTypeTestHelper.convertEntityToDtoRequest(ticketType, false);
         var actualTicketType = given().
@@ -304,7 +304,7 @@ class TicketTypeIT {
     @MethodSource("getStreamUsersInnerGroupWithRolesAccountOwnerAndAdmin")
     @Order(110)
     void failedUpdateByUsersInnerGroupWithRolesAccountOwnerOrAdminWhenNameIsNotUnique(String userKey, User user) {
-        var ticketType = itHelper.getTicketTypes().get(IT_IS_PREDEFINED_FOR_NEW_TICKET);
+        var ticketType = itHelper.getTicketTypes().get(IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET);
         var ticketTypeDto = ticketTypeTestHelper.convertEntityToDtoRequest(ticketType, false);
         ticketTypeDto.setName(itHelper.getTicketTypes().get(TICKET_TYPE_1).getName());
         given().
