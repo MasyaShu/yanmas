@@ -55,6 +55,12 @@ public class TicketSettingServiceImpl extends CrudServiceWithAccountImpl<TicketS
         if (ticketSetting == null) {
             ticketSetting = new TicketSetting();
         }
+        if (ticketSetting.getTicketTypeForNew() != null) {
+            var ticketTypeId = ticketSetting.getTicketTypeForNew().getId();
+            if (!settingsAccessToTicketTypesService.isPermittedTicketType(ticketTypeId, authorId)) {
+                ticketSetting.setTicketStatusForNew(null);
+            }
+        }
         if (ticketSetting.getTicketTypeForNew() == null) {
             var predefinedTicketTypeForNew =
                     ticketTypeService
