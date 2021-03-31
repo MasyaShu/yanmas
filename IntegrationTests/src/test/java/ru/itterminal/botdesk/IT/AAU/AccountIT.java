@@ -1,4 +1,4 @@
-package ru.itterminal.botdesk.IT;
+package ru.itterminal.botdesk.IT.AAU;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;

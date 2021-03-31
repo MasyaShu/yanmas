@@ -1,4 +1,4 @@
-package ru.itterminal.botdesk.IT;
+package ru.itterminal.botdesk.IT.AAU;
 
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.*;

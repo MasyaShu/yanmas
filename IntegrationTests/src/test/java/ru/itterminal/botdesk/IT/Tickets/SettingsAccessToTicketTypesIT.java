@@ -1,38 +1,21 @@
-package ru.itterminal.botdesk.IT;
+package ru.itterminal.botdesk.IT.Tickets;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.path.json.JsonPath.from;
+import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static ru.itterminal.botdesk.IT.UserIT.CONTENT;
-import static ru.itterminal.botdesk.IT.UserIT.TOTAL_ELEMENTS;
-import static ru.itterminal.botdesk.IT.util.ITHelper.ACCOUNT_OWNER;
-import static ru.itterminal.botdesk.IT.util.ITHelper.ADMIN;
-import static ru.itterminal.botdesk.IT.util.ITHelper.APPLICATION_JSON;
-import static ru.itterminal.botdesk.IT.util.ITHelper.AUTHOR;
-import static ru.itterminal.botdesk.IT.util.ITHelper.EMPTY_BODY;
-import static ru.itterminal.botdesk.IT.util.ITHelper.EXECUTOR;
-import static ru.itterminal.botdesk.IT.util.ITHelper.GROUP_TICKET_TYPES;
-import static ru.itterminal.botdesk.IT.util.ITHelper.GROUP_TICKET_TYPES_BY_ID;
-import static ru.itterminal.botdesk.IT.util.ITHelper.ID;
-import static ru.itterminal.botdesk.IT.util.ITHelper.IGNORE_FIELDS_FOR_COMPARE_GROUP_TICKET_TYPES;
-import static ru.itterminal.botdesk.IT.util.ITHelper.IGNORE_FIELDS_OF_BASE_ENTITY_FOR_COMPARE;
-import static ru.itterminal.botdesk.IT.util.ITHelper.INITIAL_GROUP_TICKET_TYPES;
-import static ru.itterminal.botdesk.IT.util.ITHelper.INNER_GROUP;
-import static ru.itterminal.botdesk.IT.util.ITHelper.NAME;
-import static ru.itterminal.botdesk.IT.util.ITHelper.OBSERVER;
-import static ru.itterminal.botdesk.IT.util.ITHelper.OUTER_GROUP;
-import static ru.itterminal.botdesk.IT.util.ITHelper.SIZE;
-import static ru.itterminal.botdesk.IT.util.ITHelper.STATUS;
+import static ru.itterminal.botdesk.IT.util.ITHelper.*;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_CODE;
+import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_MESSAGE;
+import static ru.itterminal.botdesk.tickets.service.validator.SettingsAccessToTicketTypesOperationValidator.THIS_KEY_OF_SETTINGS_ACCOUNT_ID_GROUP_ID_USER_ID;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -56,8 +39,8 @@ import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
 import ru.itterminal.botdesk.commons.exception.error.ApiError;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
-import ru.itterminal.botdesk.tickets.model.GroupTicketTypes;
-import ru.itterminal.botdesk.tickets.model.test.GroupTicketTypesTestHelper;
+import ru.itterminal.botdesk.tickets.model.SettingsAccessToTicketTypes;
+import ru.itterminal.botdesk.tickets.model.test.SettingsAccessToTicketTypesTestHelper;
 
 @SuppressWarnings({"unused", "deprecation", "SimplifyStreamApiCallChains"})
 @DataJpaTest
@@ -65,18 +48,20 @@ import ru.itterminal.botdesk.tickets.model.test.GroupTicketTypesTestHelper;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = {ITTestConfig.class, JwtProvider.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class GroupTicketTypesIT {
+class SettingsAccessToTicketTypesIT {
 
     public static final String TICKET_SETTING_IS_EMPTY = "Ticket setting is empty";
     public static final String NAME_IS_OCCUPIED = "name is occupied";
     public static final String ACCOUNT_GROUP_AUTHOR = "Account, Group, Author";
     public static final String ADMIN_INNER_GROUP_1 = "adminInnerGroup_1";
     public static final String CREATED_GROUP_TICKET_TYPES = "Created group ticket types";
+
     @Autowired
     private UserRepository userRepository;
 
     private static final ITHelper itHelper = new ITHelper();
-    private final GroupTicketTypesTestHelper groupTicketTypesTestHelper = new GroupTicketTypesTestHelper();
+    private final SettingsAccessToTicketTypesTestHelper settingsTestHelper =
+            new SettingsAccessToTicketTypesTestHelper();
 
     @BeforeAll
     void beforeAll() {
@@ -88,15 +73,16 @@ class GroupTicketTypesIT {
         itHelper.createInitialUsers();
         itHelper.createInitialTicketType();
         itHelper.createInitialGroupTicketTypes();
+        itHelper.createInitialSettingsAccessToTicketTypes_IT();
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamAllUsers")
+    @MethodSource("getStreamUsersFromInnerGroupWithRolesAccountOwnerAndAdmin")
     @Order(10)
-    void successGetByFilterByAllUsersWithEmptyFilter(String userKey, User user) {
-        @SuppressWarnings("SimplifyStreamApiCallChains")
+    void successGetByFilterByAllUsersFromInnerGroupWithRolesAccountOwnerAndAdminWithEmptyFilter(String userKey,
+                                                                                                User user) {
         var expectedEntity =
-                itHelper.getGroupTicketTypes().values().stream().collect(Collectors.toList());
+                itHelper.getSettingsAccessToTicketTypes().values().stream().collect(Collectors.toList());
         var response = given().
                 when()
                 .headers(
@@ -106,40 +92,64 @@ class GroupTicketTypesIT {
                 .contentType(APPLICATION_JSON)
                 .body(EMPTY_BODY)
                 .param(SIZE, expectedEntity.size())
-                .get(GROUP_TICKET_TYPES)
+                .get(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
                 .then()
                 .log().body()
                 .body(TOTAL_ELEMENTS, equalTo(expectedEntity.size()))
                 .statusCode(HttpStatus.OK.value())
                 .extract().response().asString();
-        var actualEntity = from(response).getList(CONTENT, GroupTicketTypes.class);
+        var actualEntity = from(response).getList(CONTENT, SettingsAccessToTicketTypes.class);
         assertEquals(expectedEntity.size(), actualEntity.size());
-        AssertionsForInterfaceTypes.assertThat(actualEntity)
-                .usingElementComparatorIgnoringFields(IGNORE_FIELDS_FOR_COMPARE_GROUP_TICKET_TYPES)
-                .containsExactlyInAnyOrderElementsOf(expectedEntity);
         assertThat(actualEntity).usingRecursiveComparison().ignoringActualNullFields()
                 .isEqualTo(expectedEntity);
     }
 
-    @Test
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamAllUsers")
     @Order(20)
+    void failedGetByFilter_whenUserIsNotInnerGroupAndNotHaveRoleAccountOwnerOrAdmin(String userKey,
+                                                                                    User user) {
+        if (user.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString()) ||
+                (user.getRole().getName().equals(Roles.ADMIN.toString()) && user.getGroup().getIsInner())) {
+            return;
+        }
+        var expectedEntity =
+                itHelper.getSettingsAccessToTicketTypes().values().stream().collect(Collectors.toList());
+        given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(user.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(EMPTY_BODY)
+                .param(SIZE, expectedEntity.size())
+                .get(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.FORBIDDEN.value());
+    }
+
+    @Test
+    @Order(30)
     void failedGetByFilterByAnonymousUser() {
         given().
                 when()
                 .contentType(APPLICATION_JSON)
                 .body(EMPTY_BODY)
-                .get(GROUP_TICKET_TYPES)
+                .get(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamAllUsers")
-    @Order(30)
-    void successGetByIdByAllUsers(String userKey, User user) {
+    @MethodSource("getStreamUsersFromInnerGroupWithRolesAccountOwnerAndAdmin")
+    @Order(40)
+    void successGetByIdByAllUsersFromInnerGroupWithRolesAccountOwnerAndAdmin(String userKey, User user) {
         var expectedEntity =
-                itHelper.getGroupTicketTypes().get(INITIAL_GROUP_TICKET_TYPES);
+                itHelper.getSettingsAccessToTicketTypes()
+                        .get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES);
         var actualEntity = given().
                 when().
                 headers(
@@ -148,24 +158,50 @@ class GroupTicketTypesIT {
                 )
                 .contentType(APPLICATION_JSON)
                 .pathParam(ID, expectedEntity.getId())
-                .get(GROUP_TICKET_TYPES_BY_ID)
+                .get(SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES_BY_ID)
                 .then()
                 .log().body()
                 .body(ID, equalTo(expectedEntity.getId().toString()))
                 .statusCode(HttpStatus.OK.value())
-                .extract().response().as(GroupTicketTypes.class);
+                .extract().response().as(SettingsAccessToTicketTypes.class);
         assertThat(actualEntity).usingRecursiveComparison().ignoringActualNullFields()
                 .isEqualTo(expectedEntity);
     }
 
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamAllUsers")
+    @Order(50)
+    void failedGetById_whenUserIsNotInnerGroupAndNotHaveRoleAccountOwnerOrAdmin(String userKey,
+                                                                                User user) {
+        if (user.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString()) ||
+                (user.getRole().getName().equals(Roles.ADMIN.toString()) && user.getGroup().getIsInner())) {
+            return;
+        }
+        var expectedEntity =
+                itHelper.getSettingsAccessToTicketTypes()
+                        .get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES);
+        given().
+                when().
+                headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(user.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .pathParam(ID, expectedEntity.getId())
+                .get(SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES_BY_ID)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.FORBIDDEN.value());
+    }
+
     @Test
-    @Order(40)
+    @Order(60)
     void failedGetByIdByAnonymousUser() {
         given().
                 when()
                 .contentType(APPLICATION_JSON)
                 .pathParam(ID, UUID.randomUUID().toString())
-                .get(GROUP_TICKET_TYPES_BY_ID)
+                .get(SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES_BY_ID)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.UNAUTHORIZED.value());
@@ -173,16 +209,16 @@ class GroupTicketTypesIT {
 
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamUsersFromInnerGroupWithRolesAccountOwnerAndAdmin")
-    @Order(50)
+    @Order(70)
     void successCreateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin(String userKey, User user) {
-        var expectedEntity = itHelper.getGroupTicketTypes().get(INITIAL_GROUP_TICKET_TYPES).toBuilder()
-                .name(CREATED_GROUP_TICKET_TYPES + userKey)
+        var expectedEntity = itHelper.getSettingsAccessToTicketTypes().get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES).toBuilder()
+                .user(user)
                 .deleted(null)
                 .displayName(null)
                 .id(null)
                 .version(null)
                 .build();
-        var request = groupTicketTypesTestHelper.convertEntityToDtoRequest(expectedEntity, true);
+        var request = settingsTestHelper.convertEntityToDtoRequest(expectedEntity, true);
         var actualEntity = given().
                 when().
                 headers(
@@ -191,28 +227,22 @@ class GroupTicketTypesIT {
                 )
                 .contentType(APPLICATION_JSON)
                 .body(request)
-                .post(GROUP_TICKET_TYPES)
+                .post(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
                 .then()
                 .log().body()
-                .body(NAME, equalTo(CREATED_GROUP_TICKET_TYPES + userKey))
                 .statusCode(HttpStatus.CREATED.value())
-                .extract().response().as(GroupTicketTypes.class);
-        assertThat(actualEntity).usingRecursiveComparison()
-                .ignoringActualNullFields()
-                .ignoringFields(IGNORE_FIELDS_OF_BASE_ENTITY_FOR_COMPARE)
-                .ignoringFields(NAME)
-                .isEqualTo(expectedEntity);
+                .extract().response().as(SettingsAccessToTicketTypes.class);
+        assertEquals(expectedEntity.getUser().getId(), actualEntity.getUser().getId());
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamUsersFromInnerGroupWithRolesAccountOwnerAndAdmin")
-    @Order(60)
-    void failedCreateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenNameIsNotUnique(String userKey,
+    @Order(80)
+    void failedCreateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenKeysIsNotUnique(String userKey,
                                                                                              User user) {
-        var createdEntity = itHelper.getGroupTicketTypes().get(INITIAL_GROUP_TICKET_TYPES).toBuilder()
-                .name(INITIAL_GROUP_TICKET_TYPES)
+        var createdEntity = itHelper.getSettingsAccessToTicketTypes().get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES).toBuilder()
                 .build();
-        var request = groupTicketTypesTestHelper.convertEntityToDtoRequest(createdEntity, true);
+        var request = settingsTestHelper.convertEntityToDtoRequest(createdEntity, true);
         var apiError = given().
                 when().
                 headers(
@@ -221,26 +251,26 @@ class GroupTicketTypesIT {
                 )
                 .contentType(APPLICATION_JSON)
                 .body(request)
-                .post(GROUP_TICKET_TYPES)
+                .post(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
                 .then()
                 .log().body()
                 .body(STATUS, equalTo(HttpStatus.CONFLICT.value()))
                 .extract().response().as(ApiError.class);
         assertEquals(
-                NAME_IS_OCCUPIED,
+                format(NOT_UNIQUE_MESSAGE, THIS_KEY_OF_SETTINGS_ACCOUNT_ID_GROUP_ID_USER_ID),
                 apiError.getErrors().get(NOT_UNIQUE_CODE).get(0).getMessage()
         );
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamUsersFromInnerGroupWithRolesAccountOwnerAndAdmin")
-    @Order(70)
-    void failedCreateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenListOfTicketTypesIsNull
+    @Order(90)
+    void failedCreateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenGroupOfTicketTypesIsNull
             (String userKey, User user) {
-        var createdEntity = itHelper.getGroupTicketTypes().get(INITIAL_GROUP_TICKET_TYPES).toBuilder()
-                .ticketTypes(null)
+        var createdEntity = itHelper.getSettingsAccessToTicketTypes().get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES).toBuilder()
+                .groupTicketTypes(null)
                 .build();
-        var request = groupTicketTypesTestHelper.convertEntityToDtoRequest(createdEntity, true);
+        var request = settingsTestHelper.convertEntityToDtoRequest(createdEntity, true);
         given().
                 when().
                 headers(
@@ -249,30 +279,7 @@ class GroupTicketTypesIT {
                 )
                 .contentType(APPLICATION_JSON)
                 .body(request)
-                .post(GROUP_TICKET_TYPES)
-                .then()
-                .log().body()
-                .body(STATUS, equalTo(HttpStatus.BAD_REQUEST.value()));
-    }
-
-    @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamUsersFromInnerGroupWithRolesAccountOwnerAndAdmin")
-    @Order(80)
-    void failedCreateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenListOfTicketTypesIsEmpty
-            (String userKey, User user) {
-        var createdEntity = itHelper.getGroupTicketTypes().get(INITIAL_GROUP_TICKET_TYPES).toBuilder()
-                .ticketTypes(List.of())
-                .build();
-        var request = groupTicketTypesTestHelper.convertEntityToDtoRequest(createdEntity, true);
-        given().
-                when().
-                headers(
-                        "Authorization",
-                        "Bearer " + itHelper.getTokens().get(user.getEmail())
-                )
-                .contentType(APPLICATION_JSON)
-                .body(request)
-                .post(GROUP_TICKET_TYPES)
+                .post(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
                 .then()
                 .log().body()
                 .body(STATUS, equalTo(HttpStatus.BAD_REQUEST.value()));
@@ -280,15 +287,15 @@ class GroupTicketTypesIT {
 
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamAllUsers")
-    @Order(90)
-    void failedCreateByAllUsers_whenUserIsNotInnerGroupAndNotHaveRoleAccountOwnerOrAdmin
+    @Order(100)
+    void failedCreateByAllUsersIfFromNotInnerGroupAndNotHaveRoleAccountOwnerOrAdmin
             (String userKey, User user) {
         if (user.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString()) ||
                 (user.getRole().getName().equals(Roles.ADMIN.toString()) && user.getGroup().getIsInner())) {
             return;
         }
-        var createdEntity = itHelper.getGroupTicketTypes().get(INITIAL_GROUP_TICKET_TYPES);
-        var request = groupTicketTypesTestHelper.convertEntityToDtoRequest(createdEntity, true);
+        var createdEntity = itHelper.getSettingsAccessToTicketTypes().get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES);
+        var request = settingsTestHelper.convertEntityToDtoRequest(createdEntity, true);
         given().
                 when().
                 headers(
@@ -297,20 +304,20 @@ class GroupTicketTypesIT {
                 )
                 .contentType(APPLICATION_JSON)
                 .body(request)
-                .post(GROUP_TICKET_TYPES)
+                .post(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
                 .then()
                 .log().body()
                 .body(STATUS, equalTo(HttpStatus.FORBIDDEN.value()));
     }
 
     @Test
-    @Order(100)
+    @Order(110)
     void failedCreateByAnonymousUser() {
         given().
                 when()
                 .contentType(APPLICATION_JSON)
                 .body(EMPTY_BODY)
-                .post(GROUP_TICKET_TYPES)
+                .post(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.UNAUTHORIZED.value());
@@ -318,10 +325,11 @@ class GroupTicketTypesIT {
 
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamUsersFromInnerGroupWithRolesAccountOwnerAndAdmin")
-    @Order(110)
+    @Order(120)
     void successUpdateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin(String userKey, User user) {
-        var updatedEntity = itHelper.getGroupTicketTypes().get(INITIAL_GROUP_TICKET_TYPES).toBuilder().build();
-        var request = groupTicketTypesTestHelper.convertEntityToDtoRequest(updatedEntity, false);
+        var updatedEntity = itHelper.getSettingsAccessToTicketTypes()
+                .get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES).toBuilder().build();
+        var request = settingsTestHelper.convertEntityToDtoRequest(updatedEntity, false);
         var entityAfterUpdate = given().
                 when().
                 headers(
@@ -330,27 +338,24 @@ class GroupTicketTypesIT {
                 )
                 .contentType(APPLICATION_JSON)
                 .body(request)
-                .put(GROUP_TICKET_TYPES)
+                .put(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.OK.value())
-                .extract().response().as(GroupTicketTypes.class);
-        itHelper.getGroupTicketTypes().get(INITIAL_GROUP_TICKET_TYPES).setVersion(entityAfterUpdate.getVersion());
-        assertThat(entityAfterUpdate).usingRecursiveComparison()
-                .ignoringActualNullFields()
-                .ignoringFields(IGNORE_FIELDS_OF_BASE_ENTITY_FOR_COMPARE)
-                .isEqualTo(updatedEntity);
+                .extract().response().as(SettingsAccessToTicketTypes.class);
+        itHelper.getSettingsAccessToTicketTypes().get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
+                .setVersion(entityAfterUpdate.getVersion());
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamUsersFromInnerGroupWithRolesAccountOwnerAndAdmin")
-    @Order(120)
-    void failedUpdateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenNameIsNotUnique(String userKey,
+    @Order(130)
+    void failedUpdateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenKeysIsNotUnique(String userKey,
                                                                                              User user) {
-        var updatedEntity = itHelper.getGroupTicketTypes().get(INITIAL_GROUP_TICKET_TYPES).toBuilder()
-                .name(CREATED_GROUP_TICKET_TYPES + userKey)
-                .build();
-        var request = groupTicketTypesTestHelper.convertEntityToDtoRequest(updatedEntity, false);
+        var updatedEntity = itHelper.getSettingsAccessToTicketTypes()
+                .get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES);
+        updatedEntity.setUser(user);
+        var request = settingsTestHelper.convertEntityToDtoRequest(updatedEntity, false);
         var apiError = given().
                 when().
                 headers(
@@ -359,49 +364,27 @@ class GroupTicketTypesIT {
                 )
                 .contentType(APPLICATION_JSON)
                 .body(request)
-                .put(GROUP_TICKET_TYPES)
+                .put(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
                 .then()
                 .log().body()
                 .body(STATUS, equalTo(HttpStatus.CONFLICT.value()))
                 .extract().response().as(ApiError.class);
         assertEquals(
-                NAME_IS_OCCUPIED,
+                format(NOT_UNIQUE_MESSAGE, THIS_KEY_OF_SETTINGS_ACCOUNT_ID_GROUP_ID_USER_ID),
                 apiError.getErrors().get(NOT_UNIQUE_CODE).get(0).getMessage()
         );
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamUsersFromInnerGroupWithRolesAccountOwnerAndAdmin")
-    @Order(130)
-    void failedUpdateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenListOfTicketTypesIsNull
-            (String userKey, User user) {
-        var updatedEntity = itHelper.getGroupTicketTypes().get(INITIAL_GROUP_TICKET_TYPES).toBuilder()
-                .ticketTypes(null)
-                .build();
-        var request = groupTicketTypesTestHelper.convertEntityToDtoRequest(updatedEntity, false);
-        given().
-                when().
-                headers(
-                        "Authorization",
-                        "Bearer " + itHelper.getTokens().get(user.getEmail())
-                )
-                .contentType(APPLICATION_JSON)
-                .body(request)
-                .put(GROUP_TICKET_TYPES)
-                .then()
-                .log().body()
-                .body(STATUS, equalTo(HttpStatus.BAD_REQUEST.value()));
-    }
-
-    @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamUsersFromInnerGroupWithRolesAccountOwnerAndAdmin")
     @Order(140)
-    void failedUpdateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenListOfTicketTypesIsEmpty
+    void failedUpdateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenGroupOfTicketTypesIsNull
             (String userKey, User user) {
-        var updatedEntity = itHelper.getGroupTicketTypes().get(INITIAL_GROUP_TICKET_TYPES).toBuilder()
-                .ticketTypes(List.of())
+        var updatedEntity = itHelper.getSettingsAccessToTicketTypes()
+                .get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES).toBuilder()
+                .groupTicketTypes(null)
                 .build();
-        var request = groupTicketTypesTestHelper.convertEntityToDtoRequest(updatedEntity, false);
+        var request = settingsTestHelper.convertEntityToDtoRequest(updatedEntity, false);
         given().
                 when().
                 headers(
@@ -410,7 +393,7 @@ class GroupTicketTypesIT {
                 )
                 .contentType(APPLICATION_JSON)
                 .body(request)
-                .put(GROUP_TICKET_TYPES)
+                .put(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
                 .then()
                 .log().body()
                 .body(STATUS, equalTo(HttpStatus.BAD_REQUEST.value()));
@@ -419,14 +402,14 @@ class GroupTicketTypesIT {
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamAllUsers")
     @Order(150)
-    void failedUpdateByAllUsers_whenUserIsNotInnerGroupAndNotHaveRoleAccountOwnerOrAdmin
-            (String userKey, User user) {
+    void failedUpdateByAllUsers_whenUserIsNotFromInnerGroupAndNotHaveRoleAccountOwnerOrAdmin(String userKey, User user) {
         if (user.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString()) ||
                 (user.getRole().getName().equals(Roles.ADMIN.toString()) && user.getGroup().getIsInner())) {
             return;
         }
-        var updatedEntity = itHelper.getGroupTicketTypes().get(INITIAL_GROUP_TICKET_TYPES);
-        var request = groupTicketTypesTestHelper.convertEntityToDtoRequest(updatedEntity, false);
+        var updatedEntity = itHelper.getSettingsAccessToTicketTypes()
+                .get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES);
+        var request = settingsTestHelper.convertEntityToDtoRequest(updatedEntity, false);
         given().
                 when().
                 headers(
@@ -435,7 +418,7 @@ class GroupTicketTypesIT {
                 )
                 .contentType(APPLICATION_JSON)
                 .body(request)
-                .put(GROUP_TICKET_TYPES)
+                .put(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
                 .then()
                 .log().body()
                 .body(STATUS, equalTo(HttpStatus.FORBIDDEN.value()));
@@ -448,28 +431,10 @@ class GroupTicketTypesIT {
                 when()
                 .contentType(APPLICATION_JSON)
                 .body(EMPTY_BODY)
-                .put(GROUP_TICKET_TYPES)
+                .put(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.UNAUTHORIZED.value());
-    }
-
-    private static Stream<Arguments> getStreamAllUsersFromInnerGroup_2AndFromOuterGroup_2() {
-        return itHelper.getStreamAllUsersFromGroups(
-                List.of(
-                        itHelper.getInnerGroup().get(INNER_GROUP + "2"),
-                        itHelper.getOuterGroup().get(OUTER_GROUP + "2")
-                )
-        );
-    }
-
-    private static Stream<Arguments> getStreamAllUsersFromInnerGroup_1AndFromOuterGroup_1() {
-        return itHelper.getStreamAllUsersFromGroups(
-                List.of(
-                        itHelper.getTicketSettings().get(INNER_GROUP + "1").getGroup(),
-                        itHelper.getTicketSettings().get(OUTER_GROUP + "1").getGroup()
-                )
-        );
     }
 
     private static Stream<Arguments> getStreamAllUsersInnerGroup() {

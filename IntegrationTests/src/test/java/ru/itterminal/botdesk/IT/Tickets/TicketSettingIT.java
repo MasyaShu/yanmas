@@ -1,4 +1,4 @@
-package ru.itterminal.botdesk.IT;
+package ru.itterminal.botdesk.IT.Tickets;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.path.json.JsonPath.from;
@@ -9,13 +9,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static ru.itterminal.botdesk.IT.UserIT.CONTENT;
-import static ru.itterminal.botdesk.IT.UserIT.TOTAL_ELEMENTS;
 import static ru.itterminal.botdesk.IT.util.ITHelper.ACCOUNT_OWNER;
 import static ru.itterminal.botdesk.IT.util.ITHelper.ADMIN;
 import static ru.itterminal.botdesk.IT.util.ITHelper.APPLICATION_JSON;
 import static ru.itterminal.botdesk.IT.util.ITHelper.AUTHOR;
 import static ru.itterminal.botdesk.IT.util.ITHelper.AUTHOR_ID;
+import static ru.itterminal.botdesk.IT.util.ITHelper.CONTENT;
 import static ru.itterminal.botdesk.IT.util.ITHelper.EMPTY_BODY;
 import static ru.itterminal.botdesk.IT.util.ITHelper.EXECUTOR;
 import static ru.itterminal.botdesk.IT.util.ITHelper.ID;
@@ -29,6 +28,7 @@ import static ru.itterminal.botdesk.IT.util.ITHelper.STATUS;
 import static ru.itterminal.botdesk.IT.util.ITHelper.TICKET_SETTING;
 import static ru.itterminal.botdesk.IT.util.ITHelper.TICKET_SETTING_BY_AUTHOR;
 import static ru.itterminal.botdesk.IT.util.ITHelper.TICKET_SETTING_BY_ID;
+import static ru.itterminal.botdesk.IT.util.ITHelper.TOTAL_ELEMENTS;
 import static ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_CODE;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_MESSAGE;

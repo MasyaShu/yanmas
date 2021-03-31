@@ -1,4 +1,4 @@
-package ru.itterminal.botdesk.IT;
+package ru.itterminal.botdesk.IT.Tickets;
 
 import io.restassured.RestAssured;
 import org.assertj.core.api.AssertionsForInterfaceTypes;

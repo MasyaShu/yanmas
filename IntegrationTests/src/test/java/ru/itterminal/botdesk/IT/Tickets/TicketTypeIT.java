@@ -1,5 +1,4 @@
-package ru.itterminal.botdesk.IT;
-
+package ru.itterminal.botdesk.IT.Tickets;
 
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.*;
@@ -17,8 +16,8 @@ import ru.itterminal.botdesk.IT.util.ITTestConfig;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
-import ru.itterminal.botdesk.tickets.model.TicketStatus;
-import ru.itterminal.botdesk.tickets.model.test.TicketStatusTestHelper;
+import ru.itterminal.botdesk.tickets.model.TicketType;
+import ru.itterminal.botdesk.tickets.model.test.TicketTypeTestHelper;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -37,14 +36,17 @@ import static ru.itterminal.botdesk.IT.util.ITHelper.*;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = {ITTestConfig.class, JwtProvider.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@TestPropertySource(properties = {"jwt.token.secret=ksedtob", "jwt.token.expired=8640000", "jwt.token.prefix=Bearer"})
-class TicketStatusIT {
+@TestPropertySource(properties = {"jwt.token.secret=ksedtob", "jwt.token.expired=360000", "jwt.token.prefix=Bearer"})
+class TicketTypeIT {
 
+    public static final String IS_PREDEFINED_FOR_NEW_TICKET = "isPredefinedForNewTicket";
     @Autowired
     private UserRepository userRepository;
 
     private static final ITHelper itHelper = new ITHelper();
-    private final TicketStatusTestHelper ticketStatusTestHelper = new TicketStatusTestHelper();
+    private final TicketTypeTestHelper ticketTypeTestHelper = new TicketTypeTestHelper();
+
+    public static final String TICKET_TYPE_1 = "ticketType_1";
 
 
     @BeforeAll
@@ -62,7 +64,7 @@ class TicketStatusIT {
     @MethodSource("getStreamAllUsers")
     @Order(10)
     void successGetByFilterByAllUsers(String userKey, User user) {
-        var expectedTicketStatusList = itHelper.getTicketStatuses().values();
+        var expectedTicketTypeList = itHelper.getTicketTypes().values();
         var response = given().
                 when()
                 .headers(
@@ -71,17 +73,17 @@ class TicketStatusIT {
                 )
                 .contentType(APPLICATION_JSON)
                 .body(EMPTY_BODY)
-                .param(SIZE, expectedTicketStatusList.size())
-                .get(TICKET_STATUS)
+                .param(SIZE, expectedTicketTypeList.size())
+                .get(TICKET_TYPE)
                 .then()
                 .log().body()
-                .body(TOTAL_ELEMENTS, equalTo(expectedTicketStatusList.size()))
+                .body(TOTAL_ELEMENTS, equalTo(expectedTicketTypeList.size()))
                 .statusCode(HttpStatus.OK.value())
                 .extract().response().asString();
-        List<TicketStatus> actualTicketStatusList = from(response).getList(CONTENT, TicketStatus.class);
-        assertThat(expectedTicketStatusList)
+        List<TicketType> actualTicketTypeList = from(response).getList(CONTENT, TicketType.class);
+        assertThat(expectedTicketTypeList)
                 .usingElementComparatorIgnoringFields(ACCOUNT)
-                .containsExactlyInAnyOrderElementsOf(actualTicketStatusList);
+                .containsExactlyInAnyOrderElementsOf(actualTicketTypeList);
     }
 
     @Test
@@ -91,7 +93,7 @@ class TicketStatusIT {
                 when()
                 .contentType(APPLICATION_JSON)
                 .body(EMPTY_BODY)
-                .get(TICKET_STATUS)
+                .get(TICKET_TYPE)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.UNAUTHORIZED.value());
@@ -103,17 +105,17 @@ class TicketStatusIT {
     @MethodSource("getStreamAllUsers")
     @Order(30)
     void successGetByIdByAllUsers(String userKey, User user) {
-        var ticketStatusList = itHelper.getTicketStatuses().values();
-        for (TicketStatus ticketStatus : ticketStatusList) {
+        var ticketTypeList = itHelper.getTicketTypes().values();
+        for (TicketType ticketType : ticketTypeList) {
             given().
                     when()
                     .headers(
                             "Authorization",
                             "Bearer " + itHelper.getTokens().get(user.getEmail()))
-                    .pathParam(ID, ticketStatus.getId())
-                    .get(TICKET_STATUS_BY_ID)
+                    .pathParam(ID, ticketType.getId())
+                    .get(TICKET_TYPE_BY_ID)
                     .then()
-                    .body(ID, equalTo(ticketStatus.getId().toString()))
+                    .body(ID, equalTo(ticketType.getId().toString()))
                     .log().body()
                     .statusCode(HttpStatus.OK.value());
         }
@@ -122,12 +124,12 @@ class TicketStatusIT {
     @Test
     @Order(40)
     void failedGetByIdByAnonymousUser() {
-        var ticketStatusList = itHelper.getTicketStatuses().values();
-        for (TicketStatus ticketStatus : ticketStatusList) {
+        var ticketTypeList = itHelper.getTicketTypes().values();
+        for (TicketType ticketType : ticketTypeList) {
             given().
                     when()
-                    .pathParam(ID, ticketStatus.getId())
-                    .get(TICKET_STATUS_BY_ID)
+                    .pathParam(ID, ticketType.getId())
+                    .get(TICKET_TYPE_BY_ID)
                     .then()
                     .log().body()
                     .statusCode(HttpStatus.UNAUTHORIZED.value());
@@ -140,29 +142,27 @@ class TicketStatusIT {
     @MethodSource("getStreamUsersInnerGroupWithRolesAccountOwnerAndAdmin")
     @Order(50)
     void successCreateByUsersInnerGroupWithRolesAccountOwnerOrAdmin(String userKey, User user) {
-        var ticketStatus = ticketStatusTestHelper.getRandomValidEntity();
-        var ticketStatusDto = ticketStatusTestHelper.convertEntityToDtoRequest(ticketStatus, true);
-        var actualTicketStatus = given().
+        var ticketType = ticketTypeTestHelper.getRandomValidEntity();
+        var ticketTypeDto = ticketTypeTestHelper.convertEntityToDtoRequest(ticketType, true);
+        var actualTicketType = given().
                 when()
                 .headers(
                         "Authorization",
                         "Bearer " + itHelper.getTokens().get(user.getEmail())
                 )
                 .contentType(APPLICATION_JSON)
-                .body(ticketStatusDto)
-                .post(TICKET_STATUS)
+                .body(ticketTypeDto)
+                .post(TICKET_TYPE)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.CREATED.value())
-                .extract().response().as(TicketStatus.class);
-        assertThat(List.of(ticketStatus))
-                .usingElementComparatorOnFields("name", "outId", "sortIndex")
-                .containsExactlyInAnyOrderElementsOf(List.of(actualTicketStatus));
-        assertFalse(actualTicketStatus.getDeleted());
-        assertFalse(actualTicketStatus.getIsCanceledPredefined());
-        assertFalse(actualTicketStatus.getIsFinishedPredefined());
-        assertFalse(actualTicketStatus.getIsReopenedPredefined());
-        assertFalse(actualTicketStatus.getIsStartedPredefined());
+                .extract().response().as(TicketType.class);
+        assertThat(List.of(ticketType))
+                .usingElementComparatorOnFields("name", "outId", "comment")
+                .containsExactlyInAnyOrderElementsOf(List.of(actualTicketType));
+        assertFalse(actualTicketType.getDeleted());
+        assertFalse(actualTicketType.getIsPredefinedForNewTicket());
+        itHelper.getTicketTypes().put(TICKET_TYPE_1, actualTicketType);
     }
 
     @SuppressWarnings("unused")
@@ -170,9 +170,9 @@ class TicketStatusIT {
     @MethodSource("getStreamUsersInnerGroupWithRolesAccountOwnerAndAdmin")
     @Order(60)
     void failedCreateByUsersInnerGroupWithRolesAccountOwnerOrAdminWhenNameIsNotUnique(String userKey, User user) {
-        var ticketStatus = ticketStatusTestHelper.getRandomValidEntity();
-        var ticketStatusDto = ticketStatusTestHelper.convertEntityToDtoRequest(ticketStatus, true);
-        ticketStatusDto.setName(itHelper.getTicketStatuses().get(IS_CANCELED_PREDEFINED).getName());
+        var ticketType = ticketTypeTestHelper.getRandomValidEntity();
+        var ticketTypeDto = ticketTypeTestHelper.convertEntityToDtoRequest(ticketType, true);
+        ticketTypeDto.setName(itHelper.getTicketTypes().get(IT_IS_PREDEFINED_FOR_NEW_TICKET).getName());
         given().
                 when()
                 .headers(
@@ -180,8 +180,8 @@ class TicketStatusIT {
                         "Bearer " + itHelper.getTokens().get(user.getEmail())
                 )
                 .contentType(APPLICATION_JSON)
-                .body(ticketStatusDto)
-                .post(TICKET_STATUS)
+                .body(ticketTypeDto)
+                .post(TICKET_TYPE)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.CONFLICT.value());
@@ -192,12 +192,9 @@ class TicketStatusIT {
     @MethodSource("getStreamUsersInnerGroupWithRolesAccountOwnerAndAdmin")
     @Order(70)
     void failedCreateByUsersInnerGroupWithRolesAccountOwnerOrAdminWhenPredefinedFieldsAssigned(String userKey, User user) {
-        var ticketStatus = ticketStatusTestHelper.getRandomValidEntity();
-        var ticketStatusDto = ticketStatusTestHelper.convertEntityToDtoRequest(ticketStatus, true);
-        ticketStatusDto.setIsFinishedPredefined(true);
-        ticketStatusDto.setIsReopenedPredefined(true);
-        ticketStatusDto.setIsCanceledPredefined(true);
-        ticketStatusDto.setIsStartedPredefined(true);
+        var ticketType = ticketTypeTestHelper.getRandomValidEntity();
+        var ticketTypeDto = ticketTypeTestHelper.convertEntityToDtoRequest(ticketType, true);
+        ticketTypeDto.setIsPredefinedForNewTicket(true);
         var response = given().
                 when()
                 .headers(
@@ -205,13 +202,10 @@ class TicketStatusIT {
                         "Bearer " + itHelper.getTokens().get(user.getEmail())
                 )
                 .contentType(APPLICATION_JSON)
-                .body(ticketStatusDto)
-                .post(TICKET_STATUS)
+                .body(ticketTypeDto)
+                .post(TICKET_TYPE)
                 .then()
-                .body(ERRORS, hasKey(IS_CANCELED_PREDEFINED))
-                .body(ERRORS, hasKey(IS_FINISHED_PREDEFINED))
-                .body(ERRORS, hasKey(IS_REOPENED_PREDEFINED))
-                .body(ERRORS, hasKey(IS_STARTED_PREDEFINED))
+                .body(ERRORS, hasKey(IS_PREDEFINED_FOR_NEW_TICKET))
                 .log().body()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .extract().response().asString();
@@ -222,8 +216,8 @@ class TicketStatusIT {
     @MethodSource("getStreamUsersInnerGroupWithRolesExecutorAndAuthorAndObserver")
     @Order(80)
     void failedCreateByUsersInnerGroupWithRolesExecutorOrAuthorOrObserver(String userKey, User user) {
-        var ticketStatus = ticketStatusTestHelper.getRandomValidEntity();
-        var ticketStatusDto = ticketStatusTestHelper.convertEntityToDtoRequest(ticketStatus, true);
+        var ticketType = ticketTypeTestHelper.getRandomValidEntity();
+        var ticketTypeDto = ticketTypeTestHelper.convertEntityToDtoRequest(ticketType, true);
         given().
                 when()
                 .headers(
@@ -231,8 +225,8 @@ class TicketStatusIT {
                         "Bearer " + itHelper.getTokens().get(user.getEmail())
                 )
                 .contentType(APPLICATION_JSON)
-                .body(ticketStatusDto)
-                .post(TICKET_STATUS)
+                .body(ticketTypeDto)
+                .post(TICKET_TYPE)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.FORBIDDEN.value());
@@ -243,8 +237,8 @@ class TicketStatusIT {
     @MethodSource("getStreamAllUsersOuterGroup")
     @Order(90)
     void failedCreateByAllUsersOuterGroup(String userKey, User user) {
-        var ticketStatus = ticketStatusTestHelper.getRandomValidEntity();
-        var ticketStatusDto = ticketStatusTestHelper.convertEntityToDtoRequest(ticketStatus, true);
+        var ticketType = ticketTypeTestHelper.getRandomValidEntity();
+        var ticketTypeDto = ticketTypeTestHelper.convertEntityToDtoRequest(ticketType, true);
         given().
                 when()
                 .headers(
@@ -252,8 +246,8 @@ class TicketStatusIT {
                         "Bearer " + itHelper.getTokens().get(user.getEmail())
                 )
                 .contentType(APPLICATION_JSON)
-                .body(ticketStatusDto)
-                .post(TICKET_STATUS)
+                .body(ticketTypeDto)
+                .post(TICKET_TYPE)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.FORBIDDEN.value());
@@ -262,13 +256,13 @@ class TicketStatusIT {
     @Test
     @Order(90)
     void failedCreateByAllUsersAnonymous() {
-        var ticketStatus = ticketStatusTestHelper.getRandomValidEntity();
-        var ticketStatusDto = ticketStatusTestHelper.convertEntityToDtoRequest(ticketStatus, true);
+        var ticketType = ticketTypeTestHelper.getRandomValidEntity();
+        var ticketTypeDto = ticketTypeTestHelper.convertEntityToDtoRequest(ticketType, true);
         given().
                 when()
                 .contentType(APPLICATION_JSON)
-                .body(ticketStatusDto)
-                .post(TICKET_STATUS)
+                .body(ticketTypeDto)
+                .post(TICKET_TYPE)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.UNAUTHORIZED.value());
@@ -281,31 +275,28 @@ class TicketStatusIT {
     @MethodSource("getStreamUsersInnerGroupWithRolesAccountOwnerAndAdmin")
     @Order(100)
     void successUpdateByUsersInnerGroupWithRolesAccountOwnerOrAdmin(String userKey, User user) {
-        var ticketStatus = itHelper.getTicketStatuses().get(IS_STARTED_PREDEFINED);
-        ticketStatus.setName(ticketStatus.getName() + "_update");
-        var ticketStatusDto = ticketStatusTestHelper.convertEntityToDtoRequest(ticketStatus, false);
-        var actualTicketStatus = given().
+        var ticketType = itHelper.getTicketTypes().get(IT_IS_PREDEFINED_FOR_NEW_TICKET);
+        ticketType.setName(ticketType.getName() + "_update");
+        var ticketTypeDto = ticketTypeTestHelper.convertEntityToDtoRequest(ticketType, false);
+        var actualTicketType = given().
                 when()
                 .headers(
                         "Authorization",
                         "Bearer " + itHelper.getTokens().get(user.getEmail())
                 )
                 .contentType(APPLICATION_JSON)
-                .body(ticketStatusDto)
-                .put(TICKET_STATUS)
+                .body(ticketTypeDto)
+                .put(TICKET_TYPE)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.OK.value())
-                .extract().response().as(TicketStatus.class);
-        assertThat(List.of(ticketStatus))
-                .usingElementComparatorOnFields("name", "outId", "sortIndex")
-                .containsExactlyInAnyOrderElementsOf(List.of(actualTicketStatus));
-        assertFalse(actualTicketStatus.getDeleted());
-        assertFalse(actualTicketStatus.getIsCanceledPredefined());
-        assertFalse(actualTicketStatus.getIsFinishedPredefined());
-        assertFalse(actualTicketStatus.getIsReopenedPredefined());
-        assertTrue(actualTicketStatus.getIsStartedPredefined());
-        ticketStatus.setVersion(actualTicketStatus.getVersion());
+                .extract().response().as(TicketType.class);
+        assertThat(List.of(ticketType))
+                .usingElementComparatorOnFields("name", "outId", "comment", "isPredefinedForNewTicket")
+                .containsExactlyInAnyOrderElementsOf(List.of(actualTicketType));
+        assertFalse(actualTicketType.getDeleted());
+        assertTrue(actualTicketType.getIsPredefinedForNewTicket());
+        ticketType.setVersion(actualTicketType.getVersion());
     }
 
     @SuppressWarnings("unused")
@@ -313,9 +304,9 @@ class TicketStatusIT {
     @MethodSource("getStreamUsersInnerGroupWithRolesAccountOwnerAndAdmin")
     @Order(110)
     void failedUpdateByUsersInnerGroupWithRolesAccountOwnerOrAdminWhenNameIsNotUnique(String userKey, User user) {
-        var ticketStatus = itHelper.getTicketStatuses().get(IS_STARTED_PREDEFINED);
-        var ticketStatusDto = ticketStatusTestHelper.convertEntityToDtoRequest(ticketStatus, false);
-        ticketStatusDto.setName(itHelper.getTicketStatuses().get(IS_CANCELED_PREDEFINED).getName());
+        var ticketType = itHelper.getTicketTypes().get(IT_IS_PREDEFINED_FOR_NEW_TICKET);
+        var ticketTypeDto = ticketTypeTestHelper.convertEntityToDtoRequest(ticketType, false);
+        ticketTypeDto.setName(itHelper.getTicketTypes().get(TICKET_TYPE_1).getName());
         given().
                 when()
                 .headers(
@@ -323,8 +314,8 @@ class TicketStatusIT {
                         "Bearer " + itHelper.getTokens().get(user.getEmail())
                 )
                 .contentType(APPLICATION_JSON)
-                .body(ticketStatusDto)
-                .put(TICKET_STATUS)
+                .body(ticketTypeDto)
+                .put(TICKET_TYPE)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.CONFLICT.value());
@@ -335,12 +326,9 @@ class TicketStatusIT {
     @MethodSource("getStreamUsersInnerGroupWithRolesAccountOwnerAndAdmin")
     @Order(120)
     void failedUpdateByUsersInnerGroupWithRolesAccountOwnerOrAdminWhenPredefinedFieldsAssigned(String userKey, User user) {
-        var ticketStatus = ticketStatusTestHelper.getRandomValidEntity();
-        var ticketStatusDto = ticketStatusTestHelper.convertEntityToDtoRequest(ticketStatus, false);
-        ticketStatusDto.setIsFinishedPredefined(true);
-        ticketStatusDto.setIsReopenedPredefined(true);
-        ticketStatusDto.setIsCanceledPredefined(true);
-        ticketStatusDto.setIsStartedPredefined(true);
+        var ticketType = ticketTypeTestHelper.getRandomValidEntity();
+        var ticketTypeDto = ticketTypeTestHelper.convertEntityToDtoRequest(ticketType, false);
+        ticketTypeDto.setIsPredefinedForNewTicket(true);
         var response = given().
                 when()
                 .headers(
@@ -348,13 +336,10 @@ class TicketStatusIT {
                         "Bearer " + itHelper.getTokens().get(user.getEmail())
                 )
                 .contentType(APPLICATION_JSON)
-                .body(ticketStatusDto)
-                .put(TICKET_STATUS)
+                .body(ticketTypeDto)
+                .put(TICKET_TYPE)
                 .then()
-                .body(ERRORS, hasKey(IS_CANCELED_PREDEFINED))
-                .body(ERRORS, hasKey(IS_FINISHED_PREDEFINED))
-                .body(ERRORS, hasKey(IS_REOPENED_PREDEFINED))
-                .body(ERRORS, hasKey(IS_STARTED_PREDEFINED))
+                .body(ERRORS, hasKey(IS_PREDEFINED_FOR_NEW_TICKET))
                 .log().body()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .extract().response().asString();
@@ -365,8 +350,8 @@ class TicketStatusIT {
     @MethodSource("getStreamUsersInnerGroupWithRolesExecutorAndAuthorAndObserver")
     @Order(130)
     void failedUpdateByUsersInnerGroupWithRolesExecutorOrAuthorOrObserver(String userKey, User user) {
-        var ticketStatus = ticketStatusTestHelper.getRandomValidEntity();
-        var ticketStatusDto = ticketStatusTestHelper.convertEntityToDtoRequest(ticketStatus, false);
+        var ticketType = ticketTypeTestHelper.getRandomValidEntity();
+        var ticketTypeDto = ticketTypeTestHelper.convertEntityToDtoRequest(ticketType, false);
         given().
                 when()
                 .headers(
@@ -374,8 +359,8 @@ class TicketStatusIT {
                         "Bearer " + itHelper.getTokens().get(user.getEmail())
                 )
                 .contentType(APPLICATION_JSON)
-                .body(ticketStatusDto)
-                .put(TICKET_STATUS)
+                .body(ticketTypeDto)
+                .put(TICKET_TYPE)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.FORBIDDEN.value());
@@ -386,8 +371,8 @@ class TicketStatusIT {
     @MethodSource("getStreamAllUsersOuterGroup")
     @Order(140)
     void failedUpdateByAllUsersOuterGroup(String userKey, User user) {
-        var ticketStatus = ticketStatusTestHelper.getRandomValidEntity();
-        var ticketStatusDto = ticketStatusTestHelper.convertEntityToDtoRequest(ticketStatus, false);
+        var ticketType = ticketTypeTestHelper.getRandomValidEntity();
+        var ticketTypeDto = ticketTypeTestHelper.convertEntityToDtoRequest(ticketType, false);
         given().
                 when()
                 .headers(
@@ -395,8 +380,8 @@ class TicketStatusIT {
                         "Bearer " + itHelper.getTokens().get(user.getEmail())
                 )
                 .contentType(APPLICATION_JSON)
-                .body(ticketStatusDto)
-                .put(TICKET_STATUS)
+                .body(ticketTypeDto)
+                .put(TICKET_TYPE)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.FORBIDDEN.value());
@@ -405,13 +390,13 @@ class TicketStatusIT {
     @Test
     @Order(150)
     void failedUpdateByAllUsersAnonymous() {
-        var ticketStatus = ticketStatusTestHelper.getRandomValidEntity();
-        var ticketStatusDto = ticketStatusTestHelper.convertEntityToDtoRequest(ticketStatus, false);
+        var ticketType = ticketTypeTestHelper.getRandomValidEntity();
+        var ticketTypeDto = ticketTypeTestHelper.convertEntityToDtoRequest(ticketType, false);
         given().
                 when()
                 .contentType(APPLICATION_JSON)
-                .body(ticketStatusDto)
-                .put(TICKET_STATUS)
+                .body(ticketTypeDto)
+                .put(TICKET_TYPE)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.UNAUTHORIZED.value());
@@ -443,6 +428,4 @@ class TicketStatusIT {
     private static Stream<Arguments> getStreamAllUsersOuterGroup() {
         return itHelper.getStreamUsers(itHelper.getRoleTestHelper().getPredefinedValidEntityList(), false);
     }
-
-
 }
