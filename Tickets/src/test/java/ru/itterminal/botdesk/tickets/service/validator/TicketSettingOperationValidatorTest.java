@@ -32,6 +32,7 @@ import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
 import ru.itterminal.botdesk.tickets.model.TicketSetting;
 import ru.itterminal.botdesk.tickets.model.test.TicketSettingTestHelper;
+import ru.itterminal.botdesk.tickets.service.impl.SettingsAccessToTicketTypesServiceImpl;
 import ru.itterminal.botdesk.tickets.service.impl.TicketSettingServiceImpl;
 
 @SpringJUnitConfig(value = {TicketSettingOperationValidator.class})
@@ -42,8 +43,11 @@ class TicketSettingOperationValidatorTest {
     @MockBean
     private TicketSettingServiceImpl service;
 
+    @MockBean
+    private SettingsAccessToTicketTypesServiceImpl settingsAccessToTicketTypesService;
+
     @Autowired
-    private final TicketSettingOperationValidator validator = new TicketSettingOperationValidator(service);
+    private TicketSettingOperationValidator validator;
 
     private final TicketSettingTestHelper ticketSettingTestHelper = new TicketSettingTestHelper();
 
@@ -76,6 +80,7 @@ class TicketSettingOperationValidatorTest {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void beforeCreate_shouldGetTrue_whenPassedRandomValidEntity () {
+        when(settingsAccessToTicketTypesService.isPermittedTicketType(any(), any())).thenReturn(true);
         TicketSetting ticketSetting = ticketSettingTestHelper.getRandomValidEntity();
         assertTrue(validator.beforeCreate(ticketSetting));
     }
@@ -84,6 +89,7 @@ class TicketSettingOperationValidatorTest {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void beforeCreate_shouldGetTrue_whenPassedPredefinedValidEntity () {
         TicketSetting ticketSetting = ticketSettingTestHelper.getPredefinedValidEntityList().get(0);
+        when(settingsAccessToTicketTypesService.isPermittedTicketType(any(), any())).thenReturn(true);
         assertTrue(validator.beforeCreate(ticketSetting));
     }
 
@@ -91,6 +97,7 @@ class TicketSettingOperationValidatorTest {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void beforeUpdate_shouldGetTrue_whenPassedRandomValidEntity () {
         when(service.findByUniqueFields(any())).thenReturn(Collections.emptyList());
+        when(settingsAccessToTicketTypesService.isPermittedTicketType(any(), any())).thenReturn(true);
         TicketSetting ticketSetting = ticketSettingTestHelper.getRandomValidEntity();
         assertTrue(validator.beforeUpdate(ticketSetting));
         verify(service, times(1)).findByUniqueFields(any());
@@ -100,6 +107,7 @@ class TicketSettingOperationValidatorTest {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void beforeUpdate_shouldGetTrue_whenPassedPredefinedValidEntity () {
         when(service.findByUniqueFields(any())).thenReturn(Collections.emptyList());
+        when(settingsAccessToTicketTypesService.isPermittedTicketType(any(), any())).thenReturn(true);
         TicketSetting ticketSetting = ticketSettingTestHelper.getPredefinedValidEntityList().get(0);
         assertTrue(validator.beforeUpdate(ticketSetting));
         verify(service, times(1)).findByUniqueFields(any());
@@ -139,6 +147,7 @@ class TicketSettingOperationValidatorTest {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void beforeCreate_shouldGetTrue_whenCurrentUserFromInnerGroup() {
+        when(settingsAccessToTicketTypesService.isPermittedTicketType(any(), any())).thenReturn(true);
         var ticketSetting = ticketSettingTestHelper.getPredefinedValidEntityList().get(0);
         assertTrue(validator.beforeCreate(ticketSetting));
     }
@@ -146,6 +155,7 @@ class TicketSettingOperationValidatorTest {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void beforeUpdate_shouldGetTrue_whenCurrentUserFromInnerGroup() {
+        when(settingsAccessToTicketTypesService.isPermittedTicketType(any(), any())).thenReturn(true);
         var ticketSetting = ticketSettingTestHelper.getPredefinedValidEntityList().get(0);
         assertTrue(validator.beforeUpdate(ticketSetting));
     }

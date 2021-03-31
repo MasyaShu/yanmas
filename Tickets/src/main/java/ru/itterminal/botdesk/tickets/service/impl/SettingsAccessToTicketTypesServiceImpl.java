@@ -14,19 +14,19 @@ import ru.itterminal.botdesk.aau.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.botdesk.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
-import ru.itterminal.botdesk.tickets.model.SettingsAccessToTicketViaTicketTypes;
+import ru.itterminal.botdesk.tickets.model.SettingsAccessToTicketTypes;
 import ru.itterminal.botdesk.tickets.model.TicketType;
-import ru.itterminal.botdesk.tickets.repository.SettingsAccessToTicketViaTicketTypesRepository;
-import ru.itterminal.botdesk.tickets.service.validator.SettingsAccessToTicketViaTicketTypesOperationValidator;
+import ru.itterminal.botdesk.tickets.repository.SettingsAccessToTicketTypesRepository;
+import ru.itterminal.botdesk.tickets.service.validator.SettingsAccessToTicketTypesOperationValidator;
 
 @SuppressWarnings("unused")
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SettingsAccessToTicketViaTicketTypesServiceImpl extends
-        CrudServiceWithAccountImpl<SettingsAccessToTicketViaTicketTypes, SettingsAccessToTicketViaTicketTypesOperationValidator, SettingsAccessToTicketViaTicketTypesRepository> {
+public class SettingsAccessToTicketTypesServiceImpl extends
+        CrudServiceWithAccountImpl<SettingsAccessToTicketTypes, SettingsAccessToTicketTypesOperationValidator, SettingsAccessToTicketTypesRepository> {
 
-    public static final String WHERE = "SettingsAccessToTicketViaTicketTypesServiceImpl.findByUniqueFields: ";
+    public static final String WHERE = "SettingsAccessToTicketTypesServiceImpl.findByUniqueFields: ";
     public static final String START_FIND = "Start " + WHERE + "{} , {}, {}";
 
     private final AccountServiceImpl accountService;
@@ -60,7 +60,7 @@ public class SettingsAccessToTicketViaTicketTypesServiceImpl extends
         return ticketTypesIdList.contains(checkedTicketTypeId);
     }
 
-    private SettingsAccessToTicketViaTicketTypes findSettings(UUID userId) {
+    private SettingsAccessToTicketTypes findSettings(UUID userId) {
         var user = userService.findByIdAndAccountId(userId);
         var accountId = user.getAccount().getId();
         var groupId = user.getGroup().getId();
@@ -78,8 +78,8 @@ public class SettingsAccessToTicketViaTicketTypesServiceImpl extends
     }
 
     @Transactional(readOnly = true)
-    public List<SettingsAccessToTicketViaTicketTypes> findByUniqueFields(
-            SettingsAccessToTicketViaTicketTypes settingsAccess) {
+    public List<SettingsAccessToTicketTypes> findByUniqueFields(
+            SettingsAccessToTicketTypes settingsAccess) {
         log.trace(START_FIND, settingsAccess.getAccount(), settingsAccess.getGroup(), settingsAccess.getUser());
         return repository.findAllByAccount_IdAndGroup_IdAndUser_IdAndIdNot(
                 settingsAccess.getAccount().getId(),
@@ -90,7 +90,7 @@ public class SettingsAccessToTicketViaTicketTypesServiceImpl extends
     }
 
     @Override
-    protected void setNestedObjectsOfEntityBeforeCreate(SettingsAccessToTicketViaTicketTypes entity) {
+    protected void setNestedObjectsOfEntityBeforeCreate(SettingsAccessToTicketTypes entity) {
         entity.setAccount(accountService.findById(entity.getAccount().getId()));
         if (entity.getUser() != null && entity.getUser().getId() != null) {
             entity.setUser(userService.findByIdAndAccountId(entity.getUser().getId()));
@@ -105,7 +105,7 @@ public class SettingsAccessToTicketViaTicketTypesServiceImpl extends
     }
 
     @Override
-    protected void setNestedObjectsOfEntityBeforeUpdate(SettingsAccessToTicketViaTicketTypes entity) {
+    protected void setNestedObjectsOfEntityBeforeUpdate(SettingsAccessToTicketTypes entity) {
         setNestedObjectsOfEntityBeforeCreate(entity);
     }
 

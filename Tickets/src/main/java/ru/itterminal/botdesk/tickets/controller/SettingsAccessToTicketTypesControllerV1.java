@@ -24,47 +24,47 @@ import ru.itterminal.botdesk.aau.controller.BaseControllerImpl;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Update;
 import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
-import ru.itterminal.botdesk.tickets.model.SettingsAccessToTicketViaTicketTypes;
-import ru.itterminal.botdesk.tickets.model.dto.SettingsAccessToTicketViaTicketTypesDtoRequest;
-import ru.itterminal.botdesk.tickets.model.dto.SettingsAccessToTicketViaTicketTypesDtoResponse;
-import ru.itterminal.botdesk.tickets.model.dto.SettingsAccessToTicketViaTicketTypesFilterDto;
-import ru.itterminal.botdesk.tickets.service.impl.SettingsAccessToTicketViaTicketTypesServiceImpl;
+import ru.itterminal.botdesk.tickets.model.SettingsAccessToTicketTypes;
+import ru.itterminal.botdesk.tickets.model.dto.SettingsAccessToTicketTypesDtoRequest;
+import ru.itterminal.botdesk.tickets.model.dto.SettingsAccessToTicketTypesDtoResponse;
+import ru.itterminal.botdesk.tickets.model.dto.SettingsAccessToTicketTypesFilterDto;
+import ru.itterminal.botdesk.tickets.service.impl.SettingsAccessToTicketTypesServiceImpl;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @Slf4j
 @RestController
 @Validated
-@RequestMapping("api/v1/ticket/setting-access-via-ticket-types")
+@RequestMapping("api/v1/ticket/type/setting-access")
 @RequiredArgsConstructor
-public class SettingsAccessToTicketViaTicketTypesControllerV1
-        extends BaseControllerImpl<SettingsAccessToTicketViaTicketTypes,
-        SettingsAccessToTicketViaTicketTypesServiceImpl, SettingsAccessToTicketViaTicketTypesDtoRequest,
-        SettingsAccessToTicketViaTicketTypesDtoResponse, SettingsAccessToTicketViaTicketTypesFilterDto> {
+public class SettingsAccessToTicketTypesControllerV1
+        extends BaseControllerImpl<SettingsAccessToTicketTypes,
+        SettingsAccessToTicketTypesServiceImpl, SettingsAccessToTicketTypesDtoRequest,
+        SettingsAccessToTicketTypesDtoResponse, SettingsAccessToTicketTypesFilterDto> {
 
     private final JwtUserBuilder jwtUserBuilder;
-    private static final Class responseClazz = SettingsAccessToTicketViaTicketTypesDtoResponse.class;
-    private static final Class entityClazz = SettingsAccessToTicketViaTicketTypes.class;
+    private static final Class responseClazz = SettingsAccessToTicketTypesDtoResponse.class;
+    private static final Class entityClazz = SettingsAccessToTicketTypes.class;
 
     @PostMapping()
-    public ResponseEntity<SettingsAccessToTicketViaTicketTypesDtoResponse>
-    create(@Validated(Create.class) @RequestBody SettingsAccessToTicketViaTicketTypesDtoRequest request) {
+    public ResponseEntity<SettingsAccessToTicketTypesDtoResponse>
+    create(@Validated(Create.class) @RequestBody SettingsAccessToTicketTypesDtoRequest request) {
         return baseCreate(request, entityClazz, responseClazz);
     }
 
     @PutMapping()
-    public ResponseEntity<SettingsAccessToTicketViaTicketTypesDtoResponse>
-    update(@Validated(Update.class) @RequestBody SettingsAccessToTicketViaTicketTypesDtoRequest request) {
+    public ResponseEntity<SettingsAccessToTicketTypesDtoResponse>
+    update(@Validated(Update.class) @RequestBody SettingsAccessToTicketTypesDtoRequest request) {
         return baseUpdate(request, entityClazz, responseClazz);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SettingsAccessToTicketViaTicketTypesDtoResponse> getById(@PathVariable UUID id) {
+    public ResponseEntity<SettingsAccessToTicketTypesDtoResponse> getById(@PathVariable UUID id) {
         return baseGetById(id, entityClazz, responseClazz);
     }
 
     @GetMapping()
-    public ResponseEntity<Page<SettingsAccessToTicketViaTicketTypesDtoResponse>>
-    getByFilter(@Valid @RequestBody SettingsAccessToTicketViaTicketTypesFilterDto filter,
+    public ResponseEntity<Page<SettingsAccessToTicketTypesDtoResponse>>
+    getByFilter(@Valid @RequestBody SettingsAccessToTicketTypesFilterDto filter,
                 @RequestParam(defaultValue = PAGE_DEFAULT_VALUE) @PositiveOrZero int page,
                 @RequestParam(defaultValue = SIZE_DEFAULT_VALUE) @Positive int size) {
         jwtUserBuilder.throwAccessDeniedExceptionIfCurrentUserFromOuterGroup();
