@@ -35,6 +35,7 @@ public class TicketSettingServiceImpl extends CrudServiceWithAccountImpl<TicketS
     private final UserServiceImpl userService;
     private final TicketStatusServiceImpl ticketStatusService;
     private final TicketTypeServiceImpl ticketTypeService;
+    private final SettingsAccessToTicketTypesServiceImpl settingsAccessToTicketTypesService;
 
     @Transactional(readOnly = true)
     public TicketSetting getSettingOrPredefinedValuesForTicket(@NotNull UUID accountId,

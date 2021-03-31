@@ -53,10 +53,10 @@ class TicketStatusServiceImplTest {
         when(repository.getByIsFinishedPredefinedTrueAndAccount_Id(any())).thenReturn(Optional.of(ticketStatus));
         when(repository.getByIsCanceledPredefinedTrueAndAccount_Id(any())).thenReturn(Optional.of(ticketStatus));
         service.actionAfterCompletedVerificationAccount(any());
-        verify(validator, times(0)).beforeCreate(any());
+        verify(validator, times(0)).logicalValidationBeforeCreate(any());
         verify(validator, times(0)).checkUniqueness(any());
         verify(repository, times(0)).create(any());
-        verify(validator, times(0)).beforeCreate(any());
+        verify(validator, times(0)).logicalValidationBeforeCreate(any());
         verify(repository, times(1)).getByIsStartedPredefinedTrueAndAccount_Id(any());
         verify(repository, times(1)).getByIsReopenedPredefinedTrueAndAccount_Id(any());
         verify(repository, times(1)).getByIsFinishedPredefinedTrueAndAccount_Id(any());
@@ -66,7 +66,7 @@ class TicketStatusServiceImplTest {
     @Test
     void createPredefinedEntity_shouldCreatePredefinedStatus_whenStatusNotInDataBase() {
         TicketStatus ticketStatus = ticketStatusTestHelper.getRandomValidEntity();
-        when(validator.beforeCreate(any())).thenReturn(true);
+        when(validator.logicalValidationBeforeCreate(any())).thenReturn(true);
         when(validator.checkUniqueness(any())).thenReturn(true);
         when(repository.create(any())).thenReturn(ticketStatus);
         when(accountService.findById(any())).thenReturn(ticketStatus.getAccount());
@@ -75,7 +75,7 @@ class TicketStatusServiceImplTest {
         when(repository.getByIsFinishedPredefinedTrueAndAccount_Id(any())).thenThrow(EntityNotExistException.class);
         when(repository.getByIsCanceledPredefinedTrueAndAccount_Id(any())).thenThrow(EntityNotExistException.class);
         service.actionAfterCompletedVerificationAccount(any());
-        verify(validator, times(4)).beforeCreate(any());
+        verify(validator, times(4)).logicalValidationBeforeCreate(any());
         verify(validator, times(4)).checkUniqueness(any());
         verify(repository, times(4)).create(any());
         verify(repository, times(1)).getByIsStartedPredefinedTrueAndAccount_Id(any());

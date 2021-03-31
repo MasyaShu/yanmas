@@ -12,8 +12,8 @@ import ru.itterminal.botdesk.tickets.model.TicketEvent;
 public class TicketEventOperationValidator extends BasicOperationValidatorImpl<TicketEvent> {
 
     @Override
-    public boolean beforeCreate(TicketEvent entity) {
+    public boolean logicalValidationBeforeCreate(TicketEvent entity) {
         // TODO ошибка если все пустое (нет обновления тикета, нет файлов, нет комментария)
-        return super.beforeCreate(entity);
+        return super.logicalValidationBeforeCreate(entity);
     }
 }

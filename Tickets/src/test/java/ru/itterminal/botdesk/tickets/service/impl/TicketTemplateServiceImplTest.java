@@ -63,7 +63,7 @@ class TicketTemplateServiceImplTest {
         ticketTemplate.setDateStart(startNowDay + 86400000L);
         ticketTemplate.setExpressionSchedule("* 10 * * * *");
         when(accountService.findById(any())).thenReturn(ticketTemplate.getAccount());
-        when(validator.beforeUpdate(any())).thenReturn(true);
+        when(validator.logicalValidationBeforeUpdate(any())).thenReturn(true);
         when(ticketTemplateRepository.existsById(any())).thenReturn(true);
         when(ticketTemplateRepository.findById(any())).thenReturn(Optional.of(ticketTemplate));
         when(ticketTemplateRepository.create(any())).thenReturn(ticketTemplate);
@@ -79,7 +79,7 @@ class TicketTemplateServiceImplTest {
         ticketTemplate.setDateStart(startNowDay);
         ticketTemplate.setExpressionSchedule("59 59 23 * * *");
         when(accountService.findById(any())).thenReturn(ticketTemplate.getAccount());
-        when(validator.beforeUpdate(any())).thenReturn(true);
+        when(validator.logicalValidationBeforeUpdate(any())).thenReturn(true);
         when(ticketTemplateRepository.existsById(any())).thenReturn(true);
         when(ticketTemplateRepository.findById(any())).thenReturn(Optional.of(ticketTemplate));
         when(ticketTemplateRepository.create(any())).thenReturn(ticketTemplate);
@@ -93,7 +93,7 @@ class TicketTemplateServiceImplTest {
         TicketTemplate ticketTemplate = ticketTemplateTestHelper.getRandomValidEntity();
         ticketTemplate.setExpressionSchedule("59 59 23 * * *");
         when(accountService.findById(any())).thenReturn(ticketTemplate.getAccount());
-        when(validator.beforeUpdate(any())).thenReturn(true);
+        when(validator.logicalValidationBeforeUpdate(any())).thenReturn(true);
         when(ticketTemplateRepository.existsById(any())).thenReturn(true);
         when(ticketTemplateRepository.findById(any())).thenReturn(Optional.of(ticketTemplate));
         when(ticketTemplateRepository.create(any())).thenReturn(ticketTemplate);
@@ -108,7 +108,7 @@ class TicketTemplateServiceImplTest {
         ticketTemplate.setDateEnd(startNowDay);
         ticketTemplate.setExpressionSchedule("* 10 * * * *");
         when(accountService.findById(any())).thenReturn(ticketTemplate.getAccount());
-        when(validator.beforeUpdate(any())).thenReturn(true);
+        when(validator.logicalValidationBeforeUpdate(any())).thenReturn(true);
         when(ticketTemplateRepository.existsById(any())).thenReturn(true);
         when(ticketTemplateRepository.findById(any())).thenReturn(Optional.of(ticketTemplate));
         when(ticketTemplateRepository.create(any())).thenReturn(ticketTemplate);
@@ -121,7 +121,7 @@ class TicketTemplateServiceImplTest {
         TicketTemplate ticketTemplate = ticketTemplateTestHelper.getRandomValidEntity();
         ticketTemplate.setExpressionSchedule("0 0 0 30 2 *");
         when(accountService.findById(any())).thenReturn(ticketTemplate.getAccount());
-        when(validator.beforeUpdate(any())).thenReturn(true);
+        when(validator.logicalValidationBeforeUpdate(any())).thenReturn(true);
         when(ticketTemplateRepository.existsById(any())).thenReturn(true);
         when(ticketTemplateRepository.findById(any())).thenReturn(Optional.of(ticketTemplate));
         when(ticketTemplateRepository.create(any())).thenReturn(ticketTemplate);

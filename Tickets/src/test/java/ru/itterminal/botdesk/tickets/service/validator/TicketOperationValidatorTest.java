@@ -87,7 +87,7 @@ class TicketOperationValidatorTest {
     void beforeCreate_shouldGetTrue_whenPassedTicketIsValid() {
         var ticket = ticketTestHelper.getRandomValidEntity();
         when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
-        var actualResult = validator.beforeCreate(ticket);
+        var actualResult = validator.logicalValidationBeforeCreate(ticket);
         assertTrue(actualResult);
         verify(userService, times(0)).findByEmail(any());
     }
@@ -114,7 +114,7 @@ class TicketOperationValidatorTest {
         LogicalValidationException actualException =
                 assertThrows(
                         LogicalValidationException.class,
-                        () -> validator.beforeCreate(ticket)
+                        () -> validator.logicalValidationBeforeCreate(ticket)
                 );
         assertEquals(
                 expectedException.getFieldErrors().get(EMPTY_TICKET).get(0),
@@ -148,7 +148,7 @@ class TicketOperationValidatorTest {
         LogicalValidationException actualException =
                 assertThrows(
                         LogicalValidationException.class,
-                        () -> validator.beforeCreate(ticket)
+                        () -> validator.logicalValidationBeforeCreate(ticket)
                 );
         assertEquals(
                 expectedException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR).get(0),
@@ -184,7 +184,7 @@ class TicketOperationValidatorTest {
         LogicalValidationException actualException =
                 assertThrows(
                         LogicalValidationException.class,
-                        () -> validator.beforeCreate(ticket)
+                        () -> validator.logicalValidationBeforeCreate(ticket)
                 );
         assertEquals(
                 expectedException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS).get(0),
@@ -220,7 +220,7 @@ class TicketOperationValidatorTest {
         LogicalValidationException actualException =
                 assertThrows(
                         LogicalValidationException.class,
-                        () -> validator.beforeCreate(ticket)
+                        () -> validator.logicalValidationBeforeCreate(ticket)
                 );
         assertEquals(
                 expectedException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS).get(0),
@@ -255,7 +255,7 @@ class TicketOperationValidatorTest {
         LogicalValidationException actualException =
                 assertThrows(
                         LogicalValidationException.class,
-                        () -> validator.beforeCreate(ticket)
+                        () -> validator.logicalValidationBeforeCreate(ticket)
                 );
         assertEquals(
                 expectedException.getFieldErrors().get(FILE_IS_INVALID).get(0),
@@ -290,7 +290,7 @@ class TicketOperationValidatorTest {
         LogicalValidationException actualException =
                 assertThrows(
                         LogicalValidationException.class,
-                        () -> validator.beforeCreate(ticket)
+                        () -> validator.logicalValidationBeforeCreate(ticket)
                 );
         assertEquals(
                 expectedException.getFieldErrors().get(FILE_IS_INVALID).get(0),
@@ -325,7 +325,7 @@ class TicketOperationValidatorTest {
         LogicalValidationException actualException =
                 assertThrows(
                         LogicalValidationException.class,
-                        () -> validator.beforeCreate(ticket)
+                        () -> validator.logicalValidationBeforeCreate(ticket)
                 );
         assertEquals(
                 expectedException.getFieldErrors().get(FILE_IS_INVALID).get(0),
@@ -356,7 +356,7 @@ class TicketOperationValidatorTest {
         LogicalValidationException actualException =
                 assertThrows(
                         LogicalValidationException.class,
-                        () -> validator.beforeUpdate(ticket)
+                        () -> validator.logicalValidationBeforeUpdate(ticket)
                 );
         assertEquals(
                 expectedException.getFieldErrors().get(EMPTY_TICKET).get(0),
@@ -370,7 +370,7 @@ class TicketOperationValidatorTest {
     void beforeUpdate_shouldGetTrue_whenPassedTicketIsValid() {
         var ticket = ticketTestHelper.getRandomValidEntity();
         when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
-        var actualResult = validator.beforeUpdate(ticket);
+        var actualResult = validator.logicalValidationBeforeUpdate(ticket);
         assertTrue(actualResult);
         verify(userService, times(0)).findByEmail(any());
     }
@@ -400,7 +400,7 @@ class TicketOperationValidatorTest {
         LogicalValidationException actualException =
                 assertThrows(
                         LogicalValidationException.class,
-                        () -> validator.beforeUpdate(ticket)
+                        () -> validator.logicalValidationBeforeUpdate(ticket)
                 );
         assertEquals(
                 expectedException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR).get(0),
@@ -436,7 +436,7 @@ class TicketOperationValidatorTest {
         LogicalValidationException actualException =
                 assertThrows(
                         LogicalValidationException.class,
-                        () -> validator.beforeUpdate(ticket)
+                        () -> validator.logicalValidationBeforeUpdate(ticket)
                 );
         assertEquals(
                 expectedException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS).get(0),
@@ -472,7 +472,7 @@ class TicketOperationValidatorTest {
         LogicalValidationException actualException =
                 assertThrows(
                         LogicalValidationException.class,
-                        () -> validator.beforeUpdate(ticket)
+                        () -> validator.logicalValidationBeforeUpdate(ticket)
                 );
         assertEquals(
                 expectedException.getFieldErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS).get(0),

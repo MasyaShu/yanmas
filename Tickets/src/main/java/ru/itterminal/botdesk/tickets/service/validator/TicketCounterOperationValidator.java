@@ -34,8 +34,8 @@ public class TicketCounterOperationValidator extends BasicOperationValidatorImpl
     }
 
     @Override
-    public boolean beforeUpdate(TicketCounter entity) {
-        super.beforeUpdate(entity);
+    public boolean logicalValidationBeforeUpdate(TicketCounter entity) {
+        super.logicalValidationBeforeUpdate(entity);
         var ticketCounterFromDatabase = service.findById(entity.getId());
         if (entity.getCurrentNumber() <= ticketCounterFromDatabase.getCurrentNumber()) {
             throw createLogicalValidationException(CURRENT_TICKET_NUMBER, NEW_VALUE_MUST_NOT);

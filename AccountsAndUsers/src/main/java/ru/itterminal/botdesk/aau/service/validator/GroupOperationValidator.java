@@ -30,10 +30,10 @@ public class GroupOperationValidator extends BasicOperationValidatorImpl<Group> 
             "A user from not inner group cannot create or update groups";
 
     @Override
-    public boolean beforeUpdate(Group entity) {
+    public boolean logicalValidationBeforeUpdate(Group entity) {
         var groupFromDataBase = service.findByIdAndAccountId(entity.getId());
         entity.setIsInner(groupFromDataBase.getIsInner());
-        return super.beforeUpdate(entity);
+        return super.logicalValidationBeforeUpdate(entity);
     }
 
     @Override

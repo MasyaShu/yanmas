@@ -6,12 +6,6 @@ import ru.itterminal.botdesk.commons.exception.NullEntityException;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 import ru.itterminal.botdesk.commons.service.validator.OperationValidator;
 
-/**
- * Basic implementation of service layer validator
- * <p> check only if variable not null
- *
- * @param <E> extends BaseEntity
- */
 @Slf4j
 @Component
 public class BasicOperationValidatorImpl<E extends BaseEntity> implements OperationValidator<E> {
@@ -29,7 +23,7 @@ public class BasicOperationValidatorImpl<E extends BaseEntity> implements Operat
     public static final String ANONYMOUS = "anonymous";
 
     @Override
-    public boolean beforeCreate(E entity) {
+    public boolean logicalValidationBeforeCreate(E entity) {
         log.debug(DEFAULT_CREATE_MESSAGE);
         if (entity == null) {
             log.error(INVALID_ENTITY_MESSAGE);
@@ -44,7 +38,7 @@ public class BasicOperationValidatorImpl<E extends BaseEntity> implements Operat
     }
 
     @Override
-    public boolean beforeUpdate(E entity) {
+    public boolean logicalValidationBeforeUpdate(E entity) {
         log.debug(DEFAULT_UPDATE_MESSAGE);
         if (entity == null) {
             log.error(INVALID_ENTITY_MESSAGE);

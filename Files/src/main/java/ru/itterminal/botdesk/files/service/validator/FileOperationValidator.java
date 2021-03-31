@@ -24,8 +24,8 @@ public class FileOperationValidator extends BasicOperationValidatorImpl<File> {
     public static final String CREATED_AT_ZERO = "Created at mustn't zero";
 
     @Override
-    public boolean beforeCreate(File entity) {
-        super.beforeCreate(entity);
+    public boolean logicalValidationBeforeCreate(File entity) {
+        super.logicalValidationBeforeCreate(entity);
         val errors = createMapForLogicalErrors();
         chekStringForNullOrEmpty(entity.getFileName(), FILE_NAME, FILE_NAME_NULL, FILE_NAME_EMPTY, errors);
         chekNumberForNullOrZero(entity.getCreatedAt(), CREATED_AT, CREATED_AT_NULL, CREATED_AT_ZERO, errors);

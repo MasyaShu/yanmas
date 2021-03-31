@@ -40,7 +40,7 @@ class TicketTemplateOperationValidatorTest {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void checkDateStartAfterDateEnd_shouldGetTrue_whenDateStartAndDateEndNull() {
         TicketTemplate ticketTemplate = templateTestHelper.getRandomValidEntity();
-        assertTrue(validator.beforeCreate(ticketTemplate));
+        assertTrue(validator.logicalValidationBeforeCreate(ticketTemplate));
     }
 
     @Test
@@ -49,7 +49,7 @@ class TicketTemplateOperationValidatorTest {
         TicketTemplate ticketTemplate = templateTestHelper.getRandomValidEntity();
         ticketTemplate.setDateStart(System.currentTimeMillis());
         ticketTemplate.setDateEnd(ticketTemplate.getDateStart() + 860000L);
-        assertTrue(validator.beforeCreate(ticketTemplate));
+        assertTrue(validator.logicalValidationBeforeCreate(ticketTemplate));
     }
 
     @Test
@@ -61,7 +61,7 @@ class TicketTemplateOperationValidatorTest {
         errors.put(VALIDATION_FAILED, singletonList(new ValidationError(VALIDATION_FAILED, THAN_DATE_END)));
         LogicalValidationException logicalValidationException = new LogicalValidationException(VALIDATION_FAILED, errors);
         LogicalValidationException thrown = assertThrows(LogicalValidationException.class,
-                () -> validator.beforeCreate(ticketTemplate));
+                () -> validator.logicalValidationBeforeCreate(ticketTemplate));
         assertEquals(logicalValidationException.getFieldErrors().get(VALIDATION_FAILED).get(0),
                 thrown.getFieldErrors().get(VALIDATION_FAILED).get(0));
     }
@@ -90,13 +90,13 @@ class TicketTemplateOperationValidatorTest {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void beforeCreate_shouldGetTrue_whenCurrentUserFromInnerGroup() {
         TicketTemplate ticketTemplate = templateTestHelper.getRandomValidEntity();
-        assertTrue(validator.beforeCreate(ticketTemplate));
+        assertTrue(validator.logicalValidationBeforeCreate(ticketTemplate));
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void beforeUpdate_shouldGetTrue_whenCurrentUserFromInnerGroup() {
         TicketTemplate ticketTemplate = templateTestHelper.getRandomValidEntity();
-        assertTrue(validator.beforeUpdate(ticketTemplate));
+        assertTrue(validator.logicalValidationBeforeUpdate(ticketTemplate));
     }
 }

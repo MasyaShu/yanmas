@@ -207,7 +207,7 @@ class UserOperationValidatorTest {
         user.setRole(role);
         when(roleService.getAccountOwnerRole())
                 .thenReturn(roleAccountOwner);
-        assertTrue(validator.beforeCreate(user));
+        assertTrue(validator.logicalValidationBeforeCreate(user));
         verify(service, times(0)).findAllByRoleAndAccountId(any(), any());
     }
 
@@ -225,7 +225,7 @@ class UserOperationValidatorTest {
         logicalValidationException = new LogicalValidationException(VALIDATION_FAILED, errors);
         LogicalValidationException thrown = assertThrows(
                 LogicalValidationException.class,
-                () -> validator.beforeCreate(user)
+                () -> validator.logicalValidationBeforeCreate(user)
         );
         assertEquals(
                 logicalValidationException.getFieldErrors().get(USER_WITH_ROLE_ACCOUNT_OWNER).get(0),
@@ -248,7 +248,7 @@ class UserOperationValidatorTest {
                 .thenReturn((role.equals(roleAccountOwner)) ? List.of() : List.of(oldUser));
         when(service.findById(newUser.getId())).thenReturn(userFromDatabase);
         when(roleService.getAccountOwnerRole()).thenReturn(roleAccountOwner);
-        assertTrue(validator.beforeUpdate(newUser));
+        assertTrue(validator.logicalValidationBeforeUpdate(newUser));
     }
 
     @Test
@@ -261,7 +261,7 @@ class UserOperationValidatorTest {
         when(service.findById(newUser.getId())).thenReturn(userFromDatabase);
         when(roleService.getAccountOwnerRole()).thenReturn(roleAccountOwner);
         var logicalValidationException
-                = assertThrows(LogicalValidationException.class, () -> validator.beforeUpdate(newUser));
+                = assertThrows(LogicalValidationException.class, () -> validator.logicalValidationBeforeUpdate(newUser));
         assertEquals(
                 YOU_CAN_EDIT_EMAIL_OF_THE_USER_WITH_A_ROLE_ACCOUNT_OWNER_ONLY_VIA_SPECIAL_PROCESS,
                 logicalValidationException.getFieldErrors().get(USER_WITH_ROLE_ACCOUNT_OWNER).get(0).getMessage()
@@ -279,7 +279,7 @@ class UserOperationValidatorTest {
         when(roleService.getAccountOwnerRole()).thenReturn(roleAccountOwner);
         when(ticketServiceImpl.countEntityWithUser(any())).thenReturn(2L);
         var logicalValidationException
-                = assertThrows(LogicalValidationException.class, () -> validator.beforeUpdate(newUser));
+                = assertThrows(LogicalValidationException.class, () -> validator.logicalValidationBeforeUpdate(newUser));
         assertEquals(
                 THE_USER_CANNOT_CHANGE_THE_GROUP_BECAUSE_HE_IS_PRESENT_IN_TICKETS,
                 logicalValidationException.getFieldErrors().get(CHANGE_USER_GROUP).get(0).getMessage()
@@ -295,7 +295,7 @@ class UserOperationValidatorTest {
         user.getGroup().setId(UUID.fromString(idGroup));
         when(roleService.getAccountOwnerRole())
                 .thenReturn(roleAccountOwner);
-        assertTrue(validator.beforeCreate(user));
+        assertTrue(validator.logicalValidationBeforeCreate(user));
         verify(service, times(0)).findAllByRoleAndAccountId(any(), any());
     }
 
@@ -311,7 +311,7 @@ class UserOperationValidatorTest {
         when(service.findAllByRoleAndAccount_IdAndIdNot(any(), any(), any())).thenReturn(List.of(oldUser));
         when(service.findById(newUser.getId())).thenReturn(userFromDatabase);
         when(roleService.getAccountOwnerRole()).thenReturn(roleAccountOwner);
-        assertTrue(validator.beforeUpdate(newUser));
+        assertTrue(validator.logicalValidationBeforeUpdate(newUser));
     }
 
     @ParameterizedTest
@@ -323,7 +323,7 @@ class UserOperationValidatorTest {
         user.getGroup().setId(UUID.fromString(idGroup));
         when(roleService.getAccountOwnerRole())
                 .thenReturn(roleAccountOwner);
-        assertTrue(validator.beforeCreate(user));
+        assertTrue(validator.logicalValidationBeforeCreate(user));
         verify(service, times(0)).findAllByRoleAndAccountId(any(), any());
     }
 
@@ -339,7 +339,7 @@ class UserOperationValidatorTest {
         when(service.findAllByRoleAndAccount_IdAndIdNot(any(), any(), any())).thenReturn(List.of(oldUser));
         when(service.findById(newUser.getId())).thenReturn(userFromDatabase);
         when(roleService.getAccountOwnerRole()).thenReturn(roleAccountOwner);
-        assertTrue(validator.beforeUpdate(newUser));
+        assertTrue(validator.logicalValidationBeforeUpdate(newUser));
     }
 
     @ParameterizedTest

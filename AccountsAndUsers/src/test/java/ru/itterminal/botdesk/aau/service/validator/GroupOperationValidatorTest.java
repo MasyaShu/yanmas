@@ -77,7 +77,7 @@ class GroupOperationValidatorTest {
     void checkIsInnerGroupForCreateUpdate_shouldGetNoError_whenAnonymousUser() {
         Group group = groupTestHelper.getRandomValidEntity();
         when(service.create(any())).thenReturn(group);
-        assertTrue(validator.beforeCreate(group));
+        assertTrue(validator.logicalValidationBeforeCreate(group));
     }
 
     @Test
@@ -97,7 +97,7 @@ class GroupOperationValidatorTest {
     void checkIsInnerGroupForCreateUpdate_shouldGetNoErrors_whenUserInnerGroup() {
         Group group = groupTestHelper.getRandomValidEntity();
         when(service.create(any())).thenReturn(group);
-        assertTrue(validator.beforeCreate(group));
+        assertTrue(validator.logicalValidationBeforeCreate(group));
     }
 
     @Test

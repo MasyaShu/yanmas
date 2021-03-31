@@ -18,15 +18,15 @@ public class TicketTemplateOperationValidator extends BasicOperationValidatorImp
     public static final String A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TEMPLATE = "A user from not inner group cannot create or update ticket template";
 
     @Override
-    public boolean beforeCreate(TicketTemplate entity) {
+    public boolean logicalValidationBeforeCreate(TicketTemplate entity) {
         checkDateStartAfterDateEnd(entity);
-        return super.beforeCreate(entity);
+        return super.logicalValidationBeforeCreate(entity);
     }
 
     @Override
-    public boolean beforeUpdate(TicketTemplate entity) {
+    public boolean logicalValidationBeforeUpdate(TicketTemplate entity) {
         checkDateStartAfterDateEnd(entity);
-        return super.beforeUpdate(entity);
+        return super.logicalValidationBeforeUpdate(entity);
     }
 
     private void checkDateStartAfterDateEnd(TicketTemplate entity) {

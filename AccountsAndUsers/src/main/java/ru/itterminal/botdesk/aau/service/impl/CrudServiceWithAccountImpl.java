@@ -78,7 +78,7 @@ public abstract class CrudServiceWithAccountImpl<
     public E create(E entity) {
         setNestedObjectsOfEntityBeforeCreate(entity);
         validator.checkAccessBeforeCreate(entity);
-        validator.beforeCreate(entity);
+        validator.logicalValidationBeforeCreate(entity);
         log.trace(format(CREATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.toString()));
         UUID id = UUID.randomUUID();
         entity.setId(id);
@@ -96,7 +96,7 @@ public abstract class CrudServiceWithAccountImpl<
     public E update(E entity) {
         setNestedObjectsOfEntityBeforeUpdate(entity);
         validator.checkAccessBeforeUpdate(entity);
-        validator.beforeUpdate(entity);
+        validator.logicalValidationBeforeUpdate(entity);
         log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
         var accountId = jwtUserBuilder.getJwtUser().getAccountId();
         repository.findByIdAndAccountId(entity.getId(), accountId);

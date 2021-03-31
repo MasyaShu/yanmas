@@ -39,7 +39,7 @@ public class TicketCounterServiceImpl
     @Transactional
     public TicketCounter create(TicketCounter entity) {
         validator.checkAccessBeforeCreate(entity);
-        validator.beforeCreate(entity);
+        validator.logicalValidationBeforeCreate(entity);
         log.trace(format(CREATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.toString()));
         entity.setId(jwtUserBuilder.getJwtUser().getAccountId());
         entity.generateDisplayName();

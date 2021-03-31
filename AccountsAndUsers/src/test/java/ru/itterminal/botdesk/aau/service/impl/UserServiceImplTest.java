@@ -142,41 +142,41 @@ class UserServiceImplTest {
 
     @Test
     void create_shouldCreateUser_whenPassedValidDataWithRoleAccountOwner() {
-        when(validator.beforeCreate(any())).thenReturn(true);
+        when(validator.logicalValidationBeforeCreate(any())).thenReturn(true);
         when(validator.checkUniqueness(any())).thenReturn(true);
         when(userRepository.create(any())).thenReturn(user);
         when(roleService.getAccountOwnerRole()).thenReturn(roleAccountOwner);
         user.setRole(roleAccountOwner);
         User createdUser = service.create(user);
         assertEquals(createdUser, user);
-        verify(validator, times(1)).beforeCreate(any());
+        verify(validator, times(1)).logicalValidationBeforeCreate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(userRepository, times(1)).create(any());
     }
 
     @Test
     void create_shouldCreateUser_whenPassedValidDataWithRoleAdmin() {
-        when(validator.beforeCreate(any())).thenReturn(true);
+        when(validator.logicalValidationBeforeCreate(any())).thenReturn(true);
         when(validator.checkUniqueness(any())).thenReturn(true);
         when(userRepository.create(any())).thenReturn(user);
         when(roleService.getAccountOwnerRole()).thenReturn(roleAccountOwner);
         User createdUser = service.create(user);
         assertEquals(createdUser, user);
-        verify(validator, times(1)).beforeCreate(any());
+        verify(validator, times(1)).logicalValidationBeforeCreate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(userRepository, times(1)).create(any());
     }
 
     @Test
     void update_shouldUpdateUser_whenPassedValidData() {
-        when(validator.beforeUpdate(any())).thenReturn(true);
+        when(validator.logicalValidationBeforeUpdate(any())).thenReturn(true);
         when(validator.checkUniqueness(any())).thenReturn(true);
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(user));
         when(userRepository.update(any())).thenReturn(user);
         User createdUser = service.update(user);
         assertEquals(createdUser, user);
-        verify(validator, times(1)).beforeUpdate(any());
+        verify(validator, times(1)).logicalValidationBeforeUpdate(any());
         verify(validator, times(0)).checkUniqueness(any());
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(1)).findByIdAndAccountId(any(), any());
@@ -185,7 +185,7 @@ class UserServiceImplTest {
 
     @Test
     void update_shouldGetEntityNotExistException_whenUserIdNotExistInDatabase() {
-        when(validator.beforeUpdate(any())).thenReturn(true);
+        when(validator.logicalValidationBeforeUpdate(any())).thenReturn(true);
         when(validator.checkUniqueness(any())).thenReturn(true);
         when(userRepository.existsById(any())).thenReturn(false);
         when(userRepository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(user));
@@ -196,7 +196,7 @@ class UserServiceImplTest {
         );
         var actualMessage = throwable.getMessage();
         assertEquals(expectedMessage, actualMessage);
-        verify(validator, times(1)).beforeUpdate(any());
+        verify(validator, times(1)).logicalValidationBeforeUpdate(any());
         verify(validator, times(0)).checkUniqueness(any());
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(0)).findByIdAndAccountId(any(), any());
@@ -206,14 +206,14 @@ class UserServiceImplTest {
     @Test
     void update_shouldGetOptimisticLockingFailureException_whenPassedInvalidVersionOfUser() {
         String message = String.format(CrudService.VERSION_INVALID_MESSAGE, user.getId());
-        when(validator.beforeUpdate(any())).thenReturn(true);
+        when(validator.logicalValidationBeforeUpdate(any())).thenReturn(true);
         when(validator.checkUniqueness(any())).thenReturn(true);
         when(userRepository.existsById(any())).thenReturn(true);
         when(userRepository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(user));
         when(userRepository.update(any())).thenThrow(new OptimisticLockingFailureException(message));
         Throwable throwable = assertThrows(OptimisticLockingFailureException.class, () -> service.update(user));
         assertEquals(message, throwable.getMessage());
-        verify(validator, times(1)).beforeUpdate(any());
+        verify(validator, times(1)).logicalValidationBeforeUpdate(any());
         verify(validator, times(0)).checkUniqueness(any());
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(1)).findByIdAndAccountId(any(), any());

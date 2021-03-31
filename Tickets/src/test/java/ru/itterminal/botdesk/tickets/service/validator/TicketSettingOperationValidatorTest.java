@@ -12,7 +12,7 @@ import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperatio
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_MESSAGE;
 import static ru.itterminal.botdesk.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createLogicalValidationException;
-import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_SETTING;
+import static ru.itterminal.botdesk.security.jwt.JwtUserBuilder.USER_FROM_OUTER_GROUP_CANNOT_CREATE_OR_UPDATE_THIS_ENTITY;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.TICKET_SETTING_IS_EMPTY;
 import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.TICKET_SETTING_UNIQUE_FIELDS;
 
@@ -30,12 +30,13 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import ru.itterminal.botdesk.commons.exception.LogicalValidationException;
 import ru.itterminal.botdesk.security.config.TestSecurityConfig;
+import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
 import ru.itterminal.botdesk.tickets.model.TicketSetting;
 import ru.itterminal.botdesk.tickets.model.test.TicketSettingTestHelper;
 import ru.itterminal.botdesk.tickets.service.impl.SettingsAccessToTicketTypesServiceImpl;
 import ru.itterminal.botdesk.tickets.service.impl.TicketSettingServiceImpl;
 
-@SpringJUnitConfig(value = {TicketSettingOperationValidator.class})
+@SpringJUnitConfig(value = {TicketSettingOperationValidator.class, JwtUserBuilder.class})
 @Import(TestSecurityConfig.class)
 @ActiveProfiles(SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS)
 class TicketSettingOperationValidatorTest {
@@ -45,6 +46,10 @@ class TicketSettingOperationValidatorTest {
 
     @MockBean
     private SettingsAccessToTicketTypesServiceImpl settingsAccessToTicketTypesService;
+
+    @SuppressWarnings("unused")
+    @Autowired
+    private JwtUserBuilder jwtUserBuilder;
 
     @Autowired
     private TicketSettingOperationValidator validator;
@@ -82,7 +87,7 @@ class TicketSettingOperationValidatorTest {
     void beforeCreate_shouldGetTrue_whenPassedRandomValidEntity () {
         when(settingsAccessToTicketTypesService.isPermittedTicketType(any(), any())).thenReturn(true);
         TicketSetting ticketSetting = ticketSettingTestHelper.getRandomValidEntity();
-        assertTrue(validator.beforeCreate(ticketSetting));
+        assertTrue(validator.logicalValidationBeforeCreate(ticketSetting));
     }
 
     @Test
@@ -90,7 +95,7 @@ class TicketSettingOperationValidatorTest {
     void beforeCreate_shouldGetTrue_whenPassedPredefinedValidEntity () {
         TicketSetting ticketSetting = ticketSettingTestHelper.getPredefinedValidEntityList().get(0);
         when(settingsAccessToTicketTypesService.isPermittedTicketType(any(), any())).thenReturn(true);
-        assertTrue(validator.beforeCreate(ticketSetting));
+        assertTrue(validator.logicalValidationBeforeCreate(ticketSetting));
     }
 
     @Test
@@ -99,7 +104,7 @@ class TicketSettingOperationValidatorTest {
         when(service.findByUniqueFields(any())).thenReturn(Collections.emptyList());
         when(settingsAccessToTicketTypesService.isPermittedTicketType(any(), any())).thenReturn(true);
         TicketSetting ticketSetting = ticketSettingTestHelper.getRandomValidEntity();
-        assertTrue(validator.beforeUpdate(ticketSetting));
+        assertTrue(validator.logicalValidationBeforeUpdate(ticketSetting));
         verify(service, times(1)).findByUniqueFields(any());
     }
 
@@ -109,7 +114,7 @@ class TicketSettingOperationValidatorTest {
         when(service.findByUniqueFields(any())).thenReturn(Collections.emptyList());
         when(settingsAccessToTicketTypesService.isPermittedTicketType(any(), any())).thenReturn(true);
         TicketSetting ticketSetting = ticketSettingTestHelper.getPredefinedValidEntityList().get(0);
-        assertTrue(validator.beforeUpdate(ticketSetting));
+        assertTrue(validator.logicalValidationBeforeUpdate(ticketSetting));
         verify(service, times(1)).findByUniqueFields(any());
     }
 
@@ -119,7 +124,7 @@ class TicketSettingOperationValidatorTest {
         when(service.findByUniqueFields(any())).thenReturn(Collections.emptyList());
         TicketSetting ticketSetting = new TicketSetting();
         LogicalValidationException exception = assertThrows(LogicalValidationException.class,
-                                                            ()-> validator.beforeUpdate(ticketSetting));
+                                                            ()-> validator.logicalValidationBeforeUpdate(ticketSetting));
         assertEquals(1, exception.getFieldErrors().get(TICKET_SETTING_IS_EMPTY).size());
         verify(service, times(1)).findByUniqueFields(any());
     }
@@ -130,7 +135,7 @@ class TicketSettingOperationValidatorTest {
         var ticketSetting = ticketSettingTestHelper.getPredefinedValidEntityList().get(0);
         AccessDeniedException thrown = assertThrows(AccessDeniedException.class,
                 () -> validator.checkAccessBeforeCreate(ticketSetting));
-        assertEquals(A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_SETTING,
+        assertEquals(USER_FROM_OUTER_GROUP_CANNOT_CREATE_OR_UPDATE_THIS_ENTITY,
                 thrown.getMessage());
     }
 
@@ -140,7 +145,7 @@ class TicketSettingOperationValidatorTest {
         var ticketSetting = ticketSettingTestHelper.getPredefinedValidEntityList().get(0);
         AccessDeniedException thrown = assertThrows(AccessDeniedException.class,
                 () -> validator.checkAccessBeforeUpdate(ticketSetting));
-        assertEquals(A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_SETTING,
+        assertEquals(USER_FROM_OUTER_GROUP_CANNOT_CREATE_OR_UPDATE_THIS_ENTITY,
                 thrown.getMessage());
     }
 
@@ -149,7 +154,7 @@ class TicketSettingOperationValidatorTest {
     void beforeCreate_shouldGetTrue_whenCurrentUserFromInnerGroup() {
         when(settingsAccessToTicketTypesService.isPermittedTicketType(any(), any())).thenReturn(true);
         var ticketSetting = ticketSettingTestHelper.getPredefinedValidEntityList().get(0);
-        assertTrue(validator.beforeCreate(ticketSetting));
+        assertTrue(validator.logicalValidationBeforeCreate(ticketSetting));
     }
 
     @Test
@@ -157,7 +162,7 @@ class TicketSettingOperationValidatorTest {
     void beforeUpdate_shouldGetTrue_whenCurrentUserFromInnerGroup() {
         when(settingsAccessToTicketTypesService.isPermittedTicketType(any(), any())).thenReturn(true);
         var ticketSetting = ticketSettingTestHelper.getPredefinedValidEntityList().get(0);
-        assertTrue(validator.beforeUpdate(ticketSetting));
+        assertTrue(validator.logicalValidationBeforeUpdate(ticketSetting));
     }
 
 }

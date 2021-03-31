@@ -95,13 +95,13 @@ class TicketStatusOperationValidatorTest {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void beforeCreate_shouldGetTrue_whenCurrentUserFromInnerGroup() {
-        assertTrue(validator.beforeCreate(ticketStatus));
+        assertTrue(validator.logicalValidationBeforeCreate(ticketStatus));
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void beforeUpdate_shouldGetTrue_whenCurrentUserFromInnerGroup() {
-        assertTrue(validator.beforeUpdate(ticketStatus));
+        assertTrue(validator.logicalValidationBeforeUpdate(ticketStatus));
     }
 
 

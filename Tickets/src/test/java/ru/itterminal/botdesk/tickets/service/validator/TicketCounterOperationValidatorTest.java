@@ -49,7 +49,7 @@ class TicketCounterOperationValidatorTest {
         var newCounterFromDatabase = TicketCounter.builder()
                 .currentNumber(15L)
                 .build();
-        assertTrue(validator.beforeUpdate(newCounterFromDatabase));
+        assertTrue(validator.logicalValidationBeforeUpdate(newCounterFromDatabase));
         verify(service, times(1)).findById(any());
     }
 
@@ -67,7 +67,7 @@ class TicketCounterOperationValidatorTest {
                 .currentNumber(5L)
                 .build();
         var actualException =
-                assertThrows(LogicalValidationException.class, () -> validator.beforeUpdate(newCounterFromDatabase));
+                assertThrows(LogicalValidationException.class, () -> validator.logicalValidationBeforeUpdate(newCounterFromDatabase));
         assertEquals(NEW_VALUE_MUST_NOT, actualException.getFieldErrors().get(CURRENT_TICKET_NUMBER).get(0).getMessage());
         verify(service, times(1)).findById(any());
     }

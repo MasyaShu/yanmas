@@ -101,7 +101,7 @@ class TicketServiceImplTest {
     @Test
     void create_shouldCreateTicket_whenPassedValidData() {
         ticket.getGroup().setIsInner(false);
-        when(validator.beforeCreate(any())).thenReturn(true);
+        when(validator.logicalValidationBeforeCreate(any())).thenReturn(true);
         when(validator.checkUniqueness(any())).thenReturn(true);
         when(accountService.findById(any())).thenReturn(ticket.getAccount());
         when(userService.findByIdAndAccountId(any())).thenReturn(ticket.getAuthor());
@@ -113,7 +113,7 @@ class TicketServiceImplTest {
         assertEquals(ticket, createdTicket);
         verify(accountService, times(1)).findById(any());
         verify(userService, times(2)).findByIdAndAccountId(any());
-        verify(validator, times(1)).beforeCreate(any());
+        verify(validator, times(1)).logicalValidationBeforeCreate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(repository, times(1)).create(any());
         verify(ticketCounterService, times(1)).getNextTicketNumber(any());
@@ -129,7 +129,7 @@ class TicketServiceImplTest {
         ticket.setIsFinished(false);
         when(accountService.findById(any())).thenReturn(ticket.getAccount());
         when(userService.findByIdAndAccountId(any())).thenReturn(ticket.getAuthor());
-        when(validator.beforeCreate(any())).thenReturn(true);
+        when(validator.logicalValidationBeforeCreate(any())).thenReturn(true);
         when(validator.checkUniqueness(any())).thenReturn(true);
         when(repository.create(any())).thenReturn(ticket);
         when(ticketCounterService.getNextTicketNumber(any())).thenReturn(number);
@@ -139,7 +139,7 @@ class TicketServiceImplTest {
         assertEquals(ticket, createdTicket);
         verify(accountService, times(1)).findById(any());
         verify(userService, times(2)).findByIdAndAccountId(any());
-        verify(validator, times(1)).beforeCreate(any());
+        verify(validator, times(1)).logicalValidationBeforeCreate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(repository, times(1)).create(any());
         verify(ticketCounterService, times(1)).getNextTicketNumber(any());
@@ -164,7 +164,7 @@ class TicketServiceImplTest {
         ticket.setObservers(List.of(ticket.getAuthor()));
         when(accountService.findById(any())).thenReturn(ticket.getAccount());
         when(userService.findByIdAndAccountId(any())).thenReturn(currentUser);
-        when(validator.beforeCreate(any())).thenReturn(true);
+        when(validator.logicalValidationBeforeCreate(any())).thenReturn(true);
         when(validator.checkUniqueness(any())).thenReturn(true);
         when(repository.create(any())).thenReturn(ticket);
         when(ticketCounterService.getNextTicketNumber(any())).thenReturn(number);
@@ -173,7 +173,7 @@ class TicketServiceImplTest {
         assertEquals(ticket, createdTicket);
         verify(accountService, times(1)).findById(any());
         verify(userService, times(2)).findByIdAndAccountId(any());
-        verify(validator, times(1)).beforeCreate(any());
+        verify(validator, times(1)).logicalValidationBeforeCreate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(repository, times(1)).create(any());
         verify(ticketCounterService, times(1)).getNextTicketNumber(any());
@@ -195,7 +195,7 @@ class TicketServiceImplTest {
         ticket.setTicketStatus(ticketSetting.getTicketStatusForClose());
         when(accountService.findById(any())).thenReturn(ticket.getAccount());
         when(userService.findByIdAndAccountId(any())).thenReturn(ticket.getAuthor());
-        when(validator.beforeCreate(any())).thenReturn(true);
+        when(validator.logicalValidationBeforeCreate(any())).thenReturn(true);
         when(validator.checkUniqueness(any())).thenReturn(true);
         when(repository.create(any())).thenReturn(ticket);
         when(ticketCounterService.getNextTicketNumber(any())).thenReturn(number);
@@ -205,7 +205,7 @@ class TicketServiceImplTest {
         assertEquals(ticket, createdTicket);
         verify(accountService, times(1)).findById(any());
         verify(userService, times(2)).findByIdAndAccountId(any());
-        verify(validator, times(1)).beforeCreate(any());
+        verify(validator, times(1)).logicalValidationBeforeCreate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(repository, times(1)).create(any());
         verify(ticketCounterService, times(1)).getNextTicketNumber(any());

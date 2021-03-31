@@ -36,7 +36,7 @@ class FileOperationValidatorTest {
                 .account(Account.builder().build())
                 .entityId(UUID.randomUUID())
                 .build();
-        assertTrue(validator.beforeCreate(file));
+        assertTrue(validator.logicalValidationBeforeCreate(file));
     }
 
     @Test
@@ -48,7 +48,7 @@ class FileOperationValidatorTest {
                 .build();
         LogicalValidationException actualException = assertThrows(
                 LogicalValidationException.class,
-                () -> validator.beforeCreate(file)
+                () -> validator.logicalValidationBeforeCreate(file)
         );
         assertEquals(
                 expectedException.getFieldErrors().get(FILE_NAME).get(0),
@@ -65,7 +65,7 @@ class FileOperationValidatorTest {
                 .build();
         LogicalValidationException actualException = assertThrows(
                 LogicalValidationException.class,
-                () -> validator.beforeCreate(file)
+                () -> validator.logicalValidationBeforeCreate(file)
         );
         assertEquals(
                 expectedException.getFieldErrors().get(FILE_NAME).get(0),
@@ -83,7 +83,7 @@ class FileOperationValidatorTest {
                 .build();
         LogicalValidationException actualException = assertThrows(
                 LogicalValidationException.class,
-                () -> validator.beforeCreate(file)
+                () -> validator.logicalValidationBeforeCreate(file)
         );
         assertEquals(
                 expectedException.getFieldErrors().get(CREATED_AT).get(0),
@@ -101,7 +101,7 @@ class FileOperationValidatorTest {
                 .build();
         LogicalValidationException actualException = assertThrows(
                 LogicalValidationException.class,
-                () -> validator.beforeCreate(file)
+                () -> validator.logicalValidationBeforeCreate(file)
         );
         assertEquals(
                 expectedException.getFieldErrors().get(CREATED_AT).get(0),

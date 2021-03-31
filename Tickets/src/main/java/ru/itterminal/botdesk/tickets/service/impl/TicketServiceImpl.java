@@ -81,7 +81,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
         );
         setNestedObjectsOfEntityBeforeCreate(entity);
         validator.checkAccessBeforeCreate(entity);
-        validator.beforeCreate(entity);
+        validator.logicalValidationBeforeCreate(entity);
         validator.checkUniqueness(entity);
         var createdEntity = repository.create(entity);
         if (createdEntity.getFiles() != null && !createdEntity.getFiles().isEmpty()) {

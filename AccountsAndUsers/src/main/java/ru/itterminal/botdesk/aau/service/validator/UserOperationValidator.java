@@ -62,8 +62,8 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
     }
 
     @Override
-    public boolean beforeCreate(User entity) {
-        super.beforeCreate(entity);
+    public boolean logicalValidationBeforeCreate(User entity) {
+        super.logicalValidationBeforeCreate(entity);
         checkAccountOwnerNotExist(entity);
         return true;
     }
@@ -75,8 +75,8 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
     }
 
     @Override
-    public boolean beforeUpdate(User entity) {
-        super.beforeUpdate(entity);
+    public boolean logicalValidationBeforeUpdate(User entity) {
+        super.logicalValidationBeforeUpdate(entity);
         var userFromDatabase = service.findById(entity.getId());
         if (!entity.getGroup().equals(userFromDatabase.getGroup())) {
             checkPossibilityOfChangingUserGroup(entity);

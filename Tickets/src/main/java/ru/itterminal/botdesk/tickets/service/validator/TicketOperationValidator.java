@@ -158,8 +158,8 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
     }
 
     @Override
-    public boolean beforeCreate(Ticket entity) {
-        var result = super.beforeCreate(entity);
+    public boolean logicalValidationBeforeCreate(Ticket entity) {
+        var result = super.logicalValidationBeforeCreate(entity);
         var errors = createMapForLogicalErrors();
         IsEmptySubjectDescriptionAndFiles(entity, errors);
         checkAuthorExecutorsAndObserversForWeightOfRoles(entity, errors);
@@ -203,8 +203,8 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
     }
 
     @Override
-    public boolean beforeUpdate(Ticket entity) {
-        var result = super.beforeUpdate(entity);
+    public boolean logicalValidationBeforeUpdate(Ticket entity) {
+        var result = super.logicalValidationBeforeUpdate(entity);
         var errors = createMapForLogicalErrors();
         IsEmptySubjectDescriptionAndFiles(entity, errors);
         checkAuthorExecutorsAndObserversForWeightOfRoles(entity, errors);
