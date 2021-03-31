@@ -5,19 +5,19 @@ import java.util.List;
 import ru.itterminal.botdesk.aau.model.test.GroupTestHelper;
 import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 import ru.itterminal.botdesk.commons.model.EntityTestHelperImpl;
-import ru.itterminal.botdesk.tickets.model.SettingsAccessToTicketViaTicketTypes;
-import ru.itterminal.botdesk.tickets.model.dto.SettingsAccessToTicketViaTicketTypesDtoRequest;
-import ru.itterminal.botdesk.tickets.model.dto.SettingsAccessToTicketViaTicketTypesDtoResponse;
+import ru.itterminal.botdesk.tickets.model.SettingsAccessToTicketTypes;
+import ru.itterminal.botdesk.tickets.model.dto.SettingsAccessToTicketTypesDtoRequest;
+import ru.itterminal.botdesk.tickets.model.dto.SettingsAccessToTicketTypesDtoResponse;
 
-public class SettingsAccessToTicketViaTicketTypesTestHelper extends EntityTestHelperImpl<SettingsAccessToTicketViaTicketTypes, SettingsAccessToTicketViaTicketTypesDtoRequest,
-        SettingsAccessToTicketViaTicketTypesDtoResponse> {
+public class SettingsAccessToTicketTypesTestHelper extends EntityTestHelperImpl<SettingsAccessToTicketTypes, SettingsAccessToTicketTypesDtoRequest,
+        SettingsAccessToTicketTypesDtoResponse> {
 
     private final GroupTicketTypesTestHelper groupTicketTypesTestHelper = new GroupTicketTypesTestHelper();
     private final GroupTestHelper groupTestHelper = new GroupTestHelper();
     private final UserTestHelper userTestHelper = new UserTestHelper();
 
     @Override
-    public SettingsAccessToTicketViaTicketTypes getRandomValidEntity() {
+    public SettingsAccessToTicketTypes getRandomValidEntity() {
         var groupTicketTypes = groupTicketTypesTestHelper.getRandomValidEntity();
         var account = groupTicketTypes.getAccount();
         var group = groupTestHelper.getRandomValidEntity();
@@ -33,7 +33,7 @@ public class SettingsAccessToTicketViaTicketTypesTestHelper extends EntityTestHe
             }
             case 1 -> user = null;
         }
-        var settingsAccessToTicketViaTicketTypes = SettingsAccessToTicketViaTicketTypes.builder()
+        var settingsAccessToTicketViaTicketTypes = SettingsAccessToTicketTypes.builder()
                 .account(account)
                 .group(group)
                 .user(user)
@@ -44,14 +44,14 @@ public class SettingsAccessToTicketViaTicketTypesTestHelper extends EntityTestHe
     }
 
     @Override
-    public List<SettingsAccessToTicketViaTicketTypes> setPredefinedValidEntityList() {
+    public List<SettingsAccessToTicketTypes> setPredefinedValidEntityList() {
         return null;
     }
 
     @SuppressWarnings("DuplicatedCode")
     @Override
-    public SettingsAccessToTicketViaTicketTypesDtoRequest convertEntityToDtoRequest(SettingsAccessToTicketViaTicketTypes entity, boolean isDtoForCreate) {
-        var dtoRequest = SettingsAccessToTicketViaTicketTypesDtoRequest.builder()
+    public SettingsAccessToTicketTypesDtoRequest convertEntityToDtoRequest(SettingsAccessToTicketTypes entity, boolean isDtoForCreate) {
+        var dtoRequest = SettingsAccessToTicketTypesDtoRequest.builder()
                 .groupId(
                         entity.getGroup() == null
                                 ? null

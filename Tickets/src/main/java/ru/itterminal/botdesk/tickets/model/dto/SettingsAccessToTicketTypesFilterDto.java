@@ -19,7 +19,7 @@ import ru.itterminal.botdesk.commons.model.validator.sortfields.ValidateSortFiel
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class SettingsAccessToTicketViaTicketTypesFilterDto extends BaseFilterDto {
+public class SettingsAccessToTicketTypesFilterDto extends BaseFilterDto {
 
     @ValidateFilter
     private BaseEntityFilter group;

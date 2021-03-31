@@ -28,7 +28,7 @@ import ru.itterminal.botdesk.commons.model.BaseEntity;
 @NoArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class SettingsAccessToTicketViaTicketTypes extends BaseEntity {
+public class SettingsAccessToTicketTypes extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "account_id", nullable = false)

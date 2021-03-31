@@ -34,13 +34,13 @@ import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
 import ru.itterminal.botdesk.tickets.model.GroupTicketTypes;
-import ru.itterminal.botdesk.tickets.model.SettingsAccessToTicketViaTicketTypes;
+import ru.itterminal.botdesk.tickets.model.SettingsAccessToTicketTypes;
 import ru.itterminal.botdesk.tickets.model.TicketSetting;
 import ru.itterminal.botdesk.tickets.model.TicketStatus;
 import ru.itterminal.botdesk.tickets.model.TicketTemplate;
 import ru.itterminal.botdesk.tickets.model.TicketType;
 import ru.itterminal.botdesk.tickets.model.dto.GroupTicketTypesDtoRequest;
-import ru.itterminal.botdesk.tickets.model.dto.SettingsAccessToTicketViaTicketTypesDtoRequest;
+import ru.itterminal.botdesk.tickets.model.dto.SettingsAccessToTicketTypesDtoRequest;
 import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoResponse;
 import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateDtoResponse;
 import ru.itterminal.botdesk.tickets.model.test.GroupTicketTypesTestHelper;
@@ -58,7 +58,7 @@ public class ITHelper {
     private Map<String, TicketStatus> ticketStatuses = new HashMap<>();
     private Map<String, TicketType> ticketTypes = new HashMap<>();
     private Map<String, GroupTicketTypes> groupTicketTypes = new HashMap<>();
-    private Map<String, SettingsAccessToTicketViaTicketTypes> settingsAccessToTicketViaTicketTypes = new HashMap<>();
+    private Map<String, SettingsAccessToTicketTypes> settingsAccessToTicketTypes = new HashMap<>();
     private Map<String, Group> innerGroup = new HashMap<>();
     private Map<String, Group> outerGroup = new HashMap<>();
     private Map<String, User> adminInnerGroup = new HashMap<>();
@@ -104,7 +104,7 @@ public class ITHelper {
 
     public static final String TICKET_TEMPLATE_KEY = "ticketTemplate_";
     public static final String GROUP_TICKET_TYPES = "group-ticket-types";
-    public static final String SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES = "ticket/setting-access-via-ticket-types";
+    public static final String SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES = "ticket/type/setting-access";
     public static final String INITIAL_GROUP_TICKET_TYPES = "InitialGroupTicketTypes";
     public static final String INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES =
             "InitialSettingsAccessToTicketViaTicketTypes";
@@ -114,7 +114,7 @@ public class ITHelper {
     public static final String TICKET_SETTING = "ticket-setting";
     public static final String TICKET_SETTING_BY_ID = "ticket-setting/{id}";
     public static final String GROUP_TICKET_TYPES_BY_ID = "group-ticket-types/{id}";
-    public static final String SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES_BY_ID = "ticket/setting-access-via-ticket-types/{id}";
+    public static final String SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES_BY_ID = "ticket/type/setting-access/{id}";
     public static final String TICKET_SETTING_BY_AUTHOR = "ticket-setting/by-author/{authorId}";
     public static final String AUTHOR_ID = "authorId";
     public static final String APPLICATION_JSON = "application/json";
@@ -426,11 +426,11 @@ public class ITHelper {
         groupTicketTypes.put(INITIAL_GROUP_TICKET_TYPES, createdGroupTicketTypes);
     }
 
-    public void createInitialSettingsAccessToTicketViaTicketTypes_IT() {
+    public void createInitialSettingsAccessToTicketTypes_IT() {
         var group = innerGroup.get(INNER_GROUP_1);
         var user = authorInnerGroup.get(AUTHOR_INNER_GROUP + "1");
         var groupOfTicketTypes = groupTicketTypes.get(INITIAL_GROUP_TICKET_TYPES);
-        var request = SettingsAccessToTicketViaTicketTypesDtoRequest.builder()
+        var request = SettingsAccessToTicketTypesDtoRequest.builder()
                 .groupId(group.getId())
                 .userId(user.getId())
                 .groupTicketTypesId(groupOfTicketTypes.getId())
@@ -446,12 +446,12 @@ public class ITHelper {
                 .post(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
                 .then()
                 .log().body()
-                .extract().response().as(SettingsAccessToTicketViaTicketTypes.class);
+                .extract().response().as(SettingsAccessToTicketTypes.class);
         createdSettings.setAccount(account);
         createdSettings.setGroup(group);
         createdSettings.setUser(user);
         createdSettings.setGroupTicketTypes(groupOfTicketTypes);
-        settingsAccessToTicketViaTicketTypes.put(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES, createdSettings);
+        settingsAccessToTicketTypes.put(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES, createdSettings);
     }
 
     public void createInitialTicketSettings() {

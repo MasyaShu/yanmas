@@ -13,14 +13,17 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl;
 import ru.itterminal.botdesk.security.jwt.JwtUser;
 import ru.itterminal.botdesk.tickets.model.TicketSetting;
+import ru.itterminal.botdesk.tickets.service.impl.SettingsAccessToTicketTypesServiceImpl;
 import ru.itterminal.botdesk.tickets.service.impl.TicketSettingServiceImpl;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class TicketSettingOperationValidator extends BasicOperationValidatorImpl<TicketSetting> {
 
     public static final String TICKET_SETTING_UNIQUE_FIELDS = "The key of settings (accountId, groupId, authorId)";
@@ -30,12 +33,11 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
             "A user from outer group cannot create or update ticket setting";
     public static final String A_USER_CANNOT_GET_SETTING_OR_PREDEFINED_VALUES_FOR_TICKET =
             "A user cannot get setting or predefined values for ticket if his group is not equal group of author from request";
+    public static final String ACCESS_TO_TICKET_TYPE = "Access to ticket type";
+    public static final String AUTHOR_HAS_NOT_ACCESS_TO_TICKET_TYPE = "Author has not access to ticket type";
 
     private final TicketSettingServiceImpl service;
-
-    public TicketSettingOperationValidator(TicketSettingServiceImpl service) {
-        this.service = service;
-    }
+    private final SettingsAccessToTicketTypesServiceImpl settingsAccessToTicketTypesService;
 
     @Override
     public void checkAccessBeforeCreate(TicketSetting entity) {
@@ -68,7 +70,8 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
             return true;
         } else {
             log.error(format(NOT_UNIQUE_MESSAGE, format(NOT_UNIQUE_MESSAGE, TICKET_SETTING_UNIQUE_FIELDS)));
-            throw createLogicalValidationException(NOT_UNIQUE_CODE, format(NOT_UNIQUE_MESSAGE, TICKET_SETTING_UNIQUE_FIELDS));
+            throw createLogicalValidationException(
+                    NOT_UNIQUE_CODE, format(NOT_UNIQUE_MESSAGE, TICKET_SETTING_UNIQUE_FIELDS));
         }
     }
 
@@ -106,6 +109,14 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
 
         if (isTicketSettingIsEmpty) {
             addValidationErrorIntoErrors(TICKET_SETTING_IS_EMPTY, TICKET_SETTING_MUST_NOT_BE_EMPTY, errors);
+        }
+
+        if (entity.getTicketTypeForNew() != null && entity.getAuthor() != null) {
+            var ticketTypeId = entity.getTicketTypeForNew().getId();
+            var userId = entity.getAuthor().getId();
+            if (!settingsAccessToTicketTypesService.isPermittedTicketType(ticketTypeId, userId)) {
+                addValidationErrorIntoErrors(ACCESS_TO_TICKET_TYPE, AUTHOR_HAS_NOT_ACCESS_TO_TICKET_TYPE, errors);
+            }
         }
 
         ifErrorsNotEmptyThrowLogicalValidationException(errors);

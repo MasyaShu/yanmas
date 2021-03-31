@@ -9,39 +9,39 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl;
 import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
-import ru.itterminal.botdesk.tickets.model.SettingsAccessToTicketViaTicketTypes;
-import ru.itterminal.botdesk.tickets.service.impl.SettingsAccessToTicketViaTicketTypesServiceImpl;
+import ru.itterminal.botdesk.tickets.model.SettingsAccessToTicketTypes;
+import ru.itterminal.botdesk.tickets.service.impl.SettingsAccessToTicketTypesServiceImpl;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class SettingsAccessToTicketViaTicketTypesOperationValidator
-        extends BasicOperationValidatorImpl<SettingsAccessToTicketViaTicketTypes> {
+public class SettingsAccessToTicketTypesOperationValidator
+        extends BasicOperationValidatorImpl<SettingsAccessToTicketTypes> {
 
     public static final String THIS_KEY_OF_SETTINGS_ACCOUNT_ID_GROUP_ID_USER_ID =
             "This key of settings (accountId, groupId, userId)";
 
-    private final SettingsAccessToTicketViaTicketTypesServiceImpl service;
+    private final SettingsAccessToTicketTypesServiceImpl service;
     private final JwtUserBuilder jwtUserBuilder;
 
     @Override
-    public void checkAccessBeforeCreate(SettingsAccessToTicketViaTicketTypes entity) {
+    public void checkAccessBeforeCreate(SettingsAccessToTicketTypes entity) {
         jwtUserBuilder.throwAccessDeniedExceptionIfCurrentUserFromOuterGroup();
     }
 
     @Override
-    public void checkAccessBeforeUpdate(SettingsAccessToTicketViaTicketTypes entity) {
+    public void checkAccessBeforeUpdate(SettingsAccessToTicketTypes entity) {
         jwtUserBuilder.throwAccessDeniedExceptionIfCurrentUserFromOuterGroup();
     }
 
     @Override
-    public void checkAccessBeforeRead(SettingsAccessToTicketViaTicketTypes entity) {
+    public void checkAccessBeforeRead(SettingsAccessToTicketTypes entity) {
         jwtUserBuilder.throwAccessDeniedExceptionIfCurrentUserFromOuterGroup();
     }
 
     @SuppressWarnings("DuplicatedCode")
     @Override
-    public boolean checkUniqueness(SettingsAccessToTicketViaTicketTypes entity) {
+    public boolean checkUniqueness(SettingsAccessToTicketTypes entity) {
         log.trace(CHECK_UNIQUENESS, entity);
         var foundSetting = service.findByUniqueFields(entity);
         if (foundSetting.isEmpty()) {

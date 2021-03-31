@@ -11,7 +11,7 @@ import static ru.itterminal.botdesk.IT.UserIT.TOTAL_ELEMENTS;
 import static ru.itterminal.botdesk.IT.util.ITHelper.*;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_CODE;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_MESSAGE;
-import static ru.itterminal.botdesk.tickets.service.validator.SettingsAccessToTicketViaTicketTypesOperationValidator.THIS_KEY_OF_SETTINGS_ACCOUNT_ID_GROUP_ID_USER_ID;
+import static ru.itterminal.botdesk.tickets.service.validator.SettingsAccessToTicketTypesOperationValidator.THIS_KEY_OF_SETTINGS_ACCOUNT_ID_GROUP_ID_USER_ID;
 
 import java.util.List;
 import java.util.UUID;
@@ -41,8 +41,8 @@ import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
 import ru.itterminal.botdesk.commons.exception.error.ApiError;
 import ru.itterminal.botdesk.security.jwt.JwtProvider;
-import ru.itterminal.botdesk.tickets.model.SettingsAccessToTicketViaTicketTypes;
-import ru.itterminal.botdesk.tickets.model.test.SettingsAccessToTicketViaTicketTypesTestHelper;
+import ru.itterminal.botdesk.tickets.model.SettingsAccessToTicketTypes;
+import ru.itterminal.botdesk.tickets.model.test.SettingsAccessToTicketTypesTestHelper;
 
 @SuppressWarnings({"unused", "deprecation", "SimplifyStreamApiCallChains"})
 @DataJpaTest
@@ -50,7 +50,7 @@ import ru.itterminal.botdesk.tickets.model.test.SettingsAccessToTicketViaTicketT
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = {ITTestConfig.class, JwtProvider.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class SettingsAccessToTicketViaTicketTypesIT {
+class SettingsAccessToTicketTypesIT {
 
     public static final String TICKET_SETTING_IS_EMPTY = "Ticket setting is empty";
     public static final String NAME_IS_OCCUPIED = "name is occupied";
@@ -62,8 +62,8 @@ class SettingsAccessToTicketViaTicketTypesIT {
     private UserRepository userRepository;
 
     private static final ITHelper itHelper = new ITHelper();
-    private final SettingsAccessToTicketViaTicketTypesTestHelper settingsTestHelper =
-            new SettingsAccessToTicketViaTicketTypesTestHelper();
+    private final SettingsAccessToTicketTypesTestHelper settingsTestHelper =
+            new SettingsAccessToTicketTypesTestHelper();
 
     @BeforeAll
     void beforeAll() {
@@ -75,7 +75,7 @@ class SettingsAccessToTicketViaTicketTypesIT {
         itHelper.createInitialUsers();
         itHelper.createInitialTicketType();
         itHelper.createInitialGroupTicketTypes();
-        itHelper.createInitialSettingsAccessToTicketViaTicketTypes_IT();
+        itHelper.createInitialSettingsAccessToTicketTypes_IT();
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
@@ -84,7 +84,7 @@ class SettingsAccessToTicketViaTicketTypesIT {
     void successGetByFilterByAllUsersFromInnerGroupWithRolesAccountOwnerAndAdminWithEmptyFilter(String userKey,
                                                                                                 User user) {
         var expectedEntity =
-                itHelper.getSettingsAccessToTicketViaTicketTypes().values().stream().collect(Collectors.toList());
+                itHelper.getSettingsAccessToTicketTypes().values().stream().collect(Collectors.toList());
         var response = given().
                 when()
                 .headers(
@@ -100,7 +100,7 @@ class SettingsAccessToTicketViaTicketTypesIT {
                 .body(TOTAL_ELEMENTS, equalTo(expectedEntity.size()))
                 .statusCode(HttpStatus.OK.value())
                 .extract().response().asString();
-        var actualEntity = from(response).getList(CONTENT, SettingsAccessToTicketViaTicketTypes.class);
+        var actualEntity = from(response).getList(CONTENT, SettingsAccessToTicketTypes.class);
         assertEquals(expectedEntity.size(), actualEntity.size());
         assertThat(actualEntity).usingRecursiveComparison().ignoringActualNullFields()
                 .isEqualTo(expectedEntity);
@@ -116,7 +116,7 @@ class SettingsAccessToTicketViaTicketTypesIT {
             return;
         }
         var expectedEntity =
-                itHelper.getSettingsAccessToTicketViaTicketTypes().values().stream().collect(Collectors.toList());
+                itHelper.getSettingsAccessToTicketTypes().values().stream().collect(Collectors.toList());
         given().
                 when()
                 .headers(
@@ -150,7 +150,7 @@ class SettingsAccessToTicketViaTicketTypesIT {
     @Order(40)
     void successGetByIdByAllUsersFromInnerGroupWithRolesAccountOwnerAndAdmin(String userKey, User user) {
         var expectedEntity =
-                itHelper.getSettingsAccessToTicketViaTicketTypes()
+                itHelper.getSettingsAccessToTicketTypes()
                         .get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES);
         var actualEntity = given().
                 when().
@@ -165,7 +165,7 @@ class SettingsAccessToTicketViaTicketTypesIT {
                 .log().body()
                 .body(ID, equalTo(expectedEntity.getId().toString()))
                 .statusCode(HttpStatus.OK.value())
-                .extract().response().as(SettingsAccessToTicketViaTicketTypes.class);
+                .extract().response().as(SettingsAccessToTicketTypes.class);
         assertThat(actualEntity).usingRecursiveComparison().ignoringActualNullFields()
                 .isEqualTo(expectedEntity);
     }
@@ -180,7 +180,7 @@ class SettingsAccessToTicketViaTicketTypesIT {
             return;
         }
         var expectedEntity =
-                itHelper.getSettingsAccessToTicketViaTicketTypes()
+                itHelper.getSettingsAccessToTicketTypes()
                         .get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES);
         given().
                 when().
@@ -213,7 +213,7 @@ class SettingsAccessToTicketViaTicketTypesIT {
     @MethodSource("getStreamUsersFromInnerGroupWithRolesAccountOwnerAndAdmin")
     @Order(70)
     void successCreateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin(String userKey, User user) {
-        var expectedEntity = itHelper.getSettingsAccessToTicketViaTicketTypes().get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES).toBuilder()
+        var expectedEntity = itHelper.getSettingsAccessToTicketTypes().get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES).toBuilder()
                 .user(user)
                 .deleted(null)
                 .displayName(null)
@@ -233,7 +233,7 @@ class SettingsAccessToTicketViaTicketTypesIT {
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.CREATED.value())
-                .extract().response().as(SettingsAccessToTicketViaTicketTypes.class);
+                .extract().response().as(SettingsAccessToTicketTypes.class);
         assertEquals(expectedEntity.getUser().getId(), actualEntity.getUser().getId());
     }
 
@@ -242,7 +242,7 @@ class SettingsAccessToTicketViaTicketTypesIT {
     @Order(80)
     void failedCreateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenKeysIsNotUnique(String userKey,
                                                                                              User user) {
-        var createdEntity = itHelper.getSettingsAccessToTicketViaTicketTypes().get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES).toBuilder()
+        var createdEntity = itHelper.getSettingsAccessToTicketTypes().get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES).toBuilder()
                 .build();
         var request = settingsTestHelper.convertEntityToDtoRequest(createdEntity, true);
         var apiError = given().
@@ -269,7 +269,7 @@ class SettingsAccessToTicketViaTicketTypesIT {
     @Order(90)
     void failedCreateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenGroupOfTicketTypesIsNull
             (String userKey, User user) {
-        var createdEntity = itHelper.getSettingsAccessToTicketViaTicketTypes().get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES).toBuilder()
+        var createdEntity = itHelper.getSettingsAccessToTicketTypes().get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES).toBuilder()
                 .groupTicketTypes(null)
                 .build();
         var request = settingsTestHelper.convertEntityToDtoRequest(createdEntity, true);
@@ -296,7 +296,7 @@ class SettingsAccessToTicketViaTicketTypesIT {
                 (user.getRole().getName().equals(Roles.ADMIN.toString()) && user.getGroup().getIsInner())) {
             return;
         }
-        var createdEntity = itHelper.getSettingsAccessToTicketViaTicketTypes().get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES);
+        var createdEntity = itHelper.getSettingsAccessToTicketTypes().get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES);
         var request = settingsTestHelper.convertEntityToDtoRequest(createdEntity, true);
         given().
                 when().
@@ -329,7 +329,7 @@ class SettingsAccessToTicketViaTicketTypesIT {
     @MethodSource("getStreamUsersFromInnerGroupWithRolesAccountOwnerAndAdmin")
     @Order(120)
     void successUpdateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin(String userKey, User user) {
-        var updatedEntity = itHelper.getSettingsAccessToTicketViaTicketTypes()
+        var updatedEntity = itHelper.getSettingsAccessToTicketTypes()
                 .get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES).toBuilder().build();
         var request = settingsTestHelper.convertEntityToDtoRequest(updatedEntity, false);
         var entityAfterUpdate = given().
@@ -344,8 +344,8 @@ class SettingsAccessToTicketViaTicketTypesIT {
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.OK.value())
-                .extract().response().as(SettingsAccessToTicketViaTicketTypes.class);
-        itHelper.getSettingsAccessToTicketViaTicketTypes().get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
+                .extract().response().as(SettingsAccessToTicketTypes.class);
+        itHelper.getSettingsAccessToTicketTypes().get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
                 .setVersion(entityAfterUpdate.getVersion());
     }
 
@@ -354,7 +354,7 @@ class SettingsAccessToTicketViaTicketTypesIT {
     @Order(130)
     void failedUpdateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenKeysIsNotUnique(String userKey,
                                                                                              User user) {
-        var updatedEntity = itHelper.getSettingsAccessToTicketViaTicketTypes()
+        var updatedEntity = itHelper.getSettingsAccessToTicketTypes()
                 .get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES);
         updatedEntity.setUser(user);
         var request = settingsTestHelper.convertEntityToDtoRequest(updatedEntity, false);
@@ -382,7 +382,7 @@ class SettingsAccessToTicketViaTicketTypesIT {
     @Order(140)
     void failedUpdateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenGroupOfTicketTypesIsNull
             (String userKey, User user) {
-        var updatedEntity = itHelper.getSettingsAccessToTicketViaTicketTypes()
+        var updatedEntity = itHelper.getSettingsAccessToTicketTypes()
                 .get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES).toBuilder()
                 .groupTicketTypes(null)
                 .build();
@@ -409,7 +409,7 @@ class SettingsAccessToTicketViaTicketTypesIT {
                 (user.getRole().getName().equals(Roles.ADMIN.toString()) && user.getGroup().getIsInner())) {
             return;
         }
-        var updatedEntity = itHelper.getSettingsAccessToTicketViaTicketTypes()
+        var updatedEntity = itHelper.getSettingsAccessToTicketTypes()
                 .get(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES);
         var request = settingsTestHelper.convertEntityToDtoRequest(updatedEntity, false);
         given().
