@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import ru.itterminal.botdesk.aau.util.ReflectionHelper;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.botdesk.commons.model.validator.scenario.Create;
@@ -33,16 +35,17 @@ public class TicketStatusControllerV1 extends BaseController {
 
     private final TicketStatusServiceImpl ticketStatusService;
     private final SpecificationsFactory specFactory;
+    private final ReflectionHelper reflectionHelper;
 
     private final String ENTITY_NAME = TicketStatus.class.getSimpleName();
 
     @PostMapping()
-    public ResponseEntity<TicketStatusDto> create(Principal principal,
-                                                  @Validated(Create.class) @RequestBody TicketStatusDto request) {
+    public ResponseEntity<TicketStatusDto> create(@Validated(Create.class) @RequestBody TicketStatusDto request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
-
-        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        var ticketStatus = ticketStatusService.convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(request, jwtUser.getAccountId());
+        var ticketStatus = (TicketStatus) reflectionHelper.convertRequestDtoIntoEntityWhereNestedObjectsWithOnlyValidId(
+                request,
+                TicketStatus.class
+        );
         ticketStatus.setIsCanceledPredefined(false);
         ticketStatus.setIsStartedPredefined(false);
         ticketStatus.setIsFinishedPredefined(false);
@@ -55,11 +58,12 @@ public class TicketStatusControllerV1 extends BaseController {
     }
 
     @PutMapping()
-    public ResponseEntity<TicketStatusDto> update(Principal principal,
-                                                  @Validated(Update.class) @RequestBody TicketStatusDto request) {
+    public ResponseEntity<TicketStatusDto> update(@Validated(Update.class) @RequestBody TicketStatusDto request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
-        JwtUser jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        TicketStatus ticketType = ticketStatusService.convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(request, jwtUser.getAccountId());
+        var ticketType = (TicketStatus) reflectionHelper.convertRequestDtoIntoEntityWhereNestedObjectsWithOnlyValidId(
+                request,
+                TicketStatus.class
+        );
         TicketStatus updatedTicketStatus = ticketStatusService.update(ticketType);
         TicketStatusDto returnedTicketStatus = modelMapper.map(updatedTicketStatus, TicketStatusDto.class);
         log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedTicketStatus);

@@ -1,5 +1,7 @@
 package ru.itterminal.botdesk.commons.model.dto;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,4 +30,7 @@ public class BaseFilterDto {
     @ValueOfEnum(enumClass = Sort.Direction.class, message = "must be any of: asc, desc")
     private String sortDirection = "ASC";
 
+    public List<String> getSortByFields() {
+        return null;
+    }
 }

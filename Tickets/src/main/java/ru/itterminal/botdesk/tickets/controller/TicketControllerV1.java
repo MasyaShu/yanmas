@@ -11,6 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
+import ru.itterminal.botdesk.aau.util.ReflectionHelper;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter;
 import ru.itterminal.botdesk.commons.model.filter.ListOfBaseEntityFilter;
@@ -46,20 +47,21 @@ public class TicketControllerV1 extends BaseController {
     private final TicketServiceImpl ticketService;
     private final UserServiceImpl userService;
     private final SpecificationsFactory specFactory;
+    private final ReflectionHelper reflectionHelper;
 
     private final String ENTITY_NAME = Ticket.class.getSimpleName();
 
     @PostMapping()
-    public ResponseEntity<TicketDtoResponse> create
-            (Principal principal, @Validated(Create.class) @RequestBody TicketDtoRequest ticketDtoRequest) {
+    public ResponseEntity<TicketDtoResponse> create (
+            Principal principal,
+            @Validated(Create.class) @RequestBody TicketDtoRequest ticketDtoRequest) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, ticketDtoRequest);
         var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
         var currentUser = userService.findByEmail(jwtUser.getUsername());
         var createdTicket = ticketService.create(
-                ticketService.convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(
+                (Ticket) reflectionHelper.convertRequestDtoIntoEntityWhereNestedObjectsWithOnlyValidId(
                         ticketDtoRequest,
-                        jwtUser.getAccountId()
-                ),
+                        Ticket.class),
                 currentUser
         );
         var returnedTicket = modelMapper.map(createdTicket, TicketDtoResponse.class);

@@ -1,36 +1,51 @@
 package ru.itterminal.botdesk.IT.util;
 
+import static io.restassured.RestAssured.given;
+import static io.restassured.path.json.JsonPath.from;
+import static org.hamcrest.Matchers.equalTo;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.params.provider.Arguments;
+import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.restassured.response.Response;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.junit.jupiter.params.provider.Arguments;
-import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
-import ru.itterminal.botdesk.aau.model.*;
+import ru.itterminal.botdesk.aau.model.Account;
+import ru.itterminal.botdesk.aau.model.Group;
+import ru.itterminal.botdesk.aau.model.Role;
+import ru.itterminal.botdesk.aau.model.Roles;
+import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.test.AccountTestHelper;
 import ru.itterminal.botdesk.aau.model.test.GroupTestHelper;
 import ru.itterminal.botdesk.aau.model.test.RoleTestHelper;
 import ru.itterminal.botdesk.aau.model.test.UserTestHelper;
 import ru.itterminal.botdesk.aau.repository.UserRepository;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
+import ru.itterminal.botdesk.tickets.model.GroupTicketTypes;
+import ru.itterminal.botdesk.tickets.model.SettingsAccessToTicketViaTicketTypes;
 import ru.itterminal.botdesk.tickets.model.TicketSetting;
 import ru.itterminal.botdesk.tickets.model.TicketStatus;
 import ru.itterminal.botdesk.tickets.model.TicketTemplate;
 import ru.itterminal.botdesk.tickets.model.TicketType;
+import ru.itterminal.botdesk.tickets.model.dto.GroupTicketTypesDtoRequest;
+import ru.itterminal.botdesk.tickets.model.dto.SettingsAccessToTicketViaTicketTypesDtoRequest;
 import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoResponse;
 import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateDtoResponse;
+import ru.itterminal.botdesk.tickets.model.test.GroupTicketTypesTestHelper;
 import ru.itterminal.botdesk.tickets.model.test.TicketSettingTestHelper;
 import ru.itterminal.botdesk.tickets.model.test.TicketTemplateTestHelper;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static io.restassured.RestAssured.given;
-import static io.restassured.path.json.JsonPath.from;
-import static org.hamcrest.Matchers.equalTo;
 
 @SuppressWarnings("deprecation")
 @Getter
@@ -38,11 +53,12 @@ import static org.hamcrest.Matchers.equalTo;
 @NoArgsConstructor
 public class ITHelper {
 
-    public static final String TICKET_TEMPLATE_KEY = "ticketTemplate_";
     private Account account;
     private User accountOwner;
     private Map<String, TicketStatus> ticketStatuses = new HashMap<>();
     private Map<String, TicketType> ticketTypes = new HashMap<>();
+    private Map<String, GroupTicketTypes> groupTicketTypes = new HashMap<>();
+    private Map<String, SettingsAccessToTicketViaTicketTypes> settingsAccessToTicketViaTicketTypes = new HashMap<>();
     private Map<String, Group> innerGroup = new HashMap<>();
     private Map<String, Group> outerGroup = new HashMap<>();
     private Map<String, User> adminInnerGroup = new HashMap<>();
@@ -63,6 +79,7 @@ public class ITHelper {
     private final GroupTestHelper groupTestHelper = new GroupTestHelper();
     private final TicketSettingTestHelper ticketSettingTestHelper = new TicketSettingTestHelper();
     private final TicketTemplateTestHelper ticketTemplateTestHelper = new TicketTemplateTestHelper();
+    private final GroupTicketTypesTestHelper groupTicketTypesTestHelper = new GroupTicketTypesTestHelper();
     protected final ModelMapper modelMapper = new ModelMapper();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -85,10 +102,19 @@ public class ITHelper {
             )
     );
 
+    public static final String TICKET_TEMPLATE_KEY = "ticketTemplate_";
+    public static final String GROUP_TICKET_TYPES = "group-ticket-types";
+    public static final String SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES = "ticket/setting-access-via-ticket-types";
+    public static final String INITIAL_GROUP_TICKET_TYPES = "InitialGroupTicketTypes";
+    public static final String INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES =
+            "InitialSettingsAccessToTicketViaTicketTypes";
     public static final String TICKET_TEMPLATE = "ticket-template";
+    public static final String TICKET_TYPE = "ticket-type";
     public static final String TICKET_TEMPLATE_BY_ID = "ticket-template/{id}";
     public static final String TICKET_SETTING = "ticket-setting";
     public static final String TICKET_SETTING_BY_ID = "ticket-setting/{id}";
+    public static final String GROUP_TICKET_TYPES_BY_ID = "group-ticket-types/{id}";
+    public static final String SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES_BY_ID = "ticket/setting-access-via-ticket-types/{id}";
     public static final String TICKET_SETTING_BY_AUTHOR = "ticket-setting/by-author/{authorId}";
     public static final String AUTHOR_ID = "authorId";
     public static final String APPLICATION_JSON = "application/json";
@@ -125,7 +151,8 @@ public class ITHelper {
     public static final String OUTER_GROUP = "outerGroup_";
     public static final String GROUP = "group";
     public static final String INNER_GROUP = "innerGroup_";
-    public static final String IS_PREDEFINED_FOR_NEW_TICKET = "isPredefinedForNewTicket";
+    public static final String IT_IS_PREDEFINED_FOR_NEW_TICKET = "itIsPredefinedForNewTicket";
+    public static final String IT_IS_NEW_FOR_NEW_TICKET = "itIsNewForNewTicket";
     public static final String IS_STARTED_PREDEFINED = "isStartedPredefined";
     public static final String IS_FINISHED_PREDEFINED = "isFinishedPredefined";
     public static final String IS_REOPENED_PREDEFINED = "isReopenedPredefined";
@@ -156,12 +183,14 @@ public class ITHelper {
     public static final String[] IGNORE_FIELDS_FOR_COMPARE_TICKET_SETTING =
             {"account", "group", "author", "observers", "executors", "ticketTypeForNew",
                     "ticketStatusForNew", "ticketStatusForReopen", "ticketStatusForClose", "ticketStatusForCancel"};
+    public static final String[] IGNORE_FIELDS_FOR_COMPARE_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES = {
+            "account"};
+    public static final String[] IGNORE_FIELDS_FOR_COMPARE_GROUP_TICKET_TYPES = {"account", "ticketTypes"};
     public static final String[] IGNORE_FIELDS_FOR_COMPARE_TICKET_TEMPLATE =
             {"account", "author", "observers", "ticketType"};
     public static final String TICKET_STATUS = "ticket-status";
     public static final String TICKET_STATUS_BY_ID = "ticket-status/{id}";
     public static final String ERRORS = "errors";
-    public static final String TICKET_TYPE = "ticket-type";
     public static final String TICKET_TYPE_BY_ID = "ticket-type/{id}";
 
     public void createAccount() {
@@ -262,7 +291,7 @@ public class ITHelper {
         for (TicketType ticketType : ticketTypesList) {
             ticketType.setAccount(account);
             if (ticketType.getIsPredefinedForNewTicket()) {
-                ticketTypes.put(IS_PREDEFINED_FOR_NEW_TICKET, ticketType);
+                ticketTypes.put(IT_IS_PREDEFINED_FOR_NEW_TICKET, ticketType);
             }
         }
     }
@@ -352,6 +381,79 @@ public class ITHelper {
         }
     }
 
+    public void createInitialTicketType() {
+        var newTicketType = TicketType.builder()
+                .name(IT_IS_NEW_FOR_NEW_TICKET)
+                .build();
+        var createdNewTicketType = given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + tokens.get(accountOwner.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(newTicketType)
+                .post(TICKET_TYPE)
+                .then()
+                .log().body()
+                .extract().response().as(TicketType.class);
+        createdNewTicketType.setAccount(account);
+        ticketTypes.put(IT_IS_NEW_FOR_NEW_TICKET, createdNewTicketType);
+    }
+
+    public void createInitialGroupTicketTypes() {
+        var request = GroupTicketTypesDtoRequest.builder()
+                .name(INITIAL_GROUP_TICKET_TYPES)
+                .ticketTypes(
+                        ticketTypes.values().stream()
+                                .map(BaseEntity::getId)
+                                .collect(Collectors.toList())
+                )
+                .build();
+        var createdGroupTicketTypes = given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + tokens.get(accountOwner.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(request)
+                .post(GROUP_TICKET_TYPES)
+                .then()
+                .log().body()
+                .extract().response().as(GroupTicketTypes.class);
+        createdGroupTicketTypes.setAccount(account);
+        groupTicketTypes.put(INITIAL_GROUP_TICKET_TYPES, createdGroupTicketTypes);
+    }
+
+    public void createInitialSettingsAccessToTicketViaTicketTypes_IT() {
+        var group = innerGroup.get(INNER_GROUP_1);
+        var user = authorInnerGroup.get(AUTHOR_INNER_GROUP + "1");
+        var groupOfTicketTypes = groupTicketTypes.get(INITIAL_GROUP_TICKET_TYPES);
+        var request = SettingsAccessToTicketViaTicketTypesDtoRequest.builder()
+                .groupId(group.getId())
+                .userId(user.getId())
+                .groupTicketTypesId(groupOfTicketTypes.getId())
+                .build();
+        var createdSettings = given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + tokens.get(accountOwner.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(request)
+                .post(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
+                .then()
+                .log().body()
+                .extract().response().as(SettingsAccessToTicketViaTicketTypes.class);
+        createdSettings.setAccount(account);
+        createdSettings.setGroup(group);
+        createdSettings.setUser(user);
+        createdSettings.setGroupTicketTypes(groupOfTicketTypes);
+        settingsAccessToTicketViaTicketTypes.put(INITIAL_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES, createdSettings);
+    }
+
     public void createInitialTicketSettings() {
         createInitialTicketSetting(innerGroup.get(INNER_GROUP + "1"));
         createInitialTicketSetting(outerGroup.get(OUTER_GROUP + "1"));
@@ -359,7 +461,7 @@ public class ITHelper {
 
     private TicketTemplate createInitialTicketTemplates(TicketTemplate ticketTemplate) {
         var ticketTemplateDtoRequest = ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate, true);
-        ticketTemplateDtoRequest.setTicketTypeId(ticketTypes.get(IS_PREDEFINED_FOR_NEW_TICKET).getId());
+        ticketTemplateDtoRequest.setTicketTypeId(ticketTypes.get(IT_IS_PREDEFINED_FOR_NEW_TICKET).getId());
         ticketTemplateDtoRequest.setAuthorId(authorOuterGroup.get(AUTHOR_OUTER_GROUP + 1).getId());
         var ticketTemplateDtoResponse = given().
                 when()

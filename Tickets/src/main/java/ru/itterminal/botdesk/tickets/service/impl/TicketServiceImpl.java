@@ -15,14 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
-import ru.itterminal.botdesk.commons.model.EntityConverter;
 import ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter;
 import ru.itterminal.botdesk.commons.model.filter.ListOfBaseEntityFilter;
 import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
@@ -31,7 +29,6 @@ import ru.itterminal.botdesk.files.service.FileServiceImpl;
 import ru.itterminal.botdesk.integration.across_modules.RequestsFromModuleAccountAndUsers;
 import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
 import ru.itterminal.botdesk.tickets.model.Ticket;
-import ru.itterminal.botdesk.tickets.model.dto.TicketDtoRequest;
 import ru.itterminal.botdesk.tickets.repository.TicketRepository;
 import ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator;
 
@@ -40,7 +37,7 @@ import ru.itterminal.botdesk.tickets.service.validator.TicketOperationValidator;
 @Service
 @RequiredArgsConstructor
 public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, TicketOperationValidator, TicketRepository>
-        implements RequestsFromModuleAccountAndUsers, EntityConverter<Ticket, TicketDtoRequest> {
+        implements RequestsFromModuleAccountAndUsers {
 
     public static final String YOU_MUST_USE_ANOTHER_METHOD_CREATE =
             "You must use method create(Ticket entity, User currentUser)";
@@ -176,37 +173,5 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
         var pageable = PageRequest.of(1, 25, Sort.by(Sort.Direction.fromString("ASC"), "displayName"));
         var foundTickets = findAllByFilter(specForSearch, pageable);
         return foundTickets.getTotalElements();
-    }
-
-    @SuppressWarnings("DuplicatedCode")
-    @Override
-    public Ticket convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(TicketDtoRequest request, UUID accountId) {
-        var ticket = modelMapper.map(request, Ticket.class);
-        ticket.setAccount(Account.builder().id(accountId).build());
-        ticket.setObservers(
-                (request.getObservers() == null
-                        ? null
-                        : request.getObservers().stream()
-                                .map(id -> User.builder().id(id).build())
-                                .collect(Collectors.toList())
-                )
-        );
-        ticket.setExecutors(
-                (request.getExecutors() == null
-                        ? null
-                        : request.getExecutors().stream()
-                                .map(id -> User.builder().id(id).build())
-                                .collect(Collectors.toList())
-                )
-        );
-        ticket.setFiles(
-                (request.getFiles() == null
-                        ? null
-                        : request.getFiles().stream()
-                                .map(id -> File.builder().id(id).build())
-                                .collect(Collectors.toList())
-                )
-        );
-        return ticket;
     }
 }

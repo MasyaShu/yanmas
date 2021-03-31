@@ -43,7 +43,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
+import ru.itterminal.botdesk.aau.util.ReflectionHelper;
 import ru.itterminal.botdesk.commons.controller.BaseController;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
@@ -71,7 +71,8 @@ class TicketTypeControllerV1Test {
 
     @SuppressWarnings("unused")
     @MockBean
-    private AccountServiceImpl accountService;
+    private ReflectionHelper reflectionHelper;
+
 
     @Autowired
     private TicketTypeControllerV1 controller;
@@ -136,7 +137,7 @@ class TicketTypeControllerV1Test {
     void create_shouldCreate_whenValidDataPassed() throws Exception {
         ticketTypeDto.setDeleted(null);
         when(service.create(any())).thenReturn(ticketType_1);
-        when(service.convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(any(),any())).thenReturn(ticketType_1);
+        when(reflectionHelper.convertRequestDtoIntoEntityWhereNestedObjectsWithOnlyValidId(any(), any())).thenReturn(ticketType_1);
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -147,6 +148,7 @@ class TicketTypeControllerV1Test {
                 .andExpect(jsonPath("$.id").value(TICKET_TYPES_ID_1))
                 .andExpect(jsonPath("$.name").value(TICKET_TYPES_NAME_1));
         verify(service, times(1)).create(any());
+        verify(reflectionHelper, times(1)).convertRequestDtoIntoEntityWhereNestedObjectsWithOnlyValidId(any(), any());
     }
 
     @Test

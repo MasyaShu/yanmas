@@ -1,7 +1,7 @@
 package ru.itterminal.botdesk.files.service;
 
 import static java.lang.String.format;
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createExpectedLogicalValidationException;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createLogicalValidationException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,21 +14,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.itterminal.botdesk.aau.model.Account;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
-import ru.itterminal.botdesk.commons.model.EntityConverter;
 import ru.itterminal.botdesk.files.model.File;
-import ru.itterminal.botdesk.files.model.dto.FileDto;
 import ru.itterminal.botdesk.files.repository.FileRepository;
 import ru.itterminal.botdesk.files.repository.FileSystemRepository;
 import ru.itterminal.botdesk.files.service.validator.FileOperationValidator;
 
 @Slf4j
 @Service
-public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperationValidator, FileRepository> implements
-        EntityConverter<File, FileDto> {
+public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperationValidator, FileRepository> {
 
     public static final String FILE_ID = "File id";
     public static final String FILE_ID_IS_NULL = "File id is null";
@@ -58,11 +54,11 @@ public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperat
     @Transactional(readOnly = true)
     public FileSystemResource getFileData(UUID accountId, UUID fileId) {
         if (fileId == null) {
-            throw createExpectedLogicalValidationException(FILE_ID, FILE_ID_IS_NULL);
+            throw createLogicalValidationException(FILE_ID, FILE_ID_IS_NULL);
         }
         var file = super.findByIdAndAccountId(fileId);
         if (Boolean.FALSE.equals(file.getIsUploaded())) {
-            throw createExpectedLogicalValidationException(FILE, FILE_WAS_NOT_UPLOAD);
+            throw createLogicalValidationException(FILE, FILE_WAS_NOT_UPLOAD);
         }
         return fileSystemRepository.findInFileSystem(
                 Paths.get(
@@ -76,10 +72,10 @@ public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperat
     @Transactional
     public void putFileData(UUID accountId, UUID authorId, UUID fileId, byte[] bytes) throws IOException {
         if (fileId == null) {
-            throw createExpectedLogicalValidationException(FILE_ID, FILE_ID_IS_NULL);
+            throw createLogicalValidationException(FILE_ID, FILE_ID_IS_NULL);
         }
         if (bytes.length > maxSizeOfFile) {
-            throw createExpectedLogicalValidationException(SIZE_FILE, format(MAX_SIZE, maxSizeOfFile));
+            throw createLogicalValidationException(SIZE_FILE, format(MAX_SIZE, maxSizeOfFile));
         }
         File file = repository.findByAccountIdAndAuthorIdAndId(accountId, authorId, fileId).orElseThrow(
                 () -> {
@@ -99,13 +95,6 @@ public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperat
         file.setIsUploaded(true);
         file.setSize(bytes.length);
         repository.update(file);
-    }
-
-    @Override
-    public File convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(FileDto request, UUID accountId) {
-        var file = modelMapper.map(request, File.class);
-        file.setAccount(Account.builder().id(accountId).build());
-        return file;
     }
 
     @Override

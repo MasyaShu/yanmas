@@ -37,6 +37,7 @@ public class CommonMethodsForValidation {
         }
     }
 
+    @SuppressWarnings("unused")
     @SneakyThrows
     public static void chekObjectForNull(Object object, String messageForNull, Class exceptionClass) {
         if (object == null) {
@@ -45,6 +46,7 @@ public class CommonMethodsForValidation {
         }
     }
 
+    @SuppressWarnings("unused")
     @SneakyThrows
     public static void chekObjectForNull(Object object,
                                          String keyError,
@@ -118,7 +120,7 @@ public class CommonMethodsForValidation {
     }
 
     public static LogicalValidationException
-    createExpectedLogicalValidationException(String keyError, String errorMessage) {
+    createLogicalValidationException(String keyError, String errorMessage) {
         Map<String, List<ValidationError>> errors = new HashMap<>();
         errors.put(keyError, singletonList(new ValidationError(keyError, errorMessage)));
         return new LogicalValidationException(VALIDATION_FAILED, errors);
@@ -143,7 +145,7 @@ public class CommonMethodsForValidation {
     public static void checkStringForEquals(String stringOne, String stringTwo, String keyError,
                                             String errorMessage) {
         if (stringOne.equalsIgnoreCase(stringTwo)) {
-            throw createExpectedLogicalValidationException(keyError, errorMessage);
+            throw createLogicalValidationException(keyError, errorMessage);
         }
     }
 

@@ -1,6 +1,6 @@
 package ru.itterminal.botdesk.tickets.service.validator;
 
-import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createExpectedLogicalValidationException;
+import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createLogicalValidationException;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
@@ -38,7 +38,7 @@ public class TicketCounterOperationValidator extends BasicOperationValidatorImpl
         super.beforeUpdate(entity);
         var ticketCounterFromDatabase = service.findById(entity.getId());
         if (entity.getCurrentNumber() <= ticketCounterFromDatabase.getCurrentNumber()) {
-            throw createExpectedLogicalValidationException(CURRENT_TICKET_NUMBER, NEW_VALUE_MUST_NOT);
+            throw createLogicalValidationException(CURRENT_TICKET_NUMBER, NEW_VALUE_MUST_NOT);
         }
         return true;
     }

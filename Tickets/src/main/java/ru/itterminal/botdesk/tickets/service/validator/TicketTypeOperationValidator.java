@@ -21,8 +21,8 @@ import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.chec
 @RequiredArgsConstructor
 public class TicketTypeOperationValidator extends BasicOperationValidatorImpl<TicketType> {
 
-    public static final String A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TYPE =
-            "A user from not inner group cannot create or update ticket type";
+    public static final String USER_FROM_OUTER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TYPE =
+            "A user from outer group cannot create or update ticket type";
     private final TicketTypeServiceImpl service;
 
     @Override
@@ -42,7 +42,7 @@ public class TicketTypeOperationValidator extends BasicOperationValidatorImpl<Ti
         if (!SecurityContextHolder.getContext().getAuthentication().getName().contains("anonymous")) {
             JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             if (!jwtUser.isInnerGroup()) {
-                throw new AccessDeniedException(A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TYPE);
+                throw new AccessDeniedException(USER_FROM_OUTER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_TYPE);
             }
         }
     }

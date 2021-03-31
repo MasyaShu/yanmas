@@ -1,24 +1,21 @@
 package ru.itterminal.botdesk.tickets.service.impl;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.time.ZoneId;
+import java.util.Date;
+
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.scheduling.support.SimpleTriggerContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.itterminal.botdesk.aau.model.Account;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.botdesk.aau.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
-import ru.itterminal.botdesk.commons.model.EntityConverter;
 import ru.itterminal.botdesk.tickets.model.TicketTemplate;
-import ru.itterminal.botdesk.tickets.model.dto.TicketTemplateDtoRequest;
 import ru.itterminal.botdesk.tickets.repository.TicketTemplateRepository;
 import ru.itterminal.botdesk.tickets.service.validator.TicketTemplateOperationValidator;
-
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.UUID;
 
 @SuppressWarnings("ConstantConditions")
 @Slf4j
@@ -26,7 +23,7 @@ import java.util.UUID;
 @Transactional
 @RequiredArgsConstructor
 public class TicketTemplateServiceImpl extends CrudServiceWithAccountImpl<TicketTemplate, TicketTemplateOperationValidator,
-        TicketTemplateRepository> implements EntityConverter<TicketTemplate, TicketTemplateDtoRequest> {
+        TicketTemplateRepository> {
 
     private final AccountServiceImpl accountService;
     private final TicketTypeServiceImpl ticketTypeService;
@@ -58,13 +55,6 @@ public class TicketTemplateServiceImpl extends CrudServiceWithAccountImpl<Ticket
         if (dateNextRun != null && (ticketTemplate.getDateEnd() == null || ticketTemplate.getDateEnd() >= dateNextRun.getTime())) {
             ticketTemplate.setDateNextRun(dateNextRun.getTime());
         }
-    }
-
-    @Override
-    public TicketTemplate convertRequestDtoIntoEntityWithNestedObjectsWithOnlyId(TicketTemplateDtoRequest request, UUID accountId) {
-        var ticketTemplate = modelMapper.map(request, TicketTemplate.class);
-        ticketTemplate.setAccount(Account.builder().id(accountId).build());
-        return ticketTemplate;
     }
 
     @Override

@@ -39,6 +39,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
+import ru.itterminal.botdesk.aau.util.ReflectionHelper;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
 import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.botdesk.commons.util.CommonConstants;
@@ -49,6 +50,7 @@ import ru.itterminal.botdesk.tickets.model.dto.TicketSettingDtoResponse;
 import ru.itterminal.botdesk.tickets.model.test.TicketSettingTestHelper;
 import ru.itterminal.botdesk.tickets.service.impl.TicketSettingServiceImpl;
 
+@SuppressWarnings("unused")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {TicketSettingControllerV1.class, FilterChainProxy.class})
 @Import(TestSecurityConfig.class)
@@ -59,7 +61,9 @@ class TicketSettingControllerV1Test {
     @MockBean
     private UserServiceImpl userService;
 
-    @SuppressWarnings("unused")
+    @MockBean
+    private ReflectionHelper reflectionHelper;
+
     @MockBean
     private SpecificationsFactory specFactory;
 

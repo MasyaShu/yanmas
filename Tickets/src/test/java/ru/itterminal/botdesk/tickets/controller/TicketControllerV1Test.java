@@ -38,6 +38,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 
 import ru.itterminal.botdesk.aau.service.impl.UserServiceImpl;
+import ru.itterminal.botdesk.aau.util.ReflectionHelper;
 import ru.itterminal.botdesk.commons.exception.RestExceptionHandler;
 import ru.itterminal.botdesk.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.botdesk.commons.util.CommonConstants;
@@ -58,6 +59,9 @@ class TicketControllerV1Test {
 
     @MockBean
     private UserServiceImpl userService;
+
+    @MockBean
+    private ReflectionHelper reflectionHelper;
 
     @MockBean
     private TicketServiceImpl ticketService;
