@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.itterminal.botdesk.aau.model.Roles;
 import ru.itterminal.botdesk.aau.model.User;
 import ru.itterminal.botdesk.aau.model.dto.UserDtoRequest;
 import ru.itterminal.botdesk.aau.model.dto.UserDtoResponse;
@@ -98,7 +99,7 @@ public class UserControllerV1 extends BaseController {
         log.debug(FIND_INIT_MESSAGE, ENTITY_NAME, page, size, filterDto);
         var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
         var accountId = jwtUser.getAccountId();
-        if (!jwtUser.isInnerGroup()) {
+        if (jwtUser.getWeightRole() <= Roles.AUTHOR.getWeight() || !jwtUser.isInnerGroup()) {
             var groupFilter = BaseEntityFilter.builder()
                     .typeComparison(EXIST_IN.toString())
                     .listOfIdEntities(List.of(jwtUser.getGroupId()))

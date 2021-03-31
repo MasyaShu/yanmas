@@ -111,11 +111,14 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
     public void checkAccessBeforeRead(User entity) {
         if (!SecurityContextHolder.getContext().getAuthentication().getName().contains(ANONYMOUS)) {
             JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            if (!(jwtUser.isInnerGroup() || jwtUser.getGroupId().equals(entity.getGroup().getId()))) {
+            if (!((jwtUser.isInnerGroup() && jwtUser.getWeightRole() > Roles.AUTHOR.getWeight())
+                    || jwtUser.getGroupId().equals(entity.getGroup().getId()))) {
                 throw new AccessDeniedException(ACCESS_IS_DENIED_FOR_SEARCHING_BY_PASSED_ID);
             }
         }
     }
+
+   /* */
 
     private void checkAccessCreateUpdate(User userFromRequest, User userFromDatabase) {
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

@@ -110,7 +110,7 @@ class UserIT {
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamAllUsersInnerGroup")
+    @MethodSource("getStreamUsersInnerGroupWithRolesAccountOwnerAndAdminAndExecutor")
     @Order(20)
     void successGetByFilterByAllUsersFromInnerGroups(String userKey, User user) {
         var expectedUserList = itHelper.getAllUsers();
@@ -176,6 +176,40 @@ class UserIT {
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamUsersInnerGroupWithRolesAuthorAndObserver")
+    @Order(35)
+    void successGetByFilterByUsersAuthorOrObserverFromInnerGroups(String userKey, User user) {
+        var expectedUserList = itHelper.getAllUsers().stream()
+                .filter(u -> u.getGroup().equals(user.getGroup()))
+                .collect(Collectors.toList());
+        var response = given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(user.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(EMPTY_BODY)
+                .param(SIZE, expectedUserList.size())
+                .get(USER)
+                .then()
+                .log().body()
+                .body(TOTAL_ELEMENTS, equalTo(expectedUserList.size()))
+                .statusCode(HttpStatus.OK.value())
+                .extract().response().asString();
+        List<User> actualUserList = from(response).getList(CONTENT, User.class);
+        assertThat(expectedUserList)
+                .usingElementComparatorIgnoringFields(IGNORE_FIELDS_FOR_COMPARE_USERS)
+                .containsExactlyInAnyOrderElementsOf(actualUserList);
+        assertThat(expectedUserList).usingElementComparatorOnFields(ACCOUNT).usingElementComparatorOnFields(ID)
+                .containsExactlyInAnyOrderElementsOf(actualUserList);
+        assertThat(expectedUserList).usingElementComparatorOnFields(GROUP).usingElementComparatorOnFields(ID)
+                .containsExactlyInAnyOrderElementsOf(actualUserList);
+        assertThat(expectedUserList).usingElementComparatorOnFields(ROLE).usingElementComparatorOnFields(ID)
+                .containsExactlyInAnyOrderElementsOf(actualUserList);
+    }
+
+    @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamAllUsers")
     @Order(40)
     void successGetByFilterByAllUsersAccordingTheirGroups(String userKey, User user) {
@@ -183,7 +217,8 @@ class UserIT {
         for (User one : allUsers) {
             var userFilterDto = userTestHelper.convertEntityToFilterDto(one);
             var expectedUserList = List.of(one);
-            if (!user.getGroup().getIsInner() && !user.getGroup().equals(one.getGroup())) {
+            if ((!user.getGroup().getIsInner() || user.getRole().getWeight() <= Roles.AUTHOR.getWeight())
+                    && !user.getGroup().equals(one.getGroup())) {
                 expectedUserList = Collections.emptyList();
             }
             var response = given().
@@ -228,7 +263,7 @@ class UserIT {
     }
 
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamAllUsersInnerGroup")
+    @MethodSource("getStreamUsersInnerGroupWithRolesAccountOwnerAndAdminAndExecutor")
     @Order(60)
     void successGetByIdByAllUsersFromOuterGroups(String userKey, User user) {
         var allUsers = itHelper.getAllUsers();
@@ -281,6 +316,28 @@ class UserIT {
     @MethodSource("getStreamAllUsersOuterGroup")
     @Order(80)
     void failedGetByIdByAllUsersFromOuterGroups(String userKey, User user) {
+        var allUsers = itHelper.getAllUsers();
+        for (User one : allUsers) {
+            if (!one.getGroup().equals(user.getGroup())) {
+                var response = given().
+                        when()
+                        .headers(
+                                "Authorization",
+                                "Bearer " + itHelper.getTokens().get(user.getEmail())
+                        )
+                        .pathParam(ID, one.getId())
+                        .get(USER_BY_ID)
+                        .then()
+                        .log().body()
+                        .statusCode(HttpStatus.FORBIDDEN.value());
+            }
+        }
+    }
+
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamUsersInnerGroupWithRolesAuthorAndObserver")
+    @Order(85)
+    void failedGetByIdByUsersAuthorOrObserverFromInnerGroups(String userKey, User user) {
         var allUsers = itHelper.getAllUsers();
         for (User one : allUsers) {
             if (!one.getGroup().equals(user.getGroup())) {
