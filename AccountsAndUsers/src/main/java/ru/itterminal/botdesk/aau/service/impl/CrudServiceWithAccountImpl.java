@@ -8,7 +8,6 @@ import java.util.UUID;
 
 import javax.persistence.OptimisticLockException;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
@@ -18,20 +17,12 @@ import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.botdesk.aau.service.CrudServiceWithAccount;
 import ru.itterminal.botdesk.commons.exception.EntityNotExistException;
 import ru.itterminal.botdesk.commons.model.BaseEntity;
-import ru.itterminal.botdesk.commons.model.dto.BaseEntityDto;
 import ru.itterminal.botdesk.commons.repository.EntityRepositoryWithAccount;
 import ru.itterminal.botdesk.commons.service.impl.CrudServiceImpl;
 import ru.itterminal.botdesk.commons.service.validator.OperationValidator;
 import ru.itterminal.botdesk.security.jwt.JwtUserBuilder;
 
-/**
- * Skeletal implementation of general CRUD operations for each dictionary
- *
- * @param <E> extends BaseEntity
- * @param <V> extends OperationValidate
- * @param <R> extends CustomizedParentEntityRepository
- */
-@SuppressWarnings({"unused", "DuplicatedCode"})
+@SuppressWarnings({"DuplicatedCode", "SpringJavaAutowiredFieldsWarningInspection"})
 @Slf4j
 @Service
 public abstract class CrudServiceWithAccountImpl<
@@ -41,9 +32,6 @@ public abstract class CrudServiceWithAccountImpl<
         extends CrudServiceImpl<E, V, R>
         implements CrudServiceWithAccount<E> {
 
-    protected final ModelMapper modelMapper = new ModelMapper();
-
-    @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
     @Autowired
     private JwtUserBuilder jwtUserBuilder;
 
