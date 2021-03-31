@@ -37,11 +37,7 @@ public class SettingsAccessToTicketTypesServiceImpl extends
     @Transactional(readOnly = true)
     public List<TicketType> getPermittedTicketTypes(UUID userId) {
         var foundSettings = findSettings(userId);
-        // TODO проверить через дебаг, возможно следующее действие не нужно, так как в foundSettings.groupTicketTypes
-        //  уже будет созержать список Id для типов тикетов
-        var groupTicketTypes =
-                groupTicketTypesService.findByIdAndAccountId(foundSettings.getGroupTicketTypes().getId());
-        return groupTicketTypes.getTicketTypes();
+        return foundSettings.getGroupTicketTypes().getTicketTypes();
     }
 
     @Transactional(readOnly = true)
@@ -50,11 +46,7 @@ public class SettingsAccessToTicketTypesServiceImpl extends
         if (foundSettings == null) {
             return true;
         }
-        // TODO проверить через дебаг, возможно следующее действие не нужно, так как в foundSettings.groupTicketTypes
-        //  уже будет созержать список Id для типов тикетов
-        var groupTicketTypes =
-                groupTicketTypesService.findByIdAndAccountId(foundSettings.getGroupTicketTypes().getId());
-        var ticketTypesIdList = groupTicketTypes.getTicketTypes().stream()
+        var ticketTypesIdList = foundSettings.getGroupTicketTypes().getTicketTypes().stream()
                 .map(BaseEntity::getId)
                 .collect(Collectors.toList());
         return ticketTypesIdList.contains(checkedTicketTypeId);
