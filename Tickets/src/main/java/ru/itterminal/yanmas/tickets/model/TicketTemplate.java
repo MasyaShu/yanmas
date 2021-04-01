@@ -62,4 +62,9 @@ public class TicketTemplate extends BaseEntity {
     public void generateDisplayName() {
         setDisplayName(subject);
     }
+
+    @PrePersist
+    protected void onCreate() {
+        setDeleted(false);
+    }
 }

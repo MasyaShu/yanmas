@@ -49,24 +49,21 @@ public class TicketTemplateServiceImpl extends CrudServiceWithAccountImpl<Ticket
             dateCountdown = ticketTemplate.getDateStart();
         }
         //noinspection ConstantConditions
-        triggerContext.update(null, null, new Date(dateCountdown));
+        triggerContext.update(null, null, new Date(dateCountdown)); //NOSONAR
         Date dateNextRun;
         dateNextRun = cronTrigger.nextExecutionTime(triggerContext);
-        if (dateNextRun != null && (ticketTemplate.getDateEnd() == null || ticketTemplate.getDateEnd() >= dateNextRun.getTime())) {
+        if (dateNextRun != null && (ticketTemplate.getDateEnd() == null || ticketTemplate.getDateEnd() >= dateNextRun.getTime())) { //NOSONAR
             ticketTemplate.setDateNextRun(dateNextRun.getTime());
         }
     }
 
     @Override
     protected void setNestedObjectsOfEntityBeforeCreate(TicketTemplate entity) {
-        super.setNestedObjectsOfEntityBeforeCreate(entity);
-        entity.setDeleted(false);
         setNestedObjectsOfEntity(entity);
     }
 
     @Override
     protected void setNestedObjectsOfEntityBeforeUpdate(TicketTemplate entity) {
-        super.setNestedObjectsOfEntityBeforeUpdate(entity);
         setNestedObjectsOfEntity(entity);
     }
 
