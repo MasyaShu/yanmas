@@ -10,33 +10,11 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static ru.itterminal.botdesk.IT.util.ITHelper.ACCOUNT_OWNER;
-import static ru.itterminal.botdesk.IT.util.ITHelper.ADMIN;
-import static ru.itterminal.botdesk.IT.util.ITHelper.APPLICATION_JSON;
-import static ru.itterminal.botdesk.IT.util.ITHelper.AUTHOR;
-import static ru.itterminal.botdesk.IT.util.ITHelper.AUTHOR_ID;
-import static ru.itterminal.botdesk.IT.util.ITHelper.AUTHOR_INNER_GROUP;
-import static ru.itterminal.botdesk.IT.util.ITHelper.CONTENT;
-import static ru.itterminal.botdesk.IT.util.ITHelper.EMPTY_BODY;
-import static ru.itterminal.botdesk.IT.util.ITHelper.EXECUTOR;
-import static ru.itterminal.botdesk.IT.util.ITHelper.ID;
-import static ru.itterminal.botdesk.IT.util.ITHelper.IGNORE_FIELDS_FOR_COMPARE_TICKET_SETTING;
-import static ru.itterminal.botdesk.IT.util.ITHelper.IGNORE_FIELDS_OF_BASE_ENTITY_FOR_COMPARE;
-import static ru.itterminal.botdesk.IT.util.ITHelper.INNER_GROUP;
-import static ru.itterminal.botdesk.IT.util.ITHelper.IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET;
-import static ru.itterminal.botdesk.IT.util.ITHelper.OBSERVER;
-import static ru.itterminal.botdesk.IT.util.ITHelper.OUTER_GROUP;
-import static ru.itterminal.botdesk.IT.util.ITHelper.SIZE;
-import static ru.itterminal.botdesk.IT.util.ITHelper.STATUS;
-import static ru.itterminal.botdesk.IT.util.ITHelper.TICKET_SETTING;
-import static ru.itterminal.botdesk.IT.util.ITHelper.TICKET_SETTING_BY_AUTHOR;
-import static ru.itterminal.botdesk.IT.util.ITHelper.TICKET_SETTING_BY_ID;
-import static ru.itterminal.botdesk.IT.util.ITHelper.TOTAL_ELEMENTS;
+import static ru.itterminal.botdesk.IT.util.ITHelper.*;
 import static ru.itterminal.botdesk.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_CODE;
 import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_MESSAGE;
-import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.TICKET_SETTING_MUST_NOT_BE_EMPTY;
-import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.TICKET_SETTING_UNIQUE_FIELDS;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -82,7 +60,6 @@ import ru.itterminal.botdesk.tickets.model.test.TicketSettingTestHelper;
 @TestPropertySource(properties = {"jwt.token.secret=ksedtob", "jwt.token.expired=8640000", "jwt.token.prefix=Bearer"})
 class TicketSettingIT {
 
-    public static final String TICKET_SETTING_IS_EMPTY = "Ticket setting is empty";
     public static final String ACCOUNT_GROUP_AUTHOR_IS_OCCUPIED = "Account, Group, Author is occupied";
     public static final String ACCOUNT_GROUP_AUTHOR = "Account, Group, Author";
     public static final String ADMIN_INNER_GROUP_1 = "adminInnerGroup_1";
@@ -281,7 +258,7 @@ class TicketSettingIT {
             assertThat(actualTicketSetting).usingRecursiveComparison()
                     .ignoringActualNullFields()
                     .ignoringFields("ticketStatusForCancel", "ticketStatusForClose", "ticketStatusForNew",
-                                    "ticketStatusForReopen", "ticketTypeForNew"
+                            "ticketStatusForReopen", "ticketTypeForNew"
                     )
                     .isEqualTo(expectedTicketSetting);
         }
@@ -290,7 +267,7 @@ class TicketSettingIT {
     @Test
     @Order(65)
     void successGetByAuthor_whereValueOfTicketTypeIsPredefined_ifAuthorOfTicketHasNotPermittedToTicketTypeFromTicketSettings() {
-        var expectedTicketSetting =  itHelper.getTicketSettings().get(INNER_GROUP + "1");
+        var expectedTicketSetting = itHelper.getTicketSettings().get(INNER_GROUP + "1");
         var author = itHelper.getAuthorInnerGroup().get(AUTHOR_INNER_GROUP + "1");
         var authorId = author.getId();
         var actualTicketSetting = given().
@@ -310,13 +287,13 @@ class TicketSettingIT {
         assertThat(actualTicketSetting).usingRecursiveComparison()
                 .ignoringActualNullFields()
                 .ignoringFields("ticketStatusForCancel", "ticketStatusForClose", "ticketStatusForNew",
-                                "ticketStatusForReopen", "ticketTypeForNew"
+                        "ticketStatusForReopen", "ticketTypeForNew"
                 )
                 .isEqualTo(expectedTicketSetting);
         var predefinedTicketType = itHelper.getTicketTypes().get(IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET);
         assertEquals(predefinedTicketType.getId(), actualTicketSetting.getTicketTypeForNew().getId());
         assertNotEquals(expectedTicketSetting.getTicketTypeForNew().getId(),
-                        actualTicketSetting.getTicketTypeForNew().getId()
+                actualTicketSetting.getTicketTypeForNew().getId()
         );
     }
 
@@ -403,9 +380,11 @@ class TicketSettingIT {
     @MethodSource("getStreamUsersFromInnerGroupWithRolesAccountOwnerAndAdmin")
     @Order(90)
     void successCreateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin(String userKey, User user) {
+        var ticketType = itHelper.getTicketTypes().get(IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET);
         var expectedTicketSetting = itHelper.getTicketSettings().get(INNER_GROUP + "1").toBuilder()
                 .group(user.getGroup())
                 .author(user)
+                .ticketTypeForNew(ticketType)
                 .deleted(null)
                 .displayName(null)
                 .id(null)
@@ -429,7 +408,7 @@ class TicketSettingIT {
                 .ignoringActualNullFields()
                 .ignoringFields(IGNORE_FIELDS_OF_BASE_ENTITY_FOR_COMPARE)
                 .ignoringFields("ticketStatusForCancel", "ticketStatusForClose", "ticketStatusForNew",
-                                "ticketStatusForReopen", "ticketTypeForNew"
+                        "ticketStatusForReopen", "ticketTypeForNew"
                 )
                 .isEqualTo(expectedTicketSetting);
     }
@@ -466,7 +445,7 @@ class TicketSettingIT {
                 .extract().response().as(ApiError.class);
         assertEquals(
                 TICKET_SETTING_MUST_NOT_BE_EMPTY,
-                apiError.getErrors().get(TICKET_SETTING_IS_EMPTY).get(0).getMessage()
+                apiError.getErrors().get(INVALID_TICKET_SETTINGS).get(0).getMessage()
         );
     }
 
@@ -498,6 +477,72 @@ class TicketSettingIT {
         assertEquals(
                 format(NOT_UNIQUE_MESSAGE, TICKET_SETTING_UNIQUE_FIELDS),
                 apiError.getErrors().get(NOT_UNIQUE_CODE).get(0).getMessage()
+        );
+    }
+
+    @Test
+    @Order(114)
+    void failedCreateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenAuthorHasNotPermittedToTicketType() {
+        var author = itHelper.getAuthorInnerGroup().get(AUTHOR_INNER_GROUP + "1");
+        var newTicketSetting = itHelper.getTicketSettings().get(INNER_GROUP + "1").toBuilder()
+                .author(author)
+                .deleted(null)
+                .displayName(null)
+                .id(null)
+                .version(null)
+                .build();
+        var dtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(newTicketSetting, true);
+        var apiError = given().
+                when().
+                headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(itHelper.getAccountOwner().getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(dtoRequest)
+                .post(TICKET_SETTING)
+                .then()
+                .log().body()
+                .body(STATUS, equalTo(HttpStatus.CONFLICT.value()))
+                .extract().response().as(ApiError.class);
+        assertEquals(
+                INVALID_TICKET_SETTINGS_BECAUSE_AUTHOR_HAS_NOT_ACCESS_TO_TICKET_TYPE,
+                apiError.getErrors().get(INVALID_TICKET_SETTINGS).get(0).getMessage()
+        );
+    }
+
+    @Test
+    @Order(117)
+    void failedCreateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenCurrentUserHasNotPermittedToTicketType() {
+        var currentUser = itHelper.getAdminInnerGroup().get(ADMIN_INNER_GROUP_1);
+        var group = itHelper.getInnerGroup().get(INNER_GROUP_1);
+        var groupTicketTypes = itHelper.getGroupTicketTypes().get(INITIAL_GROUP_TICKET_TYPES);
+        itHelper.createSettingsAccessToTicketTypesWithoutAddingIntoSettingsAccessToTicketTypesMap(group, currentUser, groupTicketTypes);
+        var author = itHelper.getAuthorInnerGroup().get(AUTHOR_INNER_GROUP + "2");
+        var newTicketSetting = itHelper.getTicketSettings().get(INNER_GROUP + "1").toBuilder()
+                .author(author)
+                .deleted(null)
+                .displayName(null)
+                .id(null)
+                .version(null)
+                .build();
+        var dtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(newTicketSetting, true);
+        var apiError = given().
+                when().
+                headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(dtoRequest)
+                .post(TICKET_SETTING)
+                .then()
+                .log().body()
+                .body(STATUS, equalTo(HttpStatus.CONFLICT.value()))
+                .extract().response().as(ApiError.class);
+        assertEquals(
+                INVALID_TICKET_SETTINGS_BECAUSE_CURRENT_USER_HAS_NOT_ACCESS_TO_TICKET_TYPE,
+                apiError.getErrors().get(INVALID_TICKET_SETTINGS).get(0).getMessage()
         );
     }
 
@@ -548,7 +593,9 @@ class TicketSettingIT {
     @MethodSource("getStreamUsersFromInnerGroupWithRolesAccountOwnerAndAdmin")
     @Order(140)
     void successUpdateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin(String userKey, User user) {
+        var ticketType = itHelper.getTicketTypes().get(IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET);
         var expectedTicketSetting = itHelper.getTicketSettings().get(INNER_GROUP + "1").toBuilder()
+                .ticketTypeForNew(ticketType)
                 .displayName(null)
                 .build();
         var dtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(expectedTicketSetting, false);
@@ -570,7 +617,7 @@ class TicketSettingIT {
                 .ignoringActualNullFields()
                 .ignoringFields(IGNORE_FIELDS_OF_BASE_ENTITY_FOR_COMPARE)
                 .ignoringFields("ticketStatusForCancel", "ticketStatusForClose", "ticketStatusForNew",
-                                "ticketStatusForReopen", "ticketTypeForNew"
+                        "ticketStatusForReopen", "ticketTypeForNew"
                 )
                 .isEqualTo(expectedTicketSetting);
     }
@@ -602,7 +649,7 @@ class TicketSettingIT {
                 .extract().response().as(ApiError.class);
         assertEquals(
                 TICKET_SETTING_MUST_NOT_BE_EMPTY,
-                apiError.getErrors().get(TICKET_SETTING_IS_EMPTY).get(0).getMessage()
+                apiError.getErrors().get(INVALID_TICKET_SETTINGS).get(0).getMessage()
         );
     }
 
@@ -632,6 +679,65 @@ class TicketSettingIT {
         assertEquals(
                 format(NOT_UNIQUE_MESSAGE, TICKET_SETTING_UNIQUE_FIELDS),
                 apiError.getErrors().get(NOT_UNIQUE_CODE).get(0).getMessage()
+        );
+    }
+
+    @Test
+    @Order(164)
+    void failedUpdateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenAuthorHasNotPermittedToTicketType() {
+        var author = itHelper.getAuthorInnerGroup().get(AUTHOR_INNER_GROUP + "1");
+        var newTicketSetting = itHelper.getTicketSettings().get(INNER_GROUP + "1").toBuilder()
+                .author(author)
+                .displayName(null)
+                .build();
+        var dtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(newTicketSetting, true);
+        var apiError = given().
+                when().
+                headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(itHelper.getAccountOwner().getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(dtoRequest)
+                .put(TICKET_SETTING)
+                .then()
+                .log().body()
+                .body(STATUS, equalTo(HttpStatus.CONFLICT.value()))
+                .extract().response().as(ApiError.class);
+        assertEquals(
+                INVALID_TICKET_SETTINGS_BECAUSE_AUTHOR_HAS_NOT_ACCESS_TO_TICKET_TYPE,
+                apiError.getErrors().get(INVALID_TICKET_SETTINGS).get(0).getMessage()
+        );
+    }
+
+    @Test
+    @Order(167)
+    void failedUpdateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenCurrentUserHasNotPermittedToTicketType() {
+        var currentUser = itHelper.getAdminInnerGroup().get(ADMIN_INNER_GROUP_1);
+        var group = itHelper.getInnerGroup().get(INNER_GROUP_1);
+        var groupTicketTypes = itHelper.getGroupTicketTypes().get(INITIAL_GROUP_TICKET_TYPES);
+        var author = itHelper.getAuthorInnerGroup().get(AUTHOR_INNER_GROUP + "2");
+        var newTicketSetting = itHelper.getTicketSettings().get(INNER_GROUP + "1").toBuilder()
+                .author(author)
+                .displayName(null)
+                .build();
+        var dtoRequest = ticketSettingTestHelper.convertEntityToDtoRequest(newTicketSetting, true);
+        var apiError = given().
+                when().
+                headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(dtoRequest)
+                .put(TICKET_SETTING)
+                .then()
+                .log().body()
+                .body(STATUS, equalTo(HttpStatus.CONFLICT.value()))
+                .extract().response().as(ApiError.class);
+        assertEquals(
+                INVALID_TICKET_SETTINGS_BECAUSE_CURRENT_USER_HAS_NOT_ACCESS_TO_TICKET_TYPE,
+                apiError.getErrors().get(INVALID_TICKET_SETTINGS).get(0).getMessage()
         );
     }
 

@@ -13,8 +13,7 @@ import static ru.itterminal.botdesk.commons.service.validator.impl.BasicOperatio
 import static ru.itterminal.botdesk.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
 import static ru.itterminal.botdesk.commons.util.CommonMethodsForValidation.createLogicalValidationException;
 import static ru.itterminal.botdesk.security.jwt.JwtUserBuilder.USER_FROM_OUTER_GROUP_CANNOT_CREATE_OR_UPDATE_THIS_ENTITY;
-import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.TICKET_SETTING_IS_EMPTY;
-import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.TICKET_SETTING_UNIQUE_FIELDS;
+import static ru.itterminal.botdesk.tickets.service.validator.TicketSettingOperationValidator.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -125,7 +124,7 @@ class TicketSettingOperationValidatorTest {
         TicketSetting ticketSetting = new TicketSetting();
         LogicalValidationException exception = assertThrows(LogicalValidationException.class,
                                                             ()-> validator.logicalValidationBeforeUpdate(ticketSetting));
-        assertEquals(1, exception.getFieldErrors().get(TICKET_SETTING_IS_EMPTY).size());
+        assertEquals(1, exception.getFieldErrors().get(INVALID_TICKET_SETTINGS).size());
         verify(service, times(1)).findByUniqueFields(any());
     }
 

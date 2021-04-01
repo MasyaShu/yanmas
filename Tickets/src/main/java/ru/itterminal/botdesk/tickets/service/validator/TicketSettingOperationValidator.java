@@ -28,14 +28,14 @@ import ru.itterminal.botdesk.tickets.service.impl.TicketSettingServiceImpl;
 public class TicketSettingOperationValidator extends BasicOperationValidatorImpl<TicketSetting> {
 
     public static final String TICKET_SETTING_UNIQUE_FIELDS = "The key of settings (accountId, groupId, authorId)";
-    public static final String TICKET_SETTING_IS_EMPTY = "Ticket setting is empty";
     public static final String TICKET_SETTING_MUST_NOT_BE_EMPTY = "Ticket setting mustn't be empty";
     public static final String A_USER_CANNOT_GET_SETTING_OR_PREDEFINED_VALUES_FOR_TICKET =
             "A user cannot get setting or predefined values for ticket if his group is not equal group of author from request";
-    public static final String ACCESS_TO_TICKET_TYPE = "Access to ticket type";
-    public static final String AUTHOR_HAS_NOT_ACCESS_TO_TICKET_TYPE = "Author has not access to ticket type";
-    public static final String CURRENT_USER_HAS_NOT_ACCESS_TO_TICKET_TYPE = "Current user has not access to ticket "
-            + "type";
+    public static final String INVALID_TICKET_SETTINGS = "Invalid ticket settings";
+    public static final String INVALID_TICKET_SETTINGS_BECAUSE_AUTHOR_HAS_NOT_ACCESS_TO_TICKET_TYPE =
+            "Invalid ticket settings, because author has not access to ticket type";
+    public static final String INVALID_TICKET_SETTINGS_BECAUSE_CURRENT_USER_HAS_NOT_ACCESS_TO_TICKET_TYPE =
+            "Invalid ticket settings, because current user has not access to ticket type";
 
     private final TicketSettingServiceImpl service;
     private final SettingsAccessToTicketTypesServiceImpl settingsAccessToTicketTypesService;
@@ -77,7 +77,8 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
         }
     }
 
-    private boolean logicalValidationBeforeCreateUpdate(TicketSetting entity) {
+
+    private boolean logicalValidationBeforeCreateUpdate(TicketSetting entity) { //NOSONAR
         var isTicketSettingIsEmpty = true;
         var errors = createMapForLogicalErrors();
 
@@ -110,27 +111,19 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
         }
 
         if (isTicketSettingIsEmpty) {
-            addValidationErrorIntoErrors(TICKET_SETTING_IS_EMPTY, TICKET_SETTING_MUST_NOT_BE_EMPTY, errors);
-        }
-
-        if (entity.getTicketTypeForNew() != null && entity.getAuthor() != null) {
-            var ticketTypeId = entity.getTicketTypeForNew().getId();
-            var userId = entity.getAuthor().getId();
-            if (!settingsAccessToTicketTypesService.isPermittedTicketType(ticketTypeId, userId)) {
-                addValidationErrorIntoErrors(ACCESS_TO_TICKET_TYPE, AUTHOR_HAS_NOT_ACCESS_TO_TICKET_TYPE, errors);
-            }
+            addValidationErrorIntoErrors(INVALID_TICKET_SETTINGS, TICKET_SETTING_MUST_NOT_BE_EMPTY, errors);
         }
 
         if (entity.getTicketTypeForNew() != null) {
             var ticketTypeId = entity.getTicketTypeForNew().getId();
             var currentUserId = jwtUserBuilder.getJwtUser().getId();
             if (!settingsAccessToTicketTypesService.isPermittedTicketType(ticketTypeId, currentUserId)) {
-                addValidationErrorIntoErrors(ACCESS_TO_TICKET_TYPE, CURRENT_USER_HAS_NOT_ACCESS_TO_TICKET_TYPE, errors);
+                addValidationErrorIntoErrors(INVALID_TICKET_SETTINGS, INVALID_TICKET_SETTINGS_BECAUSE_CURRENT_USER_HAS_NOT_ACCESS_TO_TICKET_TYPE, errors);
             }
-            if (entity.getAuthor() != null) {
+            if (entity.getTicketTypeForNew() != null && entity.getAuthor() != null) {
                 var authorId = entity.getAuthor().getId();
                 if (!settingsAccessToTicketTypesService.isPermittedTicketType(ticketTypeId, authorId)) {
-                    addValidationErrorIntoErrors(ACCESS_TO_TICKET_TYPE, AUTHOR_HAS_NOT_ACCESS_TO_TICKET_TYPE, errors);
+                    addValidationErrorIntoErrors(INVALID_TICKET_SETTINGS, INVALID_TICKET_SETTINGS_BECAUSE_AUTHOR_HAS_NOT_ACCESS_TO_TICKET_TYPE, errors);
                 }
             }
         }

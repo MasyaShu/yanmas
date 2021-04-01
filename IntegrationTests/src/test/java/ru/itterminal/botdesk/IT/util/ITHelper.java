@@ -449,6 +449,25 @@ public class ITHelper {
         settingsAccessToTicketTypes.put(INITIAL_SETTINGS_ACCESS_TO_TICKET_TYPES, createdSettings);
     }
 
+    public void createSettingsAccessToTicketTypesWithoutAddingIntoSettingsAccessToTicketTypesMap(Group group, User user, GroupTicketTypes groupTicketTypes) {
+        var request = SettingsAccessToTicketTypesDtoRequest.builder()
+                .groupId(group.getId())
+                .userId(user.getId())
+                .groupTicketTypesId(groupTicketTypes.getId())
+                .build();
+        given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + tokens.get(accountOwner.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(request)
+                .post(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
+                .then()
+                .log().body();
+    }
+
     public void createInitialTicketSettings() {
         createInitialTicketSetting(innerGroup.get(INNER_GROUP + "1"));
         createInitialTicketSetting(outerGroup.get(OUTER_GROUP + "1"));
