@@ -5,7 +5,7 @@
 	<modules>
 		<module>AccountsAndUsers</module>
 		<module>Commons</module>
-		<module>BotDeskApp</module>
+		<module>YanmasApp</module>
 		<module>DB-Setup</module>
         <module>Security</module>
 		<module>Integration</module>
@@ -20,7 +20,7 @@
 		<relativePath/>
 	</parent>
 
-	<groupId>ru.it-terminal.botdesk</groupId>
+	<groupId>ru.it-terminal.yanmas</groupId>
 	<artifactId>multiple_module_project</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>

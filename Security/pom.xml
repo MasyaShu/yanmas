@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>multiple_module_project</artifactId>
-        <groupId>ru.it-terminal.botdesk</groupId>
+        <groupId>ru.it-terminal.yanmas</groupId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -13,12 +13,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>ru.it-terminal.botdesk</groupId>
+            <groupId>ru.it-terminal.yanmas</groupId>
             <artifactId>Commons</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>ru.it-terminal.botdesk</groupId>
+            <groupId>ru.it-terminal.yanmas</groupId>
             <artifactId>DB-Setup</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
