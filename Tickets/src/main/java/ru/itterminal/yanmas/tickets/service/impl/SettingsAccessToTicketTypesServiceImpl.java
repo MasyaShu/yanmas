@@ -37,6 +37,9 @@ public class SettingsAccessToTicketTypesServiceImpl extends
     @Transactional(readOnly = true)
     public List<TicketType> getPermittedTicketTypes(UUID userId) {
         var foundSettings = findSettings(userId);
+        if (foundSettings == null) {
+            return null;
+        }
         return foundSettings.getGroupTicketTypes().getTicketTypes();
     }
 

@@ -449,6 +449,32 @@ public class ITHelper {
         settingsAccessToTicketTypes.put(INITIAL_SETTINGS_ACCESS_TO_TICKET_TYPES, createdSettings);
     }
 
+    public List<TicketType> getPermittedTicketTypesFromSettingsAccessToTicketTypes(User user) {
+        var permittedTicketTypes = settingsAccessToTicketTypes.values().stream()
+                .filter(p -> p.getUser().equals(user)
+                        && p.getGroup().equals(user.getGroup())
+                        && p.getAccount().equals(user.getAccount()))
+                .collect(Collectors.toList());
+        if (permittedTicketTypes.isEmpty()) {
+            permittedTicketTypes = settingsAccessToTicketTypes.values().stream()
+                    .filter(p -> p.getUser() == null
+                            && p.getGroup().equals(user.getGroup())
+                            && p.getAccount().equals(user.getAccount()))
+                    .collect(Collectors.toList());
+        }
+        if (permittedTicketTypes.isEmpty()) {
+            permittedTicketTypes = settingsAccessToTicketTypes.values().stream()
+                    .filter(p -> p.getUser() == null
+                            && p.getGroup() == null
+                            && p.getAccount().equals(user.getAccount()))
+                    .collect(Collectors.toList());
+        }
+        if (permittedTicketTypes.isEmpty()) {
+            return ticketTypes.values().stream().collect(Collectors.toList());
+        }
+        return permittedTicketTypes.get(0).getGroupTicketTypes().getTicketTypes();
+    }
+
     public void createSettingsAccessToTicketTypesWithoutAddingIntoSettingsAccessToTicketTypesMap(Group group, User user, GroupTicketTypes groupTicketTypes) {
         var request = SettingsAccessToTicketTypesDtoRequest.builder()
                 .groupId(group.getId())

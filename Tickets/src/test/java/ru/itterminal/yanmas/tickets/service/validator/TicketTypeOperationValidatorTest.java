@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithUserDetails;
@@ -16,6 +17,8 @@ import ru.itterminal.yanmas.commons.exception.error.ValidationError;
 import ru.itterminal.yanmas.security.config.TestSecurityConfig;
 import ru.itterminal.yanmas.tickets.model.TicketType;
 import ru.itterminal.yanmas.tickets.model.projection.TicketTypeUniqueFields;
+import ru.itterminal.yanmas.tickets.model.test.TicketTypeTestHelper;
+import ru.itterminal.yanmas.tickets.service.impl.SettingsAccessToTicketTypesServiceImpl;
 import ru.itterminal.yanmas.tickets.service.impl.TicketTypeServiceImpl;
 
 import java.util.*;
@@ -35,15 +38,22 @@ class TicketTypeOperationValidatorTest {
     private TicketTypeServiceImpl service;
 
     @MockBean
+    private SettingsAccessToTicketTypesServiceImpl accessToTicketTypesService;
+
+    @MockBean
     private TicketTypeUniqueFields ticketTypeUniqueFields;
 
+    @MockBean
+    private ApplicationContext appContext;
+
     @Autowired
-    private final TicketTypeOperationValidator validator = new TicketTypeOperationValidator(service);
+    private final TicketTypeOperationValidator validator = new TicketTypeOperationValidator(service, appContext);
 
     private static final String EXIST_NAME = "ticketTypes1";
     private static final String VALIDATED_FIELDS = "name";
     private static final Map<String, List<ValidationError>> errors = new HashMap<>();
     private static TicketType ticketType;
+    private final TicketTypeTestHelper ticketTypeTestHelper = new TicketTypeTestHelper();
 
     @BeforeAll
     static void setUp() {
