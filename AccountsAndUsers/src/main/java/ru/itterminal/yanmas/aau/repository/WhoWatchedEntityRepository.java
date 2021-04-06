@@ -9,4 +9,6 @@ import ru.itterminal.yanmas.aau.model.WhoWatchedEntity;
 
 @Repository
 public interface WhoWatchedEntityRepository extends CrudRepository<WhoWatchedEntity, UUID> {
+
+    WhoWatchedEntity findByAccountIdAndEntityIdAndUserId(UUID accountId, UUID entityId, UUID userId);
 }

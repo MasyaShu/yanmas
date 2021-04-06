@@ -6,6 +6,8 @@ import static ru.itterminal.yanmas.commons.service.CrudService.CREATE_INIT_MESSA
 import static ru.itterminal.yanmas.commons.service.CrudService.DELETE_FINISH_MESSAGE;
 import static ru.itterminal.yanmas.commons.service.CrudService.DELETE_INIT_MESSAGE;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.yanmas.aau.model.WhoWatchedEntity;
 import ru.itterminal.yanmas.aau.repository.WhoWatchedEntityRepository;
+import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 
 @Slf4j
 @Service
@@ -22,6 +25,7 @@ import ru.itterminal.yanmas.aau.repository.WhoWatchedEntityRepository;
 public class WhoWatchedEntityServiceImpl {
 
     private final WhoWatchedEntityRepository repository;
+    private final JwtUserBuilder jwtUserBuilder;
 
     @Transactional
     public void create(WhoWatchedEntity entity) {
@@ -50,4 +54,18 @@ public class WhoWatchedEntityServiceImpl {
         }
     }
 
+    public Boolean isWatchedEntity(UUID entityId) {
+        var jwtUser = jwtUserBuilder.getJwtUser();
+        var accountId = jwtUser.getAccountId();
+        var userId = jwtUser.getId();
+        return repository.findByAccountIdAndEntityIdAndUserId(accountId, entityId, userId) != null;
+    }
+
+    public Map<UUID, Boolean> isWatchedEntities(List<UUID> entitiesId) {
+        return null;
+    }
+
+    public int getCountUnwatchedEntities(List<UUID> entitiesId) {
+        return 0;
+    }
 }
