@@ -1,19 +1,8 @@
 
+Y88b    /      e      888b    |      e    e           e      ,d88~~\
+ Y88b  /      d8b     |Y88b   |     d8b  d8b         d8b     8888
+  Y88b/      /Y88b    | Y88b  |    d888bdY88b       /Y88b    `Y88b
+   Y8Y      /  Y88b   |  Y88b |   / Y88Y Y888b     /  Y88b    `Y88b,
+    Y      /____Y88b  |   Y88b|  /   YY   Y888b   /____Y88b     8888
+   /      /      Y88b |    Y888 /          Y888b /      Y88b \__88P'
 
-
-BBBBBBBBBBBBBBBBB                             tttt          DDDDDDDDDDDDD                                             kkkkkkkk
-B::::::::::::::::B                         ttt:::t          D::::::::::::DDD                                          k::::::k
-B::::::BBBBBB:::::B                        t:::::t          D:::::::::::::::DD                                        k::::::k
-BB:::::B     B:::::B                       t:::::t          DDD:::::DDDDD:::::D                                       k::::::k
-  B::::B     B:::::B   ooooooooooo   ttttttt:::::ttttttt      D:::::D    D:::::D     eeeeeeeeeeee        ssssssssss    k:::::k    kkkkkkk
-  B::::B     B:::::B oo:::::::::::oo t:::::::::::::::::t      D:::::D     D:::::D  ee::::::::::::ee    ss::::::::::s   k:::::k   k:::::k
-  B::::BBBBBB:::::B o:::::::::::::::ot:::::::::::::::::t      D:::::D     D:::::D e::::::eeeee:::::eess:::::::::::::s  k:::::k  k:::::k
-  B:::::::::::::BB  o:::::ooooo:::::otttttt:::::::tttttt      D:::::D     D:::::De::::::e     e:::::es::::::ssss:::::s k:::::k k:::::k
-  B::::BBBBBB:::::B o::::o     o::::o      t:::::t            D:::::D     D:::::De:::::::eeeee::::::e s:::::s  ssssss  k::::::k:::::k
-  B::::B     B:::::Bo::::o     o::::o      t:::::t            D:::::D     D:::::De:::::::::::::::::e    s::::::s       k:::::::::::k
-  B::::B     B:::::Bo::::o     o::::o      t:::::t            D:::::D     D:::::De::::::eeeeeeeeeee        s::::::s    k:::::::::::k
-  B::::B     B:::::Bo::::o     o::::o      t:::::t    tttttt  D:::::D    D:::::D e:::::::e           ssssss   s:::::s  k::::::k:::::k
-BB:::::BBBBBB::::::Bo:::::ooooo:::::o      t::::::tttt:::::tDDD:::::DDDDD:::::D  e::::::::e          s:::::ssss::::::sk::::::k k:::::k
-B:::::::::::::::::B o:::::::::::::::o      tt::::::::::::::tD:::::::::::::::DD    e::::::::eeeeeeee  s::::::::::::::s k::::::k  k:::::k
-B::::::::::::::::B   oo:::::::::::oo         tt:::::::::::ttD::::::::::::DDD       ee:::::::::::::e   s:::::::::::ss  k::::::k   k:::::k
-BBBBBBBBBBBBBBBBB      ooooooooooo             ttttttttttt  DDDDDDDDDDDDD            eeeeeeeeeeeeee    sssssssssss    kkkkkkkk    kkkkkkk

@@ -57,3 +57,12 @@ create TABLE IF NOT EXISTS users
     FOREIGN KEY (account_id) REFERENCES accounts (id),
     FOREIGN KEY (group_id) REFERENCES group_users (id)
 );
+create TABLE IF NOT EXISTS who_watched_entity
+(
+    id           uuid NOT NULL,
+    account_id   uuid NOT NULL,
+    entity_id    uuid NOT NULL,
+    user_id      uuid NOT NULL,
+    PRIMARY KEY (id)
+);
+CREATE UNIQUE INDEX unique_fields_who_watched_entity ON who_watched_entity (account_id, entity_id, user_id);
