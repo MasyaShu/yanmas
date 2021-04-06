@@ -57,6 +57,9 @@ class TicketTypeIT {
         itHelper.createAndVerifyAccount(userRepository);
         itHelper.createInitialInnerAndOuterGroups(1, 2);
         itHelper.createInitialUsers();
+        itHelper.createInitialGroupTicketTypes();
+        itHelper.createInitialSettingsAccessToTicketTypes();
+        itHelper.createInitialTicketType();
     }
 
     @SuppressWarnings("unused")
@@ -64,7 +67,7 @@ class TicketTypeIT {
     @MethodSource("getStreamAllUsers")
     @Order(10)
     void successGetByFilterByAllUsers(String userKey, User user) {
-        var expectedTicketTypeList = itHelper.getTicketTypes().values();
+        var expectedTicketTypeList = itHelper.getPermittedTicketTypesFromSettingsAccessToTicketTypes(user);
         var response = given().
                 when()
                 .headers(
@@ -82,7 +85,7 @@ class TicketTypeIT {
                 .extract().response().asString();
         List<TicketType> actualTicketTypeList = from(response).getList(CONTENT, TicketType.class);
         assertThat(expectedTicketTypeList)
-                .usingElementComparatorIgnoringFields(ACCOUNT)
+                .usingElementComparatorOnFields("id", "displayName")
                 .containsExactlyInAnyOrderElementsOf(actualTicketTypeList);
     }
 
@@ -105,7 +108,7 @@ class TicketTypeIT {
     @MethodSource("getStreamAllUsers")
     @Order(30)
     void successGetByIdByAllUsers(String userKey, User user) {
-        var ticketTypeList = itHelper.getTicketTypes().values();
+        var ticketTypeList = itHelper.getPermittedTicketTypesFromSettingsAccessToTicketTypes(user);
         for (TicketType ticketType : ticketTypeList) {
             given().
                     when()
@@ -403,7 +406,7 @@ class TicketTypeIT {
     }
 
     private static Stream<Arguments> getStreamAllUsers() {
-        return itHelper.getStreamUsers(itHelper.getRoleTestHelper().getPredefinedValidEntityList(), false);
+        return itHelper.getStreamUsers(itHelper.getRoleTestHelper().getPredefinedValidEntityList(), null);
     }
 
     private static Stream<Arguments> getStreamUsersInnerGroupWithRolesAccountOwnerAndAdmin() {

@@ -53,7 +53,9 @@ import ru.itterminal.yanmas.security.config.TestSecurityConfig;
 import ru.itterminal.yanmas.tickets.model.TicketType;
 import ru.itterminal.yanmas.tickets.model.dto.TicketTypeDto;
 import ru.itterminal.yanmas.tickets.model.dto.TicketTypeFilterDto;
+import ru.itterminal.yanmas.tickets.service.impl.SettingsAccessToTicketTypesServiceImpl;
 import ru.itterminal.yanmas.tickets.service.impl.TicketTypeServiceImpl;
+import ru.itterminal.yanmas.tickets.service.validator.TicketTypeOperationValidator;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {TicketTypeControllerV1.class, FilterChainProxy.class})
@@ -72,6 +74,12 @@ class TicketTypeControllerV1Test {
     @SuppressWarnings("unused")
     @MockBean
     private ReflectionHelper reflectionHelper;
+
+    @MockBean
+    private SettingsAccessToTicketTypesServiceImpl accessToTicketTypesService;
+
+    @MockBean
+    private TicketTypeOperationValidator validator;
 
 
     @Autowired
@@ -334,7 +342,7 @@ class TicketTypeControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getById_shouldFindOneGroup_whenGroupExistInDatabaseByPassedId() throws Exception {
-        when(service.findByIdAndAccountId( any())).thenReturn(ticketType_1);
+        when(service.findByIdAndAccountId(any())).thenReturn(ticketType_1);
         mockMvc.perform(get(HOST + PORT + API + "/" + TICKET_TYPES_ID_1))
                 .andDo(print())
                 .andExpect(status().isOk())
