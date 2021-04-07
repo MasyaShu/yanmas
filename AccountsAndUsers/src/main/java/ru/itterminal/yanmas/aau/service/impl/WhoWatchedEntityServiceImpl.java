@@ -6,7 +6,11 @@ import static ru.itterminal.yanmas.commons.service.CrudService.CREATE_INIT_MESSA
 import static ru.itterminal.yanmas.commons.service.CrudService.DELETE_FINISH_MESSAGE;
 import static ru.itterminal.yanmas.commons.service.CrudService.DELETE_INIT_MESSAGE;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -26,8 +30,8 @@ public class WhoWatchedEntityServiceImpl {
 
     private final WhoWatchedEntityRepository repository;
     private final JwtUserBuilder jwtUserBuilder;
+    private final String entityName = WhoWatchedEntity.class.getSimpleName();
 
-    // TODO добавить noRollbackForClassName для исключения "не уникальный индекс"
     @Transactional
     public void watched(List<UUID> entitiesId) {
         var jwtUser = jwtUserBuilder.getJwtUser();
@@ -36,20 +40,18 @@ public class WhoWatchedEntityServiceImpl {
         var entitiesIdWithoutDuplicates = new ArrayList<>(new HashSet<>(entitiesId));
         for (UUID entityId : entitiesIdWithoutDuplicates) {
             var entity = WhoWatchedEntity.builder()
+                    .id(UUID.randomUUID())
                     .accountId(accountId)
                     .entityId(entityId)
                     .userId(userId)
                     .build();
-            log.trace(format(CREATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.toString()));
-            entity.setId(UUID.randomUUID());
-            try {
-                var createdEntity = repository.save(entity);
-                log.trace(format(CREATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), createdEntity.toString()));
+            var foundEntity = repository.findByAccountIdAndEntityIdAndUserId(accountId, entityId, userId);
+            if (foundEntity != null) {
+                continue;
             }
-            // TODO заменить Exception на исключение "не уникальный индекс"
-            catch (Exception exception) {
-                log.debug(exception.getMessage());
-            }
+            log.trace(format(CREATE_INIT_MESSAGE, entityName, entity.toString()));
+            var createdEntity = repository.save(entity);
+            log.trace(format(CREATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), createdEntity.toString()));
         }
     }
 
@@ -64,7 +66,8 @@ public class WhoWatchedEntityServiceImpl {
             try {
                 repository.deleteByAccountIdAndEntityIdAndUserId(accountId, entityId, userId);
                 log.trace(format(DELETE_FINISH_MESSAGE, entityId.toString()));
-            } catch (Exception exception) {
+            }
+            catch (Exception exception) {
                 log.debug(exception.getMessage());
             }
         }
@@ -102,7 +105,8 @@ public class WhoWatchedEntityServiceImpl {
         var userId = jwtUser.getId();
         var entitiesIdWithoutDuplicates = new ArrayList<>(new HashSet<>(entitiesId));
         var countTotalEntities = entitiesIdWithoutDuplicates.size();
-        var watchedEntityList = repository.findAllByAccountIdAndEntityIdInAndUserId(accountId, entitiesIdWithoutDuplicates, userId);
+        var watchedEntityList =
+                repository.findAllByAccountIdAndEntityIdInAndUserId(accountId, entitiesIdWithoutDuplicates, userId);
         var countWatchedEntities = watchedEntityList.size();
         return countTotalEntities - countWatchedEntities;
     }
