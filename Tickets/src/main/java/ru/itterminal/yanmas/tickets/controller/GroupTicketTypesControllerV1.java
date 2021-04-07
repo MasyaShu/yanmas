@@ -1,6 +1,8 @@
 package ru.itterminal.yanmas.tickets.controller;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.UUID;
 
 import javax.validation.Valid;
@@ -46,11 +48,12 @@ public class GroupTicketTypesControllerV1 extends BaseController {
     private final SpecificationsFactory specFactory;
     private final ReflectionHelper reflectionHelper;
 
-    private final String ENTITY_NAME = GroupTicketTypes.class.getSimpleName();
+    private final String ENTITY_NAME = GroupTicketTypes.class.getSimpleName(); //NOSONAR
 
     @PostMapping()
     public ResponseEntity<GroupTicketTypesDtoResponse> create(@Validated(Create.class) @RequestBody GroupTicketTypesDtoRequest request) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
+        request.setTicketTypes(new ArrayList<>(new HashSet<>(request.getTicketTypes())));
         var createdGroupTicketTypes = service.create(
                 (GroupTicketTypes) reflectionHelper.convertRequestDtoIntoEntityWhereNestedObjectsWithOnlyValidId(
                         request,
@@ -65,6 +68,7 @@ public class GroupTicketTypesControllerV1 extends BaseController {
     @PutMapping()
     public ResponseEntity<GroupTicketTypesDtoResponse> update(@Validated(Update.class) @RequestBody GroupTicketTypesDtoRequest request) {
         log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
+        request.setTicketTypes(new ArrayList<>(new HashSet<>(request.getTicketTypes())));
         var updatedGroupTicketTypes = service.update(
                 (GroupTicketTypes) reflectionHelper.convertRequestDtoIntoEntityWhereNestedObjectsWithOnlyValidId(
                         request,

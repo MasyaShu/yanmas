@@ -105,6 +105,7 @@ public class ITHelper {
     public static final String TICKET_TEMPLATE_KEY = "ticketTemplate_";
     public static final String GROUP_TICKET_TYPES = "group-ticket-types";
     public static final String SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES = "ticket/type/setting-access";
+    public static final String WATCHED_ENTITIES = "watched-entities";
     public static final String INITIAL_GROUP_TICKET_TYPES = "InitialGroupTicketTypes";
     public static final String INITIAL_SETTINGS_ACCESS_TO_TICKET_TYPES = "InitialSettingsAccessToTicketViaTicketTypes";
     public static final String TICKET_TEMPLATE = "ticket-template";
@@ -470,7 +471,7 @@ public class ITHelper {
                     .collect(Collectors.toList());
         }
         if (permittedTicketTypes.isEmpty()) {
-            return ticketTypes.values().stream().collect(Collectors.toList());
+            return new ArrayList<>(ticketTypes.values());
         }
         return permittedTicketTypes.get(0).getGroupTicketTypes().getTicketTypes();
     }

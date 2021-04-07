@@ -4,21 +4,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.path.json.JsonPath.from;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static ru.itterminal.yanmas.IT.util.ITHelper.ACCOUNT;
-import static ru.itterminal.yanmas.IT.util.ITHelper.ACCOUNT_OWNER;
-import static ru.itterminal.yanmas.IT.util.ITHelper.ADMIN;
-import static ru.itterminal.yanmas.IT.util.ITHelper.APPLICATION_JSON;
-import static ru.itterminal.yanmas.IT.util.ITHelper.AUTHOR;
-import static ru.itterminal.yanmas.IT.util.ITHelper.EMPTY_BODY;
-import static ru.itterminal.yanmas.IT.util.ITHelper.EXECUTOR;
-import static ru.itterminal.yanmas.IT.util.ITHelper.GROUP;
-import static ru.itterminal.yanmas.IT.util.ITHelper.ID;
-import static ru.itterminal.yanmas.IT.util.ITHelper.IGNORE_FIELDS_FOR_COMPARE_USERS;
-import static ru.itterminal.yanmas.IT.util.ITHelper.OBSERVER;
-import static ru.itterminal.yanmas.IT.util.ITHelper.ROLE;
-import static ru.itterminal.yanmas.IT.util.ITHelper.SIZE;
-import static ru.itterminal.yanmas.IT.util.ITHelper.USER;
-import static ru.itterminal.yanmas.IT.util.ITHelper.USER_BY_ID;
+import static ru.itterminal.yanmas.IT.util.ITHelper.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -62,8 +48,6 @@ import ru.itterminal.yanmas.security.jwt.JwtProvider;
 @TestPropertySource(properties = {"jwt.token.secret=ksedtob", "jwt.token.expired=8640000", "jwt.token.prefix=Bearer"})
 class UserIT {
 
-    public static final String TOTAL_ELEMENTS = "totalElements";
-    public static final String CONTENT = "content";
     @Autowired
     private UserRepository userRepository;
 

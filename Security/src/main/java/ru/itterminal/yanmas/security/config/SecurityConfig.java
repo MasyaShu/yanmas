@@ -34,7 +34,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final CustomAccessDeniedHandler accessDeniedHandler;
 
 
-    static final String[] ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR = {"ACCOUNT_OWNER", "ADMIN", "EXECUTOR", "AUTHOR"};
+    static final String[] ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR = {"ACCOUNT_OWNER", "ADMIN", "EXECUTOR", "AUTHOR"}; //NOSONAR
     static final String[] ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR = {"ACCOUNT_OWNER", "ADMIN", "EXECUTOR"};
     static final String[] ROLE_ACCOUNT_OWNER_ADMIN = {"ACCOUNT_OWNER", "ADMIN"};
     static final String ROLE_ACCOUNT_OWNER = "ACCOUNT_OWNER";
@@ -88,7 +88,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     };
 
     static final String[] AUTH_WHITELIST_AUTHENTICATED_FOR_ANY_HTTP_METHOD = {
-            "/api/v1/file/**"
+            "/api/v1/file/**",
+            "/api/v1/watched-entities"
     };
 
     static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_FOR_PUT_HTTP_METHOD = {
