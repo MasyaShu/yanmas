@@ -22,6 +22,7 @@ public class TicketEventDtoResponse extends BaseEntityDto {
     private UUID newAuthorId;
     private String newSubject;
     private String newDescription;
+    private String newPriority;
     private Long newDeadline;
     private Boolean newIsFinished;
     private UUID newTicketTypeId;

@@ -69,6 +69,9 @@ public class TicketEvent extends BaseEntity {
     @Column(name = "new_description")
     private String newDescription;
 
+    @Column(name = "new_priority")
+    private String newPriority;
+
     @Column(name = "new_deadline")
     private Long newDeadline;
 

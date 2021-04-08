@@ -58,6 +58,9 @@ public class Ticket extends BaseEntity {
     private String subject;
 
     @Column
+    private String priority;
+
+    @Column
     private String description;
 
     @Column
