@@ -34,8 +34,8 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
     public static final String INVALID_TICKET_SETTINGS = "Invalid ticket settings";
     public static final String INVALID_TICKET_SETTINGS_BECAUSE_AUTHOR_HAS_NOT_ACCESS_TO_TICKET_TYPE =
             "Invalid ticket settings, because author has not access to ticket type";
-    public static final String INVALID_TICKET_SETTINGS_BECAUSE_CURRENT_USER_HAS_NOT_ACCESS_TO_TICKET_TYPE =
-            "Invalid ticket settings, because current user has not access to ticket type";
+    public static final String ACCESS_DENIED_BECAUSE_CURRENT_USER_HAS_NOT_PERMIT_TO_TICKET_TYPE =
+            "Access denied, because current user has not permit to ticket type";
 
     private final TicketSettingServiceImpl service;
     private final SettingsAccessToTicketTypesServiceImpl settingsAccessToTicketTypesService;
@@ -43,7 +43,7 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
 
     @Override
     public void checkAccessBeforeCreate(TicketSetting entity) {
-        checkAccessBeforeCreateUpdate();
+        checkAccessBeforeCreateUpdate(entity);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
 
     @Override
     public void checkAccessBeforeUpdate(TicketSetting entity) {
-        checkAccessBeforeCreateUpdate();
+        checkAccessBeforeCreateUpdate(entity);
     }
 
     @Override
@@ -76,7 +76,6 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
                     NOT_UNIQUE_CODE, format(NOT_UNIQUE_MESSAGE, TICKET_SETTING_UNIQUE_FIELDS));
         }
     }
-
 
     private boolean logicalValidationBeforeCreateUpdate(TicketSetting entity) { //NOSONAR
         var isTicketSettingIsEmpty = true;
@@ -114,17 +113,14 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
             addValidationErrorIntoErrors(INVALID_TICKET_SETTINGS, TICKET_SETTING_MUST_NOT_BE_EMPTY, errors);
         }
 
-        if (entity.getTicketTypeForNew() != null) {
+        if (entity.getTicketTypeForNew() != null && entity.getAuthor() != null) {
+            var authorId = entity.getAuthor().getId();
             var ticketTypeId = entity.getTicketTypeForNew().getId();
-            var currentUserId = jwtUserBuilder.getJwtUser().getId();
-            if (!settingsAccessToTicketTypesService.isPermittedTicketType(ticketTypeId, currentUserId)) {
-                addValidationErrorIntoErrors(INVALID_TICKET_SETTINGS, INVALID_TICKET_SETTINGS_BECAUSE_CURRENT_USER_HAS_NOT_ACCESS_TO_TICKET_TYPE, errors);
-            }
-            if (entity.getTicketTypeForNew() != null && entity.getAuthor() != null) {
-                var authorId = entity.getAuthor().getId();
-                if (!settingsAccessToTicketTypesService.isPermittedTicketType(ticketTypeId, authorId)) {
-                    addValidationErrorIntoErrors(INVALID_TICKET_SETTINGS, INVALID_TICKET_SETTINGS_BECAUSE_AUTHOR_HAS_NOT_ACCESS_TO_TICKET_TYPE, errors);
-                }
+            if (!settingsAccessToTicketTypesService.isPermittedTicketType(ticketTypeId, authorId)) {
+                addValidationErrorIntoErrors(
+                        INVALID_TICKET_SETTINGS, INVALID_TICKET_SETTINGS_BECAUSE_AUTHOR_HAS_NOT_ACCESS_TO_TICKET_TYPE,
+                        errors
+                );
             }
         }
 
@@ -132,8 +128,15 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
         return true;
     }
 
-    private void checkAccessBeforeCreateUpdate() {
+    private void checkAccessBeforeCreateUpdate(TicketSetting entity) {
         jwtUserBuilder.throwAccessDeniedExceptionIfCurrentUserFromOuterGroup();
+        if (entity.getTicketTypeForNew() != null) {
+            var ticketTypeId = entity.getTicketTypeForNew().getId();
+            var currentUserId = jwtUserBuilder.getJwtUser().getId();
+            if (!settingsAccessToTicketTypesService.isPermittedTicketType(ticketTypeId, currentUserId)) {
+                throw new AccessDeniedException(ACCESS_DENIED_BECAUSE_CURRENT_USER_HAS_NOT_PERMIT_TO_TICKET_TYPE);
+            }
+        }
     }
 
     public void checkAccessForGetSettingOrPredefinedValuesForTicket(UUID groupIdOfAuthor) {
