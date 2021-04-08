@@ -15,11 +15,13 @@ import org.springframework.data.domain.Sort;
 public abstract class BaseController {
 
     public static final String CREATE_INIT_MESSAGE = "Get request for create new {}: {}";
+    public static final String DELETE_INIT_MESSAGE = "Get request for delete {}: {}";
     public static final String UPDATE_INIT_MESSAGE = "Get request for update {}: {}";
     public static final String FIND_BY_ID_INIT_MESSAGE = "Get id for find {}: {}";
     public static final String FIND_ALL_INIT_MESSAGE = "Get all entities for {}";
     public static final String FIND_INIT_MESSAGE = "Get request for find {}, page: {}, size: {}, filter: {}";
     public static final String CREATE_FINISH_MESSAGE = "Done request for create new {}: {}";
+    public static final String DELETE_FINISH_MESSAGE = "Done request for delete {}: {}";
     public static final String UPDATE_FINISH_MESSAGE = "Done request for update {}: {}";
     public static final String FIND_BY_ID_FINISH_MESSAGE = "Done find by id {}: {}";
     public static final String FIND_ALL_FINISH_MESSAGE = "Done find all entities for {}";

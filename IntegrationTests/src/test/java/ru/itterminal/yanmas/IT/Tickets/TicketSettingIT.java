@@ -15,6 +15,7 @@ import static ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter.TypeCom
 import static ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_CODE;
 import static ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_MESSAGE;
 import static ru.itterminal.yanmas.tickets.service.validator.TicketSettingOperationValidator.*;
+import static ru.itterminal.yanmas.tickets.service.validator.TicketTypeOperationValidator.ACCESS_IS_DENIED_FOR_SEARCHING_BY_PASSED_TICKET_TYPE_ID;
 
 import java.util.List;
 import java.util.UUID;
@@ -538,11 +539,11 @@ class TicketSettingIT {
                 .post(TICKET_SETTING)
                 .then()
                 .log().body()
-                .body(STATUS, equalTo(HttpStatus.CONFLICT.value()))
+                .body(STATUS, equalTo(HttpStatus.FORBIDDEN.value()))
                 .extract().response().as(ApiError.class);
         assertEquals(
-                INVALID_TICKET_SETTINGS_BECAUSE_CURRENT_USER_HAS_NOT_ACCESS_TO_TICKET_TYPE,
-                apiError.getErrors().get(INVALID_TICKET_SETTINGS).get(0).getMessage()
+                ACCESS_IS_DENIED_FOR_SEARCHING_BY_PASSED_TICKET_TYPE_ID,
+                apiError.getDetail()
         );
     }
 
@@ -653,11 +654,9 @@ class TicketSettingIT {
         );
     }
 
-    @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamUsersFromInnerGroupWithRolesAccountOwnerAndAdmin")
+    @Test
     @Order(160)
-    void failedUpdateByUsersFromInnerGroupsWithRolesAccountOwnerAndAdmin_whenAfterUpdateTicketSettingWillBeNotUnique(
-            String userKey, User user) {
+    void failedUpdateByUsersFromInnerGroupsWithRolesAccountOwner_whenAfterUpdateTicketSettingWillBeNotUnique() {
         var expectedTicketSetting = itHelper.getTicketSettings().get(INNER_GROUP + "1").toBuilder()
                 .group(itHelper.getTicketSettings().get(OUTER_GROUP + "1").getGroup())
                 .displayName(null)
@@ -667,7 +666,7 @@ class TicketSettingIT {
                 when().
                 headers(
                         "Authorization",
-                        "Bearer " + itHelper.getTokens().get(user.getEmail())
+                        "Bearer " + itHelper.getTokens().get(itHelper.getAccountOwner().getEmail())
                 )
                 .contentType(APPLICATION_JSON)
                 .body(dtoRequest)
@@ -733,11 +732,11 @@ class TicketSettingIT {
                 .put(TICKET_SETTING)
                 .then()
                 .log().body()
-                .body(STATUS, equalTo(HttpStatus.CONFLICT.value()))
+                .body(STATUS, equalTo(HttpStatus.FORBIDDEN.value()))
                 .extract().response().as(ApiError.class);
         assertEquals(
-                INVALID_TICKET_SETTINGS_BECAUSE_CURRENT_USER_HAS_NOT_ACCESS_TO_TICKET_TYPE,
-                apiError.getErrors().get(INVALID_TICKET_SETTINGS).get(0).getMessage()
+                ACCESS_IS_DENIED_FOR_SEARCHING_BY_PASSED_TICKET_TYPE_ID,
+                apiError.getDetail()
         );
     }
 

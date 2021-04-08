@@ -4,6 +4,7 @@ import static java.lang.String.format;
 import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.addValidationErrorIntoErrors;
 import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
 import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.ifErrorsNotEmptyThrowLogicalValidationException;
+import static ru.itterminal.yanmas.tickets.service.validator.TicketSettingOperationValidator.ACCESS_DENIED_BECAUSE_CURRENT_USER_HAS_NOT_PERMIT_TO_TICKET_TYPE;
 
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidat
 import ru.itterminal.yanmas.files.model.File;
 import ru.itterminal.yanmas.security.jwt.JwtUser;
 import ru.itterminal.yanmas.tickets.model.Ticket;
+import ru.itterminal.yanmas.tickets.service.impl.SettingsAccessToTicketTypesServiceImpl;
 
 @Slf4j
 @Component
@@ -149,8 +151,13 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
             "File was created by another user, you cannot use it for create this ticket";
     public static final String FILE_ALREADY_HAS_A_LINK_TO_ANOTHER_ENTITY = "File already has a link to another entity";
     public static final String FILE_IS_NOT_YET_UPLOADED = "File is not yet uploaded";
+    public static final String INVALID_TICKET = "Invalid ticket";
+    public static final String INVALID_TICKET_BECAUSE_AUTHOR_HAS_NOT_ACCESS_TO_TICKET_TYPE =
+            "Invalid ticket, because author has not access to ticket type";
+
 
     private final UserServiceImpl userService;
+    private final SettingsAccessToTicketTypesServiceImpl settingsAccessToTicketTypesService;
 
     @Override
     public void checkAccessBeforeCreate(Ticket entity) {
@@ -163,6 +170,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
         var errors = createMapForLogicalErrors();
         IsEmptySubjectDescriptionAndFiles(entity, errors);
         checkAuthorExecutorsAndObserversForWeightOfRoles(entity, errors);
+        IsAuthorOfTicketHavePermitToTicketType(entity, errors);
         chekFiles(entity, errors);
         ifErrorsNotEmptyThrowLogicalValidationException(errors);
         return result;
@@ -208,9 +216,25 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
         var errors = createMapForLogicalErrors();
         IsEmptySubjectDescriptionAndFiles(entity, errors);
         checkAuthorExecutorsAndObserversForWeightOfRoles(entity, errors);
+        IsAuthorOfTicketHavePermitToTicketType(entity, errors);
         ifErrorsNotEmptyThrowLogicalValidationException(errors);
         return result;
     }
+
+    private void IsAuthorOfTicketHavePermitToTicketType(Ticket ticket, Map<String, List<ValidationError>> errors) {
+        if (ticket.getTicketType() != null && ticket.getAuthor() != null) {
+            var authorId = ticket.getAuthor().getId();
+            var ticketTypeId = ticket.getTicketType().getId();
+            if (!settingsAccessToTicketTypesService.isPermittedTicketType(ticketTypeId, authorId)) {
+                addValidationErrorIntoErrors(
+                        INVALID_TICKET, INVALID_TICKET_BECAUSE_AUTHOR_HAS_NOT_ACCESS_TO_TICKET_TYPE,
+                        errors
+                );
+                log.trace(INVALID_TICKET_BECAUSE_AUTHOR_HAS_NOT_ACCESS_TO_TICKET_TYPE);
+            }
+        }
+    }
+
 
     private void IsEmptySubjectDescriptionAndFiles(Ticket ticket, Map<String, List<ValidationError>> errors) {
         if ((ticket.getDescription() == null || ticket.getDescription().isEmpty())
@@ -221,7 +245,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
                     MUST_NOT_CREATE_UPDATE_TICKET_IF_SUBJECT_DESCRIPTION_AND_FILES_ARE_EMPTY,
                     errors
             );
-            log.error(LOG_EMPTY_TICKET, ticket);
+            log.trace(LOG_EMPTY_TICKET, ticket);
         }
     }
 
@@ -240,7 +264,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
                     ),
                     errors
             );
-            log.error(
+            log.trace(
                     format(
                             WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR_LESS_THAN_WEIGHT_OF_ROLE_AUTHOR,
                             ticket.getAuthor().getRole().getWeight(),
@@ -261,7 +285,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
                             ),
                             errors
                     );
-                    log.error(
+                    log.trace(
                             format(
                                     WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS_LESS_THAN_WEIGHT_OF_ROLE_EXECUTOR,
                                     executor.getRole().getWeight(),
@@ -285,7 +309,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
                             ),
                             errors
                     );
-                    log.error(
+                    log.trace(
                             format(
                                     WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS_LESS_THAN_WEIGHT_OF_ROLE_OBSERVER,
                                     observer.getRole().getWeight(),
@@ -417,6 +441,16 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
             throw new AccessDeniedException
                     (CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_OUTER_GROUP);
         }
+
+        // checkAccessForCreateAndUpdate_ShouldGetAccessDeniedException_whenCurrentUserHasNotPermitToTicketType
+        if (ticket.getTicketType() != null) {
+            var ticketTypeId = ticket.getTicketType().getId();
+            var currentUserId = currentUser.getId();
+            if (!settingsAccessToTicketTypesService.isPermittedTicketType(ticketTypeId, currentUserId)) {
+                throw new AccessDeniedException(ACCESS_DENIED_BECAUSE_CURRENT_USER_HAS_NOT_PERMIT_TO_TICKET_TYPE);
+            }
+        }
+
         return true;
     }
 
@@ -548,6 +582,15 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
                     ));
             throw new AccessDeniedException
                     (CURRENT_USER_WITH_ROLE_OBSERVER_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_IN_OBSERVERS);
+        }
+
+        // checkAccessForRead_ShouldGetAccessDeniedException_whenCurrentUserHasNotPermitToTicketType
+        if (ticket.getTicketType() != null) {
+            var ticketTypeId = ticket.getTicketType().getId();
+            var currentUserId = currentUser.getId();
+            if (!settingsAccessToTicketTypesService.isPermittedTicketType(ticketTypeId, currentUserId)) {
+                throw new AccessDeniedException(ACCESS_DENIED_BECAUSE_CURRENT_USER_HAS_NOT_PERMIT_TO_TICKET_TYPE);
+            }
         }
     }
 
