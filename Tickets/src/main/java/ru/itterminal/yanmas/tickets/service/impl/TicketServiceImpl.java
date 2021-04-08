@@ -20,6 +20,7 @@ import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.yanmas.aau.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.yanmas.aau.service.impl.UserServiceImpl;
+import ru.itterminal.yanmas.aau.service.impl.WhoWatchedEntityServiceImpl;
 import ru.itterminal.yanmas.commons.model.BaseEntity;
 import ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter;
 import ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter;
@@ -50,6 +51,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
 
     private final TicketCounterServiceImpl ticketCounterService;
     private final TicketSettingServiceImpl ticketSettingService;
+    private final WhoWatchedEntityServiceImpl whoWatchedEntityService;
     private final FileServiceImpl fileService;
     private final SpecificationsFactory specFactory;
     private final TicketTypeServiceImpl ticketTypeService;
@@ -90,8 +92,22 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
                 fileService.update(file);
             }
         }
+        whoWatchedEntityService.watched(List.of(createdEntity.getId()));
         log.trace(format(CREATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), createdEntity.toString()));
         return createdEntity;
+    }
+
+    @Transactional
+    public Ticket update(Ticket entity, User currentUser) {
+        // whoWatchedEntityService.watched(List.of(updatedEntity.getId()));
+        return null;
+    }
+
+    @Override
+    public Ticket findByIdAndAccountId(UUID id) {
+        var foundTicket =  super.findByIdAndAccountId(id);
+        whoWatchedEntityService.watched(List.of(foundTicket.getId()));
+        return foundTicket;
     }
 
     @Override
