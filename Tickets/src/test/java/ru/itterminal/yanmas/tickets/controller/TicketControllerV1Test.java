@@ -57,6 +57,7 @@ import ru.itterminal.yanmas.tickets.service.impl.TicketServiceImpl;
 @ActiveProfiles(SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS)
 class TicketControllerV1Test {
 
+    public static final String MUST_BE_ANY_OF_LOW_MIDDLE_HEIGHT = "must be any of: low, middle, height";
     @MockBean
     private UserServiceImpl userService;
 
@@ -153,6 +154,7 @@ class TicketControllerV1Test {
         requestDto.setVersion(null);
         requestDto.setDisplayName(null);
         requestDto.setAuthorId(null);
+        requestDto.setPriority("");
         requestDto.setSubject(fakerRU.lorem().sentence(256));
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -167,6 +169,11 @@ class TicketControllerV1Test {
                                            "$.errors.authorId[?(@.message == '%s')]",
                                            CommonConstants.MUST_NOT_BE_NULL
                                    ).exists())
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath(
+                                "$.errors.priority[?(@.message == '%s')]",
+                                MUST_BE_ANY_OF_LOW_MIDDLE_HEIGHT
+                        ).exists())
                 .andExpect(MockMvcResultMatchers
                                    .jsonPath(
                                            "$.errors.subject[?(@.message =~ /%s.*/)]",

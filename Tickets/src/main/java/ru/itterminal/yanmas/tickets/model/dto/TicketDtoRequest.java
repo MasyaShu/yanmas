@@ -5,6 +5,7 @@ import lombok.experimental.SuperBuilder;
 import ru.itterminal.yanmas.commons.model.dto.BaseEntityDto;
 import ru.itterminal.yanmas.commons.model.validator.enums.ValueOfEnum;
 import ru.itterminal.yanmas.commons.model.validator.scenario.Create;
+import ru.itterminal.yanmas.commons.model.validator.scenario.Update;
 import ru.itterminal.yanmas.tickets.model.Priority;
 
 import javax.validation.constraints.NotNull;
@@ -24,7 +25,7 @@ public class TicketDtoRequest extends BaseEntityDto {
     private UUID authorId;
     @Size(max = 256, groups = {Create.class})
     private String subject;
-    @ValueOfEnum(enumClass = Priority.class, message = "must be any of: low, middle, height")
+    @ValueOfEnum(enumClass = Priority.class, message = "must be any of: low, middle, height", groups = {Create.class, Update.class})
     private String priority;
     private String description;
     private Long deadline;
