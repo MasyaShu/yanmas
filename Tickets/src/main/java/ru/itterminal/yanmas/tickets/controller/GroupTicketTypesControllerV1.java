@@ -40,7 +40,7 @@ import ru.itterminal.yanmas.tickets.service.impl.GroupTicketTypesServiceImpl;
 @Slf4j
 @RestController("GroupTicketTypesControllerV1")
 @Validated
-@RequestMapping("api/v1/group-ticket-types")
+@RequestMapping("api/v1/ticket/type/group")
 @RequiredArgsConstructor
 public class GroupTicketTypesControllerV1 extends BaseController {
 

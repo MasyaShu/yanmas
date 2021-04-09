@@ -39,7 +39,7 @@ import ru.itterminal.yanmas.tickets.service.impl.TicketTemplateServiceImpl;
 
 @Slf4j
 @RestController("TicketTemplateControllerV1")
-@RequestMapping("api/v1/ticket-template")
+@RequestMapping("api/v1/ticket/template")
 @RequiredArgsConstructor
 public class TicketTemplateControllerV1 extends BaseController {
 

@@ -10,7 +10,7 @@ import ru.itterminal.yanmas.commons.controller.BaseController;
 @Slf4j
 @RestController("TicketEventControllerV1")
 @Validated
-@RequestMapping("api/v1/ticket-event")
+@RequestMapping("api/v1/ticket/event")
 @RequiredArgsConstructor
 public class TicketEventControllerV1 extends BaseController {
 

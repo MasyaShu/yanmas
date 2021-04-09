@@ -57,23 +57,23 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     static final String[] AUTH_WHITELIST_AUTHENTICATED_FOR_GET_HTTP_METHOD = {
             "/api/v1/account/**",
-            "/api/v1/group/**",
-            "/api/v1/role/**",
+            "/api/v1/user/group/**",
+            "/api/v1/user/role/**",
             "/api/v1/user/**",
             "/api/v1/ticket/**",
-            "/api/v1/ticket-counter/**",
-            "/api/v1/ticket-status/**",
-            "/api/v1/ticket-type/**",
-            "/api/v1/group-ticket-types/**"
+            "/api/v1/ticket/counter/**",
+            "/api/v1/ticket/status/**",
+            "/api/v1/ticket/type/**",
+            "/api/v1/ticket/type/group/**"
     };
 
     static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_GET_HTTP_METHOD = {
-            "/api/v1/ticket-setting/**"
+            "/api/v1/ticket/setting-initial/**"
 
     };
 
     static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_GET_HTTP_METHOD = {
-            "/api/v1/ticket-template/**"
+            "/api/v1/ticket/template/**"
 
     };
 
@@ -97,31 +97,31 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     };
 
     static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_POST_HTTP_METHOD = {
-            "/api/v1/group",
+            "/api/v1/user/group",
             "/api/v1/user",
-            "/api/v1/ticket-setting",
-            "/api/v1/ticket-status",
-            "/api/v1/ticket-type",
-            "/api/v1/group-ticket-types",
+            "/api/v1/ticket/setting-initial",
+            "/api/v1/ticket/status",
+            "/api/v1/ticket/type",
+            "/api/v1/ticket/type/group",
             "/api/v1/ticket/type/setting-access"
     };
 
     static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_PUT_HTTP_METHOD = {
-            "/api/v1/group",
+            "/api/v1/user/group",
             "/api/v1/user",
-            "/api/v1/ticket-template"
+            "/api/v1/ticket/template"
     };
 
     static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_POST_HTTP_METHOD = {
-            "/api/v1/ticket-template"
+            "/api/v1/ticket/template"
     };
 
     static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_PUT_HTTP_METHOD = {
-            "/api/v1/ticket-counter",
-            "/api/v1/ticket-setting",
-            "/api/v1/ticket-status",
-            "/api/v1/ticket-type",
-            "/api/v1/group-ticket-types",
+            "/api/v1/ticket/counter",
+            "/api/v1/ticket/setting-initial",
+            "/api/v1/ticket/status",
+            "/api/v1/ticket/type",
+            "/api/v1/ticket/type/group",
             "/api/v1/ticket/type/setting-access"
     };
 

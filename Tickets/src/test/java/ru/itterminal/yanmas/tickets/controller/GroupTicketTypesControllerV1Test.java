@@ -96,7 +96,7 @@ class GroupTicketTypesControllerV1Test {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String HOST = "http://localhost";
     private static final String PORT = ":8081";
-    private static final String API = "api/v1/group-ticket-types";
+    private static final String API = "api/v1/ticket/type/group";
 
     private final GroupTicketTypesFilterDto groupTicketTypesFilterDto = new GroupTicketTypesFilterDto();
     private final GroupTicketTypesTestHelper testHelper = new GroupTicketTypesTestHelper();
