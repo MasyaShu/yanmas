@@ -52,9 +52,40 @@ public abstract class CrudServiceWithAccountImpl<
 
     @Transactional(readOnly = true)
     @Override
+    public List<E> findAllByAccountIdAndListId(UUID accountId, List<UUID> listId) {
+        if (listId != null && !listId.isEmpty()) {
+            return repository.findAllByAccountIdAndListId(accountId, listId);
+        }
+        return Collections.emptyList();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
     public E findByIdAndAccountId(UUID id) {
         var searchParameter = "id and accountId";
         var accountId = jwtUserBuilder.getJwtUser().getAccountId();
+        log.trace(format(FIND_INIT_MESSAGE_WITH_ACCOUNT, searchParameter, id, accountId));
+        if (repository.existsById(id)) {
+            var foundEntity  = repository.findByIdAndAccountId(id, accountId).orElseThrow(
+                    () -> {
+                        String errorMessage = format(FIND_INVALID_MESSAGE_WITH_ACCOUNT, searchParameter, id, accountId);
+                        log.error(errorMessage);
+                        throw new EntityNotExistException(errorMessage);
+                    }
+            );
+            validator.checkAccessBeforeRead(foundEntity);
+            return foundEntity;
+        } else {
+            String errorMessage = format(FIND_INVALID_MESSAGE_WITH_ACCOUNT, searchParameter, id, accountId);
+            log.error(errorMessage);
+            throw new EntityNotExistException(errorMessage);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public E findByIdAndAccountId(UUID id, UUID accountId) {
+        var searchParameter = "id and accountId";
         log.trace(format(FIND_INIT_MESSAGE_WITH_ACCOUNT, searchParameter, id, accountId));
         if (repository.existsById(id)) {
             var foundEntity  = repository.findByIdAndAccountId(id, accountId).orElseThrow(
