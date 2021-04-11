@@ -19,7 +19,6 @@ import ru.itterminal.yanmas.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.yanmas.files.model.File;
 import ru.itterminal.yanmas.files.service.FileServiceImpl;
 import ru.itterminal.yanmas.integration.across_modules.RequestsFromModuleAccountAndUsers;
-import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 import ru.itterminal.yanmas.tickets.model.Priority;
 import ru.itterminal.yanmas.tickets.model.Ticket;
 import ru.itterminal.yanmas.tickets.repository.TicketRepository;
