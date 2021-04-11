@@ -17,9 +17,8 @@ import ru.itterminal.yanmas.commons.exception.error.ValidationError;
 import ru.itterminal.yanmas.security.config.TestSecurityConfig;
 import ru.itterminal.yanmas.tickets.model.TicketType;
 import ru.itterminal.yanmas.tickets.model.projection.TicketTypeUniqueFields;
-import ru.itterminal.yanmas.tickets.model.test.TicketTypeTestHelper;
+import ru.itterminal.yanmas.tickets.repository.TicketTypeRepository;
 import ru.itterminal.yanmas.tickets.service.impl.SettingsAccessToTicketTypesServiceImpl;
-import ru.itterminal.yanmas.tickets.service.impl.TicketTypeServiceImpl;
 
 import java.util.*;
 
@@ -35,7 +34,7 @@ import static ru.itterminal.yanmas.commons.util.CommonConstants.SPRING_ACTIVE_PR
 class TicketTypeOperationValidatorTest {
 
     @MockBean
-    private TicketTypeServiceImpl service;
+    private TicketTypeRepository repository;
 
     @MockBean
     private SettingsAccessToTicketTypesServiceImpl accessToTicketTypesService;
@@ -47,13 +46,12 @@ class TicketTypeOperationValidatorTest {
     private ApplicationContext appContext;
 
     @Autowired
-    private final TicketTypeOperationValidator validator = new TicketTypeOperationValidator(service, appContext);
+    private final TicketTypeOperationValidator validator = new TicketTypeOperationValidator(appContext, repository);
 
     private static final String EXIST_NAME = "ticketTypes1";
     private static final String VALIDATED_FIELDS = "name";
     private static final Map<String, List<ValidationError>> errors = new HashMap<>();
     private static TicketType ticketType;
-    private final TicketTypeTestHelper ticketTypeTestHelper = new TicketTypeTestHelper();
 
     @BeforeAll
     static void setUp() {
@@ -69,13 +67,13 @@ class TicketTypeOperationValidatorTest {
 
     @Test
     void checkUniqueness_shouldGetTrue_whenPassedDataIsUnique() {
-        when(service.findByUniqueFields(any())).thenReturn(Collections.emptyList());
-        assertTrue(validator.checkUniqueness(new TicketType()));
+        when(repository.getByNameAndAccount_IdAndIdNot(any(), any(), any())).thenReturn(Collections.emptyList());
+        assertTrue(validator.checkUniqueness(TicketType.builder().account(new Account()).build()));
     }
 
     @Test
     void checkUniqueness_shouldGetLogicalValidationException_whenPassedDataNotUnique() {
-        when(service.findByUniqueFields(any())).thenReturn(List.of(ticketTypeUniqueFields));
+        when(repository.getByNameAndAccount_IdAndIdNot(any(), any(), any())).thenReturn(List.of(ticketTypeUniqueFields));
         when(ticketTypeUniqueFields.getName()).thenReturn(EXIST_NAME);
         errors.put(VALIDATED_FIELDS, singletonList(new ValidationError(VALIDATED_FIELDS, "name is occupied")));
         LogicalValidationException logicalValidationException = new LogicalValidationException(VALIDATED_FIELDS, errors);

@@ -9,11 +9,8 @@ import org.springframework.stereotype.Component;
 import ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidatorImpl;
 import ru.itterminal.yanmas.security.jwt.JwtUser;
 import ru.itterminal.yanmas.tickets.model.TicketType;
-import ru.itterminal.yanmas.tickets.model.projection.TicketTypeUniqueFields;
+import ru.itterminal.yanmas.tickets.repository.TicketTypeRepository;
 import ru.itterminal.yanmas.tickets.service.impl.SettingsAccessToTicketTypesServiceImpl;
-import ru.itterminal.yanmas.tickets.service.impl.TicketTypeServiceImpl;
-
-import java.util.List;
 
 import static java.lang.String.format;
 import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.checkStringForEquals;
@@ -28,14 +25,17 @@ public class TicketTypeOperationValidator extends BasicOperationValidatorImpl<Ti
             "A user from outer group cannot create or update ticket type";
     public static final String ACCESS_IS_DENIED_FOR_SEARCHING_BY_PASSED_TICKET_TYPE_ID =
             "Access is denied for searching by passed groupId";
-    private final TicketTypeServiceImpl service;
+    private static final String START_FIND_TICKET_TYPES_BY_UNIQUE_FIELDS =
+            "Start find ticket type by unique fields, name: {} and not id: {} and not account: {}";
     private final ApplicationContext appContext;
+    private final TicketTypeRepository repository;
 
 
     @Override
     public boolean checkUniqueness(TicketType entity) {
         log.trace(CHECK_UNIQUENESS, entity);
-        List<TicketTypeUniqueFields> foundTicketTypes = service.findByUniqueFields(entity);
+        log.trace(START_FIND_TICKET_TYPES_BY_UNIQUE_FIELDS, entity.getName(), entity.getId(), entity.getAccount());
+        var foundTicketTypes = repository.getByNameAndAccount_IdAndIdNot(entity.getName(), entity.getAccount().getId(), entity.getId());
         if (!foundTicketTypes.isEmpty()) {
             String validatedField = "name";
             checkStringForEquals(entity.getName(), foundTicketTypes.get(0).getName(),
@@ -70,7 +70,7 @@ public class TicketTypeOperationValidator extends BasicOperationValidatorImpl<Ti
         var accessToTicketTypesService =
                 (SettingsAccessToTicketTypesServiceImpl) appContext.getBean("settingsAccessToTicketTypesServiceImpl");
         var permittedTicketTypes = accessToTicketTypesService.getPermittedTicketTypes(jwtUser.getId());
-        if (permittedTicketTypes!= null && !permittedTicketTypes.contains(entity)) {
+        if (permittedTicketTypes != null && !permittedTicketTypes.contains(entity)) {
             throw new AccessDeniedException(ACCESS_IS_DENIED_FOR_SEARCHING_BY_PASSED_TICKET_TYPE_ID);
         }
     }
