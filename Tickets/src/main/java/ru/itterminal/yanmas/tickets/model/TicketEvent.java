@@ -48,6 +48,9 @@ public class TicketEvent extends BaseEntity {
     @Column(name = "auto_comment")
     private String autoComment;
 
+    @Column(name = "is_comment_for_executors")
+    private Boolean isCommentForExecutors;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Long createdAt;
 

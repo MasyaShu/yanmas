@@ -81,7 +81,7 @@ create TABLE IF NOT EXISTS ticket_settings
     FOREIGN KEY (ticket_status_id_for_cancel) REFERENCES ticket_statuses (id)
 );
 
-CREATE UNIQUE INDEX unique_fields_ticket_settings ON ticket_settings (account_id, group_id, author_id);
+create UNIQUE INDEX unique_fields_ticket_settings ON ticket_settings (account_id, group_id, author_id);
 
 create TABLE IF NOT EXISTS ticket_settings_executors
 (
@@ -166,6 +166,7 @@ create TABLE IF NOT EXISTS ticket_events
     ticket_id              uuid   NOT NULL,
     comment                text,
     auto_comment           text,
+    is_comment_for_executors    bool   DEFAULT 'false',
     created_at             bigint NOT NULL,
     created_by             bigint NOT NULL,
     new_author_id          uuid   NOT NULL,

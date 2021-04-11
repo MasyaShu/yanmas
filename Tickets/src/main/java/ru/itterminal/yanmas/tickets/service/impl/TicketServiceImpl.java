@@ -1,20 +1,11 @@
 package ru.itterminal.yanmas.tickets.service.impl;
 
-import static java.lang.String.format;
-import static ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
-import static ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter.TypeComparisonForListOfBaseEntityFilter.CONTAINS_ALL_OF_LIST;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.service.impl.AccountServiceImpl;
@@ -28,9 +19,18 @@ import ru.itterminal.yanmas.files.model.File;
 import ru.itterminal.yanmas.files.service.FileServiceImpl;
 import ru.itterminal.yanmas.integration.across_modules.RequestsFromModuleAccountAndUsers;
 import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
+import ru.itterminal.yanmas.tickets.model.Priority;
 import ru.itterminal.yanmas.tickets.model.Ticket;
 import ru.itterminal.yanmas.tickets.repository.TicketRepository;
 import ru.itterminal.yanmas.tickets.service.validator.TicketOperationValidator;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static java.lang.String.format;
+import static ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
+import static ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter.TypeComparisonForListOfBaseEntityFilter.CONTAINS_ALL_OF_LIST;
 
 @SuppressWarnings("unused")
 @Slf4j
@@ -150,6 +150,9 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
                     .map(BaseEntity::getId)
                     .collect(Collectors.toList());
             ticket.setExecutors(userService.findAllByAccountIdAndListId(listExecutorsId));
+        }
+        if (ticket.getPriority() == null) {
+            ticket.setPriority(Priority.MIDDLE.toString());
         }
     }
 
