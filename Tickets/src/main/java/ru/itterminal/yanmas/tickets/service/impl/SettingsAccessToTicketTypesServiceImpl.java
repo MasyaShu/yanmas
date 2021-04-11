@@ -1,14 +1,9 @@
 package ru.itterminal.yanmas.tickets.service.impl;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.itterminal.yanmas.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.yanmas.aau.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.yanmas.aau.service.impl.GroupServiceImpl;
@@ -19,15 +14,16 @@ import ru.itterminal.yanmas.tickets.model.TicketType;
 import ru.itterminal.yanmas.tickets.repository.SettingsAccessToTicketTypesRepository;
 import ru.itterminal.yanmas.tickets.service.validator.SettingsAccessToTicketTypesOperationValidator;
 
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 @SuppressWarnings("unused")
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class SettingsAccessToTicketTypesServiceImpl extends
         CrudServiceWithAccountImpl<SettingsAccessToTicketTypes, SettingsAccessToTicketTypesOperationValidator, SettingsAccessToTicketTypesRepository> {
-
-    public static final String WHERE = "SettingsAccessToTicketTypesServiceImpl.findByUniqueFields: ";
-    public static final String START_FIND = "Start " + WHERE + "{} , {}, {}";
 
     private final AccountServiceImpl accountService;
     private final GroupServiceImpl groupService;
@@ -70,18 +66,6 @@ public class SettingsAccessToTicketTypesServiceImpl extends
                     repository.getByAccount_IdAndGroupIsNullAndUserIsNullAndDeletedIsFalse(accountId);
         }
         return foundSettings;
-    }
-
-    @Transactional(readOnly = true)
-    public List<SettingsAccessToTicketTypes> findByUniqueFields(
-            SettingsAccessToTicketTypes settingsAccess) {
-        log.trace(START_FIND, settingsAccess.getAccount(), settingsAccess.getGroup(), settingsAccess.getUser());
-        return repository.findAllByAccount_IdAndGroup_IdAndUser_IdAndIdNot(
-                settingsAccess.getAccount().getId(),
-                settingsAccess.getGroup() == null ? null : settingsAccess.getGroup().getId(),
-                settingsAccess.getUser() == null ? null : settingsAccess.getUser().getId(),
-                settingsAccess.getId()
-        );
     }
 
     @Override
