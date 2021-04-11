@@ -42,7 +42,7 @@ import ru.itterminal.yanmas.tickets.service.impl.TicketSettingServiceImpl;
 @Slf4j
 @RestController("TicketSettingControllerV1")
 @Validated
-@RequestMapping("api/v1/ticket-setting")
+@RequestMapping("api/v1/ticket/setting-initial")
 @RequiredArgsConstructor
 public class TicketSettingControllerV1 extends BaseController {
 

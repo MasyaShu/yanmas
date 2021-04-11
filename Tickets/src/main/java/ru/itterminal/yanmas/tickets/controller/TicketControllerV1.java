@@ -49,7 +49,7 @@ public class TicketControllerV1 extends BaseController {
     private final SpecificationsFactory specFactory;
     private final ReflectionHelper reflectionHelper;
 
-    private final String ENTITY_NAME = Ticket.class.getSimpleName();
+    private final String ENTITY_NAME = Ticket.class.getSimpleName(); //NOSONAR
 
     @PostMapping()
     public ResponseEntity<TicketDtoResponse> create (
@@ -139,7 +139,7 @@ public class TicketControllerV1 extends BaseController {
             Specification<Ticket> additionConditionByObserversOfTicket =
                     specFactory.makeSpecification(Ticket.class, OBSERVERS, filterByListOfObservers);
             //noinspection UnusedAssignment
-            spec = spec.and(additionConditionByObserversOfTicket);
+            spec = spec.and(additionConditionByObserversOfTicket); //NOSONAR
         }
     }
 }

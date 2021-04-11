@@ -11,6 +11,7 @@ import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.yanmas.aau.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.yanmas.aau.service.impl.UserServiceImpl;
+import ru.itterminal.yanmas.aau.service.impl.WhoWatchedEntityServiceImpl;
 import ru.itterminal.yanmas.commons.model.BaseEntity;
 import ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter;
 import ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter;
@@ -50,23 +51,23 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
 
     private final TicketCounterServiceImpl ticketCounterService;
     private final TicketSettingServiceImpl ticketSettingService;
+    private final WhoWatchedEntityServiceImpl whoWatchedEntityService;
     private final FileServiceImpl fileService;
     private final SpecificationsFactory specFactory;
     private final TicketTypeServiceImpl ticketTypeService;
     private final TicketStatusServiceImpl ticketStatusService;
     private final UserServiceImpl userService;
     private final AccountServiceImpl accountService;
-    private final JwtUserBuilder jwtUserBuilder;
 
     @Override
     @Deprecated
-    public Ticket create(Ticket entity) {
+    public Ticket create(Ticket entity) { //NOSONAR
         throw new UnsupportedOperationException(YOU_MUST_USE_ANOTHER_METHOD_CREATE);
     }
 
     @Override
     @Deprecated
-    public Ticket update(Ticket entity) {
+    public Ticket update(Ticket entity) { //NOSONAR
         throw new UnsupportedOperationException(YOU_MUST_USE_ANOTHER_METHOD_UPDATE);
     }
 
@@ -79,8 +80,8 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
                         entity.toString() + BY_USER + currentUser.getEmail()
                 )
         );
-        setNestedObjectsOfEntityBeforeCreate(entity);
-        validator.checkAccessBeforeCreate(entity);
+        setNestedObjectsOfEntityBeforeCreate(entity, currentUser);
+        validator.checkAccessBeforeCreate(entity, currentUser);
         validator.logicalValidationBeforeCreate(entity);
         validator.checkUniqueness(entity);
         var createdEntity = repository.create(entity);
@@ -90,21 +91,34 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
                 fileService.update(file);
             }
         }
+        whoWatchedEntityService.watched(List.of(createdEntity.getId()));
         log.trace(format(CREATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), createdEntity.toString()));
         return createdEntity;
     }
 
+    @Transactional
+    public Ticket update(Ticket entity, User currentUser) {
+        // whoWatchedEntityService.watched(List.of(updatedEntity.getId())); //NOSONAR
+        return null;
+    }
+
     @Override
-    protected void setNestedObjectsOfEntityBeforeCreate(Ticket ticket) {
-        var currentUser = userService.findByIdAndAccountId(jwtUserBuilder.getJwtUser().getId());
-        ticket.setAccount(accountService.findById(jwtUserBuilder.getJwtUser().getAccountId()));
-        ticket.setAuthor(userService.findByIdAndAccountId(ticket.getAuthor().getId()));
+    public Ticket findByIdAndAccountId(UUID id) {
+        var foundTicket = super.findByIdAndAccountId(id);
+        whoWatchedEntityService.watched(List.of(foundTicket.getId()));
+        return foundTicket;
+    }
+
+    protected void setNestedObjectsOfEntityBeforeCreate(Ticket ticket, User currentUser) { //NOSONAR
+        var accountId = currentUser.getAccount().getId();
+        ticket.setAccount(accountService.findById(accountId));
+        ticket.setAuthor(userService.findByIdAndAccountId(ticket.getAuthor().getId(), accountId));
         ticket.setGroup(ticket.getAuthor().getGroup());
         ticket.setId(UUID.randomUUID());
         ticket.generateDisplayName();
         ticket.setNumber(ticketCounterService.getNextTicketNumber(ticket.getAccount().getId()));
         var ticketSetting = ticketSettingService.getSettingOrPredefinedValuesForTicket(
-                ticket.getAccount().getId(),
+                accountId,
                 ticket.getGroup().getId(),
                 ticket.getAuthor().getId()
         );
@@ -117,7 +131,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
             ticket.setTicketStatus(ticketSetting.getTicketStatusForClose());
         } else if (ticketStatus != null && Boolean.FALSE.equals(isTicketFinished) && isCurrentUserFromInnerGroup
                 && (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight())) {
-            ticket.setTicketStatus(ticketStatusService.findByIdAndAccountId(ticketStatus.getId()));
+            ticket.setTicketStatus(ticketStatusService.findByIdAndAccountId(ticketStatus.getId(), accountId));
         } else if ((Boolean.FALSE.equals(isTicketFinished) && ticket.getTicketStatus() == null)
                 || (Boolean.FALSE.equals(isTicketFinished) && !isCurrentUserFromInnerGroup)
                 || (Boolean.FALSE.equals(isTicketFinished) && weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight())) {
@@ -129,7 +143,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
                 || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
             ticket.setTicketType(ticketSetting.getTicketTypeForNew());
         } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
-            ticket.setTicketType(ticketTypeService.findByIdAndAccountId(ticketType.getId()));
+            ticket.setTicketType(ticketTypeService.findByIdAndAccountId(ticketType.getId(), accountId));
         }
         // ticket.observers
         if (ticket.getObservers() == null || !isCurrentUserFromInnerGroup
@@ -139,7 +153,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
             var listObserversId = ticket.getObservers().stream()
                     .map(BaseEntity::getId)
                     .collect(Collectors.toList());
-            ticket.setObservers(userService.findAllByAccountIdAndListId(listObserversId));
+            ticket.setObservers(userService.findAllByAccountIdAndListId(accountId, listObserversId));
         }
         // ticket.executors
         if (ticket.getExecutors() == null || !isCurrentUserFromInnerGroup
@@ -149,7 +163,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
             var listExecutorsId = ticket.getExecutors().stream()
                     .map(BaseEntity::getId)
                     .collect(Collectors.toList());
-            ticket.setExecutors(userService.findAllByAccountIdAndListId(listExecutorsId));
+            ticket.setExecutors(userService.findAllByAccountIdAndListId(accountId, listExecutorsId));
         }
         if (ticket.getPriority() == null) {
             ticket.setPriority(Priority.MIDDLE.toString());
@@ -157,15 +171,15 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
     }
 
     @Override
-    public long countEntityWithUser(UUID uuid) {
+    public long countEntityWithUser(UUID userId) {
         var filterByAuthorOfTicket = BaseEntityFilter.builder()
                 .typeComparison(EXIST_IN.toString())
-                .listOfIdEntities(List.of(uuid))
+                .listOfIdEntities(List.of(userId))
                 .build();
         var specForSearch = specFactory.makeSpecification(Ticket.class, AUTHOR, filterByAuthorOfTicket);
         var filterByListOfObserversAndExecutors = ListOfBaseEntityFilter.builder()
                 .typeComparison(CONTAINS_ALL_OF_LIST.toString())
-                .listOfIdEntities(List.of(uuid))
+                .listOfIdEntities(List.of(userId))
                 .build();
         specForSearch = specForSearch.or(
                 specFactory.makeSpecification(Ticket.class, OBSERVERS, filterByListOfObserversAndExecutors)

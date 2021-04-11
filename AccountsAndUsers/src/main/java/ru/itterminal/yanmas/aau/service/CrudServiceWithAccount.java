@@ -15,5 +15,9 @@ public interface CrudServiceWithAccount<E extends BaseEntity> {
 
     List<E> findAllByAccountIdAndListId(List<UUID> listId);
 
+    List<E> findAllByAccountIdAndListId(UUID accountId, List<UUID> listId);
+
     E findByIdAndAccountId(UUID id);
+
+    E findByIdAndAccountId(UUID id, UUID accountId);
 }

@@ -19,7 +19,7 @@ import java.security.Principal;
 @Slf4j
 @RestController("TicketCounterControllerV1")
 @Validated
-@RequestMapping("api/v1/ticket-counter")
+@RequestMapping("api/v1/ticket/counter")
 @RequiredArgsConstructor
 public class TicketCounterControllerV1 extends BaseController {
 

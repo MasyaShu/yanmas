@@ -18,7 +18,7 @@ import java.util.List;
 @Slf4j
 @RestController("RoleControllerV1")
 @Validated
-@RequestMapping("api/v1/role")
+@RequestMapping("api/v1/user/role")
 @RequiredArgsConstructor
 public class RoleControllerV1 extends BaseController {
 

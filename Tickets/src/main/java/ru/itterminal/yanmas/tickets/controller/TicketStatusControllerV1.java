@@ -29,7 +29,7 @@ import java.util.UUID;
 @Slf4j
 @RestController("TicketStatusControllerV1")
 @Validated
-@RequestMapping("api/v1/ticket-status")
+@RequestMapping("api/v1/ticket/status")
 @RequiredArgsConstructor
 public class TicketStatusControllerV1 extends BaseController {
 

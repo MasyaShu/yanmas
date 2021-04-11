@@ -1,15 +1,5 @@
 package ru.itterminal.yanmas.tickets.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Stream;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,16 +9,15 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-
 import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.model.test.RoleTestHelper;
 import ru.itterminal.yanmas.aau.model.test.UserTestHelper;
 import ru.itterminal.yanmas.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.yanmas.aau.service.impl.UserServiceImpl;
+import ru.itterminal.yanmas.aau.service.impl.WhoWatchedEntityServiceImpl;
 import ru.itterminal.yanmas.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.yanmas.files.service.FileServiceImpl;
-import ru.itterminal.yanmas.security.jwt.JwtUser;
 import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 import ru.itterminal.yanmas.tickets.model.Ticket;
 import ru.itterminal.yanmas.tickets.model.TicketSetting;
@@ -36,6 +25,13 @@ import ru.itterminal.yanmas.tickets.model.test.TicketSettingTestHelper;
 import ru.itterminal.yanmas.tickets.model.test.TicketTestHelper;
 import ru.itterminal.yanmas.tickets.repository.TicketRepository;
 import ru.itterminal.yanmas.tickets.service.validator.TicketOperationValidator;
+
+import java.util.List;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @SuppressWarnings("unused")
 @SpringJUnitConfig(value = {TicketServiceImpl.class})
@@ -48,17 +44,19 @@ class TicketServiceImplTest {
     @MockBean
     private FileServiceImpl fileService;
 
+    @SuppressWarnings("unused")
+    @MockBean
+    private JwtUserBuilder jwtUserBuilder;
+
+    @SuppressWarnings("unused")
+    @MockBean
+    private WhoWatchedEntityServiceImpl whoWatchedEntityService;
+
     @MockBean
     private TicketOperationValidator validator;
 
     @MockBean
     private TicketCounterServiceImpl ticketCounterService;
-
-    @MockBean
-    private JwtUserBuilder jwtUserBuilder;
-
-    @MockBean
-    private JwtUser jwtUser;
 
     @MockBean
     private SpecificationsFactory specFactory;
@@ -95,17 +93,14 @@ class TicketServiceImplTest {
         ticket = ticketTestHelper.getRandomValidEntity();
         currentUser = userTestHelper.getRandomValidEntity();
         ticketSetting = ticketSettingTestHelper.getRandomValidEntity();
-        when(jwtUserBuilder.getJwtUser()).thenReturn(jwtUser);
-        when(jwtUser.getAccountId()).thenReturn(UUID.randomUUID());
     }
 
     @Test
     void create_shouldCreateTicket_whenPassedValidData() {
         ticket.getGroup().setIsInner(false);
         when(validator.logicalValidationBeforeCreate(any())).thenReturn(true);
-        when(validator.checkUniqueness(any())).thenReturn(true);
         when(accountService.findById(any())).thenReturn(ticket.getAccount());
-        when(userService.findByIdAndAccountId(any())).thenReturn(ticket.getAuthor());
+        when(userService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getAuthor());
         when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any(), any()))
                 .thenReturn(new TicketSetting());
         when(repository.create(any())).thenReturn(ticket);
@@ -113,9 +108,8 @@ class TicketServiceImplTest {
         var createdTicket = service.create(ticket, ticket.getAuthor());
         Assertions.assertEquals(ticket, createdTicket);
         verify(accountService, times(1)).findById(any());
-        verify(userService, times(2)).findByIdAndAccountId(any());
+        verify(userService, times(1)).findByIdAndAccountId(any(), any());
         verify(validator, times(1)).logicalValidationBeforeCreate(any());
-        verify(validator, times(1)).checkUniqueness(any());
         verify(repository, times(1)).create(any());
         verify(ticketCounterService, times(1)).getNextTicketNumber(any());
     }
@@ -129,9 +123,8 @@ class TicketServiceImplTest {
         ticket.setNumber(number);
         ticket.setIsFinished(false);
         when(accountService.findById(any())).thenReturn(ticket.getAccount());
-        when(userService.findByIdAndAccountId(any())).thenReturn(ticket.getAuthor());
+        when(userService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getAuthor());
         when(validator.logicalValidationBeforeCreate(any())).thenReturn(true);
-        when(validator.checkUniqueness(any())).thenReturn(true);
         when(repository.create(any())).thenReturn(ticket);
         when(ticketCounterService.getNextTicketNumber(any())).thenReturn(number);
         when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any(), any())).thenReturn(ticketSetting);
@@ -139,9 +132,8 @@ class TicketServiceImplTest {
         var createdTicket = service.create(ticket, currentUser);
         Assertions.assertEquals(ticket, createdTicket);
         verify(accountService, times(1)).findById(any());
-        verify(userService, times(2)).findByIdAndAccountId(any());
+        verify(userService, times(1)).findByIdAndAccountId(any(), any());
         verify(validator, times(1)).logicalValidationBeforeCreate(any());
-        verify(validator, times(1)).checkUniqueness(any());
         verify(repository, times(1)).create(any());
         verify(ticketCounterService, times(1)).getNextTicketNumber(any());
         verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
@@ -164,18 +156,16 @@ class TicketServiceImplTest {
         ticket.setExecutors(List.of(currentUser));
         ticket.setObservers(List.of(ticket.getAuthor()));
         when(accountService.findById(any())).thenReturn(ticket.getAccount());
-        when(userService.findByIdAndAccountId(any())).thenReturn(currentUser);
+        when(userService.findByIdAndAccountId(any(), any())).thenReturn(currentUser);
         when(validator.logicalValidationBeforeCreate(any())).thenReturn(true);
-        when(validator.checkUniqueness(any())).thenReturn(true);
         when(repository.create(any())).thenReturn(ticket);
         when(ticketCounterService.getNextTicketNumber(any())).thenReturn(number);
         currentUser.setRole(roleTestHelper.getRoleByName(nameOfRole));
         var createdTicket = service.create(ticket, currentUser);
         Assertions.assertEquals(ticket, createdTicket);
         verify(accountService, times(1)).findById(any());
-        verify(userService, times(2)).findByIdAndAccountId(any());
+        verify(userService, times(1)).findByIdAndAccountId(any(), any());
         verify(validator, times(1)).logicalValidationBeforeCreate(any());
-        verify(validator, times(1)).checkUniqueness(any());
         verify(repository, times(1)).create(any());
         verify(ticketCounterService, times(1)).getNextTicketNumber(any());
         verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
@@ -195,9 +185,8 @@ class TicketServiceImplTest {
         ticket.setObservers(List.of(ticket.getAuthor()));
         ticket.setTicketStatus(ticketSetting.getTicketStatusForClose());
         when(accountService.findById(any())).thenReturn(ticket.getAccount());
-        when(userService.findByIdAndAccountId(any())).thenReturn(ticket.getAuthor());
+        when(userService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getAuthor());
         when(validator.logicalValidationBeforeCreate(any())).thenReturn(true);
-        when(validator.checkUniqueness(any())).thenReturn(true);
         when(repository.create(any())).thenReturn(ticket);
         when(ticketCounterService.getNextTicketNumber(any())).thenReturn(number);
         when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any(), any())).thenReturn(ticketSetting);
@@ -205,9 +194,8 @@ class TicketServiceImplTest {
         var createdTicket = service.create(ticket, currentUser);
         Assertions.assertEquals(ticket, createdTicket);
         verify(accountService, times(1)).findById(any());
-        verify(userService, times(2)).findByIdAndAccountId(any());
+        verify(userService, times(1)).findByIdAndAccountId(any(), any());
         verify(validator, times(1)).logicalValidationBeforeCreate(any());
-        verify(validator, times(1)).checkUniqueness(any());
         verify(repository, times(1)).create(any());
         verify(ticketCounterService, times(1)).getNextTicketNumber(any());
         verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any(), any());

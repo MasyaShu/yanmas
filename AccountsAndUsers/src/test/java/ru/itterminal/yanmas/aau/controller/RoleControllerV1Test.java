@@ -37,7 +37,7 @@ class RoleControllerV1Test {
 
     private static final String HOST = "http://localhost";
     private static final String PORT = ":8081";
-    private static final String API = "api/v1/role/";
+    private static final String API = "api/v1/user/role/";
     private static final String ROLE_NAME_1 = "TestNameOfRole_1";
     private static final String ROLE_NAME_2 = "TestNameOfRole_2";
     private static final String ROLE_UUID_1 = "d45e0a6e-cb5b-11ea-87d0-0242ac138003";

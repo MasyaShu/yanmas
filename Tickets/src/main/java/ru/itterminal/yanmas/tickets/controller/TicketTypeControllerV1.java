@@ -34,7 +34,7 @@ import static ru.itterminal.yanmas.commons.model.filter.StringFilter.TypeCompari
 @Slf4j
 @RestController("TicketTypeControllerV1")
 @Validated
-@RequestMapping("api/v1/ticket-type")
+@RequestMapping("api/v1/ticket/type")
 @RequiredArgsConstructor
 public class TicketTypeControllerV1 extends BaseController {
 

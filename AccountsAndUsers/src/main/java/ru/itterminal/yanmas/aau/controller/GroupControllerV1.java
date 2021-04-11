@@ -33,7 +33,7 @@ import static ru.itterminal.yanmas.commons.model.filter.StringFilter.TypeCompari
 @Slf4j
 @RestController("GroupControllerV1")
 @Validated
-@RequestMapping("api/v1/group")
+@RequestMapping("api/v1/user/group")
 @RequiredArgsConstructor
 public class GroupControllerV1 extends BaseController {
 
