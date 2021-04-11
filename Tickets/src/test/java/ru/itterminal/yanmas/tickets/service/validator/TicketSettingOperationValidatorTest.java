@@ -1,21 +1,5 @@
 package ru.itterminal.yanmas.tickets.service.validator;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_CODE;
-import static ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_MESSAGE;
-import static ru.itterminal.yanmas.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
-import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createLogicalValidationException;
-import static ru.itterminal.yanmas.security.jwt.JwtUserBuilder.USER_FROM_OUTER_GROUP_CANNOT_CREATE_OR_UPDATE_THIS_ENTITY;
-
-import java.util.Collections;
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -24,14 +8,26 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-
+import ru.itterminal.yanmas.aau.model.Account;
 import ru.itterminal.yanmas.commons.exception.LogicalValidationException;
 import ru.itterminal.yanmas.security.config.TestSecurityConfig;
 import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 import ru.itterminal.yanmas.tickets.model.TicketSetting;
 import ru.itterminal.yanmas.tickets.model.test.TicketSettingTestHelper;
+import ru.itterminal.yanmas.tickets.repository.TicketSettingRepository;
 import ru.itterminal.yanmas.tickets.service.impl.SettingsAccessToTicketTypesServiceImpl;
-import ru.itterminal.yanmas.tickets.service.impl.TicketSettingServiceImpl;
+
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_CODE;
+import static ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_MESSAGE;
+import static ru.itterminal.yanmas.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
+import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createLogicalValidationException;
+import static ru.itterminal.yanmas.security.jwt.JwtUserBuilder.USER_FROM_OUTER_GROUP_CANNOT_CREATE_OR_UPDATE_THIS_ENTITY;
 
 @SpringJUnitConfig(value = {TicketSettingOperationValidator.class, JwtUserBuilder.class})
 @Import(TestSecurityConfig.class)
@@ -39,7 +35,7 @@ import ru.itterminal.yanmas.tickets.service.impl.TicketSettingServiceImpl;
 class TicketSettingOperationValidatorTest {
 
     @MockBean
-    private TicketSettingServiceImpl service;
+    private TicketSettingRepository repository;
 
     @MockBean
     private SettingsAccessToTicketTypesServiceImpl settingsAccessToTicketTypesService;
@@ -55,15 +51,15 @@ class TicketSettingOperationValidatorTest {
 
     @Test
     void checkUniqueness_shouldGetTrue_whenTicketSettingIsUnique() {
-        when(service.findByUniqueFields(any())).thenReturn(Collections.emptyList());
-        assertTrue(validator.checkUniqueness(new TicketSetting()));
-        verify(service, times(1)).findByUniqueFields(any());
+        when(repository.findAllByAccount_IdAndGroup_IdAndAuthor_IdAndIdNot(any(), any(), any(), any())).thenReturn(Collections.emptyList());
+        assertTrue(validator.checkUniqueness(ticketSettingTestHelper.getRandomValidEntity()));
+        verify(repository, times(1)).findAllByAccount_IdAndGroup_IdAndAuthor_IdAndIdNot(any(), any(), any(), any());
 
     }
 
     @Test
     void checkUniqueness_shouldGetLogicalValidationException_whenPassedDataNotUnique() {
-        when(service.findByUniqueFields(any())).thenReturn(List.of(new TicketSetting()));
+        when(repository.findAllByAccount_IdAndGroup_IdAndAuthor_IdAndIdNot(any(), any(), any(), any())).thenReturn(List.of(new TicketSetting()));
         var expectedException =
                 createLogicalValidationException(NOT_UNIQUE_CODE, String.format(NOT_UNIQUE_MESSAGE, TicketSettingOperationValidator.TICKET_SETTING_UNIQUE_FIELDS));
         var ticketSetting = ticketSettingTestHelper.getRandomValidEntity();
@@ -76,12 +72,12 @@ class TicketSettingOperationValidatorTest {
                 expectedException.getFieldErrors().get(NOT_UNIQUE_CODE).get(0),
                 actualException.getFieldErrors().get(NOT_UNIQUE_CODE).get(0)
         );
-        verify(service, times(1)).findByUniqueFields(any());
+        verify(repository, times(1)).findAllByAccount_IdAndGroup_IdAndAuthor_IdAndIdNot(any(), any(), any(), any());
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void beforeCreate_shouldGetTrue_whenPassedRandomValidEntity () {
+    void beforeCreate_shouldGetTrue_whenPassedRandomValidEntity() {
         when(settingsAccessToTicketTypesService.isPermittedTicketType(any(), any())).thenReturn(true);
         TicketSetting ticketSetting = ticketSettingTestHelper.getRandomValidEntity();
         assertTrue(validator.logicalValidationBeforeCreate(ticketSetting));
@@ -89,7 +85,7 @@ class TicketSettingOperationValidatorTest {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void beforeCreate_shouldGetTrue_whenPassedPredefinedValidEntity () {
+    void beforeCreate_shouldGetTrue_whenPassedPredefinedValidEntity() {
         TicketSetting ticketSetting = ticketSettingTestHelper.getPredefinedValidEntityList().get(0);
         when(settingsAccessToTicketTypesService.isPermittedTicketType(any(), any())).thenReturn(true);
         assertTrue(validator.logicalValidationBeforeCreate(ticketSetting));
@@ -97,33 +93,34 @@ class TicketSettingOperationValidatorTest {
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void beforeUpdate_shouldGetTrue_whenPassedRandomValidEntity () {
-        when(service.findByUniqueFields(any())).thenReturn(Collections.emptyList());
+    void beforeUpdate_shouldGetTrue_whenPassedRandomValidEntity() {
+        when(repository.findAllByAccount_IdAndGroup_IdAndAuthor_IdAndIdNot(any(), any(), any(), any())).thenReturn(Collections.emptyList());
         when(settingsAccessToTicketTypesService.isPermittedTicketType(any(), any())).thenReturn(true);
         TicketSetting ticketSetting = ticketSettingTestHelper.getRandomValidEntity();
         assertTrue(validator.logicalValidationBeforeUpdate(ticketSetting));
-        verify(service, times(1)).findByUniqueFields(any());
+        verify(repository, times(1)).findAllByAccount_IdAndGroup_IdAndAuthor_IdAndIdNot(any(), any(), any(), any());
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void beforeUpdate_shouldGetTrue_whenPassedPredefinedValidEntity () {
-        when(service.findByUniqueFields(any())).thenReturn(Collections.emptyList());
+    void beforeUpdate_shouldGetTrue_whenPassedPredefinedValidEntity() {
+        when(repository.findAllByAccount_IdAndGroup_IdAndAuthor_IdAndIdNot(any(), any(), any(), any())).thenReturn(Collections.emptyList());
         when(settingsAccessToTicketTypesService.isPermittedTicketType(any(), any())).thenReturn(true);
         TicketSetting ticketSetting = ticketSettingTestHelper.getPredefinedValidEntityList().get(0);
         assertTrue(validator.logicalValidationBeforeUpdate(ticketSetting));
-        verify(service, times(1)).findByUniqueFields(any());
+        verify(repository, times(1)).findAllByAccount_IdAndGroup_IdAndAuthor_IdAndIdNot(any(), any(), any(), any());
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void beforeUpdate_shouldGetLogicalValidationException_whenAllPassedSettingIsNull() {
-        when(service.findByUniqueFields(any())).thenReturn(Collections.emptyList());
+        when(repository.findAllByAccount_IdAndGroup_IdAndAuthor_IdAndIdNot(any(), any(), any(), any())).thenReturn(Collections.emptyList());
         TicketSetting ticketSetting = new TicketSetting();
+        ticketSetting.setAccount(new Account());
         LogicalValidationException exception = assertThrows(LogicalValidationException.class,
-                                                            ()-> validator.logicalValidationBeforeUpdate(ticketSetting));
+                () -> validator.logicalValidationBeforeUpdate(ticketSetting));
         assertEquals(1, exception.getFieldErrors().get(TicketSettingOperationValidator.INVALID_TICKET_SETTINGS).size());
-        verify(service, times(1)).findByUniqueFields(any());
+        verify(repository, times(1)).findAllByAccount_IdAndGroup_IdAndAuthor_IdAndIdNot(any(), any(), any(), any());
     }
 
     @Test

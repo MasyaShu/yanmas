@@ -1,26 +1,21 @@
 package ru.itterminal.yanmas.tickets.service.validator;
 
-import static java.lang.String.format;
-import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.addValidationErrorIntoErrors;
-import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createLogicalValidationException;
-import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
-import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.ifErrorsNotEmptyThrowLogicalValidationException;
-
-import java.util.List;
-import java.util.UUID;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidatorImpl;
 import ru.itterminal.yanmas.security.jwt.JwtUser;
 import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 import ru.itterminal.yanmas.tickets.model.TicketSetting;
+import ru.itterminal.yanmas.tickets.repository.TicketSettingRepository;
 import ru.itterminal.yanmas.tickets.service.impl.SettingsAccessToTicketTypesServiceImpl;
-import ru.itterminal.yanmas.tickets.service.impl.TicketSettingServiceImpl;
+
+import java.util.UUID;
+
+import static java.lang.String.format;
+import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.*;
 
 @Slf4j
 @Component
@@ -36,10 +31,11 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
             "Invalid ticket settings, because author has not access to ticket type";
     public static final String ACCESS_DENIED_BECAUSE_CURRENT_USER_HAS_NOT_PERMIT_TO_TICKET_TYPE =
             "Access denied, because current user has not permit to ticket type";
+    public static final String START_FIND = "Start {} , {}, {}";
 
-    private final TicketSettingServiceImpl service;
     private final SettingsAccessToTicketTypesServiceImpl settingsAccessToTicketTypesService;
     private final JwtUserBuilder jwtUserBuilder;
+    private final TicketSettingRepository repository;
 
     @Override
     public void checkAccessBeforeCreate(TicketSetting entity) {
@@ -66,7 +62,13 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
     @Override
     public boolean checkUniqueness(TicketSetting entity) {
         log.trace(CHECK_UNIQUENESS, entity);
-        List<TicketSetting> foundTicketSetting = service.findByUniqueFields(entity);
+        log.trace(START_FIND, entity.getAccount(), entity.getGroup(), entity.getAuthor());
+        var foundTicketSetting = repository.findAllByAccount_IdAndGroup_IdAndAuthor_IdAndIdNot(
+                entity.getAccount().getId(),
+                entity.getGroup() == null ? null : entity.getGroup().getId(),
+                entity.getAuthor() == null ? null : entity.getAuthor().getId(),
+                entity.getId()
+        );
         if (foundTicketSetting.isEmpty()) {
             log.trace(FIELDS_UNIQUE, entity);
             return true;
