@@ -16,7 +16,7 @@ import ru.itterminal.yanmas.commons.exception.error.ValidationError;
 import ru.itterminal.yanmas.security.config.TestSecurityConfig;
 import ru.itterminal.yanmas.tickets.model.TicketStatus;
 import ru.itterminal.yanmas.tickets.model.projection.TicketStatusUniqueFields;
-import ru.itterminal.yanmas.tickets.service.impl.TicketStatusServiceImpl;
+import ru.itterminal.yanmas.tickets.repository.TicketStatusRepository;
 
 import java.util.*;
 
@@ -31,13 +31,13 @@ import static ru.itterminal.yanmas.commons.util.CommonConstants.SPRING_ACTIVE_PR
 @ActiveProfiles(SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS)
 class TicketStatusOperationValidatorTest {
     @MockBean
-    private TicketStatusServiceImpl service;
+    private TicketStatusRepository repository;
 
     @MockBean
     private TicketStatusUniqueFields ticketStatusUniqueFields;
 
     @Autowired
-    private final TicketStatusOperationValidator validator = new TicketStatusOperationValidator(service);
+    private final TicketStatusOperationValidator validator = new TicketStatusOperationValidator(repository);
 
     private static final String EXIST_NAME = "ticketStatuss1";
     private static final String VALIDATED_FIELDS = "name";
@@ -58,13 +58,13 @@ class TicketStatusOperationValidatorTest {
 
     @Test
     void checkUniqueness_shouldGetTrue_whenPassedDataIsUnique() {
-        when(service.findByUniqueFields(any())).thenReturn(Collections.emptyList());
-        assertTrue(validator.checkUniqueness(new TicketStatus()));
+        when(repository.getByNameAndAccount_IdAndIdNot(any(), any(), any())).thenReturn(Collections.emptyList());
+        assertTrue(validator.checkUniqueness(TicketStatus.builder().account(new Account()).build()));
     }
 
     @Test
     void checkUniqueness_shouldGetLogicalValidationException_whenPassedDataNotUnique() {
-        when(service.findByUniqueFields(any())).thenReturn(List.of(ticketStatusUniqueFields));
+        when(repository.getByNameAndAccount_IdAndIdNot(any(), any(), any())).thenReturn(List.of(ticketStatusUniqueFields));
         when(ticketStatusUniqueFields.getName()).thenReturn(EXIST_NAME);
         errors.put(VALIDATED_FIELDS, singletonList(new ValidationError(VALIDATED_FIELDS, "name is occupied")));
         LogicalValidationException logicalValidationException = new LogicalValidationException(VALIDATED_FIELDS, errors);
