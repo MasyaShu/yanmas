@@ -812,9 +812,6 @@ class UserControllerV1Test {
                                 CommonConstants.SIZE_MUST_BE_BETWEEN
                         ).exists())
                 .andExpect(MockMvcResultMatchers
-                        .jsonPath("$.errors.email[?(@.message == '%s')]", AAUConstants.INVALID_EMAIL)
-                        .exists())
-                .andExpect(MockMvcResultMatchers
                         .jsonPath(
                                 "$.errors.sortByFields[?(@.message =~ /.*%s.*/)]",
                                 CommonConstants.DO_NOT_MATCH_THE_AVAILABLE_SORT_VALUES
