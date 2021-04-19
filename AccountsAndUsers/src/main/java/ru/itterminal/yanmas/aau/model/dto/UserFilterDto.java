@@ -24,7 +24,7 @@ import java.util.List;
 @ToString
 public class UserFilterDto extends BaseFilterDto {
 
-    @ValidateFilter(regexp = AAUConstants.EMAIL_PATTERN, messageRegexp = AAUConstants.INVALID_EMAIL)
+    @ValidateFilter
     private StringFilter email;
 
     @ValidateFilter(max = 128)
