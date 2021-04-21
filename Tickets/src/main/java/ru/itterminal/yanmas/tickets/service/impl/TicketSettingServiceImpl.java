@@ -1,16 +1,9 @@
 package ru.itterminal.yanmas.tickets.service.impl;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import javax.validation.constraints.NotNull;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.itterminal.yanmas.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.yanmas.aau.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.yanmas.aau.service.impl.GroupServiceImpl;
@@ -20,15 +13,16 @@ import ru.itterminal.yanmas.tickets.model.TicketSetting;
 import ru.itterminal.yanmas.tickets.repository.TicketSettingRepository;
 import ru.itterminal.yanmas.tickets.service.validator.TicketSettingOperationValidator;
 
+import javax.validation.constraints.NotNull;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 @Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class TicketSettingServiceImpl extends CrudServiceWithAccountImpl<TicketSetting, TicketSettingOperationValidator,
         TicketSettingRepository> {
-
-    public static final String WHERE = "TicketSettingServiceImpl.findByUniqueFields: ";
-    public static final String START_FIND = "Start " + WHERE + "{} , {}, {}";
 
     private final AccountServiceImpl accountService;
     private final GroupServiceImpl groupService;
@@ -92,17 +86,6 @@ public class TicketSettingServiceImpl extends CrudServiceWithAccountImpl<TicketS
             ticketSetting.setTicketStatusForCancel(predefinedTicketStatusForCancel);
         }
         return ticketSetting;
-    }
-
-    @Transactional(readOnly = true)
-    public List<TicketSetting> findByUniqueFields(TicketSetting ticketSetting) {
-        log.trace(START_FIND, ticketSetting.getAccount(), ticketSetting.getGroup(), ticketSetting.getAuthor());
-        return repository.findAllByAccount_IdAndGroup_IdAndAuthor_IdAndIdNot(
-                ticketSetting.getAccount().getId(),
-                ticketSetting.getGroup() == null ? null : ticketSetting.getGroup().getId(),
-                ticketSetting.getAuthor() == null ? null : ticketSetting.getAuthor().getId(),
-                ticketSetting.getId()
-        );
     }
 
     @Override

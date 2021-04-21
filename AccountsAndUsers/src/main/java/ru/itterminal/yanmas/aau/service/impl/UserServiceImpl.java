@@ -1,15 +1,8 @@
 package ru.itterminal.yanmas.aau.service.impl;
 
-import static java.lang.String.format;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.UUID;
-
-import javax.persistence.OptimisticLockException;
-
+import io.jsonwebtoken.JwtException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -18,13 +11,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import io.jsonwebtoken.JwtException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.yanmas.aau.model.Role;
 import ru.itterminal.yanmas.aau.model.User;
-import ru.itterminal.yanmas.aau.model.projection.UserUniqueFields;
 import ru.itterminal.yanmas.aau.repository.UserRepository;
 import ru.itterminal.yanmas.aau.service.validator.UserOperationValidator;
 import ru.itterminal.yanmas.commons.exception.EntityNotExistException;
@@ -34,6 +22,15 @@ import ru.itterminal.yanmas.integration.email.SenderEmailViaSMTPServer;
 import ru.itterminal.yanmas.security.jwt.JwtProvider;
 import ru.itterminal.yanmas.security.jwt.JwtUser;
 import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
+
+import javax.persistence.OptimisticLockException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.UUID;
+
+import static java.lang.String.format;
 
 @Slf4j
 @Service
@@ -82,8 +79,6 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
             "Start reset password by token: {} and new password {}";
     public static final String START_FIND_USER_BY_EMAIL = "Start find user by email: {}";
     public static final String NOT_FOUND_USER_BY_EMAIL = "Not found user by email: %s";
-    public static final String START_FIND_USER_BY_UNIQUE_FIELDS =
-            "Start find user by unique fields, email: {} and not id: {}";
     public static final String START_FIND_ALL_USERS_BY_ROLE_AND_NOT_ID =
             "Start find all users by role: {} and not id: {}";
     public static final String START_FIND_ALL_USERS_BY_ROLE_ACCOUNT_ID_AND_NOT_ID =
@@ -169,12 +164,6 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
                         format(NOT_FOUND_USER_BY_EMAIL, email)
                 )
         );
-    }
-
-    @Transactional(readOnly = true)
-    public List<UserUniqueFields> findByUniqueFields(User user) {
-        log.trace(START_FIND_USER_BY_UNIQUE_FIELDS, user.getEmail(), user.getId());
-        return repository.getByEmailAndIdNot(user.getEmail(), user.getId());
     }
 
     @SuppressWarnings("unused")

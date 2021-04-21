@@ -26,6 +26,7 @@ public class TicketDtoResponse extends BaseEntityDto {
     private String description;
     private Long deadline;
     private Boolean isFinished;
+    private String priority;
     private BaseEntityDto ticketType;
     private BaseEntityDto ticketStatus;
     private BaseEntityDto ticketTemplate;

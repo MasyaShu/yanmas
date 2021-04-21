@@ -1,6 +1,24 @@
 package ru.itterminal.yanmas.security.config;
 
 import static ru.itterminal.yanmas.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
+import static ru.itterminal.yanmas.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_GET_HTTP_METHOD;
+import static ru.itterminal.yanmas.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_POST_HTTP_METHOD;
+import static ru.itterminal.yanmas.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_GET_HTTP_METHOD;
+import static ru.itterminal.yanmas.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_POST_HTTP_METHOD;
+import static ru.itterminal.yanmas.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_PUT_HTTP_METHOD;
+import static ru.itterminal.yanmas.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_GET_HTTP_METHOD;
+import static ru.itterminal.yanmas.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_POST_HTTP_METHOD;
+import static ru.itterminal.yanmas.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_PUT_HTTP_METHOD;
+import static ru.itterminal.yanmas.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_FOR_GET_HTTP_METHOD;
+import static ru.itterminal.yanmas.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_FOR_PUT_HTTP_METHOD;
+import static ru.itterminal.yanmas.security.config.SecurityConfig.AUTH_WHITELIST_ANONYMOUS_FOR_ANY_HTTP_METHODS;
+import static ru.itterminal.yanmas.security.config.SecurityConfig.AUTH_WHITELIST_ANONYMOUS_FOR_POST_HTTP_METHOD;
+import static ru.itterminal.yanmas.security.config.SecurityConfig.AUTH_WHITELIST_AUTHENTICATED_FOR_ANY_HTTP_METHOD;
+import static ru.itterminal.yanmas.security.config.SecurityConfig.AUTH_WHITELIST_AUTHENTICATED_FOR_GET_HTTP_METHOD;
+import static ru.itterminal.yanmas.security.config.SecurityConfig.AUTH_WHITELIST_PERMIT_ALL;
+import static ru.itterminal.yanmas.security.config.SecurityConfig.ROLE_ACCOUNT_OWNER_ADMIN;
+import static ru.itterminal.yanmas.security.config.SecurityConfig.ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR;
+import static ru.itterminal.yanmas.security.config.SecurityConfig.ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR;
 
 import java.util.List;
 import java.util.UUID;
@@ -14,10 +32,12 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 import ru.itterminal.yanmas.security.jwt.CustomAccessDeniedHandler;
 import ru.itterminal.yanmas.security.jwt.CustomAuthenticationEntryPoint;
+import ru.itterminal.yanmas.security.jwt.JwtFilter;
 import ru.itterminal.yanmas.security.jwt.JwtUser;
 
 @SuppressWarnings("DuplicatedCode")
@@ -72,29 +92,36 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 .exceptionHandling().authenticationEntryPoint(customAuthenticationEntryPoint).and()
                 .exceptionHandling().accessDeniedHandler(accessDeniedHandler).and()
                 .authorizeRequests()
-                .antMatchers(SecurityConfig.AUTH_WHITELIST_PERMIT_ALL).permitAll()
-                .antMatchers(SecurityConfig.AUTH_WHITELIST_ANONYMOUS_FOR_ANY_HTTP_METHODS).anonymous()
-                .antMatchers(SecurityConfig.AUTH_WHITELIST_AUTHENTICATED_FOR_ANY_HTTP_METHOD).authenticated()
-                .antMatchers(HttpMethod.GET, SecurityConfig.AUTH_WHITELIST_AUTHENTICATED_FOR_GET_HTTP_METHOD).authenticated()
-                .antMatchers(HttpMethod.POST, SecurityConfig.AUTH_WHITELIST_ANONYMOUS_FOR_POST_HTTP_METHOD).anonymous()
-                .antMatchers(HttpMethod.PUT, SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_FOR_PUT_HTTP_METHOD)
+                // Account owner
+                .antMatchers(HttpMethod.PUT, AUTH_WHITELIST_ACCOUNT_OWNER_FOR_PUT_HTTP_METHOD)
                 .hasAuthority(ROLE_ACCOUNT_OWNER)
-                .antMatchers(HttpMethod.GET, SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_FOR_GET_HTTP_METHOD)
+                .antMatchers(HttpMethod.GET, AUTH_WHITELIST_ACCOUNT_OWNER_FOR_GET_HTTP_METHOD)
                 .hasAuthority(ROLE_ACCOUNT_OWNER)
-                .antMatchers(HttpMethod.POST, SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_POST_HTTP_METHOD)
-                .hasAnyAuthority(SecurityConfig.ROLE_ACCOUNT_OWNER_ADMIN)
-                .antMatchers(HttpMethod.PUT, SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_PUT_HTTP_METHOD)
-                .hasAnyAuthority(SecurityConfig.ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR)
-                .antMatchers(HttpMethod.POST, SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_POST_HTTP_METHOD)
-                .hasAnyAuthority(SecurityConfig.ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR)
-                .antMatchers(HttpMethod.PUT, SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_PUT_HTTP_METHOD)
-                .hasAnyAuthority(SecurityConfig.ROLE_ACCOUNT_OWNER_ADMIN)
-                .antMatchers(HttpMethod.GET, SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_GET_HTTP_METHOD)
-                .hasAnyAuthority(SecurityConfig.ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR)
-                .antMatchers(HttpMethod.POST, SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_POST_HTTP_METHOD)
-                .hasAnyAuthority(SecurityConfig.ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR)
-                .antMatchers(HttpMethod.GET, SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_GET_HTTP_METHOD)
-                .hasAnyAuthority(SecurityConfig.ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR)
+                // Account owner + admin
+                .antMatchers(HttpMethod.POST, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_POST_HTTP_METHOD)
+                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN)
+                .antMatchers(HttpMethod.PUT, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_PUT_HTTP_METHOD)
+                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN)
+                .antMatchers(HttpMethod.GET, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_GET_HTTP_METHOD)
+                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN)
+                // Account owner + admin + executor
+                .antMatchers(HttpMethod.POST, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_POST_HTTP_METHOD)
+                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR)
+                .antMatchers(HttpMethod.PUT, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_PUT_HTTP_METHOD)
+                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR)
+                .antMatchers(HttpMethod.GET, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_GET_HTTP_METHOD)
+                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR)
+                // Account owner + admin + executor + author
+                .antMatchers(HttpMethod.POST, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_POST_HTTP_METHOD)
+                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR)
+                .antMatchers(HttpMethod.GET, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_GET_HTTP_METHOD)
+                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR)
+                // other
+                .antMatchers(AUTH_WHITELIST_PERMIT_ALL).permitAll()
+                .antMatchers(AUTH_WHITELIST_ANONYMOUS_FOR_ANY_HTTP_METHODS).anonymous()
+                .antMatchers(AUTH_WHITELIST_AUTHENTICATED_FOR_ANY_HTTP_METHOD).authenticated()
+                .antMatchers(HttpMethod.GET, AUTH_WHITELIST_AUTHENTICATED_FOR_GET_HTTP_METHOD).authenticated()
+                .antMatchers(HttpMethod.POST, AUTH_WHITELIST_ANONYMOUS_FOR_POST_HTTP_METHOD).anonymous()
                 .antMatchers("/**").denyAll().and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.headers().frameOptions().disable();

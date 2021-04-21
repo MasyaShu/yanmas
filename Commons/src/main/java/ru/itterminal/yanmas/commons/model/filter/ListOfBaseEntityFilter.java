@@ -54,7 +54,8 @@ public  class ListOfBaseEntityFilter implements Filter{
                 || fromString(typeComparison).equals(IS_NOT_EQUAL_TO)
                 || fromString(typeComparison).equals(NOT_CONTAINS_ANY_IN_LIST)
                 || fromString(typeComparison).equals(CONTAINS_ANY_IN_LIST)
-                || fromString(typeComparison).equals(CONTAINS_ALL_OF_LIST))
+                || fromString(typeComparison).equals(CONTAINS_ALL_OF_LIST)
+                || fromString(typeComparison).equals(NOT_CONTAINS_ALL_OF_LIST))
                 && (listOfIdEntities == null || listOfIdEntities.isEmpty())) {
             throw new IllegalArgumentException(format("listOfIdEntities must not be null or empty for comparison %s", typeComparison));
         }

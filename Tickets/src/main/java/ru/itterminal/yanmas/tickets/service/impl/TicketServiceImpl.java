@@ -2,7 +2,6 @@ package ru.itterminal.yanmas.tickets.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -12,6 +11,7 @@ import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.yanmas.aau.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.yanmas.aau.service.impl.UserServiceImpl;
+import ru.itterminal.yanmas.aau.service.impl.WhoWatchedEntityServiceImpl;
 import ru.itterminal.yanmas.commons.model.BaseEntity;
 import ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter;
 import ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter;
@@ -19,11 +19,11 @@ import ru.itterminal.yanmas.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.yanmas.files.model.File;
 import ru.itterminal.yanmas.files.service.FileServiceImpl;
 import ru.itterminal.yanmas.integration.across_modules.RequestsFromModuleAccountAndUsers;
+import ru.itterminal.yanmas.tickets.model.Priority;
 import ru.itterminal.yanmas.tickets.model.Ticket;
 import ru.itterminal.yanmas.tickets.repository.TicketRepository;
 import ru.itterminal.yanmas.tickets.service.validator.TicketOperationValidator;
 
-import javax.persistence.OptimisticLockException;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -50,6 +50,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
 
     private final TicketCounterServiceImpl ticketCounterService;
     private final TicketSettingServiceImpl ticketSettingService;
+    private final WhoWatchedEntityServiceImpl whoWatchedEntityService;
     private final FileServiceImpl fileService;
     private final SpecificationsFactory specFactory;
     private final TicketTypeServiceImpl ticketTypeService;
@@ -81,6 +82,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
         setNestedObjectsOfEntityBeforeCreate(entity, currentUser);
         validator.checkAccessBeforeCreate(entity, currentUser);
         validator.logicalValidationBeforeCreate(entity);
+        validator.checkUniqueness(entity);
         var createdEntity = repository.create(entity);
         if (createdEntity.getFiles() != null && !createdEntity.getFiles().isEmpty()) {
             for (File file : createdEntity.getFiles()) {
@@ -88,25 +90,22 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
                 fileService.update(file);
             }
         }
+        whoWatchedEntityService.watched(List.of(createdEntity.getId()));
         log.trace(format(CREATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), createdEntity.toString()));
         return createdEntity;
     }
 
     @Transactional
     public Ticket update(Ticket entity, User currentUser) {
-        setNestedObjectsOfEntityBeforeUpdate(entity, currentUser);
-        validator.checkAccessBeforeUpdate(entity, currentUser);
-        validator.logicalValidationBeforeUpdate(entity);
-        log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
-        try {
-            entity.generateDisplayName();
-            var updatedEntity = repository.update(entity);
-            log.trace(format(UPDATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), updatedEntity));
-            return updatedEntity;
-        }
-        catch (OptimisticLockException ex) {
-            throw new OptimisticLockingFailureException(format(VERSION_INVALID_MESSAGE, entity.getId()));
-        }
+        // whoWatchedEntityService.watched(List.of(updatedEntity.getId())); //NOSONAR
+        return null;
+    }
+
+    @Override
+    public Ticket findByIdAndAccountId(UUID id) {
+        var foundTicket = super.findByIdAndAccountId(id);
+        whoWatchedEntityService.watched(List.of(foundTicket.getId()));
+        return foundTicket;
     }
 
     protected void setNestedObjectsOfEntityBeforeCreate(Ticket ticket, User currentUser) { //NOSONAR
@@ -165,9 +164,9 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
                     .collect(Collectors.toList());
             ticket.setExecutors(userService.findAllByAccountIdAndListId(accountId, listExecutorsId));
         }
-    }
-
-    protected void setNestedObjectsOfEntityBeforeUpdate(Ticket ticket, User currentUser) { //NOSONAR
+        if (ticket.getPriority() == null) {
+            ticket.setPriority(Priority.MIDDLE.toString());
+        }
     }
 
     @Override

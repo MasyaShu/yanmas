@@ -57,7 +57,8 @@ public class StringFilter implements Filter {
                 && (value == null || value.isEmpty())) {
             throw new IllegalArgumentException(format("Value must not be null or empty for comparison %s", typeComparison));
         } else {
-            if (value.length() > max || value.length() < min) {
+            if ((!fromString(typeComparison).equals(IS_EMPTY) && !fromString(typeComparison).equals(IS_NOT_EMPTY))
+                    && (value.length() > max || value.length() < min)) {
                 throw new IllegalArgumentException(format("size must be between %s and %s", min, max));
             }
             if (!regexp.isEmpty()) {

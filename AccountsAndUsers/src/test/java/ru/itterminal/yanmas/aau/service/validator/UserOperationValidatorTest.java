@@ -45,6 +45,7 @@ import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.model.projection.UserUniqueFields;
 import ru.itterminal.yanmas.aau.model.test.RoleTestHelper;
+import ru.itterminal.yanmas.aau.repository.UserRepository;
 import ru.itterminal.yanmas.aau.service.impl.RoleServiceImpl;
 import ru.itterminal.yanmas.aau.service.impl.UserServiceImpl;
 import ru.itterminal.yanmas.commons.exception.LogicalValidationException;
@@ -62,6 +63,9 @@ class UserOperationValidatorTest {
     @MockBean
     private UserServiceImpl service;
 
+    @MockBean
+    private UserRepository repository;
+
     @Mock
     private UserUniqueFields userUniqueFields;
 
@@ -77,7 +81,7 @@ class UserOperationValidatorTest {
     final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @Autowired
-    private final UserOperationValidator validator = new UserOperationValidator(service, roleService, appContext);
+    private final UserOperationValidator validator = new UserOperationValidator(service, roleService, appContext, repository);
 
     private static final String EXIST_EMAIL = "mail@mal.ru";
     private static final String NEW_USER_EMAIL = "mail_new@mal.ru";
@@ -135,13 +139,13 @@ class UserOperationValidatorTest {
 
     @Test
     void checkUniqueness_shouldGetTrue_whenPassedDataIsUnique() {
-        when(service.findByUniqueFields(any())).thenReturn(Collections.emptyList());
+        when(repository.getByEmailAndIdNot(any(), any())).thenReturn(Collections.emptyList());
         assertTrue(validator.checkUniqueness(new User()));
     }
 
     @Test
     void checkUniqueness_shouldGetLogicalValidationException_whenPassedDataNotUnique() {
-        when(service.findByUniqueFields(any())).thenReturn(List.of(userUniqueFields));
+        when(repository.getByEmailAndIdNot(any(), any())).thenReturn(List.of(userUniqueFields));
         when(userUniqueFields.getEmail()).thenReturn(EXIST_EMAIL);
         errors.put("email", singletonList(new ValidationError("not unique", "email is occupied")));
         logicalValidationException = new LogicalValidationException("Validation failed", errors);

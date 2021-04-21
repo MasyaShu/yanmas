@@ -103,19 +103,19 @@ public class ITHelper {
     );
 
     public static final String TICKET_TEMPLATE_KEY = "ticketTemplate_";
-    public static final String GROUP_TICKET_TYPES = "group-ticket-types";
+    public static final String GROUP_TICKET_TYPES = "ticket/type/group";
     public static final String SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES = "ticket/type/setting-access";
     public static final String WATCHED_ENTITIES = "watched-entities";
     public static final String INITIAL_GROUP_TICKET_TYPES = "InitialGroupTicketTypes";
     public static final String INITIAL_SETTINGS_ACCESS_TO_TICKET_TYPES = "InitialSettingsAccessToTicketViaTicketTypes";
-    public static final String TICKET_TEMPLATE = "ticket-template";
-    public static final String TICKET_TYPE = "ticket-type";
-    public static final String TICKET_TEMPLATE_BY_ID = "ticket-template/{id}";
-    public static final String TICKET_SETTING = "ticket-setting";
-    public static final String TICKET_SETTING_BY_ID = "ticket-setting/{id}";
-    public static final String GROUP_TICKET_TYPES_BY_ID = "group-ticket-types/{id}";
+    public static final String TICKET_TEMPLATE = "ticket/template";
+    public static final String TICKET_TYPE = "ticket/type";
+    public static final String TICKET_TEMPLATE_BY_ID = "ticket/template/{id}";
+    public static final String TICKET_SETTING = "ticket/setting-initial";
+    public static final String TICKET_SETTING_BY_ID = "ticket/setting-initial/{id}";
+    public static final String GROUP_TICKET_TYPES_BY_ID = "ticket/type/group/{id}";
     public static final String SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES_BY_ID = "ticket/type/setting-access/{id}";
-    public static final String TICKET_SETTING_BY_AUTHOR = "ticket-setting/by-author/{authorId}";
+    public static final String TICKET_SETTING_BY_AUTHOR = "ticket/setting-initial/by-author/{authorId}";
     public static final String AUTHOR_ID = "authorId";
     public static final String APPLICATION_JSON = "application/json";
     public static final String REQUEST_PASSWORD_RESET = "auth/request-password-reset";
@@ -149,7 +149,7 @@ public class ITHelper {
     public static final String IS_INNER = "isInner";
     public static final String IS_DEPRECATED = "isDeprecated";
     public static final String OUTER_GROUP = "outerGroup_";
-    public static final String GROUP = "group";
+    public static final String GROUP = "user/group";
     public static final String INNER_GROUP = "innerGroup_";
     public static final String IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET = "itIsPredefinedTicketTypeForNewTicket";
     public static final String IT_IS_NEW_TICKET_TYPE_FOR_NEW_TICKET = "itIsNewTicketTypeForNewTicket";
@@ -172,7 +172,7 @@ public class ITHelper {
     public static final String OBSERVER = "OBSERVER";
     public static final String ACCOUNT_OWNER = "ACCOUNT_OWNER";
     public static final String EMPTY_BODY = "{}";
-    public static final String GROUP_BY_ID = "group/{id}";
+    public static final String GROUP_BY_ID = "user/group/{id}";
     public static final String SIZE = "size";
     public static final String TOTAL_ELEMENTS = "totalElements";
     public static final String CONTENT = "content";
@@ -188,10 +188,10 @@ public class ITHelper {
     public static final String[] IGNORE_FIELDS_FOR_COMPARE_GROUP_TICKET_TYPES = {"account", "ticketTypes"};
     public static final String[] IGNORE_FIELDS_FOR_COMPARE_TICKET_TEMPLATE =
             {"account", "author", "observers", "ticketType"};
-    public static final String TICKET_STATUS = "ticket-status";
-    public static final String TICKET_STATUS_BY_ID = "ticket-status/{id}";
+    public static final String TICKET_STATUS = "ticket/status";
+    public static final String TICKET_STATUS_BY_ID = "ticket/status/{id}";
     public static final String ERRORS = "errors";
-    public static final String TICKET_TYPE_BY_ID = "ticket-type/{id}";
+    public static final String TICKET_TYPE_BY_ID = "ticket/type/{id}";
 
     public void createAccount() {
         var anonymousUser = userTestHelper.getRandomValidEntity();

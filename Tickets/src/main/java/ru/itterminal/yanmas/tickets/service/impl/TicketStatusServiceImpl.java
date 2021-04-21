@@ -1,23 +1,20 @@
 package ru.itterminal.yanmas.tickets.service.impl;
 
-import static java.lang.String.format;
-
-import java.util.List;
-import java.util.UUID;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.itterminal.yanmas.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.yanmas.aau.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.yanmas.commons.exception.EntityNotExistException;
 import ru.itterminal.yanmas.integration.across_modules.CompletedVerificationAccount;
 import ru.itterminal.yanmas.tickets.model.TicketStatus;
-import ru.itterminal.yanmas.tickets.model.projection.TicketStatusUniqueFields;
 import ru.itterminal.yanmas.tickets.repository.TicketStatusRepository;
 import ru.itterminal.yanmas.tickets.service.validator.TicketStatusOperationValidator;
+
+import java.util.UUID;
+
+import static java.lang.String.format;
 
 @Slf4j
 @Service
@@ -29,21 +26,12 @@ public class TicketStatusServiceImpl extends
 
     private final AccountServiceImpl accountService;
 
-    private static final String START_FIND_TICKET_TYPES_BY_UNIQUE_FIELDS =
-            "Start find ticket status by unique fields, name: {} and not id: {} and not account: {}";
     private static final String START_FIND_STATUS_FOR_ACCOUNT = "Start find {} predefined status for account: {}";
     private static final String IS_PREDEFINED_TRUE = "IsPredefinedTrue";
     public static final String CANCELED = "Canceled";
     public static final String REOPENED = "Reopened";
     public static final String FINISHED = "Finished";
     public static final String STARTED = "Started";
-
-    @Transactional(readOnly = true)
-    public List<TicketStatusUniqueFields> findByUniqueFields(TicketStatus ticketStatus) {
-        log.trace(START_FIND_TICKET_TYPES_BY_UNIQUE_FIELDS, ticketStatus.getName(), ticketStatus.getId(), ticketStatus.getAccount());
-        return repository.getByNameAndAccount_IdAndIdNot(ticketStatus.getName(), ticketStatus.getAccount().getId(), ticketStatus
-                .getId());
-    }
 
     @Transactional(readOnly = true)
     public TicketStatus findStartedPredefinedStatus(UUID accountId) {

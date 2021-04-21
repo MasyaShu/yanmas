@@ -8,7 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.model.User;
-import ru.itterminal.yanmas.aau.model.projection.UserUniqueFields;
+import ru.itterminal.yanmas.aau.repository.UserRepository;
 import ru.itterminal.yanmas.aau.service.impl.RoleServiceImpl;
 import ru.itterminal.yanmas.aau.service.impl.UserServiceImpl;
 import ru.itterminal.yanmas.commons.exception.LogicalValidationException;
@@ -42,9 +42,12 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
             "You can edit email of the user with a role Account owner only via special process called \"update email of account owner\"";
     public static final String CHANGE_USER_GROUP = "Change user group";
     public static final String THE_USER_CANNOT_CHANGE_THE_GROUP_BECAUSE_HE_IS_PRESENT_IN_TICKETS = "The user cannot change the group, because he is present in tickets";
+    public static final String START_FIND_USER_BY_UNIQUE_FIELDS =
+            "Start find user by unique fields, email: {} and not id: {}";
     private final UserServiceImpl service;
     private final RoleServiceImpl roleService;
     private final ApplicationContext appContext;
+    private final UserRepository repository;
 
     protected static final String USER_WITH_ROLE_ACCOUNT_OWNER_IS_UNIQUE = "User: {} with role ACCOUNT_OWNER is unique";
     protected static final String USER_WITH_ROLE_ACCOUNT_OWNER = "User with role ACCOUNT_OWNER";
@@ -89,7 +92,8 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
     public boolean checkUniqueness(User entity) {
         log.trace(CHECK_UNIQUENESS, entity);
         Map<String, List<ValidationError>> errors = new HashMap<>();
-        List<UserUniqueFields> foundUser = service.findByUniqueFields(entity);
+        log.trace(START_FIND_USER_BY_UNIQUE_FIELDS, entity.getEmail(), entity.getId());
+        var foundUser = repository.getByEmailAndIdNot(entity.getEmail(), entity.getId());
         if (foundUser.isEmpty()) {
             log.trace(FIELDS_UNIQUE, entity);
             return true;

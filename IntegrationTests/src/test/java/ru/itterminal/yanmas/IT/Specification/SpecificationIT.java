@@ -61,6 +61,7 @@ class SpecificationIT {
     public static final String EMPTY = "";
     public static final String IS_PREDEFINED_FOR_NEW_TICKET = "itIsPredefinedTicketTypeForNewTicket";
     public static final String TICKET_TYPE_1 = "ticketType_1";
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private UserRepository userRepository;
 

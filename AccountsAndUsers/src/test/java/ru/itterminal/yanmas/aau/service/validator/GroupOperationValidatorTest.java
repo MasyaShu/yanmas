@@ -12,6 +12,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import ru.itterminal.yanmas.aau.model.Group;
 import ru.itterminal.yanmas.aau.model.projection.GroupUniqueFields;
 import ru.itterminal.yanmas.aau.model.test.GroupTestHelper;
+import ru.itterminal.yanmas.aau.repository.GroupRepository;
 import ru.itterminal.yanmas.aau.service.impl.GroupServiceImpl;
 import ru.itterminal.yanmas.commons.exception.LogicalValidationException;
 import ru.itterminal.yanmas.commons.exception.error.ValidationError;
@@ -33,13 +34,16 @@ import static ru.itterminal.yanmas.security.config.TestSecurityConfig.NOT_INNER_
 class GroupOperationValidatorTest {
 
     @MockBean
+    private GroupRepository repository;
+
+    @MockBean
     private GroupServiceImpl service;
 
     @MockBean
     private GroupUniqueFields userUniqueFields;
 
     @Autowired
-    private final GroupOperationValidator validator = new GroupOperationValidator(service);
+    private final GroupOperationValidator validator = new GroupOperationValidator(service, repository);
 
     private static final String EXIST_NAME = "groupName1";
     private static final String VALIDATED_FIELDS = "name";
@@ -52,16 +56,16 @@ class GroupOperationValidatorTest {
     @Test
     void checkUniqueness_shouldGetTrue_whenPassedDataUnique() {
         Group group = groupTestHelper.getRandomValidEntity();
-        when(service.findByUniqueFields(any())).thenReturn(Collections.emptyList());
+        when(repository.getByNameAndIsInnerAndAccount_IdAndIdNot(any(), any(), any(), any())).thenReturn(Collections.emptyList());
         assertTrue(validator.checkUniqueness(group));
-        verify(service, times(1)).findByUniqueFields(any());
+        verify(repository, times(1)).getByNameAndIsInnerAndAccount_IdAndIdNot(any(), any(), any(), any());
     }
 
     @Test
     void checkUniqueness_shouldGetLogicalValidationException_whenPassedDataNotUnique() {
         Group group = groupTestHelper.getRandomValidEntity();
         group.setName(EXIST_NAME);
-        when(service.findByUniqueFields(any())).thenReturn(List.of(userUniqueFields));
+        when(repository.getByNameAndIsInnerAndAccount_IdAndIdNot(any(), any(), any(), any())).thenReturn(List.of(userUniqueFields));
         when(userUniqueFields.getName()).thenReturn(EXIST_NAME);
         errors.put("name", singletonList(new ValidationError(VALIDATED_FIELDS, "name is occupied")));
         LogicalValidationException logicalValidationException = new LogicalValidationException(VALIDATED_FIELDS, errors);
@@ -69,7 +73,7 @@ class GroupOperationValidatorTest {
                 () -> validator.checkUniqueness(group));
         assertEquals(logicalValidationException.getFieldErrors().get("name").get(0),
                 thrown.getFieldErrors().get("name").get(0));
-        verify(service, times(1)).findByUniqueFields(any());
+        verify(repository, times(1)).getByNameAndIsInnerAndAccount_IdAndIdNot(any(), any(), any(), any());
     }
 
     @Test

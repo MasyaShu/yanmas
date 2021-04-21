@@ -1,20 +1,17 @@
 package ru.itterminal.yanmas.tickets.model.dto;
 
-import java.util.List;
-import java.util.UUID;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import ru.itterminal.yanmas.commons.model.dto.BaseEntityDto;
+import ru.itterminal.yanmas.commons.model.validator.enums.ValueOfEnum;
+import ru.itterminal.yanmas.commons.model.validator.scenario.Create;
+import ru.itterminal.yanmas.commons.model.validator.scenario.Update;
+import ru.itterminal.yanmas.tickets.model.Priority;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-import lombok.experimental.SuperBuilder;
-import ru.itterminal.yanmas.commons.model.dto.BaseEntityDto;
-import ru.itterminal.yanmas.commons.model.validator.scenario.Create;
+import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -28,6 +25,8 @@ public class TicketDtoRequest extends BaseEntityDto {
     private UUID authorId;
     @Size(max = 256, groups = {Create.class})
     private String subject;
+    @ValueOfEnum(enumClass = Priority.class, message = "must be any of: low, middle, height", groups = {Create.class, Update.class})
+    private String priority;
     private String description;
     private Long deadline;
     private Boolean isFinished;

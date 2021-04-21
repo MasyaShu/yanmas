@@ -50,7 +50,7 @@ class TicketCounterIT {
 
     public static final String TOTAL_ELEMENTS = "totalElements";
     public static final String CONTENT = "content";
-    public static final String TICKET_COUNTER = "ticket-counter";
+    public static final String TICKET_COUNTER = "ticket/counter";
     public static final String CURRENT_NUMBER = "currentNumber";
 
     @Autowired

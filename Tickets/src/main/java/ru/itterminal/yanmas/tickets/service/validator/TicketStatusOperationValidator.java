@@ -8,10 +8,7 @@ import org.springframework.stereotype.Component;
 import ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidatorImpl;
 import ru.itterminal.yanmas.security.jwt.JwtUser;
 import ru.itterminal.yanmas.tickets.model.TicketStatus;
-import ru.itterminal.yanmas.tickets.model.projection.TicketStatusUniqueFields;
-import ru.itterminal.yanmas.tickets.service.impl.TicketStatusServiceImpl;
-
-import java.util.List;
+import ru.itterminal.yanmas.tickets.repository.TicketStatusRepository;
 
 import static java.lang.String.format;
 import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.checkStringForEquals;
@@ -24,12 +21,16 @@ public class TicketStatusOperationValidator extends BasicOperationValidatorImpl<
     private static final String NAME = "name";
     public static final String A_USER_FROM_NOT_INNER_GROUP_CANNOT_CREATE_OR_UPDATE_TICKET_STATUS =
             "A user from not inner group cannot create or update ticket status";
-    private final TicketStatusServiceImpl service;
+    private static final String START_FIND_TICKET_TYPES_BY_UNIQUE_FIELDS =
+            "Start find ticket status by unique fields, name: {} and not id: {} and not account: {}";
+    private final TicketStatusRepository repository;
 
     @Override
     public boolean checkUniqueness(TicketStatus entity) {
         log.trace(CHECK_UNIQUENESS, entity);
-        List<TicketStatusUniqueFields> foundTicketStatus = service.findByUniqueFields(entity);
+        log.trace(START_FIND_TICKET_TYPES_BY_UNIQUE_FIELDS, entity.getName(), entity.getId(), entity.getAccount());
+        var foundTicketStatus = repository.getByNameAndAccount_IdAndIdNot(entity.getName(), entity.getAccount().getId(), entity
+                .getId());
         if (!foundTicketStatus.isEmpty()) {
             String validatedField = NAME;
             checkStringForEquals(entity.getName(), foundTicketStatus.get(0).getName(),
