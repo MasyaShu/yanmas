@@ -15,7 +15,6 @@ import ru.itterminal.yanmas.aau.model.test.RoleTestHelper;
 import ru.itterminal.yanmas.aau.model.test.UserTestHelper;
 import ru.itterminal.yanmas.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.yanmas.aau.service.impl.UserServiceImpl;
-import ru.itterminal.yanmas.aau.service.impl.WhoWatchedEntityServiceImpl;
 import ru.itterminal.yanmas.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.yanmas.files.service.FileServiceImpl;
 import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
@@ -47,10 +46,6 @@ class TicketServiceImplTest {
     @SuppressWarnings("unused")
     @MockBean
     private JwtUserBuilder jwtUserBuilder;
-
-    @SuppressWarnings("unused")
-    @MockBean
-    private WhoWatchedEntityServiceImpl whoWatchedEntityService;
 
     @MockBean
     private TicketOperationValidator validator;

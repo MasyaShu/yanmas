@@ -38,6 +38,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 
 import ru.itterminal.yanmas.aau.service.impl.UserServiceImpl;
+import ru.itterminal.yanmas.aau.service.impl.WhoWatchedEntityServiceImpl;
 import ru.itterminal.yanmas.aau.util.ReflectionHelper;
 import ru.itterminal.yanmas.commons.exception.RestExceptionHandler;
 import ru.itterminal.yanmas.commons.model.spec.SpecificationsFactory;
@@ -69,6 +70,10 @@ class TicketControllerV1Test {
 
     @MockBean
     private SpecificationsFactory specFactory;
+
+    @SuppressWarnings("unused")
+    @MockBean
+    private WhoWatchedEntityServiceImpl whoWatchedEntityService;
 
     @Autowired
     FilterChainProxy springSecurityFilterChain;
