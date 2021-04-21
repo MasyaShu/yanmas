@@ -1,26 +1,17 @@
 package ru.itterminal.yanmas.tickets.service.impl;
 
-import static java.lang.String.format;
-import static ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
-import static ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter.TypeComparisonForListOfBaseEntityFilter.CONTAINS_ALL_OF_LIST;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.yanmas.aau.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.yanmas.aau.service.impl.UserServiceImpl;
-import ru.itterminal.yanmas.aau.service.impl.WhoWatchedEntityServiceImpl;
 import ru.itterminal.yanmas.commons.model.BaseEntity;
 import ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter;
 import ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter;
@@ -31,6 +22,15 @@ import ru.itterminal.yanmas.integration.across_modules.RequestsFromModuleAccount
 import ru.itterminal.yanmas.tickets.model.Ticket;
 import ru.itterminal.yanmas.tickets.repository.TicketRepository;
 import ru.itterminal.yanmas.tickets.service.validator.TicketOperationValidator;
+
+import javax.persistence.OptimisticLockException;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static java.lang.String.format;
+import static ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
+import static ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter.TypeComparisonForListOfBaseEntityFilter.CONTAINS_ALL_OF_LIST;
 
 @SuppressWarnings("unused")
 @Slf4j
@@ -50,7 +50,6 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
 
     private final TicketCounterServiceImpl ticketCounterService;
     private final TicketSettingServiceImpl ticketSettingService;
-    private final WhoWatchedEntityServiceImpl whoWatchedEntityService;
     private final FileServiceImpl fileService;
     private final SpecificationsFactory specFactory;
     private final TicketTypeServiceImpl ticketTypeService;
@@ -89,22 +88,25 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
                 fileService.update(file);
             }
         }
-        whoWatchedEntityService.watched(List.of(createdEntity.getId()));
         log.trace(format(CREATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), createdEntity.toString()));
         return createdEntity;
     }
 
     @Transactional
     public Ticket update(Ticket entity, User currentUser) {
-        // whoWatchedEntityService.watched(List.of(updatedEntity.getId())); //NOSONAR
-        return null;
-    }
-
-    @Override
-    public Ticket findByIdAndAccountId(UUID id) {
-        var foundTicket = super.findByIdAndAccountId(id);
-        whoWatchedEntityService.watched(List.of(foundTicket.getId()));
-        return foundTicket;
+        setNestedObjectsOfEntityBeforeUpdate(entity, currentUser);
+        validator.checkAccessBeforeUpdate(entity, currentUser);
+        validator.logicalValidationBeforeUpdate(entity);
+        log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
+        try {
+            entity.generateDisplayName();
+            var updatedEntity = repository.update(entity);
+            log.trace(format(UPDATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), updatedEntity));
+            return updatedEntity;
+        }
+        catch (OptimisticLockException ex) {
+            throw new OptimisticLockingFailureException(format(VERSION_INVALID_MESSAGE, entity.getId()));
+        }
     }
 
     protected void setNestedObjectsOfEntityBeforeCreate(Ticket ticket, User currentUser) { //NOSONAR
@@ -163,6 +165,9 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
                     .collect(Collectors.toList());
             ticket.setExecutors(userService.findAllByAccountIdAndListId(accountId, listExecutorsId));
         }
+    }
+
+    protected void setNestedObjectsOfEntityBeforeUpdate(Ticket ticket, User currentUser) { //NOSONAR
     }
 
     @Override

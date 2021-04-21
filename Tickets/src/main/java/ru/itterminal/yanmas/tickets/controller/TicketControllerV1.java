@@ -11,6 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.service.impl.UserServiceImpl;
+import ru.itterminal.yanmas.aau.service.impl.WhoWatchedEntityServiceImpl;
 import ru.itterminal.yanmas.aau.util.ReflectionHelper;
 import ru.itterminal.yanmas.commons.controller.BaseController;
 import ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter;
@@ -46,13 +47,14 @@ public class TicketControllerV1 extends BaseController {
 
     private final TicketServiceImpl ticketService;
     private final UserServiceImpl userService;
+    private final WhoWatchedEntityServiceImpl whoWatchedEntityService;
     private final SpecificationsFactory specFactory;
     private final ReflectionHelper reflectionHelper;
 
     private final String ENTITY_NAME = Ticket.class.getSimpleName(); //NOSONAR
 
     @PostMapping()
-    public ResponseEntity<TicketDtoResponse> create (
+    public ResponseEntity<TicketDtoResponse> create(
             Principal principal,
             @Validated(Create.class) @RequestBody TicketDtoRequest ticketDtoRequest) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, ticketDtoRequest);
@@ -61,10 +63,12 @@ public class TicketControllerV1 extends BaseController {
         var createdTicket = ticketService.create(
                 (Ticket) reflectionHelper.convertRequestDtoIntoEntityWhereNestedObjectsWithOnlyValidId(
                         ticketDtoRequest,
-                        Ticket.class),
+                        Ticket.class
+                ),
                 currentUser
         );
         var returnedTicket = modelMapper.map(createdTicket, TicketDtoResponse.class);
+        whoWatchedEntityService.watched(List.of(createdTicket.getId(), currentUser.getAccount().getId(), currentUser.getId()));
         log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdTicket);
         return new ResponseEntity<>(returnedTicket, HttpStatus.CREATED);
     }
@@ -92,6 +96,7 @@ public class TicketControllerV1 extends BaseController {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
         var foundTicket = ticketService.findByIdAndAccountId(id);
         var returnedTicket = modelMapper.map(foundTicket, TicketDtoResponse.class);
+        whoWatchedEntityService.watched(List.of(foundTicket.getId()));
         log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundTicket);
         return new ResponseEntity<>(returnedTicket, HttpStatus.OK);
     }
