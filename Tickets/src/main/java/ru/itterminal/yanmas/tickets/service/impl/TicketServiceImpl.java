@@ -164,6 +164,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
                     .collect(Collectors.toList());
             ticket.setExecutors(userService.findAllByAccountIdAndListId(accountId, listExecutorsId));
         }
+        // ticket.priority
         if (ticket.getPriority() == null) {
             ticket.setPriority(Priority.MIDDLE.toString());
         }

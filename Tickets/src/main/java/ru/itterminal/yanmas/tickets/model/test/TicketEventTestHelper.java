@@ -1,20 +1,15 @@
 package ru.itterminal.yanmas.tickets.model.test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.model.test.AccountTestHelper;
 import ru.itterminal.yanmas.aau.model.test.GroupTestHelper;
 import ru.itterminal.yanmas.aau.model.test.RoleTestHelper;
 import ru.itterminal.yanmas.aau.model.test.UserTestHelper;
-import ru.itterminal.yanmas.commons.model.BaseEntity;
 import ru.itterminal.yanmas.commons.model.EntityTestHelperImpl;
 import ru.itterminal.yanmas.tickets.model.TicketEvent;
 import ru.itterminal.yanmas.tickets.model.dto.TicketEventDtoRequest;
 import ru.itterminal.yanmas.tickets.model.dto.TicketEventDtoResponse;
+
+import java.util.List;
 
 @SuppressWarnings({"unused", "DuplicatedCode"})
 public class TicketEventTestHelper extends EntityTestHelperImpl<TicketEvent, TicketEventDtoRequest, TicketEventDtoResponse> {
@@ -46,34 +41,9 @@ public class TicketEventTestHelper extends EntityTestHelperImpl<TicketEvent, Tic
         ticketTemplate.setAccount(account);
         TicketEvent ticketEvent = TicketEvent.builder()
                 .account(account)
-                .newSubject(fakerRU.funnyName().toString())
-                .newDescription(fakerRU.lorem().paragraph())
-                .newAuthor(author)
-                .createdAt(fakerRU.date().birthday().getTime())
-                .createdBy(fakerRU.date().birthday().getTime())
-                .newIsFinished(fakerRU.bool().bool())
-                .newDeadline(null)
-                .newObservers(null)
-                .newExecutors(null)
-                .newTicketType(ticketType)
-                .newTicketStatus(ticketStatus)
                 .ticketId(ticketTestHelper.getRandomValidEntity().getId())
                 .build();
         setRandomValidPropertiesOfBaseEntity(ticketEvent);
-        if (fakerRU.bool().bool()) {
-            var executorOne = ticketEvent.getNewAuthor().toBuilder().build();
-            executorOne.setRole(roleTestHelper.getRoleByName(Roles.EXECUTOR.toString()));
-            var executorTwo = ticketEvent.getNewAuthor().toBuilder().build();
-            executorTwo.setRole(roleTestHelper.getRoleByName(Roles.EXECUTOR.toString()));
-            ticketEvent.setNewExecutors(List.of(executorOne, executorTwo));
-        }
-        if (fakerRU.bool().bool()) {
-            var observerOne = ticketEvent.getNewAuthor().toBuilder().build();
-            observerOne.setRole(roleTestHelper.getRoleByName(Roles.OBSERVER.toString()));
-            var observerTwo = ticketEvent.getNewAuthor().toBuilder().build();
-            observerTwo.setRole(roleTestHelper.getRoleByName(Roles.OBSERVER.toString()));
-            ticketEvent.setNewObservers(List.of(observerOne, observerTwo));
-        }
         return ticketEvent;
     }
 
@@ -85,43 +55,12 @@ public class TicketEventTestHelper extends EntityTestHelperImpl<TicketEvent, Tic
     @Override
     @SuppressWarnings("DuplicatedCode")
     public TicketEventDtoRequest convertEntityToDtoRequest(TicketEvent entity, boolean isDtoForCreate) {
-        List<UUID> observersIdList = new ArrayList<>();
-        if (entity.getNewObservers() != null) {
-            observersIdList = entity.getNewObservers()
-                    .stream()
-                    .map(BaseEntity::getId)
-                    .collect(Collectors.toList());
-        }
-
-        List<UUID> executorsIdList = new ArrayList<>();
-        if (entity.getNewExecutors() != null) {
-            executorsIdList = entity.getNewExecutors()
-                    .stream()
-                    .map(BaseEntity::getId)
-                    .collect(Collectors.toList());
-        }
-
         return TicketEventDtoRequest.builder()
                 .id(entity.getId())
                 .outId(entity.getOutId())
                 .deleted(entity.getDeleted())
                 .version(entity.getVersion())
                 .displayName(entity.getDisplayName())
-                .newAuthorId(entity.getNewAuthor() == null
-                                ? null
-                                : entity.getNewAuthor().getId())
-                .newSubject(entity.getNewSubject())
-                .newDescription(entity.getNewDescription())
-                .newDeadline(entity.getNewDeadline())
-                .newIsFinished(entity.getNewIsFinished())
-                .newTicketTypeId(entity.getNewTicketType() == null
-                                ? null
-                                : entity.getNewTicketType().getId())
-                .newTicketStatusId(entity.getNewTicketStatus() == null
-                                    ? null
-                                    : entity.getNewTicketStatus().getId())
-                .newObservers(observersIdList)
-                .newExecutors(executorsIdList)
                 .build();
     }
 

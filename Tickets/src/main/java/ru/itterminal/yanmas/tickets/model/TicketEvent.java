@@ -1,28 +1,15 @@
 package ru.itterminal.yanmas.tickets.model;
 
-import java.util.List;
-import java.util.UUID;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import ru.itterminal.yanmas.aau.model.Account;
 import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.commons.model.BaseEntity;
 import ru.itterminal.yanmas.files.model.File;
+
+import javax.persistence.*;
+import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "ticket_events")
@@ -54,59 +41,18 @@ public class TicketEvent extends BaseEntity {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Long createdAt;
 
-    @Column(name = "created_by", nullable = false, updatable = false)
-    private Long createdBy;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_id")
+    private User createdBy;
 
     @SuppressWarnings("JpaDataSourceORMInspection")
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "entity_id")
     private List<File> files;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "new_author_id")
-    private User newAuthor;
-
-    @Column(name = "new_subject")
-    private String newSubject;
-
-    @Column(name = "new_description")
-    private String newDescription;
-
-    @Column(name = "new_priority")
-    private String newPriority;
-
-    @Column(name = "new_deadline")
-    private Long newDeadline;
-
-    @Column(name = "new_is_finished", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private Boolean newIsFinished;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "new_ticket_type_id")
-    private TicketType newTicketType;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "new_ticket_status_id")
-    private TicketStatus newTicketStatus;
-
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "ticket_event_observers",
-            joinColumns = @JoinColumn(name = "ticket_event_id"),
-            inverseJoinColumns = @JoinColumn(name = "observer_id")
-    )
-    private List<User> newObservers;
-
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "ticket_event_executors",
-            joinColumns = @JoinColumn(name = "ticket_event_id"),
-            inverseJoinColumns = @JoinColumn(name = "executor_id")
-    )
-    private List<User> newExecutors;
-
     @Override
     public void generateDisplayName() {
-        setDisplayName(newSubject);
+        var trimComment = "Event created by " + createdBy.getName();
+        setDisplayName(trimComment);
     }
 }

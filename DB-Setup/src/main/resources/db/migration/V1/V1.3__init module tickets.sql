@@ -168,38 +168,11 @@ create TABLE IF NOT EXISTS ticket_events
     auto_comment           text,
     is_comment_for_executors    bool   DEFAULT 'false',
     created_at             bigint NOT NULL,
-    created_by             bigint NOT NULL,
-    new_author_id          uuid   NOT NULL,
-    new_subject            varchar(256),
-    new_description        text,
-    new_deadline           bigint,
-    new_priority           varchar(10),
-    new_is_finished        bool   NOT NULL DEFAULT 'false',
-    new_ticket_type_id     uuid   NOT NULL,
-    new_ticket_status_id   uuid   NOT NULL,
-    new_ticket_template_id uuid,
+    created_by_id          uuid NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (account_id) REFERENCES accounts (id),
-    FOREIGN KEY (new_author_id) REFERENCES users (id),
-    FOREIGN KEY (new_ticket_type_id) REFERENCES ticket_types (id),
-    FOREIGN KEY (new_ticket_status_id) REFERENCES ticket_statuses (id)
+    FOREIGN KEY (account_id) REFERENCES accounts (id)
 );
 
-create TABLE IF NOT EXISTS ticket_event_executors
-(
-    ticket_event_id uuid NOT NULL,
-    executor_id     uuid NOT NULL,
-    FOREIGN KEY (ticket_event_id) REFERENCES ticket_events (id),
-    FOREIGN KEY (executor_id) REFERENCES users (id)
-);
-
-create TABLE IF NOT EXISTS ticket_event_observers
-(
-    ticket_event_id uuid NOT NULL,
-    observer_id     uuid NOT NULL,
-    FOREIGN KEY (ticket_event_id) REFERENCES ticket_events (id),
-    FOREIGN KEY (observer_id) REFERENCES users (id)
-);
 create TABLE IF NOT EXISTS group_ticket_types
 (
     out_id       varchar(128),
