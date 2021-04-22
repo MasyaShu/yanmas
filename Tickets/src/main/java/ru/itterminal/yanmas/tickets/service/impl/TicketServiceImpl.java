@@ -105,31 +105,31 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
             var updatedEntity = repository.update(entity);
             log.trace(format(UPDATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), updatedEntity));
             return updatedEntity;
-        }
-        catch (OptimisticLockException ex) {
+        } catch (OptimisticLockException ex) {
             throw new OptimisticLockingFailureException(format(VERSION_INVALID_MESSAGE, entity.getId()));
         }
     }
 
 
+    @SuppressWarnings("DuplicatedCode")
     protected void setNestedObjectsOfEntityBeforeCreate(Ticket ticket, User currentUser) { //NOSONAR
         var accountId = currentUser.getAccount().getId();
         ticket.setAccount(accountService.findById(accountId));
         ticket.setAuthor(userService.findByIdAndAccountId(ticket.getAuthor().getId(), accountId));
         ticket.setGroup(ticket.getAuthor().getGroup());
         ticket.setId(UUID.randomUUID());
-        ticket.generateDisplayName();
         ticket.setNumber(ticketCounterService.getNextTicketNumber(ticket.getAccount().getId()));
+        ticket.generateDisplayName();
         var ticketSetting = ticketSettingService.getSettingOrPredefinedValuesForTicket(
                 accountId,
                 ticket.getGroup().getId(),
                 ticket.getAuthor().getId()
         );
-        // ticket.status
         boolean isCurrentUserFromInnerGroup = currentUser.getGroup().getIsInner();
         var isTicketFinished = ticket.getIsFinished();
         var ticketStatus = ticket.getTicketStatus();
         var weightOfRoleOfCurrentUser = currentUser.getRole().getWeight();
+        // ticket.status
         if (Boolean.TRUE.equals(isTicketFinished) && (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight())) {
             ticket.setTicketStatus(ticketSetting.getTicketStatusForClose());
         } else if (ticketStatus != null && Boolean.FALSE.equals(isTicketFinished) && isCurrentUserFromInnerGroup
@@ -168,12 +168,70 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
                     .collect(Collectors.toList());
             ticket.setExecutors(userService.findAllByAccountIdAndListId(accountId, listExecutorsId));
         }
+        // ticket.priority
         if (ticket.getPriority() == null) {
             ticket.setPriority(Priority.MIDDLE.toString());
         }
     }
 
+    @SuppressWarnings("DuplicatedCode")
     protected void setNestedObjectsOfEntityBeforeUpdate(Ticket ticket, User currentUser) { //NOSONAR
+        var accountId = currentUser.getAccount().getId();
+        ticket.setAccount(accountService.findById(accountId));
+        ticket.setAuthor(userService.findByIdAndAccountId(ticket.getAuthor().getId(), accountId));
+        ticket.setGroup(ticket.getAuthor().getGroup());
+        ticket.generateDisplayName();
+        var ticketSetting = ticketSettingService.getSettingOrPredefinedValuesForTicket(
+                accountId,
+                ticket.getGroup().getId(),
+                ticket.getAuthor().getId()
+        );
+        var ticketBeforeUpdate = findByIdAndAccountId(ticket.getId(), accountId);
+        boolean isCurrentUserFromInnerGroup = currentUser.getGroup().getIsInner();
+        var isTicketFinished = ticket.getIsFinished();
+        var isTicketFinishedBeforeUpdate = ticketBeforeUpdate.getIsFinished();
+        var weightOfRoleOfCurrentUser = currentUser.getRole().getWeight();
+        // ticket.status
+        var ticketStatus = ticket.getTicketStatus();
+        if (Boolean.TRUE.equals(isTicketFinished) && Boolean.FALSE.equals(isTicketFinishedBeforeUpdate)) {
+            ticket.setTicketStatus(ticketSetting.getTicketStatusForClose());
+        } else if (ticketStatus == null) {
+            ticket.setTicketStatus(ticketBeforeUpdate.getTicketStatus());
+        } else if (isTicketFinished == null || !isTicketFinished) {
+            ticket.setTicketStatus(ticketStatusService.findByIdAndAccountId(ticketStatus.getId(), accountId));
+        }
+        // ticket.ticketType
+        var ticketType = ticket.getTicketType();
+        if (ticketType == null || !isCurrentUserFromInnerGroup
+                || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
+            ticket.setTicketType(ticketBeforeUpdate.getTicketType());
+        } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
+            ticket.setTicketType(ticketTypeService.findByIdAndAccountId(ticketType.getId(), accountId));
+        }
+        // ticket.observers
+        if (ticket.getObservers() == null || !isCurrentUserFromInnerGroup
+                || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
+            ticket.setObservers(ticketBeforeUpdate.getObservers());
+        } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
+            var listObserversId = ticket.getObservers().stream()
+                    .map(BaseEntity::getId)
+                    .collect(Collectors.toList());
+            ticket.setObservers(userService.findAllByAccountIdAndListId(accountId, listObserversId));
+        }
+        // ticket.executors
+        if (ticket.getExecutors() == null || !isCurrentUserFromInnerGroup
+                || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
+            ticket.setExecutors(ticketBeforeUpdate.getExecutors());
+        } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
+            var listExecutorsId = ticket.getExecutors().stream()
+                    .map(BaseEntity::getId)
+                    .collect(Collectors.toList());
+            ticket.setExecutors(userService.findAllByAccountIdAndListId(accountId, listExecutorsId));
+        }
+        // ticket.priority
+        if (ticket.getPriority() == null) {
+            ticket.setPriority(ticketBeforeUpdate.getPriority());
+        }
     }
 
     @Override

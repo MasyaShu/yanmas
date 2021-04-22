@@ -9,6 +9,7 @@ import ru.itterminal.yanmas.commons.model.validator.scenario.Update;
 import ru.itterminal.yanmas.tickets.model.Priority;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
 import java.util.List;
 import java.util.UUID;
@@ -21,9 +22,9 @@ import java.util.UUID;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class TicketDtoRequest extends BaseEntityDto {
-    @NotNull(groups = {Create.class})
+    @NotNull(groups = {Create.class, Update.class})
     private UUID authorId;
-    @Size(max = 256, groups = {Create.class})
+    @Size(max = 256, groups = {Create.class, Update.class})
     private String subject;
     @ValueOfEnum(enumClass = Priority.class, message = "must be any of: low, middle, height", groups = {Create.class, Update.class})
     private String priority;
@@ -34,5 +35,6 @@ public class TicketDtoRequest extends BaseEntityDto {
     private UUID ticketStatusId;
     private List<UUID> observers;
     private List<UUID> executors;
+    @Null(groups = {Update.class})
     private List<UUID> files;
 }

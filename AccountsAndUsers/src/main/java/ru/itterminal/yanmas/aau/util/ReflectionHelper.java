@@ -33,12 +33,12 @@ public class ReflectionHelper {
             var accountId = jwtUserBuilder.getJwtUser().getAccountId();
             for (Field fieldEntity : fieldsReturnedEntity) {
                 if (fieldEntity.getName().equals(ACCOUNT)) {
-                    fieldEntity.setAccessible(true);
-                    fieldEntity.set(returnedEntity, Account.builder().id(accountId).build());
+                    fieldEntity.setAccessible(true); //NOSONAR
+                    fieldEntity.set(returnedEntity, Account.builder().id(accountId).build()); //NOSONAR
                 }
                 if (fieldEntity.getType().isAssignableFrom(List.class)) {
                     var accordingFieldOfRequest = requestClazz.getDeclaredField(fieldEntity.getName());
-                    accordingFieldOfRequest.setAccessible(true);
+                    accordingFieldOfRequest.setAccessible(true); //NOSONAR
                     var listFromRequest = (List<UUID>) accordingFieldOfRequest.get(request);
                     if (listFromRequest != null && !listFromRequest.isEmpty()) {
                         var typeEntityFromList = (Class<? extends BaseEntity>)
@@ -49,18 +49,18 @@ public class ReflectionHelper {
                             newEntity.setId(uuid);
                             listOfEntities.add(newEntity);
                         }
-                        fieldEntity.setAccessible(true);
-                        fieldEntity.set(returnedEntity, listOfEntities);
+                        fieldEntity.setAccessible(true); //NOSONAR
+                        fieldEntity.set(returnedEntity, listOfEntities); //NOSONAR
                     } else {
-                        fieldEntity.setAccessible(true);
-                        fieldEntity.set(returnedEntity, null);
+                        fieldEntity.setAccessible(true); //NOSONAR
+                        fieldEntity.set(returnedEntity, null); //NOSONAR
                     }
                 }
             }
             return returnedEntity;
         }
         catch (Exception e) {
-            throw new RuntimeException(e.getCause());
+            throw new RuntimeException(e.getCause()); //NOSONAR
         }
     }
 }
