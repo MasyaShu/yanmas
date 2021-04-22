@@ -134,7 +134,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
 
 
     @SuppressWarnings("DuplicatedCode")
-    protected void setNestedObjectsOfEntityBeforeCreate(Ticket ticket, User currentUser) { //NOSONAR
+    private void setNestedObjectsOfEntityBeforeCreate(Ticket ticket, User currentUser) { //NOSONAR
         var accountId = currentUser.getAccount().getId();
         ticket.setAccount(accountService.findById(accountId));
         ticket.setAuthor(userService.findByIdAndAccountId(ticket.getAuthor().getId(), accountId));
@@ -197,7 +197,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
     }
 
     @SuppressWarnings("DuplicatedCode")
-    protected void setNestedObjectsOfEntityBeforeUpdate(Ticket ticket, User currentUser) { //NOSONAR
+    private void setNestedObjectsOfEntityBeforeUpdate(Ticket ticket, User currentUser) { //NOSONAR
         var accountId = currentUser.getAccount().getId();
         ticket.setAccount(accountService.findById(accountId));
         ticket.setAuthor(userService.findByIdAndAccountId(ticket.getAuthor().getId(), accountId));

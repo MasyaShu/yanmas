@@ -26,6 +26,7 @@ import ru.itterminal.yanmas.tickets.repository.TicketRepository;
 import ru.itterminal.yanmas.tickets.service.validator.TicketOperationValidator;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -69,7 +70,7 @@ class TicketServiceImplTest {
     private AccountServiceImpl accountService;
 
     @Autowired
-    private TicketServiceImpl service;
+    private TicketServiceImpl ticketService;
 
     @MockBean
     private TicketSettingServiceImpl ticketSettingService;
@@ -100,7 +101,7 @@ class TicketServiceImplTest {
                 .thenReturn(new TicketSetting());
         when(repository.create(any())).thenReturn(ticket);
         when(ticketCounterService.getNextTicketNumber(any())).thenReturn(ticket.getNumber());
-        var createdTicket = service.create(ticket, ticket.getAuthor());
+        var createdTicket = ticketService.create(ticket, ticket.getAuthor());
         Assertions.assertEquals(ticket, createdTicket);
         verify(accountService, times(1)).findById(any());
         verify(userService, times(1)).findByIdAndAccountId(any(), any());
@@ -124,7 +125,7 @@ class TicketServiceImplTest {
         when(ticketCounterService.getNextTicketNumber(any())).thenReturn(number);
         when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any(), any())).thenReturn(ticketSetting);
         currentUser.setRole(roleTestHelper.getRoleByName(nameOfRole));
-        var createdTicket = service.create(ticket, currentUser);
+        var createdTicket = ticketService.create(ticket, currentUser);
         Assertions.assertEquals(ticket, createdTicket);
         verify(accountService, times(1)).findById(any());
         verify(userService, times(1)).findByIdAndAccountId(any(), any());
@@ -156,7 +157,7 @@ class TicketServiceImplTest {
         when(repository.create(any())).thenReturn(ticket);
         when(ticketCounterService.getNextTicketNumber(any())).thenReturn(number);
         currentUser.setRole(roleTestHelper.getRoleByName(nameOfRole));
-        var createdTicket = service.create(ticket, currentUser);
+        var createdTicket = ticketService.create(ticket, currentUser);
         Assertions.assertEquals(ticket, createdTicket);
         verify(accountService, times(1)).findById(any());
         verify(userService, times(1)).findByIdAndAccountId(any(), any());
@@ -186,7 +187,7 @@ class TicketServiceImplTest {
         when(ticketCounterService.getNextTicketNumber(any())).thenReturn(number);
         when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any(), any())).thenReturn(ticketSetting);
         currentUser.setRole(roleTestHelper.getRoleByName(nameOfRole));
-        var createdTicket = service.create(ticket, currentUser);
+        var createdTicket = ticketService.create(ticket, currentUser);
         Assertions.assertEquals(ticket, createdTicket);
         verify(accountService, times(1)).findById(any());
         verify(userService, times(1)).findByIdAndAccountId(any(), any());
@@ -196,6 +197,39 @@ class TicketServiceImplTest {
         verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
         assertEquals(ticket.getGroup(), ticket.getAuthor().getGroup());
         assertEquals(ticket.getNumber(), number);
+    }
+
+    @Test
+    void update_shouldUpdateTicket_whenPassedValidData() {
+        when(validator.logicalValidationBeforeUpdate(any())).thenReturn(true);
+        when(accountService.findById(any())).thenReturn(ticket.getAccount());
+        when(userService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getAuthor());
+        when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any(), any()))
+                .thenReturn(new TicketSetting());
+        when(repository.update(any())).thenReturn(ticket);
+        when(repository.existsById(any())).thenReturn(true);
+        when(repository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(ticket));
+        var updatedTicket = ticketService.update(ticket, ticket.getAuthor());
+        Assertions.assertEquals(ticket, updatedTicket);
+        verify(accountService, times(1)).findById(any());
+        verify(userService, times(1)).findByIdAndAccountId(any(), any());
+        verify(validator, times(1)).logicalValidationBeforeUpdate(any());
+        verify(repository, times(1)).update(any());
+        verify(repository, times(1)).existsById(any());
+        verify(repository, times(1)).findByIdAndAccountId(any(), any());
+        verify(ticketCounterService, times(0)).getNextTicketNumber(any());
+    }
+
+    @Test
+    void reOpen_shouldReOpenTicket_whenPassedValidData() {
+        when(validator.logicalValidationBeforeUpdate(any())).thenReturn(true);
+        when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any(), any()))
+                .thenReturn(ticketSettingTestHelper.getRandomValidEntity());
+        when(repository.update(any())).thenReturn(ticket);
+        var updatedTicket = ticketService.reOpen(ticket);
+        Assertions.assertEquals(ticket, updatedTicket);
+        verify(validator, times(1)).logicalValidationBeforeUpdate(any());
+        verify(repository, times(1)).update(any());
     }
 
     private static Stream<Arguments> getStreamOfUsersFromInnerGroupsWithRolesAccountOwnerOrAdminOrExecutor() {

@@ -26,6 +26,7 @@ public class TicketTestHelper extends EntityTestHelperImpl<Ticket, TicketDtoRequ
     private final TicketTemplateTestHelper ticketTemplateTestHelper = new TicketTemplateTestHelper();
     private final RoleTestHelper roleTestHelper = new RoleTestHelper();
 
+    @SuppressWarnings("DuplicatedCode")
     @Override
     public Ticket getRandomValidEntity() {
         var account = accountTestHelper.getRandomValidEntity();
@@ -78,7 +79,7 @@ public class TicketTestHelper extends EntityTestHelperImpl<Ticket, TicketDtoRequ
 
     @Override
     public List<Ticket> setPredefinedValidEntityList() {
-        return null;
+        return null; //NOSONAR
     }
 
     @Override
