@@ -48,6 +48,8 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
     public static final String AUTHOR = "author";
     public static final String OBSERVERS = "observers";
     public static final String EXECUTORS = "executors";
+    public static final String START_REOPEN_TICKET_WITH_ID = "Start reopen ticket with id: %s";
+    public static final String FINISH_REOPEN_TICKET_WITH_ID = "Finish reopen ticket with id: %s";
 
     private final TicketCounterServiceImpl ticketCounterService;
     private final TicketSettingServiceImpl ticketSettingService;
@@ -104,6 +106,26 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
             entity.generateDisplayName();
             var updatedEntity = repository.update(entity);
             log.trace(format(UPDATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), updatedEntity));
+            return updatedEntity;
+        } catch (OptimisticLockException ex) {
+            throw new OptimisticLockingFailureException(format(VERSION_INVALID_MESSAGE, entity.getId()));
+        }
+    }
+
+    @Transactional
+    public Ticket reOpen(Ticket entity) {
+        validator.logicalValidationBeforeUpdate(entity);
+        log.trace(format(START_REOPEN_TICKET_WITH_ID, entity.getId()));
+        var ticketSetting = ticketSettingService.getSettingOrPredefinedValuesForTicket(
+                entity.getAccount().getId(),
+                entity.getGroup().getId(),
+                entity.getAuthor().getId()
+        );
+        try {
+            entity.setIsFinished(false);
+            entity.setTicketStatus(ticketSetting.getTicketStatusForReopen());
+            var updatedEntity = repository.update(entity);
+            log.trace(format(FINISH_REOPEN_TICKET_WITH_ID, entity.getId()));
             return updatedEntity;
         } catch (OptimisticLockException ex) {
             throw new OptimisticLockingFailureException(format(VERSION_INVALID_MESSAGE, entity.getId()));
