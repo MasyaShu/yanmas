@@ -22,13 +22,17 @@ import java.util.UUID;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class TicketDtoRequest extends BaseEntityDto {
+
+    public static final String MUST_BE_ANY_OF_LOW_MIDDLE_HEIGHT = "must be any of: low, middle, height";
+
     @NotNull(groups = {Create.class, Update.class})
     private UUID authorId;
     @Size(max = 256, groups = {Create.class, Update.class})
     private String subject;
-    @ValueOfEnum(enumClass = Priority.class, message = "must be any of: low, middle, height", groups = {Create.class, Update.class})
+    @ValueOfEnum(enumClass = Priority.class, message = MUST_BE_ANY_OF_LOW_MIDDLE_HEIGHT, groups = {Create.class, Update.class})
     private String priority;
     private String description;
+    private String commentForTicketEvent;
     private Long deadline;
     private Boolean isFinished;
     private UUID ticketTypeId;

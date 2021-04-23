@@ -6,13 +6,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.itterminal.yanmas.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
 
 import java.util.Collections;
 import java.util.Locale;
-import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,7 +50,6 @@ import ru.itterminal.yanmas.tickets.model.dto.TicketDtoResponse;
 import ru.itterminal.yanmas.tickets.model.test.TicketTestHelper;
 import ru.itterminal.yanmas.tickets.service.impl.TicketServiceImpl;
 
-@SuppressWarnings("unused")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {TicketControllerV1.class, FilterChainProxy.class})
 @Import(TestSecurityConfig.class)
@@ -59,15 +58,18 @@ import ru.itterminal.yanmas.tickets.service.impl.TicketServiceImpl;
 class TicketControllerV1Test {
 
     public static final String MUST_BE_ANY_OF_LOW_MIDDLE_HEIGHT = "must be any of: low, middle, height";
+    public static final String ERROR_PRIORITY = "Error priority";
     @MockBean
     private UserServiceImpl userService;
 
+    @SuppressWarnings("unused")
     @MockBean
     private ReflectionHelper reflectionHelper;
 
     @MockBean
     private TicketServiceImpl ticketService;
 
+    @SuppressWarnings("unused")
     @MockBean
     private SpecificationsFactory specFactory;
 
@@ -118,7 +120,6 @@ class TicketControllerV1Test {
         requestDto.setDeleted(null);
         requestDto.setVersion(null);
         requestDto.setDisplayName(null);
-        UUID accountId = ticket.getAccount().getId();
         when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
         if (requestDto.getObservers() != null && !requestDto.getObservers().isEmpty()) {
             when(userService.findAllByAccountIdAndListId(requestDto.getObservers()))
@@ -136,13 +137,13 @@ class TicketControllerV1Test {
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDto));
 
-        var requestResult = mockMvc.perform(request)
+        var response = mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-        var actualTicketDtoResponse = objectMapper.readValue(requestResult, TicketDtoResponse.class);
+        var actualTicketDtoResponse = objectMapper.readValue(response, TicketDtoResponse.class);
         var expectedTicketDtoResponse = mapper.map(ticket, TicketDtoResponse.class);
         assertEquals(expectedTicketDtoResponse, actualTicketDtoResponse);
         verify(userService, times(0)).findByIdAndAccountId(any());
@@ -175,14 +176,97 @@ class TicketControllerV1Test {
                                            CommonConstants.MUST_NOT_BE_NULL
                                    ).exists())
                 .andExpect(MockMvcResultMatchers
-                        .jsonPath(
-                                "$.errors.priority[?(@.message == '%s')]",
-                                MUST_BE_ANY_OF_LOW_MIDDLE_HEIGHT
-                        ).exists())
+                                   .jsonPath(
+                                           "$.errors.priority[?(@.message == '%s')]",
+                                           MUST_BE_ANY_OF_LOW_MIDDLE_HEIGHT
+                                   ).exists())
                 .andExpect(MockMvcResultMatchers
                                    .jsonPath(
                                            "$.errors.subject[?(@.message =~ /%s.*/)]",
                                            CommonConstants.SIZE_MUST_BE_BETWEEN
                                    ).exists());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
+    void update_shouldUpdate_whenValidDataPassed() throws Exception {
+        requestDto.setDisplayName(null);
+        requestDto.setFiles(null);
+        when(userService.findByEmail(any())).thenReturn(ticket.getAuthor());
+        if (requestDto.getObservers() != null && !requestDto.getObservers().isEmpty()) {
+            when(userService.findAllByAccountIdAndListId(requestDto.getObservers()))
+                    .thenReturn(ticket.getObservers());
+        } else {
+            when(userService.findAllByAccountIdAndListId(Collections.emptyList())).thenReturn(null);
+        }
+        if (requestDto.getExecutors() != null && !requestDto.getExecutors().isEmpty()) {
+            when(userService.findAllByAccountIdAndListId(requestDto.getExecutors()))
+                    .thenReturn(ticket.getExecutors());
+        }
+        when(ticketService.update(any(), any())).thenReturn(ticket);
+        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestDto));
+
+        var response = mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        var actualTicketDtoResponse = objectMapper.readValue(response, TicketDtoResponse.class);
+        var expectedTicketDtoResponse = mapper.map(ticket, TicketDtoResponse.class);
+        assertEquals(expectedTicketDtoResponse, actualTicketDtoResponse);
+        verify(userService, times(0)).findByIdAndAccountId(any());
+        verify(userService, times(0)).findAllByAccountIdAndListId(any());
+        verify(userService, times(1)).findByEmail(any());
+        verify(ticketService, times(1)).update(any(), any());
+    }
+
+    @Test
+    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
+    void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidDataPassed() throws Exception {
+        requestDto.setId(null);
+        requestDto.setVersion(null);
+        requestDto.setDeleted(null);
+        requestDto.setAuthorId(null);
+        requestDto.setPriority(ERROR_PRIORITY);
+        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestDto));
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers
+                                   .jsonPath("$.errors.id[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                                   .exists())
+                .andExpect(MockMvcResultMatchers
+                                   .jsonPath("$.errors.version[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                                   .exists())
+                .andExpect(MockMvcResultMatchers
+                                   .jsonPath("$.errors.files[?(@.message == '%s')]", CommonConstants.MUST_BE_NULL)
+                                   .exists())
+                .andExpect(MockMvcResultMatchers
+                                   .jsonPath("$.errors.displayName[?(@.message == '%s')]", CommonConstants.MUST_BE_NULL)
+                                   .exists())
+                .andExpect(MockMvcResultMatchers
+                                   .jsonPath("$.errors.deleted[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                                   .exists())
+                .andExpect(MockMvcResultMatchers
+                                   .jsonPath(
+                                           "$.errors.authorId[?(@.message == '%s')]", CommonConstants.MUST_NOT_BE_NULL)
+                                   .exists())
+                .andExpect(MockMvcResultMatchers
+                                   .jsonPath(
+                                           "$.errors.priority[?(@.message == '%s')]",
+                                           MUST_BE_ANY_OF_LOW_MIDDLE_HEIGHT
+                                   )
+                                   .exists());
+        verify(userService, times(0)).findByIdAndAccountId(any());
+        verify(userService, times(0)).findAllByAccountIdAndListId(any());
+        verify(userService, times(0)).findByEmail(any());
+        verify(ticketService, times(0)).update(any(), any());
     }
 }

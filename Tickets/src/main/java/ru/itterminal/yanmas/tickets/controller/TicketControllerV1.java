@@ -18,6 +18,7 @@ import ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter;
 import ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter;
 import ru.itterminal.yanmas.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.yanmas.commons.model.validator.scenario.Create;
+import ru.itterminal.yanmas.commons.model.validator.scenario.Update;
 import ru.itterminal.yanmas.security.jwt.JwtUser;
 import ru.itterminal.yanmas.tickets.model.Ticket;
 import ru.itterminal.yanmas.tickets.model.dto.TicketDtoRequest;
@@ -67,10 +68,30 @@ public class TicketControllerV1 extends BaseController {
                 ),
                 currentUser
         );
+        whoWatchedEntityService.watched(List.of(createdTicket.getId()));
         var returnedTicket = modelMapper.map(createdTicket, TicketDtoResponse.class);
-        whoWatchedEntityService.watched(List.of(createdTicket.getId(), currentUser.getAccount().getId(), currentUser.getId()));
         log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdTicket);
         return new ResponseEntity<>(returnedTicket, HttpStatus.CREATED);
+    }
+
+    @PutMapping()
+    public ResponseEntity<TicketDtoResponse> update(
+            Principal principal,
+            @Validated(Update.class) @RequestBody TicketDtoRequest ticketDtoRequest) {
+        log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, ticketDtoRequest);
+        var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
+        var currentUser = userService.findByEmail(jwtUser.getUsername());
+        var updatedTicket = ticketService.update(
+                (Ticket) reflectionHelper.convertRequestDtoIntoEntityWhereNestedObjectsWithOnlyValidId(
+                        ticketDtoRequest,
+                        Ticket.class
+                ),
+                currentUser
+        );
+        whoWatchedEntityService.watched(List.of(updatedTicket.getId()));
+        var returnedTicket = modelMapper.map(updatedTicket, TicketDtoResponse.class);
+        log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedTicket);
+        return new ResponseEntity<>(returnedTicket, HttpStatus.OK);
     }
 
     @GetMapping()

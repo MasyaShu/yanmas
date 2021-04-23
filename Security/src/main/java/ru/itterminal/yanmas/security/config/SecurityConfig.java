@@ -127,7 +127,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_POST_HTTP_METHOD = {
             "/api/v1/ticket"
+    };
 
+    static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_PUT_HTTP_METHOD = {
+            "/api/v1/ticket"
     };
 
     @SuppressWarnings("EmptyMethod")
@@ -167,6 +170,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR)
                 // Account owner + admin + executor + author
                 .antMatchers(HttpMethod.POST, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_POST_HTTP_METHOD)
+                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR)
+                .antMatchers(HttpMethod.PUT, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_PUT_HTTP_METHOD)
                 .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR)
                 .antMatchers(HttpMethod.GET, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_GET_HTTP_METHOD)
                 .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR)
