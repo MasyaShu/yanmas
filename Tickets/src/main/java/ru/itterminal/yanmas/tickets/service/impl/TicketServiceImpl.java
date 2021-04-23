@@ -199,6 +199,11 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
     @SuppressWarnings("DuplicatedCode")
     private void setNestedObjectsOfEntityBeforeUpdate(Ticket ticket, User currentUser) { //NOSONAR
         var accountId = currentUser.getAccount().getId();
+        var ticketBeforeUpdate = findByIdAndAccountId(ticket.getId(), accountId);
+        ticket.setTicketTemplate(ticketBeforeUpdate.getTicketTemplate());
+        ticket.setNumber(ticketBeforeUpdate.getNumber());
+        ticket.setCreatedAt(ticketBeforeUpdate.getCreatedAt());
+        ticket.setFiles(ticketBeforeUpdate.getFiles());
         ticket.setAccount(accountService.findById(accountId));
         ticket.setAuthor(userService.findByIdAndAccountId(ticket.getAuthor().getId(), accountId));
         ticket.setGroup(ticket.getAuthor().getGroup());
@@ -208,7 +213,6 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
                 ticket.getGroup().getId(),
                 ticket.getAuthor().getId()
         );
-        var ticketBeforeUpdate = findByIdAndAccountId(ticket.getId(), accountId);
         boolean isCurrentUserFromInnerGroup = currentUser.getGroup().getIsInner();
         var isTicketFinished = ticket.getIsFinished();
         var isTicketFinishedBeforeUpdate = ticketBeforeUpdate.getIsFinished();

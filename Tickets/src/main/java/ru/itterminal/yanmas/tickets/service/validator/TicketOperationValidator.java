@@ -1,9 +1,19 @@
 package ru.itterminal.yanmas.tickets.service.validator;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import static java.lang.String.format;
+import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.addValidationErrorIntoErrors;
+import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
+import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.ifErrorsNotEmptyThrowLogicalValidationException;
+import static ru.itterminal.yanmas.tickets.service.validator.TicketSettingOperationValidator.ACCESS_DENIED_BECAUSE_CURRENT_USER_HAS_NOT_PERMIT_TO_TICKET_TYPE;
+
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.commons.exception.error.ValidationError;
@@ -11,13 +21,7 @@ import ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidat
 import ru.itterminal.yanmas.files.model.File;
 import ru.itterminal.yanmas.tickets.model.Ticket;
 import ru.itterminal.yanmas.tickets.service.impl.SettingsAccessToTicketTypesServiceImpl;
-
-import java.util.List;
-import java.util.Map;
-
-import static java.lang.String.format;
-import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.*;
-import static ru.itterminal.yanmas.tickets.service.validator.TicketSettingOperationValidator.ACCESS_DENIED_BECAUSE_CURRENT_USER_HAS_NOT_PERMIT_TO_TICKET_TYPE;
+import ru.itterminal.yanmas.tickets.service.impl.TicketServiceImpl;
 
 @Slf4j
 @Component
@@ -141,16 +145,19 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
             CURRENT_USER_WITH_ROLE_OBSERVER_CAN_NOT_READ_TICKET_IF_TICKET_HAS_NOT_CURRENT_USER_IN_OBSERVERS =
             "Current user with role OBSERVER can not read ticket if ticket has not current user in observers";
     public static final String FILE_IS_INVALID = "File is invalid";
-    public static final String ACCESS_DENIED_BECAUSE_FILE_WAS_CREATED_BY_ANOTHER_USER_YOU_CANNOT_USE_IT_FOR_CREATE_THIS_TICKET =
+    public static final String
+            ACCESS_DENIED_BECAUSE_FILE_WAS_CREATED_BY_ANOTHER_USER_YOU_CANNOT_USE_IT_FOR_CREATE_THIS_TICKET =
             "Access denied, because file was created by another user, you cannot use it for create this ticket";
     public static final String FILE_ALREADY_HAS_A_LINK_TO_ANOTHER_ENTITY = "File already has a link to another entity";
     public static final String FILE_IS_NOT_YET_UPLOADED = "File is not yet uploaded";
     public static final String INVALID_TICKET = "Invalid ticket";
     public static final String INVALID_TICKET_BECAUSE_AUTHOR_HAS_NOT_ACCESS_TO_TICKET_TYPE =
             "Invalid ticket, because author has not access to ticket type";
-
+    public static final String INVALID_TICKET_BECAUSE_TICKET_DOES_NOT_HAVE_ANY_CHANGES =
+            "Invalid ticket, because ticket does not have any changes";
 
     private final SettingsAccessToTicketTypesServiceImpl settingsAccessToTicketTypesService;
+    private final TicketServiceImpl ticketService;
 
     public void checkAccessBeforeCreate(Ticket entity, User currentUser) {
         checkAccessForCreateAndUpdate(entity, currentUser);
@@ -194,7 +201,8 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
         if (entity.getFiles() != null && !entity.getFiles().isEmpty()) {
             for (File file : entity.getFiles()) {
                 if (!file.getAuthorId().equals(currentUser.getId())) {
-                    throw new AccessDeniedException(ACCESS_DENIED_BECAUSE_FILE_WAS_CREATED_BY_ANOTHER_USER_YOU_CANNOT_USE_IT_FOR_CREATE_THIS_TICKET);
+                    throw new AccessDeniedException(
+                            ACCESS_DENIED_BECAUSE_FILE_WAS_CREATED_BY_ANOTHER_USER_YOU_CANNOT_USE_IT_FOR_CREATE_THIS_TICKET);
                 }
             }
         }
@@ -211,8 +219,20 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
         isEmptySubjectDescriptionAndFiles(entity, errors);
         checkAuthorExecutorsAndObserversForWeightOfRoles(entity, errors);
         isAuthorOfTicketHavePermitToTicketType(entity, errors);
+        isNewTicketHaveChangesBeforeUpdate(entity, errors);
         ifErrorsNotEmptyThrowLogicalValidationException(errors);
         return result;
+    }
+
+    private void isNewTicketHaveChangesBeforeUpdate(Ticket ticket, Map<String, List<ValidationError>> errors) {
+        var ticketBeforeUpdate = ticketService.findByIdAndAccountId(ticket.getId());
+        if (ticket.equalsBeforeUpdate(ticketBeforeUpdate)) {
+            addValidationErrorIntoErrors(
+                    INVALID_TICKET, INVALID_TICKET_BECAUSE_TICKET_DOES_NOT_HAVE_ANY_CHANGES,
+                    errors
+            );
+            log.trace(INVALID_TICKET_BECAUSE_TICKET_DOES_NOT_HAVE_ANY_CHANGES);
+        }
     }
 
     private void isAuthorOfTicketHavePermitToTicketType(Ticket ticket, Map<String, List<ValidationError>> errors) {
@@ -228,7 +248,6 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
             }
         }
     }
-
 
     private void isEmptySubjectDescriptionAndFiles(Ticket ticket, Map<String, List<ValidationError>> errors) {
         if ((ticket.getDescription() == null || ticket.getDescription().isEmpty())
