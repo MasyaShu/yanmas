@@ -151,6 +151,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
     public static final String FILE_ALREADY_HAS_A_LINK_TO_ANOTHER_ENTITY = "File already has a link to another entity";
     public static final String FILE_IS_NOT_YET_UPLOADED = "File is not yet uploaded";
     public static final String INVALID_TICKET = "Invalid ticket";
+    public static final String NO_CHANGES = "No changes";
     public static final String INVALID_TICKET_BECAUSE_AUTHOR_HAS_NOT_ACCESS_TO_TICKET_TYPE =
             "Invalid ticket, because author has not access to ticket type";
     public static final String INVALID_TICKET_BECAUSE_TICKET_DOES_NOT_HAVE_ANY_CHANGES =
@@ -228,7 +229,7 @@ public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket
         var ticketBeforeUpdate = ticketService.findByIdAndAccountId(ticket.getId());
         if (ticket.equalsBeforeUpdate(ticketBeforeUpdate)) {
             addValidationErrorIntoErrors(
-                    INVALID_TICKET, INVALID_TICKET_BECAUSE_TICKET_DOES_NOT_HAVE_ANY_CHANGES,
+                    NO_CHANGES, INVALID_TICKET_BECAUSE_TICKET_DOES_NOT_HAVE_ANY_CHANGES,
                     errors
             );
             log.trace(INVALID_TICKET_BECAUSE_TICKET_DOES_NOT_HAVE_ANY_CHANGES);
