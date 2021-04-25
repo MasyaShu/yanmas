@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import ru.itterminal.yanmas.aau.model.Account;
 import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.model.test.AccountTestHelper;
 import ru.itterminal.yanmas.aau.model.test.GroupTestHelper;
@@ -30,6 +31,55 @@ public class TicketTestHelper extends EntityTestHelperImpl<Ticket, TicketDtoRequ
     @Override
     public Ticket getRandomValidEntity() {
         var account = accountTestHelper.getRandomValidEntity();
+        var group = groupTestHelper.getRandomValidEntity();
+        group.setAccount(account);
+        var author = userTestHelper.getRandomValidEntity();
+        author.setAccount(account);
+        author.setGroup(group);
+        author.setRole(roleTestHelper.getPredefinedValidEntityList().get(3));
+        var ticketType = ticketTypeTestHelper.getRandomValidEntity();
+        ticketType.setAccount(account);
+        var ticketStatus = ticketStatusTestHelper.getRandomValidEntity();
+        ticketStatus.setAccount(account);
+        var ticketTemplate = ticketTemplateTestHelper.getRandomValidEntity();
+        ticketTemplate.setAccount(account);
+        Ticket ticket = Ticket.builder()
+                .account(account)
+                .number(fakerRU.number().randomNumber())
+                .subject(fakerRU.funnyName().toString())
+                .description(fakerRU.lorem().paragraph())
+                .author(author)
+                .createdAt(fakerRU.date().birthday().getTime())
+                .isFinished(fakerRU.bool().bool())
+                .deadline(null)
+                .group(group)
+                .observers(null)
+                .executors(null)
+                .files(null)
+                .ticketType(ticketType)
+                .ticketStatus(ticketStatus)
+                .ticketTemplate(ticketTemplate)
+                .build();
+        setRandomValidPropertiesOfBaseEntity(ticket);
+        if (fakerRU.bool().bool()) {
+            var executorOne = ticket.getAuthor().toBuilder().build();
+            executorOne.setRole(roleTestHelper.getRoleByName(Roles.EXECUTOR.toString()));
+            var executorTwo = ticket.getAuthor().toBuilder().build();
+            executorTwo.setRole(roleTestHelper.getRoleByName(Roles.EXECUTOR.toString()));
+            ticket.setExecutors(List.of(executorOne, executorTwo));
+        }
+        if (fakerRU.bool().bool()) {
+            var observerOne = ticket.getAuthor().toBuilder().build();
+            observerOne.setRole(roleTestHelper.getRoleByName(Roles.OBSERVER.toString()));
+            var observerTwo = ticket.getAuthor().toBuilder().build();
+            observerTwo.setRole(roleTestHelper.getRoleByName(Roles.OBSERVER.toString()));
+            ticket.setObservers(List.of(observerOne, observerTwo));
+        }
+        return ticket;
+    }
+
+    @SuppressWarnings("DuplicatedCode")
+    public Ticket getRandomValidEntityWithAccount(Account account) {
         var group = groupTestHelper.getRandomValidEntity();
         group.setAccount(account);
         var author = userTestHelper.getRandomValidEntity();

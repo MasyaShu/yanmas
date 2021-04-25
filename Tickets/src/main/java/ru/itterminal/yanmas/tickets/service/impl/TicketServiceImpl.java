@@ -33,7 +33,6 @@ import static java.lang.String.format;
 import static ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
 import static ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter.TypeComparisonForListOfBaseEntityFilter.CONTAINS_ALL_OF_LIST;
 
-@SuppressWarnings("unused")
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -204,7 +203,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
         ticket.setNumber(ticketBeforeUpdate.getNumber());
         ticket.setCreatedAt(ticketBeforeUpdate.getCreatedAt());
         ticket.setFiles(ticketBeforeUpdate.getFiles());
-        ticket.setAccount(accountService.findById(accountId));
+        ticket.setAccount(ticketBeforeUpdate.getAccount());
         ticket.setAuthor(userService.findByIdAndAccountId(ticket.getAuthor().getId(), accountId));
         ticket.setGroup(ticket.getAuthor().getGroup());
         ticket.generateDisplayName();
@@ -235,8 +234,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
             ticket.setTicketType(ticketTypeService.findByIdAndAccountId(ticketType.getId(), accountId));
         }
         // ticket.observers
-        if (ticket.getObservers() == null || !isCurrentUserFromInnerGroup
-                || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
+        if (!isCurrentUserFromInnerGroup || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
             ticket.setObservers(ticketBeforeUpdate.getObservers());
         } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
             var listObserversId = ticket.getObservers().stream()
@@ -245,8 +243,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
             ticket.setObservers(userService.findAllByAccountIdAndListId(accountId, listObserversId));
         }
         // ticket.executors
-        if (ticket.getExecutors() == null || !isCurrentUserFromInnerGroup
-                || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
+        if (!isCurrentUserFromInnerGroup || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
             ticket.setExecutors(ticketBeforeUpdate.getExecutors());
         } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
             var listExecutorsId = ticket.getExecutors().stream()
