@@ -32,6 +32,7 @@ public class TicketDtoRequest extends BaseEntityDto {
     @ValueOfEnum(enumClass = Priority.class, message = MUST_BE_ANY_OF_LOW_MIDDLE_HEIGHT, groups = {Create.class, Update.class})
     private String priority;
     private String description;
+    @Null(groups = {Create.class})
     private String commentForTicketEvent;
     private Long deadline;
     private Boolean isFinished;
