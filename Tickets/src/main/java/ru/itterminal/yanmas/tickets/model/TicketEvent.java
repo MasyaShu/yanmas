@@ -9,7 +9,6 @@ import ru.itterminal.yanmas.files.model.File;
 
 import javax.persistence.*;
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Table(name = "ticket_events")
@@ -22,12 +21,13 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 public class TicketEvent extends BaseEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ticket_id")
-    private UUID ticketId;
+    private Ticket ticket;
 
     @Column
     private String comment;
@@ -41,18 +41,17 @@ public class TicketEvent extends BaseEntity {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Long createdAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "created_by_id")
     private User createdBy;
 
     @SuppressWarnings("JpaDataSourceORMInspection")
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "entity_id")
     private List<File> files;
 
     @Override
     public void generateDisplayName() {
-        var trimComment = "Event created by " + createdBy.getName();
-        setDisplayName(trimComment);
+        setDisplayName("Event created by " + createdBy.getName());
     }
 }
