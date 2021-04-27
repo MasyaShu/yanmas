@@ -7,7 +7,7 @@ import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.repository.RoleRepository;
 import ru.itterminal.yanmas.aau.service.validator.RoleOperationValidator;
 import ru.itterminal.yanmas.commons.exception.EntityNotExistException;
-import ru.itterminal.yanmas.commons.service.impl.CrudServiceImpl;
+import ru.itterminal.yanmas.commons.service.crud.impl.CrudServiceImpl;
 
 import static java.lang.String.format;
 

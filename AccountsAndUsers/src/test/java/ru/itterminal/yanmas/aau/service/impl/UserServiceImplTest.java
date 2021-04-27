@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -41,7 +42,7 @@ import ru.itterminal.yanmas.aau.repository.UserRepository;
 import ru.itterminal.yanmas.aau.service.validator.UserOperationValidator;
 import ru.itterminal.yanmas.commons.exception.EntityNotExistException;
 import ru.itterminal.yanmas.commons.exception.FailedSaveEntityException;
-import ru.itterminal.yanmas.commons.service.CrudService;
+import ru.itterminal.yanmas.commons.service.crud.CrudService;
 import ru.itterminal.yanmas.integration.across_modules.CompletedVerificationAccount;
 import ru.itterminal.yanmas.integration.email.SenderEmailViaSMTPServer;
 import ru.itterminal.yanmas.security.jwt.JwtProvider;
@@ -64,6 +65,7 @@ class UserServiceImplTest {
     private RoleServiceImpl roleService;
 
     @MockBean
+    @Qualifier("basicOperationValidatorImpl")
     private UserOperationValidator validator;
 
     @MockBean

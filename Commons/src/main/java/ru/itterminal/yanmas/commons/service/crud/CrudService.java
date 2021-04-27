@@ -1,4 +1,4 @@
-package ru.itterminal.yanmas.commons.service;
+package ru.itterminal.yanmas.commons.service.crud;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -11,6 +11,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
@@ -29,6 +30,7 @@ import ru.itterminal.yanmas.tickets.service.validator.TicketTemplateOperationVal
 class TicketTemplateServiceImplTest {
 
     @MockBean
+    @Qualifier("basicOperationValidatorImpl")
     private TicketTemplateOperationValidator validator;
 
     @MockBean

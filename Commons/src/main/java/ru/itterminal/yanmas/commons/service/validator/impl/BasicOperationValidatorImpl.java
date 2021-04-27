@@ -1,6 +1,8 @@
 package ru.itterminal.yanmas.commons.service.validator.impl;
 
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import ru.itterminal.yanmas.commons.exception.NullEntityException;
 import ru.itterminal.yanmas.commons.model.BaseEntity;
@@ -8,6 +10,7 @@ import ru.itterminal.yanmas.commons.service.validator.OperationValidator;
 
 @Slf4j
 @Component
+@Primary
 public class BasicOperationValidatorImpl<E extends BaseEntity> implements OperationValidator<E> {
 
     public static final String DEFAULT_CREATE_MESSAGE = "Using default validation for crate method";
