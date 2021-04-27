@@ -33,7 +33,7 @@ import ru.itterminal.yanmas.commons.exception.EntityNotExistException;
 import ru.itterminal.yanmas.commons.exception.NullEntityException;
 import ru.itterminal.yanmas.commons.model.GeneralEntity;
 import ru.itterminal.yanmas.commons.repository.GeneralEntityRepository;
-import ru.itterminal.yanmas.commons.service.CrudService;
+import ru.itterminal.yanmas.commons.service.crud.CrudService;
 import ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidatorImpl;
 
 @ExtendWith(SpringExtension.class)

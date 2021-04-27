@@ -1,10 +1,10 @@
 package ru.itterminal.yanmas.aau.service.impl;
 
 import static java.lang.String.format;
-import static ru.itterminal.yanmas.commons.service.CrudService.CREATE_FINISH_MESSAGE;
-import static ru.itterminal.yanmas.commons.service.CrudService.CREATE_INIT_MESSAGE;
-import static ru.itterminal.yanmas.commons.service.CrudService.DELETE_FINISH_MESSAGE;
-import static ru.itterminal.yanmas.commons.service.CrudService.DELETE_INIT_MESSAGE;
+import static ru.itterminal.yanmas.commons.service.crud.CrudService.CREATE_FINISH_MESSAGE;
+import static ru.itterminal.yanmas.commons.service.crud.CrudService.CREATE_INIT_MESSAGE;
+import static ru.itterminal.yanmas.commons.service.crud.CrudService.DELETE_FINISH_MESSAGE;
+import static ru.itterminal.yanmas.commons.service.crud.CrudService.DELETE_INIT_MESSAGE;
 
 import java.util.ArrayList;
 import java.util.HashSet;

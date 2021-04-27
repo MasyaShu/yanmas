@@ -1,26 +1,5 @@
 package ru.itterminal.yanmas.tickets.service.validator;
 
-import static java.lang.String.format;
-import static java.util.Collections.singletonList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
-import static ru.itterminal.yanmas.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
-import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createLogicalValidationException;
-import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
-import static ru.itterminal.yanmas.security.config.TestSecurityConfig.AUTHOR_ACCOUNT_1_IS_INNER_GROUP_ID;
-import static ru.itterminal.yanmas.tickets.service.validator.TicketOperationValidator.*;
-import static ru.itterminal.yanmas.tickets.service.validator.TicketSettingOperationValidator.ACCESS_DENIED_BECAUSE_CURRENT_USER_HAS_NOT_PERMIT_TO_TICKET_TYPE;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Stream;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -32,7 +11,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-
 import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.model.test.RoleTestHelper;
 import ru.itterminal.yanmas.commons.exception.LogicalValidationException;
@@ -41,6 +19,24 @@ import ru.itterminal.yanmas.files.model.File;
 import ru.itterminal.yanmas.security.config.TestSecurityConfig;
 import ru.itterminal.yanmas.tickets.model.test.TicketTestHelper;
 import ru.itterminal.yanmas.tickets.service.impl.SettingsAccessToTicketTypesServiceImpl;
+import ru.itterminal.yanmas.tickets.service.impl.TicketServiceImpl;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Stream;
+
+import static java.lang.String.format;
+import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidatorImpl.VALIDATION_FAILED;
+import static ru.itterminal.yanmas.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
+import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createLogicalValidationException;
+import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
+import static ru.itterminal.yanmas.security.config.TestSecurityConfig.AUTHOR_ACCOUNT_1_IS_INNER_GROUP_ID;
+import static ru.itterminal.yanmas.tickets.service.validator.TicketOperationValidator.*;
+import static ru.itterminal.yanmas.tickets.service.validator.TicketSettingOperationValidator.ACCESS_DENIED_BECAUSE_CURRENT_USER_HAS_NOT_PERMIT_TO_TICKET_TYPE;
 
 @SpringJUnitConfig(value = {TicketOperationValidator.class})
 @Import(TestSecurityConfig.class)
@@ -49,6 +45,9 @@ class TicketOperationValidatorTest {
 
     @MockBean
     private SettingsAccessToTicketTypesServiceImpl settingsAccessToTicketTypesService;
+
+    @MockBean
+    private TicketServiceImpl ticketService;
 
     @Autowired
     private TicketOperationValidator validator;
@@ -313,6 +312,8 @@ class TicketOperationValidatorTest {
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     void logicalValidationBeforeUpdate_shouldGetLogicalValidationException_whenAuthorOfTicketHasNotPermitToTicketType() {
         var ticket = ticketTestHelper.getRandomValidEntity();
+        var ticketBeforeUpdate = ticketTestHelper.getRandomValidEntity();
+        when(ticketService.findByIdAndAccountId(any())).thenReturn(ticketBeforeUpdate);
         when(settingsAccessToTicketTypesService.isPermittedTicketType(any(), any())).thenReturn(false);
         var expectedException = createLogicalValidationException(
                 INVALID_TICKET,
@@ -332,6 +333,8 @@ class TicketOperationValidatorTest {
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     void logicalValidationBeforeUpdate_shouldGetLogicalValidationException_whenSubjectDescriptionFilesAreEmpty() {
+        var ticketBeforeUpdate = ticketTestHelper.getRandomValidEntity();
+        when(ticketService.findByIdAndAccountId(any())).thenReturn(ticketBeforeUpdate);
         var expectedErrors = createMapForLogicalErrors();
         var ticket = ticketTestHelper.getRandomValidEntity();
         ticket.setSubject("");
@@ -362,7 +365,9 @@ class TicketOperationValidatorTest {
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     void logicalValidationBeforeUpdate_shouldGetTrue_whenPassedTicketIsValid() {
         var ticket = ticketTestHelper.getRandomValidEntity();
+        var ticketBeforeUpdate = ticketTestHelper.getRandomValidEntity();
         when(settingsAccessToTicketTypesService.isPermittedTicketType(any(), any())).thenReturn(true);
+        when(ticketService.findByIdAndAccountId(any())).thenReturn(ticketBeforeUpdate);
         var actualResult = validator.logicalValidationBeforeUpdate(ticket);
         assertTrue(actualResult);
         verify(settingsAccessToTicketTypesService, times(1)).isPermittedTicketType(any(), any());
@@ -373,6 +378,8 @@ class TicketOperationValidatorTest {
     void logicalValidationBeforeUpdate_shouldGetLogicalValidationException_whenWeightOfRoleOfAuthorLessThanAccordingWeightOfRole() {
         var expectedErrors = createMapForLogicalErrors();
         var ticket = ticketTestHelper.getRandomValidEntity();
+        var ticketBeforeUpdate = ticketTestHelper.getRandomValidEntity();
+        when(ticketService.findByIdAndAccountId(any())).thenReturn(ticketBeforeUpdate);
         ticket.getAuthor().setRole(roleTestHelper.getPredefinedValidEntityList().get(4));
         expectedErrors.put(
                 TicketOperationValidator.WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR,
@@ -406,6 +413,8 @@ class TicketOperationValidatorTest {
     void logicalValidationBeforeUpdate_shouldGetLogicalValidationException_whenWeightOfRoleOfObserverLessThanAccordingWeightOfRole() {
         var expectedErrors = createMapForLogicalErrors();
         var ticket = ticketTestHelper.getRandomValidEntity();
+        var ticketBeforeUpdate = ticketTestHelper.getRandomValidEntity();
+        when(ticketService.findByIdAndAccountId(any())).thenReturn(ticketBeforeUpdate);
         var observer = ticket.getAuthor();
         observer.getRole().setWeight(0);
         ticket.setObservers(List.of(observer));
@@ -435,11 +444,14 @@ class TicketOperationValidatorTest {
                 actualException.getFieldErrors().get(TicketOperationValidator.WEIGHT_OF_ROLE_INTO_FIELD_OBSERVERS)
                         .get(0)
         );
+        verify(ticketService, times(1)).findByIdAndAccountId(any());
     }
 
     @Test
     @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
     void logicalValidationBeforeUpdate_shouldGetLogicalValidationException_whenWeightOfRoleOfExecutorLessThanAccordingWeightOfRole() {
+        var ticketBeforeUpdate = ticketTestHelper.getRandomValidEntity();
+        when(ticketService.findByIdAndAccountId(any())).thenReturn(ticketBeforeUpdate);
         var expectedErrors = createMapForLogicalErrors();
         var ticket = ticketTestHelper.getRandomValidEntity();
         var executor = ticket.getAuthor();
@@ -470,6 +482,24 @@ class TicketOperationValidatorTest {
                         .get(0),
                 actualException.getFieldErrors().get(TicketOperationValidator.WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS)
                         .get(0)
+        );
+    }
+
+    @Test
+    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
+    void logicalValidationBeforeUpdate_shouldGetLogicalValidationException_whenNewTicketNotHasAnyChanges() {
+        var ticket = ticketTestHelper.getRandomValidEntity();
+        when(ticketService.findByIdAndAccountId(any())).thenReturn(ticket);
+        var expectedException = createLogicalValidationException(
+                NO_CHANGES,
+                INVALID_TICKET_BECAUSE_TICKET_DOES_NOT_HAVE_ANY_CHANGES);
+        var actualException = assertThrows(
+                LogicalValidationException.class,
+                () -> validator.logicalValidationBeforeUpdate(ticket)
+        );
+        assertEquals(
+                expectedException.getFieldErrors().get(NO_CHANGES).get(0),
+                actualException.getFieldErrors().get(NO_CHANGES).get(0)
         );
     }
 

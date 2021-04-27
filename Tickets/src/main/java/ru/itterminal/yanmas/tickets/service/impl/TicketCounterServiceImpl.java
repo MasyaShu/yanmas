@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ru.itterminal.yanmas.commons.service.impl.CrudServiceImpl;
+import ru.itterminal.yanmas.commons.service.crud.impl.CrudServiceImpl;
 import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 import ru.itterminal.yanmas.tickets.model.TicketCounter;
 import ru.itterminal.yanmas.tickets.repository.TicketCounterRepository;

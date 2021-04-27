@@ -3,6 +3,7 @@ package ru.itterminal.yanmas.tickets.service.impl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import ru.itterminal.yanmas.aau.service.impl.AccountServiceImpl;
@@ -24,6 +25,7 @@ import static org.mockito.Mockito.*;
 class TicketStatusServiceImplTest {
 
     @MockBean
+    @Qualifier("basicOperationValidatorImpl")
     private TicketStatusOperationValidator validator;
 
     @MockBean

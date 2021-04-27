@@ -18,7 +18,7 @@ import ru.itterminal.yanmas.aau.service.CrudServiceWithAccount;
 import ru.itterminal.yanmas.commons.exception.EntityNotExistException;
 import ru.itterminal.yanmas.commons.model.BaseEntity;
 import ru.itterminal.yanmas.commons.repository.EntityRepositoryWithAccount;
-import ru.itterminal.yanmas.commons.service.impl.CrudServiceImpl;
+import ru.itterminal.yanmas.commons.service.crud.impl.CrudServiceImpl;
 import ru.itterminal.yanmas.commons.service.validator.OperationValidator;
 import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 
@@ -33,7 +33,7 @@ public abstract class CrudServiceWithAccountImpl<
         implements CrudServiceWithAccount<E> {
 
     @Autowired
-    private JwtUserBuilder jwtUserBuilder;
+    protected JwtUserBuilder jwtUserBuilder;
 
     @Transactional(readOnly = true)
     @Override

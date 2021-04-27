@@ -3,6 +3,7 @@ package ru.itterminal.yanmas.security.config;
 import static ru.itterminal.yanmas.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
 import static ru.itterminal.yanmas.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_GET_HTTP_METHOD;
 import static ru.itterminal.yanmas.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_POST_HTTP_METHOD;
+import static ru.itterminal.yanmas.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_PUT_HTTP_METHOD;
 import static ru.itterminal.yanmas.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_GET_HTTP_METHOD;
 import static ru.itterminal.yanmas.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_POST_HTTP_METHOD;
 import static ru.itterminal.yanmas.security.config.SecurityConfig.AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_PUT_HTTP_METHOD;
@@ -32,12 +33,10 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 import ru.itterminal.yanmas.security.jwt.CustomAccessDeniedHandler;
 import ru.itterminal.yanmas.security.jwt.CustomAuthenticationEntryPoint;
-import ru.itterminal.yanmas.security.jwt.JwtFilter;
 import ru.itterminal.yanmas.security.jwt.JwtUser;
 
 @SuppressWarnings("DuplicatedCode")
@@ -113,6 +112,8 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR)
                 // Account owner + admin + executor + author
                 .antMatchers(HttpMethod.POST, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_POST_HTTP_METHOD)
+                .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR)
+                .antMatchers(HttpMethod.PUT, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_PUT_HTTP_METHOD)
                 .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR)
                 .antMatchers(HttpMethod.GET, AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_GET_HTTP_METHOD)
                 .hasAnyAuthority(ROLE_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR)

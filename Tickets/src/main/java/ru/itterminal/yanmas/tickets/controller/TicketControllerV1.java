@@ -11,12 +11,14 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.service.impl.UserServiceImpl;
+import ru.itterminal.yanmas.aau.service.impl.WhoWatchedEntityServiceImpl;
 import ru.itterminal.yanmas.aau.util.ReflectionHelper;
 import ru.itterminal.yanmas.commons.controller.BaseController;
 import ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter;
 import ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter;
 import ru.itterminal.yanmas.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.yanmas.commons.model.validator.scenario.Create;
+import ru.itterminal.yanmas.commons.model.validator.scenario.Update;
 import ru.itterminal.yanmas.security.jwt.JwtUser;
 import ru.itterminal.yanmas.tickets.model.Ticket;
 import ru.itterminal.yanmas.tickets.model.dto.TicketDtoRequest;
@@ -46,13 +48,14 @@ public class TicketControllerV1 extends BaseController {
 
     private final TicketServiceImpl ticketService;
     private final UserServiceImpl userService;
+    private final WhoWatchedEntityServiceImpl whoWatchedEntityService;
     private final SpecificationsFactory specFactory;
     private final ReflectionHelper reflectionHelper;
 
     private final String ENTITY_NAME = Ticket.class.getSimpleName(); //NOSONAR
 
     @PostMapping()
-    public ResponseEntity<TicketDtoResponse> create (
+    public ResponseEntity<TicketDtoResponse> create(
             Principal principal,
             @Validated(Create.class) @RequestBody TicketDtoRequest ticketDtoRequest) {
         log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, ticketDtoRequest);
@@ -61,12 +64,34 @@ public class TicketControllerV1 extends BaseController {
         var createdTicket = ticketService.create(
                 (Ticket) reflectionHelper.convertRequestDtoIntoEntityWhereNestedObjectsWithOnlyValidId(
                         ticketDtoRequest,
-                        Ticket.class),
+                        Ticket.class
+                ),
                 currentUser
         );
+        whoWatchedEntityService.watched(List.of(createdTicket.getId()));
         var returnedTicket = modelMapper.map(createdTicket, TicketDtoResponse.class);
         log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdTicket);
         return new ResponseEntity<>(returnedTicket, HttpStatus.CREATED);
+    }
+
+    @PutMapping()
+    public ResponseEntity<TicketDtoResponse> update(
+            Principal principal,
+            @Validated(Update.class) @RequestBody TicketDtoRequest ticketDtoRequest) {
+        log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, ticketDtoRequest);
+        var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
+        var currentUser = userService.findByEmail(jwtUser.getUsername());
+        var updatedTicket = ticketService.update(
+                (Ticket) reflectionHelper.convertRequestDtoIntoEntityWhereNestedObjectsWithOnlyValidId(
+                        ticketDtoRequest,
+                        Ticket.class
+                ),
+                currentUser
+        );
+        whoWatchedEntityService.watched(List.of(updatedTicket.getId()));
+        var returnedTicket = modelMapper.map(updatedTicket, TicketDtoResponse.class);
+        log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedTicket);
+        return new ResponseEntity<>(returnedTicket, HttpStatus.OK);
     }
 
     @GetMapping()
@@ -92,6 +117,7 @@ public class TicketControllerV1 extends BaseController {
         log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
         var foundTicket = ticketService.findByIdAndAccountId(id);
         var returnedTicket = modelMapper.map(foundTicket, TicketDtoResponse.class);
+        whoWatchedEntityService.watched(List.of(foundTicket.getId()));
         log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundTicket);
         return new ResponseEntity<>(returnedTicket, HttpStatus.OK);
     }

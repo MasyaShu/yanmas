@@ -1,4 +1,4 @@
-package ru.itterminal.yanmas.commons.service.impl;
+package ru.itterminal.yanmas.commons.service.crud.impl;
 
 import static java.lang.String.format;
 
@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.yanmas.commons.exception.EntityNotExistException;
 import ru.itterminal.yanmas.commons.model.BaseEntity;
 import ru.itterminal.yanmas.commons.repository.CustomizedParentEntityRepository;
-import ru.itterminal.yanmas.commons.service.CrudService;
+import ru.itterminal.yanmas.commons.service.crud.CrudService;
 import ru.itterminal.yanmas.commons.service.validator.OperationValidator;
 
 @SuppressWarnings({"SpringJavaAutowiredFieldsWarningInspection", "DuplicatedCode"})
@@ -30,11 +30,9 @@ public abstract class CrudServiceImpl<E extends BaseEntity,
         R extends CustomizedParentEntityRepository<E>>
         implements CrudService<E> {
 
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     protected R repository;
 
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     protected V validator;
 

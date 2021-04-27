@@ -22,6 +22,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -55,6 +56,7 @@ class FileServiceImplTest {
 
     @SuppressWarnings("unused")
     @MockBean
+    @Qualifier("basicOperationValidatorImpl")
     private FileOperationValidator validator;
 
     @SuppressWarnings("unused")
