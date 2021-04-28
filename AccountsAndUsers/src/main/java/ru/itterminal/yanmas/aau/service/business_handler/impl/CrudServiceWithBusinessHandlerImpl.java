@@ -2,6 +2,7 @@ package ru.itterminal.yanmas.aau.service.business_handler.impl;
 
 import static java.lang.String.format;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.OptimisticLockException;
@@ -19,6 +20,7 @@ import ru.itterminal.yanmas.aau.service.business_handler.CrudServiceWithBusiness
 import ru.itterminal.yanmas.aau.service.business_handler.EntityBusinessHandler;
 import ru.itterminal.yanmas.aau.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.yanmas.aau.service.validator.OperationValidatorWithCurrentUser;
+import ru.itterminal.yanmas.commons.exception.EntityNotExistException;
 import ru.itterminal.yanmas.commons.model.BaseEntity;
 import ru.itterminal.yanmas.commons.repository.EntityRepositoryWithAccount;
 
@@ -37,6 +39,8 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
 
     @Autowired
     protected V validator;
+
+    public static final String NOT_FOUND_ENTITY_BY_EMAIL = "Not found entity by id: %s";
 
     @Transactional
     public E create(E entity, User currentUser) {
@@ -73,4 +77,28 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
         businessHandler.beforeFindAllByFilter(specification, currentUser);
         return repository.findAll(specification, pageable);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<E> findAllByAccountId(User currentUser) {
+        return repository.findAllByAccountId(currentUser.getAccount().getId());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<E> findAllByAccountIdAndListId(List<UUID> listId, User currentUser) {
+        return repository.findAllByAccountIdAndListId(currentUser.getAccount().getId(), listId);
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public E findByIdAndAccountId(UUID id, User currentUser) {
+        return repository.findByIdAndAccountId(id, currentUser.getAccount().getId()).orElseThrow(
+                () -> new EntityNotExistException(
+                format(NOT_FOUND_ENTITY_BY_EMAIL, id)
+                )
+        );
+    }
+
 }

@@ -14,9 +14,6 @@ public interface CrudServiceWithBusinessHandler<E extends BaseEntity> extends Cr
 
     List<E> findAllByAccountIdAndListId(List<UUID> listId, User currentUser);
 
-    List<E> findAllByAccountIdAndListId(UUID accountId, List<UUID> listId, User currentUser);
-
     E findByIdAndAccountId(UUID id, User currentUser);
 
-    E findByIdAndAccountId(UUID id, UUID accountId, User currentUser);
 }
