@@ -94,11 +94,13 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
     @Override
     @Transactional(readOnly = true)
     public E findByIdAndAccountId(UUID id, User currentUser) {
-        return repository.findByIdAndAccountId(id, currentUser.getAccount().getId()).orElseThrow(
+        var foundEntity =  repository.findByIdAndAccountId(id, currentUser.getAccount().getId()).orElseThrow(
                 () -> new EntityNotExistException(
                         format(NOT_FOUND_ENTITY_BY_EMAIL, id)
                 )
         );
+        validator.checkAccessBeforeRead(foundEntity, currentUser);
+        return foundEntity;
     }
 
 }

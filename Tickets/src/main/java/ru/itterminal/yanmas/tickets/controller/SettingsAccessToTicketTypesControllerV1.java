@@ -28,6 +28,7 @@ import ru.itterminal.yanmas.tickets.model.SettingsAccessToTicketTypes;
 import ru.itterminal.yanmas.tickets.model.dto.SettingsAccessToTicketTypesDtoRequest;
 import ru.itterminal.yanmas.tickets.model.dto.SettingsAccessToTicketTypesDtoResponse;
 import ru.itterminal.yanmas.tickets.model.dto.SettingsAccessToTicketTypesFilterDto;
+import ru.itterminal.yanmas.tickets.service.business_handler.SettingsAccessToTicketTypesBusinessHandler;
 import ru.itterminal.yanmas.tickets.service.impl.SettingsAccessToTicketTypesServiceImpl;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
@@ -37,9 +38,13 @@ import ru.itterminal.yanmas.tickets.service.impl.SettingsAccessToTicketTypesServ
 @RequestMapping("api/v1/ticket/type/setting-access")
 @RequiredArgsConstructor
 public class SettingsAccessToTicketTypesControllerV1
-        extends BaseControllerImpl<SettingsAccessToTicketTypes,
-        SettingsAccessToTicketTypesServiceImpl, SettingsAccessToTicketTypesDtoRequest,
-        SettingsAccessToTicketTypesDtoResponse, SettingsAccessToTicketTypesFilterDto> {
+        extends BaseControllerImpl<
+        SettingsAccessToTicketTypes,
+        SettingsAccessToTicketTypesBusinessHandler,
+        SettingsAccessToTicketTypesServiceImpl,
+        SettingsAccessToTicketTypesDtoRequest,
+        SettingsAccessToTicketTypesDtoResponse,
+        SettingsAccessToTicketTypesFilterDto> {
 
     private final JwtUserBuilder jwtUserBuilder;
     private static final Class responseClazz = SettingsAccessToTicketTypesDtoResponse.class;
@@ -59,7 +64,7 @@ public class SettingsAccessToTicketTypesControllerV1
 
     @GetMapping("/{id}")
     public ResponseEntity<SettingsAccessToTicketTypesDtoResponse> getById(@PathVariable UUID id) {
-        return baseGetById(id, entityClazz, responseClazz);
+        return baseGetById(id, responseClazz);
     }
 
     @GetMapping()

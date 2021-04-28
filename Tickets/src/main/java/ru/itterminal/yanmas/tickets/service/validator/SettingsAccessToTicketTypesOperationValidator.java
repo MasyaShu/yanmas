@@ -1,21 +1,23 @@
 package ru.itterminal.yanmas.tickets.service.validator;
 
+import static java.lang.String.format;
+import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createLogicalValidationException;
+
+import org.springframework.stereotype.Component;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidatorImpl;
+import ru.itterminal.yanmas.aau.model.User;
+import ru.itterminal.yanmas.aau.service.validator.BasicOperationValidatorWithCurrentUserImpl;
 import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 import ru.itterminal.yanmas.tickets.model.SettingsAccessToTicketTypes;
 import ru.itterminal.yanmas.tickets.repository.SettingsAccessToTicketTypesRepository;
-
-import static java.lang.String.format;
-import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createLogicalValidationException;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class SettingsAccessToTicketTypesOperationValidator
-        extends BasicOperationValidatorImpl<SettingsAccessToTicketTypes> {
+        extends BasicOperationValidatorWithCurrentUserImpl<SettingsAccessToTicketTypes> {
 
     public static final String THIS_KEY_OF_SETTINGS_ACCOUNT_ID_GROUP_ID_USER_ID =
             "This key of settings (accountId, groupId, userId)";
@@ -25,19 +27,21 @@ public class SettingsAccessToTicketTypesOperationValidator
     private final SettingsAccessToTicketTypesRepository repository;
 
     @Override
-    public void checkAccessBeforeCreate(SettingsAccessToTicketTypes entity) {
+    public void checkAccessBeforeCreate(SettingsAccessToTicketTypes entity, User currentUser) {
         jwtUserBuilder.throwAccessDeniedExceptionIfCurrentUserFromOuterGroup();
     }
 
     @Override
-    public void checkAccessBeforeUpdate(SettingsAccessToTicketTypes entity) {
+    public void checkAccessBeforeUpdate(SettingsAccessToTicketTypes entity, User currentUser) {
         jwtUserBuilder.throwAccessDeniedExceptionIfCurrentUserFromOuterGroup();
     }
 
     @Override
-    public void checkAccessBeforeRead(SettingsAccessToTicketTypes entity) {
+    public void checkAccessBeforeRead(SettingsAccessToTicketTypes entity, User currentUser) {
         jwtUserBuilder.throwAccessDeniedExceptionIfCurrentUserFromOuterGroup();
     }
+
+
 
     @SuppressWarnings("DuplicatedCode")
     @Override

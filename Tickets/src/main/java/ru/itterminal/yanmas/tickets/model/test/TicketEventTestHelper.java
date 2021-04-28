@@ -41,7 +41,6 @@ public class TicketEventTestHelper extends EntityTestHelperImpl<TicketEvent, Tic
         ticketTemplate.setAccount(account);
         TicketEvent ticketEvent = TicketEvent.builder()
                 .account(account)
-                .ticketId(ticketTestHelper.getRandomValidEntity().getId())
                 .build();
         setRandomValidPropertiesOfBaseEntity(ticketEvent);
         return ticketEvent;

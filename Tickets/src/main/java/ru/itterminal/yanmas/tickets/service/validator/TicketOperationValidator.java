@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.model.User;
+import ru.itterminal.yanmas.aau.service.validator.BasicOperationValidatorWithCurrentUserImpl;
 import ru.itterminal.yanmas.commons.exception.error.ValidationError;
 import ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidatorImpl;
 import ru.itterminal.yanmas.files.model.File;
@@ -26,7 +27,7 @@ import ru.itterminal.yanmas.tickets.service.impl.TicketServiceImpl;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class TicketOperationValidator extends BasicOperationValidatorImpl<Ticket> {
+public class TicketOperationValidator extends BasicOperationValidatorWithCurrentUserImpl<Ticket> {
 
     public static final String
             CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP =
