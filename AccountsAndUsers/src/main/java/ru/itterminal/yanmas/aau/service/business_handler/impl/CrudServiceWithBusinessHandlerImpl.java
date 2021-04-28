@@ -59,6 +59,7 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
 
     @Transactional
     public E update(E entity, User currentUser) {
+        findByIdAndAccountId(entity.getId(), currentUser);
         businessHandler.beforeUpdate(entity, currentUser);
         validator.checkAccessBeforeUpdate(entity, currentUser);
         validator.logicalValidationBeforeUpdate(entity);
@@ -90,13 +91,12 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
         return repository.findAllByAccountIdAndListId(currentUser.getAccount().getId(), listId);
     }
 
-
     @Override
     @Transactional(readOnly = true)
     public E findByIdAndAccountId(UUID id, User currentUser) {
         return repository.findByIdAndAccountId(id, currentUser.getAccount().getId()).orElseThrow(
                 () -> new EntityNotExistException(
-                format(NOT_FOUND_ENTITY_BY_EMAIL, id)
+                        format(NOT_FOUND_ENTITY_BY_EMAIL, id)
                 )
         );
     }
