@@ -18,20 +18,21 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.service.business_handler.CrudServiceWithBusinessHandler;
 import ru.itterminal.yanmas.aau.service.business_handler.EntityBusinessHandler;
-import ru.itterminal.yanmas.aau.service.impl.CrudServiceWithAccountImpl;
 import ru.itterminal.yanmas.aau.service.validator.OperationValidatorWithCurrentUser;
+import ru.itterminal.yanmas.aau.util.ReflectionHelper;
 import ru.itterminal.yanmas.commons.exception.EntityNotExistException;
 import ru.itterminal.yanmas.commons.model.BaseEntity;
 import ru.itterminal.yanmas.commons.repository.EntityRepositoryWithAccount;
+import ru.itterminal.yanmas.commons.service.crud.impl.CrudServiceImpl;
 
-@SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
+@SuppressWarnings({"SpringJavaAutowiredFieldsWarningInspection"})
 @Service
 public abstract class CrudServiceWithBusinessHandlerImpl<
         E extends BaseEntity,
         V extends OperationValidatorWithCurrentUser<E>,
         B extends EntityBusinessHandler<E>,
         R extends EntityRepositoryWithAccount<E>>
-        extends CrudServiceWithAccountImpl<E, V, R>
+        extends CrudServiceImpl<E, V, R>
         implements CrudServiceWithBusinessHandler<E> {
 
     @Autowired
@@ -40,10 +41,14 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
     @Autowired
     protected V validator;
 
+    @Autowired
+    protected ReflectionHelper reflectionHelper;
+
     public static final String NOT_FOUND_ENTITY_BY_EMAIL = "Not found entity by id: %s";
 
     @Transactional
     public E create(E entity, User currentUser) {
+        reflectionHelper.settingNestedObjectsIntoEntity(entity, currentUser);
         businessHandler.beforeCreate(entity, currentUser);
         validator.checkAccessBeforeCreate(entity, currentUser);
         validator.logicalValidationBeforeCreate(entity);
@@ -59,6 +64,7 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
 
     @Transactional
     public E update(E entity, User currentUser) {
+        reflectionHelper.settingNestedObjectsIntoEntity(entity, currentUser);
         findByIdAndAccountId(entity.getId(), currentUser);
         businessHandler.beforeUpdate(entity, currentUser);
         validator.checkAccessBeforeUpdate(entity, currentUser);

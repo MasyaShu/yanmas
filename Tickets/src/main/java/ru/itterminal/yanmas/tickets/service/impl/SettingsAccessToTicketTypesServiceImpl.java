@@ -64,5 +64,4 @@ public class SettingsAccessToTicketTypesServiceImpl extends
         }
         return foundSettings;
     }
-
 }
