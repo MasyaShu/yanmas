@@ -1,16 +1,12 @@
 package ru.itterminal.yanmas.aau.controller;
 
-import java.util.UUID;
-
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-
-import lombok.SneakyThrows;
 import ru.itterminal.yanmas.aau.model.User;
-import ru.itterminal.yanmas.aau.service.business_handler.EntityBusinessHandler;
 import ru.itterminal.yanmas.aau.service.business_handler.impl.CrudServiceWithBusinessHandlerImpl;
 import ru.itterminal.yanmas.aau.service.impl.UserServiceImpl;
 import ru.itterminal.yanmas.aau.util.ReflectionHelper;
@@ -21,22 +17,20 @@ import ru.itterminal.yanmas.commons.model.dto.BaseFilterDto;
 import ru.itterminal.yanmas.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 
-@SuppressWarnings({"unchecked", "rawtypes", "SpringJavaAutowiredFieldsWarningInspection"})
+import java.util.UUID;
+
+@SuppressWarnings({"unchecked", "rawtypes", "SpringJavaAutowiredFieldsWarningInspection", "SpringJavaInjectionPointsAutowiringInspection"})
 @Component
 public abstract class BaseControllerImpl<
-        Entity extends BaseEntity,
-        BusinessHandler extends EntityBusinessHandler,
-        Service extends CrudServiceWithBusinessHandlerImpl,
-        Request extends BaseEntityDto,
-        Response extends BaseEntityDto,
-        Filter extends BaseFilterDto>
+        E extends BaseEntity, // Entity
+        S extends CrudServiceWithBusinessHandlerImpl, // Service
+        R extends BaseEntityDto, // Request
+        P extends BaseEntityDto, // Response
+        F extends BaseFilterDto> // Filter
         extends BaseController {
 
     @Autowired
-    protected BusinessHandler businessHandler;
-
-    @Autowired
-    protected Service service;
+    protected S service;
 
     @Autowired
     protected JwtUserBuilder jwtUserBuilder;
@@ -51,8 +45,8 @@ public abstract class BaseControllerImpl<
     ReflectionHelper reflectionHelper;
 
     @SneakyThrows
-    protected ResponseEntity<Response> baseCreate(Request request, Class<Entity> entityClass,
-                                                  Class<Response> responseClass) {
+    protected ResponseEntity<P> baseCreate(R request, Class<E> entityClass,
+                                           Class<P> responseClass) {
         var currentUser = getCurrentUser();
         var createdEntity = service.create(
                 reflectionHelper.convertRequestDtoIntoEntityWhereNestedObjectsWithOnlyValidId(
@@ -65,8 +59,8 @@ public abstract class BaseControllerImpl<
         return new ResponseEntity<>(returnedEntity, HttpStatus.CREATED);
     }
 
-    protected ResponseEntity<Response> baseUpdate(Request request, Class<Entity> entityClass,
-                                                  Class<Response> responseClass) {
+    protected ResponseEntity<P> baseUpdate(R request, Class<E> entityClass,
+                                           Class<P> responseClass) {
         var currentUser = getCurrentUser();
         var updatedEntity = service.update(
                 reflectionHelper.convertRequestDtoIntoEntityWhereNestedObjectsWithOnlyValidId(
@@ -79,24 +73,23 @@ public abstract class BaseControllerImpl<
         return new ResponseEntity<>(returnedEntity, HttpStatus.OK);
     }
 
-    protected ResponseEntity<Response> baseGetById(UUID id, Class<Response> responseClass) {
+    protected ResponseEntity<P> baseGetById(UUID id, Class<P> responseClass) {
         var currentUser = getCurrentUser();
         var foundEntity = service.findByIdAndAccountId(id, currentUser);
         var returnedEntity = modelMapper.map(foundEntity, responseClass);
         return new ResponseEntity<>(returnedEntity, HttpStatus.OK);
     }
 
-    protected ResponseEntity<Page<Response>> baseGetByFilter(Filter filterDto,
-                                                             int page,
-                                                             int size,
-                                                             Class<Entity> entityClass,
-                                                             Class<Response> responseClass) {
+    protected ResponseEntity<Page<P>> baseGetByFilter(F filterDto,
+                                                      int page,
+                                                      int size,
+                                                      Class<E> entityClass,
+                                                      Class<P> responseClass) {
         var currentUser = getCurrentUser();
         var pageable = createPageable(size, page, filterDto.getSortByFields(), filterDto.getSortDirection());
         var specification =
                 specFactory
                         .makeSpecificationFromEntityFilterDto(entityClass, filterDto, currentUser.getAccount().getId());
-        businessHandler.beforeFindAllByFilter(specification, currentUser);
         var foundEntities = service.findAllByFilter(specification, pageable, currentUser);
         var returnedEntities = mapPage(foundEntities, responseClass, pageable);
         return new ResponseEntity<>(returnedEntities, HttpStatus.OK);

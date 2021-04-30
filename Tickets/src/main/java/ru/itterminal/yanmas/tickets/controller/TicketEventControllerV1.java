@@ -37,7 +37,6 @@ import ru.itterminal.yanmas.tickets.service.impl.TicketEventServiceImpl;
 @RequiredArgsConstructor
 public class TicketEventControllerV1 extends BaseControllerImpl<
         TicketEvent,
-        TicketEventBusinessHandler,
         TicketEventServiceImpl,
         TicketEventDtoRequest,
         TicketEventDtoResponse,

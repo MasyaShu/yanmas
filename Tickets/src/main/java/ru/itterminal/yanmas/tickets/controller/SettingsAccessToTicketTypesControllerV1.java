@@ -1,25 +1,10 @@
 package ru.itterminal.yanmas.tickets.controller;
 
-import java.util.UUID;
-
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
 import ru.itterminal.yanmas.aau.controller.BaseControllerImpl;
 import ru.itterminal.yanmas.commons.model.validator.scenario.Create;
 import ru.itterminal.yanmas.commons.model.validator.scenario.Update;
@@ -27,11 +12,14 @@ import ru.itterminal.yanmas.tickets.model.SettingsAccessToTicketTypes;
 import ru.itterminal.yanmas.tickets.model.dto.SettingsAccessToTicketTypesDtoRequest;
 import ru.itterminal.yanmas.tickets.model.dto.SettingsAccessToTicketTypesDtoResponse;
 import ru.itterminal.yanmas.tickets.model.dto.SettingsAccessToTicketTypesFilterDto;
-import ru.itterminal.yanmas.tickets.service.business_handler.SettingsAccessToTicketTypesBusinessHandler;
 import ru.itterminal.yanmas.tickets.service.impl.SettingsAccessToTicketTypesServiceImpl;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
+import java.util.UUID;
+
 @SuppressWarnings({"unchecked", "rawtypes"})
-@Slf4j
 @RestController
 @Validated
 @RequestMapping("api/v1/ticket/type/setting-access")
@@ -39,7 +27,6 @@ import ru.itterminal.yanmas.tickets.service.impl.SettingsAccessToTicketTypesServ
 public class SettingsAccessToTicketTypesControllerV1
         extends BaseControllerImpl<
         SettingsAccessToTicketTypes,
-        SettingsAccessToTicketTypesBusinessHandler,
         SettingsAccessToTicketTypesServiceImpl,
         SettingsAccessToTicketTypesDtoRequest,
         SettingsAccessToTicketTypesDtoResponse,
