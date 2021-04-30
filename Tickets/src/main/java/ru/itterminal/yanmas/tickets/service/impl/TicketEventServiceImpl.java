@@ -3,6 +3,7 @@ package ru.itterminal.yanmas.tickets.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.service.business_handler.impl.CrudServiceWithBusinessHandlerImpl;
 import ru.itterminal.yanmas.aau.service.impl.WhoWatchedEntityServiceImpl;
 import ru.itterminal.yanmas.tickets.model.TicketEvent;
@@ -22,7 +23,8 @@ public class TicketEventServiceImpl extends CrudServiceWithBusinessHandlerImpl<T
     public static final String TICKET_EVENT_MUST_NOT_BE_UPDATED =
             "Ticket event must not be updated";
 
-
-
-
+    @Override
+    public TicketEvent create(TicketEvent entity, User currentUser) {
+        return super.create(entity, currentUser);
+    }
 }
