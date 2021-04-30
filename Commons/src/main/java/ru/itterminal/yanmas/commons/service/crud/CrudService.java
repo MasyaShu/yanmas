@@ -39,4 +39,5 @@ public interface  CrudService<E extends BaseEntity> {
     Page<E> findAllByFilter(Specification<E> specification, Pageable pageable);
 
     E update(E entity);
+
 }

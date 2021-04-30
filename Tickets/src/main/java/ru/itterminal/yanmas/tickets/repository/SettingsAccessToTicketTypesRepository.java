@@ -32,4 +32,10 @@ public interface SettingsAccessToTicketTypesRepository
             UUID groupId,
             UUID userId,
             UUID id);
+
+    List<SettingsAccessToTicketTypes> findAllByAccount_IdAndGroup_IdAndUser_Id(
+            UUID accountId,
+            UUID groupId,
+            UUID userId);
+
 }

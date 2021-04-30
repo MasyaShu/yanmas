@@ -14,6 +14,7 @@ public class JwtUserBuilder {
         return (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
+    // TODO Delete
     public void throwAccessDeniedExceptionIfCurrentUserFromOuterGroup() {
         if (!SecurityContextHolder.getContext().getAuthentication().getName().contains("anonymous")) {
             JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

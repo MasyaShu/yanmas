@@ -130,6 +130,7 @@ public abstract class CrudServiceWithAccountImpl<
         validator.logicalValidationBeforeUpdate(entity);
         log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
         var accountId = jwtUserBuilder.getJwtUser().getAccountId();
+        // TODO нужно через червис + это должно быть первое действие в этом методе
         repository.findByIdAndAccountId(entity.getId(), accountId);
         try {
             entity.generateDisplayName();

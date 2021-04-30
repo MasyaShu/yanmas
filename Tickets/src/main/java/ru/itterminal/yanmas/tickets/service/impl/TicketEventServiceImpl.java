@@ -14,7 +14,7 @@ import ru.itterminal.yanmas.tickets.service.validator.TicketEventOperationValida
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class TicketEventServiceImpl extends CrudServiceWithBusinessHandlerImpl<TicketEvent, TicketEventOperationValidator, TicketEventBusinessHandler, TicketEventRepository> {
+public class TicketEventServiceImpl extends CrudServiceWithBusinessHandlerImpl<TicketEvent, TicketEventBusinessHandler, TicketEventRepository> {
 
     private final WhoWatchedEntityServiceImpl whoWatchedEntityService;
 

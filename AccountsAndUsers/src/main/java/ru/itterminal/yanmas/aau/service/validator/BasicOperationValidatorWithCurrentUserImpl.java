@@ -7,6 +7,7 @@ import ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidat
 
 @SuppressWarnings("unused")
 @Component
+// TODO Delete
 public class BasicOperationValidatorWithCurrentUserImpl<E extends BaseEntity> extends BasicOperationValidatorImpl<E>
         implements OperationValidatorWithCurrentUser<E> {
 }

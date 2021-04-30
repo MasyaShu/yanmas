@@ -23,11 +23,11 @@ import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.yanmas.aau.controller.BaseControllerImpl;
 import ru.itterminal.yanmas.commons.model.validator.scenario.Create;
 import ru.itterminal.yanmas.commons.model.validator.scenario.Update;
-import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 import ru.itterminal.yanmas.tickets.model.SettingsAccessToTicketTypes;
 import ru.itterminal.yanmas.tickets.model.dto.SettingsAccessToTicketTypesDtoRequest;
 import ru.itterminal.yanmas.tickets.model.dto.SettingsAccessToTicketTypesDtoResponse;
 import ru.itterminal.yanmas.tickets.model.dto.SettingsAccessToTicketTypesFilterDto;
+import ru.itterminal.yanmas.tickets.service.business_handler.SettingsAccessToTicketTypesBusinessHandler;
 import ru.itterminal.yanmas.tickets.service.impl.SettingsAccessToTicketTypesServiceImpl;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
@@ -37,11 +37,14 @@ import ru.itterminal.yanmas.tickets.service.impl.SettingsAccessToTicketTypesServ
 @RequestMapping("api/v1/ticket/type/setting-access")
 @RequiredArgsConstructor
 public class SettingsAccessToTicketTypesControllerV1
-        extends BaseControllerImpl<SettingsAccessToTicketTypes,
-        SettingsAccessToTicketTypesServiceImpl, SettingsAccessToTicketTypesDtoRequest,
-        SettingsAccessToTicketTypesDtoResponse, SettingsAccessToTicketTypesFilterDto> {
+        extends BaseControllerImpl<
+        SettingsAccessToTicketTypes,
+        SettingsAccessToTicketTypesBusinessHandler,
+        SettingsAccessToTicketTypesServiceImpl,
+        SettingsAccessToTicketTypesDtoRequest,
+        SettingsAccessToTicketTypesDtoResponse,
+        SettingsAccessToTicketTypesFilterDto> {
 
-    private final JwtUserBuilder jwtUserBuilder;
     private static final Class responseClazz = SettingsAccessToTicketTypesDtoResponse.class;
     private static final Class entityClazz = SettingsAccessToTicketTypes.class;
 
@@ -59,7 +62,7 @@ public class SettingsAccessToTicketTypesControllerV1
 
     @GetMapping("/{id}")
     public ResponseEntity<SettingsAccessToTicketTypesDtoResponse> getById(@PathVariable UUID id) {
-        return baseGetById(id, entityClazz, responseClazz);
+        return baseGetById(id, responseClazz);
     }
 
     @GetMapping()
@@ -67,7 +70,6 @@ public class SettingsAccessToTicketTypesControllerV1
     getByFilter(@Valid @RequestBody SettingsAccessToTicketTypesFilterDto filter,
                 @RequestParam(defaultValue = PAGE_DEFAULT_VALUE) @PositiveOrZero int page,
                 @RequestParam(defaultValue = SIZE_DEFAULT_VALUE) @Positive int size) {
-        jwtUserBuilder.throwAccessDeniedExceptionIfCurrentUserFromOuterGroup();
         return baseGetByFilter(filter, page, size, entityClazz, responseClazz);
     }
 }

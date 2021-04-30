@@ -1,34 +1,32 @@
 package ru.itterminal.yanmas.tickets.service.impl;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import ru.itterminal.yanmas.aau.service.impl.AccountServiceImpl;
-import ru.itterminal.yanmas.aau.service.impl.CrudServiceWithAccountImpl;
-import ru.itterminal.yanmas.aau.service.impl.GroupServiceImpl;
-import ru.itterminal.yanmas.aau.service.impl.UserServiceImpl;
-import ru.itterminal.yanmas.commons.model.BaseEntity;
-import ru.itterminal.yanmas.tickets.model.SettingsAccessToTicketTypes;
-import ru.itterminal.yanmas.tickets.model.TicketType;
-import ru.itterminal.yanmas.tickets.repository.SettingsAccessToTicketTypesRepository;
-import ru.itterminal.yanmas.tickets.service.validator.SettingsAccessToTicketTypesOperationValidator;
-
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("unused")
-@Slf4j
-@Service
-@RequiredArgsConstructor
-public class SettingsAccessToTicketTypesServiceImpl extends
-        CrudServiceWithAccountImpl<SettingsAccessToTicketTypes, SettingsAccessToTicketTypesOperationValidator, SettingsAccessToTicketTypesRepository> {
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-    private final AccountServiceImpl accountService;
-    private final GroupServiceImpl groupService;
+import ru.itterminal.yanmas.aau.service.business_handler.impl.CrudServiceWithBusinessHandlerImpl;
+import ru.itterminal.yanmas.aau.service.impl.UserServiceImpl;
+import ru.itterminal.yanmas.aau.service.validator.EntityValidator;
+import ru.itterminal.yanmas.commons.model.BaseEntity;
+import ru.itterminal.yanmas.tickets.model.SettingsAccessToTicketTypes;
+import ru.itterminal.yanmas.tickets.model.TicketType;
+import ru.itterminal.yanmas.tickets.repository.SettingsAccessToTicketTypesRepository;
+import ru.itterminal.yanmas.tickets.service.business_handler.SettingsAccessToTicketTypesBusinessHandler;
+
+@Service
+public class SettingsAccessToTicketTypesServiceImpl extends
+        CrudServiceWithBusinessHandlerImpl<SettingsAccessToTicketTypes, SettingsAccessToTicketTypesBusinessHandler, SettingsAccessToTicketTypesRepository> {
+
     private final UserServiceImpl userService;
-    private final GroupTicketTypesServiceImpl groupTicketTypesService;
+
+    public SettingsAccessToTicketTypesServiceImpl(UserServiceImpl userService,
+                                                  List<EntityValidator<SettingsAccessToTicketTypes>> validators) {
+        this.userService = userService;
+        this.validators = validators;
+    }
 
     @Transactional(readOnly = true)
     public List<TicketType> getPermittedTicketTypes(UUID userId) {
@@ -68,24 +66,5 @@ public class SettingsAccessToTicketTypesServiceImpl extends
         return foundSettings;
     }
 
-    @Override
-    protected void setNestedObjectsOfEntityBeforeCreate(SettingsAccessToTicketTypes entity) {
-        entity.setAccount(accountService.findById(entity.getAccount().getId()));
-        if (entity.getUser() != null && entity.getUser().getId() != null) {
-            entity.setUser(userService.findByIdAndAccountId(entity.getUser().getId()));
-            entity.setGroup(entity.getUser().getGroup());
-        } else if (entity.getGroup() != null && entity.getGroup().getId() != null) {
-            entity.setGroup(groupService.findByIdAndAccountId(entity.getGroup().getId()));
-        }
-        if (entity.getGroupTicketTypes() != null && entity.getGroupTicketTypes().getId() != null) {
-            entity.setGroupTicketTypes(
-                    groupTicketTypesService.findByIdAndAccountId(entity.getGroupTicketTypes().getId()));
-        }
-    }
-
-    @Override
-    protected void setNestedObjectsOfEntityBeforeUpdate(SettingsAccessToTicketTypes entity) {
-        setNestedObjectsOfEntityBeforeCreate(entity);
-    }
 
 }
