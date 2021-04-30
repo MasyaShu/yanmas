@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.yanmas.aau.controller.BaseControllerImpl;
 import ru.itterminal.yanmas.commons.model.validator.scenario.Create;
 import ru.itterminal.yanmas.commons.model.validator.scenario.Update;
-import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 import ru.itterminal.yanmas.tickets.model.SettingsAccessToTicketTypes;
 import ru.itterminal.yanmas.tickets.model.dto.SettingsAccessToTicketTypesDtoRequest;
 import ru.itterminal.yanmas.tickets.model.dto.SettingsAccessToTicketTypesDtoResponse;
@@ -46,7 +45,6 @@ public class SettingsAccessToTicketTypesControllerV1
         SettingsAccessToTicketTypesDtoResponse,
         SettingsAccessToTicketTypesFilterDto> {
 
-    private final JwtUserBuilder jwtUserBuilder;
     private static final Class responseClazz = SettingsAccessToTicketTypesDtoResponse.class;
     private static final Class entityClazz = SettingsAccessToTicketTypes.class;
 
@@ -72,7 +70,6 @@ public class SettingsAccessToTicketTypesControllerV1
     getByFilter(@Valid @RequestBody SettingsAccessToTicketTypesFilterDto filter,
                 @RequestParam(defaultValue = PAGE_DEFAULT_VALUE) @PositiveOrZero int page,
                 @RequestParam(defaultValue = SIZE_DEFAULT_VALUE) @Positive int size) {
-        jwtUserBuilder.throwAccessDeniedExceptionIfCurrentUserFromOuterGroup();
         return baseGetByFilter(filter, page, size, entityClazz, responseClazz);
     }
 }

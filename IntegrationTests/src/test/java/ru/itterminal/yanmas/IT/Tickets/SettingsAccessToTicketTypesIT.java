@@ -7,9 +7,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static ru.itterminal.yanmas.IT.util.ITHelper.*;
+import static ru.itterminal.yanmas.aau.service.validator.EntityValidator.THIS_KEY_OF_SETTINGS_ACCOUNT_ID_GROUP_ID_USER_ID;
 import static ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_CODE;
 import static ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_MESSAGE;
-import static ru.itterminal.yanmas.tickets.service.validator.SettingsAccessToTicketTypesOperationValidator.THIS_KEY_OF_SETTINGS_ACCOUNT_ID_GROUP_ID_USER_ID;
 
 import java.util.List;
 import java.util.UUID;

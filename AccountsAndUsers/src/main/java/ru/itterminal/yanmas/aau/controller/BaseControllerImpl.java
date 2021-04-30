@@ -97,7 +97,7 @@ public abstract class BaseControllerImpl<
                 specFactory
                         .makeSpecificationFromEntityFilterDto(entityClass, filterDto, currentUser.getAccount().getId());
         businessHandler.beforeFindAllByFilter(specification, currentUser);
-        var foundEntities = service.findAllByFilter(specification, pageable);
+        var foundEntities = service.findAllByFilter(specification, pageable, currentUser);
         var returnedEntities = mapPage(foundEntities, responseClass, pageable);
         return new ResponseEntity<>(returnedEntities, HttpStatus.OK);
     }

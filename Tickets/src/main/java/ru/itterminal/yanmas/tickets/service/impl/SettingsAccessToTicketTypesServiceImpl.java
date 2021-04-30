@@ -7,25 +7,26 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.yanmas.aau.service.business_handler.impl.CrudServiceWithBusinessHandlerImpl;
 import ru.itterminal.yanmas.aau.service.impl.UserServiceImpl;
+import ru.itterminal.yanmas.aau.service.validator.EntityValidator;
 import ru.itterminal.yanmas.commons.model.BaseEntity;
 import ru.itterminal.yanmas.tickets.model.SettingsAccessToTicketTypes;
 import ru.itterminal.yanmas.tickets.model.TicketType;
 import ru.itterminal.yanmas.tickets.repository.SettingsAccessToTicketTypesRepository;
 import ru.itterminal.yanmas.tickets.service.business_handler.SettingsAccessToTicketTypesBusinessHandler;
-import ru.itterminal.yanmas.tickets.service.validator.SettingsAccessToTicketTypesOperationValidator;
 
-@Slf4j
 @Service
-@RequiredArgsConstructor
 public class SettingsAccessToTicketTypesServiceImpl extends
-        CrudServiceWithBusinessHandlerImpl<SettingsAccessToTicketTypes, SettingsAccessToTicketTypesOperationValidator
-                , SettingsAccessToTicketTypesBusinessHandler, SettingsAccessToTicketTypesRepository> {
+        CrudServiceWithBusinessHandlerImpl<SettingsAccessToTicketTypes, SettingsAccessToTicketTypesBusinessHandler, SettingsAccessToTicketTypesRepository> {
 
     private final UserServiceImpl userService;
+
+    public SettingsAccessToTicketTypesServiceImpl(UserServiceImpl userService,
+                                                  List<EntityValidator<SettingsAccessToTicketTypes>> validators) {
+        this.userService = userService;
+        this.validators = validators;
+    }
 
     @Transactional(readOnly = true)
     public List<TicketType> getPermittedTicketTypes(UUID userId) {
@@ -64,4 +65,6 @@ public class SettingsAccessToTicketTypesServiceImpl extends
         }
         return foundSettings;
     }
+
+
 }
