@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.itterminal.yanmas.aau.model.Role;
 import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.repository.RoleRepository;
-import ru.itterminal.yanmas.aau.service.validator.RoleOperationValidator;
+import ru.itterminal.yanmas.aau.service.validator.account.RoleOperationValidator;
 import ru.itterminal.yanmas.commons.exception.EntityNotExistException;
 import ru.itterminal.yanmas.commons.service.crud.impl.CrudServiceImpl;
 
@@ -29,14 +29,20 @@ public class RoleServiceImpl extends CrudServiceImpl<Role, RoleOperationValidato
         return accountOwnerRole;
     }
 
+    /**
+     * @deprecated - Role is a immutable entity
+     */
     @Override
-    @Deprecated
+    @Deprecated(since = "the beginning of time")
     public Role create(Role entity) {
         throw new UnsupportedOperationException(METHOD_NOT_SUPPORTED);
     }
 
+    /**
+     * @deprecated - Role is a immutable entity
+     */
     @Override
-    @Deprecated
+    @Deprecated(since = "the beginning of time")
     public Role update(Role entity) {
         throw new UnsupportedOperationException(METHOD_NOT_SUPPORTED);
     }

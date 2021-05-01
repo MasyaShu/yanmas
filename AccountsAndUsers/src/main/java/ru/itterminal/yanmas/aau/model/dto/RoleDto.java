@@ -10,12 +10,12 @@ import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
+@EqualsAndHashCode(callSuper = true)
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
 public class RoleDto extends BaseEntityDto {
-
     @NotNull(groups = {Create.class, Update.class})
     private String name;
 }

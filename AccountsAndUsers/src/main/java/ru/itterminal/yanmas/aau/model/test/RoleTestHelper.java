@@ -47,7 +47,7 @@ public class RoleTestHelper extends EntityTestHelperImpl<Role, RoleDto,RoleDto> 
     @Override
     public List<Role> setPredefinedValidEntityList() {
         List<Role> roleList = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
+        for (var i = 0; i < 5; i++) {
             Role role = Role.builder()
                     .weight(rolesWeight[i])
                     .name(rolesName[i])
@@ -58,12 +58,11 @@ public class RoleTestHelper extends EntityTestHelperImpl<Role, RoleDto,RoleDto> 
         return roleList;
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public Role getRoleByName(String nameOfRole) {
-        return getPredefinedValidEntityList().stream()
+        var returnedRole = getPredefinedValidEntityList().stream()
                 .filter(role -> role.getName().equals(nameOfRole))
-                .findFirst()
-                .get();
+                .findFirst();
+        return returnedRole.orElse(null);
     }
 
     public List<Role> getRolesByNames(List<String> namesOfRole) {
