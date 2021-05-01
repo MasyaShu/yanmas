@@ -1,33 +1,23 @@
 package ru.itterminal.yanmas.tickets.controller;
 
-import java.util.UUID;
-
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
 import ru.itterminal.yanmas.aau.controller.BaseControllerImpl;
 import ru.itterminal.yanmas.commons.model.validator.scenario.Create;
-import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 import ru.itterminal.yanmas.tickets.model.TicketEvent;
 import ru.itterminal.yanmas.tickets.model.dto.TicketEventDtoRequest;
 import ru.itterminal.yanmas.tickets.model.dto.TicketEventDtoResponse;
 import ru.itterminal.yanmas.tickets.model.dto.TicketEventFilterDto;
-import ru.itterminal.yanmas.tickets.service.business_handler.TicketEventBusinessHandler;
 import ru.itterminal.yanmas.tickets.service.impl.TicketEventServiceImpl;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
+import java.util.UUID;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @Slf4j
@@ -41,19 +31,19 @@ public class TicketEventControllerV1 extends BaseControllerImpl<
         TicketEventDtoRequest,
         TicketEventDtoResponse,
         TicketEventFilterDto> {
-    private final JwtUserBuilder jwtUserBuilder;
+
     private static final Class responseClazz = TicketEventDtoResponse.class;
     private static final Class entityClazz = TicketEvent.class;
 
     @PostMapping()
     public ResponseEntity<TicketEventDtoResponse>
     create(@Validated(Create.class) @RequestBody TicketEventDtoRequest request) {
-        return baseCreate(request, entityClazz, responseClazz);
+        return create(request, entityClazz, responseClazz);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<TicketEventDtoResponse> getById(@PathVariable UUID id) {
-        return baseGetById(id, responseClazz);
+        return getById(id, responseClazz);
     }
 
     @GetMapping()
@@ -62,6 +52,6 @@ public class TicketEventControllerV1 extends BaseControllerImpl<
                 @RequestParam(defaultValue = PAGE_DEFAULT_VALUE) @PositiveOrZero int page,
                 @RequestParam(defaultValue = SIZE_DEFAULT_VALUE) @Positive int size) {
         jwtUserBuilder.throwAccessDeniedExceptionIfCurrentUserFromOuterGroup();
-        return baseGetByFilter(filter, page, size, entityClazz, responseClazz);
+        return getByFilter(filter, page, size, entityClazz, responseClazz);
     }
 }

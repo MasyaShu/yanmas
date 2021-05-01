@@ -45,8 +45,8 @@ public abstract class BaseControllerImpl<
     ReflectionHelper reflectionHelper;
 
     @SneakyThrows
-    protected ResponseEntity<P> baseCreate(R request, Class<E> entityClass,
-                                           Class<P> responseClass) {
+    protected ResponseEntity<P> create(R request, Class<E> entityClass,
+                                       Class<P> responseClass) {
         var currentUser = getCurrentUser();
         var createdEntity = service.create(
                 reflectionHelper.convertRequestDtoIntoEntityWhereNestedObjectsWithOnlyValidId(
@@ -59,8 +59,8 @@ public abstract class BaseControllerImpl<
         return new ResponseEntity<>(returnedEntity, HttpStatus.CREATED);
     }
 
-    protected ResponseEntity<P> baseUpdate(R request, Class<E> entityClass,
-                                           Class<P> responseClass) {
+    protected ResponseEntity<P> update(R request, Class<E> entityClass,
+                                       Class<P> responseClass) {
         var currentUser = getCurrentUser();
         var updatedEntity = service.update(
                 reflectionHelper.convertRequestDtoIntoEntityWhereNestedObjectsWithOnlyValidId(
@@ -73,18 +73,18 @@ public abstract class BaseControllerImpl<
         return new ResponseEntity<>(returnedEntity, HttpStatus.OK);
     }
 
-    protected ResponseEntity<P> baseGetById(UUID id, Class<P> responseClass) {
+    protected ResponseEntity<P> getById(UUID id, Class<P> responseClass) {
         var currentUser = getCurrentUser();
         var foundEntity = service.findByIdAndAccountId(id, currentUser);
         var returnedEntity = modelMapper.map(foundEntity, responseClass);
         return new ResponseEntity<>(returnedEntity, HttpStatus.OK);
     }
 
-    protected ResponseEntity<Page<P>> baseGetByFilter(F filterDto,
-                                                      int page,
-                                                      int size,
-                                                      Class<E> entityClass,
-                                                      Class<P> responseClass) {
+    protected ResponseEntity<Page<P>> getByFilter(F filterDto,
+                                                  int page,
+                                                  int size,
+                                                  Class<E> entityClass,
+                                                  Class<P> responseClass) {
         var currentUser = getCurrentUser();
         var pageable = createPageable(size, page, filterDto.getSortByFields(), filterDto.getSortDirection());
         var specification =

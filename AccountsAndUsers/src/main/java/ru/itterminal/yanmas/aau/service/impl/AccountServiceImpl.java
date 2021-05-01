@@ -8,7 +8,7 @@ import ru.itterminal.yanmas.aau.model.Group;
 import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.model.dto.AccountCreateDto;
 import ru.itterminal.yanmas.aau.repository.AccountRepository;
-import ru.itterminal.yanmas.aau.service.validator.AccountOperationValidator;
+import ru.itterminal.yanmas.aau.service.validator.account.AccountOperationValidator;
 import ru.itterminal.yanmas.commons.service.crud.impl.CrudServiceImpl;
 
 import java.util.UUID;

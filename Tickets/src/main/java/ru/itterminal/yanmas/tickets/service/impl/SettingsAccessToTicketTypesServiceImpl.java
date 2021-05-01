@@ -18,7 +18,10 @@ import ru.itterminal.yanmas.tickets.service.business_handler.SettingsAccessToTic
 
 @Service
 public class SettingsAccessToTicketTypesServiceImpl extends
-        CrudServiceWithBusinessHandlerImpl<SettingsAccessToTicketTypes, SettingsAccessToTicketTypesBusinessHandler, SettingsAccessToTicketTypesRepository> {
+        CrudServiceWithBusinessHandlerImpl<
+                SettingsAccessToTicketTypes,
+                SettingsAccessToTicketTypesBusinessHandler,
+                SettingsAccessToTicketTypesRepository> {
 
     private final UserServiceImpl userService;
 
@@ -32,7 +35,7 @@ public class SettingsAccessToTicketTypesServiceImpl extends
     public List<TicketType> getPermittedTicketTypes(UUID userId) {
         var foundSettings = findSettings(userId);
         if (foundSettings == null) {
-            return null;
+            return null; //NOSONAR
         }
         return foundSettings.getGroupTicketTypes().getTicketTypes();
     }

@@ -26,7 +26,7 @@ import ru.itterminal.yanmas.commons.exception.EntityNotExistException;
 import ru.itterminal.yanmas.commons.model.BaseEntity;
 import ru.itterminal.yanmas.commons.repository.EntityRepositoryWithAccount;
 
-@SuppressWarnings({"SpringJavaAutowiredFieldsWarningInspection"})
+@SuppressWarnings({"SpringJavaAutowiredFieldsWarningInspection", "SpringJavaInjectionPointsAutowiringInspection"})
 @Service
 public abstract class CrudServiceWithBusinessHandlerImpl<
         E extends BaseEntity,
@@ -54,10 +54,10 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
         reflectionHelper.settingNestedObjectsIntoEntity(entity, currentUser);
         businessHandler.beforeCreate(entity, currentUser);
         checkAccessBeforeCreate(entity, currentUser);
-        entity.setId(UUID.randomUUID()); // TODO Delete
-        entity.generateDisplayName(); // TODO Delete
+        entity.setId(UUID.randomUUID());
+        entity.generateDisplayName();
         logicalValidationBeforeCreate(entity);
-        E createdEntity = repository.create(entity);
+        var createdEntity = repository.create(entity);
         businessHandler.afterCreate(createdEntity, currentUser);
         return createdEntity;
     }
@@ -72,8 +72,8 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
         checkAccessBeforeUpdate(entity, currentUser);
         logicalValidationBeforeUpdate(entity);
         try {
-            entity.generateDisplayName(); // TODO Delete
-            E updatedEntity = repository.update(entity);
+            entity.generateDisplayName();
+            var updatedEntity = repository.update(entity);
             businessHandler.afterUpdate(updatedEntity, currentUser);
             return updatedEntity;
         }

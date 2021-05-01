@@ -38,18 +38,18 @@ public class SettingsAccessToTicketTypesControllerV1
     @PostMapping()
     public ResponseEntity<SettingsAccessToTicketTypesDtoResponse>
     create(@Validated(Create.class) @RequestBody SettingsAccessToTicketTypesDtoRequest request) {
-        return baseCreate(request, entityClazz, responseClazz);
+        return create(request, entityClazz, responseClazz);
     }
 
     @PutMapping()
     public ResponseEntity<SettingsAccessToTicketTypesDtoResponse>
     update(@Validated(Update.class) @RequestBody SettingsAccessToTicketTypesDtoRequest request) {
-        return baseUpdate(request, entityClazz, responseClazz);
+        return update(request, entityClazz, responseClazz);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<SettingsAccessToTicketTypesDtoResponse> getById(@PathVariable UUID id) {
-        return baseGetById(id, responseClazz);
+        return getById(id, responseClazz);
     }
 
     @GetMapping()
@@ -57,6 +57,6 @@ public class SettingsAccessToTicketTypesControllerV1
     getByFilter(@Valid @RequestBody SettingsAccessToTicketTypesFilterDto filter,
                 @RequestParam(defaultValue = PAGE_DEFAULT_VALUE) @PositiveOrZero int page,
                 @RequestParam(defaultValue = SIZE_DEFAULT_VALUE) @Positive int size) {
-        return baseGetByFilter(filter, page, size, entityClazz, responseClazz);
+        return getByFilter(filter, page, size, entityClazz, responseClazz);
     }
 }

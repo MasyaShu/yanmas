@@ -24,7 +24,7 @@ import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.model.dto.AccountCreateDto;
 import ru.itterminal.yanmas.aau.repository.AccountRepository;
-import ru.itterminal.yanmas.aau.service.validator.AccountOperationValidator;
+import ru.itterminal.yanmas.aau.service.validator.account.AccountOperationValidator;
 import ru.itterminal.yanmas.security.config.TestSecurityConfig;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
