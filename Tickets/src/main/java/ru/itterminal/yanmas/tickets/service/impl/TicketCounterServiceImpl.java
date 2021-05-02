@@ -15,7 +15,7 @@ import ru.itterminal.yanmas.commons.service.crud.impl.CrudServiceImpl;
 import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 import ru.itterminal.yanmas.tickets.model.TicketCounter;
 import ru.itterminal.yanmas.tickets.repository.TicketCounterRepository;
-import ru.itterminal.yanmas.tickets.service.validator.TicketCounterOperationValidator;
+import ru.itterminal.yanmas.tickets.service.validator.ticket_counter.TicketCounterOperationValidator;
 
 @Slf4j
 @Service
@@ -52,7 +52,7 @@ public class TicketCounterServiceImpl
     public Long getNextTicketNumber(UUID accountId) {
         log.debug(START_NEXT, accountId);
         Long ticketNumber;
-        TicketCounter ticketCounter = repository.findById(accountId).orElseGet(() -> {
+        var ticketCounter = repository.findById(accountId).orElseGet(() -> {
             var newTicketCounter = TicketCounter.builder()
                     .currentNumber(1L)
                     .build();
@@ -72,7 +72,7 @@ public class TicketCounterServiceImpl
 
     public TicketCounter getTicketCounter(UUID accountId) {
         log.debug(START_CURRENT, accountId);
-        TicketCounter ticketCounter = repository.findById(accountId).orElseGet(() -> {
+        var ticketCounter = repository.findById(accountId).orElseGet(() -> {
             var newTicketCounter = TicketCounter.builder()
                     .currentNumber(0L)
                     .build();

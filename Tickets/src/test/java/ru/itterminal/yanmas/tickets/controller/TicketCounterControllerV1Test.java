@@ -35,11 +35,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ru.itterminal.yanmas.commons.exception.RestExceptionHandler;
 import ru.itterminal.yanmas.security.config.TestSecurityConfig;
+import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 import ru.itterminal.yanmas.tickets.model.TicketCounter;
 import ru.itterminal.yanmas.tickets.service.impl.TicketCounterServiceImpl;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringJUnitConfig(value = {TicketCounterControllerV1.class, FilterChainProxy.class})
+@SpringJUnitConfig(value = {TicketCounterControllerV1.class, FilterChainProxy.class, JwtUserBuilder.class})
 @Import(TestSecurityConfig.class)
 @WebMvcTest
 @ActiveProfiles(SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS)
@@ -56,6 +57,10 @@ class TicketCounterControllerV1Test {
 
     @MockBean
     private TicketCounterServiceImpl service;
+
+    @SuppressWarnings("unused")
+    @Autowired
+    private JwtUserBuilder jwtUserBuilder;
 
     private MockMvc mockMvc;
 

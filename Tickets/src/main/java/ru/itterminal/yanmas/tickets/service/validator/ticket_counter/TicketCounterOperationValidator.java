@@ -1,4 +1,4 @@
-package ru.itterminal.yanmas.tickets.service.validator;
+package ru.itterminal.yanmas.tickets.service.validator.ticket_counter;
 
 import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createLogicalValidationException;
 

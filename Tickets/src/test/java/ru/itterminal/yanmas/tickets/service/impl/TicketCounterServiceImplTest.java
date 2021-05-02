@@ -22,7 +22,7 @@ import ru.itterminal.yanmas.security.jwt.JwtUser;
 import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 import ru.itterminal.yanmas.tickets.model.TicketCounter;
 import ru.itterminal.yanmas.tickets.repository.TicketCounterRepository;
-import ru.itterminal.yanmas.tickets.service.validator.TicketCounterOperationValidator;
+import ru.itterminal.yanmas.tickets.service.validator.ticket_counter.TicketCounterOperationValidator;
 
 @SpringJUnitConfig(value = {TicketCounterServiceImpl.class})
 @TestInstance(PER_CLASS)

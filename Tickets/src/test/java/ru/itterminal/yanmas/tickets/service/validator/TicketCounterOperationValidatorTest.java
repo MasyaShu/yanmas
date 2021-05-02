@@ -1,6 +1,5 @@
 package ru.itterminal.yanmas.tickets.service.validator;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,6 +19,7 @@ import ru.itterminal.yanmas.security.jwt.JwtUser;
 import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 import ru.itterminal.yanmas.tickets.model.TicketCounter;
 import ru.itterminal.yanmas.tickets.service.impl.TicketCounterServiceImpl;
+import ru.itterminal.yanmas.tickets.service.validator.ticket_counter.TicketCounterOperationValidator;
 
 @SpringJUnitConfig(value = {TicketCounterOperationValidator.class})
 class TicketCounterOperationValidatorTest {
