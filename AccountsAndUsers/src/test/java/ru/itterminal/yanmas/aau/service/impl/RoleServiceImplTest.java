@@ -10,7 +10,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import ru.itterminal.yanmas.aau.model.Role;
 import ru.itterminal.yanmas.aau.model.test.RoleTestHelper;
 import ru.itterminal.yanmas.aau.repository.RoleRepository;
-import ru.itterminal.yanmas.aau.service.validator.RoleOperationValidator;
+import ru.itterminal.yanmas.aau.service.validator.account.RoleOperationValidator;
 
 import java.util.Optional;
 

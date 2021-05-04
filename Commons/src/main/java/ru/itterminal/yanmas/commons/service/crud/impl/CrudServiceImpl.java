@@ -22,7 +22,7 @@ import ru.itterminal.yanmas.commons.repository.CustomizedParentEntityRepository;
 import ru.itterminal.yanmas.commons.service.crud.CrudService;
 import ru.itterminal.yanmas.commons.service.validator.OperationValidator;
 
-@SuppressWarnings({"SpringJavaAutowiredFieldsWarningInspection", "DuplicatedCode"})
+@SuppressWarnings({"SpringJavaAutowiredFieldsWarningInspection", "DuplicatedCode", "SpringJavaInjectionPointsAutowiringInspection"})
 @Slf4j
 @Service
 public abstract class CrudServiceImpl<E extends BaseEntity,

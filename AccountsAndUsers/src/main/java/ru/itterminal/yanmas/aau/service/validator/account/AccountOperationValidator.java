@@ -1,4 +1,4 @@
-package ru.itterminal.yanmas.aau.service.validator;
+package ru.itterminal.yanmas.aau.service.validator.account;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

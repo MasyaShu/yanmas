@@ -24,14 +24,14 @@ public class RoleControllerV1 extends BaseController {
 
     final RoleServiceImpl service;
 
-    private final String ENTITY_NAME = Role.class.getSimpleName();
+    private final String entityName = Role.class.getSimpleName();
 
     @GetMapping()
     public ResponseEntity<List<RoleDto>> getAll() {
-        log.debug(FIND_ALL_INIT_MESSAGE, ENTITY_NAME);
+        log.debug(FIND_ALL_INIT_MESSAGE, entityName);
         List<Role> foundRoles = service.findAll();
         List<RoleDto> returnedRole = mapList(foundRoles, RoleDto.class);
-        log.debug(FIND_ALL_FINISH_MESSAGE, ENTITY_NAME);
+        log.debug(FIND_ALL_FINISH_MESSAGE, entityName);
         return new ResponseEntity<>(returnedRole, HttpStatus.OK);
     }
 
