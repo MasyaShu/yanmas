@@ -17,6 +17,8 @@ public interface EntityValidator<E extends BaseEntity> {
     String THIS_KEY_OF_SETTINGS_ACCOUNT_ID_GROUP_ID_USER_ID = "This key of settings (accountId, groupId, userId)";
     String USER_FROM_OUTER_GROUP_CANNOT_CREATE_OR_UPDATE_OR_READ_THIS_ENTITY =
             "A user from outer group cannot access to this entity";
+    public static final String ACCESS_IS_DENIED_FOR_SEARCHING_BY_PASSED_GROUP_ID =
+            "Access is denied for searching by passed groupId";
 
     default void logicalValidationBeforeCreate(E entity, Map<String, List<ValidationError>> errors) {}
 

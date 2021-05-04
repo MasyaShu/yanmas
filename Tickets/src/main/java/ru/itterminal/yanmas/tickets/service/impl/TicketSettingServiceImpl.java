@@ -95,7 +95,7 @@ public class TicketSettingServiceImpl extends CrudServiceWithAccountImpl<TicketS
             entity.setAuthor(userService.findByIdAndAccountId(entity.getAuthor().getId()));
             entity.setGroup(entity.getAuthor().getGroup());
         } else if (entity.getGroup() != null && entity.getGroup().getId() != null) {
-            entity.setGroup(groupService.findByIdAndAccountId(entity.getGroup().getId()));
+            entity.setGroup(groupService.findByIdAndAccountId(entity.getGroup().getId(), null));
         }
         if (entity.getObservers() != null) {
             entity.setObservers(

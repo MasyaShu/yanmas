@@ -42,7 +42,7 @@ public class AccountServiceImpl extends CrudServiceImpl<Account, AccountOperatio
                 .isInner(true)
                 .isDeprecated(false)
                 .build();
-        Group createdGroup = groupService.create(groupAccountOwner);
+        Group createdGroup = groupService.create(groupAccountOwner, null);
         User user = User.builder()
                 .email(accountDto.getEmailAccountOwner())
                 .password(accountDto.getPasswordAccountOwner())

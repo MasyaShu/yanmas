@@ -89,14 +89,14 @@ class AccountServiceImplTest {
     void create_shouldCreateAccount_whenPassedValidData() {
         when(validator.checkUniqueness(anyString())).thenReturn(true);
         when(repository.create(any())).thenReturn(account);
-        when(groupService.create(any())).thenReturn(group);
+        when(groupService.create(any(), any())).thenReturn(group);
         when(userService.create(any())).thenReturn(user);
         when(roleService.getAccountOwnerRole()).thenReturn(ROLE_ACCOUNT_OWNER);
         Account createdAccount = service.create(accountDto);
         assertEquals(account, createdAccount);
         verify(validator, times(1)).checkUniqueness(anyString());
         verify(repository, times(1)).create(any());
-        verify(groupService, times(1)).create(any());
+        verify(groupService, times(1)).create(any(), any());
         verify(userService, times(1)).create(any());
         verify(roleService, times(1)).getAccountOwnerRole();
     }

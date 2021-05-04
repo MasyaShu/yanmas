@@ -20,7 +20,8 @@ public interface EntityBusinessHandler<E extends BaseEntity> {
     default void afterUpdate(E entity, User currentUser) {
     }
 
-    default void beforeFindAllByFilter(Specification<E> specification, User currentUser) {
+    default Specification<E> beforeFindAllByFilter(Specification<E> specification, User currentUser) {
+        return specification;
     }
 
 }

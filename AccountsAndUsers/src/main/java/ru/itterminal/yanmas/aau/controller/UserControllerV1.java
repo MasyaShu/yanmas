@@ -2,6 +2,7 @@ package ru.itterminal.yanmas.aau.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ import ru.itterminal.yanmas.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.yanmas.commons.model.validator.scenario.Create;
 import ru.itterminal.yanmas.commons.model.validator.scenario.Update;
 import ru.itterminal.yanmas.security.jwt.JwtUser;
+import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -47,6 +49,9 @@ public class UserControllerV1 extends BaseController {
     private final GroupServiceImpl groupService;
     private final SpecificationsFactory specFactory;
 
+    @Autowired
+    protected JwtUserBuilder jwtUserBuilder;
+
     private final String ENTITY_NAME = User.class.getSimpleName();
 
     @PostMapping()
@@ -59,7 +64,7 @@ public class UserControllerV1 extends BaseController {
         // !!! setting is here because it is not possible into service layer (cycle dependency with AccountServiceImpl)
         user.setAccount(accountService.findById(jwtUser.getAccountId()));
         user.setRole(roleService.findById(request.getRole()));
-        user.setGroup(groupService.findByIdAndAccountId(request.getGroup()));
+        user.setGroup(groupService.findByIdAndAccountId(request.getGroup(), getCurrentUser()));
         var createdUser = userService.create(user);
         var returnedUser = modelMapper.map(createdUser, UserDtoResponse.class);
         log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdUser);
@@ -74,7 +79,7 @@ public class UserControllerV1 extends BaseController {
         var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
         user.setAccount(accountService.findById(jwtUser.getAccountId()));
         user.setRole(roleService.findById(request.getRole()));
-        user.setGroup(groupService.findByIdAndAccountId(request.getGroup()));
+        user.setGroup(groupService.findByIdAndAccountId(request.getGroup(), getCurrentUser()));
         var updatedUser = userService.update(user);
         var returnedUser = modelMapper.map(updatedUser, UserDtoResponse.class);
         log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedUser);
@@ -112,5 +117,10 @@ public class UserControllerV1 extends BaseController {
         var returnedUsers = mapPage(foundUsers, UserDtoResponse.class, pageable);
         log.debug(FIND_FINISH_MESSAGE, ENTITY_NAME, foundUsers.getTotalElements());
         return new ResponseEntity<>(returnedUsers, HttpStatus.OK);
+    }
+
+    private User getCurrentUser() {
+        var jwtUser = jwtUserBuilder.getJwtUser();
+        return userService.findByIdAndAccountId(jwtUser.getId(), jwtUser.getAccountId());
     }
 }

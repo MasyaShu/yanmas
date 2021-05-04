@@ -12,4 +12,7 @@ import java.util.UUID;
 public interface GroupRepository extends EntityRepositoryWithAccount<Group> {
 
     List<GroupUniqueFields> getByNameAndIsInnerAndAccount_IdAndIdNot(String name, Boolean isInner, UUID accountId, UUID id);
+
+    List<GroupUniqueFields> getByNameAndIsInnerAndAccount_Id(String name, Boolean isInner, UUID accountId);
+
 }
