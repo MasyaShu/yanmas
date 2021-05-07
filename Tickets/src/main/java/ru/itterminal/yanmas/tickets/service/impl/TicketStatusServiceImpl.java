@@ -3,6 +3,7 @@ package ru.itterminal.yanmas.tickets.service.impl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.itterminal.yanmas.aau.service.business_handler.impl.CrudServiceWithBusinessHandlerImpl;
+import ru.itterminal.yanmas.aau.service.business_handler.impl.EmptyBusinessHandlerImpl;
 import ru.itterminal.yanmas.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.yanmas.aau.service.impl.UserServiceImpl;
 import ru.itterminal.yanmas.aau.service.validator.EntityValidator;
@@ -10,7 +11,6 @@ import ru.itterminal.yanmas.commons.exception.EntityNotExistException;
 import ru.itterminal.yanmas.integration.across_modules.CompletedVerificationAccount;
 import ru.itterminal.yanmas.tickets.model.TicketStatus;
 import ru.itterminal.yanmas.tickets.repository.TicketStatusRepository;
-import ru.itterminal.yanmas.tickets.service.business_handler.TicketStatusBusinessHandler;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,7 +20,7 @@ import static ru.itterminal.yanmas.aau.service.CrudServiceWithAccount.FIND_INVAL
 
 @Service
 public class TicketStatusServiceImpl extends
-        CrudServiceWithBusinessHandlerImpl<TicketStatus, TicketStatusBusinessHandler, TicketStatusRepository>
+        CrudServiceWithBusinessHandlerImpl<TicketStatus, EmptyBusinessHandlerImpl<TicketStatus>, TicketStatusRepository>
         implements CompletedVerificationAccount {
 
 

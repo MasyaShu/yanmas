@@ -52,5 +52,17 @@ public class TicketStatus extends BaseEntity {
     @PrePersist
     protected void onCreate() {
         setDeleted(false);
+        if(getIsCanceledPredefined() == null) {
+            setIsCanceledPredefined(false);
+        }
+        if(getIsFinishedPredefined() == null) {
+            setIsFinishedPredefined(false);
+        }
+        if(getIsReopenedPredefined() == null) {
+            setIsReopenedPredefined(false);
+        }
+        if(getIsStartedPredefined() == null) {
+            setIsStartedPredefined(false);
+        }
     }
 }
