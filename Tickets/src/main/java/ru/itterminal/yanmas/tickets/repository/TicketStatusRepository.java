@@ -15,7 +15,7 @@ public interface TicketStatusRepository extends EntityRepositoryWithAccount<Tick
 
     List<TicketStatusUniqueFields> getByNameAndAccount_IdAndIdNot(String name, UUID accountId, UUID id);
 
-    Optional<TicketStatus> getByNameAndAccount_Id(String name, UUID accountId);
+    List<TicketStatusUniqueFields> getByNameAndAccount_Id(String name, UUID accountId);
 
     Optional<TicketStatus> getByIdAndAccount_Id(UUID id, UUID accountId);
 

@@ -1,32 +1,40 @@
 package ru.itterminal.yanmas.tickets.service.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.itterminal.yanmas.aau.service.business_handler.impl.CrudServiceWithBusinessHandlerImpl;
 import ru.itterminal.yanmas.aau.service.impl.AccountServiceImpl;
-import ru.itterminal.yanmas.aau.service.impl.CrudServiceWithAccountImpl;
+import ru.itterminal.yanmas.aau.service.impl.UserServiceImpl;
+import ru.itterminal.yanmas.aau.service.validator.EntityValidator;
 import ru.itterminal.yanmas.commons.exception.EntityNotExistException;
 import ru.itterminal.yanmas.integration.across_modules.CompletedVerificationAccount;
 import ru.itterminal.yanmas.tickets.model.TicketStatus;
 import ru.itterminal.yanmas.tickets.repository.TicketStatusRepository;
-import ru.itterminal.yanmas.tickets.service.validator.TicketStatusOperationValidator;
+import ru.itterminal.yanmas.tickets.service.business_handler.TicketStatusBusinessHandler;
 
+import java.util.List;
 import java.util.UUID;
 
 import static java.lang.String.format;
+import static ru.itterminal.yanmas.aau.service.CrudServiceWithAccount.FIND_INVALID_MESSAGE_WITH_ACCOUNT;
 
-@Slf4j
 @Service
-@AllArgsConstructor
 public class TicketStatusServiceImpl extends
-        CrudServiceWithAccountImpl<TicketStatus, TicketStatusOperationValidator, TicketStatusRepository>
+        CrudServiceWithBusinessHandlerImpl<TicketStatus, TicketStatusBusinessHandler, TicketStatusRepository>
         implements CompletedVerificationAccount {
 
 
     private final AccountServiceImpl accountService;
+    private final UserServiceImpl userService;
 
-    private static final String START_FIND_STATUS_FOR_ACCOUNT = "Start find {} predefined status for account: {}";
+    public TicketStatusServiceImpl(List<EntityValidator<TicketStatus>> validators,
+                                   AccountServiceImpl accountService,
+                                   UserServiceImpl userService) {
+        this.validators = validators;
+        this.accountService = accountService;
+        this.userService = userService;
+    }
+
     private static final String IS_PREDEFINED_TRUE = "IsPredefinedTrue";
     public static final String CANCELED = "Canceled";
     public static final String REOPENED = "Reopened";
@@ -35,11 +43,9 @@ public class TicketStatusServiceImpl extends
 
     @Transactional(readOnly = true)
     public TicketStatus findStartedPredefinedStatus(UUID accountId) {
-        log.trace(START_FIND_STATUS_FOR_ACCOUNT, STARTED, accountId);
         return repository.getByIsStartedPredefinedTrueAndAccount_Id(accountId).orElseThrow(
                 () -> {
                     String errorMessage = format(FIND_INVALID_MESSAGE_WITH_ACCOUNT, IS_PREDEFINED_TRUE, STARTED, accountId);
-                    log.error(errorMessage);
                     throw new EntityNotExistException(errorMessage);
                 }
         );
@@ -47,11 +53,9 @@ public class TicketStatusServiceImpl extends
 
     @Transactional(readOnly = true)
     public TicketStatus findCanceledPredefinedStatus(UUID accountId) {
-        log.trace(START_FIND_STATUS_FOR_ACCOUNT, CANCELED, accountId);
         return repository.getByIsCanceledPredefinedTrueAndAccount_Id(accountId).orElseThrow(
                 () -> {
                     String errorMessage = format(FIND_INVALID_MESSAGE_WITH_ACCOUNT, IS_PREDEFINED_TRUE, CANCELED, accountId);
-                    log.error(errorMessage);
                     throw new EntityNotExistException(errorMessage);
                 }
         );
@@ -59,11 +63,9 @@ public class TicketStatusServiceImpl extends
 
     @Transactional(readOnly = true)
     public TicketStatus findReopenedPredefinedStatus(UUID accountId) {
-        log.trace(START_FIND_STATUS_FOR_ACCOUNT, REOPENED, accountId);
         return repository.getByIsReopenedPredefinedTrueAndAccount_Id(accountId).orElseThrow(
                 () -> {
                     String errorMessage = format(FIND_INVALID_MESSAGE_WITH_ACCOUNT, IS_PREDEFINED_TRUE, REOPENED, accountId);
-                    log.error(errorMessage);
                     throw new EntityNotExistException(errorMessage);
                 }
         );
@@ -71,11 +73,9 @@ public class TicketStatusServiceImpl extends
 
     @Transactional(readOnly = true)
     public TicketStatus findFinishedPredefinedStatus(UUID accountId) {
-        log.trace(START_FIND_STATUS_FOR_ACCOUNT, FINISHED, accountId);
         return repository.getByIsFinishedPredefinedTrueAndAccount_Id(accountId).orElseThrow(
                 () -> {
                     String errorMessage = format(FIND_INVALID_MESSAGE_WITH_ACCOUNT, IS_PREDEFINED_TRUE, FINISHED, accountId);
-                    log.error(errorMessage);
                     throw new EntityNotExistException(errorMessage);
                 }
         );
@@ -83,12 +83,14 @@ public class TicketStatusServiceImpl extends
 
     @Override
     @Transactional(noRollbackForClassName = {"EntityNotExistException"})
-    public void actionAfterCompletedVerificationAccount(UUID accountId) {
+    public void actionAfterCompletedVerificationAccount(UUID accountId, UUID idCurrentUser) {
+        var account = accountService.findById(accountId);
+        var currentUser = userService.findById(idCurrentUser);
         try {
             findStartedPredefinedStatus(accountId);
         } catch (EntityNotExistException e) {
             var startedPredefinedStatus = TicketStatus.builder()
-                    .account(accountService.findById(accountId))
+                    .account(account)
                     .isFinishedPredefined(false)
                     .isCanceledPredefined(false)
                     .isStartedPredefined(true)
@@ -96,14 +98,14 @@ public class TicketStatusServiceImpl extends
                     .name(STARTED)
                     .sortIndex(100)
                     .build();
-            create(startedPredefinedStatus);
+            create(startedPredefinedStatus, currentUser);
         }
 
         try {
             findReopenedPredefinedStatus(accountId);
         } catch (EntityNotExistException e) {
             var reopenedPredefinedStatus = TicketStatus.builder()
-                    .account(accountService.findById(accountId))
+                    .account(account)
                     .isFinishedPredefined(false)
                     .isCanceledPredefined(false)
                     .isStartedPredefined(false)
@@ -111,14 +113,14 @@ public class TicketStatusServiceImpl extends
                     .name(REOPENED)
                     .sortIndex(200)
                     .build();
-            create(reopenedPredefinedStatus);
+            create(reopenedPredefinedStatus, currentUser);
         }
 
         try {
             findFinishedPredefinedStatus(accountId);
         } catch (EntityNotExistException e) {
             var finishedPredefinedStatus = TicketStatus.builder()
-                    .account(accountService.findById(accountId))
+                    .account(account)
                     .isFinishedPredefined(true)
                     .isCanceledPredefined(false)
                     .isStartedPredefined(false)
@@ -126,14 +128,14 @@ public class TicketStatusServiceImpl extends
                     .name(FINISHED)
                     .sortIndex(300)
                     .build();
-            create(finishedPredefinedStatus);
+            create(finishedPredefinedStatus, currentUser);
         }
 
         try {
             findCanceledPredefinedStatus(accountId);
         } catch (EntityNotExistException e) {
             var canceledPredefinedStatus = TicketStatus.builder()
-                    .account(accountService.findById(accountId))
+                    .account(account)
                     .isFinishedPredefined(false)
                     .isCanceledPredefined(true)
                     .isStartedPredefined(false)
@@ -141,22 +143,7 @@ public class TicketStatusServiceImpl extends
                     .name(CANCELED)
                     .sortIndex(400)
                     .build();
-            create(canceledPredefinedStatus);
+            create(canceledPredefinedStatus, currentUser);
         }
-    }
-
-    @Override
-    protected void setNestedObjectsOfEntityBeforeCreate(TicketStatus entity) {
-        setNestedObjectsOfEntity(entity);
-        entity.setDeleted(false);
-    }
-
-    @Override
-    protected void setNestedObjectsOfEntityBeforeUpdate(TicketStatus entity) {
-        setNestedObjectsOfEntity(entity);
-    }
-
-    private void setNestedObjectsOfEntity(TicketStatus entity) {
-        entity.setAccount(accountService.findById(entity.getAccount().getId()));
     }
 }

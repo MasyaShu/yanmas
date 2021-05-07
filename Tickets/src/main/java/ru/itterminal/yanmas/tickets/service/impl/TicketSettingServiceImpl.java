@@ -118,26 +118,26 @@ public class TicketSettingServiceImpl extends CrudServiceWithAccountImpl<TicketS
         if (entity.getTicketTypeForNew() != null && entity.getTicketTypeForNew().getId() != null) {
             entity.setTicketTypeForNew(ticketTypeService.findByIdAndAccountId(entity.getTicketTypeForNew().getId()));
         }
-        if (entity.getTicketStatusForNew() != null && entity.getTicketStatusForNew().getId() != null) {
-            entity.setTicketStatusForNew(
-                    ticketStatusService.findByIdAndAccountId(entity.getTicketStatusForNew().getId())
-            );
-        }
-        if (entity.getTicketStatusForReopen() != null && entity.getTicketStatusForReopen().getId() != null) {
-            entity.setTicketStatusForReopen(
-                    ticketStatusService.findByIdAndAccountId(entity.getTicketStatusForReopen().getId())
-            );
-        }
-        if (entity.getTicketStatusForClose() != null && entity.getTicketStatusForClose().getId() != null) {
-            entity.setTicketStatusForClose(
-                    ticketStatusService.findByIdAndAccountId(entity.getTicketStatusForClose().getId())
-            );
-        }
-        if (entity.getTicketStatusForCancel() != null && entity.getTicketStatusForCancel().getId() != null) {
-            entity.setTicketStatusForCancel(
-                    ticketStatusService.findByIdAndAccountId(entity.getTicketStatusForCancel().getId())
-            );
-        }
+//        if (entity.getTicketStatusForNew() != null && entity.getTicketStatusForNew().getId() != null) {
+//            entity.setTicketStatusForNew(
+//                    ticketStatusService.findByIdAndAccountId(entity.getTicketStatusForNew().getId())
+//            );
+//        }
+//        if (entity.getTicketStatusForReopen() != null && entity.getTicketStatusForReopen().getId() != null) {
+//            entity.setTicketStatusForReopen(
+//                    ticketStatusService.findByIdAndAccountId(entity.getTicketStatusForReopen().getId())
+//            );
+//        }
+//        if (entity.getTicketStatusForClose() != null && entity.getTicketStatusForClose().getId() != null) {
+//            entity.setTicketStatusForClose(
+//                    ticketStatusService.findByIdAndAccountId(entity.getTicketStatusForClose().getId())
+//            );
+//        }
+//        if (entity.getTicketStatusForCancel() != null && entity.getTicketStatusForCancel().getId() != null) {
+//            entity.setTicketStatusForCancel(
+//                    ticketStatusService.findByIdAndAccountId(entity.getTicketStatusForCancel().getId())
+//            );
+//        }
     }
 
     @Override

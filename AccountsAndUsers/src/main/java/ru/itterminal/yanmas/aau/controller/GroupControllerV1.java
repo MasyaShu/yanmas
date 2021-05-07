@@ -23,8 +23,8 @@ import java.util.UUID;
 @RequestMapping("api/v1/user/group")
 @RequiredArgsConstructor
 public class GroupControllerV1
-        extends BaseControllerImpl<
-        Group,
+        extends BaseControllerImpl
+        <Group,
         GroupServiceImpl,
         GroupDto,
         GroupDto,
