@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.format;
+import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.addValidationErrorIntoErrors;
 import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.checkStringForEquals;
 
 @Component
@@ -30,8 +31,10 @@ public class LogicalValidationBeforeCreateCheckUniquesGroup implements EntityVal
                 entity.getAccount().getId()
         );
         if (!foundGroup.isEmpty()) {
-            checkStringForEquals(entity.getName(), foundGroup.get(0).getName(),
-                    NAME, format(NOT_UNIQUE_MESSAGE, entity.getName())
+            addValidationErrorIntoErrors(
+                    NOT_UNIQUE_CODE,
+                    format(NOT_UNIQUE_MESSAGE, THIS_NAME),
+                    errors
             );
         }
     }

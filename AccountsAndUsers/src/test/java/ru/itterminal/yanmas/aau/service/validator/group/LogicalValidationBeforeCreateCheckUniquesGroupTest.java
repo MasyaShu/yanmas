@@ -37,17 +37,24 @@ class LogicalValidationBeforeCreateCheckUniquesGroupTest {
     private final GroupTestHelper groupTestHelper = new GroupTestHelper();
 
     @Test
-    void logicalValidationBeforeCreate_shouldGetLogicalValidationException_whenNameNotUnique() {
+    void logicalValidationBeforeCreate_shouldAddErrorToMap_whenNameNotUnique() {
         Group group = groupTestHelper.getRandomValidEntity();
         var errors = createMapForLogicalErrors();
-        errors.put("name", singletonList(new ValidationError("name", group.getName() + " is occupied")));
         when(repository.getByNameAndIsInnerAndAccount_Id(any(), any(), any())).thenReturn(List.of(groupUniqueFields));
-        when(groupUniqueFields.getName()).thenReturn(group.getName());
-        LogicalValidationException logicalValidationException = new LogicalValidationException("name", errors);
-        LogicalValidationException thrown = assertThrows(LogicalValidationException.class,
-                () -> logicalValidationBeforeCreateCheckUniquesGroup.logicalValidationBeforeCreate(group, errors));
-        assertEquals(logicalValidationException.getFieldErrors().get("name").get(0),
-                thrown.getFieldErrors().get("name").get(0));
+        assertEquals(0, errors.values().size());
+        logicalValidationBeforeCreateCheckUniquesGroup.logicalValidationBeforeCreate(group, errors);
+        assertEquals(1, errors.values().size());
+        verify(repository, times(1)).getByNameAndIsInnerAndAccount_Id(any(), any(), any());
+    }
+
+    @Test
+    void logicalValidationBeforeCreate_shouldNotAddErrorToMap_whenNameUnique() {
+        Group group = groupTestHelper.getRandomValidEntity();
+        var errors = createMapForLogicalErrors();
+        when(repository.getByNameAndIsInnerAndAccount_Id(any(), any(), any())).thenReturn(List.of());
+        assertEquals(0, errors.values().size());
+        logicalValidationBeforeCreateCheckUniquesGroup.logicalValidationBeforeCreate(group, errors);
+        assertEquals(0, errors.values().size());
         verify(repository, times(1)).getByNameAndIsInnerAndAccount_Id(any(), any(), any());
     }
 }

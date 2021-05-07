@@ -9,14 +9,10 @@ import ru.itterminal.yanmas.aau.model.Group;
 import ru.itterminal.yanmas.aau.model.projection.GroupUniqueFields;
 import ru.itterminal.yanmas.aau.model.test.GroupTestHelper;
 import ru.itterminal.yanmas.aau.repository.GroupRepository;
-import ru.itterminal.yanmas.commons.exception.LogicalValidationException;
-import ru.itterminal.yanmas.commons.exception.error.ValidationError;
 
 import java.util.List;
 
-import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static ru.itterminal.yanmas.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
@@ -39,19 +35,24 @@ class LogicalValidationBeforeUpdateCheckUniquesGroupTest {
     private final GroupTestHelper groupTestHelper = new GroupTestHelper();
 
     @Test
-    void logicalValidationBeforeUpdate_shouldGetLogicalValidationException_whenNameNotUnique() {
+    void logicalValidationBeforeUpdate_shouldAddErrorToMap_whenNameNotUnique() {
         Group group = groupTestHelper.getRandomValidEntity();
         var errors = createMapForLogicalErrors();
-        errors.put("name", singletonList(new ValidationError("name", group.getName() + " is occupied")));
         when(repository.getByNameAndIsInnerAndAccount_IdAndIdNot(any(), any(), any(), any())).thenReturn(List.of(groupUniqueFields));
-        when(groupUniqueFields.getName()).thenReturn(group.getName());
-        LogicalValidationException logicalValidationException = new LogicalValidationException("name", errors);
-        LogicalValidationException thrown = assertThrows(LogicalValidationException.class,
-                () -> logicalValidationBeforeUpdateCheckUniquesGroup.logicalValidationBeforeUpdate(group, errors));
-        assertEquals(logicalValidationException.getFieldErrors().get("name").get(0),
-                thrown.getFieldErrors().get("name").get(0));
+        assertEquals(0, errors.values().size());
+        logicalValidationBeforeUpdateCheckUniquesGroup.logicalValidationBeforeUpdate(group, errors);
+        assertEquals(1, errors.values().size());
         verify(repository, times(1)).getByNameAndIsInnerAndAccount_IdAndIdNot(any(), any(), any(), any());
     }
 
-
+    @Test
+    void logicalValidationBeforeUpdate_shouldNotAddErrorToMap_whenNameUnique() {
+        Group group = groupTestHelper.getRandomValidEntity();
+        var errors = createMapForLogicalErrors();
+        when(repository.getByNameAndIsInnerAndAccount_IdAndIdNot(any(), any(), any(), any())).thenReturn(List.of());
+        assertEquals(0, errors.values().size());
+        logicalValidationBeforeUpdateCheckUniquesGroup.logicalValidationBeforeUpdate(group, errors);
+        assertEquals(0, errors.values().size());
+        verify(repository, times(1)).getByNameAndIsInnerAndAccount_IdAndIdNot(any(), any(), any(), any());
+    }
 }
