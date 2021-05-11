@@ -56,6 +56,7 @@ class SettingsAccessToTicketTypesIT {
     public static final String ADMIN_INNER_GROUP_1 = "adminInnerGroup_1";
     public static final String CREATED_GROUP_TICKET_TYPES = "Created group ticket types";
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private UserRepository userRepository;
 
