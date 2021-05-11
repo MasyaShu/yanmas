@@ -1,14 +1,5 @@
 package ru.itterminal.yanmas.aau.service.business_handler.impl;
 
-import static java.lang.String.format;
-import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
-import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.ifErrorsNotEmptyThrowLogicalValidationException;
-
-import java.util.List;
-import java.util.UUID;
-
-import javax.persistence.OptimisticLockException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
@@ -16,7 +7,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.service.business_handler.CrudServiceWithBusinessHandler;
 import ru.itterminal.yanmas.aau.service.business_handler.EntityBusinessHandler;
@@ -25,6 +15,14 @@ import ru.itterminal.yanmas.aau.util.ReflectionHelper;
 import ru.itterminal.yanmas.commons.exception.EntityNotExistException;
 import ru.itterminal.yanmas.commons.model.BaseEntity;
 import ru.itterminal.yanmas.commons.repository.EntityRepositoryWithAccount;
+
+import javax.persistence.OptimisticLockException;
+import java.util.List;
+import java.util.UUID;
+
+import static java.lang.String.format;
+import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
+import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.ifErrorsNotEmptyThrowLogicalValidationException;
 
 @SuppressWarnings({"SpringJavaAutowiredFieldsWarningInspection", "SpringJavaInjectionPointsAutowiringInspection"})
 @Service
@@ -44,6 +42,13 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
 
     @Autowired
     protected R repository;
+
+    protected CrudServiceWithBusinessHandlerImpl(List<EntityValidator<E>> validators) {
+        this.validators = validators;
+    }
+
+    protected CrudServiceWithBusinessHandlerImpl() {
+    }
 
     public static final String NOT_FOUND_ENTITY_BY_EMAIL = "Not found entity by id: %s";
 
@@ -106,14 +111,18 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
     @Override
     @Transactional(readOnly = true)
     public E findByIdAndAccountId(UUID id, User currentUser) {
-        checkAccessBeforeRead(currentUser);
-        var foundEntity = repository.findByIdAndAccountId(id, currentUser.getAccount().getId()).orElseThrow(
-                () -> new EntityNotExistException(
-                        format(NOT_FOUND_ENTITY_BY_EMAIL, id)
-                )
-        );
-        checkAccessBeforeRead(foundEntity, currentUser);
-        return foundEntity;
+        if (currentUser!=null) {
+            checkAccessBeforeRead(currentUser);
+            var foundEntity = repository.findByIdAndAccountId(id, currentUser.getAccount().getId()).orElseThrow(
+                    () -> new EntityNotExistException(
+                            format(NOT_FOUND_ENTITY_BY_EMAIL, id)
+                    )
+            );
+            checkAccessBeforeRead(foundEntity, currentUser);
+            return foundEntity;
+        } else {
+            return null;
+        }
     }
 
     private void checkAccessBeforeCreate(User currentUser) {
