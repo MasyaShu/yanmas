@@ -220,11 +220,11 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
         if (Files.notExists(folderForUploadFilesForThisAccount)) {
             var ticketTypeServiceImpl =
                     (CompletedVerificationAccount) appContext.getBean(TICKET_TYPE_SERVICE_IMPL);
-            ticketTypeServiceImpl.actionAfterCompletedVerificationAccount(user.getAccount().getId());
+            ticketTypeServiceImpl.actionAfterCompletedVerificationAccount(user.getAccount().getId(), user.getId());
 
             var ticketStatusServiceImpl =
                     (CompletedVerificationAccount) appContext.getBean(TICKET_STATUS_SERVICE_IMPL);
-            ticketStatusServiceImpl.actionAfterCompletedVerificationAccount(user.getAccount().getId());
+            ticketStatusServiceImpl.actionAfterCompletedVerificationAccount(user.getAccount().getId(), user.getId());
             Files.createDirectories(folderForUploadFilesForThisAccount);
         }
     }

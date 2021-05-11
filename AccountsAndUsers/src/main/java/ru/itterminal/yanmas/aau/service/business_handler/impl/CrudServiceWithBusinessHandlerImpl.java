@@ -76,8 +76,7 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
             var updatedEntity = repository.update(entity);
             businessHandler.afterUpdate(updatedEntity, currentUser);
             return updatedEntity;
-        }
-        catch (OptimisticLockException ex) {
+        } catch (OptimisticLockException ex) {
             throw new OptimisticLockingFailureException(format(VERSION_INVALID_MESSAGE, entity.getId()));
         }
     }
@@ -86,7 +85,7 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
     @Transactional(readOnly = true)
     public Page<E> findAllByFilter(Specification<E> specification, Pageable pageable, User currentUser) {
         checkAccessBeforeRead(currentUser);
-        businessHandler.beforeFindAllByFilter(specification, currentUser);
+        specification = businessHandler.beforeFindAllByFilter(specification, currentUser);
         return repository.findAll(specification, pageable);
     }
 
@@ -108,7 +107,7 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
     @Transactional(readOnly = true)
     public E findByIdAndAccountId(UUID id, User currentUser) {
         checkAccessBeforeRead(currentUser);
-        var foundEntity =  repository.findByIdAndAccountId(id, currentUser.getAccount().getId()).orElseThrow(
+        var foundEntity = repository.findByIdAndAccountId(id, currentUser.getAccount().getId()).orElseThrow(
                 () -> new EntityNotExistException(
                         format(NOT_FOUND_ENTITY_BY_EMAIL, id)
                 )
@@ -117,56 +116,72 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
         return foundEntity;
     }
 
-    private void  checkAccessBeforeCreate(User currentUser) {
-        for (EntityValidator<E> validator : validators) {
-            validator.checkAccessBeforeCreate(currentUser);
+    private void checkAccessBeforeCreate(User currentUser) {
+        if (validators != null) {
+            for (EntityValidator<E> validator : validators) {
+                validator.checkAccessBeforeCreate(currentUser);
+            }
         }
     }
 
-    private void  checkAccessBeforeCreate(E entity, User currentUser) {
-        for (EntityValidator<E> validator : validators) {
-            validator.checkAccessBeforeCreate(entity, currentUser);
+    private void checkAccessBeforeCreate(E entity, User currentUser) {
+        if (validators != null) {
+            for (EntityValidator<E> validator : validators) {
+                validator.checkAccessBeforeCreate(entity, currentUser);
+            }
         }
     }
 
-    private void  checkAccessBeforeUpdate(User currentUser) {
-        for (EntityValidator<E> validator : validators) {
-            validator.checkAccessBeforeUpdate(currentUser);
+    private void checkAccessBeforeUpdate(User currentUser) {
+        if (validators != null) {
+            for (EntityValidator<E> validator : validators) {
+                validator.checkAccessBeforeUpdate(currentUser);
+            }
         }
     }
 
-    private void  checkAccessBeforeUpdate(E entity, User currentUser) {
-        for (EntityValidator<E> validator : validators) {
-            validator.checkAccessBeforeUpdate(entity, currentUser);
+    private void checkAccessBeforeUpdate(E entity, User currentUser) {
+        if (validators != null) {
+            for (EntityValidator<E> validator : validators) {
+                validator.checkAccessBeforeUpdate(entity, currentUser);
+            }
         }
     }
 
-    private void  checkAccessBeforeRead(User currentUser) {
-        for (EntityValidator<E> validator : validators) {
-            validator.checkAccessBeforeRead(currentUser);
+    private void checkAccessBeforeRead(User currentUser) {
+        if (validators != null) {
+            for (EntityValidator<E> validator : validators) {
+                validator.checkAccessBeforeRead(currentUser);
+            }
         }
     }
 
-    private void  checkAccessBeforeRead(E entity, User currentUser) {
-        for (EntityValidator<E> validator : validators) {
-            validator.checkAccessBeforeRead(entity, currentUser);
+    private void checkAccessBeforeRead(E entity, User currentUser) {
+        if (validators != null) {
+            for (EntityValidator<E> validator : validators) {
+                validator.checkAccessBeforeRead(entity, currentUser);
+            }
         }
     }
 
-    private void  logicalValidationBeforeCreate(E entity) {
-        var errors = createMapForLogicalErrors();
-        for (EntityValidator<E> validator : validators) {
-            validator.logicalValidationBeforeCreate(entity, errors);
+    private void logicalValidationBeforeCreate(E entity) {
+        if (validators != null) {
+            var errors = createMapForLogicalErrors();
+            for (EntityValidator<E> validator : validators) {
+                validator.logicalValidationBeforeCreate(entity, errors);
+            }
+            ifErrorsNotEmptyThrowLogicalValidationException(errors);
         }
-        ifErrorsNotEmptyThrowLogicalValidationException(errors);
     }
 
-    private void  logicalValidationBeforeUpdate(E entity) {
-        var errors = createMapForLogicalErrors();
-        for (EntityValidator<E> validator : validators) {
-            validator.logicalValidationBeforeUpdate(entity, errors);
+    private void logicalValidationBeforeUpdate(E entity) {
+        if (validators != null) {
+            var errors = createMapForLogicalErrors();
+            for (EntityValidator<E> validator : validators) {
+                validator.logicalValidationBeforeUpdate(entity, errors);
+            }
+            ifErrorsNotEmptyThrowLogicalValidationException(errors);
         }
-        ifErrorsNotEmptyThrowLogicalValidationException(errors);
     }
 
 }

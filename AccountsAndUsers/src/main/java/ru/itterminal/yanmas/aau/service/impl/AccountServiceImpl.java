@@ -36,7 +36,7 @@ public class AccountServiceImpl extends CrudServiceImpl<Account, AccountOperatio
                 .isInner(true)
                 .isDeprecated(false)
                 .build();
-        var createdGroupAccountOwner = groupService.create(groupAccountOwner);
+        var createdGroupAccountOwner = groupService.create(groupAccountOwner, null);
         var userAccountOwner = User.builder()
                 .email(accountDto.getEmailAccountOwner())
                 .password(accountDto.getPasswordAccountOwner())

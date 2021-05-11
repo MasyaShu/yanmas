@@ -26,21 +26,18 @@ public class TicketEventTestHelper extends EntityTestHelperImpl<TicketEvent, Tic
     @Deprecated(since = "Must check before use!!!")
     @Override
     public TicketEvent getRandomValidEntity() {
-        var account = accountTestHelper.getRandomValidEntity();
-        var group = groupTestHelper.getRandomValidEntity();
-        group.setAccount(account);
-        var author = userTestHelper.getRandomValidEntity();
-        author.setAccount(account);
-        author.setGroup(group);
-        author.setRole(roleTestHelper.getPredefinedValidEntityList().get(3));
-        var ticketType = ticketTypeTestHelper.getRandomValidEntity();
-        ticketType.setAccount(account);
-        var ticketStatus = ticketStatusTestHelper.getRandomValidEntity();
-        ticketStatus.setAccount(account);
-        var ticketTemplate = ticketTemplateTestHelper.getRandomValidEntity();
-        ticketTemplate.setAccount(account);
+        var ticket = ticketTestHelper.getRandomValidEntity();
+        var createdBy = userTestHelper.getRandomValidEntity();
+        createdBy.setAccount(ticket.getAccount());
+        ticket.setAuthor(createdBy);
         TicketEvent ticketEvent = TicketEvent.builder()
-                .account(account)
+                .account(ticket.getAccount())
+                .ticket(ticket)
+                .comment(fakerRU.lorem().paragraph())
+                .autoComment(fakerRU.lorem().paragraph())
+                .createdBy(createdBy)
+                .createdAt(System.currentTimeMillis())
+                .isCommentForExecutors(false)
                 .build();
         setRandomValidPropertiesOfBaseEntity(ticketEvent);
         return ticketEvent;

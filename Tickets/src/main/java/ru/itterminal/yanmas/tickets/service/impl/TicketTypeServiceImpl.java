@@ -42,7 +42,7 @@ public class TicketTypeServiceImpl extends
 
     @Override
     @Transactional(noRollbackForClassName = {"EntityNotExistException"})
-    public void actionAfterCompletedVerificationAccount(UUID accountId) {
+    public void actionAfterCompletedVerificationAccount(UUID accountId, UUID idCurrentUser) {
         try {
             findStartedPredefinedTicketTypeForNewTicket(accountId);
         } catch (EntityNotExistException e) {

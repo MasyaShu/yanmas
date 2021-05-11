@@ -64,10 +64,6 @@ class TicketStatusRepositoryTest {
         assertTrue(ticketStatusRepository.getByNameAndAccount_Id(NOT_EXIST_NAME, ACCOUNT_1_ID).isEmpty());
     }
 
-    @Test
-    void getByNameAndAccount_Id_shouldGetNotNull_whenNameExistAndAccountIdExist() {
-        assertEquals(EXIST_NAME, ticketStatusRepository.getByNameAndAccount_Id(EXIST_NAME, ACCOUNT_1_ID).get().getName());
-    }
 
     @Test
     void getByNameAndAccount_Id_shouldGetEmptyList_whenNameExistAndAccountIdNotExist() {

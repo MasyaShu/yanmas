@@ -155,7 +155,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
             ticket.setTicketStatus(ticketSetting.getTicketStatusForClose());
         } else if (ticketStatus != null && Boolean.FALSE.equals(isTicketFinished) && isCurrentUserFromInnerGroup
                 && (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight())) {
-            ticket.setTicketStatus(ticketStatusService.findByIdAndAccountId(ticketStatus.getId(), accountId));
+            ticket.setTicketStatus(ticketStatusService.findByIdAndAccountId(ticketStatus.getId(), currentUser));
         } else if ((Boolean.FALSE.equals(isTicketFinished) && ticket.getTicketStatus() == null)
                 || (Boolean.FALSE.equals(isTicketFinished) && !isCurrentUserFromInnerGroup)
                 || (Boolean.FALSE.equals(isTicketFinished) && weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight())) {
@@ -223,7 +223,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
         } else if (ticketStatus == null) {
             ticket.setTicketStatus(ticketBeforeUpdate.getTicketStatus());
         } else if (isTicketFinished == null || !isTicketFinished) {
-            ticket.setTicketStatus(ticketStatusService.findByIdAndAccountId(ticketStatus.getId(), accountId));
+            ticket.setTicketStatus(ticketStatusService.findByIdAndAccountId(ticketStatus.getId(), currentUser));
         }
         // ticket.ticketType
         var ticketType = ticket.getTicketType();

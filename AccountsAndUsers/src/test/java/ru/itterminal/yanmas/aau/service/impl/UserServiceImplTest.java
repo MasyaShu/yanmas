@@ -243,8 +243,8 @@ class UserServiceImplTest {
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(1)).findById(any());
         verify(userRepository, times(1)).save(any());
-        verify(ticketTypeServiceImpl, atMost(1)).actionAfterCompletedVerificationAccount(any());
-        verify(ticketStatusServiceImpl, atMost(1)).actionAfterCompletedVerificationAccount(any());
+        verify(ticketTypeServiceImpl, atMost(1)).actionAfterCompletedVerificationAccount(any(), any());
+        verify(ticketStatusServiceImpl, atMost(1)).actionAfterCompletedVerificationAccount(any(), any());
     }
 
     @Test
@@ -259,8 +259,8 @@ class UserServiceImplTest {
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(1)).findById(any());
         verify(userRepository, times(0)).save(any());
-        verify(ticketTypeServiceImpl, times(0)).actionAfterCompletedVerificationAccount(any());
-        verify(ticketStatusServiceImpl, times(0)).actionAfterCompletedVerificationAccount(any());
+        verify(ticketTypeServiceImpl, times(0)).actionAfterCompletedVerificationAccount(any(), any());
+        verify(ticketStatusServiceImpl, times(0)).actionAfterCompletedVerificationAccount(any(), any());
     }
 
     @Test
@@ -275,8 +275,8 @@ class UserServiceImplTest {
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(1)).findById(any());
         verify(userRepository, times(0)).save(any());
-        verify(ticketTypeServiceImpl, times(0)).actionAfterCompletedVerificationAccount(any());
-        verify(ticketStatusServiceImpl, times(0)).actionAfterCompletedVerificationAccount(any());
+        verify(ticketTypeServiceImpl, times(0)).actionAfterCompletedVerificationAccount(any(), any());
+        verify(ticketStatusServiceImpl, times(0)).actionAfterCompletedVerificationAccount(any(), any());
     }
 
     @Test
@@ -292,8 +292,8 @@ class UserServiceImplTest {
         verify(userRepository, times(1)).existsById(any());
         verify(userRepository, times(1)).findById(any());
         verify(userRepository, times(1)).save(any());
-        verify(ticketTypeServiceImpl, times(0)).actionAfterCompletedVerificationAccount(any());
-        verify(ticketStatusServiceImpl, times(0)).actionAfterCompletedVerificationAccount(any());
+        verify(ticketTypeServiceImpl, times(0)).actionAfterCompletedVerificationAccount(any(), any());
+        verify(ticketStatusServiceImpl, times(0)).actionAfterCompletedVerificationAccount(any(), any());
     }
 
     @Test
@@ -303,8 +303,8 @@ class UserServiceImplTest {
         verify(userRepository, times(0)).existsById(any());
         verify(userRepository, times(0)).findById(any());
         verify(userRepository, times(0)).save(any());
-        verify(ticketTypeServiceImpl, times(0)).actionAfterCompletedVerificationAccount(any());
-        verify(ticketStatusServiceImpl, times(0)).actionAfterCompletedVerificationAccount(any());
+        verify(ticketTypeServiceImpl, times(0)).actionAfterCompletedVerificationAccount(any(), any());
+        verify(ticketStatusServiceImpl, times(0)).actionAfterCompletedVerificationAccount(any(), any());
     }
 
     @Test
