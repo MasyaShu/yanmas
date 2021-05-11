@@ -66,6 +66,7 @@ import ru.itterminal.yanmas.commons.model.filter.StringFilter;
 import ru.itterminal.yanmas.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.yanmas.commons.util.CommonConstants;
 import ru.itterminal.yanmas.security.config.TestSecurityConfig;
+import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {UserControllerV1.class, FilterChainProxy.class})
@@ -82,6 +83,9 @@ class UserControllerV1Test {
     @SuppressWarnings("unused")
     @MockBean
     private SpecificationsFactory specFactory;
+
+    @MockBean
+    private JwtUserBuilder jwtUserBuilder;
 
     @MockBean
     private AccountServiceImpl accountService;
@@ -195,7 +199,7 @@ class UserControllerV1Test {
         when(service.create(any())).thenReturn(user_1);
         when(accountService.findById(any())).thenReturn(user_1.getAccount());
         when(roleService.findById(any())).thenReturn(user_1.getRole());
-        when(groupService.findByIdAndAccountId(any())).thenReturn(user_1.getGroup());
+        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(user_1.getGroup());
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -213,7 +217,7 @@ class UserControllerV1Test {
         verify(service, times(1)).create(any());
         verify(accountService, times(1)).findById(any());
         verify(roleService, times(1)).findById(any());
-        verify(groupService, times(1)).findByIdAndAccountId(any());
+        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
     }
 
     @Test
@@ -229,7 +233,7 @@ class UserControllerV1Test {
         verify(service, times(0)).create(any());
         verify(accountService, times(0)).findById(any());
         verify(roleService, times(0)).findById(any());
-        verify(groupService, times(0)).findByIdAndAccountId(any());
+        verify(groupService, times(0)).findByIdAndAccountId(any(), any());
 
     }
 
@@ -247,7 +251,7 @@ class UserControllerV1Test {
         verify(service, times(0)).create(any());
         verify(accountService, times(0)).findById(any());
         verify(roleService, times(0)).findById(any());
-        verify(groupService, times(0)).findByIdAndAccountId(any());
+        verify(groupService, times(0)).findByIdAndAccountId(any(), any());
     }
 
     @Test
@@ -418,7 +422,7 @@ class UserControllerV1Test {
         when(service.update(any())).thenReturn(user_1);
         when(accountService.findById(any())).thenReturn(user_1.getAccount());
         when(roleService.findById(any())).thenReturn(user_1.getRole());
-        when(groupService.findByIdAndAccountId(any())).thenReturn(user_1.getGroup());
+        when(groupService.findByIdAndAccountId(any(), any())).thenReturn(user_1.getGroup());
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -436,7 +440,7 @@ class UserControllerV1Test {
         verify(service, times(1)).update(any());
         verify(accountService, times(1)).findById(any());
         verify(roleService, times(1)).findById(any());
-        verify(groupService, times(1)).findByIdAndAccountId(any());
+        verify(groupService, times(1)).findByIdAndAccountId(any(), any());
     }
 
     @Test
