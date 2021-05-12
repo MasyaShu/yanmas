@@ -30,11 +30,9 @@ class UpdateDeniedIfCurrentUserNotNullAndFromOuterGroupValidatorTest {
 
     @Test
     @WithAnonymousUser
-    void checkAccessBeforeCreate_shouldGetNoError_whenAnonymousUser() {
-        Group group = groupTestHelper.getRandomValidEntity();
-        var currentUser = User.builder().group(group).build();
+    void checkAccessBeforeCreate_shouldGetNoError_whenCurentUserIsNull() {
         Throwable throwable = catchThrowable(() -> updateDeniedIfCurrentUserNotNullAndFromOuterGroupValidator
-                .checkAccessBeforeCreate(currentUser));
+                .checkAccessBeforeCreate(null));
         assertThat(throwable).isNull();
     }
 

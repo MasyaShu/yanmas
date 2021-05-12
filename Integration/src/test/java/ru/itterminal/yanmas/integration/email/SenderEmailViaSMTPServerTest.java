@@ -20,7 +20,7 @@ class SenderEmailViaSMTPServerTest {
                 "Test message from UnitTest of Yanmas : " + Calendar.getInstance().getTime().toString(),
                 "Yanmas. Тест сообщения"
         );
-        senderEmail.sendEmail(email);
+       // senderEmail.sendEmail(email);
     }
 
 }
