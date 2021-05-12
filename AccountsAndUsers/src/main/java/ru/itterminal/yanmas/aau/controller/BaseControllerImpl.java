@@ -16,7 +16,6 @@ import ru.itterminal.yanmas.commons.model.dto.BaseEntityDto;
 import ru.itterminal.yanmas.commons.model.dto.BaseFilterDto;
 import ru.itterminal.yanmas.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
-
 import java.util.UUID;
 
 @SuppressWarnings({"unchecked", "rawtypes", "SpringJavaAutowiredFieldsWarningInspection", "SpringJavaInjectionPointsAutowiringInspection"})

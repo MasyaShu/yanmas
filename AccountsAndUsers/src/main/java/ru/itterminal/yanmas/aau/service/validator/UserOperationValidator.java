@@ -1,11 +1,22 @@
 package ru.itterminal.yanmas.aau.service.validator;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import static java.lang.String.format;
+import static java.util.Collections.singletonList;
+import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.addValidationErrorIntoErrors;
+import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
+import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.ifErrorsNotEmptyThrowLogicalValidationException;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.repository.UserRepository;
@@ -16,14 +27,6 @@ import ru.itterminal.yanmas.commons.exception.error.ValidationError;
 import ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidatorImpl;
 import ru.itterminal.yanmas.integration.across_modules.RequestsFromModuleAccountAndUsers;
 import ru.itterminal.yanmas.security.jwt.JwtUser;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static java.lang.String.format;
-import static java.util.Collections.singletonList;
-import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.*;
 
 @Slf4j
 @Component
@@ -41,7 +44,8 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
     public static final String YOU_CAN_EDIT_EMAIL_OF_THE_USER_WITH_A_ROLE_ACCOUNT_OWNER_ONLY_VIA_SPECIAL_PROCESS =
             "You can edit email of the user with a role Account owner only via special process called \"update email of account owner\"";
     public static final String CHANGE_USER_GROUP = "Change user group";
-    public static final String THE_USER_CANNOT_CHANGE_THE_GROUP_BECAUSE_HE_IS_PRESENT_IN_TICKETS = "The user cannot change the group, because he is present in tickets";
+    public static final String THE_USER_CANNOT_CHANGE_THE_GROUP_BECAUSE_HE_IS_PRESENT_IN_TICKETS =
+            "The user cannot change the group, because he is present in tickets";
     public static final String START_FIND_USER_BY_UNIQUE_FIELDS =
             "Start find user by unique fields, email: {} and not id: {}";
     private final UserServiceImpl service;
@@ -65,7 +69,7 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         }
     }
 
-
+    @Deprecated
     @Override
     public boolean logicalValidationBeforeCreate(User entity) {
         super.logicalValidationBeforeCreate(entity);
@@ -84,6 +88,7 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
     public boolean logicalValidationBeforeUpdate(User entity) {
         super.logicalValidationBeforeUpdate(entity);
         var userFromDatabase = service.findById(entity.getId());
+        // NotAllowedChangeGroupOfUserIfUserWasUsedInTicketsValidator
         if (!entity.getGroup().equals(userFromDatabase.getGroup())) {
             checkPossibilityOfChangingUserGroup(entity);
         }
@@ -116,11 +121,16 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
     }
 
     @Override
+    @Deprecated
     public void checkAccessBeforeRead(User entity) {
         if (!SecurityContextHolder.getContext().getAuthentication().getName().contains(ANONYMOUS)) {
             JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            // AccessDeniedIfCurrentUserFromOuterGroupAndGroupsIdIsNotEqualsValidator
+            // AccessDeniedIfWeightOfRoleOfCurrentUserLessThanWeightOfExecutorAndGroupsIdIsNotEqualsValidator
             if (!((jwtUser.isInnerGroup() && jwtUser.getWeightRole() > Roles.AUTHOR.getWeight())
-                    || jwtUser.getGroupId().equals(entity.getGroup().getId()))) {
+                    || jwtUser.getGroupId().equals(entity.getGroup().getId())
+            )
+            ) {
                 throw new AccessDeniedException(ACCESS_IS_DENIED_FOR_SEARCHING_BY_PASSED_ID);
             }
         }
@@ -218,6 +228,7 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
                     ACCOUNT_MUST_HAVE_USER_WITH_ROLE_ACCOUNT_OWNER
             )));
         }
+        // NotAllowedUpdateEmailOfAccountOwnerDirectlyValidator
         if (newUserHasRoleAccountOwner && !entity.getEmail().equals(userFromDatabase.getEmail())) {
             addValidationErrorIntoErrors(
                     USER_WITH_ROLE_ACCOUNT_OWNER,
@@ -228,12 +239,14 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         ifErrorsNotEmptyThrowLogicalValidationException(errors);
     }
 
+    // NotAllowedChangeGroupOfUserIfUserWasUsedInTicketsValidator
+    @Deprecated
     private void checkPossibilityOfChangingUserGroup(User entity) {
         var errors = createMapForLogicalErrors();
         var ticketServiceImpl =
                 (RequestsFromModuleAccountAndUsers) appContext.getBean("ticketServiceImpl");
         long countTicket = ticketServiceImpl.countEntityWithUser(entity.getId());
-        if (countTicket!=0) {
+        if (countTicket != 0) {
             addValidationErrorIntoErrors(
                     CHANGE_USER_GROUP,
                     THE_USER_CANNOT_CHANGE_THE_GROUP_BECAUSE_HE_IS_PRESENT_IN_TICKETS,
