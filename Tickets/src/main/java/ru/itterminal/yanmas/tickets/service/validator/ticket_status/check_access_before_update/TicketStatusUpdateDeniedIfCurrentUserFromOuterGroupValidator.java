@@ -1,4 +1,4 @@
-package ru.itterminal.yanmas.tickets.service.validator.ticket_status;
+package ru.itterminal.yanmas.tickets.service.validator.ticket_status.check_access_before_update;
 
 import org.springframework.stereotype.Component;
 import ru.itterminal.yanmas.aau.model.User;
@@ -7,10 +7,10 @@ import ru.itterminal.yanmas.tickets.model.TicketStatus;
 
 @SuppressWarnings("unused")
 @Component
-public class CheckAccessBeforeCreateTicketStatusAccessDeniedForUsersFromOuterGroups implements EntityValidator<TicketStatus> {
+public class TicketStatusUpdateDeniedIfCurrentUserFromOuterGroupValidator implements EntityValidator<TicketStatus> {
 
     @Override
-    public void checkAccessBeforeCreate(User currentUser) {
+    public void checkAccessBeforeUpdate(User currentUser) {
         throwAccessDeniedExceptionIfCurrentUserFromOuterGroup(currentUser);
     }
 }

@@ -9,6 +9,7 @@ import ru.itterminal.yanmas.tickets.model.TicketStatus;
 import ru.itterminal.yanmas.tickets.model.projection.TicketStatusUniqueFields;
 import ru.itterminal.yanmas.tickets.model.test.TicketStatusTestHelper;
 import ru.itterminal.yanmas.tickets.repository.TicketStatusRepository;
+import ru.itterminal.yanmas.tickets.service.validator.ticket_status.logical_validation.CheckUniquesBeforeUpdateTicketStatusValidator;
 
 import java.util.List;
 
@@ -19,9 +20,9 @@ import static org.mockito.Mockito.times;
 import static ru.itterminal.yanmas.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
 import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
 
-@SpringJUnitConfig(value = {LogicalValidationBeforeUpdateCheckUniquesTicketStatus.class})
+@SpringJUnitConfig(value = {CheckUniquesBeforeUpdateTicketStatusValidator.class})
 @ActiveProfiles(SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS)
-class LogicalValidationBeforeUpdateCheckUniquesTicketStatusTest {
+class CheckUniquesBeforeUpdateTicketStatusValidatorTest {
     @MockBean
     private TicketStatusRepository repository;
 
@@ -29,8 +30,8 @@ class LogicalValidationBeforeUpdateCheckUniquesTicketStatusTest {
     private TicketStatusUniqueFields ticketStatusUniqueFields;
 
     @Autowired
-    private final LogicalValidationBeforeUpdateCheckUniquesTicketStatus validationBeforeUpdateCheckUniquesTicketStatus =
-            new LogicalValidationBeforeUpdateCheckUniquesTicketStatus(repository);
+    private final CheckUniquesBeforeUpdateTicketStatusValidator validationBeforeUpdateCheckUniquesTicketStatus =
+            new CheckUniquesBeforeUpdateTicketStatusValidator(repository);
 
     private final TicketStatusTestHelper ticketStatusTestHelper = new TicketStatusTestHelper();
 

@@ -1,4 +1,4 @@
-package ru.itterminal.yanmas.tickets.service.validator.ticket_status;
+package ru.itterminal.yanmas.tickets.service.validator.ticket_status.logical_validation;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,7 @@ import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.check
 
 @Component
 @RequiredArgsConstructor
-public class LogicalValidationBeforeCreateCheckUniquesTicketStatus implements EntityValidator<TicketStatus> {
+public class CheckUniquesBeforeCreateTicketStatusValidator implements EntityValidator<TicketStatus> {
 
     public static final String NAME = "name";
     private final TicketStatusRepository repository;

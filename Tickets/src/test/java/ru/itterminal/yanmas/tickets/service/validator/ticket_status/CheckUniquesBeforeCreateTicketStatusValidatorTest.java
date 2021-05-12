@@ -3,14 +3,13 @@ package ru.itterminal.yanmas.tickets.service.validator.ticket_status;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import ru.itterminal.yanmas.security.config.TestSecurityConfig;
 import ru.itterminal.yanmas.tickets.model.TicketStatus;
 import ru.itterminal.yanmas.tickets.model.projection.TicketStatusUniqueFields;
 import ru.itterminal.yanmas.tickets.model.test.TicketStatusTestHelper;
 import ru.itterminal.yanmas.tickets.repository.TicketStatusRepository;
+import ru.itterminal.yanmas.tickets.service.validator.ticket_status.logical_validation.CheckUniquesBeforeCreateTicketStatusValidator;
 
 import java.util.List;
 
@@ -20,9 +19,9 @@ import static org.mockito.Mockito.*;
 import static ru.itterminal.yanmas.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
 import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
 
-@SpringJUnitConfig(value = {LogicalValidationBeforeCreateCheckUniquesTicketStatus.class})
+@SpringJUnitConfig(value = {CheckUniquesBeforeCreateTicketStatusValidator.class})
 @ActiveProfiles(SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS)
-class LogicalValidationBeforeCreateCheckUniquesTicketStatusTest {
+class CheckUniquesBeforeCreateTicketStatusValidatorTest {
 
     @MockBean
     private TicketStatusRepository repository;
@@ -31,8 +30,8 @@ class LogicalValidationBeforeCreateCheckUniquesTicketStatusTest {
     private TicketStatusUniqueFields ticketStatusUniqueFields;
 
     @Autowired
-    private final LogicalValidationBeforeCreateCheckUniquesTicketStatus validationBeforeCreateCheckUniquesTicketStatus =
-            new LogicalValidationBeforeCreateCheckUniquesTicketStatus(repository);
+    private final CheckUniquesBeforeCreateTicketStatusValidator validationBeforeCreateCheckUniquesTicketStatus =
+            new CheckUniquesBeforeCreateTicketStatusValidator(repository);
 
     private final TicketStatusTestHelper ticketStatusTestHelper = new TicketStatusTestHelper();
 
