@@ -1,4 +1,4 @@
-package ru.itterminal.yanmas.tickets.service.validator;
+package ru.itterminal.yanmas.tickets.service.validator.ticket_setting;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;

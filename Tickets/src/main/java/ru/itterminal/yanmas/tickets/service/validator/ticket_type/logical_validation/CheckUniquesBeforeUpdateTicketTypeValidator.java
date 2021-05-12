@@ -1,36 +1,33 @@
-package ru.itterminal.yanmas.aau.service.validator.group.logical_validation;
+package ru.itterminal.yanmas.tickets.service.validator.ticket_type.logical_validation;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.itterminal.yanmas.aau.model.Group;
-import ru.itterminal.yanmas.aau.repository.GroupRepository;
 import ru.itterminal.yanmas.aau.service.validator.EntityValidator;
 import ru.itterminal.yanmas.commons.exception.error.ValidationError;
+import ru.itterminal.yanmas.tickets.model.TicketType;
+import ru.itterminal.yanmas.tickets.repository.TicketTypeRepository;
 
 import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.format;
 import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.addValidationErrorIntoErrors;
-import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.checkStringForEquals;
 
 @Component
 @RequiredArgsConstructor
-public class CheckUniquesBeforeUpdateGroupValidator implements EntityValidator<Group> {
+public class CheckUniquesBeforeUpdateTicketTypeValidator implements EntityValidator<TicketType> {
 
-    public static final String NAME = "name";
-    private final GroupRepository repository;
+    private final TicketTypeRepository repository;
 
     @Override
-    public void logicalValidationBeforeUpdate(Group entity,
-                                              Map<String, List<ValidationError>> errors) {
-        var foundGroup = repository.getByNameAndIsInnerAndAccount_IdAndIdNot(
+    public void logicalValidationBeforeUpdate(TicketType entity, Map<String, List<ValidationError>> errors) {
+
+        var foundTicketTypes = repository.getByNameAndAccount_IdAndIdNot(
                 entity.getName(),
-                entity.getIsInner(),
                 entity.getAccount().getId(),
                 entity.getId()
         );
-        if (!foundGroup.isEmpty()) {
+        if (!foundTicketTypes.isEmpty()) {
             addValidationErrorIntoErrors(
                     NOT_UNIQUE_CODE,
                     format(NOT_UNIQUE_MESSAGE, THIS_NAME),
@@ -38,5 +35,4 @@ public class CheckUniquesBeforeUpdateGroupValidator implements EntityValidator<G
             );
         }
     }
-
 }

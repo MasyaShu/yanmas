@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.itterminal.yanmas.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.yanmas.aau.service.impl.CrudServiceWithAccountImpl;
+import ru.itterminal.yanmas.aau.service.impl.UserServiceImpl;
 import ru.itterminal.yanmas.commons.model.BaseEntity;
 import ru.itterminal.yanmas.tickets.model.GroupTicketTypes;
 import ru.itterminal.yanmas.tickets.repository.GroupTicketTypesRepository;
@@ -20,15 +21,18 @@ public class GroupTicketTypesServiceImpl extends
 
     private final AccountServiceImpl accountService;
     private final TicketTypeServiceImpl ticketTypeService;
+    private final UserServiceImpl userService;
 
     @Override
     protected void setNestedObjectsOfEntityBeforeCreate(GroupTicketTypes entity) {
+        var jwtUser = jwtUserBuilder.getJwtUser();
+        var currentUser = userService.findByIdAndAccountId(jwtUser.getId(), jwtUser.getAccountId());
         entity.setAccount(accountService.findById(entity.getAccount().getId()));
         entity.setTicketTypes(
                 ticketTypeService.findAllByAccountIdAndListId(
                         entity.getTicketTypes().stream()
                                 .map(BaseEntity::getId)
-                                .collect(Collectors.toList())
+                                .collect(Collectors.toList()), currentUser
                 )
         );
     }

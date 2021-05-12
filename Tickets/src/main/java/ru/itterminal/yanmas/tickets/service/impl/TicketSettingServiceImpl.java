@@ -7,7 +7,7 @@ import ru.itterminal.yanmas.aau.service.business_handler.impl.CrudServiceWithBus
 import ru.itterminal.yanmas.aau.service.business_handler.impl.EmptyBusinessHandlerImpl;
 import ru.itterminal.yanmas.tickets.model.TicketSetting;
 import ru.itterminal.yanmas.tickets.repository.TicketSettingRepository;
-import ru.itterminal.yanmas.tickets.service.validator.TicketSettingOperationValidator;
+import ru.itterminal.yanmas.tickets.service.validator.ticket_setting.TicketSettingOperationValidator;
 
 import javax.validation.constraints.NotNull;
 import java.util.UUID;

@@ -42,8 +42,8 @@ public class TicketTemplateServiceImpl extends CrudServiceWithAccountImpl<Ticket
     }
 
     private void setNextExecutionTime(TicketTemplate ticketTemplate) {
-        CronTrigger cronTrigger = new CronTrigger(ticketTemplate.getExpressionSchedule(), ZoneId.of("GMT"));
-        SimpleTriggerContext triggerContext = new SimpleTriggerContext();
+        var cronTrigger = new CronTrigger(ticketTemplate.getExpressionSchedule(), ZoneId.of("GMT"));
+        var triggerContext = new SimpleTriggerContext();
         var dateCountdown = System.currentTimeMillis();
         if (ticketTemplate.getDateStart() != null && ticketTemplate.getDateStart() >= System.currentTimeMillis()) {
             dateCountdown = ticketTemplate.getDateStart();
@@ -70,6 +70,6 @@ public class TicketTemplateServiceImpl extends CrudServiceWithAccountImpl<Ticket
     private void setNestedObjectsOfEntity(TicketTemplate entity) {
         entity.setAccount(accountService.findById(entity.getAccount().getId()));
         entity.setAuthor(userService.findByIdAndAccountId(entity.getAuthor().getId()));
-        entity.setTicketType(ticketTypeService.findByIdAndAccountId(entity.getTicketType().getId()));
+        entity.setTicketType(ticketTypeService.findByIdAndAccountId(entity.getTicketType().getId(), null));
     }
 }

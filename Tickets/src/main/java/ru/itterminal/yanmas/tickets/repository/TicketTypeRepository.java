@@ -15,7 +15,7 @@ public interface TicketTypeRepository extends EntityRepositoryWithAccount<Ticket
 
     List<TicketTypeUniqueFields> getByNameAndAccount_IdAndIdNot(String name, UUID accountId, UUID id);
 
-    Optional<TicketType> getByNameAndAccount_Id(String name, UUID accountId);
+    List<TicketTypeUniqueFields> getByNameAndAccount_Id(String name, UUID accountId);
 
     Optional<TicketType> getByIdAndAccount_Id(UUID id, UUID accountId);
 

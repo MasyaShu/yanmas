@@ -167,7 +167,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
                 || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
             ticket.setTicketType(ticketSetting.getTicketTypeForNew());
         } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
-            ticket.setTicketType(ticketTypeService.findByIdAndAccountId(ticketType.getId(), accountId));
+            ticket.setTicketType(ticketTypeService.findByIdAndAccountId(ticketType.getId(), currentUser));
         }
         // ticket.observers
         if (ticket.getObservers() == null || !isCurrentUserFromInnerGroup
@@ -231,7 +231,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
                 || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
             ticket.setTicketType(ticketBeforeUpdate.getTicketType());
         } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
-            ticket.setTicketType(ticketTypeService.findByIdAndAccountId(ticketType.getId(), accountId));
+            ticket.setTicketType(ticketTypeService.findByIdAndAccountId(ticketType.getId(), currentUser));
         }
         // ticket.observers
         if (!isCurrentUserFromInnerGroup || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {

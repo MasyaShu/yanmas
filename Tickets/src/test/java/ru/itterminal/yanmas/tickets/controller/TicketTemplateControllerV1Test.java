@@ -170,7 +170,7 @@ class TicketTemplateControllerV1Test {
         ticketTemplateDtoRequest.setDeleted(null);
         when(templateService.create(any())).thenReturn(ticketTemplate);
         when(userService.findByIdAndAccountId(any())).thenReturn(ticketTemplate.getAuthor());
-        when(ticketTypeService.findByIdAndAccountId(any())).thenReturn(ticketTemplate.getTicketType());
+        when(ticketTypeService.findByIdAndAccountId(any(), any())).thenReturn(ticketTemplate.getTicketType());
         MockHttpServletRequestBuilder request = post(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -349,7 +349,7 @@ class TicketTemplateControllerV1Test {
                 ticketTemplateTestHelper.convertEntityToDtoRequest(ticketTemplate, false);
         when(templateService.update(any())).thenReturn(ticketTemplate);
         when(userService.findByIdAndAccountId(any())).thenReturn(ticketTemplate.getAuthor());
-        when(ticketTypeService.findByIdAndAccountId(any())).thenReturn(ticketTemplate.getTicketType());
+        when(ticketTypeService.findByIdAndAccountId(any(), any())).thenReturn(ticketTemplate.getTicketType());
         MockHttpServletRequestBuilder request = put(HOST + PORT + API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
