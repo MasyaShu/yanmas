@@ -18,11 +18,13 @@ public interface UserRepository extends EntityRepositoryWithAccount<User> {
 
     List<User> findAllByRoleAndIdNot(Role role, UUID id);
 
-    List<User> findAllByRoleAndAccount_IdAndIdNot(Role role, UUID accountId, UUID id);
+    List<User> findAllByRoleAndAccount_IdAndIdNot(Role role, UUID accountId, UUID id); //NOSONAR
 
-    List<User> findAllByRoleAndAccount_Id(Role role, UUID accountId);
+    List<User> findAllByRoleAndAccount_Id(Role role, UUID accountId); //NOSONAR
 
     Optional<User> getByEmail(String email);
 
     List<User> findAllByRole(Role role);
+
+    Integer countUserByRole_Name(String roleName); //NOSONAR
 }

@@ -57,12 +57,14 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
             "Access is denied for searching by passed Id";
     public static final String EMAIL = "email";
 
+    @Deprecated
     @Override
     public void checkAccessBeforeCreate(User entity) {
         if (!SecurityContextHolder.getContext().getAuthentication().getName().contains(ANONYMOUS)) {
             checkAccessCreateUpdate(entity, null);
         }
     }
+
 
     @Override
     public boolean logicalValidationBeforeCreate(User entity) {
@@ -71,6 +73,7 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         return true;
     }
 
+    @Deprecated
     @Override
     public void checkAccessBeforeUpdate(User entity) {
         var userFromDatabase = service.findById(entity.getId());
@@ -88,6 +91,7 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         return true;
     }
 
+    @Deprecated
     @Override
     public boolean checkUniqueness(User entity) {
         log.trace(CHECK_UNIQUENESS, entity);
@@ -122,28 +126,33 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         }
     }
 
-   /* */
-
+    @Deprecated
     private void checkAccessCreateUpdate(User userFromRequest, User userFromDatabase) {
         JwtUser jwtUser = (JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        // WeightOfRoleOfCurrentUserMustBeGreatThanWeightOfRoleFromEntityBeforeCreateUserValidator
+        // WeightOfRoleOfCurrentUserMustBeGreatThanWeightOfRoleFromEntityBeforeUpdateUserValidator
         if (userFromRequest.getRole().getWeight() > jwtUser.getWeightRole()) {
             throw new AccessDeniedException(format(
                     IS_FORBIDDEN_TO_ASSIGN_A_USER_WITH_A_ROLE,
                     userFromRequest.getRole().getDisplayName()
             ));
         }
+        // WeightOfRoleOfCurrentUserMustBeGreatThanWeightOfRoleFromDatabaseBeforeUpdateUserValidator
         if (userFromDatabase != null && userFromDatabase.getRole().getWeight() > jwtUser.getWeightRole()) {
             throw new AccessDeniedException(format(
                     IS_FORBIDDEN_TO_CHANGE_THE_USER_WITH_THE_ROLE,
                     userFromRequest.getRole().getDisplayName()
             ));
         }
+        // UserFromOuterGroupCanCreateUserOnlyWithinHisGroupValidator
+        // UserFromOuterGroupCanUpdateUserOnlyWithinHisGroupValidator
         if (!jwtUser.isInnerGroup() && !userFromRequest.getGroup().getId().equals(jwtUser.getGroupId())) {
             throw new AccessDeniedException(format(
                     NOT_ALLOWED_TO_ASSIGN_A_GROUP_WITH_ID_NOT_EQUAL,
                     jwtUser.getGroupId()
             ));
         }
+        // UserFromOuterGroupCanUpdateUserOnlyWithinHisGroupValidator
         if (userFromDatabase != null && !jwtUser.isInnerGroup() && !userFromDatabase.getGroup().getId()
                 .equals(jwtUser.getGroupId())) {
             throw new AccessDeniedException(format(
@@ -153,6 +162,8 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         }
     }
 
+    @Deprecated
+    // NotAllowedCreateMoreThanOneUserWithRoleAccountOwnerWithinAccountValidator
     private void checkAccountOwnerNotExist(User entity) {
         Map<String, List<ValidationError>> errors = new HashMap<>();
 
@@ -170,7 +181,6 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
                 )));
             }
         }
-
         if (!errors.isEmpty()) {
             log.error(FIELDS_ARE_NOT_VALID, errors);
             throw new LogicalValidationException(VALIDATION_FAILED, errors);
