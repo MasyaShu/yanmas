@@ -41,6 +41,7 @@ import static ru.itterminal.yanmas.IT.util.ITHelper.*;
 class GroupIT {
 
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private UserRepository userRepository;
 

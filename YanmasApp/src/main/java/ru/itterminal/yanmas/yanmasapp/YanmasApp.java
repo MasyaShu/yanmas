@@ -29,10 +29,10 @@ public class YanmasApp {
 
     @Bean
     public EntityManagerFactory entityManagerFactory() {
-        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+        var vendorAdapter = new HibernateJpaVendorAdapter();
         vendorAdapter.setGenerateDdl(Boolean.FALSE);
         vendorAdapter.setShowSql(Boolean.TRUE);
-        LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
+        var factory = new LocalContainerEntityManagerFactoryBean();
         factory.setJpaVendorAdapter(vendorAdapter);
 
         factory.setPackagesToScan("ru.itterminal.yanmas");
