@@ -12,7 +12,6 @@ import java.util.Map;
 
 import static java.lang.String.format;
 import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.addValidationErrorIntoErrors;
-import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.checkStringForEquals;
 
 @Component
 @RequiredArgsConstructor

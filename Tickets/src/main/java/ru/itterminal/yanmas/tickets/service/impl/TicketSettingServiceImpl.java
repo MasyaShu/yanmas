@@ -1,33 +1,25 @@
 package ru.itterminal.yanmas.tickets.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.itterminal.yanmas.aau.service.impl.AccountServiceImpl;
-import ru.itterminal.yanmas.aau.service.impl.CrudServiceWithAccountImpl;
-import ru.itterminal.yanmas.aau.service.impl.GroupServiceImpl;
-import ru.itterminal.yanmas.aau.service.impl.UserServiceImpl;
-import ru.itterminal.yanmas.commons.model.BaseEntity;
+import ru.itterminal.yanmas.aau.service.business_handler.impl.CrudServiceWithBusinessHandlerImpl;
+import ru.itterminal.yanmas.aau.service.business_handler.impl.EmptyBusinessHandlerImpl;
 import ru.itterminal.yanmas.tickets.model.TicketSetting;
 import ru.itterminal.yanmas.tickets.repository.TicketSettingRepository;
 import ru.itterminal.yanmas.tickets.service.validator.TicketSettingOperationValidator;
 
 import javax.validation.constraints.NotNull;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
-@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class TicketSettingServiceImpl extends CrudServiceWithAccountImpl<TicketSetting, TicketSettingOperationValidator,
-        TicketSettingRepository> {
+public class TicketSettingServiceImpl extends CrudServiceWithBusinessHandlerImpl
+        <TicketSetting, EmptyBusinessHandlerImpl<TicketSetting>, TicketSettingRepository> {
 
-    private final AccountServiceImpl accountService;
-    private final GroupServiceImpl groupService;
-    private final UserServiceImpl userService;
     private final TicketStatusServiceImpl ticketStatusService;
+    private final TicketSettingOperationValidator validator;
     private final TicketTypeServiceImpl ticketTypeService;
     private final SettingsAccessToTicketTypesServiceImpl settingsAccessToTicketTypesService;
 
@@ -86,63 +78,6 @@ public class TicketSettingServiceImpl extends CrudServiceWithAccountImpl<TicketS
             ticketSetting.setTicketStatusForCancel(predefinedTicketStatusForCancel);
         }
         return ticketSetting;
-    }
-
-    @Override
-    protected void setNestedObjectsOfEntityBeforeCreate(TicketSetting entity) {
-        entity.setAccount(accountService.findById(entity.getAccount().getId()));
-        if (entity.getAuthor() != null && entity.getAuthor().getId() != null) {
-            entity.setAuthor(userService.findByIdAndAccountId(entity.getAuthor().getId()));
-            entity.setGroup(entity.getAuthor().getGroup());
-        } else if (entity.getGroup() != null && entity.getGroup().getId() != null) {
-            entity.setGroup(groupService.findByIdAndAccountId(entity.getGroup().getId(), null));
-        }
-        if (entity.getObservers() != null) {
-            entity.setObservers(
-                    userService.findAllByAccountIdAndListId(
-                            entity.getObservers().stream()
-                                    .map(BaseEntity::getId)
-                                    .collect(Collectors.toList())
-                    )
-            );
-        }
-        if (entity.getExecutors() != null) {
-            entity.setExecutors(
-                    userService.findAllByAccountIdAndListId(
-                            entity.getExecutors().stream()
-                                    .map(BaseEntity::getId)
-                                    .collect(Collectors.toList())
-                    )
-            );
-        }
-        if (entity.getTicketTypeForNew() != null && entity.getTicketTypeForNew().getId() != null) {
-            entity.setTicketTypeForNew(ticketTypeService.findByIdAndAccountId(entity.getTicketTypeForNew().getId()));
-        }
-//        if (entity.getTicketStatusForNew() != null && entity.getTicketStatusForNew().getId() != null) {
-//            entity.setTicketStatusForNew(
-//                    ticketStatusService.findByIdAndAccountId(entity.getTicketStatusForNew().getId())
-//            );
-//        }
-//        if (entity.getTicketStatusForReopen() != null && entity.getTicketStatusForReopen().getId() != null) {
-//            entity.setTicketStatusForReopen(
-//                    ticketStatusService.findByIdAndAccountId(entity.getTicketStatusForReopen().getId())
-//            );
-//        }
-//        if (entity.getTicketStatusForClose() != null && entity.getTicketStatusForClose().getId() != null) {
-//            entity.setTicketStatusForClose(
-//                    ticketStatusService.findByIdAndAccountId(entity.getTicketStatusForClose().getId())
-//            );
-//        }
-//        if (entity.getTicketStatusForCancel() != null && entity.getTicketStatusForCancel().getId() != null) {
-//            entity.setTicketStatusForCancel(
-//                    ticketStatusService.findByIdAndAccountId(entity.getTicketStatusForCancel().getId())
-//            );
-//        }
-    }
-
-    @Override
-    protected void setNestedObjectsOfEntityBeforeUpdate(TicketSetting entity) {
-        setNestedObjectsOfEntityBeforeCreate(entity);
     }
 
 }

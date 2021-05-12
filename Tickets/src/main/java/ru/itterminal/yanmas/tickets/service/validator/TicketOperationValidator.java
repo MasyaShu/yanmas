@@ -1,28 +1,24 @@
 package ru.itterminal.yanmas.tickets.service.validator;
 
-import static java.lang.String.format;
-import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.addValidationErrorIntoErrors;
-import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
-import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.ifErrorsNotEmptyThrowLogicalValidationException;
-import static ru.itterminal.yanmas.tickets.service.validator.TicketSettingOperationValidator.ACCESS_DENIED_BECAUSE_CURRENT_USER_HAS_NOT_PERMIT_TO_TICKET_TYPE;
-
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Component;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Component;
 import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.service.validator.BasicOperationValidatorWithCurrentUserImpl;
 import ru.itterminal.yanmas.commons.exception.error.ValidationError;
-import ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidatorImpl;
 import ru.itterminal.yanmas.files.model.File;
 import ru.itterminal.yanmas.tickets.model.Ticket;
 import ru.itterminal.yanmas.tickets.service.impl.SettingsAccessToTicketTypesServiceImpl;
 import ru.itterminal.yanmas.tickets.service.impl.TicketServiceImpl;
+
+import java.util.List;
+import java.util.Map;
+
+import static java.lang.String.format;
+import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.*;
+import static ru.itterminal.yanmas.tickets.service.validator.ticket_setting.check_access_before_create.NotAllowedCreateFromCurrentUserIfTicketTypeIsNotPermitted.ACCESS_DENIED_BECAUSE_CURRENT_USER_HAS_NOT_PERMIT_TO_TICKET_TYPE;
 
 @Slf4j
 @Component

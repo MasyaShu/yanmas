@@ -23,4 +23,9 @@ public interface TicketSettingRepository extends EntityRepositoryWithAccount<Tic
             UUID authorId,
             UUID id);
 
+    List<TicketSetting> findAllByAccount_IdAndGroup_IdAndAuthor_Id(
+            UUID accountId,
+            UUID groupId,
+            UUID authorId);
+
 }

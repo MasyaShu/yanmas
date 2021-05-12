@@ -44,6 +44,7 @@ import ru.itterminal.yanmas.commons.exception.RestExceptionHandler;
 import ru.itterminal.yanmas.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.yanmas.commons.util.CommonConstants;
 import ru.itterminal.yanmas.security.config.TestSecurityConfig;
+import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 import ru.itterminal.yanmas.tickets.model.TicketSetting;
 import ru.itterminal.yanmas.tickets.model.dto.TicketSettingDtoRequest;
 import ru.itterminal.yanmas.tickets.model.dto.TicketSettingDtoResponse;
@@ -60,6 +61,9 @@ class TicketSettingControllerV1Test {
 
     @MockBean
     private UserServiceImpl userService;
+
+    @MockBean
+    private JwtUserBuilder jwtUserBuilder;
 
     @MockBean
     private ReflectionHelper reflectionHelper;
@@ -102,168 +106,6 @@ class TicketSettingControllerV1Test {
         requestDto.setDisplayName(null);
     }
 
-    @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void create_shouldCreate_whenValidDataPassed() throws Exception {
-        requestDto.setId(null);
-        requestDto.setDeleted(null);
-        requestDto.setVersion(null);
-        when(ticketSettingService.create(any())).thenReturn(ticketSetting);
-        MockHttpServletRequestBuilder request = post(HOST + PORT + API)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requestDto));
-        var requestResult = mockMvc.perform(request)
-                .andDo(print())
-                .andExpect(status().isCreated())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        TicketSettingDtoResponse actualTicketSettingDtoResponse =
-                objectMapper.readValue(requestResult, TicketSettingDtoResponse.class);
-        TicketSettingDtoResponse expectedTicketSettingDtoResponse =
-                mapper.map(
-                        ticketSetting,
-                        TicketSettingDtoResponse.class
-                );
-        assertEquals(expectedTicketSettingDtoResponse, actualTicketSettingDtoResponse);
-        verify(ticketSettingService, times(1)).create(any());
-    }
-
-    @Test
-    @WithAnonymousUser
-    void create_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
-        MockHttpServletRequestBuilder request = post(HOST + PORT + API)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requestDto));
-
-        mockMvc.perform(request)
-                .andDo(print())
-                .andExpect(status().isUnauthorized());
-        verify(userService, times(0)).findByIdAndAccountId(any());
-        verify(ticketSettingService, times(0)).create(any());
-    }
-
-    @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    void create_shouldGetStatusForbidden_whenNotAllowedRole() throws Exception {
-        requestDto.setId(null);
-        requestDto.setDeleted(null);
-        requestDto.setVersion(null);
-        MockHttpServletRequestBuilder request = post(HOST + PORT + API)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requestDto));
-        mockMvc.perform(request)
-                .andDo(print())
-                .andExpect(status().isForbidden());
-        verify(userService, times(0)).findByIdAndAccountId(any());
-        verify(ticketSettingService, times(0)).create(any());
-    }
-
-    @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void create_shouldGetStatusBadRequestWithErrorsDescriptions_whenVersionNotNull() throws Exception {
-        TicketSettingDtoRequest dtoRequest = helper.convertEntityToDtoRequest(helper.getRandomValidEntity(), true);
-        dtoRequest.setVersion(15);
-        dtoRequest.setId(UUID.randomUUID());
-        MockHttpServletRequestBuilder request = post(HOST + PORT + API)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dtoRequest));
-
-        mockMvc.perform(request)
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(MockMvcResultMatchers
-                                   .jsonPath(
-                                           "$.errors.id[?(@.message == '%s')]",
-                                           CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY
-                                   ).exists())
-                .andExpect(
-                        MockMvcResultMatchers
-                                .jsonPath(
-                                        "$.errors.version[?(@.message == '%s')]",
-                                        CommonConstants.MUST_BE_NULL_FOR_THE_NEW_ENTITY
-                                ).exists());
-        verify(userService, times(0)).findByIdAndAccountId(any());
-        verify(ticketSettingService, times(0)).create(any());
-    }
-
-    @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void update_shouldUpdate_whenValidDataPassed() throws Exception {
-        requestDto.setDeleted(false);
-        when(ticketSettingService.update(any())).thenReturn(ticketSetting);
-        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requestDto));
-        var requestResult = mockMvc.perform(request)
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        TicketSettingDtoResponse actualTicketSettingDtoResponse =
-                objectMapper.readValue(requestResult, TicketSettingDtoResponse.class);
-        TicketSettingDtoResponse expectedTicketSettingDtoResponse =
-                mapper.map(
-                        ticketSetting,
-                        TicketSettingDtoResponse.class
-                );
-        assertEquals(expectedTicketSettingDtoResponse, actualTicketSettingDtoResponse);
-        verify(ticketSettingService, times(1)).update(any());
-    }
-
-    @Test
-    @WithAnonymousUser
-    void update_shouldGetStatusForbidden_whenAnonymousUser() throws Exception {
-        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requestDto));
-        mockMvc.perform(request)
-                .andDo(print())
-                .andExpect(status().isUnauthorized());
-        verify(userService, times(0)).findByIdAndAccountId(any());
-        verify(ticketSettingService, times(0)).update(any());
-    }
-
-    @Test
-    @WithUserDetails("AUTHOR_ACCOUNT_1_IS_INNER_GROUP")
-    void update_shouldGetStatusForbidden_whenNotAllowedRole() throws Exception {
-        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requestDto));
-        mockMvc.perform(request)
-                .andDo(print())
-                .andExpect(status().isForbidden());
-        verify(userService, times(0)).findByIdAndAccountId(any());
-        verify(ticketSettingService, times(0)).update(any());
-    }
-
-    @Test
-    @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
-    void update_shouldGetStatusBadRequestWithErrorsDescriptions_whenInvalidIdPassed() throws Exception {
-        UUID uuid = UUID.randomUUID();
-        requestDto.setId(uuid);
-        requestDto.setVersion(1);
-        String json = objectMapper.writeValueAsString(requestDto);
-        json = json.replace(uuid.toString(), "abracadabra");
-        MockHttpServletRequestBuilder request = put(HOST + PORT + API)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(json);
-        mockMvc.perform(request)
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.title").value(CommonConstants.MESSAGE_NOT_READABLE));
-        verify(userService, times(0)).findByIdAndAccountId(any());
-        verify(ticketSettingService, times(0)).update(any());
-    }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
@@ -311,19 +153,5 @@ class TicketSettingControllerV1Test {
                 .andExpect(status().isForbidden());
         verify(userService, times(0)).findByIdAndAccountId(any());
         verify(ticketSettingService, times(0)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
-    }
-
-    @Test
-    @WithUserDetails("OBSERVER_ACCOUNT_1_IS_INNER_GROUP")
-    void getById_shouldGetStatusForbidden_whenUserHasRoleObserver() throws Exception {
-        MockHttpServletRequestBuilder request =
-                get(HOST + PORT + API + "/" + ticketSetting.getAuthor().getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON);
-
-        mockMvc.perform(request)
-                .andDo(print())
-                .andExpect(status().isForbidden());
-        verify(ticketSettingService, times(0)).findByIdAndAccountId(any());
     }
 }
