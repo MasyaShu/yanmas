@@ -1,4 +1,4 @@
-package ru.itterminal.yanmas.aau.service.validator.group;
+package ru.itterminal.yanmas.aau.service.validator.group.logical_validation;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,7 @@ import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.check
 
 @Component
 @RequiredArgsConstructor
-public class LogicalValidationBeforeUpdateCheckUniquesGroup implements EntityValidator<Group> {
+public class CheckUniquesBeforeUpdateGroupValidator implements EntityValidator<Group> {
 
     public static final String NAME = "name";
     private final GroupRepository repository;

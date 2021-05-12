@@ -13,6 +13,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import ru.itterminal.yanmas.aau.model.test.GroupTestHelper;
 import ru.itterminal.yanmas.aau.model.test.RoleTestHelper;
 import ru.itterminal.yanmas.aau.model.test.UserTestHelper;
+import ru.itterminal.yanmas.aau.service.validator.group.check_access_before_read.ReadDeniedIfRoleOfCurrentUserIsAuthorOrObserverAndCurrentUserGroupNotEqualEntityValidator;
 import ru.itterminal.yanmas.security.config.TestSecurityConfig;
 
 import java.util.stream.Stream;
@@ -24,13 +25,13 @@ import static ru.itterminal.yanmas.commons.util.CommonConstants.SPRING_ACTIVE_PR
 import static ru.itterminal.yanmas.security.config.TestSecurityConfig.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringJUnitConfig(value = {CheckAccessBeforeReadAccessDeniedForUsersFromInnerGroupsRoleAfterAdminAndGroupEntityNonEqualsGroupUser.class})
+@SpringJUnitConfig(value = {ReadDeniedIfRoleOfCurrentUserIsAuthorOrObserverAndCurrentUserGroupNotEqualEntityValidator.class})
 @Import(TestSecurityConfig.class)
 @ActiveProfiles(SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS)
-class CheckAccessBeforeReadAccessDeniedForUsersFromInnerGroupsRoleAfterAdminAndGroupEntityNonEqualsGroupUserTest {
+class ReadDeniedIfRoleOfCurrentUserIsAuthorOrObserverAndCurrentUserGroupNotEqualEntityValidatorTest {
 
     @Autowired
-    CheckAccessBeforeReadAccessDeniedForUsersFromInnerGroupsRoleAfterAdminAndGroupEntityNonEqualsGroupUser checkAccessBeforeReadAccessDeniedForUsersFromInnerGroupsRoleAfterAdminAndGroupEntityNonEqualsGroupUser;
+    ReadDeniedIfRoleOfCurrentUserIsAuthorOrObserverAndCurrentUserGroupNotEqualEntityValidator readDeniedIfRoleOfCurrentUserIsAuthorOrObserverAndCurrentUserGroupNotEqualEntityValidator;
     private final GroupTestHelper groupTestHelper = new GroupTestHelper();
     private final UserTestHelper userTestHelper = new UserTestHelper();
     private final RoleTestHelper roleTestHelper = new RoleTestHelper();
@@ -44,7 +45,7 @@ class CheckAccessBeforeReadAccessDeniedForUsersFromInnerGroupsRoleAfterAdminAndG
         currentUser.setRole(roleTestHelper.getRoleByName(role));
         currentUser.getGroup().setIsInner(isInnerGroup);
         Throwable throwable = catchThrowable(() ->
-                checkAccessBeforeReadAccessDeniedForUsersFromInnerGroupsRoleAfterAdminAndGroupEntityNonEqualsGroupUser
+                readDeniedIfRoleOfCurrentUserIsAuthorOrObserverAndCurrentUserGroupNotEqualEntityValidator
                         .checkAccessBeforeRead(groupForRead, currentUser));
         assertThat(throwable).isNull();
     }
@@ -58,7 +59,7 @@ class CheckAccessBeforeReadAccessDeniedForUsersFromInnerGroupsRoleAfterAdminAndG
         currentUser.setRole(roleTestHelper.getRoleByName(role));
         currentUser.getGroup().setIsInner(isInnerGroup);
         assertThrows(AccessDeniedException.class,
-                () -> checkAccessBeforeReadAccessDeniedForUsersFromInnerGroupsRoleAfterAdminAndGroupEntityNonEqualsGroupUser
+                () -> readDeniedIfRoleOfCurrentUserIsAuthorOrObserverAndCurrentUserGroupNotEqualEntityValidator
                         .checkAccessBeforeRead(groupForRead, currentUser));
     }
 

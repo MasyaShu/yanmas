@@ -11,6 +11,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import ru.itterminal.yanmas.aau.model.Group;
 import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.model.test.GroupTestHelper;
+import ru.itterminal.yanmas.aau.service.validator.group.check_access_before_update.CreateDeniedIfCurrentUserNotNullAndFromOuterGroupValidator;
 import ru.itterminal.yanmas.security.config.TestSecurityConfig;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -18,12 +19,12 @@ import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static ru.itterminal.yanmas.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
 
-@SpringJUnitConfig(value = {CheckAccessBeforeUpdateAccessDeniedForUsersFromOuterGroupsAndNotAnonymous.class})
+@SpringJUnitConfig(value = {CreateDeniedIfCurrentUserNotNullAndFromOuterGroupValidator.class})
 @Import(TestSecurityConfig.class)
 @ActiveProfiles(SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS)
-class CheckAccessBeforeUpdateAccessDeniedForUsersFromOuterGroupsAndNotAnonymousTest {
+class CreateDeniedIfCurrentUserNotNullAndFromOuterGroupValidatorTest {
     @Autowired
-    CheckAccessBeforeUpdateAccessDeniedForUsersFromOuterGroupsAndNotAnonymous checkAccessBeforeUpdateAccessDeniedForUsersFromOuterGroupsAndNotAnonymous;
+    CreateDeniedIfCurrentUserNotNullAndFromOuterGroupValidator createDeniedIfCurrentUserNotNullAndFromOuterGroupValidator;
     private final GroupTestHelper groupTestHelper = new GroupTestHelper();
 
     @Test
@@ -31,7 +32,7 @@ class CheckAccessBeforeUpdateAccessDeniedForUsersFromOuterGroupsAndNotAnonymousT
     void checkAccessBeforeCreate_shouldGetNoError_whenAnonymousUser() {
         Group group = groupTestHelper.getRandomValidEntity();
         var currentUser = User.builder().group(group).build();
-        Throwable throwable = catchThrowable(() -> checkAccessBeforeUpdateAccessDeniedForUsersFromOuterGroupsAndNotAnonymous
+        Throwable throwable = catchThrowable(() -> createDeniedIfCurrentUserNotNullAndFromOuterGroupValidator
                 .checkAccessBeforeUpdate(currentUser));
         assertThat(throwable).isNull();
     }
@@ -42,7 +43,7 @@ class CheckAccessBeforeUpdateAccessDeniedForUsersFromOuterGroupsAndNotAnonymousT
         Group group = groupTestHelper.getRandomValidEntity();
         group.setIsInner(true);
         var currentUser = User.builder().group(group).build();
-        Throwable throwable = catchThrowable(() -> checkAccessBeforeUpdateAccessDeniedForUsersFromOuterGroupsAndNotAnonymous
+        Throwable throwable = catchThrowable(() -> createDeniedIfCurrentUserNotNullAndFromOuterGroupValidator
                 .checkAccessBeforeUpdate(currentUser));
         assertThat(throwable).isNull();
     }
@@ -54,7 +55,7 @@ class CheckAccessBeforeUpdateAccessDeniedForUsersFromOuterGroupsAndNotAnonymousT
         group.setIsInner(false);
         var currentUser = User.builder().group(group).build();
         assertThrows(AccessDeniedException.class,
-                () -> checkAccessBeforeUpdateAccessDeniedForUsersFromOuterGroupsAndNotAnonymous
+                () -> createDeniedIfCurrentUserNotNullAndFromOuterGroupValidator
                         .checkAccessBeforeUpdate(currentUser));
     }
 }

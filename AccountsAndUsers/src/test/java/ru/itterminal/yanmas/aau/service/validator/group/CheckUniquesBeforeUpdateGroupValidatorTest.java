@@ -9,6 +9,7 @@ import ru.itterminal.yanmas.aau.model.Group;
 import ru.itterminal.yanmas.aau.model.projection.GroupUniqueFields;
 import ru.itterminal.yanmas.aau.model.test.GroupTestHelper;
 import ru.itterminal.yanmas.aau.repository.GroupRepository;
+import ru.itterminal.yanmas.aau.service.validator.group.logical_validation.CheckUniquesBeforeUpdateGroupValidator;
 
 import java.util.List;
 
@@ -18,9 +19,9 @@ import static org.mockito.Mockito.*;
 import static ru.itterminal.yanmas.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
 import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
 
-@SpringJUnitConfig(value = {LogicalValidationBeforeUpdateCheckUniquesGroup.class})
+@SpringJUnitConfig(value = {CheckUniquesBeforeUpdateGroupValidator.class})
 @ActiveProfiles(SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS)
-class LogicalValidationBeforeUpdateCheckUniquesGroupTest {
+class CheckUniquesBeforeUpdateGroupValidatorTest {
 
     @MockBean
     private GroupRepository repository;
@@ -29,8 +30,8 @@ class LogicalValidationBeforeUpdateCheckUniquesGroupTest {
     private GroupUniqueFields groupUniqueFields;
 
     @Autowired
-    private final LogicalValidationBeforeUpdateCheckUniquesGroup logicalValidationBeforeUpdateCheckUniquesGroup =
-            new LogicalValidationBeforeUpdateCheckUniquesGroup(repository);
+    private final CheckUniquesBeforeUpdateGroupValidator checkUniquesBeforeUpdateGroupValidator =
+            new CheckUniquesBeforeUpdateGroupValidator(repository);
 
     private final GroupTestHelper groupTestHelper = new GroupTestHelper();
 
@@ -40,7 +41,7 @@ class LogicalValidationBeforeUpdateCheckUniquesGroupTest {
         var errors = createMapForLogicalErrors();
         when(repository.getByNameAndIsInnerAndAccount_IdAndIdNot(any(), any(), any(), any())).thenReturn(List.of(groupUniqueFields));
         assertEquals(0, errors.values().size());
-        logicalValidationBeforeUpdateCheckUniquesGroup.logicalValidationBeforeUpdate(group, errors);
+        checkUniquesBeforeUpdateGroupValidator.logicalValidationBeforeUpdate(group, errors);
         assertEquals(1, errors.values().size());
         verify(repository, times(1)).getByNameAndIsInnerAndAccount_IdAndIdNot(any(), any(), any(), any());
     }
@@ -51,7 +52,7 @@ class LogicalValidationBeforeUpdateCheckUniquesGroupTest {
         var errors = createMapForLogicalErrors();
         when(repository.getByNameAndIsInnerAndAccount_IdAndIdNot(any(), any(), any(), any())).thenReturn(List.of());
         assertEquals(0, errors.values().size());
-        logicalValidationBeforeUpdateCheckUniquesGroup.logicalValidationBeforeUpdate(group, errors);
+        checkUniquesBeforeUpdateGroupValidator.logicalValidationBeforeUpdate(group, errors);
         assertEquals(0, errors.values().size());
         verify(repository, times(1)).getByNameAndIsInnerAndAccount_IdAndIdNot(any(), any(), any(), any());
     }
