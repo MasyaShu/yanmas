@@ -98,6 +98,7 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
         entity.setId(id);
         entity.setIsArchived(false);
         validator.checkUniqueness(entity);
+        //start - UserBusinessHandlerImpl.beforeCreate
         entity.setPassword(encoder.encode(entity.getPassword()));
         if (entity.getRole().equals(roleService.getAccountOwnerRole())) {
             String emailVerificationToken = jwtProvider.createTokenWithUserId(entity.getId());
@@ -106,9 +107,11 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
         } else {
             entity.setEmailVerificationStatus(true);
         }
+        //finish - UserBusinessHandlerImpl.beforeCreate
         entity.generateDisplayName();
         User createdUser = repository.create(entity);
         log.trace(format(CREATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), createdUser.toString()));
+        //start - UserBusinessHandlerImpl.afterCreate
         if (createdUser.getEmailVerificationToken() != null) {
             var email = senderEmailViaSMTPServer.createEmail(
                     createdUser.getEmail(),
@@ -117,6 +120,7 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
             );
             senderEmailViaSMTPServer.sendEmail(email);
         }
+        //finish - UserBusinessHandlerImpl.afterCreate
         return createdUser;
     }
 
@@ -126,6 +130,7 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
         validator.checkAccessBeforeUpdate(entity);
         validator.logicalValidationBeforeUpdate(entity);
         log.trace(format(UPDATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.getId(), entity));
+        //start - UserBusinessHandlerImpl.beforeUpdate
         User entityFromDatabase = super.findByIdAndAccountId(entity.getId());
         if (entity.getPassword() == null || entity.getPassword().isEmpty()) {
             entity.setPassword(entityFromDatabase.getPassword());
@@ -135,6 +140,7 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
         entity.setEmailVerificationStatus(entityFromDatabase.getEmailVerificationStatus());
         entity.setEmailVerificationToken(entityFromDatabase.getEmailVerificationToken());
         entity.setPasswordResetToken(entityFromDatabase.getPasswordResetToken());
+        //finish - UserBusinessHandlerImpl.beforeUpdate
         try {
             entity.generateDisplayName();
             User updatedEntity = repository.update(entity);
@@ -166,27 +172,32 @@ public class UserServiceImpl extends CrudServiceWithAccountImpl<User, UserOperat
         );
     }
 
-    @SuppressWarnings("unused")
+    // TODO must be deleted after big refactoring
+    @Deprecated
     @Transactional(readOnly = true)
     public List<User> findAllByRoleAndIdNot(Role role, UUID id) {
         log.trace(START_FIND_ALL_USERS_BY_ROLE_AND_NOT_ID, role, id);
         return repository.findAllByRoleAndIdNot(role, id);
     }
 
-    @SuppressWarnings("DuplicatedCode")
+    // TODO must be deleted after big refactoring
+    @Deprecated
     @Transactional(readOnly = true)
     public List<User> findAllByRoleAndAccount_IdAndIdNot(Role role, UUID accountId, UUID id) {
         log.trace(START_FIND_ALL_USERS_BY_ROLE_ACCOUNT_ID_AND_NOT_ID, role, accountId, id);
         return repository.findAllByRoleAndAccount_IdAndIdNot(role, accountId, id);
     }
 
-    @SuppressWarnings("unused")
+    // TODO must be deleted after big refactoring
+    @Deprecated
     @Transactional(readOnly = true)
     public List<User> findAllByRole(Role role) {
         log.trace(START_FIND_ALL_USERS_BY_ROLE, role);
         return repository.findAllByRole(role);
     }
 
+    // TODO must be deleted after big refactoring
+    @Deprecated
     @Transactional(readOnly = true)
     public List<User> findAllByRoleAndAccountId(Role role, UUID accountId) {
         log.trace(START_FIND_ALL_USERS_BY_ROLE, role);

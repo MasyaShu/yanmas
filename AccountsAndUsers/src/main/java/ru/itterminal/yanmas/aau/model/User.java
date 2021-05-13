@@ -72,6 +72,7 @@ public class User extends BaseEntity {
 
     @PrePersist
     protected void onCreate() {
+        setIsArchived(false);
         setDeleted(false);
     }
 

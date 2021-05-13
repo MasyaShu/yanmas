@@ -16,10 +16,13 @@ public interface UserRepository extends EntityRepositoryWithAccount<User> {
 
     List<UserUniqueFields> getByEmailAndIdNot(String email, UUID id);
 
+    // TODO must be deleted after big refactoring
     List<User> findAllByRoleAndIdNot(Role role, UUID id);
 
+    // TODO must be deleted after big refactoring
     List<User> findAllByRoleAndAccount_IdAndIdNot(Role role, UUID accountId, UUID id); //NOSONAR
 
+    // TODO must be deleted after big refactoring
     List<User> findAllByRoleAndAccount_Id(Role role, UUID accountId); //NOSONAR
 
     Optional<User> getByEmail(String email);
