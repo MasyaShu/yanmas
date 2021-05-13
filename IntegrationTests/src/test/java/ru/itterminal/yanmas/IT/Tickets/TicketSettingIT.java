@@ -49,7 +49,7 @@ import static ru.itterminal.yanmas.tickets.service.validator.ticket_setting.logi
 @DataJpaTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ContextConfiguration(classes = {ITTestConfig.class, JwtProvider.class})
+@ContextConfiguration(classes = {ITTestConfig.class, JwtProvider.class, UserRepository.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestPropertySource(properties = {"jwt.token.secret=ksedtob", "jwt.token.expired=8640000", "jwt.token.prefix=Bearer"})
 class TicketSettingIT {

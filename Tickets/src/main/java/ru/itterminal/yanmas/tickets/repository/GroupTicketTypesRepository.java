@@ -14,4 +14,6 @@ public interface GroupTicketTypesRepository extends EntityRepositoryWithAccount<
 
     List<GroupTicketTypesUniqueFields> getByNameAndAccount_IdAndIdNot(String name, UUID accountId, UUID id);
 
+    List<GroupTicketTypesUniqueFields> getByNameAndAccount_Id(String name, UUID accountId);
+
 }
