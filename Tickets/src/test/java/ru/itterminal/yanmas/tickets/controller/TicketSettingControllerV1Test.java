@@ -1,20 +1,6 @@
 package ru.itterminal.yanmas.tickets.controller;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.itterminal.yanmas.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
-
-import java.util.UUID;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +11,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.security.web.FilterChainProxy;
@@ -33,23 +18,27 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import ru.itterminal.yanmas.aau.service.impl.UserServiceImpl;
 import ru.itterminal.yanmas.aau.util.ReflectionHelper;
 import ru.itterminal.yanmas.commons.exception.RestExceptionHandler;
 import ru.itterminal.yanmas.commons.model.spec.SpecificationsFactory;
-import ru.itterminal.yanmas.commons.util.CommonConstants;
 import ru.itterminal.yanmas.security.config.TestSecurityConfig;
+import ru.itterminal.yanmas.security.jwt.JwtUser;
 import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 import ru.itterminal.yanmas.tickets.model.TicketSetting;
 import ru.itterminal.yanmas.tickets.model.dto.TicketSettingDtoRequest;
 import ru.itterminal.yanmas.tickets.model.dto.TicketSettingDtoResponse;
 import ru.itterminal.yanmas.tickets.model.test.TicketSettingTestHelper;
 import ru.itterminal.yanmas.tickets.service.impl.TicketSettingServiceImpl;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.itterminal.yanmas.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
 
 @SuppressWarnings("unused")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -110,8 +99,9 @@ class TicketSettingControllerV1Test {
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getSettingOrPredefinedValuesForTicket_shouldGetTicketSetting_whenPassedValidAuthorId() throws Exception {
+        when(jwtUserBuilder.getJwtUser()).thenReturn(new JwtUser());
         when(userService.findByIdAndAccountId(any())).thenReturn(ticketSetting.getAuthor());
-        when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any(), any())).thenReturn(ticketSetting);
+        when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any())).thenReturn(ticketSetting);
 
         TicketSettingDtoResponse expectedTicketSettingDtoResponse =
                 mapper.map(
@@ -137,7 +127,7 @@ class TicketSettingControllerV1Test {
         assertEquals(expectedTicketSettingDtoResponse, actualTicketSettingDtoResponse);
 
         verify(userService, times(1)).findByIdAndAccountId(any());
-        verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
+        verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any());
     }
 
     @Test
@@ -152,6 +142,6 @@ class TicketSettingControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isForbidden());
         verify(userService, times(0)).findByIdAndAccountId(any());
-        verify(ticketSettingService, times(0)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
+        verify(ticketSettingService, times(0)).getSettingOrPredefinedValuesForTicket(any(), any());
     }
 }

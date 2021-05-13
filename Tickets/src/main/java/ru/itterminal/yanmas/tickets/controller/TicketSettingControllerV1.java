@@ -5,13 +5,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.itterminal.yanmas.aau.controller.BaseControllerImpl;
 import ru.itterminal.yanmas.commons.model.validator.scenario.Create;
 import ru.itterminal.yanmas.commons.model.validator.scenario.Update;
-import ru.itterminal.yanmas.security.jwt.JwtUser;
 import ru.itterminal.yanmas.tickets.model.TicketSetting;
 import ru.itterminal.yanmas.tickets.model.dto.TicketSettingDtoRequest;
 import ru.itterminal.yanmas.tickets.model.dto.TicketSettingDtoResponse;
@@ -21,7 +19,6 @@ import ru.itterminal.yanmas.tickets.service.impl.TicketSettingServiceImpl;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
-import java.security.Principal;
 import java.util.UUID;
 
 @SuppressWarnings({"DuplicatedCode", "unchecked", "rawtypes"})
@@ -70,13 +67,12 @@ public class TicketSettingControllerV1 extends BaseControllerImpl<
     @GetMapping("/by-author/{authorId}")
     @PreAuthorize("hasAnyAuthority('ACCOUNT_OWNER', 'ADMIN', 'EXECUTOR', 'AUTHOR')")
     public ResponseEntity<TicketSettingDtoResponse> getSettingOrPredefinedValuesForTicket
-            (Principal user, @PathVariable UUID authorId) {
-        var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
+            (@PathVariable UUID authorId) {
+        var currentUser = getCurrentUser();
         var foundUser = userService.findByIdAndAccountId(authorId);
         var ticketSetting = ticketSettingService.getSettingOrPredefinedValuesForTicket(
-                jwtUser.getAccountId(),
-                foundUser.getGroup().getId(),
-                authorId
+                currentUser,
+                foundUser
         );
         var returnedTicketSetting = modelMapper.map(ticketSetting, TicketSettingDtoResponse.class);
         return new ResponseEntity<>(returnedTicketSetting, HttpStatus.OK);
