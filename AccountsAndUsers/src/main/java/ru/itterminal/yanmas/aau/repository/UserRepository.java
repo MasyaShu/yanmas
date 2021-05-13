@@ -27,4 +27,6 @@ public interface UserRepository extends EntityRepositoryWithAccount<User> {
     List<User> findAllByRole(Role role);
 
     Integer countUserByRole_Name(String roleName); //NOSONAR
+
+    Integer countUserByRole_NameAndIdNot(String roleName, UUID id); //NOSONAR
 }

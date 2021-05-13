@@ -84,6 +84,7 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         checkAccessCreateUpdate(entity, userFromDatabase);
     }
 
+    @Deprecated
     @Override
     public boolean logicalValidationBeforeUpdate(User entity) {
         super.logicalValidationBeforeUpdate(entity);
@@ -197,6 +198,7 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
         }
     }
 
+    @Deprecated
     private void checkAccountOwnerExistsAfterUpdateAndRestrictionForEditEmailOfAccountOwner(User entity,
                                                                                             User userFromDatabase) {
 
@@ -213,15 +215,18 @@ public class UserOperationValidator extends BasicOperationValidatorImpl<User> {
                 roleService.getAccountOwnerRole(), entity.getAccount().getId(), entity.getId()
         );
 
-        boolean oldUserHasRoleAccountOwner = !usersFromDatabaseWithRoleAccountOwner.isEmpty();
-        boolean newUserHasRoleAccountOwner = entity.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString());
+        var oldUserHasRoleAccountOwner = !usersFromDatabaseWithRoleAccountOwner.isEmpty();
+        var newUserHasRoleAccountOwner = entity.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString());
 
+        // AfterUpdateCannotBeMoreThanOneUserWithRoleAccountOwnerWithinAccountValidator
         if (oldUserHasRoleAccountOwner && newUserHasRoleAccountOwner) {
             errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(
                     NOT_UNIQUE_CODE,
                     format(NOT_UNIQUE_MESSAGE, USER_WITH_ROLE_ACCOUNT_OWNER)
             )));
         }
+
+        // AfterUpdateMustBeOneUserWithRoleAccountOwnerWithinAccountValidator
         if (!oldUserHasRoleAccountOwner && !newUserHasRoleAccountOwner) {
             errors.put(USER_WITH_ROLE_ACCOUNT_OWNER, singletonList(new ValidationError(
                     NOT_UNIQUE_CODE,
