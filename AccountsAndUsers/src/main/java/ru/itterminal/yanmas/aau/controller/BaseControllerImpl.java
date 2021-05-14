@@ -94,7 +94,7 @@ public abstract class BaseControllerImpl<
         return new ResponseEntity<>(returnedEntities, HttpStatus.OK);
     }
 
-    private User getCurrentUser() {
+    protected User getCurrentUser() {
         var jwtUser = jwtUserBuilder.getJwtUser();
         return userService.findById(jwtUser.getId());
     }
