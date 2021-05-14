@@ -54,9 +54,9 @@ public class UserDtoRequest extends BaseEntityDto {
     private Boolean isArchived;
 
     @NotNull(groups = {Create.class, Update.class})
-    private UUID group;
+    private UUID groupId;
 
     @NotNull(groups = {Create.class, Update.class})
-    private UUID role;
+    private UUID roleId;
 
 }

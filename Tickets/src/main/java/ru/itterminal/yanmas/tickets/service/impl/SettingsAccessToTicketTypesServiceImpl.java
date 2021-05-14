@@ -47,7 +47,7 @@ public class SettingsAccessToTicketTypesServiceImpl extends
     }
 
     private SettingsAccessToTicketTypes findSettings(UUID userId) {
-        var user = userService.findByIdAndAccountId(userId);
+        var user = userService.findById(userId);
         var accountId = user.getAccount().getId();
         var groupId = user.getGroup().getId();
         var foundSettings =

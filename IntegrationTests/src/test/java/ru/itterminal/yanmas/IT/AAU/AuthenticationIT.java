@@ -1,18 +1,33 @@
 package ru.itterminal.yanmas.IT.AAU;
 
-import io.restassured.RestAssured;
-import io.restassured.response.Response;
-import org.junit.jupiter.api.*;
+import static io.restassured.RestAssured.given;
+import static ru.itterminal.yanmas.IT.util.ITHelper.ADMIN_INNER_GROUP;
+import static ru.itterminal.yanmas.IT.util.ITHelper.APPLICATION_JSON;
+import static ru.itterminal.yanmas.IT.util.ITHelper.SIGN_IN;
+import static ru.itterminal.yanmas.IT.util.ITHelper.TOKEN;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import ru.itterminal.yanmas.IT.util.ITHelper;
 import ru.itterminal.yanmas.IT.util.ITTestConfig;
 import ru.itterminal.yanmas.aau.model.User;
@@ -20,13 +35,6 @@ import ru.itterminal.yanmas.aau.model.dto.ResetPasswordDto;
 import ru.itterminal.yanmas.aau.model.test.UserTestHelper;
 import ru.itterminal.yanmas.aau.repository.UserRepository;
 import ru.itterminal.yanmas.security.jwt.JwtProvider;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Stream;
-
-import static io.restassured.RestAssured.given;
-import static ru.itterminal.yanmas.IT.util.ITHelper.*;
 
 @DataJpaTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -40,10 +48,6 @@ class AuthenticationIT {
     public static final String TOKEN_REFRESH = "auth/token-refresh";
     public static final int TWO_HOUR_IN_MILLISECONDS = 7200000;
     public static final int ONE_HOUR_IN_MILLISECONDS = 3600000;
-
-    @Value("${jwt.token.secret}")
-    private String secretToken;
-
 
     @Autowired
     private JwtProvider jwtProvider;
@@ -235,13 +239,14 @@ class AuthenticationIT {
     @Test
     @Order(120)
     void failedRequestEmailUpdateByAccountOwnerWhenEmailNotUnique() {
-        var emailAccountOwner = itHelper.getAccountOwner().getEmail();
+        var newEmailAccountOwner = itHelper.getAdminInnerGroup().get("adminInnerGroup_1").getEmail();
+        var oldEmailAccountOwner = itHelper.getAccountOwner().getEmail();
         given()
                 .headers(
                         "Authorization",
-                        "Bearer " + itHelper.getTokens().get(emailAccountOwner)
+                        "Bearer " + itHelper.getTokens().get(oldEmailAccountOwner)
                 )
-                .param("newEmail", emailAccountOwner)
+                .param("newEmail", newEmailAccountOwner)
                 .get(REQUEST_EMAIL_UPDATE)
                 .then()
                 .log().body()

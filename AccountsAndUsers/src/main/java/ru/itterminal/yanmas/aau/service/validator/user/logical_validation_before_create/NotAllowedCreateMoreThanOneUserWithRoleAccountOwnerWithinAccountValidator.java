@@ -25,9 +25,10 @@ public class NotAllowedCreateMoreThanOneUserWithRoleAccountOwnerWithinAccountVal
     @Override
     public void logicalValidationBeforeCreate(User entity,
                                               Map<String, List<ValidationError>> errors) {
+        var isNewUserWithRoleAccountOwner = entity.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString());
         var countUsersWithRoleAccountOwner =
-                repository.countUserByRole_Name(Roles.ACCOUNT_OWNER.toString());
-        if (countUsersWithRoleAccountOwner != 0) {
+                repository.countUserByRole_NameAndAccount_Id(Roles.ACCOUNT_OWNER.toString(), entity.getAccount().getId());
+        if (isNewUserWithRoleAccountOwner && countUsersWithRoleAccountOwner != 0) {
             addValidationErrorIntoErrors(
                     USER_WITH_ROLE_ACCOUNT_OWNER,
                     USER_WITH_ROLE_ACCOUNT_OWNER_IS_OCCUPIED,

@@ -26,7 +26,9 @@ public class AfterUpdateCannotBeMoreThanOneUserWithRoleAccountOwnerWithinAccount
     public void logicalValidationBeforeCreate(User entity,
                                               Map<String, List<ValidationError>> errors) {
         var countUsersWithRoleAccountOwnerInDatabase =
-                repository.countUserByRole_NameAndIdNot(Roles.ACCOUNT_OWNER.toString(), entity.getId());
+                repository.countUserByRole_NameAndAccount_IdAndIdNot(Roles.ACCOUNT_OWNER.toString(),
+                                                                     entity.getAccount().getId(),
+                                                                     entity.getId());
         var isNewUserWithRoleAccountOwner = entity.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString());
 
         if (countUsersWithRoleAccountOwnerInDatabase != 0 && isNewUserWithRoleAccountOwner) {

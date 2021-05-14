@@ -97,6 +97,7 @@ public class ReflectionHelper {
         }
     }
 
+    @SuppressWarnings("DuplicatedCode")
     void setNestedListOfEntity(Object entity, User currentUser, Field fieldEntity) throws Throwable {
         var typeObjectFromList =
                 ((ParameterizedType) fieldEntity.getGenericType()).getActualTypeArguments()[0];
@@ -110,14 +111,25 @@ public class ReflectionHelper {
             for (BaseEntity entityFromList : listOfEntities) {
                 try {
                     var repository = (EntityRepositoryWithAccount) appContext.getBean(nameOfEntityRepository);
-                    var entityFromDatabase = repository.findByIdAndAccountId(
-                            entityFromList.getId(),
-                            currentUser.getAccount().getId()
-                    ).orElseThrow(
-                            () -> new EntityNotExistException(
-                                    format(FIND_INVALID_MESSAGE, entityFromList.getId(), typeOfObjectFromList)
-                            )
-                    );
+                    Object entityFromDatabase;
+                    if (currentUser != null) {
+                        entityFromDatabase = repository.findByIdAndAccountId(
+                                entityFromList.getId(),
+                                currentUser.getAccount().getId()
+                        ).orElseThrow(
+                                () -> new EntityNotExistException(
+                                        format(FIND_INVALID_MESSAGE, entityFromList.getId(), typeOfObjectFromList)
+                                )
+                        );
+                    } else {
+                        entityFromDatabase = repository.findById(
+                                entityFromList.getId()
+                        ).orElseThrow(
+                                () -> new EntityNotExistException(
+                                        format(FIND_INVALID_MESSAGE, entityFromList.getId(), typeOfObjectFromList)
+                                )
+                        );
+                    }
                     listOfEntitiesFromDatabase.add(entityFromDatabase);
                 }
                 catch (ClassCastException e) {
@@ -135,6 +147,7 @@ public class ReflectionHelper {
         }
     }
 
+    @SuppressWarnings("DuplicatedCode")
     void setNestedEntity(Object entity, User currentUser, Field fieldEntity) throws Throwable {
         var nestedEntity = (BaseEntity) fieldEntity.get(entity);
         var typeOfNestedEntity = fieldEntity.getType().getSimpleName();
@@ -142,14 +155,25 @@ public class ReflectionHelper {
                 + REPOSITORY;
         try {
             var repository = (EntityRepositoryWithAccount) appContext.getBean(nameOfEntityRepository);
-            var entityFromDatabase = repository.findByIdAndAccountId(
-                    nestedEntity.getId(),
-                    currentUser.getAccount().getId()
-            ).orElseThrow(
-                    () -> new EntityNotExistException(
-                            format(FIND_INVALID_MESSAGE, nestedEntity.getId(), typeOfNestedEntity)
-                    )
-            );
+            Object entityFromDatabase;
+            if (currentUser != null) {
+                entityFromDatabase = repository.findByIdAndAccountId(
+                        nestedEntity.getId(),
+                        currentUser.getAccount().getId()
+                ).orElseThrow(
+                        () -> new EntityNotExistException(
+                                format(FIND_INVALID_MESSAGE, nestedEntity.getId(), typeOfNestedEntity)
+                        )
+                );
+            } else {
+                entityFromDatabase = repository.findById(
+                        nestedEntity.getId()
+                ).orElseThrow(
+                        () -> new EntityNotExistException(
+                                format(FIND_INVALID_MESSAGE, nestedEntity.getId(), typeOfNestedEntity)
+                        )
+                );
+            }
             fieldEntity.set(entity, entityFromDatabase);
         }
         catch (ClassCastException e) {

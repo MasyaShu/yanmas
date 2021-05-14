@@ -100,7 +100,7 @@ class TicketSettingControllerV1Test {
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_INNER_GROUP")
     void getSettingOrPredefinedValuesForTicket_shouldGetTicketSetting_whenPassedValidAuthorId() throws Exception {
         when(jwtUserBuilder.getJwtUser()).thenReturn(new JwtUser());
-        when(userService.findByIdAndAccountId(any())).thenReturn(ticketSetting.getAuthor());
+        when(userService.findByIdAndAccountId(any(), any())).thenReturn(ticketSetting.getAuthor());
         when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any())).thenReturn(ticketSetting);
 
         TicketSettingDtoResponse expectedTicketSettingDtoResponse =
@@ -126,7 +126,7 @@ class TicketSettingControllerV1Test {
 
         assertEquals(expectedTicketSettingDtoResponse, actualTicketSettingDtoResponse);
 
-        verify(userService, times(1)).findByIdAndAccountId(any());
+        verify(userService, times(1)).findByIdAndAccountId(any(), any());
         verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any());
     }
 
@@ -141,7 +141,7 @@ class TicketSettingControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
-        verify(userService, times(0)).findByIdAndAccountId(any());
+        verify(userService, times(0)).findByIdAndAccountId(any(), any());
         verify(ticketSettingService, times(0)).getSettingOrPredefinedValuesForTicket(any(), any());
     }
 }

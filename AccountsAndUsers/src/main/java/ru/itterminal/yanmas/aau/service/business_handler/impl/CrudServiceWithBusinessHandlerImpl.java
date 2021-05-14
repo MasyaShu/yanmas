@@ -55,11 +55,11 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
     public E create(E entity, User currentUser) {
         checkAccessBeforeCreate(currentUser);
         reflectionHelper.settingNestedObjectsIntoEntity(entity, currentUser);
+        entity.setId(UUID.randomUUID());
         businessHandler.beforeCreate(entity, currentUser);
         checkAccessBeforeCreate(entity, currentUser);
-        entity.setId(UUID.randomUUID());
-        entity.generateDisplayName();
         logicalValidationBeforeCreate(entity);
+        entity.generateDisplayName();
         var createdEntity = repository.create(entity);
         businessHandler.afterCreate(createdEntity, currentUser);
         return createdEntity;

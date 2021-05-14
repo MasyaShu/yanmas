@@ -40,8 +40,6 @@ import static ru.itterminal.yanmas.IT.util.ITHelper.*;
 @TestPropertySource(properties = {"jwt.token.secret=ksedtob", "jwt.token.expired=8640000", "jwt.token.prefix=Bearer"})
 class GroupIT {
 
-
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private UserRepository userRepository;
 

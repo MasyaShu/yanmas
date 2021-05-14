@@ -571,8 +571,8 @@ public class ITHelper {
         for (Role role : roles) {
             var newUser = userTestHelper.getRandomValidEntity();
             var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(newUser, true);
-            userDtoRequest.setRole(role.getId());
-            userDtoRequest.setGroup(group.getId());
+            userDtoRequest.setRoleId(role.getId());
+            userDtoRequest.setGroupId(group.getId());
 
             User createdUser = given()
                     .headers(
@@ -652,8 +652,8 @@ public class ITHelper {
     public User createUserByGivenUserForGivenRoleAndGroupWithSaveInMaps(Group group, Role role, User currentUser) {
         var newUser = userTestHelper.getRandomValidEntity();
         var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(newUser, true);
-        userDtoRequest.setRole(role.getId());
-        userDtoRequest.setGroup(group.getId());
+        userDtoRequest.setRoleId(role.getId());
+        userDtoRequest.setGroupId(group.getId());
 
         User createdUser = given()
                 .headers(
@@ -731,8 +731,8 @@ public class ITHelper {
     public User createUserByGivenUserForGivenRoleAndGroupWithoutSaveInMaps(Group group, Role role, User currentUser) {
         var newUser = userTestHelper.getRandomValidEntity();
         var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(newUser, true);
-        userDtoRequest.setRole(role.getId());
-        userDtoRequest.setGroup(group.getId());
+        userDtoRequest.setRoleId(role.getId());
+        userDtoRequest.setGroupId(group.getId());
 
         User createdUser = given()
                 .headers(

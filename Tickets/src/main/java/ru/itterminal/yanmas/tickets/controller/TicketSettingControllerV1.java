@@ -69,7 +69,7 @@ public class TicketSettingControllerV1 extends BaseControllerImpl<
     public ResponseEntity<TicketSettingDtoResponse> getSettingOrPredefinedValuesForTicket
             (@PathVariable UUID authorId) {
         var currentUser = getCurrentUser();
-        var foundUser = userService.findByIdAndAccountId(authorId);
+        var foundUser = userService.findByIdAndAccountId(authorId, currentUser);
         var ticketSetting = ticketSettingService.getSettingOrPredefinedValuesForTicket(
                 currentUser,
                 foundUser

@@ -48,7 +48,6 @@ import ru.itterminal.yanmas.security.jwt.JwtProvider;
 @TestPropertySource(properties = {"jwt.token.secret=ksedtob", "jwt.token.expired=8640000", "jwt.token.prefix=Bearer"})
 class UserIT {
 
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private UserRepository userRepository;
 
@@ -460,8 +459,8 @@ class UserIT {
                     if (user.getRole().getWeight() >= oneRole.getWeight()) {
                         var newUser = userTestHelper.getRandomValidEntity();
                         var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(newUser, true);
-                        userDtoRequest.setRole(oneRole.getId());
-                        userDtoRequest.setGroup(oneGroup.getId());
+                        userDtoRequest.setRoleId(oneRole.getId());
+                        userDtoRequest.setGroupId(oneGroup.getId());
                         given()
                                 .headers(
                                         "Authorization",
@@ -490,8 +489,8 @@ class UserIT {
                 if (oneRole.getName().equals(Roles.ACCOUNT_OWNER.toString())) {
                     var newUser = userTestHelper.getRandomValidEntity();
                     var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(newUser, true);
-                    userDtoRequest.setRole(oneRole.getId());
-                    userDtoRequest.setGroup(oneGroup.getId());
+                    userDtoRequest.setRoleId(oneRole.getId());
+                    userDtoRequest.setGroupId(oneGroup.getId());
                     given()
                             .headers(
                                     "Authorization",
@@ -521,8 +520,8 @@ class UserIT {
             for (Role oneRole : allRoles) {
                 var newUser = userTestHelper.getRandomValidEntity();
                 var userDtoRequest = userTestHelper.convertUserToUserDtoRequest(newUser, true);
-                userDtoRequest.setRole(oneRole.getId());
-                userDtoRequest.setGroup(oneGroup.getId());
+                userDtoRequest.setRoleId(oneRole.getId());
+                userDtoRequest.setGroupId(oneGroup.getId());
                 given()
                         .headers(
                                 "Authorization",

@@ -133,125 +133,125 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
 
     @SuppressWarnings("DuplicatedCode")
     private void setNestedObjectsOfEntityBeforeCreate(Ticket ticket, User currentUser) { //NOSONAR
-        var accountId = currentUser.getAccount().getId();
-        ticket.setAccount(accountService.findById(accountId));
-        ticket.setAuthor(userService.findByIdAndAccountId(ticket.getAuthor().getId(), accountId));
-        ticket.setGroup(ticket.getAuthor().getGroup());
-        ticket.setId(UUID.randomUUID());
-        ticket.setNumber(ticketCounterService.getNextTicketNumber(ticket.getAccount().getId()));
-        ticket.generateDisplayName();
-        var ticketSetting = ticketSettingService.getSettingOrPredefinedValuesForTicket(
-                currentUser,
-                ticket.getAuthor()
-        );
-        boolean isCurrentUserFromInnerGroup = currentUser.getGroup().getIsInner();
-        var isTicketFinished = ticket.getIsFinished();
-        var ticketStatus = ticket.getTicketStatus();
-        var weightOfRoleOfCurrentUser = currentUser.getRole().getWeight();
-        // ticket.status
-        if (Boolean.TRUE.equals(isTicketFinished) && (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight())) {
-            ticket.setTicketStatus(ticketSetting.getTicketStatusForClose());
-        } else if (ticketStatus != null && Boolean.FALSE.equals(isTicketFinished) && isCurrentUserFromInnerGroup
-                && (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight())) {
-            ticket.setTicketStatus(ticketStatusService.findByIdAndAccountId(ticketStatus.getId(), currentUser));
-        } else if ((Boolean.FALSE.equals(isTicketFinished) && ticket.getTicketStatus() == null)
-                || (Boolean.FALSE.equals(isTicketFinished) && !isCurrentUserFromInnerGroup)
-                || (Boolean.FALSE.equals(isTicketFinished) && weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight())) {
-            ticket.setTicketStatus(ticketSetting.getTicketStatusForNew());
-        }
-        // ticket.ticketType
-        var ticketType = ticket.getTicketType();
-        if (ticketType == null || !isCurrentUserFromInnerGroup
-                || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
-            ticket.setTicketType(ticketSetting.getTicketTypeForNew());
-        } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
-            ticket.setTicketType(ticketTypeService.findByIdAndAccountId(ticketType.getId(), currentUser));
-        }
-        // ticket.observers
-        if (ticket.getObservers() == null || !isCurrentUserFromInnerGroup
-                || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
-            ticket.setObservers(ticketSetting.getObservers());
-        } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
-            var listObserversId = ticket.getObservers().stream()
-                    .map(BaseEntity::getId)
-                    .collect(Collectors.toList());
-            ticket.setObservers(userService.findAllByAccountIdAndListId(accountId, listObserversId));
-        }
-        // ticket.executors
-        if (ticket.getExecutors() == null || !isCurrentUserFromInnerGroup
-                || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
-            ticket.setExecutors(ticketSetting.getExecutors());
-        } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
-            var listExecutorsId = ticket.getExecutors().stream()
-                    .map(BaseEntity::getId)
-                    .collect(Collectors.toList());
-            ticket.setExecutors(userService.findAllByAccountIdAndListId(accountId, listExecutorsId));
-        }
-        // ticket.priority
-        if (ticket.getPriority() == null) {
-            ticket.setPriority(Priority.MIDDLE.toString());
-        }
+//        var accountId = currentUser.getAccount().getId();
+//        ticket.setAccount(accountService.findById(accountId));
+//        ticket.setAuthor(userService.findByIdAndAccountId(ticket.getAuthor().getId(), accountId));
+//        ticket.setGroup(ticket.getAuthor().getGroup());
+//        ticket.setId(UUID.randomUUID());
+//        ticket.setNumber(ticketCounterService.getNextTicketNumber(ticket.getAccount().getId()));
+//        ticket.generateDisplayName();
+//        var ticketSetting = ticketSettingService.getSettingOrPredefinedValuesForTicket(
+//                currentUser,
+//                ticket.getAuthor()
+//        );
+//        boolean isCurrentUserFromInnerGroup = currentUser.getGroup().getIsInner();
+//        var isTicketFinished = ticket.getIsFinished();
+//        var ticketStatus = ticket.getTicketStatus();
+//        var weightOfRoleOfCurrentUser = currentUser.getRole().getWeight();
+//        // ticket.status
+//        if (Boolean.TRUE.equals(isTicketFinished) && (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight())) {
+//            ticket.setTicketStatus(ticketSetting.getTicketStatusForClose());
+//        } else if (ticketStatus != null && Boolean.FALSE.equals(isTicketFinished) && isCurrentUserFromInnerGroup
+//                && (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight())) {
+//            ticket.setTicketStatus(ticketStatusService.findByIdAndAccountId(ticketStatus.getId(), currentUser));
+//        } else if ((Boolean.FALSE.equals(isTicketFinished) && ticket.getTicketStatus() == null)
+//                || (Boolean.FALSE.equals(isTicketFinished) && !isCurrentUserFromInnerGroup)
+//                || (Boolean.FALSE.equals(isTicketFinished) && weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight())) {
+//            ticket.setTicketStatus(ticketSetting.getTicketStatusForNew());
+//        }
+//        // ticket.ticketType
+//        var ticketType = ticket.getTicketType();
+//        if (ticketType == null || !isCurrentUserFromInnerGroup
+//                || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
+//            ticket.setTicketType(ticketSetting.getTicketTypeForNew());
+//        } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
+//            ticket.setTicketType(ticketTypeService.findByIdAndAccountId(ticketType.getId(), currentUser));
+//        }
+//        // ticket.observers
+//        if (ticket.getObservers() == null || !isCurrentUserFromInnerGroup
+//                || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
+//            ticket.setObservers(ticketSetting.getObservers());
+//        } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
+//            var listObserversId = ticket.getObservers().stream()
+//                    .map(BaseEntity::getId)
+//                    .collect(Collectors.toList());
+//            ticket.setObservers(userService.findAllByAccountIdAndListId(accountId, listObserversId));
+//        }
+//        // ticket.executors
+//        if (ticket.getExecutors() == null || !isCurrentUserFromInnerGroup
+//                || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
+//            ticket.setExecutors(ticketSetting.getExecutors());
+//        } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
+//            var listExecutorsId = ticket.getExecutors().stream()
+//                    .map(BaseEntity::getId)
+//                    .collect(Collectors.toList());
+//            ticket.setExecutors(userService.findAllByAccountIdAndListId(accountId, listExecutorsId));
+//        }
+//        // ticket.priority
+//        if (ticket.getPriority() == null) {
+//            ticket.setPriority(Priority.MIDDLE.toString());
+//        }
     }
 
     @SuppressWarnings("DuplicatedCode")
     private void setNestedObjectsOfEntityBeforeUpdate(Ticket ticket, User currentUser) { //NOSONAR
-        var accountId = currentUser.getAccount().getId();
-        var ticketBeforeUpdate = findByIdAndAccountId(ticket.getId(), accountId);
-        ticket.setTicketTemplate(ticketBeforeUpdate.getTicketTemplate());
-        ticket.setNumber(ticketBeforeUpdate.getNumber());
-        ticket.setCreatedAt(ticketBeforeUpdate.getCreatedAt());
-        ticket.setFiles(ticketBeforeUpdate.getFiles());
-        ticket.setAccount(ticketBeforeUpdate.getAccount());
-        ticket.setAuthor(userService.findByIdAndAccountId(ticket.getAuthor().getId(), accountId));
-        ticket.setGroup(ticket.getAuthor().getGroup());
-        ticket.generateDisplayName();
-        var ticketSetting = ticketSettingService.getSettingOrPredefinedValuesForTicket(
-                currentUser,
-                ticket.getAuthor()
-        );
-        boolean isCurrentUserFromInnerGroup = currentUser.getGroup().getIsInner();
-        var isTicketFinished = ticket.getIsFinished();
-        var isTicketFinishedBeforeUpdate = ticketBeforeUpdate.getIsFinished();
-        var weightOfRoleOfCurrentUser = currentUser.getRole().getWeight();
-        // ticket.status
-        var ticketStatus = ticket.getTicketStatus();
-        if (Boolean.TRUE.equals(isTicketFinished) && Boolean.FALSE.equals(isTicketFinishedBeforeUpdate)) {
-            ticket.setTicketStatus(ticketSetting.getTicketStatusForClose());
-        } else if (ticketStatus == null) {
-            ticket.setTicketStatus(ticketBeforeUpdate.getTicketStatus());
-        } else if (isTicketFinished == null || !isTicketFinished) {
-            ticket.setTicketStatus(ticketStatusService.findByIdAndAccountId(ticketStatus.getId(), currentUser));
-        }
-        // ticket.ticketType
-        var ticketType = ticket.getTicketType();
-        if (ticketType == null || !isCurrentUserFromInnerGroup
-                || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
-            ticket.setTicketType(ticketBeforeUpdate.getTicketType());
-        } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
-            ticket.setTicketType(ticketTypeService.findByIdAndAccountId(ticketType.getId(), currentUser));
-        }
-        // ticket.observers
-        if (!isCurrentUserFromInnerGroup || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
-            ticket.setObservers(ticketBeforeUpdate.getObservers());
-        } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
-            var listObserversId = ticket.getObservers().stream()
-                    .map(BaseEntity::getId)
-                    .collect(Collectors.toList());
-            ticket.setObservers(userService.findAllByAccountIdAndListId(accountId, listObserversId));
-        }
-        // ticket.executors
-        if (!isCurrentUserFromInnerGroup || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
-            ticket.setExecutors(ticketBeforeUpdate.getExecutors());
-        } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
-            var listExecutorsId = ticket.getExecutors().stream()
-                    .map(BaseEntity::getId)
-                    .collect(Collectors.toList());
-            ticket.setExecutors(userService.findAllByAccountIdAndListId(accountId, listExecutorsId));
-        }
-        // ticket.priority
-        if (ticket.getPriority() == null) {
-            ticket.setPriority(ticketBeforeUpdate.getPriority());
-        }
+//        var accountId = currentUser.getAccount().getId();
+//        var ticketBeforeUpdate = findByIdAndAccountId(ticket.getId(), accountId);
+//        ticket.setTicketTemplate(ticketBeforeUpdate.getTicketTemplate());
+//        ticket.setNumber(ticketBeforeUpdate.getNumber());
+//        ticket.setCreatedAt(ticketBeforeUpdate.getCreatedAt());
+//        ticket.setFiles(ticketBeforeUpdate.getFiles());
+//        ticket.setAccount(ticketBeforeUpdate.getAccount());
+//        ticket.setAuthor(userService.findByIdAndAccountId(ticket.getAuthor().getId(), accountId));
+//        ticket.setGroup(ticket.getAuthor().getGroup());
+//        ticket.generateDisplayName();
+//        var ticketSetting = ticketSettingService.getSettingOrPredefinedValuesForTicket(
+//                currentUser,
+//                ticket.getAuthor()
+//        );
+//        boolean isCurrentUserFromInnerGroup = currentUser.getGroup().getIsInner();
+//        var isTicketFinished = ticket.getIsFinished();
+//        var isTicketFinishedBeforeUpdate = ticketBeforeUpdate.getIsFinished();
+//        var weightOfRoleOfCurrentUser = currentUser.getRole().getWeight();
+//        // ticket.status
+//        var ticketStatus = ticket.getTicketStatus();
+//        if (Boolean.TRUE.equals(isTicketFinished) && Boolean.FALSE.equals(isTicketFinishedBeforeUpdate)) {
+//            ticket.setTicketStatus(ticketSetting.getTicketStatusForClose());
+//        } else if (ticketStatus == null) {
+//            ticket.setTicketStatus(ticketBeforeUpdate.getTicketStatus());
+//        } else if (isTicketFinished == null || !isTicketFinished) {
+//            ticket.setTicketStatus(ticketStatusService.findByIdAndAccountId(ticketStatus.getId(), currentUser));
+//        }
+//        // ticket.ticketType
+//        var ticketType = ticket.getTicketType();
+//        if (ticketType == null || !isCurrentUserFromInnerGroup
+//                || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
+//            ticket.setTicketType(ticketBeforeUpdate.getTicketType());
+//        } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
+//            ticket.setTicketType(ticketTypeService.findByIdAndAccountId(ticketType.getId(), currentUser));
+//        }
+//        // ticket.observers
+//        if (!isCurrentUserFromInnerGroup || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
+//            ticket.setObservers(ticketBeforeUpdate.getObservers());
+//        } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
+//            var listObserversId = ticket.getObservers().stream()
+//                    .map(BaseEntity::getId)
+//                    .collect(Collectors.toList());
+//            ticket.setObservers(userService.findAllByAccountIdAndListId(accountId, listObserversId));
+//        }
+//        // ticket.executors
+//        if (!isCurrentUserFromInnerGroup || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
+//            ticket.setExecutors(ticketBeforeUpdate.getExecutors());
+//        } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
+//            var listExecutorsId = ticket.getExecutors().stream()
+//                    .map(BaseEntity::getId)
+//                    .collect(Collectors.toList());
+//            ticket.setExecutors(userService.findAllByAccountIdAndListId(accountId, listExecutorsId));
+//        }
+//        // ticket.priority
+//        if (ticket.getPriority() == null) {
+//            ticket.setPriority(ticketBeforeUpdate.getPriority());
+//        }
     }
 
     @Override
