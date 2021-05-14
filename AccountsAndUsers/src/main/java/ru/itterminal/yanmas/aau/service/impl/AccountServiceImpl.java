@@ -44,7 +44,7 @@ public class AccountServiceImpl extends CrudServiceImpl<Account, AccountOperatio
                 .account(account)
                 .group(createdGroupAccountOwner)
                 .build();
-        userService.create(userAccountOwner);
+        userService.create(userAccountOwner, null);
         return createdAccount;
     }
 }

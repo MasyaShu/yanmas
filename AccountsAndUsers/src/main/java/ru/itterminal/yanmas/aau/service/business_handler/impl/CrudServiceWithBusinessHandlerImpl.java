@@ -1,5 +1,14 @@
 package ru.itterminal.yanmas.aau.service.business_handler.impl;
 
+import static java.lang.String.format;
+import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
+import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.ifErrorsNotEmptyThrowLogicalValidationException;
+
+import java.util.List;
+import java.util.UUID;
+
+import javax.persistence.OptimisticLockException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -8,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.service.business_handler.CrudServiceWithBusinessHandler;
 import ru.itterminal.yanmas.aau.service.business_handler.EntityBusinessHandler;
@@ -16,14 +26,6 @@ import ru.itterminal.yanmas.aau.util.ReflectionHelper;
 import ru.itterminal.yanmas.commons.exception.EntityNotExistException;
 import ru.itterminal.yanmas.commons.model.BaseEntity;
 import ru.itterminal.yanmas.commons.repository.EntityRepositoryWithAccount;
-
-import javax.persistence.OptimisticLockException;
-import java.util.List;
-import java.util.UUID;
-
-import static java.lang.String.format;
-import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
-import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.ifErrorsNotEmptyThrowLogicalValidationException;
 
 @SuppressWarnings({"SpringJavaAutowiredFieldsWarningInspection"})
 @Service
@@ -77,7 +79,8 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
             var updatedEntity = repository.update(entity);
             businessHandler.afterUpdate(updatedEntity, currentUser);
             return updatedEntity;
-        } catch (OptimisticLockException ex) {
+        }
+        catch (OptimisticLockException ex) {
             throw new OptimisticLockingFailureException(format(VERSION_INVALID_MESSAGE, entity.getId()));
         }
     }
@@ -121,7 +124,16 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
         }
     }
 
-    private void checkAccessBeforeCreate(User currentUser) {
+    @Transactional(readOnly = true)
+    public E findById(UUID id) {
+        return repository.findById(id).orElseThrow(
+                () -> new EntityNotExistException(
+                        format(NOT_FOUND_ENTITY_BY_EMAIL, id)
+                )
+        );
+    }
+
+    protected void checkAccessBeforeCreate(User currentUser) {
         if (validators != null) {
             for (EntityValidator<E> validator : validators) {
                 validator.checkAccessBeforeCreate(currentUser);
@@ -129,7 +141,7 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
         }
     }
 
-    private void checkAccessBeforeCreate(E entity, User currentUser) {
+    protected void checkAccessBeforeCreate(E entity, User currentUser) {
         if (validators != null) {
             for (EntityValidator<E> validator : validators) {
                 validator.checkAccessBeforeCreate(entity, currentUser);
@@ -137,7 +149,7 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
         }
     }
 
-    private void checkAccessBeforeUpdate(User currentUser) {
+    protected void checkAccessBeforeUpdate(User currentUser) {
         if (validators != null) {
             for (EntityValidator<E> validator : validators) {
                 validator.checkAccessBeforeUpdate(currentUser);
@@ -145,7 +157,7 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
         }
     }
 
-    private void checkAccessBeforeUpdate(E entity, User currentUser) {
+    protected void checkAccessBeforeUpdate(E entity, User currentUser) {
         if (validators != null) {
             for (EntityValidator<E> validator : validators) {
                 validator.checkAccessBeforeUpdate(entity, currentUser);
@@ -153,7 +165,7 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
         }
     }
 
-    private void checkAccessBeforeRead(User currentUser) {
+    protected void checkAccessBeforeRead(User currentUser) {
         if (validators != null) {
             for (EntityValidator<E> validator : validators) {
                 validator.checkAccessBeforeRead(currentUser);
@@ -161,7 +173,7 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
         }
     }
 
-    private void checkAccessBeforeRead(E entity, User currentUser) {
+    protected void checkAccessBeforeRead(E entity, User currentUser) {
         if (validators != null) {
             for (EntityValidator<E> validator : validators) {
                 validator.checkAccessBeforeRead(entity, currentUser);
@@ -169,7 +181,7 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
         }
     }
 
-    private void logicalValidationBeforeCreate(E entity) {
+    protected void logicalValidationBeforeCreate(E entity) {
         if (validators != null) {
             var errors = createMapForLogicalErrors();
             for (EntityValidator<E> validator : validators) {
@@ -179,7 +191,7 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
         }
     }
 
-    private void logicalValidationBeforeUpdate(E entity) {
+    protected void logicalValidationBeforeUpdate(E entity) {
         if (validators != null) {
             var errors = createMapForLogicalErrors();
             for (EntityValidator<E> validator : validators) {

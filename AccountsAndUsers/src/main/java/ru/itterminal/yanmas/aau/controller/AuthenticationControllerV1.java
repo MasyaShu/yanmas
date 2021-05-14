@@ -12,6 +12,7 @@ import ru.itterminal.yanmas.aau.service.impl.UserServiceImpl;
 import ru.itterminal.yanmas.commons.exception.JwtAuthenticationException;
 import ru.itterminal.yanmas.security.jwt.JwtProvider;
 import ru.itterminal.yanmas.security.jwt.JwtUser;
+import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
@@ -40,6 +41,7 @@ public class AuthenticationControllerV1 {
 
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
+    private final JwtUserBuilder jwtUserBuilder;
     private final UserServiceImpl userService;
 
     @PostMapping("/signin")
@@ -76,18 +78,20 @@ public class AuthenticationControllerV1 {
     }
 
     @GetMapping(path = "/request-email-update")
-    public ResponseEntity<String> requestEmailUpdate(
+    public ResponseEntity<String> requestForUpdateEmailOfAccountOwner(
             @Pattern(regexp = EMAIL_PATTERN, message = INVALID_EMAIL)
             @NotEmpty
             @RequestParam(value = "newEmail") String newEmail
     ) {
-        userService.requestUpdateEmailOfAccountOwner(newEmail);
+        var jwtUser = jwtUserBuilder.getJwtUser();
+        var currentUser = userService.findById(jwtUser.getId());
+        userService.requestForUpdateEmailOfAccountOwner(newEmail, currentUser);
         return ResponseEntity.ok(TOKEN_FOR_UPDATE_EMAIL_WAS_SENT_TO_NEW_EMAIL);
     }
 
     @GetMapping(path = "/request-password-reset")
     public ResponseEntity<String> requestPasswordReset(@RequestParam(value = "email") @NotEmpty String email) {
-        userService.requestPasswordReset(email);
+        userService.requestForResetPassword(email);
         return ResponseEntity.ok(TOKEN_FOR_RESET_PASSWORD_WAS_SENT_TO_EMAIL);
     }
 
@@ -98,8 +102,10 @@ public class AuthenticationControllerV1 {
     }
 
     @GetMapping(path = "/email-update")
-    public ResponseEntity<String> emailUpdate(@RequestParam(value = "token") @NotEmpty String token) {
-        userService.updateEmailOfAccountOwner(token);
+    public ResponseEntity<String> updateEmailOfAccountOwner(@RequestParam(value = "token") @NotEmpty String token) {
+        var jwtUser = jwtUserBuilder.getJwtUser();
+        var currentUser = userService.findById(jwtUser.getId());
+        userService.updateEmailOfAccountOwner(token, currentUser);
         return ResponseEntity.ok(EMAIL_WAS_SUCCESSFULLY_UPDATED);
     }
 }

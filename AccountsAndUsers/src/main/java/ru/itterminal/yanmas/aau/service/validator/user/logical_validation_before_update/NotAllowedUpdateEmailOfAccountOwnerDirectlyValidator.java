@@ -27,7 +27,7 @@ public class NotAllowedUpdateEmailOfAccountOwnerDirectlyValidator implements Ent
     public void logicalValidationBeforeUpdate(User entity,
                                               Map<String, List<ValidationError>> errors) {
         var isNewUserWithRoleAccountOwner = entity.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString());
-        var userFromDatabase = service.findByIdAndAccountId(entity.getId(), entity.getAccount().getId());
+        var userFromDatabase = service.findById(entity.getId());
         if (isNewUserWithRoleAccountOwner && !entity.getEmail().equals(userFromDatabase.getEmail())) {
             addValidationErrorIntoErrors(
                     USER_WITH_ROLE_ACCOUNT_OWNER,

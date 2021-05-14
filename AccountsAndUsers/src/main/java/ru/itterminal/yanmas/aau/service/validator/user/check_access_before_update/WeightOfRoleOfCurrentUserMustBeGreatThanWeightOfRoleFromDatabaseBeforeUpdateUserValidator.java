@@ -19,7 +19,7 @@ public class WeightOfRoleOfCurrentUserMustBeGreatThanWeightOfRoleFromDatabaseBef
     @Override
     public void checkAccessBeforeUpdate(User entity, User currentUser) {
         if (currentUser != null) {
-            var userFromDatabase = service.findByIdAndAccountId(entity.getId(), currentUser.getAccount().getId());
+            var userFromDatabase = service.findByIdAndAccountId(entity.getId(), currentUser);
             var weightOfRoleOfCurrentUser = currentUser.getRole().getWeight();
             var weightOfRoleFromDatabase = userFromDatabase.getRole().getWeight();
             if (weightOfRoleFromDatabase > weightOfRoleOfCurrentUser) {

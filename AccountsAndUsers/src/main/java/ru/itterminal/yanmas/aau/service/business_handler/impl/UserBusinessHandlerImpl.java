@@ -47,7 +47,7 @@ public class UserBusinessHandlerImpl implements EntityBusinessHandler<User> {
 
     @Override
     public void beforeUpdate(User entity, User currentUser) {
-        var entityFromDatabase = userService.findByIdAndAccountId(entity.getId(), currentUser.getAccount().getId());
+        var entityFromDatabase = userService.findByIdAndAccountId(entity.getId(), currentUser);
         if (entity.getPassword() == null || entity.getPassword().isEmpty()) {
             entity.setPassword(entityFromDatabase.getPassword());
         } else {

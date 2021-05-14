@@ -1,14 +1,29 @@
 package ru.itterminal.yanmas.aau.controller;
 
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import static ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
+
+import java.util.List;
+import java.util.UUID;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
+
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+import lombok.AllArgsConstructor;
 import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.model.dto.UserDtoRequest;
@@ -23,20 +38,8 @@ import ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter;
 import ru.itterminal.yanmas.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.yanmas.commons.model.validator.scenario.Create;
 import ru.itterminal.yanmas.commons.model.validator.scenario.Update;
-import ru.itterminal.yanmas.security.jwt.JwtUser;
 import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
-import java.security.Principal;
-import java.util.List;
-import java.util.UUID;
-
-import static ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
-
-@SuppressWarnings("DuplicatedCode")
-@Slf4j
 @RestController("UserControllerV1")
 @Validated
 @RequestMapping("api/v1/user")
@@ -48,61 +51,51 @@ public class UserControllerV1 extends BaseController {
     private final RoleServiceImpl roleService;
     private final GroupServiceImpl groupService;
     private final SpecificationsFactory specFactory;
+    private final  JwtUserBuilder jwtUserBuilder;
 
-    @Autowired
-    protected JwtUserBuilder jwtUserBuilder;
-
-    private final String ENTITY_NAME = User.class.getSimpleName();
-
+    @SuppressWarnings("DuplicatedCode")
     @PostMapping()
     @ResponseStatus(value = HttpStatus.CREATED)
-    public ResponseEntity<UserDtoResponse> create(Principal principal,
-                                                  @Validated(Create.class) @RequestBody UserDtoRequest request) {
-        log.debug(CREATE_INIT_MESSAGE, ENTITY_NAME, request);
+    public ResponseEntity<UserDtoResponse> create(@Validated(Create.class) @RequestBody UserDtoRequest request) {
         var user = modelMapper.map(request, User.class);
-        var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
+        var currentUser = getCurrentUser();
         // !!! setting is here because it is not possible into service layer (cycle dependency with AccountServiceImpl)
-        user.setAccount(accountService.findById(jwtUser.getAccountId()));
+        user.setAccount(accountService.findById(currentUser.getAccount().getId()));
         user.setRole(roleService.findById(request.getRole()));
-        user.setGroup(groupService.findByIdAndAccountId(request.getGroup(), getCurrentUser()));
-        var createdUser = userService.create(user);
+        user.setGroup(groupService.findByIdAndAccountId(request.getGroup(), currentUser));
+        var createdUser = userService.create(user, currentUser);
         var returnedUser = modelMapper.map(createdUser, UserDtoResponse.class);
-        log.info(CREATE_FINISH_MESSAGE, ENTITY_NAME, createdUser);
         return new ResponseEntity<>(returnedUser, HttpStatus.CREATED);
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @PutMapping()
-    public ResponseEntity<UserDtoResponse> update(Principal principal,
-                                                  @Validated(Update.class) @RequestBody UserDtoRequest request) {
-        log.debug(UPDATE_INIT_MESSAGE, ENTITY_NAME, request);
+    public ResponseEntity<UserDtoResponse> update(@Validated(Update.class) @RequestBody UserDtoRequest request) {
         var user = modelMapper.map(request, User.class);
-        var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal());
-        user.setAccount(accountService.findById(jwtUser.getAccountId()));
+        var currentUser = getCurrentUser();
+        user.setAccount(accountService.findById(currentUser.getAccount().getId()));
         user.setRole(roleService.findById(request.getRole()));
-        user.setGroup(groupService.findByIdAndAccountId(request.getGroup(), getCurrentUser()));
-        var updatedUser = userService.update(user);
+        user.setGroup(groupService.findByIdAndAccountId(request.getGroup(), currentUser));
+        var updatedUser = userService.update(user, currentUser);
         var returnedUser = modelMapper.map(updatedUser, UserDtoResponse.class);
-        log.info(UPDATE_FINISH_MESSAGE, ENTITY_NAME, updatedUser);
         return new ResponseEntity<>(returnedUser, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDtoResponse> getById(@PathVariable UUID id) {
-        log.debug(FIND_BY_ID_INIT_MESSAGE, ENTITY_NAME, id);
-        var foundUser = userService.findByIdAndAccountId(id);
+        var currentUser = getCurrentUser();
+        var foundUser = userService.findByIdAndAccountId(id, currentUser);
         var returnedUser = modelMapper.map(foundUser, UserDtoResponse.class);
-        log.debug(FIND_BY_ID_FINISH_MESSAGE, ENTITY_NAME, foundUser);
         return new ResponseEntity<>(returnedUser, HttpStatus.OK);
     }
 
     @GetMapping()
     public ResponseEntity<Page<UserDtoResponse>> getByFilter(
-            Principal user,
             @Valid @RequestBody UserFilterDto filterDto,
             @RequestParam(defaultValue = PAGE_DEFAULT_VALUE) @PositiveOrZero int page,
             @RequestParam(defaultValue = SIZE_DEFAULT_VALUE) @Positive int size) {
-        log.debug(FIND_INIT_MESSAGE, ENTITY_NAME, page, size, filterDto);
-        var jwtUser = ((JwtUser) ((UsernamePasswordAuthenticationToken) user).getPrincipal());
+        var jwtUser = jwtUserBuilder.getJwtUser();
+        var currentUser = userService.findById(jwtUser.getId());
         var accountId = jwtUser.getAccountId();
         if (jwtUser.getWeightRole() <= Roles.AUTHOR.getWeight() || !jwtUser.isInnerGroup()) {
             var groupFilter = BaseEntityFilter.builder()
@@ -113,14 +106,13 @@ public class UserControllerV1 extends BaseController {
         }
         var pageable = createPageable(size, page, filterDto.getSortByFields(), filterDto.getSortDirection());
         var userSpecification = specFactory.makeSpecificationFromEntityFilterDto(User.class, filterDto, accountId);
-        var foundUsers = userService.findAllByFilter(userSpecification, pageable);
+        var foundUsers = userService.findAllByFilter(userSpecification, pageable, currentUser);
         var returnedUsers = mapPage(foundUsers, UserDtoResponse.class, pageable);
-        log.debug(FIND_FINISH_MESSAGE, ENTITY_NAME, foundUsers.getTotalElements());
         return new ResponseEntity<>(returnedUsers, HttpStatus.OK);
     }
 
     private User getCurrentUser() {
         var jwtUser = jwtUserBuilder.getJwtUser();
-        return userService.findByIdAndAccountId(jwtUser.getId(), jwtUser.getAccountId());
+        return userService.findById(jwtUser.getId());
     }
 }

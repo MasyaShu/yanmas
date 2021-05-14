@@ -29,7 +29,7 @@ public class NotAllowedChangeGroupOfUserIfUserWasUsedInTicketsValidator implemen
     @Override
     public void logicalValidationBeforeUpdate(User entity,
                                               Map<String, List<ValidationError>> errors) {
-        var userFromDatabase = service.findByIdAndAccountId(entity.getId(), entity.getAccount().getId());
+        var userFromDatabase = service.findById(entity.getId());
         var groupIdOfUserFromDatabase = userFromDatabase.getGroup().getId();
         var groupIdOfUserFromEntity = entity.getGroup().getId();
         if (!groupIdOfUserFromDatabase.equals(groupIdOfUserFromEntity)) {

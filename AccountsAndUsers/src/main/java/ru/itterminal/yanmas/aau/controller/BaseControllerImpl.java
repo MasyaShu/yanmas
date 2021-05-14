@@ -18,7 +18,7 @@ import ru.itterminal.yanmas.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 import java.util.UUID;
 
-@SuppressWarnings({"unchecked", "rawtypes", "SpringJavaAutowiredFieldsWarningInspection", "SpringJavaInjectionPointsAutowiringInspection"})
+@SuppressWarnings({"unchecked", "rawtypes", "SpringJavaAutowiredFieldsWarningInspection"})
 @Component
 public abstract class BaseControllerImpl<
         E extends BaseEntity, // Entity
@@ -96,6 +96,6 @@ public abstract class BaseControllerImpl<
 
     private User getCurrentUser() {
         var jwtUser = jwtUserBuilder.getJwtUser();
-        return userService.findByIdAndAccountId(jwtUser.getId(), jwtUser.getAccountId());
+        return userService.findById(jwtUser.getId());
     }
 }

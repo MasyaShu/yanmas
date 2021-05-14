@@ -31,7 +31,7 @@ public class UserFromOuterGroupCanUpdateUserOnlyWithinHisGroupValidator implemen
                             )
                     );
                 }
-                var userFromDatabase = service.findByIdAndAccountId(entity.getId(), currentUser.getAccount().getId());
+                var userFromDatabase = service.findById(entity.getId());
                 var groupFromDataBase = userFromDatabase.getGroup();
                 if (!groupFromDataBase.getId().equals(groupOfCurrentUser.getId())) {
                     throw new AccessDeniedException(

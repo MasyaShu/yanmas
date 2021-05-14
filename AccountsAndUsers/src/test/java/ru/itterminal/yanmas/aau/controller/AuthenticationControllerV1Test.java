@@ -14,7 +14,6 @@ import static ru.itterminal.yanmas.commons.util.CommonConstants.MUST_NOT_BE_NULL
 import static ru.itterminal.yanmas.commons.util.CommonConstants.SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS;
 import static ru.itterminal.yanmas.security.config.TestSecurityConfig.EMAIL_1;
 
-import io.jsonwebtoken.ExpiredJwtException;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,13 +41,16 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import ru.itterminal.yanmas.aau.model.dto.AuthenticationRequestDto;
 import ru.itterminal.yanmas.aau.model.dto.ResetPasswordDto;
 import ru.itterminal.yanmas.aau.service.impl.UserServiceImpl;
+import ru.itterminal.yanmas.aau.util.AAUConstants;
 import ru.itterminal.yanmas.commons.exception.RestExceptionHandler;
 import ru.itterminal.yanmas.security.config.TestSecurityConfig;
 import ru.itterminal.yanmas.security.jwt.JwtProvider;
-import ru.itterminal.yanmas.aau.util.AAUConstants;
+import ru.itterminal.yanmas.security.jwt.JwtUser;
+import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringJUnitConfig(value = {AuthenticationControllerV1.class, FilterChainProxy.class})
@@ -69,6 +71,9 @@ class AuthenticationControllerV1Test {
     @SuppressWarnings("unused")
     @MockBean
     private JwtProvider jwtProvider;
+
+    @MockBean
+    private JwtUserBuilder jwtUserBuilder;
 
     @Mock
     Authentication authentication;
@@ -181,7 +186,7 @@ class AuthenticationControllerV1Test {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").value(AuthenticationControllerV1.TOKEN_FOR_RESET_PASSWORD_WAS_SENT_TO_EMAIL));
-        verify(userService, times(1)).requestPasswordReset(EMAIL_1);
+        verify(userService, times(1)).requestForResetPassword(EMAIL_1);
     }
 
     @Test
@@ -192,7 +197,7 @@ class AuthenticationControllerV1Test {
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
-        verify(userService, times(0)).requestPasswordReset(EMAIL_1);
+        verify(userService, times(0)).requestForResetPassword(EMAIL_1);
     }
 
     @Test
@@ -264,24 +269,26 @@ class AuthenticationControllerV1Test {
     @Test
     @WithUserDetails("OWNER_ACCOUNT_1_IS_INNER_GROUP")
     void requestEmailUpdate_shouldGetStatusOk_whenPassedValidEmail() throws Exception {
+        when(jwtUserBuilder.getJwtUser()).thenReturn(new JwtUser());
         MockHttpServletRequestBuilder request =
                 get(HOST + PORT + API + "request-email-update?newEmail=" + EMAIL_1);
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").value(AuthenticationControllerV1.TOKEN_FOR_UPDATE_EMAIL_WAS_SENT_TO_NEW_EMAIL));
-        verify(userService, times(1)).requestUpdateEmailOfAccountOwner(EMAIL_1);
+        verify(userService, times(1)).requestForUpdateEmailOfAccountOwner(any(), any());
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
     void requestEmailUpdate_shouldGetStatusForbidden_whenUserIsNotAccountOwner() throws Exception {
+        when(jwtUserBuilder.getJwtUser()).thenReturn(new JwtUser());
         MockHttpServletRequestBuilder request =
                 get(HOST + PORT + API + "request-email-update?newEmail=" + EMAIL_1);
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
-        verify(userService, times(0)).requestUpdateEmailOfAccountOwner(EMAIL_1);
+        verify(userService, times(0)).requestForUpdateEmailOfAccountOwner(any(), any());
     }
 
     @Test
@@ -295,7 +302,7 @@ class AuthenticationControllerV1Test {
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers
                         .jsonPath("$.detail", AAUConstants.INVALID_EMAIL).exists());
-        verify(userService, times(0)).requestUpdateEmailOfAccountOwner(anyString());
+        verify(userService, times(0)).requestForUpdateEmailOfAccountOwner(any(), any());
     }
 
     @Test
@@ -310,30 +317,32 @@ class AuthenticationControllerV1Test {
                         .jsonPath("$.detail")
                         .value(Matchers.containsString(
                                 MUST_NOT_BE_EMPTY)));
-        verify(userService, times(0)).requestUpdateEmailOfAccountOwner(anyString());
+        verify(userService, times(0)).requestForUpdateEmailOfAccountOwner(any(), any());
     }
 
     @Test
     @WithUserDetails("OWNER_ACCOUNT_1_IS_INNER_GROUP")
     void emailUpdate_shouldGetStatusOk_whenPassedValidToken() throws Exception {
+        when(jwtUserBuilder.getJwtUser()).thenReturn(new JwtUser());
         var request =
                 get(HOST + PORT + API + "email-update?token=" + mockEmailVerificationToken);
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").value(AuthenticationControllerV1.EMAIL_WAS_SUCCESSFULLY_UPDATED));
-        verify(userService, times(1)).updateEmailOfAccountOwner(mockEmailVerificationToken);
+        verify(userService, times(1)).updateEmailOfAccountOwner(any(), any());
     }
 
     @Test
     @WithUserDetails("ADMIN_ACCOUNT_1_IS_NOT_INNER_GROUP")
     void emailUpdate_shouldGetStatusForbidden_whenUserIsNotAccountOwner() throws Exception {
+        when(jwtUserBuilder.getJwtUser()).thenReturn(new JwtUser());
         var request
                 = get(HOST + PORT + API + "email-update?token=" + mockEmailVerificationToken);
         mockMvc.perform(request)
                 .andDo(print())
                 .andExpect(status().isForbidden());
-        verify(userService, times(0)).updateEmailOfAccountOwner(mockEmailVerificationToken);
+        verify(userService, times(0)).updateEmailOfAccountOwner(any(), any());
     }
 
     @Test
@@ -348,7 +357,7 @@ class AuthenticationControllerV1Test {
                         .jsonPath("$.detail")
                         .value(Matchers.containsString(
                                 MUST_NOT_BE_EMPTY)));
-        verify(userService, times(0)).updateEmailOfAccountOwner(anyString());
+        verify(userService, times(0)).updateEmailOfAccountOwner(any(), any());
     }
 
     @Test
