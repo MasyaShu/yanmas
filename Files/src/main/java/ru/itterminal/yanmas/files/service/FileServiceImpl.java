@@ -1,30 +1,32 @@
 package ru.itterminal.yanmas.files.service;
 
-import static java.lang.String.format;
-import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createLogicalValidationException;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.UUID;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import lombok.extern.slf4j.Slf4j;
-import ru.itterminal.yanmas.aau.service.impl.AccountServiceImpl;
-import ru.itterminal.yanmas.aau.service.impl.CrudServiceWithAccountImpl;
+import ru.itterminal.yanmas.aau.model.User;
+import ru.itterminal.yanmas.aau.service.business_handler.impl.CrudServiceWithBusinessHandlerImpl;
+import ru.itterminal.yanmas.aau.service.business_handler.impl.EmptyBusinessHandlerImpl;
+import ru.itterminal.yanmas.aau.service.validator.EntityValidator;
 import ru.itterminal.yanmas.commons.exception.EntityNotExistException;
 import ru.itterminal.yanmas.files.model.File;
 import ru.itterminal.yanmas.files.repository.FileRepository;
 import ru.itterminal.yanmas.files.repository.FileSystemRepository;
-import ru.itterminal.yanmas.files.service.validator.FileOperationValidator;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.UUID;
+
+import static java.lang.String.format;
+import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createLogicalValidationException;
 
 @Slf4j
 @Service
-public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperationValidator, FileRepository> {
+public class FileServiceImpl extends CrudServiceWithBusinessHandlerImpl
+        <File, EmptyBusinessHandlerImpl<File>, FileRepository> {
 
     public static final String FILE_ID = "File id";
     public static final String FILE_ID_IS_NULL = "File id is null";
@@ -40,46 +42,45 @@ public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperat
     private final String dirUploadedFiles;
 
     private final FileSystemRepository fileSystemRepository;
-    private final AccountServiceImpl accountService;
 
     public FileServiceImpl(FileSystemRepository fileSystemRepository,
-                           AccountServiceImpl accountService,
-                           @Value("${dir.uploaded.files}") String dirUploadedFiles) throws IOException {
+                           @Value("${dir.uploaded.files}") String dirUploadedFiles,
+                           List<EntityValidator<File>> validators) throws IOException {
         this.fileSystemRepository = fileSystemRepository;
-        this.accountService = accountService;
         this.dirUploadedFiles = dirUploadedFiles;
+        this.validators = validators;
         Files.createDirectories(Paths.get(dirUploadedFiles));
     }
 
     @Transactional(readOnly = true)
-    public FileSystemResource getFileData(UUID accountId, UUID fileId) {
+    public FileSystemResource getFileData(User currentUser, UUID fileId) {
         if (fileId == null) {
             throw createLogicalValidationException(FILE_ID, FILE_ID_IS_NULL);
         }
-        var file = super.findByIdAndAccountId(fileId);
+        var file = super.findByIdAndAccountId(fileId, currentUser);
         if (Boolean.FALSE.equals(file.getIsUploaded())) {
             throw createLogicalValidationException(FILE, FILE_WAS_NOT_UPLOAD);
         }
         return fileSystemRepository.findInFileSystem(
                 Paths.get(
                         dirUploadedFiles,
-                        accountId.toString(),
+                        currentUser.getAccount().getId().toString(),
                         fileId.toString()
                 )
         );
     }
 
     @Transactional
-    public void putFileData(UUID accountId, UUID authorId, UUID fileId, byte[] bytes) throws IOException {
+    public void putFileData(User currentUser, UUID fileId, byte[] bytes) throws IOException {
         if (fileId == null) {
             throw createLogicalValidationException(FILE_ID, FILE_ID_IS_NULL);
         }
         if (bytes.length > maxSizeOfFile) {
             throw createLogicalValidationException(SIZE_FILE, format(MAX_SIZE, maxSizeOfFile));
         }
-        File file = repository.findByAccountIdAndAuthorIdAndId(accountId, authorId, fileId).orElseThrow(
+        var file = repository.findByAccountIdAndAuthorIdAndId(currentUser.getAccount().getId(), currentUser.getId(), fileId).orElseThrow(
                 () -> {
-                    var errorMessage = format(COULD_NOT_FIND_FILE, SEARCH_PARAMETER, accountId, authorId, fileId);
+                    var errorMessage = format(COULD_NOT_FIND_FILE, SEARCH_PARAMETER, currentUser.getAccount().getId(), currentUser.getId(), fileId);
                     log.error(errorMessage);
                     throw new EntityNotExistException(errorMessage);
                 }
@@ -88,22 +89,12 @@ public class FileServiceImpl extends CrudServiceWithAccountImpl<File, FileOperat
                 bytes,
                 Paths.get(
                         dirUploadedFiles,
-                        accountId.toString(),
+                        currentUser.getAccount().getId().toString(),
                         fileId.toString()
                 )
         );
         file.setIsUploaded(true);
         file.setSize(bytes.length);
         repository.update(file);
-    }
-
-    @Override
-    protected void setNestedObjectsOfEntityBeforeCreate(File entity) {
-        entity.setAccount(accountService.findById(entity.getAccount().getId()));
-    }
-
-    @Override
-    protected void setNestedObjectsOfEntityBeforeUpdate(File entity) {
-        entity.setAccount(accountService.findById(entity.getAccount().getId()));
     }
 }
