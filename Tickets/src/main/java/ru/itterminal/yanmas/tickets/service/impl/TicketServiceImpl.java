@@ -112,13 +112,12 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
     }
 
     @Transactional
-    public Ticket reOpen(Ticket entity) {
+    public Ticket reOpen(Ticket entity, User currentUser) {
         validator.logicalValidationBeforeUpdate(entity);
         log.trace(format(START_REOPEN_TICKET_WITH_ID, entity.getId()));
         var ticketSetting = ticketSettingService.getSettingOrPredefinedValuesForTicket(
-                entity.getAccount().getId(),
-                entity.getGroup().getId(),
-                entity.getAuthor().getId()
+                currentUser,
+                entity.getAuthor()
         );
         try {
             entity.setIsFinished(false);
@@ -142,9 +141,8 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
         ticket.setNumber(ticketCounterService.getNextTicketNumber(ticket.getAccount().getId()));
         ticket.generateDisplayName();
         var ticketSetting = ticketSettingService.getSettingOrPredefinedValuesForTicket(
-                accountId,
-                ticket.getGroup().getId(),
-                ticket.getAuthor().getId()
+                currentUser,
+                ticket.getAuthor()
         );
         boolean isCurrentUserFromInnerGroup = currentUser.getGroup().getIsInner();
         var isTicketFinished = ticket.getIsFinished();
@@ -167,7 +165,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
                 || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
             ticket.setTicketType(ticketSetting.getTicketTypeForNew());
         } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
-            ticket.setTicketType(ticketTypeService.findByIdAndAccountId(ticketType.getId(), accountId));
+            ticket.setTicketType(ticketTypeService.findByIdAndAccountId(ticketType.getId(), currentUser));
         }
         // ticket.observers
         if (ticket.getObservers() == null || !isCurrentUserFromInnerGroup
@@ -208,9 +206,8 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
         ticket.setGroup(ticket.getAuthor().getGroup());
         ticket.generateDisplayName();
         var ticketSetting = ticketSettingService.getSettingOrPredefinedValuesForTicket(
-                accountId,
-                ticket.getGroup().getId(),
-                ticket.getAuthor().getId()
+                currentUser,
+                ticket.getAuthor()
         );
         boolean isCurrentUserFromInnerGroup = currentUser.getGroup().getIsInner();
         var isTicketFinished = ticket.getIsFinished();
@@ -231,7 +228,7 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
                 || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
             ticket.setTicketType(ticketBeforeUpdate.getTicketType());
         } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
-            ticket.setTicketType(ticketTypeService.findByIdAndAccountId(ticketType.getId(), accountId));
+            ticket.setTicketType(ticketTypeService.findByIdAndAccountId(ticketType.getId(), currentUser));
         }
         // ticket.observers
         if (!isCurrentUserFromInnerGroup || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {

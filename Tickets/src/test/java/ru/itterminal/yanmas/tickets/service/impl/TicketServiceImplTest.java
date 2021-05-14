@@ -101,7 +101,7 @@ class TicketServiceImplTest {
         when(validator.logicalValidationBeforeCreate(any())).thenReturn(true);
         when(accountService.findById(any())).thenReturn(ticket.getAccount());
         when(userService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getAuthor());
-        when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any(), any()))
+        when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any()))
                 .thenReturn(new TicketSetting());
         when(repository.create(any())).thenReturn(ticket);
         when(ticketCounterService.getNextTicketNumber(any())).thenReturn(ticket.getNumber());
@@ -127,7 +127,7 @@ class TicketServiceImplTest {
         when(validator.logicalValidationBeforeCreate(any())).thenReturn(true);
         when(repository.create(any())).thenReturn(ticket);
         when(ticketCounterService.getNextTicketNumber(any())).thenReturn(number);
-        when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any(), any())).thenReturn(ticketSetting);
+        when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any())).thenReturn(ticketSetting);
         currentUser.setRole(roleTestHelper.getRoleByName(nameOfRole));
         var createdTicket = ticketService.create(ticket, currentUser);
         assertEquals(ticket, createdTicket);
@@ -136,7 +136,7 @@ class TicketServiceImplTest {
         verify(validator, times(1)).logicalValidationBeforeCreate(any());
         verify(repository, times(1)).create(any());
         verify(ticketCounterService, times(1)).getNextTicketNumber(any());
-        verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
+        verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any());
         assertEquals(createdTicket.getTicketStatus(), ticketSetting.getTicketStatusForNew());
         assertEquals(createdTicket.getTicketType(), ticketSetting.getTicketTypeForNew());
         assertEquals(createdTicket.getExecutors(), ticketSetting.getExecutors());
@@ -168,7 +168,7 @@ class TicketServiceImplTest {
         verify(validator, times(1)).logicalValidationBeforeCreate(any());
         verify(repository, times(1)).create(any());
         verify(ticketCounterService, times(1)).getNextTicketNumber(any());
-        verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
+        verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any());
         assertEquals(ticket.getGroup(), ticket.getAuthor().getGroup());
         assertEquals(ticket.getNumber(), number);
     }
@@ -189,7 +189,7 @@ class TicketServiceImplTest {
         when(validator.logicalValidationBeforeCreate(any())).thenReturn(true);
         when(repository.create(any())).thenReturn(ticket);
         when(ticketCounterService.getNextTicketNumber(any())).thenReturn(number);
-        when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any(), any())).thenReturn(ticketSetting);
+        when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any())).thenReturn(ticketSetting);
         currentUser.setRole(roleTestHelper.getRoleByName(nameOfRole));
         var createdTicket = ticketService.create(ticket, currentUser);
         assertEquals(ticket, createdTicket);
@@ -198,7 +198,7 @@ class TicketServiceImplTest {
         verify(validator, times(1)).logicalValidationBeforeCreate(any());
         verify(repository, times(1)).create(any());
         verify(ticketCounterService, times(1)).getNextTicketNumber(any());
-        verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any(), any());
+        verify(ticketSettingService, times(1)).getSettingOrPredefinedValuesForTicket(any(), any());
         assertEquals(ticket.getGroup(), ticket.getAuthor().getGroup());
         assertEquals(ticket.getNumber(), number);
     }
@@ -211,7 +211,7 @@ class TicketServiceImplTest {
         when(validator.logicalValidationBeforeUpdate(any())).thenReturn(true);
         when(userService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getAuthor());
         when(ticketStatusService.findByIdAndAccountId(any(), any())).thenReturn(ticket.getTicketStatus());
-        when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any(), any()))
+        when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any()))
                 .thenReturn(new TicketSetting());
         when(repository.update(any())).thenReturn(ticket);
         when(repository.existsById(any())).thenReturn(true);
@@ -237,10 +237,10 @@ class TicketServiceImplTest {
     @Test
     void reOpen_shouldReOpenTicket_whenPassedValidData() {
         when(validator.logicalValidationBeforeUpdate(any())).thenReturn(true);
-        when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any(), any()))
+        when(ticketSettingService.getSettingOrPredefinedValuesForTicket(any(), any()))
                 .thenReturn(ticketSettingTestHelper.getRandomValidEntity());
         when(repository.update(any())).thenReturn(ticket);
-        var updatedTicket = ticketService.reOpen(ticket);
+        var updatedTicket = ticketService.reOpen(ticket, any());
         assertEquals(ticket, updatedTicket);
         verify(validator, times(1)).logicalValidationBeforeUpdate(any());
         verify(repository, times(1)).update(any());

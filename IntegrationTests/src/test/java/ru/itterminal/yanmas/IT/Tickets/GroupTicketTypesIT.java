@@ -1,44 +1,8 @@
 package ru.itterminal.yanmas.IT.Tickets;
 
-import static io.restassured.RestAssured.given;
-import static io.restassured.path.json.JsonPath.from;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static ru.itterminal.yanmas.IT.util.ITHelper.ACCOUNT_OWNER;
-import static ru.itterminal.yanmas.IT.util.ITHelper.ADMIN;
-import static ru.itterminal.yanmas.IT.util.ITHelper.APPLICATION_JSON;
-import static ru.itterminal.yanmas.IT.util.ITHelper.AUTHOR;
-import static ru.itterminal.yanmas.IT.util.ITHelper.CONTENT;
-import static ru.itterminal.yanmas.IT.util.ITHelper.EMPTY_BODY;
-import static ru.itterminal.yanmas.IT.util.ITHelper.EXECUTOR;
-import static ru.itterminal.yanmas.IT.util.ITHelper.GROUP_TICKET_TYPES;
-import static ru.itterminal.yanmas.IT.util.ITHelper.GROUP_TICKET_TYPES_BY_ID;
-import static ru.itterminal.yanmas.IT.util.ITHelper.ID;
-import static ru.itterminal.yanmas.IT.util.ITHelper.IGNORE_FIELDS_FOR_COMPARE_GROUP_TICKET_TYPES;
-import static ru.itterminal.yanmas.IT.util.ITHelper.IGNORE_FIELDS_OF_BASE_ENTITY_FOR_COMPARE;
-import static ru.itterminal.yanmas.IT.util.ITHelper.INITIAL_GROUP_TICKET_TYPES;
-import static ru.itterminal.yanmas.IT.util.ITHelper.INNER_GROUP;
-import static ru.itterminal.yanmas.IT.util.ITHelper.NAME;
-import static ru.itterminal.yanmas.IT.util.ITHelper.OBSERVER;
-import static ru.itterminal.yanmas.IT.util.ITHelper.OUTER_GROUP;
-import static ru.itterminal.yanmas.IT.util.ITHelper.SIZE;
-import static ru.itterminal.yanmas.IT.util.ITHelper.STATUS;
-import static ru.itterminal.yanmas.IT.util.ITHelper.TOTAL_ELEMENTS;
-import static ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_CODE;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import io.restassured.RestAssured;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -47,8 +11,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
-
-import io.restassured.RestAssured;
 import ru.itterminal.yanmas.IT.util.ITHelper;
 import ru.itterminal.yanmas.IT.util.ITTestConfig;
 import ru.itterminal.yanmas.aau.model.Roles;
@@ -59,11 +21,27 @@ import ru.itterminal.yanmas.security.jwt.JwtProvider;
 import ru.itterminal.yanmas.tickets.model.GroupTicketTypes;
 import ru.itterminal.yanmas.tickets.model.test.GroupTicketTypesTestHelper;
 
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static io.restassured.RestAssured.given;
+import static io.restassured.path.json.JsonPath.from;
+import static java.lang.String.format;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static ru.itterminal.yanmas.IT.util.ITHelper.*;
+import static ru.itterminal.yanmas.aau.service.validator.EntityValidator.NOT_UNIQUE_MESSAGE;
+import static ru.itterminal.yanmas.aau.service.validator.EntityValidator.THIS_NAME;
+import static ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_CODE;
+
 @SuppressWarnings({"unused", "deprecation", "SimplifyStreamApiCallChains"})
 @DataJpaTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ContextConfiguration(classes = {ITTestConfig.class, JwtProvider.class})
+@ContextConfiguration(classes = {ITTestConfig.class, JwtProvider.class, UserRepository.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class GroupTicketTypesIT {
 
@@ -227,7 +205,7 @@ class GroupTicketTypesIT {
                 .body(STATUS, equalTo(HttpStatus.CONFLICT.value()))
                 .extract().response().as(ApiError.class);
         assertEquals(
-                NAME_IS_OCCUPIED,
+                format(NOT_UNIQUE_MESSAGE, THIS_NAME),
                 apiError.getErrors().get(NOT_UNIQUE_CODE).get(0).getMessage()
         );
     }
@@ -365,7 +343,7 @@ class GroupTicketTypesIT {
                 .body(STATUS, equalTo(HttpStatus.CONFLICT.value()))
                 .extract().response().as(ApiError.class);
         assertEquals(
-                NAME_IS_OCCUPIED,
+                format(NOT_UNIQUE_MESSAGE, THIS_NAME),
                 apiError.getErrors().get(NOT_UNIQUE_CODE).get(0).getMessage()
         );
     }

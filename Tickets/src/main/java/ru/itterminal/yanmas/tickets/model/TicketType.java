@@ -40,5 +40,8 @@ public class TicketType extends BaseEntity {
     @PrePersist
     protected void onCreate() {
         setDeleted(false);
+        if (getIsPredefinedForNewTicket() == null) {
+            setIsPredefinedForNewTicket(false);
+        }
     }
 }

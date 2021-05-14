@@ -137,7 +137,7 @@ public class ReflectionHelper {
 
     void setNestedEntity(Object entity, User currentUser, Field fieldEntity) throws Throwable {
         var nestedEntity = (BaseEntity) fieldEntity.get(entity);
-        var typeOfNestedEntity = fieldEntity.getName();
+        var typeOfNestedEntity = fieldEntity.getType().getSimpleName();
         var nameOfEntityRepository = typeOfNestedEntity.substring(0, 1).toLowerCase() + typeOfNestedEntity.substring(1)
                 + REPOSITORY;
         try {

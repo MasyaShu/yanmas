@@ -1,34 +1,8 @@
 package ru.itterminal.yanmas.IT.Tickets;
 
-import static io.restassured.RestAssured.given;
-import static io.restassured.path.json.JsonPath.from;
-import static java.lang.String.format;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static ru.itterminal.yanmas.IT.util.ITHelper.*;
-import static ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
-import static ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_CODE;
-import static ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_MESSAGE;
-import static ru.itterminal.yanmas.tickets.service.validator.TicketSettingOperationValidator.*;
-import static ru.itterminal.yanmas.tickets.service.validator.TicketTypeOperationValidator.ACCESS_IS_DENIED_FOR_SEARCHING_BY_PASSED_TICKET_TYPE_ID;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import io.restassured.RestAssured;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -38,8 +12,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-
-import io.restassured.RestAssured;
 import ru.itterminal.yanmas.IT.util.ITHelper;
 import ru.itterminal.yanmas.IT.util.ITTestConfig;
 import ru.itterminal.yanmas.aau.model.Roles;
@@ -52,11 +24,32 @@ import ru.itterminal.yanmas.tickets.model.TicketSetting;
 import ru.itterminal.yanmas.tickets.model.dto.TicketSettingFilterDto;
 import ru.itterminal.yanmas.tickets.model.test.TicketSettingTestHelper;
 
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static io.restassured.RestAssured.given;
+import static io.restassured.path.json.JsonPath.from;
+import static java.lang.String.format;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.*;
+import static ru.itterminal.yanmas.IT.util.ITHelper.*;
+import static ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
+import static ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_CODE;
+import static ru.itterminal.yanmas.commons.service.validator.impl.BasicOperationValidatorImpl.NOT_UNIQUE_MESSAGE;
+import static ru.itterminal.yanmas.tickets.service.validator.ticket_setting.check_access_before_create.NotAllowedCreateFromCurrentUserIfTicketTypeIsNotPermitted.ACCESS_DENIED_BECAUSE_CURRENT_USER_HAS_NOT_PERMIT_TO_TICKET_TYPE;
+import static ru.itterminal.yanmas.tickets.service.validator.ticket_setting.logical_validation.CheckAccessAuthorFromTicketSettingHasToTicketTypeValidator.INVALID_TICKET_SETTINGS;
+import static ru.itterminal.yanmas.tickets.service.validator.ticket_setting.logical_validation.CheckAccessAuthorFromTicketSettingHasToTicketTypeValidator.INVALID_TICKET_SETTINGS_BECAUSE_AUTHOR_HAS_NOT_ACCESS_TO_TICKET_TYPE;
+import static ru.itterminal.yanmas.tickets.service.validator.ticket_setting.logical_validation.CheckTicketSettingMustNotBeEmptyValidator.TICKET_SETTING_MUST_NOT_BE_EMPTY;
+import static ru.itterminal.yanmas.tickets.service.validator.ticket_setting.logical_validation.CheckUniquesBeforeCreateTicketSettingValidator.TICKET_SETTING_UNIQUE_FIELDS;
+
 @SuppressWarnings({"unused", "deprecation"})
 @DataJpaTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ContextConfiguration(classes = {ITTestConfig.class, JwtProvider.class})
+@ContextConfiguration(classes = {ITTestConfig.class, JwtProvider.class, UserRepository.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestPropertySource(properties = {"jwt.token.secret=ksedtob", "jwt.token.expired=8640000", "jwt.token.prefix=Bearer"})
 class TicketSettingIT {
@@ -542,7 +535,7 @@ class TicketSettingIT {
                 .body(STATUS, equalTo(HttpStatus.FORBIDDEN.value()))
                 .extract().response().as(ApiError.class);
         assertEquals(
-                ACCESS_IS_DENIED_FOR_SEARCHING_BY_PASSED_TICKET_TYPE_ID,
+                ACCESS_DENIED_BECAUSE_CURRENT_USER_HAS_NOT_PERMIT_TO_TICKET_TYPE,
                 apiError.getDetail()
         );
     }
@@ -735,7 +728,7 @@ class TicketSettingIT {
                 .body(STATUS, equalTo(HttpStatus.FORBIDDEN.value()))
                 .extract().response().as(ApiError.class);
         assertEquals(
-                ACCESS_IS_DENIED_FOR_SEARCHING_BY_PASSED_TICKET_TYPE_ID,
+                ACCESS_DENIED_BECAUSE_CURRENT_USER_HAS_NOT_PERMIT_TO_TICKET_TYPE,
                 apiError.getDetail()
         );
     }

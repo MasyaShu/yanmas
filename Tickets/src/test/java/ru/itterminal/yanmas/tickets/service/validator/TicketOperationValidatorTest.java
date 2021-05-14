@@ -36,7 +36,7 @@ import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.creat
 import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
 import static ru.itterminal.yanmas.security.config.TestSecurityConfig.AUTHOR_ACCOUNT_1_IS_INNER_GROUP_ID;
 import static ru.itterminal.yanmas.tickets.service.validator.TicketOperationValidator.*;
-import static ru.itterminal.yanmas.tickets.service.validator.TicketSettingOperationValidator.ACCESS_DENIED_BECAUSE_CURRENT_USER_HAS_NOT_PERMIT_TO_TICKET_TYPE;
+import static ru.itterminal.yanmas.tickets.service.validator.ticket_setting.check_access_before_create.NotAllowedCreateFromCurrentUserIfTicketTypeIsNotPermitted.ACCESS_DENIED_BECAUSE_CURRENT_USER_HAS_NOT_PERMIT_TO_TICKET_TYPE;
 
 @SpringJUnitConfig(value = {TicketOperationValidator.class})
 @Import(TestSecurityConfig.class)
