@@ -20,9 +20,9 @@ public interface EntityValidator<E extends BaseEntity> {
             "A user from outer group cannot access to this entity";
     String ACCESS_IS_DENIED_FOR_SEARCHING_BY_PASSED_GROUP_ID =
             "Access is denied for searching by passed groupId";
-    String THIS_NAME =
-            "This name";
+    String THIS_NAME = "This name";
     String EMPTY_TICKET = "Empty ticket";
+    String EMPTY_FIELDS = "Empty fields";
 
     default void logicalValidationBeforeCreate(E entity, Map<String, List<ValidationError>> errors) {}
 
