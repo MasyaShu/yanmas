@@ -134,7 +134,7 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
     }
 
     protected void checkAccessBeforeCreate(User currentUser) {
-        if (validators != null) {
+        if (validators != null && validators.size() != 0) { //NOSONAR
             for (EntityValidator<E> validator : validators) {
                 validator.checkAccessBeforeCreate(currentUser);
             }
@@ -142,7 +142,7 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
     }
 
     protected void checkAccessBeforeCreate(E entity, User currentUser) {
-        if (validators != null) {
+        if (validators != null && validators.size() != 0) { //NOSONAR
             for (EntityValidator<E> validator : validators) {
                 validator.checkAccessBeforeCreate(entity, currentUser);
             }
@@ -150,7 +150,7 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
     }
 
     protected void checkAccessBeforeUpdate(User currentUser) {
-        if (validators != null) {
+        if (validators != null && validators.size() != 0) { //NOSONAR
             for (EntityValidator<E> validator : validators) {
                 validator.checkAccessBeforeUpdate(currentUser);
             }
@@ -158,7 +158,7 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
     }
 
     protected void checkAccessBeforeUpdate(E entity, User currentUser) {
-        if (validators != null) {
+        if (validators != null && validators.size() != 0) { //NOSONAR
             for (EntityValidator<E> validator : validators) {
                 validator.checkAccessBeforeUpdate(entity, currentUser);
             }
@@ -166,7 +166,7 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
     }
 
     protected void checkAccessBeforeRead(User currentUser) {
-        if (validators != null) {
+        if (validators != null && validators.size() != 0) { //NOSONAR
             for (EntityValidator<E> validator : validators) {
                 validator.checkAccessBeforeRead(currentUser);
             }
@@ -174,7 +174,7 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
     }
 
     protected void checkAccessBeforeRead(E entity, User currentUser) {
-        if (validators != null) {
+        if (validators != null && validators.size() != 0) { //NOSONAR
             for (EntityValidator<E> validator : validators) {
                 validator.checkAccessBeforeRead(entity, currentUser);
             }
@@ -182,7 +182,7 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
     }
 
     protected void logicalValidationBeforeCreate(E entity) {
-        if (validators != null) {
+        if (validators != null && validators.size() != 0) { //NOSONAR
             var errors = createMapForLogicalErrors();
             for (EntityValidator<E> validator : validators) {
                 validator.logicalValidationBeforeCreate(entity, errors);
@@ -192,7 +192,7 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
     }
 
     protected void logicalValidationBeforeUpdate(E entity) {
-        if (validators != null) {
+        if (validators != null && validators.size() != 0) { //NOSONAR
             var errors = createMapForLogicalErrors();
             for (EntityValidator<E> validator : validators) {
                 validator.logicalValidationBeforeUpdate(entity, errors);

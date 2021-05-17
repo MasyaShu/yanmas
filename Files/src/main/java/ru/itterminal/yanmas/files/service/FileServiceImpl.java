@@ -57,7 +57,7 @@ public class FileServiceImpl extends CrudServiceWithBusinessHandlerImpl
         if (fileId == null) {
             throw createLogicalValidationException(FILE_ID, FILE_ID_IS_NULL);
         }
-        var file = super.findByIdAndAccountId(fileId, currentUser);
+        var file = findByIdAndAccountId(fileId, currentUser);
         if (Boolean.FALSE.equals(file.getIsUploaded())) {
             throw createLogicalValidationException(FILE, FILE_WAS_NOT_UPLOAD);
         }

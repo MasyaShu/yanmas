@@ -44,9 +44,11 @@ class FileServiceImplTest {
     @MockBean
     private FileRepository repository;
 
+    @SuppressWarnings("unused")
     @MockBean
     private ReflectionHelper reflectionHelper;
 
+    @SuppressWarnings("unused")
     @MockBean
     private EmptyBusinessHandlerImpl<File> businessHandler;
 
@@ -59,6 +61,7 @@ class FileServiceImplTest {
     @MockBean
     private FileSystemRepository fileSystemRepository;
 
+    @SuppressWarnings("unused")
     @MockBean
     private List<EntityValidator<File>> validators;
 
@@ -89,17 +92,15 @@ class FileServiceImplTest {
                 .build();
     }
 
-//    @Test TODO починить тест
-//    void getFileData_shouldGetBytesOfFile_whenAccordingWithPlannedBehavior() {
-//        when(jwtUserBuilder.getJwtUser()).thenReturn(jwtUser);
-//        when(jwtUser.getAccountId()).thenReturn(UUID.randomUUID());
-//        when(repository.existsById(any())).thenReturn(true);
-//        when(repository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(file));
-//        service.getFileData(currentUser, UUID.randomUUID());
-//        verify(fileSystemRepository, times(1)).findInFileSystem(any());
-//        verify(repository, times(1)).findByIdAndAccountId(any(), any());
-//        verify(repository, times(1)).existsById(any());
-//    }
+    @Test
+    void getFileData_shouldGetBytesOfFile_whenAccordingWithPlannedBehavior() {
+        when(jwtUserBuilder.getJwtUser()).thenReturn(jwtUser);
+        when(jwtUser.getAccountId()).thenReturn(UUID.randomUUID());
+        when(repository.findByIdAndAccountId(any(), any())).thenReturn(Optional.of(file));
+        service.getFileData(currentUser, UUID.randomUUID());
+        verify(fileSystemRepository, times(1)).findInFileSystem(any());
+        verify(repository, times(1)).findByIdAndAccountId(any(), any());
+    }
 
     @Test
     void putFileData_shouldGetStatusTrue_whenAccordingWithPlannedBehavior() throws IOException {
