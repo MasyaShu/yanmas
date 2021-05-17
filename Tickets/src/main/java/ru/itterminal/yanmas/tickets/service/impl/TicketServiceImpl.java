@@ -88,7 +88,8 @@ public class TicketServiceImpl extends CrudServiceWithAccountImpl<Ticket, Ticket
         if (createdEntity.getFiles() != null && !createdEntity.getFiles().isEmpty()) {
             for (File file : createdEntity.getFiles()) {
                 file.setEntityId(entity.getId());
-                fileService.update(file);
+                // TODO it must will be
+                // fileService.update(file);
             }
         }
         log.trace(format(CREATE_FINISH_MESSAGE, entity.getClass().getSimpleName(), createdEntity.toString()));
