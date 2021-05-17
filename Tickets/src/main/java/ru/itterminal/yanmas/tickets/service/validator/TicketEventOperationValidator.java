@@ -3,7 +3,6 @@ package ru.itterminal.yanmas.tickets.service.validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.service.validator.BasicOperationValidatorWithCurrentUserImpl;
 import ru.itterminal.yanmas.commons.exception.error.ValidationError;
 import ru.itterminal.yanmas.tickets.model.TicketEvent;
@@ -17,19 +16,12 @@ import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.*;
 @Component
 @RequiredArgsConstructor
 public class TicketEventOperationValidator extends BasicOperationValidatorWithCurrentUserImpl<TicketEvent> {
-    private final TicketOperationValidator ticketOperationValidator;
 
     public static final String MUST_NOT_CREATE_EVENT_IF_FIELDS_TICKET_CREATED_BY_OR_CREATED_AT_ARE_EMPTY =
             "Mustn't create event if fields 'ticket', 'createdBy' or 'createdAt' are empty";
     public static final String MUST_NOT_CREATE_EVENT_IF_FIELDS_COMMENT_AUTO_COMMENT_AND_FILES_ARE_EMPTY =
             "Mustn't create event if fields 'comment', 'autoComment' and 'files' are empty";
     public static final String EMPTY_FIELDS = "Empty fields";
-
-    @Override
-    public void checkAccessBeforeRead(TicketEvent entity, User currentUser) {
-        ticketOperationValidator.checkAccessBeforeRead(entity.getTicket(), currentUser);
-        super.checkAccessBeforeRead(entity, currentUser);
-    }
 
     @Override
     public boolean logicalValidationBeforeCreate(TicketEvent entity) {

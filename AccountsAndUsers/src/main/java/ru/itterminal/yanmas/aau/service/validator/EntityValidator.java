@@ -22,6 +22,7 @@ public interface EntityValidator<E extends BaseEntity> {
             "Access is denied for searching by passed groupId";
     String THIS_NAME =
             "This name";
+    String EMPTY_TICKET = "Empty ticket";
 
     default void logicalValidationBeforeCreate(E entity, Map<String, List<ValidationError>> errors) {}
 

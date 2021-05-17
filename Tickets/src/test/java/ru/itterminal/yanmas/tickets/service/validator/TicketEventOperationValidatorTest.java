@@ -21,9 +21,6 @@ import static ru.itterminal.yanmas.tickets.service.validator.TicketEventOperatio
 @ActiveProfiles(SPRING_ACTIVE_PROFILE_FOR_UNIT_TESTS)
 class TicketEventOperationValidatorTest {
 
-    @MockBean
-    private TicketOperationValidator ticketOperationValidator;
-
     @Autowired
     private TicketEventOperationValidator validator;
 
