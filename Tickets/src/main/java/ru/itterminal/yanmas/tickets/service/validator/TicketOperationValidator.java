@@ -336,6 +336,7 @@ public class TicketOperationValidator extends BasicOperationValidatorWithCurrent
 
     @SuppressWarnings("DuplicatedCode")
     public boolean checkAccessForCreateAndUpdate(Ticket ticket, User currentUser) { //NOSONAR
+
         var nameOfRoleOfCurrentUser = currentUser.getRole().getName();
         var isCurrentUserFromInnerGroup = currentUser.getGroup().getIsInner();
         var isAuthorOfTicketFromInnerGroup = ticket.getAuthor().getGroup().getIsInner();
