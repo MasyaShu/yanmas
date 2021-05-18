@@ -1,10 +1,10 @@
-package ru.itterminal.yanmas.tickets.service.business_handler;
+package ru.itterminal.yanmas.tickets.service.expansion_spec.ticket_type;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import ru.itterminal.yanmas.aau.model.User;
-import ru.itterminal.yanmas.aau.service.business_handler.EntityBusinessHandler;
+import ru.itterminal.yanmas.aau.service.expansion_spec.ExpansionSpec;
 import ru.itterminal.yanmas.commons.model.filter.StringFilter;
 import ru.itterminal.yanmas.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.yanmas.tickets.model.TicketType;
@@ -14,14 +14,13 @@ import static ru.itterminal.yanmas.commons.model.filter.StringFilter.TypeCompari
 
 @Component
 @RequiredArgsConstructor
-public class TicketTypeBusinessHandler implements EntityBusinessHandler<TicketType> {
+public class AddFilterByPermittedTicketTypes implements ExpansionSpec<TicketType> {
 
-    private final SettingsAccessToTicketTypesServiceImpl accessToTicketTypesService;
     private final SpecificationsFactory specFactory;
+    private final SettingsAccessToTicketTypesServiceImpl accessToTicketTypesService;
 
     @Override
-    public Specification<TicketType> beforeFindAllByFilter(Specification<TicketType> specification, User currentUser) {
-
+    public Specification<TicketType> expansionSpec(Specification<TicketType> specification, User currentUser) {
         var permittedTicketTypes = accessToTicketTypesService.getPermittedTicketTypes(currentUser.getId());
         if (permittedTicketTypes != null) {
             Specification<TicketType> specificationByListId = null;

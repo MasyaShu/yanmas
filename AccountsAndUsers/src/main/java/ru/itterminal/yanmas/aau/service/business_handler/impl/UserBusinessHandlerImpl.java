@@ -1,20 +1,13 @@
 package ru.itterminal.yanmas.aau.service.business_handler.impl;
 
-import static ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
-
-import java.util.List;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import lombok.RequiredArgsConstructor;
 import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.service.business_handler.EntityBusinessHandler;
 import ru.itterminal.yanmas.aau.service.impl.UserServiceImpl;
-import ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter;
 import ru.itterminal.yanmas.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.yanmas.integration.email.SenderEmailViaSMTPServer;
 import ru.itterminal.yanmas.security.jwt.JwtProvider;
@@ -66,20 +59,6 @@ public class UserBusinessHandlerImpl implements EntityBusinessHandler<User> {
         entity.setEmailVerificationToken(entityFromDatabase.getEmailVerificationToken());
         entity.setPasswordResetToken(entityFromDatabase.getPasswordResetToken());
 
-    }
-
-    @Override
-    public Specification<User> beforeFindAllByFilter(Specification<User> specification, User currentUser) {
-        if (currentUser.getRole().getWeight() <= Roles.AUTHOR.getWeight()
-                || Boolean.FALSE.equals(currentUser.getGroup().getIsInner())) {
-            var groupFilter = BaseEntityFilter.builder()
-                    .typeComparison(EXIST_IN.toString())
-                    .listOfIdEntities(List.of(currentUser.getGroup().getId()))
-                    .build();
-            var groupSpec = specFactory.makeSpecification(User.class, "group", groupFilter);
-            return specification.and(groupSpec);
-        }
-        return specification;
     }
 
     private void setEmailVerificationToken(User entity) {
