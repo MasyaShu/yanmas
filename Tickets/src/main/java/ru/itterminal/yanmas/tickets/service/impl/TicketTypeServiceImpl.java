@@ -4,13 +4,13 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.itterminal.yanmas.aau.service.business_handler.impl.CrudServiceWithBusinessHandlerImpl;
+import ru.itterminal.yanmas.aau.service.business_handler.impl.EmptyBusinessHandlerImpl;
 import ru.itterminal.yanmas.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.yanmas.aau.service.impl.UserServiceImpl;
 import ru.itterminal.yanmas.commons.exception.EntityNotExistException;
 import ru.itterminal.yanmas.integration.across_modules.CompletedVerificationAccount;
 import ru.itterminal.yanmas.tickets.model.TicketType;
 import ru.itterminal.yanmas.tickets.repository.TicketTypeRepository;
-import ru.itterminal.yanmas.tickets.service.business_handler.TicketTypeBusinessHandler;
 
 import java.util.UUID;
 
@@ -20,7 +20,7 @@ import static ru.itterminal.yanmas.aau.service.CrudServiceWithAccount.FIND_INVAL
 @Service
 @AllArgsConstructor
 public class TicketTypeServiceImpl extends CrudServiceWithBusinessHandlerImpl
-        <TicketType, TicketTypeBusinessHandler, TicketTypeRepository>
+        <TicketType, EmptyBusinessHandlerImpl<TicketType>, TicketTypeRepository>
         implements CompletedVerificationAccount {
 
     public static final String DEFAULT_TYPE = "Default type";
