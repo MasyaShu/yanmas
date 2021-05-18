@@ -75,7 +75,7 @@ import ru.itterminal.yanmas.tickets.model.TicketStatus;
 import ru.itterminal.yanmas.tickets.repository.TicketStatusRepository;
 import ru.itterminal.yanmas.tickets.repository.TicketTypeRepository;
 
-@SuppressWarnings("OptionalGetWithoutIsPresent")
+@SuppressWarnings({"OptionalGetWithoutIsPresent", "unused"})
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = {ITTestConfig.class, JwtProvider.class})
