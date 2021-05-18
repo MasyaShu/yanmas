@@ -25,20 +25,4 @@ public class GroupBusinessHandlerImpl implements EntityBusinessHandler<Group> {
         var groupFromDataBase = service.findByIdAndAccountId(entity.getId(), currentUser);
         entity.setIsInner(groupFromDataBase.getIsInner());
     }
-
-    @Override
-    public Specification<Group> beforeFindAllByFilter(Specification<Group> specification,
-                                      User currentUser) {
-        var spec = specification;
-        if (currentUser.getRole().getWeight() <= Roles.AUTHOR.getWeight()
-                || Boolean.FALSE.equals(currentUser.getGroup().getIsInner())) {
-            var filterById = StringFilter.builder()
-                    .typeComparison(TEXT_EQUALS.toString())
-                    .value(currentUser.getGroup().getId().toString())
-                    .build();
-            var specificationById = specFactory.makeSpecification(Group.class, "id", filterById);
-            spec = spec.and(specificationById);
-        }
-        return spec;
-    }
 }

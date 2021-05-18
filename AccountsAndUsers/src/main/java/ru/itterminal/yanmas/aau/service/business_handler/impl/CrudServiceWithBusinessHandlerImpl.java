@@ -36,11 +36,11 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
         R extends EntityRepositoryWithAccount<E>>
         implements CrudServiceWithBusinessHandler<E> {
 
-    @Autowired
+    @Autowired(required = false)
     @Lazy
     protected List<EntityValidator<E>> validators;
 
-    @Autowired
+    @Autowired(required = false)
     @Lazy
     protected List<ExpansionSpec<E>> expansionSpecs;
 
