@@ -15,7 +15,7 @@ import static ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter.TypeCom
 
 @Component
 @RequiredArgsConstructor
-public class AddFilterByGroupIfWeightOfCurrentUserLessThanWeightOfRoleAuthorSpec implements ExpansionSpec<User> {
+public class AddFilterForUserByGroupIfWeightOfCurrentUserLessThanWeightOfRoleAuthorSpec implements ExpansionSpec<User> {
 
     private final SpecificationsFactory specFactory;
 

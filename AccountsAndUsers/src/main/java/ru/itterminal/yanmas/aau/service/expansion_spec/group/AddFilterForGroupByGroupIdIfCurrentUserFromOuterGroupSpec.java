@@ -14,7 +14,7 @@ import ru.itterminal.yanmas.commons.model.spec.SpecificationsFactory;
 
 @Component
 @RequiredArgsConstructor
-public class AddFilterByGroupIdIfCurrentUserFromOuterGroupSpec implements ExpansionSpec<Group> {
+public class AddFilterForGroupByGroupIdIfCurrentUserFromOuterGroupSpec implements ExpansionSpec<Group> {
 
     private final SpecificationsFactory specFactory;
 

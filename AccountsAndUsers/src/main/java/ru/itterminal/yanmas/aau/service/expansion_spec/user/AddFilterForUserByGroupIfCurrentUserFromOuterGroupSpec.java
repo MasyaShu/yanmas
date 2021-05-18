@@ -14,7 +14,7 @@ import static ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter.TypeCom
 
 @Component
 @RequiredArgsConstructor
-public class AddFilterByGroupIfCurrentUserFromOuterGroupSpec implements ExpansionSpec<User> {
+public class AddFilterForUserByGroupIfCurrentUserFromOuterGroupSpec implements ExpansionSpec<User> {
 
     private final SpecificationsFactory specFactory;
 

@@ -16,7 +16,7 @@ import static ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter.TypeCom
 
 @Component
 @RequiredArgsConstructor
-public class AddFilterByGroupIdIfCurrentUserIsFromOuterGroupAndHasRoleAdminOrExecutorSpec implements ExpansionSpec<Ticket> {
+public class AddFilterForTicketByGroupIdIfCurrentUserIsFromOuterGroupAndHasRoleAdminOrExecutorSpec implements ExpansionSpec<Ticket> {
 
     private final SpecificationsFactory specFactory;
 

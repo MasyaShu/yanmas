@@ -15,7 +15,7 @@ import ru.itterminal.yanmas.commons.model.spec.SpecificationsFactory;
 
 @Component
 @RequiredArgsConstructor
-public class AddFilterByGroupIdIfWeightOfCurrentUserLessThanWeightOfRoleAuthorSpec implements ExpansionSpec<Group> {
+public class AddFilterForGroupByGroupIdIfWeightOfCurrentUserLessThanWeightOfRoleAuthorSpec implements ExpansionSpec<Group> {
 
     private final SpecificationsFactory specFactory;
 

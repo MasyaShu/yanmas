@@ -17,7 +17,7 @@ import static ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter.TypeCom
 
 @Component
 @RequiredArgsConstructor
-public class AddFilterByTicketTypeSpec implements ExpansionSpec<Ticket> {
+public class AddFilterForTicketByPermittedTicketTypesSpec implements ExpansionSpec<Ticket> {
 
     private final SpecificationsFactory specFactory;
     private final SettingsAccessToTicketTypesServiceImpl settingsAccessToTicketTypesService;

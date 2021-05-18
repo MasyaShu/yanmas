@@ -14,7 +14,7 @@ import static ru.itterminal.yanmas.commons.model.filter.StringFilter.TypeCompari
 
 @Component
 @RequiredArgsConstructor
-public class AddFilterByPermittedTicketTypes implements ExpansionSpec<TicketType> {
+public class AddFilterForTicketTypeByPermittedTicketTypesSpec implements ExpansionSpec<TicketType> {
 
     private final SpecificationsFactory specFactory;
     private final SettingsAccessToTicketTypesServiceImpl accessToTicketTypesService;
