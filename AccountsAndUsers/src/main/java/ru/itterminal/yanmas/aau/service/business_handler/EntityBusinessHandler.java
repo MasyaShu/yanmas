@@ -20,6 +20,7 @@ public interface EntityBusinessHandler<E extends BaseEntity> {
     default void afterUpdate(E entity, User currentUser) {
     }
 
+    // TODO must be deleted
     default Specification<E> beforeFindAllByFilter(Specification<E> specification, User currentUser) {
         return specification;
     }

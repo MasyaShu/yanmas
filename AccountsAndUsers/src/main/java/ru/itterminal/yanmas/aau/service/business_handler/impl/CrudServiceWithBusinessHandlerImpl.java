@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.service.business_handler.CrudServiceWithBusinessHandler;
 import ru.itterminal.yanmas.aau.service.business_handler.EntityBusinessHandler;
+import ru.itterminal.yanmas.aau.service.expansion_spec.ExpansionSpec;
 import ru.itterminal.yanmas.aau.service.validator.EntityValidator;
 import ru.itterminal.yanmas.aau.util.ReflectionHelper;
 import ru.itterminal.yanmas.commons.exception.EntityNotExistException;
@@ -38,6 +39,10 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
     @Autowired
     @Lazy
     protected List<EntityValidator<E>> validators;
+
+    @Autowired
+    @Lazy
+    protected List<ExpansionSpec<E>> expansionSpecs;
 
     @Autowired
     protected B businessHandler;
@@ -89,7 +94,7 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
     @Transactional(readOnly = true)
     public Page<E> findAllByFilter(Specification<E> specification, Pageable pageable, User currentUser) {
         checkAccessBeforeRead(currentUser);
-        specification = businessHandler.beforeFindAllByFilter(specification, currentUser);
+        specification = expansionSpec(specification, currentUser);
         return repository.findAll(specification, pageable);
     }
 
@@ -199,6 +204,15 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
             }
             ifErrorsNotEmptyThrowLogicalValidationException(errors);
         }
+    }
+
+    protected Specification<E>  expansionSpec(Specification<E> specification, User currentUser) {
+        if (expansionSpecs != null && expansionSpecs.size() != 0) { //NOSONAR
+            for (ExpansionSpec<E> item : expansionSpecs) {
+                specification = specification.and(item.expansionSpec(specification, currentUser));
+            }
+        }
+        return specification;
     }
 
 }
