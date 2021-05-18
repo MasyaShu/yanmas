@@ -30,6 +30,7 @@ import ru.itterminal.yanmas.integration.across_modules.CompletedVerificationAcco
 import ru.itterminal.yanmas.integration.email.SenderEmailViaSMTPServer;
 import ru.itterminal.yanmas.security.jwt.JwtProvider;
 import ru.itterminal.yanmas.security.jwt.JwtUser;
+import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 
 @Service
 @RequiredArgsConstructor
@@ -55,6 +56,7 @@ public class UserServiceImpl extends CrudServiceWithBusinessHandlerImpl<User, Us
 
     private final BCryptPasswordEncoder encoder;
     private final JwtProvider jwtProvider;
+    private final JwtUserBuilder jwtUserBuilder;
     private final SenderEmailViaSMTPServer senderEmailViaSMTPServer;
     private final ApplicationContext appContext;
     private final CheckUniquesUserBeforeUpdateValidator checkUniquesUserBeforeUpdateValidator;
@@ -214,5 +216,11 @@ public class UserServiceImpl extends CrudServiceWithBusinessHandlerImpl<User, Us
         var errors = createMapForLogicalErrors();
         checkUniquesUserBeforeUpdateValidator.logicalValidationBeforeUpdate(user, errors);
         ifErrorsNotEmptyThrowLogicalValidationException(errors);
+    }
+
+    @Transactional(readOnly = true)
+    public User getCurrentUserFromJwtUser() {
+        var jwtUser = jwtUserBuilder.getJwtUser();
+        return findById(jwtUser.getId());
     }
 }

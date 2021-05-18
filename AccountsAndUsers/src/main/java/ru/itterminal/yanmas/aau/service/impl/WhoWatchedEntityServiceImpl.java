@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.model.WhoWatchedEntity;
 import ru.itterminal.yanmas.aau.repository.WhoWatchedEntityRepository;
 import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
@@ -33,10 +34,9 @@ public class WhoWatchedEntityServiceImpl {
     private final String entityName = WhoWatchedEntity.class.getSimpleName();
 
     @Transactional
-    public void watched(List<UUID> entitiesId) {
-        var jwtUser = jwtUserBuilder.getJwtUser();
-        var accountId = jwtUser.getAccountId();
-        var userId = jwtUser.getId();
+    public void watched(List<UUID> entitiesId, User currentUser) {
+        var accountId = currentUser.getAccount().getId();
+        var userId = currentUser.getId();
         var entitiesIdWithoutDuplicates = new ArrayList<>(new HashSet<>(entitiesId));
         for (UUID entityId : entitiesIdWithoutDuplicates) {
             var entity = WhoWatchedEntity.builder()
@@ -56,10 +56,9 @@ public class WhoWatchedEntityServiceImpl {
     }
 
     @Transactional
-    public void unwatched(List<UUID> entitiesId) {
-        var jwtUser = jwtUserBuilder.getJwtUser();
-        var accountId = jwtUser.getAccountId();
-        var userId = jwtUser.getId();
+    public void unwatched(List<UUID> entitiesId, User currentUser) {
+        var accountId = currentUser.getAccount().getId();
+        var userId = currentUser.getId();
         var entitiesIdWithoutDuplicates = new ArrayList<>(new HashSet<>(entitiesId));
         for (UUID entityId : entitiesIdWithoutDuplicates) {
             log.trace(format(DELETE_INIT_MESSAGE, entityId.toString()));
