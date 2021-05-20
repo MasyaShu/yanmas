@@ -18,7 +18,7 @@ import static ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter.T
 
 @Component
 @RequiredArgsConstructor
-public class AddFilterForTicketByAuthorIdIfCurrentUserHasRoleAuthorSpec implements ExpansionSpec<Ticket> {
+public class AddFilterForTicketByAuthorIdAndByObserversIdIfCurrentUserHasRoleAuthorSpec implements ExpansionSpec<Ticket> {
 
     private final SpecificationsFactory specFactory;
 

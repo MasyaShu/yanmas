@@ -24,4 +24,13 @@ public class TicketBusinessHandler implements EntityBusinessHandler<Ticket> {
         }
     }
 
+    @Override
+    public void beforeCreate(Ticket entity, User currentUser) {
+         entity.setGroup(entity.getAuthor().getGroup());
+    }
+
+    @Override
+    public void beforeUpdate(Ticket entity, User currentUser) {
+        entity.setGroup(entity.getAuthor().getGroup());
+    }
 }
