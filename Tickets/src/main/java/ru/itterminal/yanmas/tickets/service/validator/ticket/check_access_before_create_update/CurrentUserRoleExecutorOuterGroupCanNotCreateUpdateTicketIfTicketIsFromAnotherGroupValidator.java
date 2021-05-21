@@ -28,8 +28,7 @@ public class CurrentUserRoleExecutorOuterGroupCanNotCreateUpdateTicketIfTicketIs
     private void checkAccessForCreateAndUpdate(Ticket entity, User currentUser) {
         if (currentUser.getRole().getName().equals(Roles.EXECUTOR.toString())
                 && Boolean.FALSE.equals(currentUser.getGroup().getIsInner())
-                && Boolean.FALSE.equals(entity.getAuthor().getGroup().getIsInner())
-                && !currentUser.getGroup().equals(entity.getAuthor().getGroup())) {
+                && !currentUser.getGroup().equals(entity.getGroup())) {
             throw new AccessDeniedException
                     (CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP);
         }
