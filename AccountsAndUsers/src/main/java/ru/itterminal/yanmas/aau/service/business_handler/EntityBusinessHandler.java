@@ -5,13 +5,15 @@ import ru.itterminal.yanmas.commons.model.BaseEntity;
 
 public interface EntityBusinessHandler<E extends BaseEntity> {
 
-    default void beforeCreate(E entity, User currentUser) {
+    default E beforeCreate(E entity, User currentUser) {
+        return entity;
     }
 
     default void afterCreate(E entity, User currentUser) {
     }
 
-    default void beforeUpdate(E entity, User currentUser) {
+    default E beforeUpdate(E entity, User currentUser) {
+        return entity;
     }
 
     @SuppressWarnings("unused")

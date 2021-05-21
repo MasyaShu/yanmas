@@ -21,8 +21,7 @@ import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.repository.UserRepository;
-import ru.itterminal.yanmas.aau.service.business_handler.impl.CrudServiceWithBusinessHandlerImpl;
-import ru.itterminal.yanmas.aau.service.business_handler.impl.UserBusinessHandlerImpl;
+import ru.itterminal.yanmas.aau.service.CrudServiceWithBusinessHandlerImpl;
 import ru.itterminal.yanmas.aau.service.validator.user.logical_validation_before_update.CheckUniquesUserBeforeUpdateValidator;
 import ru.itterminal.yanmas.commons.exception.EntityNotExistException;
 import ru.itterminal.yanmas.commons.exception.FailedSaveEntityException;
@@ -34,7 +33,7 @@ import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl extends CrudServiceWithBusinessHandlerImpl<User, UserBusinessHandlerImpl, UserRepository> {
+public class UserServiceImpl extends CrudServiceWithBusinessHandlerImpl<User, UserRepository> {
 
     public static final String TICKET_TYPE_SERVICE_IMPL = "ticketTypeServiceImpl";
     public static final String TICKET_STATUS_SERVICE_IMPL = "ticketStatusServiceImpl";

@@ -1,4 +1,4 @@
-package ru.itterminal.yanmas.tickets.service.business_handler;
+package ru.itterminal.yanmas.tickets.service.business_handler.ticket_template;
 
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.scheduling.support.SimpleTriggerContext;
@@ -11,16 +11,18 @@ import java.time.ZoneId;
 import java.util.Date;
 
 @Component
-public class TicketTemplateBusinessHandler implements EntityBusinessHandler<TicketTemplate> {
+public class SetNextExecutionTimeBeforeCreateAndUpdateTicketTemplateBusinessHandler implements EntityBusinessHandler<TicketTemplate> {
 
     @Override
-    public void beforeCreate(TicketTemplate entity, User currentUser) {
+    public TicketTemplate beforeCreate(TicketTemplate entity, User currentUser) {
         setNextExecutionTime(entity);
+        return entity;
     }
 
     @Override
-    public void beforeUpdate(TicketTemplate entity, User currentUser) {
+    public TicketTemplate beforeUpdate(TicketTemplate entity, User currentUser) {
         setNextExecutionTime(entity);
+        return entity;
     }
 
     private void setNextExecutionTime(TicketTemplate ticketTemplate) {

@@ -1,18 +1,7 @@
 package ru.itterminal.yanmas.files.service;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import ru.itterminal.yanmas.aau.model.User;
-import ru.itterminal.yanmas.aau.service.business_handler.impl.CrudServiceWithBusinessHandlerImpl;
-import ru.itterminal.yanmas.aau.service.business_handler.impl.EmptyBusinessHandlerImpl;
-import ru.itterminal.yanmas.aau.service.validator.EntityValidator;
-import ru.itterminal.yanmas.commons.exception.EntityNotExistException;
-import ru.itterminal.yanmas.files.model.File;
-import ru.itterminal.yanmas.files.repository.FileRepository;
-import ru.itterminal.yanmas.files.repository.FileSystemRepository;
+import static java.lang.String.format;
+import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createLogicalValidationException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,13 +9,24 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
-import static java.lang.String.format;
-import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createLogicalValidationException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import lombok.extern.slf4j.Slf4j;
+import ru.itterminal.yanmas.aau.model.User;
+import ru.itterminal.yanmas.aau.service.CrudServiceWithBusinessHandlerImpl;
+import ru.itterminal.yanmas.aau.service.validator.EntityValidator;
+import ru.itterminal.yanmas.commons.exception.EntityNotExistException;
+import ru.itterminal.yanmas.files.model.File;
+import ru.itterminal.yanmas.files.repository.FileRepository;
+import ru.itterminal.yanmas.files.repository.FileSystemRepository;
 
 @Slf4j
 @Service
 public class FileServiceImpl extends CrudServiceWithBusinessHandlerImpl
-        <File, EmptyBusinessHandlerImpl<File>, FileRepository> {
+        <File, FileRepository> {
 
     public static final String FILE_ID = "File id";
     public static final String FILE_ID_IS_NULL = "File id is null";

@@ -1,4 +1,4 @@
-package ru.itterminal.yanmas.aau.service.business_handler;
+package ru.itterminal.yanmas.aau.service;
 
 import java.util.List;
 import java.util.UUID;

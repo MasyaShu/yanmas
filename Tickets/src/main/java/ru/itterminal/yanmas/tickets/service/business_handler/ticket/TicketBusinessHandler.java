@@ -1,4 +1,4 @@
-package ru.itterminal.yanmas.tickets.service.business_handler;
+package ru.itterminal.yanmas.tickets.service.business_handler.ticket;
 
 import java.util.stream.Collectors;
 
@@ -41,8 +41,9 @@ public class TicketBusinessHandler implements EntityBusinessHandler<Ticket> {
     }
 
     @Override
-    public void beforeCreate(Ticket ticket, User currentUser) {
+    public Ticket beforeCreate(Ticket ticket, User currentUser) {
         ticket.setGroup(ticket.getAuthor().getGroup());
+
         var ticketSetting = ticketSettingService.getSettingOrPredefinedValuesForTicket(
                 currentUser,
                 ticket.getAuthor()
@@ -52,6 +53,7 @@ public class TicketBusinessHandler implements EntityBusinessHandler<Ticket> {
         var ticketStatus = ticket.getTicketStatus();
         var weightOfRoleOfCurrentUser = currentUser.getRole().getWeight();
 
+        // SettingTicketStatusBeforeCreateAndUpdateTicketBusinessHandler
         // ticket.status
         if (Boolean.TRUE.equals(isTicketFinished) && (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight())) {
             ticket.setTicketStatus(ticketSetting.getTicketStatusForClose());
@@ -64,6 +66,7 @@ public class TicketBusinessHandler implements EntityBusinessHandler<Ticket> {
             ticket.setTicketStatus(ticketSetting.getTicketStatusForNew());
         }
 
+        // SettingTicketTypeBeforeCreateAndUpdateTicketBusinessHandler
         // ticket.ticketType
         var ticketType = ticket.getTicketType();
         if (ticketType == null || !isCurrentUserFromInnerGroup
@@ -73,6 +76,7 @@ public class TicketBusinessHandler implements EntityBusinessHandler<Ticket> {
             ticket.setTicketType(ticketTypeService.findByIdAndAccountId(ticketType.getId(), currentUser));
         }
 
+        // SettingObserversBeforeCreateAndUpdateTicketBusinessHandler
         // ticket.observers
         if (ticket.getObservers() == null || !isCurrentUserFromInnerGroup
                 || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
@@ -84,6 +88,7 @@ public class TicketBusinessHandler implements EntityBusinessHandler<Ticket> {
             ticket.setObservers(userService.findAllByAccountIdAndListId(listObserversId, currentUser));
         }
 
+        // SettingTicketExecutorsBeforeCreateAndUpdateTicketBusinessHandler
         // ticket.executors
         if (ticket.getExecutors() == null || !isCurrentUserFromInnerGroup
                 || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
@@ -95,14 +100,17 @@ public class TicketBusinessHandler implements EntityBusinessHandler<Ticket> {
             ticket.setExecutors(userService.findAllByAccountIdAndListId(listExecutorsId, currentUser));
         }
 
+        // SettingTicketPriorityBeforeCreateAndUpdateTicketBusinessHandler
         // ticket.priority
         if (ticket.getPriority() == null) {
             ticket.setPriority(Priority.MIDDLE.toString());
         }
+
+        return ticket;
     }
 
     @Override
-    public void beforeUpdate(Ticket ticket, User currentUser) {
+    public Ticket beforeUpdate(Ticket ticket, User currentUser) {
         ticket.setGroup(ticket.getAuthor().getGroup());
         var ticketFromDatabase = ticketService.findByIdAndAccountId(ticket.getId(), currentUser);
         ticket.setTicketTemplate(ticketFromDatabase.getTicketTemplate());
@@ -161,5 +169,7 @@ public class TicketBusinessHandler implements EntityBusinessHandler<Ticket> {
         if (ticket.getPriority() == null) {
             ticket.setPriority(ticketFromDatabase.getPriority());
         }
+
+        return ticket;
     }
 }

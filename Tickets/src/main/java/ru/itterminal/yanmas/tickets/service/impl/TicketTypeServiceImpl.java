@@ -1,10 +1,15 @@
 package ru.itterminal.yanmas.tickets.service.impl;
 
-import lombok.AllArgsConstructor;
+import static java.lang.String.format;
+import static ru.itterminal.yanmas.aau.service.CrudServiceWithAccount.FIND_INVALID_MESSAGE_WITH_ACCOUNT;
+
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.itterminal.yanmas.aau.service.business_handler.impl.CrudServiceWithBusinessHandlerImpl;
-import ru.itterminal.yanmas.aau.service.business_handler.impl.EmptyBusinessHandlerImpl;
+
+import lombok.AllArgsConstructor;
+import ru.itterminal.yanmas.aau.service.CrudServiceWithBusinessHandlerImpl;
 import ru.itterminal.yanmas.aau.service.impl.AccountServiceImpl;
 import ru.itterminal.yanmas.aau.service.impl.UserServiceImpl;
 import ru.itterminal.yanmas.commons.exception.EntityNotExistException;
@@ -12,15 +17,10 @@ import ru.itterminal.yanmas.integration.across_modules.CompletedVerificationAcco
 import ru.itterminal.yanmas.tickets.model.TicketType;
 import ru.itterminal.yanmas.tickets.repository.TicketTypeRepository;
 
-import java.util.UUID;
-
-import static java.lang.String.format;
-import static ru.itterminal.yanmas.aau.service.CrudServiceWithAccount.FIND_INVALID_MESSAGE_WITH_ACCOUNT;
-
 @Service
 @AllArgsConstructor
 public class TicketTypeServiceImpl extends CrudServiceWithBusinessHandlerImpl
-        <TicketType, EmptyBusinessHandlerImpl<TicketType>, TicketTypeRepository>
+        <TicketType, TicketTypeRepository>
         implements CompletedVerificationAccount {
 
     public static final String DEFAULT_TYPE = "Default type";

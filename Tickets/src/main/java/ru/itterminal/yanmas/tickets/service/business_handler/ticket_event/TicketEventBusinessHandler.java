@@ -1,4 +1,4 @@
-package ru.itterminal.yanmas.tickets.service.business_handler;
+package ru.itterminal.yanmas.tickets.service.business_handler.ticket_event;
 
 import org.springframework.stereotype.Component;
 import ru.itterminal.yanmas.aau.model.User;
@@ -7,8 +7,9 @@ import ru.itterminal.yanmas.tickets.model.TicketEvent;
 
 @Component
 public class TicketEventBusinessHandler implements EntityBusinessHandler<TicketEvent> {
+
     @Override
-    public void beforeCreate(TicketEvent entity, User currentUser) {
-        EntityBusinessHandler.super.beforeCreate(entity, currentUser);
+    public TicketEvent beforeCreate(TicketEvent entity, User currentUser) {
+        return  entity;
     }
 }

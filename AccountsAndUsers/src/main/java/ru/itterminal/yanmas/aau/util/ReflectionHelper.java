@@ -1,7 +1,7 @@
 package ru.itterminal.yanmas.aau.util;
 
 import static java.lang.String.format;
-import static ru.itterminal.yanmas.aau.service.business_handler.CrudServiceWithBusinessHandler.FIND_INVALID_MESSAGE;
+import static ru.itterminal.yanmas.aau.service.CrudServiceWithBusinessHandler.FIND_INVALID_MESSAGE;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;

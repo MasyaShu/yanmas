@@ -1,22 +1,22 @@
 package ru.itterminal.yanmas.tickets.service.impl;
 
-import lombok.RequiredArgsConstructor;
+import javax.validation.constraints.NotNull;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import lombok.RequiredArgsConstructor;
 import ru.itterminal.yanmas.aau.model.User;
-import ru.itterminal.yanmas.aau.service.business_handler.impl.CrudServiceWithBusinessHandlerImpl;
-import ru.itterminal.yanmas.aau.service.business_handler.impl.EmptyBusinessHandlerImpl;
+import ru.itterminal.yanmas.aau.service.CrudServiceWithBusinessHandlerImpl;
 import ru.itterminal.yanmas.tickets.model.TicketSetting;
 import ru.itterminal.yanmas.tickets.repository.TicketSettingRepository;
 import ru.itterminal.yanmas.tickets.service.validator.ticket_setting.TicketSettingOperationValidator;
-
-import javax.validation.constraints.NotNull;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class TicketSettingServiceImpl extends CrudServiceWithBusinessHandlerImpl
-        <TicketSetting, EmptyBusinessHandlerImpl<TicketSetting>, TicketSettingRepository> {
+        <TicketSetting, TicketSettingRepository> {
 
     private final TicketStatusServiceImpl ticketStatusService;
     private final TicketSettingOperationValidator validator;

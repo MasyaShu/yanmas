@@ -17,18 +17,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import ru.itterminal.yanmas.aau.model.User;
-import ru.itterminal.yanmas.aau.service.business_handler.impl.CrudServiceWithBusinessHandlerImpl;
+import ru.itterminal.yanmas.aau.service.CrudServiceWithBusinessHandlerImpl;
 import ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter;
 import ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter;
 import ru.itterminal.yanmas.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.yanmas.integration.across_modules.RequestsFromModuleAccountAndUsers;
 import ru.itterminal.yanmas.tickets.model.Ticket;
 import ru.itterminal.yanmas.tickets.repository.TicketRepository;
-import ru.itterminal.yanmas.tickets.service.business_handler.TicketBusinessHandler;
 
 @Service
 @RequiredArgsConstructor
-public class TicketServiceImpl extends CrudServiceWithBusinessHandlerImpl<Ticket, TicketBusinessHandler, TicketRepository>
+public class TicketServiceImpl extends CrudServiceWithBusinessHandlerImpl<Ticket, TicketRepository>
         implements RequestsFromModuleAccountAndUsers {
 
     public static final String AUTHOR = "author";

@@ -1,4 +1,4 @@
-package ru.itterminal.yanmas.aau.service.business_handler.impl;
+package ru.itterminal.yanmas.aau.service;
 
 import static java.lang.String.format;
 import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.createMapForLogicalErrors;
@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import ru.itterminal.yanmas.aau.model.User;
-import ru.itterminal.yanmas.aau.service.business_handler.CrudServiceWithBusinessHandler;
 import ru.itterminal.yanmas.aau.service.business_handler.EntityBusinessHandler;
 import ru.itterminal.yanmas.aau.service.expansion_spec.ExpansionSpec;
 import ru.itterminal.yanmas.aau.service.validator.EntityValidator;
@@ -32,7 +31,6 @@ import ru.itterminal.yanmas.commons.repository.EntityRepositoryWithAccount;
 @Service
 public abstract class CrudServiceWithBusinessHandlerImpl<
         E extends BaseEntity,
-        B extends EntityBusinessHandler<E>,
         R extends EntityRepositoryWithAccount<E>>
         implements CrudServiceWithBusinessHandler<E> {
 
@@ -44,8 +42,9 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
     @Lazy
     protected List<ExpansionSpec<E>> expansionSpecs;
 
-    @Autowired
-    protected B businessHandler;
+    @Autowired(required = false)
+    @Lazy
+    protected List<EntityBusinessHandler<E>> businessHandlers;
 
     @Autowired
     protected ReflectionHelper reflectionHelper;
@@ -61,12 +60,12 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
         checkAccessBeforeCreate(currentUser);
         reflectionHelper.settingNestedObjectsIntoEntity(entity, currentUser);
         entity.setId(UUID.randomUUID());
-        businessHandler.beforeCreate(entity, currentUser);
+        entity = businessHandlerBeforeCreate(entity, currentUser);
         checkAccessBeforeCreate(entity, currentUser);
         logicalValidationBeforeCreate(entity);
         entity.generateDisplayName();
         var createdEntity = repository.create(entity);
-        businessHandler.afterCreate(createdEntity, currentUser);
+        businessHandlerAfterCreate(createdEntity, currentUser);
         return createdEntity;
     }
 
@@ -76,13 +75,13 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
         checkAccessBeforeUpdate(currentUser);
         reflectionHelper.settingNestedObjectsIntoEntity(entity, currentUser);
         findByIdAndAccountId(entity.getId(), currentUser);
-        businessHandler.beforeUpdate(entity, currentUser);
+        entity = businessHandlerBeforeUpdate(entity, currentUser);
         checkAccessBeforeUpdate(entity, currentUser);
         logicalValidationBeforeUpdate(entity);
         try {
             entity.generateDisplayName();
             var updatedEntity = repository.update(entity);
-            businessHandler.afterUpdate(updatedEntity, currentUser);
+            businessHandlerAfterUpdate(updatedEntity, currentUser);
             return updatedEntity;
         }
         catch (OptimisticLockException ex) {
@@ -215,4 +214,37 @@ public abstract class CrudServiceWithBusinessHandlerImpl<
         return specification;
     }
 
+    protected E businessHandlerBeforeCreate(E entity, User currentUser) {
+        if (businessHandlers != null && businessHandlers.size() != 0) { //NOSONAR
+            for (EntityBusinessHandler<E> item : businessHandlers) {
+                entity = item.beforeCreate(entity, currentUser);
+            }
+        }
+        return entity;
+    }
+
+    protected void businessHandlerAfterCreate(E entity, User currentUser) {
+        if (businessHandlers != null && businessHandlers.size() != 0) { //NOSONAR
+            for (EntityBusinessHandler<E> item : businessHandlers) {
+                item.afterCreate(entity, currentUser);
+            }
+        }
+    }
+
+    protected E businessHandlerBeforeUpdate(E entity, User currentUser) {
+        if (businessHandlers != null && businessHandlers.size() != 0) { //NOSONAR
+            for (EntityBusinessHandler<E> item : businessHandlers) {
+                entity = item.beforeUpdate(entity, currentUser);
+            }
+        }
+        return entity;
+    }
+
+    protected void businessHandlerAfterUpdate(E entity, User currentUser) {
+        if (businessHandlers != null && businessHandlers.size() != 0) { //NOSONAR
+            for (EntityBusinessHandler<E> item : businessHandlers) {
+                item.afterUpdate(entity, currentUser);
+            }
+        }
+    }
 }

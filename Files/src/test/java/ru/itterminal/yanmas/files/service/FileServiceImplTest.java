@@ -9,7 +9,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import ru.itterminal.yanmas.aau.model.Account;
 import ru.itterminal.yanmas.aau.model.User;
-import ru.itterminal.yanmas.aau.service.business_handler.impl.EmptyBusinessHandlerImpl;
 import ru.itterminal.yanmas.aau.service.validator.EntityValidator;
 import ru.itterminal.yanmas.aau.util.ReflectionHelper;
 import ru.itterminal.yanmas.commons.exception.EntityNotExistException;
@@ -47,10 +46,6 @@ class FileServiceImplTest {
     @SuppressWarnings("unused")
     @MockBean
     private ReflectionHelper reflectionHelper;
-
-    @SuppressWarnings("unused")
-    @MockBean
-    private EmptyBusinessHandlerImpl<File> businessHandler;
 
     @MockBean
     private JwtUserBuilder jwtUserBuilder;
