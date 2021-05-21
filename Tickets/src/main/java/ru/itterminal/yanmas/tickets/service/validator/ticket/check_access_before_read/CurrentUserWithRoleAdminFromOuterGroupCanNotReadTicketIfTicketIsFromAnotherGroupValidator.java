@@ -8,18 +8,18 @@ import ru.itterminal.yanmas.aau.service.validator.EntityValidator;
 import ru.itterminal.yanmas.tickets.model.Ticket;
 
 @Component
-public class CurrentUserRoleAuthorOuterGroupCanNotReadTicketIfAuthorOfTicketIsFromInnerGroupValidator implements EntityValidator<Ticket> {
+public class CurrentUserWithRoleAdminFromOuterGroupCanNotReadTicketIfTicketIsFromAnotherGroupValidator implements EntityValidator<Ticket> {
     public static final String
-            CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP =
-            "Current user with role AUTHOR from outer group can not read ticket if author of ticket is from inner group";
+            CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP =
+            "Current user with role ADMIN from outer group can not read ticket if ticket is from another group";
 
     @Override
     public void checkAccessBeforeRead(Ticket entity, User currentUser) {
-        if (currentUser.getRole().getName().equals(Roles.AUTHOR.toString())
+        if (currentUser.getRole().getName().equals(Roles.ADMIN.toString())
                 && Boolean.FALSE.equals(currentUser.getGroup().getIsInner())
-                && Boolean.TRUE.equals(entity.getAuthor().getGroup().getIsInner())) {
+                && !currentUser.getGroup().equals(entity.getGroup())) {
             throw new AccessDeniedException
-                    (CURRENT_USER_WITH_ROLE_AUTHOR_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_AUTHOR_OF_TICKET_IS_FROM_INNER_GROUP);
+                    (CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_READ_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP);
         }
     }
 }

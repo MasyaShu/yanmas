@@ -10,10 +10,10 @@ import ru.itterminal.yanmas.tickets.model.Ticket;
 
 @Component
 @RequiredArgsConstructor
-public class CurrentUserRoleAuthorInnerGroupCanNotCreateUpdateTicketIfAuthorOfTicketIsNotCurrentUserValidator implements EntityValidator<Ticket> {
+public class CurrentUserRoleAuthorCanNotCreateUpdateTicketIfAuthorOfTicketIsNotCurrentUserValidator implements EntityValidator<Ticket> {
     public static final String
-            CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER =
-            "Current user with role AUTHOR from inner group can not create/update ticket if author of ticket is not current user";
+            CURRENT_USER_WITH_ROLE_AUTHOR_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER =
+            "Current user with role AUTHOR can not create/update ticket if author of ticket is not current user";
 
     @Override
     public void checkAccessBeforeCreate(Ticket entity, User currentUser) {
@@ -27,11 +27,10 @@ public class CurrentUserRoleAuthorInnerGroupCanNotCreateUpdateTicketIfAuthorOfTi
 
     private void checkAccessForCreateAndUpdate(Ticket entity, User currentUser) {
         if (currentUser.getRole().getName().equals(Roles.AUTHOR.toString())
-                && Boolean.TRUE.equals(currentUser.getGroup().getIsInner())
-                && Boolean.TRUE.equals(entity.getAuthor().getGroup().getIsInner())
                 && !entity.getAuthor().equals(currentUser)) {
             throw new AccessDeniedException
-                    (CURRENT_USER_WITH_ROLE_AUTHOR_FROM_INNER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER);
+                    (CURRENT_USER_WITH_ROLE_AUTHOR_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER);
         }
+
     }
 }
