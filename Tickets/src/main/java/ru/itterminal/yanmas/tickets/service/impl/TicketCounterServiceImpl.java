@@ -19,7 +19,6 @@ import ru.itterminal.yanmas.tickets.service.validator.ticket_counter.TicketCount
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class TicketCounterServiceImpl
         extends CrudServiceImpl<TicketCounter, TicketCounterOperationValidator, TicketCounterRepository> {
@@ -40,7 +39,7 @@ public class TicketCounterServiceImpl
     public TicketCounter create(TicketCounter entity) {
         validator.checkAccessBeforeCreate(entity);
         validator.logicalValidationBeforeCreate(entity);
-        log.trace(format(CREATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity.toString()));
+        log.trace(format(CREATE_INIT_MESSAGE, entity.getClass().getSimpleName(), entity));
         entity.setId(jwtUserBuilder.getJwtUser().getAccountId());
         entity.generateDisplayName();
         validator.checkUniqueness(entity);
@@ -49,6 +48,7 @@ public class TicketCounterServiceImpl
         return createdEntity;
     }
 
+    @Transactional
     public Long getNextTicketNumber(UUID accountId) {
         log.debug(START_NEXT, accountId);
         Long ticketNumber;
@@ -61,15 +61,15 @@ public class TicketCounterServiceImpl
         ticketNumber = ticketCounter.getCurrentNumber();
         try {
             ticketCounter.setCurrentNumber(ticketNumber + 1);
-            update(ticketCounter);
-        }
-        catch (OptimisticLockException e) {
+            repository.update(ticketCounter);
+        } catch (OptimisticLockException e) {
             ticketNumber = getNextTicketNumber(accountId);
         }
         log.debug(FINISH_NEXT, accountId);
         return ticketNumber;
     }
 
+    @Transactional
     public TicketCounter getTicketCounter(UUID accountId) {
         log.debug(START_CURRENT, accountId);
         var ticketCounter = repository.findById(accountId).orElseGet(() -> {

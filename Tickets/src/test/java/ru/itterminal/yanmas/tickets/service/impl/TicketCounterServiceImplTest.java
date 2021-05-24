@@ -79,8 +79,6 @@ class TicketCounterServiceImplTest {
         when(validator.logicalValidationBeforeCreate(any())).thenReturn(true);
         when(validator.checkUniqueness(any())).thenReturn(true);
         when(repository.create(any())).thenReturn(ticketCounterWithNumber1);
-        when(validator.logicalValidationBeforeUpdate(any())).thenReturn(true);
-        when(repository.existsById(any())).thenReturn(true);
         when(repository.update(any())).thenReturn(ticketCounterWithNumber2);
         Long expectedTicketNumber = 1L;
         Long actualTicketNumber = service.getNextTicketNumber(UUID.randomUUID());
@@ -89,8 +87,6 @@ class TicketCounterServiceImplTest {
         verify(validator, times(1)).logicalValidationBeforeCreate(any());
         verify(validator, times(1)).checkUniqueness(any());
         verify(repository, times(1)).create(any());
-        verify(validator, times(1)).logicalValidationBeforeUpdate(any());
-        verify(repository, times(1)).existsById(any());
         verify(repository, times(1)).update(any());
         verify(jwtUserBuilder, times(1)).getJwtUser();
     }
@@ -98,8 +94,6 @@ class TicketCounterServiceImplTest {
     @Test
     void getNextTicketNumber_shouldGetSecondNumber_whenEntityExistInDatabase () {
         when(repository.findById(any())).thenReturn(Optional.of(ticketCounterWithNumber2));
-        when(validator.logicalValidationBeforeUpdate(any())).thenReturn(true);
-        when(repository.existsById(any())).thenReturn(true);
         when(repository.update(any())).thenReturn(ticketCounterWithNumber3);
         Long expectedTicketNumber = 2L;
         Long actualTicketNumber = service.getNextTicketNumber(UUID.randomUUID());
@@ -108,8 +102,6 @@ class TicketCounterServiceImplTest {
         verify(validator, times(0)).logicalValidationBeforeCreate(any());
         verify(validator, times(0)).checkUniqueness(any());
         verify(repository, times(0)).create(any());
-        verify(validator, times(1)).logicalValidationBeforeUpdate(any());
-        verify(repository, times(1)).existsById(any());
         verify(repository, times(1)).update(any());
     }
 
