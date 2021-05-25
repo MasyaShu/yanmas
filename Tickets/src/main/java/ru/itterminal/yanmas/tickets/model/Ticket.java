@@ -119,6 +119,7 @@ public class Ticket extends BaseEntity {
     }
 
     @SuppressWarnings({"RedundantIfStatement", "EqualsReplaceableByObjectsCall"})
+    // TODO Прверить после реализации TicketEvent все еще is never used
     public boolean equalsBeforeUpdate(Object o) {
         Ticket ticket = (Ticket) o;
         if (account != null ? !account.equals(ticket.account) : ticket.account != null) { //NOSONAR

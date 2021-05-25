@@ -1,8 +1,7 @@
 package ru.itterminal.yanmas.tickets.service.business_handler.ticket;
 
-import org.springframework.stereotype.Component;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.service.business_handler.EntityBusinessHandler;
@@ -28,17 +27,19 @@ public class SettingTicketStatusBeforeCreateAndUpdateTicketBusinessHandler imple
                 ticket.getAuthor()
         );
         boolean isCurrentUserFromInnerGroup = currentUser.getGroup().getIsInner();
-        var isTicketFinished = ticket.getIsFinished();
+        var isTicketFinished = ticket.getIsFinished() != null && Boolean.FALSE.equals(ticket.getIsFinished());
         var ticketStatus = ticket.getTicketStatus();
         var weightOfRoleOfCurrentUser = currentUser.getRole().getWeight();
-        if (Boolean.TRUE.equals(isTicketFinished) && (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight())) {
+        if (isTicketFinished && (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight())) {
             ticket.setTicketStatus(ticketSetting.getTicketStatusForClose());
-        } else if (ticketStatus != null && Boolean.FALSE.equals(isTicketFinished) && isCurrentUserFromInnerGroup
+        } else if (ticketStatus != null && !isTicketFinished && isCurrentUserFromInnerGroup
                 && (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight())) {
             ticket.setTicketStatus(ticketStatusService.findByIdAndAccountId(ticketStatus.getId(), currentUser));
-        } else if ((Boolean.FALSE.equals(isTicketFinished) && ticket.getTicketStatus() == null)
-                || (Boolean.FALSE.equals(isTicketFinished) && !isCurrentUserFromInnerGroup)
-                || (Boolean.FALSE.equals(isTicketFinished) && weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight())) {
+        } else if (
+                (!isTicketFinished && ticket.getTicketStatus() == null)
+                        || (!isTicketFinished && !isCurrentUserFromInnerGroup)
+                        || (!isTicketFinished && weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight())
+        ) {
             ticket.setTicketStatus(ticketSetting.getTicketStatusForNew());
         }
         return ticket;

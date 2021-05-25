@@ -4,6 +4,7 @@ import static java.lang.String.format;
 import static ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
 import static ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter.TypeComparisonForListOfBaseEntityFilter.CONTAINS_ALL_OF_LIST;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -54,7 +55,6 @@ public class TicketServiceImpl extends CrudServiceWithBusinessHandlerImpl<Ticket
         }
     }
 
-
     @Override
     @Transactional(readOnly = true)
     public long countEntityWithUser(UUID userId) {
@@ -76,5 +76,19 @@ public class TicketServiceImpl extends CrudServiceWithBusinessHandlerImpl<Ticket
         var pageable = PageRequest.of(1, 25, Sort.by(Sort.Direction.fromString("ASC"), "displayName"));
         var foundTickets = repository.findAll(specForSearch, pageable);
         return foundTickets.getTotalElements();
+    }
+
+    @Override
+    protected Ticket businessHandlerBeforeCreate(Ticket entity, User currentUser) {
+        var ticket = super.businessHandlerBeforeCreate(entity, currentUser);
+        var observers = ticket.getObservers();
+        if (observers!=null && !observers.isEmpty()) {
+           ticket.setObservers(new ArrayList<>(observers));
+        }
+        var executors = ticket.getExecutors();
+        if (executors!=null && !executors.isEmpty()) {
+            ticket.setExecutors(new ArrayList<>(executors));
+        }
+        return ticket;
     }
 }

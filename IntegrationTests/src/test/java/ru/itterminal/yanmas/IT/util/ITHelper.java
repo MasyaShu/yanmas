@@ -1,51 +1,36 @@
 package ru.itterminal.yanmas.IT.util;
 
-import static io.restassured.RestAssured.given;
-import static io.restassured.path.json.JsonPath.from;
-import static org.hamcrest.Matchers.equalTo;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.junit.jupiter.params.provider.Arguments;
-import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import com.github.javafaker.Faker;
 import io.restassured.response.Response;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.itterminal.yanmas.aau.model.Account;
-import ru.itterminal.yanmas.aau.model.Group;
-import ru.itterminal.yanmas.aau.model.Role;
-import ru.itterminal.yanmas.aau.model.Roles;
-import ru.itterminal.yanmas.aau.model.User;
+import org.junit.jupiter.params.provider.Arguments;
+import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
+import ru.itterminal.yanmas.aau.model.*;
 import ru.itterminal.yanmas.aau.model.test.AccountTestHelper;
 import ru.itterminal.yanmas.aau.model.test.GroupTestHelper;
 import ru.itterminal.yanmas.aau.model.test.RoleTestHelper;
 import ru.itterminal.yanmas.aau.model.test.UserTestHelper;
 import ru.itterminal.yanmas.aau.repository.UserRepository;
 import ru.itterminal.yanmas.commons.model.BaseEntity;
-import ru.itterminal.yanmas.tickets.model.GroupTicketTypes;
-import ru.itterminal.yanmas.tickets.model.SettingsAccessToTicketTypes;
-import ru.itterminal.yanmas.tickets.model.TicketSetting;
-import ru.itterminal.yanmas.tickets.model.TicketStatus;
-import ru.itterminal.yanmas.tickets.model.TicketTemplate;
-import ru.itterminal.yanmas.tickets.model.TicketType;
-import ru.itterminal.yanmas.tickets.model.dto.GroupTicketTypesDtoRequest;
-import ru.itterminal.yanmas.tickets.model.dto.SettingsAccessToTicketTypesDtoRequest;
-import ru.itterminal.yanmas.tickets.model.dto.TicketSettingDtoResponse;
-import ru.itterminal.yanmas.tickets.model.dto.TicketTemplateDtoResponse;
+import ru.itterminal.yanmas.tickets.model.*;
+import ru.itterminal.yanmas.tickets.model.dto.*;
 import ru.itterminal.yanmas.tickets.model.test.GroupTicketTypesTestHelper;
 import ru.itterminal.yanmas.tickets.model.test.TicketSettingTestHelper;
 import ru.itterminal.yanmas.tickets.model.test.TicketTemplateTestHelper;
+import ru.itterminal.yanmas.tickets.repository.TicketStatusRepository;
+import ru.itterminal.yanmas.tickets.repository.TicketTypeRepository;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static io.restassured.RestAssured.given;
+import static io.restassured.path.json.JsonPath.from;
+import static org.hamcrest.Matchers.equalTo;
 
 @SuppressWarnings("deprecation")
 @Getter
@@ -53,8 +38,10 @@ import ru.itterminal.yanmas.tickets.model.test.TicketTemplateTestHelper;
 @NoArgsConstructor
 public class ITHelper {
 
+    public static final String INITIAL_TICKET_CREATED_BY = "InitialTicketCreatedBy_";
     private Account account;
     private User accountOwner;
+    private Map<String, Ticket> tickets = new HashMap<>();
     private Map<String, TicketStatus> ticketStatuses = new HashMap<>();
     private Map<String, TicketType> ticketTypes = new HashMap<>();
     private Map<String, GroupTicketTypes> groupTicketTypes = new HashMap<>();
@@ -82,6 +69,7 @@ public class ITHelper {
     private final GroupTicketTypesTestHelper groupTicketTypesTestHelper = new GroupTicketTypesTestHelper();
     protected final ModelMapper modelMapper = new ModelMapper();
     private final ObjectMapper objectMapper = new ObjectMapper();
+    protected Faker faker = new Faker(new Locale("ru", "RU"));
 
     private final List<Role> allRolesWithoutAccountOwner = roleTestHelper.getRolesByNames(
             List.of(
@@ -89,6 +77,15 @@ public class ITHelper {
                     ITHelper.AUTHOR,
                     ITHelper.EXECUTOR,
                     ITHelper.OBSERVER
+            )
+    );
+
+    private final List<Role> allRolesWithoutObserver = roleTestHelper.getRolesByNames(
+            List.of(
+                    ITHelper.ACCOUNT_OWNER,
+                    ITHelper.ADMIN,
+                    ITHelper.AUTHOR,
+                    ITHelper.EXECUTOR
             )
     );
 
@@ -110,6 +107,7 @@ public class ITHelper {
     public static final String INITIAL_SETTINGS_ACCESS_TO_TICKET_TYPES = "InitialSettingsAccessToTicketViaTicketTypes";
     public static final String TICKET_TEMPLATE = "ticket/template";
     public static final String TICKET_TYPE = "ticket/type";
+    public static final String TICKET = "ticket";
     public static final String TICKET_TEMPLATE_BY_ID = "ticket/template/{id}";
     public static final String TICKET_SETTING = "ticket/setting-initial";
     public static final String TICKET_SETTING_BY_ID = "ticket/setting-initial/{id}";
@@ -399,6 +397,62 @@ public class ITHelper {
                 .extract().response().as(TicketType.class);
         createdNewTicketType.setAccount(account);
         ticketTypes.put(IT_IS_NEW_TICKET_TYPE_FOR_NEW_TICKET, createdNewTicketType);
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    public void createInitialTickets(UserRepository userRepository, TicketStatusRepository ticketStatusRepository, TicketTypeRepository ticketTypeRepository) {
+        var allUsersWithoutObservers = getUser(allRolesWithoutObserver, null);
+        var executor_1 = executorInnerGroup.get(EXECUTOR_INNER_GROUP + "1");
+        var executor_2 = executorInnerGroup.get(EXECUTOR_INNER_GROUP + "2");
+        var executorsIdList = List.of(executor_1.getId(), executor_2.getId());
+        var observer_1 = observerInnerGroup.get(OBSERVER_INNER_GROUP + "1");
+        var observer_2 = observerInnerGroup.get(OBSERVER_INNER_GROUP + "2");
+        var observersIdList = List.of(observer_1.getId(), observer_2.getId());
+        for(Map.Entry<String, User> entry : allUsersWithoutObservers.entrySet()) {
+            var authorOfTicket = entry.getValue();
+            var newTicketDtoRequest = TicketDtoRequest.builder()
+                    .authorId(authorOfTicket.getId())
+                    .subject(faker.funnyName().toString())
+                    .description(faker.lorem().paragraph())
+                    .executors(executorsIdList)
+                    .observers(observersIdList)
+                    .build();
+            var createdNewTicket = given().
+                    when()
+                    .headers(
+                            "Authorization",
+                            "Bearer " + tokens.get(authorOfTicket.getEmail())
+                    )
+                    .contentType(APPLICATION_JSON)
+                    .body(newTicketDtoRequest)
+                    .post(TICKET)
+                    .then()
+                    .log().body()
+                    .extract().response().as(Ticket.class);
+            createdNewTicket.setAccount(account);
+            createdNewTicket.setGroup(authorOfTicket.getGroup());
+            createdNewTicket.setAuthor(authorOfTicket);
+            var accountId = createdNewTicket.getAccount().getId();
+            var ticketStatus = ticketStatusRepository.getByIdAndAccount_Id(createdNewTicket.getTicketStatus().getId(), accountId).get();
+            createdNewTicket.setTicketStatus(ticketStatus);
+            var ticketType = ticketTypeRepository.getByIdAndAccount_Id(createdNewTicket.getTicketType().getId(), accountId).get();
+            createdNewTicket.setTicketType(ticketType);
+            if (createdNewTicket.getObservers()!=null && !createdNewTicket.getObservers().isEmpty()) {
+                var listIdOfObservers = createdNewTicket.getObservers().stream()
+                        .map(BaseEntity::getId)
+                        .collect(Collectors.toList());
+                var observers = userRepository.findAllByAccountIdAndListId(accountId, listIdOfObservers);
+                createdNewTicket.setObservers(observers);
+            }
+            if (createdNewTicket.getExecutors()!=null && !createdNewTicket.getExecutors().isEmpty()) {
+                var listIdOfExecutors = createdNewTicket.getExecutors().stream()
+                        .map(BaseEntity::getId)
+                        .collect(Collectors.toList());
+                var executors = userRepository.findAllByAccountIdAndListId(accountId, listIdOfExecutors);
+                createdNewTicket.setObservers(executors);
+            }
+            tickets.put(INITIAL_TICKET_CREATED_BY + entry.getKey(), createdNewTicket);
+        }
     }
 
     public void createInitialGroupTicketTypes() {
