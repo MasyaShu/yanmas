@@ -1,10 +1,7 @@
 package ru.itterminal.yanmas.tickets.service.business_handler.ticket;
 
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Component;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.service.business_handler.EntityBusinessHandler;
@@ -13,6 +10,9 @@ import ru.itterminal.yanmas.commons.model.BaseEntity;
 import ru.itterminal.yanmas.tickets.model.Ticket;
 import ru.itterminal.yanmas.tickets.service.impl.TicketServiceImpl;
 import ru.itterminal.yanmas.tickets.service.impl.TicketSettingServiceImpl;
+
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("DuplicatedCode")
 @Component
@@ -34,7 +34,7 @@ public class SettingTicketObserversBeforeCreateAndUpdateTicketBusinessHandler im
         var weightOfRoleOfCurrentUser = currentUser.getRole().getWeight();
         if (ticket.getObservers() == null || !isCurrentUserFromInnerGroup
                 || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
-            ticket.setObservers(ticketSetting.getObservers());
+            ticket.setObservers(new ArrayList<>(ticketSetting.getObservers()));
         } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
             var listObserversId = ticket.getObservers().stream()
                     .map(BaseEntity::getId)

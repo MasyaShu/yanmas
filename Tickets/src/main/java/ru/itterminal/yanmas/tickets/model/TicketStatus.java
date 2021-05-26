@@ -18,7 +18,7 @@ import javax.persistence.*;
 @EqualsAndHashCode(callSuper = true)
 public class TicketStatus extends BaseEntity {
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 

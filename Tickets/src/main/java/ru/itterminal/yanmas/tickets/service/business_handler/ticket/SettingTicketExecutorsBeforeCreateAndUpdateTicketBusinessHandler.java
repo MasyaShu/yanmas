@@ -1,5 +1,6 @@
 package ru.itterminal.yanmas.tickets.service.business_handler.ticket;
 
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
@@ -34,7 +35,7 @@ public class SettingTicketExecutorsBeforeCreateAndUpdateTicketBusinessHandler im
         var weightOfRoleOfCurrentUser = currentUser.getRole().getWeight();
         if (ticket.getExecutors() == null || !isCurrentUserFromInnerGroup
                 || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
-            ticket.setExecutors(ticketSetting.getExecutors());
+            ticket.setExecutors(new ArrayList<>(ticketSetting.getExecutors()));
         } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
             var listExecutorsId = ticket.getExecutors().stream()
                     .map(BaseEntity::getId)

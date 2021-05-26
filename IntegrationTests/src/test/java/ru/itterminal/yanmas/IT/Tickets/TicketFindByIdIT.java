@@ -12,8 +12,6 @@ import ru.itterminal.yanmas.IT.util.ITTestConfig;
 import ru.itterminal.yanmas.aau.repository.UserRepository;
 import ru.itterminal.yanmas.security.jwt.JwtProvider;
 import ru.itterminal.yanmas.tickets.model.test.TicketSettingTestHelper;
-import ru.itterminal.yanmas.tickets.repository.TicketStatusRepository;
-import ru.itterminal.yanmas.tickets.repository.TicketTypeRepository;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -21,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DataJpaTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ContextConfiguration(classes = {ITTestConfig.class, JwtProvider.class, UserRepository.class, TicketStatusRepository.class, TicketTypeRepository.class})
+@ContextConfiguration(classes = {ITTestConfig.class, JwtProvider.class, UserRepository.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestPropertySource(properties = {"jwt.token.secret=ksedtob", "jwt.token.expired=8640000", "jwt.token.prefix=Bearer"})
 class TicketFindByIdIT {
@@ -32,12 +30,6 @@ class TicketFindByIdIT {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private TicketStatusRepository ticketStatusRepository;
-
-    @Autowired
-    private TicketTypeRepository ticketTypeRepository;
 
     private static final ITHelper itHelper = new ITHelper();
     private final TicketSettingTestHelper ticketSettingTestHelper = new TicketSettingTestHelper();
@@ -54,7 +46,7 @@ class TicketFindByIdIT {
         itHelper.createInitialTicketSettings();
         itHelper.createInitialGroupTicketTypes();
         itHelper.createInitialSettingsAccessToTicketTypes();
-        itHelper.createInitialTickets(userRepository, ticketStatusRepository, ticketTypeRepository);
+        itHelper.createInitialTickets();
     }
 
     @Test

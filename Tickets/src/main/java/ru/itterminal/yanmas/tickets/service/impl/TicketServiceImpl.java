@@ -1,22 +1,11 @@
 package ru.itterminal.yanmas.tickets.service.impl;
 
-import static java.lang.String.format;
-import static ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
-import static ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter.TypeComparisonForListOfBaseEntityFilter.CONTAINS_ALL_OF_LIST;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import javax.persistence.OptimisticLockException;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import lombok.RequiredArgsConstructor;
 import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.service.CrudServiceWithBusinessHandlerImpl;
 import ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter;
@@ -25,6 +14,14 @@ import ru.itterminal.yanmas.commons.model.spec.SpecificationsFactory;
 import ru.itterminal.yanmas.integration.across_modules.RequestsFromModuleAccountAndUsers;
 import ru.itterminal.yanmas.tickets.model.Ticket;
 import ru.itterminal.yanmas.tickets.repository.TicketRepository;
+
+import javax.persistence.OptimisticLockException;
+import java.util.List;
+import java.util.UUID;
+
+import static java.lang.String.format;
+import static ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
+import static ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter.TypeComparisonForListOfBaseEntityFilter.CONTAINS_ALL_OF_LIST;
 
 @Service
 @RequiredArgsConstructor
@@ -76,19 +73,5 @@ public class TicketServiceImpl extends CrudServiceWithBusinessHandlerImpl<Ticket
         var pageable = PageRequest.of(1, 25, Sort.by(Sort.Direction.fromString("ASC"), "displayName"));
         var foundTickets = repository.findAll(specForSearch, pageable);
         return foundTickets.getTotalElements();
-    }
-
-    @Override
-    protected Ticket businessHandlerBeforeCreate(Ticket entity, User currentUser) {
-        var ticket = super.businessHandlerBeforeCreate(entity, currentUser);
-        var observers = ticket.getObservers();
-        if (observers!=null && !observers.isEmpty()) {
-           ticket.setObservers(new ArrayList<>(observers));
-        }
-        var executors = ticket.getExecutors();
-        if (executors!=null && !executors.isEmpty()) {
-            ticket.setExecutors(new ArrayList<>(executors));
-        }
-        return ticket;
     }
 }
