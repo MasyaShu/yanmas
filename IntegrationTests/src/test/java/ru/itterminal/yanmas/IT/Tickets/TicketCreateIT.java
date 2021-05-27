@@ -18,6 +18,7 @@ import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.repository.UserRepository;
 import ru.itterminal.yanmas.commons.exception.error.ApiError;
+import ru.itterminal.yanmas.commons.model.dto.BaseEntityDto;
 import ru.itterminal.yanmas.security.jwt.JwtProvider;
 import ru.itterminal.yanmas.tickets.model.Priority;
 import ru.itterminal.yanmas.tickets.model.Ticket;
@@ -26,10 +27,12 @@ import ru.itterminal.yanmas.tickets.model.test.TicketSettingTestHelper;
 import ru.itterminal.yanmas.tickets.model.test.TicketTestHelper;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
 import static java.lang.String.format;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static ru.itterminal.yanmas.IT.util.ITHelper.*;
 import static ru.itterminal.yanmas.aau.service.validator.EntityValidator.EMPTY_TICKET;
@@ -379,7 +382,7 @@ class TicketCreateIT {
     //SettingTicketPriorityBeforeCreateAndUpdateTicketBusinessHandler
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamAllUsersWithRoleAccountOwnerAdminExecutorAuthor")
-    @Order(100)
+    @Order(110)
     void successCreate_CurrentUserByRoleAccountOwnerOrAdminOrExecutorOrAuthorAndPriorityNotNull(String userKey, User currentUser) {
         var newTicket = Ticket.builder()
                 .author(currentUser)
@@ -402,6 +405,199 @@ class TicketCreateIT {
                 .extract().response().as(TicketDtoResponse.class);
         Assertions.assertEquals(currentUser.getGroup().getId(), ticketDtoResponse.getGroup().getId());
         Assertions.assertEquals(Priority.HEIGHT.toString(), ticketDtoResponse.getPriority());
+
+    }
+
+    //SettingTicketExecutorsBeforeCreateAndUpdateTicketBusinessHandler
+    //SettingTicketObserversBeforeCreateAndUpdateTicketBusinessHandler
+    //SettingTicketStatusBeforeCreateAndUpdateTicketBusinessHandler
+    //SettingTicketTypeBeforeCreateAndUpdateTicketBusinessHandler
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamAllUsersWithRoleAccountOwnerAdminExecutorAuthor")
+    @Order(120)
+    void successCreate_ticketTypeTicketStatusExecutorsObserversFromTicketSetting(String userKey, User currentUser) {
+        var ticketSettings = itHelper.getTicketSettingForUser(currentUser);
+        var newTicket = Ticket.builder()
+                .author(currentUser)
+                .subject(TICKET)
+                .build();
+        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
+        var ticketDtoResponse = given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(newTicketDtoRequest)
+                .post(TICKET)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.CREATED.value())
+                .extract().response().as(TicketDtoResponse.class);
+        Assertions.assertEquals(ticketSettings.getTicketStatusForNew().getId(), ticketDtoResponse.getTicketStatus().getId());
+        Assertions.assertEquals(ticketSettings.getTicketTypeForNew().getId(), ticketDtoResponse.getTicketType().getId());
+        Assertions.assertEquals(ticketSettings.getObservers().size(), ticketDtoResponse.getObservers().size());
+        Assertions.assertEquals(ticketSettings.getExecutors().size(), ticketDtoResponse.getExecutors().size());
+        var observersIdExpected = ticketSettings.getObservers().stream()
+                .map(User::getId)
+                .collect(Collectors.toList());
+        var observersIdActual = ticketDtoResponse.getObservers().stream()
+                .map(BaseEntityDto::getId)
+                .collect(Collectors.toList());
+        assertThat(observersIdExpected)
+                .containsExactlyInAnyOrderElementsOf(observersIdActual);
+
+        var executorsIdExpected = ticketSettings.getExecutors().stream()
+                .map(User::getId)
+                .collect(Collectors.toList());
+        var executorsIdActual = ticketDtoResponse.getExecutors().stream()
+                .map(BaseEntityDto::getId)
+                .collect(Collectors.toList());
+        assertThat(executorsIdExpected)
+                .containsExactlyInAnyOrderElementsOf(executorsIdActual);
+    }
+
+    //SettingTicketExecutorsBeforeCreateAndUpdateTicketBusinessHandler
+    //SettingTicketObserversBeforeCreateAndUpdateTicketBusinessHandler
+    //SettingTicketStatusBeforeCreateAndUpdateTicketBusinessHandler
+    //SettingTicketTypeBeforeCreateAndUpdateTicketBusinessHandler
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamAllUsersWithRoleAuthor")
+    @Order(130)
+    void successCreate_ticketTypeTicketStatusExecutorsObserversFromTicketSettingWhenCurrentUserWithRoleAuthor(String userKey, User currentUser) {
+        var ticketSettings = itHelper.getTicketSettingForUser(currentUser);
+        var executors = itHelper.getUsersByGroupAndRole(currentUser.getGroup(), null,
+                itHelper.getRoleTestHelper().getRoleByName(EXECUTOR), null);
+        var observers = itHelper.getUsersByGroupAndRole(currentUser.getGroup(), null,
+                itHelper.getRoleTestHelper().getRoleByName(OBSERVER), null);
+        var newTicket = Ticket.builder()
+                .author(currentUser)
+                .subject(TICKET)
+                .ticketStatus(itHelper.getTicketStatuses().get(IS_CANCELED_PREDEFINED))
+                .ticketType(itHelper.getTicketTypes().get(TICKET_TYPE_WHICH_IS_NEVER_USED_INTO_INITIAL_TICKETS))
+                .build();
+        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
+        var ticketDtoResponse = given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(newTicketDtoRequest)
+                .post(TICKET)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.CREATED.value())
+                .extract().response().as(TicketDtoResponse.class);
+        Assertions.assertEquals(ticketSettings.getTicketStatusForNew().getId(), ticketDtoResponse.getTicketStatus().getId());
+        Assertions.assertEquals(ticketSettings.getTicketTypeForNew().getId(), ticketDtoResponse.getTicketType().getId());
+        Assertions.assertEquals(ticketSettings.getObservers().size(), ticketDtoResponse.getObservers().size());
+        Assertions.assertEquals(ticketSettings.getExecutors().size(), ticketDtoResponse.getExecutors().size());
+        var observersIdExpected = ticketSettings.getObservers().stream()
+                .map(User::getId)
+                .collect(Collectors.toList());
+        var observersIdActual = ticketDtoResponse.getObservers().stream()
+                .map(BaseEntityDto::getId)
+                .collect(Collectors.toList());
+        assertThat(observersIdExpected)
+                .containsExactlyInAnyOrderElementsOf(observersIdActual);
+
+        var executorsIdExpected = ticketSettings.getExecutors().stream()
+                .map(User::getId)
+                .collect(Collectors.toList());
+        var executorsIdActual = ticketDtoResponse.getExecutors().stream()
+                .map(BaseEntityDto::getId)
+                .collect(Collectors.toList());
+        assertThat(executorsIdExpected)
+                .containsExactlyInAnyOrderElementsOf(executorsIdActual);
+    }
+
+    //SettingTicketExecutorsBeforeCreateAndUpdateTicketBusinessHandler
+    //SettingTicketObserversBeforeCreateAndUpdateTicketBusinessHandler
+    //SettingTicketStatusBeforeCreateAndUpdateTicketBusinessHandler
+    //SettingTicketTypeBeforeCreateAndUpdateTicketBusinessHandler
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamUsersFromOuterGroupWithRoleAdminAndExecutorAndAuthor")
+    @Order(140)
+    void successCreate_ticketTypeTicketStatusExecutorsObserversFromTicketSettingWhenCurrentUserFromOuterGroup(String userKey, User currentUser) {
+        var ticketSettings = itHelper.getTicketSettingForUser(currentUser);
+        var executors = itHelper.getUsersByGroupAndRole(currentUser.getGroup(), null,
+                itHelper.getRoleTestHelper().getRoleByName(EXECUTOR), null);
+        var observers = itHelper.getUsersByGroupAndRole(currentUser.getGroup(), null,
+                itHelper.getRoleTestHelper().getRoleByName(OBSERVER), null);
+        var newTicket = Ticket.builder()
+                .author(currentUser)
+                .subject(TICKET)
+                .ticketStatus(itHelper.getTicketStatuses().get(IS_CANCELED_PREDEFINED))
+                .ticketType(itHelper.getTicketTypes().get(TICKET_TYPE_WHICH_IS_NEVER_USED_INTO_INITIAL_TICKETS))
+                .build();
+        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
+        var ticketDtoResponse = given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(newTicketDtoRequest)
+                .post(TICKET)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.CREATED.value())
+                .extract().response().as(TicketDtoResponse.class);
+        Assertions.assertEquals(ticketSettings.getTicketStatusForNew().getId(), ticketDtoResponse.getTicketStatus().getId());
+        Assertions.assertEquals(ticketSettings.getTicketTypeForNew().getId(), ticketDtoResponse.getTicketType().getId());
+        Assertions.assertEquals(ticketSettings.getObservers().size(), ticketDtoResponse.getObservers().size());
+        Assertions.assertEquals(ticketSettings.getExecutors().size(), ticketDtoResponse.getExecutors().size());
+        var observersIdExpected = ticketSettings.getObservers().stream()
+                .map(User::getId)
+                .collect(Collectors.toList());
+        var observersIdActual = ticketDtoResponse.getObservers().stream()
+                .map(BaseEntityDto::getId)
+                .collect(Collectors.toList());
+        assertThat(observersIdExpected)
+                .containsExactlyInAnyOrderElementsOf(observersIdActual);
+
+        var executorsIdExpected = ticketSettings.getExecutors().stream()
+                .map(User::getId)
+                .collect(Collectors.toList());
+        var executorsIdActual = ticketDtoResponse.getExecutors().stream()
+                .map(BaseEntityDto::getId)
+                .collect(Collectors.toList());
+        assertThat(executorsIdExpected)
+                .containsExactlyInAnyOrderElementsOf(executorsIdActual);
+    }
+
+    //SettingTicketStatusBeforeCreateAndUpdateTicketBusinessHandler
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamUsersFromOuterGroupWithRoleAdminAndExecutorAndAuthor")
+    @Order(150)
+    void successCreate_tTicketStatusFromTicketSettingWhenCurrentUserFromOuterGroupAndIsFinishedTrue(String userKey, User currentUser) {
+        var ticketSettings = itHelper.getTicketSettingForUser(currentUser);
+        var newTicket = Ticket.builder()
+                .author(currentUser)
+                .subject(TICKET)
+                .isFinished(true)
+                .ticketStatus(ticketSettings.getTicketStatusForClose())
+                .build();
+        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
+        var ticketDtoResponse = given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(newTicketDtoRequest)
+                .post(TICKET)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.CREATED.value())
+                .extract().response().as(TicketDtoResponse.class);
+        Assertions.assertEquals(ticketSettings.getTicketStatusForClose().getId(), ticketDtoResponse.getTicketStatus().getId());
+        Assertions.assertTrue(ticketDtoResponse.getIsFinished());
     }
 
     private static Stream<Arguments> getStreamAllUsersWithRoleAuthor() {
@@ -428,6 +624,13 @@ class TicketCreateIT {
     private static Stream<Arguments> getStreamUsersFromOuterGroupWithRoleAdminAndExecutor() {
         var roles = itHelper.getRoleTestHelper().getRolesByNames(
                 List.of(ADMIN, EXECUTOR)
+        );
+        return itHelper.getStreamUsers(roles, false);
+    }
+
+    private static Stream<Arguments> getStreamUsersFromOuterGroupWithRoleAdminAndExecutorAndAuthor() {
+        var roles = itHelper.getRoleTestHelper().getRolesByNames(
+                List.of(ADMIN, EXECUTOR, AUTHOR)
         );
         return itHelper.getStreamUsers(roles, false);
     }

@@ -26,21 +26,20 @@ public class SettingTicketStatusBeforeCreateAndUpdateTicketBusinessHandler imple
                 currentUser,
                 ticket.getAuthor()
         );
-        boolean isCurrentUserFromInnerGroup = currentUser.getGroup().getIsInner();
-        var isTicketFinished = ticket.getIsFinished() != null && Boolean.FALSE.equals(ticket.getIsFinished());
+        var isTicketFinished = ticket.getIsFinished() != null && Boolean.TRUE.equals(ticket.getIsFinished());
         var ticketStatus = ticket.getTicketStatus();
         var weightOfRoleOfCurrentUser = currentUser.getRole().getWeight();
         if (isTicketFinished && (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight())) {
             ticket.setTicketStatus(ticketSetting.getTicketStatusForClose());
-        } else if (ticketStatus != null && !isTicketFinished && isCurrentUserFromInnerGroup
+        } else if (ticketStatus != null && !isTicketFinished
                 && (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight())) {
             ticket.setTicketStatus(ticketStatusService.findByIdAndAccountId(ticketStatus.getId(), currentUser));
         } else if (
-                (!isTicketFinished && ticket.getTicketStatus() == null)
-                        || (!isTicketFinished && !isCurrentUserFromInnerGroup)
-                        || (!isTicketFinished && weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight())
+                (ticket.getTicketStatus() == null)
+                        || (weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight())
         ) {
             ticket.setTicketStatus(ticketSetting.getTicketStatusForNew());
+            ticket.setIsFinished(false);
         }
         return ticket;
     }

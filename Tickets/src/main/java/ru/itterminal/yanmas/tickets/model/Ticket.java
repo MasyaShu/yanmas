@@ -105,7 +105,9 @@ public class Ticket extends BaseEntity {
     @PrePersist
     protected void onCreate() {
         createdAt = System.currentTimeMillis();
-        isFinished = false;
+        if(isFinished==null) {
+            isFinished = false;
+        }
         setDeleted(false);
     }
 

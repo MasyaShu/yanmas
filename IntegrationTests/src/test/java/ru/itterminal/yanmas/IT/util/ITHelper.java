@@ -594,6 +594,47 @@ public class ITHelper {
         settingsAccessToTicketTypesForAllowAndLimitAccess.setDeleted(true);
     }
 
+    public TicketSetting getTicketSettingForUser(User user) {
+       var listTicketSettings = ticketSettings.values().stream()
+                .filter(tt -> tt.getAuthor() != null && tt.getAuthor().equals(user))
+                .collect(Collectors.toList());
+       if (listTicketSettings.isEmpty()) {
+           listTicketSettings = ticketSettings.values().stream()
+                   .filter(tt -> tt.getGroup() != null &&
+                           tt.getAuthor() == null &&
+                           tt.getGroup().equals(user.getGroup()))
+                   .collect(Collectors.toList());
+       }
+        if (listTicketSettings.isEmpty()) {
+            listTicketSettings = ticketSettings.values().stream()
+                    .filter(tt -> tt.getAccount() != null &&
+                            tt.getGroup() == null &&
+                            tt.getAccount().equals(user.getAccount()))
+                    .collect(Collectors.toList());
+        }
+
+        var ticketSettingFromReturn = new TicketSetting();
+        if (!listTicketSettings.isEmpty()) {
+            ticketSettingFromReturn = listTicketSettings.get(0);
+        }
+        if (ticketSettingFromReturn.getTicketTypeForNew() == null) {
+            ticketSettingFromReturn.setTicketTypeForNew(ticketTypes.get(IT_IS_PREDEFINED_TICKET_TYPE_FOR_NEW_TICKET));
+        }
+        if (ticketSettingFromReturn.getTicketStatusForNew() == null) {
+            ticketSettingFromReturn.setTicketStatusForNew(ticketStatuses.get(IS_STARTED_PREDEFINED));
+        }
+        if (ticketSettingFromReturn.getTicketStatusForCancel() == null) {
+            ticketSettingFromReturn.setTicketStatusForCancel(ticketStatuses.get(IS_CANCELED_PREDEFINED));
+        }
+        if (ticketSettingFromReturn.getTicketStatusForClose() == null) {
+            ticketSettingFromReturn.setTicketStatusForClose(ticketStatuses.get(IS_FINISHED_PREDEFINED));
+        }
+        if (ticketSettingFromReturn.getTicketStatusForReopen() == null) {
+            ticketSettingFromReturn.setTicketStatusForReopen(ticketStatuses.get(IS_REOPENED_PREDEFINED));
+        }
+        return ticketSettingFromReturn;
+    }
+
     public List<TicketType> getPermittedTicketTypesFromSettingsAccessToTicketTypes(User user) {
         var permittedTicketTypes = settingsAccessToTicketTypes.values().stream()
                 .filter(p -> p.getUser().equals(user)
