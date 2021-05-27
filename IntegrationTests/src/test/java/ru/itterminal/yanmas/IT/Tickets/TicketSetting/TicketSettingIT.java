@@ -1,4 +1,4 @@
-package ru.itterminal.yanmas.IT.Tickets;
+package ru.itterminal.yanmas.IT.Tickets.TicketSetting;
 
 import io.restassured.RestAssured;
 import org.assertj.core.api.AssertionsForInterfaceTypes;

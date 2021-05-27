@@ -1,4 +1,4 @@
-package ru.itterminal.yanmas.IT.Tickets;
+package ru.itterminal.yanmas.IT.Tickets.TicketStatus;
 
 
 import io.restassured.RestAssured;

@@ -25,13 +25,13 @@ public class TicketSettingServiceImpl extends CrudServiceWithBusinessHandlerImpl
 
     @Transactional(readOnly = true)
     public TicketSetting getSettingOrPredefinedValuesForTicket(@NotNull User currentUser,
-                                                               @NotNull User foundUser) {
-        validator.checkAccessForGetSettingOrPredefinedValuesForTicket(currentUser, foundUser);
+                                                               @NotNull User authorOfTicket) {
+        validator.checkAccessForGetSettingOrPredefinedValuesForTicket(currentUser, authorOfTicket);
         var ticketSetting = repository
-                .getByAccount_IdAndGroup_IdAndAuthor_IdAndDeletedIsFalse(currentUser.getAccount().getId(), foundUser.getGroup().getId(), foundUser.getId());
+                .getByAccount_IdAndGroup_IdAndAuthor_IdAndDeletedIsFalse(currentUser.getAccount().getId(), authorOfTicket.getGroup().getId(), authorOfTicket.getId());
         if (ticketSetting == null) {
             ticketSetting = repository
-                    .getByAccount_IdAndGroup_IdAndAuthorIsNullAndDeletedIsFalse(currentUser.getAccount().getId(), foundUser.getGroup().getId());
+                    .getByAccount_IdAndGroup_IdAndAuthorIsNullAndDeletedIsFalse(currentUser.getAccount().getId(), authorOfTicket.getGroup().getId());
         }
         if (ticketSetting == null) {
             ticketSetting = repository
@@ -42,7 +42,7 @@ public class TicketSettingServiceImpl extends CrudServiceWithBusinessHandlerImpl
         }
         if (ticketSetting.getTicketTypeForNew() != null) {
             var ticketTypeId = ticketSetting.getTicketTypeForNew().getId();
-            if (!settingsAccessToTicketTypesService.isPermittedTicketType(ticketTypeId, foundUser.getId())) {
+            if (!settingsAccessToTicketTypesService.isPermittedTicketType(ticketTypeId, authorOfTicket.getId())) {
                 ticketSetting.setTicketTypeForNew(null);
             }
         }
