@@ -1,4 +1,4 @@
-package ru.itterminal.yanmas.tickets.service.validator.ticket.check_access_before_create_update;
+package ru.itterminal.yanmas.tickets.service.validator.ticket.check_access_before_update;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -10,15 +10,11 @@ import ru.itterminal.yanmas.tickets.model.Ticket;
 
 @Component
 @RequiredArgsConstructor
-public class CurrentUserRoleExecutorOuterGroupCanNotCreateUpdateTicketIfTicketIsFromAnotherGroupValidator implements EntityValidator<Ticket> {
+public class CurrentUserRoleAdminOuterGroupCanNotCreateUpdateTicketIfTicketIsFromAnotherGroupValidator implements EntityValidator<Ticket> {
     public static final String
-            CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP =
-            "Current user with role EXECUTOR from outer group can not create/update ticket if ticket is from another group";
+            CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_UPDATE_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP =
+            "Current user with role ADMIN from outer group can not update ticket if ticket is from another group";
 
-    @Override
-    public void checkAccessBeforeCreate(Ticket entity, User currentUser) {
-        checkAccessForCreateAndUpdate(entity, currentUser);
-    }
 
     @Override
     public void checkAccessBeforeUpdate(Ticket entity, User currentUser) {
@@ -26,12 +22,11 @@ public class CurrentUserRoleExecutorOuterGroupCanNotCreateUpdateTicketIfTicketIs
     }
 
     private void checkAccessForCreateAndUpdate(Ticket entity, User currentUser) {
-        if (currentUser.getRole().getName().equals(Roles.EXECUTOR.toString())
+        if (currentUser.getRole().getName().equals(Roles.ADMIN.toString())
                 && Boolean.FALSE.equals(currentUser.getGroup().getIsInner())
                 && !currentUser.getGroup().equals(entity.getGroup())) {
             throw new AccessDeniedException
-                    (CURRENT_USER_WITH_ROLE_EXECUTOR_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP);
+                    (CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_UPDATE_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP);
         }
-
     }
 }

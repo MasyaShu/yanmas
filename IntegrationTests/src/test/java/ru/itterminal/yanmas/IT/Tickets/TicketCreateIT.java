@@ -1,10 +1,7 @@
 package ru.itterminal.yanmas.IT.Tickets;
 
 import io.restassured.RestAssured;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -54,6 +51,7 @@ import static ru.itterminal.yanmas.tickets.service.validator.ticket.logical_vali
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = {ITTestConfig.class, JwtProvider.class, UserRepository.class})
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestPropertySource(properties = {"jwt.token.secret=ksedtob", "jwt.token.expired=8640000", "jwt.token.prefix=Bearer"})
 class TicketCreateIT {
 
@@ -78,11 +76,14 @@ class TicketCreateIT {
         itHelper.createInitialUsers();
         itHelper.createInitialTicketType();
         itHelper.createInitialTicketSettings();
+        itHelper.createTicketTypeWhichIsNeverUsedIntoInitialTickets();
+        itHelper.createGroupOfTicketTypesWhichIsNeverUsedIntoInitialTickets();
     }
 
     // CurrentUserRoleAuthorCanNotCreateUpdateTicketIfAuthorOfTicketIsNotCurrentUserValidator
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamUsersRoleAuthor")
+    @MethodSource("getStreamAllUsersWithRoleAuthor")
+    @Order(10)
     void accessDenied_CurrentUserRoleAuthorCanNotCreateTicketIfAuthorOfTicketIsNotCurrentUser(String userKey, User currentUser) {
         var executorOfAuthorGroup = itHelper.getUsersByGroupAndRole(currentUser.getGroup(), null, itHelper.getRoleTestHelper().getRoleByName(EXECUTOR), null);
         var newTicket = Ticket.builder()
@@ -98,20 +99,16 @@ class TicketCreateIT {
                 )
                 .contentType(APPLICATION_JSON)
                 .body(newTicketDtoRequest)
-                .post(TICKET)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.FORBIDDEN.value())
                 .body("detail", equalTo(CURRENT_USER_WITH_ROLE_AUTHOR_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER));
     }
 
-    /*
-    CurrentUserRoleAdminOuterGroupCanNotCreateUpdateTicketIfTicketIsFromAnotherGroupValidator
-    CurrentUserRoleExecutorOuterGroupCanNotCreateUpdateTicketIfTicketIsFromAnotherGroupValidator
-    classes not tested
-       */
+    //TicketSettingOperationValidator
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamUsersRoleAdminOrExecutorOuterGroup")
+    @MethodSource("getStreamUsersFromOuterGroupWithRoleAdminAndExecutor")
+    @Order(20)
     void accessDenied_CurrentUserRoleAdminOrExecutorOuterGroupCanNotCreateTicketIfTicketIsFromAnotherGroup(String userKey, User currentUser) {
         var executorOfAuthorGroup = itHelper.getUsersByGroupAndRole(null, currentUser.getGroup(), itHelper.getRoleTestHelper().getRoleByName(AUTHOR), null);
         var newTicket = Ticket.builder()
@@ -131,12 +128,12 @@ class TicketCreateIT {
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.FORBIDDEN.value());
-        //.body("detail", equalTo(CURRENT_USER_WITH_ROLE_ADMIN_FROM_OUTER_GROUP_CAN_NOT_CREATE_UPDATE_TICKET_IF_TICKET_IS_FROM_ANOTHER_GROUP));
     }
 
     //SecurityConfig
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamUsersRoleObserver")
+    @MethodSource("getStreamUsersWithRoleObserver")
+    @Order(30)
     void accessDenied_accessDeniedIfCurrentUserByRoleObserver(String userKey, User currentUser) {
         var executorOfAuthorGroup = itHelper.getUsersByGroupAndRole(null, currentUser.getGroup(), itHelper.getRoleTestHelper().getRoleByName(AUTHOR), null);
         var newTicket = Ticket.builder()
@@ -160,6 +157,7 @@ class TicketCreateIT {
 
     //AuthorCannotBeAUserWeighingLessThanTheWeightOfTheAuthorValidator
     @Test
+    @Order(40)
     void logicalError_AuthorCannotBeAUserWeighingLessThanTheWeightOfTheAuthor() {
         var weightOfRoleAuthor = Roles.AUTHOR.getWeight();
         var AuthorTicket = itHelper.getObserverInnerGroup().get(OBSERVER_INNER_GROUP + 1);
@@ -188,35 +186,9 @@ class TicketCreateIT {
         Assertions.assertEquals(expectedMessage, apiError.getErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR).get(0).getMessage());
     }
 
-    //CheckAuthorTicketHasAccessToTicketTypeValidator
-    //TODO Отложен до реализации методов включения настроек
-    @Test
-    void logicalError_AuthorTicketHasAccessToTicketType() {
-        var AuthorTicket = itHelper.getAuthorInnerGroup().get(AUTHOR_INNER_GROUP + 1);
-        var newTicket = Ticket.builder()
-                .author(AuthorTicket)
-                .subject(TICKET)
-                .build();
-        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
-        var apiError = given().
-                when()
-                .headers(
-                        "Authorization",
-                        "Bearer " + itHelper.getTokens().get(itHelper.getAccountOwner().getEmail())
-                )
-                .contentType(APPLICATION_JSON)
-                .body(newTicketDtoRequest)
-                .post(TICKET)
-                .then()
-                .log().body()
-                .statusCode(HttpStatus.CONFLICT.value())
-                .extract().response().as(ApiError.class);
-
-        Assertions.assertEquals(INVALID_TICKET_BECAUSE_AUTHOR_HAS_NOT_ACCESS_TO_TICKET_TYPE, apiError.getErrors().get(INVALID_TICKET).get(0).getMessage());
-    }
-
     //ExecutorCannotBeAUserWeighingLessThanTheWeightOfTheExecutorValidator
     @Test
+    @Order(41)
     void logicalError_ExecutorCannotBeAUserWeighingLessThanTheWeightOfTheExecutor() {
         var weightOfRoleExecutor = Roles.EXECUTOR.getWeight();
         var executor = itHelper.getAuthorInnerGroup().get(AUTHOR_INNER_GROUP + 1);
@@ -246,8 +218,49 @@ class TicketCreateIT {
         Assertions.assertEquals(expectedMessage, apiError.getErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS).get(0).getMessage());
     }
 
+    //CheckAuthorTicketHasAccessToTicketTypeValidator
+    @Test
+    @Order(45)
+    void LimitAllInitialUsersOnAllTicketTypes() {
+        itHelper.limitAllInitialUsersOnAllTicketTypes();
+    }
+
+    @Test
+    @Order(50)
+    void logicalError_AuthorTicketHasAccessToTicketType() {
+        var AuthorTicket = itHelper.getAuthorInnerGroup().get(AUTHOR_INNER_GROUP + 1);
+        var newTicket = Ticket.builder()
+                .author(AuthorTicket)
+                .subject(TICKET)
+                .build();
+        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
+        var apiError = given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(itHelper.getAccountOwner().getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(newTicketDtoRequest)
+                .post(TICKET)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.CONFLICT.value())
+                .extract().response().as(ApiError.class);
+
+        Assertions.assertEquals(INVALID_TICKET_BECAUSE_AUTHOR_HAS_NOT_ACCESS_TO_TICKET_TYPE,
+                apiError.getErrors().get(INVALID_TICKET).get(0).getMessage());
+    }
+
+    @Test
+    @Order(55)
+    void AllowAllInitialUsersOnAllTicketTypes() {
+        itHelper.allowAllInitialUsersOnAllTicketTypes();
+    }
+
     //ExecutorFromOuterGroupCanBeIfHisGroupEqualsGroupOfTicketValidator
     @Test
+    @Order(70)
     void logicalError_ExecutorFromOuterGroupCanBeIfHisGroupEqualsGroupOfTicket() {
         var executor = itHelper.getExecutorOuterGroup().get(EXECUTOR_OUTER_GROUP + 1);
         var author = itHelper.getAuthorOuterGroup().get(AUTHOR_OUTER_GROUP + 2);
@@ -276,6 +289,7 @@ class TicketCreateIT {
 
     //ObserverFromOuterGroupCanBeIfHisGroupEqualsGroupOfTicketValidator
     @Test
+    @Order(80)
     void logicalError_ObserverFromOuterGroupCanBeIfHisGroupEqualsGroupOfTicket() {
         var observer = itHelper.getObserverOuterGroup().get(OBSERVER_OUTER_GROUP + 1);
         var author = itHelper.getAuthorOuterGroup().get(AUTHOR_OUTER_GROUP + 2);
@@ -305,6 +319,7 @@ class TicketCreateIT {
     //MustNotCreateUpdateTicketIfSubjectDescriptionFilesAreEmptyValidator
     @ParameterizedTest
     @NullAndEmptySource
+    @Order(90)
     void logicalError_MustNotCreateTicketIfSubjectDescriptionFilesAreEmpty(String input) {
         var author = itHelper.getAuthorOuterGroup().get(AUTHOR_OUTER_GROUP + 2);
         var newTicket = Ticket.builder()
@@ -336,8 +351,9 @@ class TicketCreateIT {
     //SettingGroupFromAuthorOfTicketBeforeCreateAndUpdateTicketBusinessHandler
     //SettingTicketPriorityBeforeCreateAndUpdateTicketBusinessHandler
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamUsersRoleAccountOwnerAdminExecutorAuthor")
-    void success_CurrentUserByRoleAccountOwnerOrAdminOrExecutorOrAuthor(String userKey, User currentUser) {
+    @MethodSource("getStreamAllUsersWithRoleAccountOwnerAdminExecutorAuthor")
+    @Order(100)
+    void successCreate_CurrentUserByRoleAccountOwnerOrAdminOrExecutorOrAuthor(String userKey, User currentUser) {
         var newTicket = Ticket.builder()
                 .author(currentUser)
                 .subject(TICKET)
@@ -358,31 +374,58 @@ class TicketCreateIT {
                 .extract().response().as(TicketDtoResponse.class);
         Assertions.assertEquals(currentUser.getGroup().getId(), ticketDtoResponse.getGroup().getId());
         Assertions.assertEquals(Priority.MIDDLE.toString(), ticketDtoResponse.getPriority());
-        //Assertions.assertEquals(itHelper.getTicketSettings().get(), ticketDtoResponse.getPriority());
     }
 
-    private static Stream<Arguments> getStreamUsersRoleAuthor() {
+    //SettingTicketPriorityBeforeCreateAndUpdateTicketBusinessHandler
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamAllUsersWithRoleAccountOwnerAdminExecutorAuthor")
+    @Order(100)
+    void successCreate_CurrentUserByRoleAccountOwnerOrAdminOrExecutorOrAuthorAndPriorityNotNull(String userKey, User currentUser) {
+        var newTicket = Ticket.builder()
+                .author(currentUser)
+                .subject(TICKET)
+                .priority(Priority.HEIGHT.toString())
+                .build();
+        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
+        var ticketDtoResponse = given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(newTicketDtoRequest)
+                .post(TICKET)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.CREATED.value())
+                .extract().response().as(TicketDtoResponse.class);
+        Assertions.assertEquals(currentUser.getGroup().getId(), ticketDtoResponse.getGroup().getId());
+        Assertions.assertEquals(Priority.HEIGHT.toString(), ticketDtoResponse.getPriority());
+    }
+
+    private static Stream<Arguments> getStreamAllUsersWithRoleAuthor() {
         var roles = itHelper.getRoleTestHelper().getRolesByNames(
                 List.of(AUTHOR)
         );
         return itHelper.getStreamUsers(roles, null);
     }
 
-    private static Stream<Arguments> getStreamUsersRoleAccountOwnerAdminExecutorAuthor() {
+    private static Stream<Arguments> getStreamAllUsersWithRoleAccountOwnerAdminExecutorAuthor() {
         var roles = itHelper.getRoleTestHelper().getRolesByNames(
                 List.of(AUTHOR, EXECUTOR, ADMIN, ACCOUNT_OWNER)
         );
         return itHelper.getStreamUsers(roles, null);
     }
 
-    private static Stream<Arguments> getStreamUsersRoleObserver() {
+    private static Stream<Arguments> getStreamUsersWithRoleObserver() {
         var roles = itHelper.getRoleTestHelper().getRolesByNames(
                 List.of(OBSERVER)
         );
         return itHelper.getStreamUsers(roles, null);
     }
 
-    private static Stream<Arguments> getStreamUsersRoleAdminOrExecutorOuterGroup() {
+    private static Stream<Arguments> getStreamUsersFromOuterGroupWithRoleAdminAndExecutor() {
         var roles = itHelper.getRoleTestHelper().getRolesByNames(
                 List.of(ADMIN, EXECUTOR)
         );

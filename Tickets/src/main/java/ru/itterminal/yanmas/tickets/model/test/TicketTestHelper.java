@@ -181,6 +181,7 @@ public class TicketTestHelper extends EntityTestHelperImpl<Ticket, TicketDtoRequ
                 .observers(observersIdList)
                 .executors(executorsIdList)
                 .files(filesIdList)
+                .priority(entity.getPriority())
                 .build();
     }
 
