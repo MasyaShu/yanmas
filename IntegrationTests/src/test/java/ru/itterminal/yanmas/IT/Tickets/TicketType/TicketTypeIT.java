@@ -1,4 +1,4 @@
-package ru.itterminal.yanmas.IT.Tickets;
+package ru.itterminal.yanmas.IT.Tickets.TicketType;
 
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.*;
@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static ru.itterminal.yanmas.IT.util.ITHelper.*;
 
+@SuppressWarnings("unused")
 @DataJpaTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)

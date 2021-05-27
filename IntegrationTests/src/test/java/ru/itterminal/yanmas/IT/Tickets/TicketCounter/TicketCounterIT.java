@@ -1,4 +1,4 @@
-package ru.itterminal.yanmas.IT.Tickets;
+package ru.itterminal.yanmas.IT.Tickets.TicketCounter;
 
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
