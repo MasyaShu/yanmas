@@ -120,6 +120,45 @@ class TicketFindByIdIT {
         }
     }
 
+    @Test
+    @Order(25)
+    void LimitAllInitialUsersOnAllTicketTypes() {
+        itHelper.limitAllInitialUsersOnAllTicketTypes();
+    }
+
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamAllInitialUsersExceptObservers")
+    @Order(30)
+    void AccessDeniedWhenLimitAllInitialUsersOnAllTicketTypes(String userKey, User currentUser) {
+        UUID idOfTicketWhichAuthorIdEqualsCurrentUserId = null;
+        var initialTickets = itHelper.getTickets().values();
+        for (TicketDtoResponse initialTicket : initialTickets) {
+            if (initialTicket.getAuthor().getId().equals(currentUser.getId())) {
+                idOfTicketWhichAuthorIdEqualsCurrentUserId = initialTicket.getId();
+                break;
+            }
+        }
+        var apiError = given().
+                when().
+                headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .pathParam(ID, idOfTicketWhichAuthorIdEqualsCurrentUserId)
+                .get(TICKET_BY_ID)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.FORBIDDEN.value())
+                .extract().response().as(ApiError.class);
+    }
+
+    @Test
+    @Order(35)
+    void AllowAllInitialUsersOnAllTicketTypes() {
+        itHelper.allowAllInitialUsersOnAllTicketTypes();
+    }
+
 
     private static Stream<Arguments> getStreamAllInitialUsersExceptObservers() {
         var roles = itHelper.getRoleTestHelper().getRolesByNames(

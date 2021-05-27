@@ -61,6 +61,7 @@ public class ITHelper {
     private Map<String, TicketTemplate> ticketTemplates = new HashMap<>();
     private TicketType ticketTypeWhichIsNeverUsedIntoInitialTickets = null;
     private GroupTicketTypes groupOfTicketTypesWhichIsNeverUsedIntoInitialTickets = null;
+    private List<SettingsAccessToTicketTypesDtoResponse> settingsAccessToTicketTypesWithGroupOfTicketTypesWhichIsNeverUsedIntoInitialTickets = new ArrayList<>();
 
     private final UserTestHelper userTestHelper = new UserTestHelper();
     private final AccountTestHelper accountTestHelper = new AccountTestHelper();
@@ -527,11 +528,82 @@ public class ITHelper {
     }
 
     public void limitAllInitialUsersOnAllTicketTypes() {
-
+        if (settingsAccessToTicketTypesWithGroupOfTicketTypesWhichIsNeverUsedIntoInitialTickets.isEmpty()) {
+            var allInitialGroups = getAllGroup();
+            for (Group initialGroup : allInitialGroups) {
+                var request = SettingsAccessToTicketTypesDtoRequest.builder()
+                        .groupId(initialGroup.getId())
+                        .groupTicketTypesId(groupOfTicketTypesWhichIsNeverUsedIntoInitialTickets.getId())
+                        .build();
+                var settingsAccessToTicketTypesDtoResponse = given().
+                        when()
+                        .headers(
+                                "Authorization",
+                                "Bearer " + tokens.get(accountOwner.getEmail())
+                        )
+                        .contentType(APPLICATION_JSON)
+                        .body(request)
+                        .post(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
+                        .then()
+                        .log().body()
+                        .extract().response().as(SettingsAccessToTicketTypesDtoResponse.class);
+                settingsAccessToTicketTypesWithGroupOfTicketTypesWhichIsNeverUsedIntoInitialTickets.add(settingsAccessToTicketTypesDtoResponse);
+            }
+        } else {
+            for (SettingsAccessToTicketTypesDtoResponse item :
+                    settingsAccessToTicketTypesWithGroupOfTicketTypesWhichIsNeverUsedIntoInitialTickets) {
+                var request = SettingsAccessToTicketTypesDtoRequest.builder()
+                        .id(item.getId())
+                        .groupId(item.getGroup().getId())
+                        .groupTicketTypesId(item.getGroupTicketTypes().getId())
+                        .version(item.getVersion())
+                        .deleted(false)
+                        .displayName(item.getDisplayName())
+                        .build();
+                var settingsAccessToTicketTypesDtoResponse = given().
+                        when()
+                        .headers(
+                                "Authorization",
+                                "Bearer " + tokens.get(accountOwner.getEmail())
+                        )
+                        .contentType(APPLICATION_JSON)
+                        .body(request)
+                        .put(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
+                        .then()
+                        .log().body()
+                        .extract().response().as(SettingsAccessToTicketTypesDtoResponse.class);
+                item.setVersion(settingsAccessToTicketTypesDtoResponse.getVersion());
+                item.setDeleted(false);
+            }
+        }
     }
 
     public void allowAllInitialUsersOnAllTicketTypes() {
-
+        for (SettingsAccessToTicketTypesDtoResponse item :
+                settingsAccessToTicketTypesWithGroupOfTicketTypesWhichIsNeverUsedIntoInitialTickets) {
+            var request = SettingsAccessToTicketTypesDtoRequest.builder()
+                    .id(item.getId())
+                    .groupId(item.getGroup().getId())
+                    .groupTicketTypesId(item.getGroupTicketTypes().getId())
+                    .version(item.getVersion())
+                    .deleted(true)
+                    .displayName(item.getDisplayName())
+                    .build();
+            var settingsAccessToTicketTypesDtoResponse = given().
+                    when()
+                    .headers(
+                            "Authorization",
+                            "Bearer " + tokens.get(accountOwner.getEmail())
+                    )
+                    .contentType(APPLICATION_JSON)
+                    .body(request)
+                    .put(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
+                    .then()
+                    .log().body()
+                    .extract().response().as(SettingsAccessToTicketTypesDtoResponse.class);
+            item.setVersion(settingsAccessToTicketTypesDtoResponse.getVersion());
+            item.setDeleted(true);
+        }
     }
 
     public List<TicketType> getPermittedTicketTypesFromSettingsAccessToTicketTypes(User user) {
