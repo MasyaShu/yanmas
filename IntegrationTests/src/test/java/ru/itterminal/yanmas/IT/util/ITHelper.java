@@ -104,7 +104,7 @@ public class ITHelper {
 
     public static final String TICKET_TEMPLATE_KEY = "ticketTemplate_";
     public static final String GROUP_TICKET_TYPES = "ticket/type/group";
-    public static final String SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES = "ticket/type/setting-access";
+    public static final String SETTING_ACCESS_TO_TICKET_TYPES = "ticket/type/setting-access";
     public static final String WATCHED_ENTITIES = "watched-entities";
     public static final String INITIAL_GROUP_TICKET_TYPES = "InitialGroupTicketTypes";
     public static final String INITIAL_SETTINGS_ACCESS_TO_TICKET_TYPES = "InitialSettingsAccessToTicketViaTicketTypes";
@@ -116,7 +116,7 @@ public class ITHelper {
     public static final String TICKET_SETTING = "ticket/setting-initial";
     public static final String TICKET_SETTING_BY_ID = "ticket/setting-initial/{id}";
     public static final String GROUP_TICKET_TYPES_BY_ID = "ticket/type/group/{id}";
-    public static final String SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES_BY_ID = "ticket/type/setting-access/{id}";
+    public static final String SETTINGS_ACCESS_TO_TICKET_TYPES_BY_ID = "ticket/type/setting-access/{id}";
     public static final String TICKET_SETTING_BY_AUTHOR = "ticket/setting-initial/by-author/{authorId}";
     public static final String AUTHOR_ID = "authorId";
     public static final String APPLICATION_JSON = "application/json";
@@ -185,7 +185,7 @@ public class ITHelper {
     public static final String[] IGNORE_FIELDS_FOR_COMPARE_TICKET_SETTING =
             {"account", "group", "author", "observers", "executors", "ticketTypeForNew",
                     "ticketStatusForNew", "ticketStatusForReopen", "ticketStatusForClose", "ticketStatusForCancel"};
-    public static final String[] IGNORE_FIELDS_FOR_COMPARE_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES = {
+    public static final String[] IGNORE_FIELDS_FOR_COMPARE_SETTINGS_ACCESS_TO_TICKET_TYPES = {
             "account"};
     public static final String[] IGNORE_FIELDS_FOR_COMPARE_GROUP_TICKET_TYPES = {"account", "ticketTypes"};
     public static final String[] IGNORE_FIELDS_FOR_COMPARE_TICKET_TEMPLATE =
@@ -516,7 +516,7 @@ public class ITHelper {
                 )
                 .contentType(APPLICATION_JSON)
                 .body(request)
-                .post(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
+                .post(SETTING_ACCESS_TO_TICKET_TYPES)
                 .then()
                 .log().body()
                 .extract().response().as(SettingsAccessToTicketTypes.class);
@@ -543,7 +543,7 @@ public class ITHelper {
                         )
                         .contentType(APPLICATION_JSON)
                         .body(request)
-                        .post(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
+                        .post(SETTING_ACCESS_TO_TICKET_TYPES)
                         .then()
                         .log().body()
                         .extract().response().as(SettingsAccessToTicketTypesDtoResponse.class);
@@ -568,7 +568,7 @@ public class ITHelper {
                         )
                         .contentType(APPLICATION_JSON)
                         .body(request)
-                        .put(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
+                        .put(SETTING_ACCESS_TO_TICKET_TYPES)
                         .then()
                         .log().body()
                         .extract().response().as(SettingsAccessToTicketTypesDtoResponse.class);
@@ -597,7 +597,7 @@ public class ITHelper {
                     )
                     .contentType(APPLICATION_JSON)
                     .body(request)
-                    .put(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
+                    .put(SETTING_ACCESS_TO_TICKET_TYPES)
                     .then()
                     .log().body()
                     .extract().response().as(SettingsAccessToTicketTypesDtoResponse.class);
@@ -646,7 +646,7 @@ public class ITHelper {
                 )
                 .contentType(APPLICATION_JSON)
                 .body(request)
-                .post(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
+                .post(SETTING_ACCESS_TO_TICKET_TYPES)
                 .then()
                 .log().body();
     }

@@ -126,7 +126,7 @@ create TABLE IF NOT EXISTS tickets
     description        text,
     deadline           bigint,
     is_finished        bool   NOT NULL DEFAULT 'false',
-    priority           varchar(10)    DEFAULT ('MIDDLE'),
+    priority           varchar(10)     DEFAULT ('MIDDLE'),
     ticket_type_id     uuid   NOT NULL,
     ticket_status_id   uuid   NOT NULL,
     ticket_template_id uuid,
@@ -157,18 +157,18 @@ create TABLE IF NOT EXISTS ticket_observers
 
 create TABLE IF NOT EXISTS ticket_events
 (
-    out_id                 varchar(128),
-    display_name           varchar(256)    DEFAULT (NULL),
-    deleted                bool   NOT NULL DEFAULT 'false',
-    version                int4   NOT NULL DEFAULT (0),
-    id                     uuid   NOT NULL,
-    account_id             uuid   NOT NULL,
-    ticket_id              uuid   NOT NULL,
-    comment                text,
-    auto_comment           text,
-    is_comment_for_executors    bool   DEFAULT 'false',
-    created_at             bigint NOT NULL,
-    created_by_id          uuid NOT NULL,
+    out_id                   varchar(128),
+    display_name             varchar(256)    DEFAULT (NULL),
+    deleted                  bool   NOT NULL DEFAULT 'false',
+    version                  int4   NOT NULL DEFAULT (0),
+    id                       uuid   NOT NULL,
+    account_id               uuid   NOT NULL,
+    ticket_id                uuid   NOT NULL,
+    comment                  text,
+    auto_comment             text,
+    is_comment_for_executors bool            DEFAULT 'false',
+    created_at               bigint NOT NULL,
+    created_by_id            uuid   NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (account_id) REFERENCES accounts (id)
 );
@@ -192,7 +192,7 @@ create TABLE IF NOT EXISTS ticket_types_in_group
     FOREIGN KEY (group_of_ticket_types_id) REFERENCES group_ticket_types (id),
     FOREIGN KEY (ticket_type_id) REFERENCES ticket_types (id)
 );
-create TABLE IF NOT EXISTS settings_access_to_ticket_via_ticket_types
+create TABLE IF NOT EXISTS settings_access_to_ticket_types
 (
     out_id                   varchar(128),
     display_name             varchar(256)  DEFAULT (NULL),
@@ -200,8 +200,8 @@ create TABLE IF NOT EXISTS settings_access_to_ticket_via_ticket_types
     version                  int4 NOT NULL DEFAULT (0),
     id                       uuid NOT NULL,
     account_id               uuid NOT NULL,
-    group_id                 uuid NOT NULL,
-    user_id                  uuid NOT NULL,
+    group_id                 uuid,
+    user_id                  uuid,
     group_of_ticket_types_id uuid NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (account_id) REFERENCES accounts (id),

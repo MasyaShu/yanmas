@@ -104,7 +104,7 @@ class TicketFindByIdIT {
                 var apiError = given().
                         when().
                         headers(
-                                "Authorization",
+                                "Au Fthorization",
                                 "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
                         )
                         .contentType(APPLICATION_JSON)

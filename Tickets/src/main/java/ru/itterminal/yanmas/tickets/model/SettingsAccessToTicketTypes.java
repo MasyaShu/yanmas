@@ -20,7 +20,7 @@ import ru.itterminal.yanmas.commons.model.BaseEntity;
 
 @SuppressWarnings("DuplicatedCode")
 @Entity
-@Table(name = "settings_access_to_ticket_via_ticket_types")
+@Table(name = "settings_access_to_ticket_types")
 @Getter
 @Setter
 @SuperBuilder(toBuilder = true)
@@ -35,11 +35,11 @@ public class SettingsAccessToTicketTypes extends BaseEntity {
     private Account account;
 
     @ManyToOne
-    @JoinColumn(name = "group_id", nullable = false)
+    @JoinColumn(name = "group_id")
     private Group group;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToOne
