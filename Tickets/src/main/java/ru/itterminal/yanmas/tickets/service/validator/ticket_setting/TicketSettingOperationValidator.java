@@ -13,7 +13,7 @@ public class TicketSettingOperationValidator extends BasicOperationValidatorImpl
             "Current user from outer group cannot get setting or predefined values for ticket if his group is not equal group of author from request";
 
     public void checkAccessForGetSettingOrPredefinedValuesForTicket(User currentUSer, User foundUser) {
-        if (Boolean.FALSE.equals(currentUSer.getGroup().getIsInner()) &&
+        if (Boolean.FALSE.equals(foundUser.getGroup().getIsInner()) &&
                 !currentUSer.getGroup().getId().equals(foundUser.getGroup().getId())) {
             throw new AccessDeniedException(CURRENT_USER_FROM_OUTER_GROUP_CANNOT_GET_SETTING_OR_PREDEFINED_VALUES_FOR_TICKET_IF_HIS_GROUP_IS_NOT_EQUAL_GROUP_OF_AUTHOR_FROM_REQUEST);
         }
