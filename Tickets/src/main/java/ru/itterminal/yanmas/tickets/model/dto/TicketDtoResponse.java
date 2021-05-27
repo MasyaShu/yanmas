@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import ru.itterminal.yanmas.aau.model.Group;
 import ru.itterminal.yanmas.commons.model.dto.BaseEntityDto;
 
 @Getter
@@ -22,6 +23,7 @@ public class TicketDtoResponse extends BaseEntityDto {
     private Long number;
     private Long createdAt;
     private BaseEntityDto author;
+    private BaseEntityDto group;
     private String subject;
     private String description;
     private Long deadline;
