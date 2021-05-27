@@ -353,10 +353,11 @@ class TicketCreateIT {
 
     //SettingGroupFromAuthorOfTicketBeforeCreateAndUpdateTicketBusinessHandler
     //SettingTicketPriorityBeforeCreateAndUpdateTicketBusinessHandler
+    //SettingTicketNumberBeforeCreateTicketBusinessHandler
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamAllUsersWithRoleAccountOwnerAdminExecutorAuthor")
     @Order(100)
-    void successCreate_CurrentUserByRoleAccountOwnerOrAdminOrExecutorOrAuthor(String userKey, User currentUser) {
+    void successCreate_CurrentUserByRoleAccountOwnerOrAdminOrExecutorOrAuthorSetGroupPriorotyNumberCreatedAt(String userKey, User currentUser) {
         var newTicket = Ticket.builder()
                 .author(currentUser)
                 .subject(TICKET)
@@ -377,6 +378,8 @@ class TicketCreateIT {
                 .extract().response().as(TicketDtoResponse.class);
         Assertions.assertEquals(currentUser.getGroup().getId(), ticketDtoResponse.getGroup().getId());
         Assertions.assertEquals(Priority.MIDDLE.toString(), ticketDtoResponse.getPriority());
+        Assertions.assertTrue(ticketDtoResponse.getNumber() > 0);
+        Assertions.assertTrue(ticketDtoResponse.getCreatedAt() <= System.currentTimeMillis());
     }
 
     //SettingTicketPriorityBeforeCreateAndUpdateTicketBusinessHandler
@@ -410,12 +413,11 @@ class TicketCreateIT {
 
     //SettingTicketExecutorsBeforeCreateAndUpdateTicketBusinessHandler
     //SettingTicketObserversBeforeCreateAndUpdateTicketBusinessHandler
-    //SettingTicketStatusBeforeCreateAndUpdateTicketBusinessHandler
     //SettingTicketTypeBeforeCreateAndUpdateTicketBusinessHandler
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamAllUsersWithRoleAccountOwnerAdminExecutorAuthor")
     @Order(120)
-    void successCreate_ticketTypeTicketStatusExecutorsObserversFromTicketSetting(String userKey, User currentUser) {
+    void successCreate_ticketTypeExecutorsObserversFromTicketSetting(String userKey, User currentUser) {
         var ticketSettings = itHelper.getTicketSettingForUser(currentUser);
         var newTicket = Ticket.builder()
                 .author(currentUser)
@@ -435,7 +437,6 @@ class TicketCreateIT {
                 .log().body()
                 .statusCode(HttpStatus.CREATED.value())
                 .extract().response().as(TicketDtoResponse.class);
-        Assertions.assertEquals(ticketSettings.getTicketStatusForNew().getId(), ticketDtoResponse.getTicketStatus().getId());
         Assertions.assertEquals(ticketSettings.getTicketTypeForNew().getId(), ticketDtoResponse.getTicketType().getId());
         Assertions.assertEquals(ticketSettings.getObservers().size(), ticketDtoResponse.getObservers().size());
         Assertions.assertEquals(ticketSettings.getExecutors().size(), ticketDtoResponse.getExecutors().size());
@@ -460,12 +461,11 @@ class TicketCreateIT {
 
     //SettingTicketExecutorsBeforeCreateAndUpdateTicketBusinessHandler
     //SettingTicketObserversBeforeCreateAndUpdateTicketBusinessHandler
-    //SettingTicketStatusBeforeCreateAndUpdateTicketBusinessHandler
     //SettingTicketTypeBeforeCreateAndUpdateTicketBusinessHandler
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamAllUsersWithRoleAuthor")
     @Order(130)
-    void successCreate_ticketTypeTicketStatusExecutorsObserversFromTicketSettingWhenCurrentUserWithRoleAuthor(String userKey, User currentUser) {
+    void successCreate_ticketTypeExecutorsObserversFromTicketSettingWhenCurrentUserWithRoleAuthor(String userKey, User currentUser) {
         var ticketSettings = itHelper.getTicketSettingForUser(currentUser);
         var executors = itHelper.getUsersByGroupAndRole(currentUser.getGroup(), null,
                 itHelper.getRoleTestHelper().getRoleByName(EXECUTOR), null);
@@ -474,7 +474,6 @@ class TicketCreateIT {
         var newTicket = Ticket.builder()
                 .author(currentUser)
                 .subject(TICKET)
-                .ticketStatus(itHelper.getTicketStatuses().get(IS_CANCELED_PREDEFINED))
                 .ticketType(itHelper.getTicketTypes().get(TICKET_TYPE_WHICH_IS_NEVER_USED_INTO_INITIAL_TICKETS))
                 .build();
         var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
@@ -491,7 +490,6 @@ class TicketCreateIT {
                 .log().body()
                 .statusCode(HttpStatus.CREATED.value())
                 .extract().response().as(TicketDtoResponse.class);
-        Assertions.assertEquals(ticketSettings.getTicketStatusForNew().getId(), ticketDtoResponse.getTicketStatus().getId());
         Assertions.assertEquals(ticketSettings.getTicketTypeForNew().getId(), ticketDtoResponse.getTicketType().getId());
         Assertions.assertEquals(ticketSettings.getObservers().size(), ticketDtoResponse.getObservers().size());
         Assertions.assertEquals(ticketSettings.getExecutors().size(), ticketDtoResponse.getExecutors().size());
@@ -516,12 +514,11 @@ class TicketCreateIT {
 
     //SettingTicketExecutorsBeforeCreateAndUpdateTicketBusinessHandler
     //SettingTicketObserversBeforeCreateAndUpdateTicketBusinessHandler
-    //SettingTicketStatusBeforeCreateAndUpdateTicketBusinessHandler
     //SettingTicketTypeBeforeCreateAndUpdateTicketBusinessHandler
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamUsersFromOuterGroupWithRoleAdminAndExecutorAndAuthor")
     @Order(140)
-    void successCreate_ticketTypeTicketStatusExecutorsObserversFromTicketSettingWhenCurrentUserFromOuterGroup(String userKey, User currentUser) {
+    void successCreate_ticketTypeExecutorsObserversFromTicketSettingWhenCurrentUserFromOuterGroup(String userKey, User currentUser) {
         var ticketSettings = itHelper.getTicketSettingForUser(currentUser);
         var executors = itHelper.getUsersByGroupAndRole(currentUser.getGroup(), null,
                 itHelper.getRoleTestHelper().getRoleByName(EXECUTOR), null);
@@ -530,7 +527,6 @@ class TicketCreateIT {
         var newTicket = Ticket.builder()
                 .author(currentUser)
                 .subject(TICKET)
-                .ticketStatus(itHelper.getTicketStatuses().get(IS_CANCELED_PREDEFINED))
                 .ticketType(itHelper.getTicketTypes().get(TICKET_TYPE_WHICH_IS_NEVER_USED_INTO_INITIAL_TICKETS))
                 .build();
         var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
@@ -547,7 +543,6 @@ class TicketCreateIT {
                 .log().body()
                 .statusCode(HttpStatus.CREATED.value())
                 .extract().response().as(TicketDtoResponse.class);
-        Assertions.assertEquals(ticketSettings.getTicketStatusForNew().getId(), ticketDtoResponse.getTicketStatus().getId());
         Assertions.assertEquals(ticketSettings.getTicketTypeForNew().getId(), ticketDtoResponse.getTicketType().getId());
         Assertions.assertEquals(ticketSettings.getObservers().size(), ticketDtoResponse.getObservers().size());
         Assertions.assertEquals(ticketSettings.getExecutors().size(), ticketDtoResponse.getExecutors().size());
@@ -572,15 +567,14 @@ class TicketCreateIT {
 
     //SettingTicketStatusBeforeCreateAndUpdateTicketBusinessHandler
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamUsersFromOuterGroupWithRoleAdminAndExecutorAndAuthor")
+    @MethodSource("getStreamAllUsersWithRoleAccountOwnerAdminExecutor")
     @Order(150)
-    void successCreate_tTicketStatusFromTicketSettingWhenCurrentUserFromOuterGroupAndIsFinishedTrue(String userKey, User currentUser) {
+    void successCreate_ticketStatusToFinishWhenCurrentUserWithRoleAccountOwnerAdminExecutorAndIsFinishedTrue(String userKey, User currentUser) {
         var ticketSettings = itHelper.getTicketSettingForUser(currentUser);
         var newTicket = Ticket.builder()
                 .author(currentUser)
                 .subject(TICKET)
                 .isFinished(true)
-                .ticketStatus(ticketSettings.getTicketStatusForClose())
                 .build();
         var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
         var ticketDtoResponse = given().
@@ -600,6 +594,64 @@ class TicketCreateIT {
         Assertions.assertTrue(ticketDtoResponse.getIsFinished());
     }
 
+    //SettingTicketStatusBeforeCreateAndUpdateTicketBusinessHandler
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamAllUsersWithRoleAuthor")
+    @Order(160)
+    void successCreate_ticketStatusFromTicketSettingWhenCurrentUserWithRoleAuthorAndIsFinishedTrue(String userKey, User currentUser) {
+        var ticketSettings = itHelper.getTicketSettingForUser(currentUser);
+        var newTicket = Ticket.builder()
+                .author(currentUser)
+                .subject(TICKET)
+                .ticketStatus(ticketSettings.getTicketStatusForCancel())
+                .isFinished(true)
+                .build();
+        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
+        var ticketDtoResponse = given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(newTicketDtoRequest)
+                .post(TICKET)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.CREATED.value())
+                .extract().response().as(TicketDtoResponse.class);
+        Assertions.assertEquals(ticketSettings.getTicketStatusForNew().getId(), ticketDtoResponse.getTicketStatus().getId());
+        Assertions.assertFalse(ticketDtoResponse.getIsFinished());
+    }
+
+    //SettingTicketStatusBeforeCreateAndUpdateTicketBusinessHandler
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamAllUsersWithRoleAccountOwnerAdminExecutor")
+    @Order(170)
+    void successCreate_ticketStatusFromRequestWhenCurrentUserWithRoleAccountOwnerAdminExecutor(String userKey, User currentUser) {
+        var ticketSettings = itHelper.getTicketSettingForUser(currentUser);
+        var newTicket = Ticket.builder()
+                .author(currentUser)
+                .subject(TICKET)
+                .ticketStatus(ticketSettings.getTicketStatusForCancel())
+                .build();
+        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
+        var ticketDtoResponse = given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(newTicketDtoRequest)
+                .post(TICKET)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.CREATED.value())
+                .extract().response().as(TicketDtoResponse.class);
+        Assertions.assertEquals(ticketSettings.getTicketStatusForCancel().getId(), ticketDtoResponse.getTicketStatus().getId());
+    }
+
     private static Stream<Arguments> getStreamAllUsersWithRoleAuthor() {
         var roles = itHelper.getRoleTestHelper().getRolesByNames(
                 List.of(AUTHOR)
@@ -610,6 +662,13 @@ class TicketCreateIT {
     private static Stream<Arguments> getStreamAllUsersWithRoleAccountOwnerAdminExecutorAuthor() {
         var roles = itHelper.getRoleTestHelper().getRolesByNames(
                 List.of(AUTHOR, EXECUTOR, ADMIN, ACCOUNT_OWNER)
+        );
+        return itHelper.getStreamUsers(roles, null);
+    }
+
+    private static Stream<Arguments> getStreamAllUsersWithRoleAccountOwnerAdminExecutor() {
+        var roles = itHelper.getRoleTestHelper().getRolesByNames(
+                List.of(EXECUTOR, ADMIN, ACCOUNT_OWNER)
         );
         return itHelper.getStreamUsers(roles, null);
     }

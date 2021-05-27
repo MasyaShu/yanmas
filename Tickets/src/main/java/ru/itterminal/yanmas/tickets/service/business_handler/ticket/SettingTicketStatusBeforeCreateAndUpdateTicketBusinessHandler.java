@@ -31,8 +31,8 @@ public class SettingTicketStatusBeforeCreateAndUpdateTicketBusinessHandler imple
         var weightOfRoleOfCurrentUser = currentUser.getRole().getWeight();
         if (isTicketFinished && (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight())) {
             ticket.setTicketStatus(ticketSetting.getTicketStatusForClose());
-        } else if (ticketStatus != null && !isTicketFinished
-                && (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight())) {
+        } else if (ticketStatus != null &&
+                (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight())) {
             ticket.setTicketStatus(ticketStatusService.findByIdAndAccountId(ticketStatus.getId(), currentUser));
         } else if (
                 (ticket.getTicketStatus() == null)
