@@ -22,6 +22,7 @@ public class TicketDtoResponse extends BaseEntityDto {
     private Long number;
     private Long createdAt;
     private BaseEntityDto author;
+    private BaseEntityDto group;
     private String subject;
     private String description;
     private Long deadline;

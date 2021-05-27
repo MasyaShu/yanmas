@@ -860,6 +860,17 @@ public class ITHelper {
         return new ArrayList<>(getUser(roleTestHelper.getPredefinedValidEntityList(), null).values());
     }
 
+    public  List<User> getUsersByGroupAndRole(Group group, Group excludeGroup, Role role, Role excludeRole) {
+        var allUsers = getUser(roleTestHelper.getPredefinedValidEntityList(), null);
+        var filterUsers =  allUsers.entrySet().stream()
+                .filter(entry -> group == null || group.equals(entry.getValue().getGroup()))
+                .filter(entry -> excludeGroup == null || !excludeGroup.equals(entry.getValue().getGroup()))
+                .filter(entry -> role == null || role.equals(entry.getValue().getRole()))
+                .filter(entry -> excludeRole == null || !excludeRole.equals(entry.getValue().getRole()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return new ArrayList<>(filterUsers.values());
+    }
+
     private Map<String, User> getUser(List<Role> roles, Boolean isInnerGroup) {
         Map<String, User> allUsers = new HashMap<>();
         allUsers.putAll(adminInnerGroup);

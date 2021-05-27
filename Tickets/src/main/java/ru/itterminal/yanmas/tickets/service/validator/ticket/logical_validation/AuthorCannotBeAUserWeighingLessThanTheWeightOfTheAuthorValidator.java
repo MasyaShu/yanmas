@@ -16,7 +16,7 @@ import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.addVa
 public class AuthorCannotBeAUserWeighingLessThanTheWeightOfTheAuthorValidator implements EntityValidator<Ticket> {
     public static final String WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR_LESS_THAN_WEIGHT_OF_ROLE_AUTHOR =
             "Weight of role (%s) into field Author less than weight of role Author (%s)";
-    String WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR = "Weight of role into field Author";
+    public static final String  WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR = "Weight of role into field Author";
 
     @Override
     public void logicalValidationBeforeCreate(Ticket entity, Map<String, List<ValidationError>> errors) {
