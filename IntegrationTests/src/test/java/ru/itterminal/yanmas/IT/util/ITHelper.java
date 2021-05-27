@@ -37,6 +37,8 @@ import static org.hamcrest.Matchers.equalTo;
 public class ITHelper {
 
     public static final String INITIAL_TICKET_CREATED_BY = "InitialTicketCreatedBy_";
+    public static final String TICKET_TYPE_WHICH_IS_NEVER_USED_INTO_INITIAL_TICKETS = "TicketTypeWhichIsNeverUsedIntoInitialTickets";
+    public static final String GROUP_OF_TICKET_TYPES_WHICH_IS_NEVER_USED_INTO_INITIAL_TICKETS = "groupOfTicketTypesWhichIsNeverUsedIntoInitialTickets";
     private Account account;
     private User accountOwner;
     private Map<String, TicketDtoResponse> tickets = new HashMap<>();
@@ -57,6 +59,9 @@ public class ITHelper {
     private Map<String, String> tokens = new HashMap<>();
     private Map<String, TicketSetting> ticketSettings = new HashMap<>();
     private Map<String, TicketTemplate> ticketTemplates = new HashMap<>();
+    private TicketType ticketTypeWhichIsNeverUsedIntoInitialTickets = null;
+    private GroupTicketTypes groupOfTicketTypesWhichIsNeverUsedIntoInitialTickets = null;
+    private SettingsAccessToTicketTypesDtoResponse settingsAccessToTicketTypesForAllowAndLimitAccess = null;
 
     private final UserTestHelper userTestHelper = new UserTestHelper();
     private final AccountTestHelper accountTestHelper = new AccountTestHelper();
@@ -99,7 +104,7 @@ public class ITHelper {
 
     public static final String TICKET_TEMPLATE_KEY = "ticketTemplate_";
     public static final String GROUP_TICKET_TYPES = "ticket/type/group";
-    public static final String SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES = "ticket/type/setting-access";
+    public static final String SETTING_ACCESS_TO_TICKET_TYPES = "ticket/type/setting-access";
     public static final String WATCHED_ENTITIES = "watched-entities";
     public static final String INITIAL_GROUP_TICKET_TYPES = "InitialGroupTicketTypes";
     public static final String INITIAL_SETTINGS_ACCESS_TO_TICKET_TYPES = "InitialSettingsAccessToTicketViaTicketTypes";
@@ -107,10 +112,11 @@ public class ITHelper {
     public static final String TICKET_TYPE = "ticket/type";
     public static final String TICKET = "ticket";
     public static final String TICKET_TEMPLATE_BY_ID = "ticket/template/{id}";
+    public static final String TICKET_BY_ID = "ticket/{id}";
     public static final String TICKET_SETTING = "ticket/setting-initial";
     public static final String TICKET_SETTING_BY_ID = "ticket/setting-initial/{id}";
     public static final String GROUP_TICKET_TYPES_BY_ID = "ticket/type/group/{id}";
-    public static final String SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES_BY_ID = "ticket/type/setting-access/{id}";
+    public static final String SETTINGS_ACCESS_TO_TICKET_TYPES_BY_ID = "ticket/type/setting-access/{id}";
     public static final String TICKET_SETTING_BY_AUTHOR = "ticket/setting-initial/by-author/{authorId}";
     public static final String AUTHOR_ID = "authorId";
     public static final String APPLICATION_JSON = "application/json";
@@ -179,7 +185,7 @@ public class ITHelper {
     public static final String[] IGNORE_FIELDS_FOR_COMPARE_TICKET_SETTING =
             {"account", "group", "author", "observers", "executors", "ticketTypeForNew",
                     "ticketStatusForNew", "ticketStatusForReopen", "ticketStatusForClose", "ticketStatusForCancel"};
-    public static final String[] IGNORE_FIELDS_FOR_COMPARE_SETTINGS_ACCESS_TO_TICKET_VIA_TICKET_TYPES = {
+    public static final String[] IGNORE_FIELDS_FOR_COMPARE_SETTINGS_ACCESS_TO_TICKET_TYPES = {
             "account"};
     public static final String[] IGNORE_FIELDS_FOR_COMPARE_GROUP_TICKET_TYPES = {"account", "ticketTypes"};
     public static final String[] IGNORE_FIELDS_FOR_COMPARE_TICKET_TEMPLATE =
@@ -397,6 +403,27 @@ public class ITHelper {
         ticketTypes.put(IT_IS_NEW_TICKET_TYPE_FOR_NEW_TICKET, createdNewTicketType);
     }
 
+    public void createTicketTypeWhichIsNeverUsedIntoInitialTickets() {
+        var newTicketType = TicketType.builder()
+                .name(TICKET_TYPE_WHICH_IS_NEVER_USED_INTO_INITIAL_TICKETS)
+                .build();
+        var createdNewTicketType = given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + tokens.get(accountOwner.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(newTicketType)
+                .post(TICKET_TYPE)
+                .then()
+                .log().body()
+                .extract().response().as(TicketType.class);
+        createdNewTicketType.setAccount(account);
+        ticketTypeWhichIsNeverUsedIntoInitialTickets = createdNewTicketType;
+    }
+
+
     public void createInitialTickets() {
         var allUsersWithoutObservers = getUser(allRolesWithoutObserver, null);
         var executor_1 = executorInnerGroup.get(EXECUTOR_INNER_GROUP + "1");
@@ -405,7 +432,7 @@ public class ITHelper {
         var observer_1 = observerInnerGroup.get(OBSERVER_INNER_GROUP + "1");
         var observer_2 = observerInnerGroup.get(OBSERVER_INNER_GROUP + "2");
         var observersIdList = List.of(observer_1.getId(), observer_2.getId());
-        for(Map.Entry<String, User> entry : allUsersWithoutObservers.entrySet()) {
+        for (Map.Entry<String, User> entry : allUsersWithoutObservers.entrySet()) {
             var authorOfTicket = entry.getValue();
             var newTicketDtoRequest = TicketDtoRequest.builder()
                     .authorId(authorOfTicket.getId())
@@ -451,6 +478,27 @@ public class ITHelper {
         groupTicketTypes.put(INITIAL_GROUP_TICKET_TYPES, createdGroupTicketTypes);
     }
 
+    public void createGroupOfTicketTypesWhichIsNeverUsedIntoInitialTickets() {
+        var request = GroupTicketTypesDtoRequest.builder()
+                .name(GROUP_OF_TICKET_TYPES_WHICH_IS_NEVER_USED_INTO_INITIAL_TICKETS)
+                .ticketTypes(List.of(ticketTypeWhichIsNeverUsedIntoInitialTickets.getId()))
+                .build();
+        var createdGroupTicketTypes = given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + tokens.get(accountOwner.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(request)
+                .post(GROUP_TICKET_TYPES)
+                .then()
+                .log().body()
+                .extract().response().as(GroupTicketTypes.class);
+        createdGroupTicketTypes.setAccount(account);
+        groupOfTicketTypesWhichIsNeverUsedIntoInitialTickets = createdGroupTicketTypes;
+    }
+
     public void createInitialSettingsAccessToTicketTypes() {
         var group = innerGroup.get(INNER_GROUP_1);
         var user = authorInnerGroup.get(AUTHOR_INNER_GROUP + "1");
@@ -468,7 +516,7 @@ public class ITHelper {
                 )
                 .contentType(APPLICATION_JSON)
                 .body(request)
-                .post(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
+                .post(SETTING_ACCESS_TO_TICKET_TYPES)
                 .then()
                 .log().body()
                 .extract().response().as(SettingsAccessToTicketTypes.class);
@@ -477,6 +525,73 @@ public class ITHelper {
         createdSettings.setUser(user);
         createdSettings.setGroupTicketTypes(groupOfTicketTypes);
         settingsAccessToTicketTypes.put(INITIAL_SETTINGS_ACCESS_TO_TICKET_TYPES, createdSettings);
+    }
+
+    public void limitAllInitialUsersOnAllTicketTypes() {
+        if (settingsAccessToTicketTypesForAllowAndLimitAccess == null) {
+            var request = SettingsAccessToTicketTypesDtoRequest.builder()
+                    .groupTicketTypesId(groupOfTicketTypesWhichIsNeverUsedIntoInitialTickets.getId())
+                    .build();
+            settingsAccessToTicketTypesForAllowAndLimitAccess = given().
+                    when()
+                    .headers(
+                            "Authorization",
+                            "Bearer " + tokens.get(accountOwner.getEmail())
+                    )
+                    .contentType(APPLICATION_JSON)
+                    .body(request)
+                    .post(SETTING_ACCESS_TO_TICKET_TYPES)
+                    .then()
+                    .log().body()
+                    .extract().response().as(SettingsAccessToTicketTypesDtoResponse.class);
+        } else {
+            var request = SettingsAccessToTicketTypesDtoRequest.builder()
+                    .id(settingsAccessToTicketTypesForAllowAndLimitAccess.getId())
+                    .groupId(settingsAccessToTicketTypesForAllowAndLimitAccess.getGroup().getId())
+                    .groupTicketTypesId(settingsAccessToTicketTypesForAllowAndLimitAccess.getGroupTicketTypes().getId())
+                    .version(settingsAccessToTicketTypesForAllowAndLimitAccess.getVersion())
+                    .deleted(false)
+                    .displayName(settingsAccessToTicketTypesForAllowAndLimitAccess.getDisplayName())
+                    .build();
+            var settingsAccessToTicketTypesDtoResponse = given().
+                    when()
+                    .headers(
+                            "Authorization",
+                            "Bearer " + tokens.get(accountOwner.getEmail())
+                    )
+                    .contentType(APPLICATION_JSON)
+                    .body(request)
+                    .put(SETTING_ACCESS_TO_TICKET_TYPES)
+                    .then()
+                    .log().body()
+                    .extract().response().as(SettingsAccessToTicketTypesDtoResponse.class);
+            settingsAccessToTicketTypesForAllowAndLimitAccess.setVersion(settingsAccessToTicketTypesDtoResponse.getVersion());
+            settingsAccessToTicketTypesForAllowAndLimitAccess.setDeleted(false);
+        }
+    }
+
+    public void allowAllInitialUsersOnAllTicketTypes() {
+            var request = SettingsAccessToTicketTypesDtoRequest.builder()
+                    .id(settingsAccessToTicketTypesForAllowAndLimitAccess.getId())
+                    .groupTicketTypesId(settingsAccessToTicketTypesForAllowAndLimitAccess.getGroupTicketTypes().getId())
+                    .version(settingsAccessToTicketTypesForAllowAndLimitAccess.getVersion())
+                    .deleted(true)
+                    .displayName(settingsAccessToTicketTypesForAllowAndLimitAccess.getDisplayName())
+                    .build();
+            var settingsAccessToTicketTypesDtoResponse = given().
+                    when()
+                    .headers(
+                            "Authorization",
+                            "Bearer " + tokens.get(accountOwner.getEmail())
+                    )
+                    .contentType(APPLICATION_JSON)
+                    .body(request)
+                    .put(SETTING_ACCESS_TO_TICKET_TYPES)
+                    .then()
+                    .log().body()
+                    .extract().response().as(SettingsAccessToTicketTypesDtoResponse.class);
+        settingsAccessToTicketTypesForAllowAndLimitAccess.setVersion(settingsAccessToTicketTypesDtoResponse.getVersion());
+        settingsAccessToTicketTypesForAllowAndLimitAccess.setDeleted(true);
     }
 
     public List<TicketType> getPermittedTicketTypesFromSettingsAccessToTicketTypes(User user) {
@@ -519,7 +634,7 @@ public class ITHelper {
                 )
                 .contentType(APPLICATION_JSON)
                 .body(request)
-                .post(SETTING_ACCESS_TO_TICKET_VIA_TICKET_TYPES)
+                .post(SETTING_ACCESS_TO_TICKET_TYPES)
                 .then()
                 .log().body();
     }

@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import ru.itterminal.yanmas.aau.model.Group;
 import ru.itterminal.yanmas.commons.model.dto.BaseEntityDto;
 
 @Getter
