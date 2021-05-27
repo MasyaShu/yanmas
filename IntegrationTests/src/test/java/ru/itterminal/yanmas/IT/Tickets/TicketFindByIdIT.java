@@ -104,7 +104,7 @@ class TicketFindByIdIT {
                 var apiError = given().
                         when().
                         headers(
-                                "Au Fthorization",
+                                "Authorization",
                                 "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
                         )
                         .contentType(APPLICATION_JSON)
@@ -122,7 +122,7 @@ class TicketFindByIdIT {
 
     @Test
     @Order(25)
-    void LimitAllInitialUsersOnAllTicketTypes() {
+    void LimitAllInitialUsersOnAllTicketTypes() { //NOSONAR
         itHelper.limitAllInitialUsersOnAllTicketTypes();
     }
 
@@ -151,11 +151,12 @@ class TicketFindByIdIT {
                 .log().body()
                 .statusCode(HttpStatus.FORBIDDEN.value())
                 .extract().response().as(ApiError.class);
+        assertEquals("Access denied, because current user has not permit to ticket type", apiError.getDetail());
     }
 
     @Test
     @Order(35)
-    void AllowAllInitialUsersOnAllTicketTypes() {
+    void AllowAllInitialUsersOnAllTicketTypes() { //NOSONAR
         itHelper.allowAllInitialUsersOnAllTicketTypes();
     }
 
