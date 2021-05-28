@@ -34,10 +34,8 @@ public class SettingTicketStatusBeforeCreateAndUpdateTicketBusinessHandler imple
         } else if (ticketStatus != null &&
                 (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight())) {
             ticket.setTicketStatus(ticketStatusService.findByIdAndAccountId(ticketStatus.getId(), currentUser));
-        } else if (
-                (ticket.getTicketStatus() == null)
-                        || (weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight())
-        ) {
+        } else if ((ticket.getTicketStatus() == null)
+                || (weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight())) {
             ticket.setTicketStatus(ticketSetting.getTicketStatusForNew());
             ticket.setIsFinished(false);
         }
@@ -58,7 +56,7 @@ public class SettingTicketStatusBeforeCreateAndUpdateTicketBusinessHandler imple
             ticket.setTicketStatus(ticketSetting.getTicketStatusForClose());
         } else if (ticketStatus == null) {
             ticket.setTicketStatus(ticketFromDatabase.getTicketStatus());
-        } else if (isTicketFinished == null || !isTicketFinished) {
+        } else {
             ticket.setTicketStatus(ticketStatusService.findByIdAndAccountId(ticketStatus.getId(), currentUser));
         }
         return ticket;
