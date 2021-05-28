@@ -27,10 +27,10 @@ public class AddFilterForTicketByPermittedTicketTypesSpec implements ExpansionSp
     @Override
     public Specification<Ticket> expansionSpec(Specification<Ticket> spec, User currentUser) {
         var permittedTicketTypes = settingsAccessToTicketTypesService.getPermittedTicketTypes(currentUser.getId());
-        var permittedTicketTypesId = permittedTicketTypes.stream()
-                .map(BaseEntity::getId)
-                .collect(Collectors.toList());
-        if (!permittedTicketTypes.isEmpty()) {
+        if (permittedTicketTypes!=null && !permittedTicketTypes.isEmpty()) {
+            var permittedTicketTypesId = permittedTicketTypes.stream()
+                    .map(BaseEntity::getId)
+                    .collect(Collectors.toList());
             var filterByListOfTicketTypes = BaseEntityFilter.builder()
                     .typeComparison(EXIST_IN.toString())
                     .listOfIdEntities(permittedTicketTypesId)
