@@ -59,9 +59,6 @@ public class TicketFilterDto extends BaseFilterDto {
     private BaseEntityFilter ticketTemplate;
 
     @ValidateFilter
-    private BaseEntityFilter ticketInheritor;
-
-    @ValidateFilter
     private ListOfBaseEntityFilter observers;
 
     @ValidateFilter

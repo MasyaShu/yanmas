@@ -18,6 +18,7 @@ import ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter;
 import ru.itterminal.yanmas.commons.model.filter.BooleanFilter;
 import ru.itterminal.yanmas.commons.model.filter.StringFilter;
 
+@SuppressWarnings("DuplicatedCode")
 public class UserTestHelper extends EntityTestHelperImpl<User, UserDtoRequest, UserDtoResponse> {
 
     private final RoleTestHelper roleHelper = new RoleTestHelper();
