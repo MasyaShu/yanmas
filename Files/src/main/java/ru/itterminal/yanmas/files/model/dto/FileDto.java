@@ -1,20 +1,14 @@
 package ru.itterminal.yanmas.files.model.dto;
 
-import java.util.UUID;
-
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
-
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import ru.itterminal.yanmas.commons.model.dto.BaseEntityDto;
 import ru.itterminal.yanmas.commons.model.validator.scenario.Create;
 import ru.itterminal.yanmas.commons.model.validator.scenario.Update;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Null;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -25,7 +19,7 @@ import ru.itterminal.yanmas.commons.model.validator.scenario.Update;
 @EqualsAndHashCode(callSuper = true)
 public class FileDto extends BaseEntityDto {
 
-    @NotNull(groups = {Create.class})
+    @NotBlank(groups = {Create.class})
     @Null(groups = {Update.class})
     private String fileName;
 

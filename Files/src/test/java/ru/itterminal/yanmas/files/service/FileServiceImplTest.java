@@ -109,25 +109,6 @@ class FileServiceImplTest {
     }
 
     @Test
-    void putFileData_shouldGetLogicalValidationException_whenFileIdIsNull() throws IOException {
-        LogicalValidationException expectedException = createLogicalValidationException(
-                FILE_ID,
-                FILE_ID_IS_NULL
-        );
-        LogicalValidationException actualException = assertThrows(
-                LogicalValidationException.class,
-                () -> service.putFileData(currentUser, null, fileData)
-        );
-        assertEquals(
-                expectedException.getFieldErrors().get(FILE_ID).get(0),
-                actualException.getFieldErrors().get(FILE_ID).get(0)
-        );
-        verify(repository, times(0)).findByAccountIdAndAuthorIdAndId(any(), any(), any());
-        verify(repository, times(0)).save(any());
-        verify(fileSystemRepository, times(0)).save(any(), any());
-    }
-
-    @Test
     void putFileData_shouldGetEntityNotExistException_whenCantFindEntityByPassedParameters() throws IOException {
         when(repository.findByAccountIdAndAuthorIdAndId(any(), any(), any())).thenReturn(Optional.empty());
         UUID fileId = UUID.randomUUID();

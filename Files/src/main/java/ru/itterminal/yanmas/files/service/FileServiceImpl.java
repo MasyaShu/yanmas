@@ -54,9 +54,6 @@ public class FileServiceImpl extends CrudServiceWithBusinessHandlerImpl
 
     @Transactional(readOnly = true)
     public FileSystemResource getFileData(User currentUser, UUID fileId) {
-        if (fileId == null) {
-            throw createLogicalValidationException(FILE_ID, FILE_ID_IS_NULL);
-        }
         var file = findByIdAndAccountId(fileId, currentUser);
         if (Boolean.FALSE.equals(file.getIsUploaded())) {
             throw createLogicalValidationException(FILE, FILE_WAS_NOT_UPLOAD);
@@ -72,9 +69,6 @@ public class FileServiceImpl extends CrudServiceWithBusinessHandlerImpl
 
     @Transactional
     public void putFileData(User currentUser, UUID fileId, byte[] bytes) throws IOException {
-        if (fileId == null) {
-            throw createLogicalValidationException(FILE_ID, FILE_ID_IS_NULL);
-        }
         if (bytes.length > maxSizeOfFile) {
             throw createLogicalValidationException(SIZE_FILE, format(MAX_SIZE, maxSizeOfFile));
         }

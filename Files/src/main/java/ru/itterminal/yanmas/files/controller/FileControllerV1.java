@@ -10,7 +10,6 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.itterminal.yanmas.aau.controller.BaseControllerImpl;
 import ru.itterminal.yanmas.commons.model.dto.BaseFilterDto;
 import ru.itterminal.yanmas.commons.model.validator.scenario.Create;
-import ru.itterminal.yanmas.commons.model.validator.scenario.Update;
 import ru.itterminal.yanmas.files.model.File;
 import ru.itterminal.yanmas.files.model.dto.FileDto;
 import ru.itterminal.yanmas.files.service.FileServiceImpl;
@@ -39,12 +38,6 @@ public class FileControllerV1 extends BaseControllerImpl<
     public ResponseEntity<FileDto>
     create(@Validated(Create.class) @RequestBody FileDto request) {
         return create(request, entityClazz, responseClazz);
-    }
-
-    @PutMapping()
-    public ResponseEntity<FileDto>
-    update(@Validated(Update.class) @RequestBody FileDto request) {
-        return update(request, entityClazz, responseClazz);
     }
 
     @GetMapping("/{fileId}/data")
