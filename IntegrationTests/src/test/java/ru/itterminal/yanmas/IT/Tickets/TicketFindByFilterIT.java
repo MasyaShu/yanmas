@@ -1,7 +1,30 @@
 package ru.itterminal.yanmas.IT.Tickets;
 
-import io.restassured.RestAssured;
-import org.junit.jupiter.api.*;
+import static io.restassured.RestAssured.given;
+import static io.restassured.path.json.JsonPath.from;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static ru.itterminal.yanmas.IT.util.ITHelper.ACCOUNT_OWNER;
+import static ru.itterminal.yanmas.IT.util.ITHelper.ADMIN;
+import static ru.itterminal.yanmas.IT.util.ITHelper.APPLICATION_JSON;
+import static ru.itterminal.yanmas.IT.util.ITHelper.AUTHOR;
+import static ru.itterminal.yanmas.IT.util.ITHelper.CONTENT;
+import static ru.itterminal.yanmas.IT.util.ITHelper.EMPTY_BODY;
+import static ru.itterminal.yanmas.IT.util.ITHelper.EXECUTOR;
+import static ru.itterminal.yanmas.IT.util.ITHelper.OBSERVER;
+import static ru.itterminal.yanmas.IT.util.ITHelper.TICKET;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -11,6 +34,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+
+import io.restassured.RestAssured;
 import ru.itterminal.yanmas.IT.util.ITHelper;
 import ru.itterminal.yanmas.IT.util.ITTestConfig;
 import ru.itterminal.yanmas.aau.model.User;
@@ -20,17 +45,6 @@ import ru.itterminal.yanmas.security.jwt.JwtProvider;
 import ru.itterminal.yanmas.tickets.model.dto.TicketDtoResponse;
 import ru.itterminal.yanmas.tickets.model.dto.TicketFilterDto;
 import ru.itterminal.yanmas.tickets.model.test.TicketTestHelper;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static io.restassured.RestAssured.given;
-import static io.restassured.path.json.JsonPath.from;
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static ru.itterminal.yanmas.IT.util.ITHelper.*;
 
 @DataJpaTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -233,6 +247,68 @@ class TicketFindByFilterIT {
             List<TicketDtoResponse> expectedTicketList = from(listOfTicketDtoResponse).getList(CONTENT, TicketDtoResponse.class);
             assertEquals(0, expectedTicketList.size());
         }
+    }
+
+    @Test
+    @Order(70)
+    void UnauthorizedHttpStatusForAnonymousUser() {
+        given().
+                when()
+                .body(EMPTY_BODY)
+                .get(TICKET)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
+    }
+
+    @Test
+    @Order(75)
+    void LimitAllInitialUsersOnAllTicketTypes() { //NOSONAR
+        itHelper.limitAllInitialUsersOnAllTicketTypes();
+    }
+
+    @SuppressWarnings("unused")
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamInitialUsersWithRoleObserverFromInnerGroup")
+    @Order(80)
+    void SuccessWhenCurrentUserIsFromObserversOfInitialTicketAndFilterIsEmptyAndLimitAllInitialUsersOnAllTicketTypes(String userKey, User currentUser) {
+        var listOfTicketDtoResponse = given().
+                when().
+                headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(EMPTY_BODY)
+                .get(TICKET)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.OK.value())
+                .extract().response().asString();
+        List<TicketDtoResponse> expectedTickets = from(listOfTicketDtoResponse).getList(CONTENT, TicketDtoResponse.class);
+        assertEquals(0, expectedTickets.size());
+    }
+
+    @SuppressWarnings("unused")
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamAllInitialUsersWithRoleAuthor")
+    @Order(90)
+    void SuccessWhenCurrentUserIsAuthorOfTicketAndFilterIsEmptyAndLimitAllInitialUsersOnAllTicketTypes(String userKey, User currentUser) {
+        var listOfTicketDtoResponse = given().
+                when().
+                headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(EMPTY_BODY)
+                .get(TICKET)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.OK.value())
+                .extract().response().asString();
+        List<TicketDtoResponse> expectedTicketList = from(listOfTicketDtoResponse).getList(CONTENT, TicketDtoResponse.class);
+        assertEquals(0, expectedTicketList.size());
     }
 
     @SuppressWarnings("unused")
