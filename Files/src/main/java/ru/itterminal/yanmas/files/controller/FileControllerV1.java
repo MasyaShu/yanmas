@@ -10,7 +10,6 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.itterminal.yanmas.aau.controller.BaseControllerImpl;
 import ru.itterminal.yanmas.commons.model.dto.BaseFilterDto;
 import ru.itterminal.yanmas.commons.model.validator.scenario.Create;
-import ru.itterminal.yanmas.commons.model.validator.scenario.Update;
 import ru.itterminal.yanmas.files.model.File;
 import ru.itterminal.yanmas.files.model.dto.FileDto;
 import ru.itterminal.yanmas.files.service.FileServiceImpl;
@@ -41,12 +40,6 @@ public class FileControllerV1 extends BaseControllerImpl<
         return create(request, entityClazz, responseClazz);
     }
 
-    @PutMapping()
-    public ResponseEntity<FileDto>
-    update(@Validated(Update.class) @RequestBody FileDto request) {
-        return update(request, entityClazz, responseClazz);
-    }
-
     @GetMapping("/{fileId}/data")
     public FileSystemResource getFileData(@PathVariable("fileId") UUID fileId) {
         var currentUser = getCurrentUser();
@@ -54,7 +47,6 @@ public class FileControllerV1 extends BaseControllerImpl<
     }
 
     @PostMapping("/{fileId}/data")
-    @ResponseStatus(value = HttpStatus.CREATED)
     public ResponseEntity<Boolean> putFileData(@PathVariable("fileId") UUID fileId,
                                                @RequestParam("file") MultipartFile file
     ) throws IOException {

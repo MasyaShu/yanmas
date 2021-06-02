@@ -14,7 +14,6 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import lombok.extern.slf4j.Slf4j;
 import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.service.CrudServiceWithBusinessHandlerImpl;
 import ru.itterminal.yanmas.aau.service.validator.EntityValidator;
@@ -23,22 +22,18 @@ import ru.itterminal.yanmas.files.model.File;
 import ru.itterminal.yanmas.files.repository.FileRepository;
 import ru.itterminal.yanmas.files.repository.FileSystemRepository;
 
-@Slf4j
 @Service
 public class FileServiceImpl extends CrudServiceWithBusinessHandlerImpl
         <File, FileRepository> {
 
-    public static final String FILE_ID = "File id";
-    public static final String FILE_ID_IS_NULL = "File id is null";
     public static final String FILE = "File";
     public static final String FILE_WAS_NOT_UPLOAD = "File wasn't upload";
+    public static final String FILE_WAS_ALREADY_UPLOADED = "File was already uploaded";
     public static final String SIZE_FILE = "Size of file";
     public static final String MAX_SIZE = "Size of file mustn't over %s bytes";
     public static final String COULD_NOT_FIND_FILE = "Could not find entity by %s: '%s', '%s', '%s'";
     public static final String SEARCH_PARAMETER = "accountId, authorId and fileId";
 
-    @Value("${maxSizeOfFile}")
-    private Long maxSizeOfFile;
     private final String dirUploadedFiles;
 
     private final FileSystemRepository fileSystemRepository;
@@ -54,9 +49,6 @@ public class FileServiceImpl extends CrudServiceWithBusinessHandlerImpl
 
     @Transactional(readOnly = true)
     public FileSystemResource getFileData(User currentUser, UUID fileId) {
-        if (fileId == null) {
-            throw createLogicalValidationException(FILE_ID, FILE_ID_IS_NULL);
-        }
         var file = findByIdAndAccountId(fileId, currentUser);
         if (Boolean.FALSE.equals(file.getIsUploaded())) {
             throw createLogicalValidationException(FILE, FILE_WAS_NOT_UPLOAD);
@@ -72,19 +64,20 @@ public class FileServiceImpl extends CrudServiceWithBusinessHandlerImpl
 
     @Transactional
     public void putFileData(User currentUser, UUID fileId, byte[] bytes) throws IOException {
-        if (fileId == null) {
-            throw createLogicalValidationException(FILE_ID, FILE_ID_IS_NULL);
+        var file = repository
+                .findByAccountIdAndAuthorIdAndId(currentUser.getAccount().getId(), currentUser.getId(), fileId)
+                .orElseThrow(
+                        () -> {
+                            var errorMessage =
+                                    format(COULD_NOT_FIND_FILE, SEARCH_PARAMETER, currentUser.getAccount().getId(),
+                                           currentUser.getId(), fileId
+                                    );
+                            throw new EntityNotExistException(errorMessage);
+                        }
+                );
+        if (Boolean.TRUE.equals(file.getIsUploaded())) {
+            throw createLogicalValidationException(FILE, FILE_WAS_ALREADY_UPLOADED);
         }
-        if (bytes.length > maxSizeOfFile) {
-            throw createLogicalValidationException(SIZE_FILE, format(MAX_SIZE, maxSizeOfFile));
-        }
-        var file = repository.findByAccountIdAndAuthorIdAndId(currentUser.getAccount().getId(), currentUser.getId(), fileId).orElseThrow(
-                () -> {
-                    var errorMessage = format(COULD_NOT_FIND_FILE, SEARCH_PARAMETER, currentUser.getAccount().getId(), currentUser.getId(), fileId);
-                    log.error(errorMessage);
-                    throw new EntityNotExistException(errorMessage);
-                }
-        );
         fileSystemRepository.save(
                 bytes,
                 Paths.get(

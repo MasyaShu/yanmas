@@ -10,7 +10,7 @@ create TABLE IF NOT EXISTS files
     size         int,
     created_at   bigint       NOT NULL,
     account_id   uuid         NOT NULL,
-    entity_id    uuid         NOT NULL,
+    entity_id    uuid                  DEFAULT (NULL),
     is_uploaded  bool         NOT NULL DEFAULT 'false',
     PRIMARY KEY (id),
     FOREIGN KEY (account_id) REFERENCES accounts (id)

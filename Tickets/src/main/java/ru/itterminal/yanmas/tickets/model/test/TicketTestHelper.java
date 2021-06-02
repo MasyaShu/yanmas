@@ -1,5 +1,15 @@
 package ru.itterminal.yanmas.tickets.model.test;
 
+import static ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
+import static ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter.TypeComparisonForListOfBaseEntityFilter.CONTAINS_ALL_OF_LIST;
+import static ru.itterminal.yanmas.commons.model.filter.NumberFilter.TypeComparisonForNumberFilter.IS_EQUAL_TO;
+import static ru.itterminal.yanmas.commons.model.filter.StringFilter.TypeComparisonForStringFilter.TEXT_EQUALS;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import ru.itterminal.yanmas.aau.model.Account;
 import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.model.test.AccountTestHelper;
@@ -9,21 +19,15 @@ import ru.itterminal.yanmas.aau.model.test.UserTestHelper;
 import ru.itterminal.yanmas.commons.model.BaseEntity;
 import ru.itterminal.yanmas.commons.model.EntityTestHelperImpl;
 import ru.itterminal.yanmas.commons.model.dto.BaseEntityDto;
-import ru.itterminal.yanmas.commons.model.filter.*;
+import ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter;
+import ru.itterminal.yanmas.commons.model.filter.BooleanFilter;
+import ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter;
+import ru.itterminal.yanmas.commons.model.filter.NumberFilter;
+import ru.itterminal.yanmas.commons.model.filter.StringFilter;
 import ru.itterminal.yanmas.tickets.model.Ticket;
 import ru.itterminal.yanmas.tickets.model.dto.TicketDtoRequest;
 import ru.itterminal.yanmas.tickets.model.dto.TicketDtoResponse;
 import ru.itterminal.yanmas.tickets.model.dto.TicketFilterDto;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import static ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
-import static ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter.TypeComparisonForListOfBaseEntityFilter.CONTAINS_ALL_OF_LIST;
-import static ru.itterminal.yanmas.commons.model.filter.NumberFilter.TypeComparisonForNumberFilter.IS_EQUAL_TO;
-import static ru.itterminal.yanmas.commons.model.filter.StringFilter.TypeComparisonForStringFilter.TEXT_EQUALS;
 
 public class TicketTestHelper extends EntityTestHelperImpl<Ticket, TicketDtoRequest, TicketDtoResponse> {
 
@@ -143,7 +147,6 @@ public class TicketTestHelper extends EntityTestHelperImpl<Ticket, TicketDtoRequ
     @Override
     @SuppressWarnings("DuplicatedCode")
     public TicketDtoRequest convertEntityToDtoRequest(Ticket entity, boolean isDtoForCreate) {
-
         List<UUID> observersIdList = new ArrayList<>();
         if (entity.getObservers() != null) {
             observersIdList = entity.getObservers()
@@ -173,23 +176,25 @@ public class TicketTestHelper extends EntityTestHelperImpl<Ticket, TicketDtoRequ
                 .outId(entity.getOutId())
                 .deleted(entity.getDeleted())
                 .version(entity.getVersion())
-                //.displayName(entity.getDisplayName())
+                .displayName(null)
                 .authorId(entity.getAuthor() == null
-                                ? null
-                                : entity.getAuthor().getId())
+                                  ? null
+                                  : entity.getAuthor().getId())
                 .subject(entity.getSubject())
                 .description(entity.getDescription())
                 .deadline(entity.getDeadline())
                 .isFinished(entity.getIsFinished())
                 .ticketTypeId(entity.getTicketType() == null
-                                ? null
-                                : entity.getTicketType().getId())
+                                      ? null
+                                      : entity.getTicketType().getId())
                 .ticketStatusId(entity.getTicketStatus() == null
-                                    ? null
-                                    : entity.getTicketStatus().getId())
+                                        ? null
+                                        : entity.getTicketStatus().getId())
                 .observers(observersIdList)
                 .executors(executorsIdList)
-                .files(isDtoForCreate ? filesIdList : null)
+                .files(isDtoForCreate
+                               ? filesIdList
+                               : null)
                 .priority(entity.getPriority())
                 .build();
     }

@@ -35,7 +35,7 @@ public class File extends BaseEntity {
     @JoinColumn(name = "account_id", nullable = false, updatable = false)
     private Account account;
 
-    @Column(name = "file_name", nullable = false, length = 260, updatable = false)
+    @Column(name = "file_name", nullable = false, length = 256, updatable = false)
     private String fileName;
 
     @Column
@@ -56,6 +56,8 @@ public class File extends BaseEntity {
     @PrePersist
     protected void onCreate() {
         createdAt = System.currentTimeMillis();
+        setDeleted(false);
+        isUploaded = false;
     }
 
     @Override

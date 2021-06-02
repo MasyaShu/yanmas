@@ -36,3 +36,6 @@ build/
 /.mvn/wrapper/MavenWrapperDownloader.java
 /mvnw
 /mvnw.cmd
+
+### YanMas ###
+/uploaded-files/*
