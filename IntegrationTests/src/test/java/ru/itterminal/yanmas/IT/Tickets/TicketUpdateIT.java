@@ -26,6 +26,7 @@ import ru.itterminal.yanmas.tickets.model.dto.TicketDtoResponse;
 import ru.itterminal.yanmas.tickets.model.test.TicketSettingTestHelper;
 import ru.itterminal.yanmas.tickets.model.test.TicketTestHelper;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -37,10 +38,9 @@ import static org.hamcrest.Matchers.equalTo;
 import static ru.itterminal.yanmas.IT.util.ITHelper.*;
 import static ru.itterminal.yanmas.aau.service.validator.EntityValidator.EMPTY_TICKET;
 import static ru.itterminal.yanmas.tickets.service.validator.ticket.check_access_before_create_update.CurrentUserRoleAuthorCanNotCreateUpdateTicketIfAuthorOfTicketIsNotCurrentUserValidator.CURRENT_USER_WITH_ROLE_AUTHOR_CAN_NOT_CREATE_UPDATE_TICKET_IF_AUTHOR_OF_TICKET_IS_NOT_CURRENT_USER;
+import static ru.itterminal.yanmas.tickets.service.validator.ticket.check_access_before_read.CurrentUserCanNotReadTicketIfNotPermitToTicketTypeValidator.ACCESS_DENIED_BECAUSE_CURRENT_USER_HAS_NOT_PERMIT_TO_TICKET_TYPE;
 import static ru.itterminal.yanmas.tickets.service.validator.ticket.logical_validation.AuthorCannotBeAUserWeighingLessThanTheWeightOfTheAuthorValidator.WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR;
 import static ru.itterminal.yanmas.tickets.service.validator.ticket.logical_validation.AuthorCannotBeAUserWeighingLessThanTheWeightOfTheAuthorValidator.WEIGHT_OF_ROLE_INTO_FIELD_AUTHOR_LESS_THAN_WEIGHT_OF_ROLE_AUTHOR;
-import static ru.itterminal.yanmas.tickets.service.validator.ticket.logical_validation.CheckAuthorTicketHasAccessToTicketTypeValidator.INVALID_TICKET;
-import static ru.itterminal.yanmas.tickets.service.validator.ticket.logical_validation.CheckAuthorTicketHasAccessToTicketTypeValidator.INVALID_TICKET_BECAUSE_AUTHOR_HAS_NOT_ACCESS_TO_TICKET_TYPE;
 import static ru.itterminal.yanmas.tickets.service.validator.ticket.logical_validation.ExecutorCannotBeAUserWeighingLessThanTheWeightOfTheExecutorValidator.WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS;
 import static ru.itterminal.yanmas.tickets.service.validator.ticket.logical_validation.ExecutorCannotBeAUserWeighingLessThanTheWeightOfTheExecutorValidator.WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS_LESS_THAN_WEIGHT_OF_ROLE_EXECUTOR;
 import static ru.itterminal.yanmas.tickets.service.validator.ticket.logical_validation.ExecutorFromOuterGroupCanBeIfHisGroupEqualsGroupOfTicketValidator.EXECUTOR_FROM_OUTER_GROUP_CAN_BE_IF_HIS_GROUP_EQUALS_GROUP_OF_TICKET;
@@ -56,7 +56,7 @@ import static ru.itterminal.yanmas.tickets.service.validator.ticket.logical_vali
 @ContextConfiguration(classes = {ITTestConfig.class, JwtProvider.class, UserRepository.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestPropertySource(properties = {"jwt.token.secret=ksedtob", "jwt.token.expired=8640000", "jwt.token.prefix=Bearer"})
-class TicketCreateIT {
+class TicketUpdateIT {
 
     @Autowired
     private UserRepository userRepository;
@@ -75,6 +75,8 @@ class TicketCreateIT {
         itHelper.createInitialUsers();
         itHelper.createInitialTicketType();
         itHelper.createInitialTicketSettings();
+        itHelper.createInitialGroupTicketTypes();
+        itHelper.createInitialTickets();
         itHelper.createTicketTypeWhichIsNeverUsedIntoInitialTickets();
         itHelper.createGroupOfTicketTypesWhichIsNeverUsedIntoInitialTickets();
     }
@@ -85,11 +87,9 @@ class TicketCreateIT {
     @Order(10)
     void accessDenied_CurrentUserRoleAuthorCanNotCreateTicketIfAuthorOfTicketIsNotCurrentUser(String userKey, User currentUser) {
         var executorOfAuthorGroup = itHelper.getUsersByGroupAndRole(currentUser.getGroup(), null, itHelper.getRoleTestHelper().getRoleByName(EXECUTOR), null);
-        var newTicket = Ticket.builder()
-                .author(executorOfAuthorGroup.get(0))
-                .subject(TICKET)
-                .build();
-        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
+        var updateTicket = itHelper.getTicketFromUser(currentUser);
+        updateTicket.setAuthor(executorOfAuthorGroup.get(0));
+        var updateTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(updateTicket, false);
         given().
                 when()
                 .headers(
@@ -97,7 +97,8 @@ class TicketCreateIT {
                         "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
                 )
                 .contentType(APPLICATION_JSON)
-                .body(newTicketDtoRequest)
+                .body(updateTicketDtoRequest)
+                .put(TICKET)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.FORBIDDEN.value())
@@ -110,11 +111,9 @@ class TicketCreateIT {
     @Order(20)
     void accessDenied_CurrentUserRoleAdminOrExecutorOuterGroupCanNotCreateTicketIfTicketIsFromAnotherGroup(String userKey, User currentUser) {
         var executorOfAuthorGroup = itHelper.getUsersByGroupAndRole(null, currentUser.getGroup(), itHelper.getRoleTestHelper().getRoleByName(AUTHOR), null);
-        var newTicket = Ticket.builder()
-                .author(executorOfAuthorGroup.get(0))
-                .subject(TICKET)
-                .build();
-        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
+        var updateTicket = itHelper.getTicketFromUser(currentUser);
+        updateTicket.setAuthor(executorOfAuthorGroup.get(0));
+        var updateTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(updateTicket, false);
         given().
                 when()
                 .headers(
@@ -122,8 +121,8 @@ class TicketCreateIT {
                         "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
                 )
                 .contentType(APPLICATION_JSON)
-                .body(newTicketDtoRequest)
-                .post(TICKET)
+                .body(updateTicketDtoRequest)
+                .put(TICKET)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.FORBIDDEN.value());
@@ -135,11 +134,8 @@ class TicketCreateIT {
     @Order(30)
     void accessDenied_accessDeniedIfCurrentUserByRoleObserver(String userKey, User currentUser) {
         var executorOfAuthorGroup = itHelper.getUsersByGroupAndRole(null, currentUser.getGroup(), itHelper.getRoleTestHelper().getRoleByName(AUTHOR), null);
-        var newTicket = Ticket.builder()
-                .author(executorOfAuthorGroup.get(0))
-                .subject(TICKET)
-                .build();
-        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
+        var updateTicket = itHelper.getTicketFromUser(itHelper.getAuthorOuterGroup().get(AUTHOR_OUTER_GROUP + 1));
+        var updateTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(updateTicket, false);
         given().
                 when()
                 .headers(
@@ -147,11 +143,47 @@ class TicketCreateIT {
                         "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
                 )
                 .contentType(APPLICATION_JSON)
-                .body(newTicketDtoRequest)
-                .post(TICKET)
+                .body(updateTicketDtoRequest)
+                .put(TICKET)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.FORBIDDEN.value());
+    }
+
+    //CheckAuthorTicketHasAccessToTicketTypeValidator
+    //CurrentUserCanNotReadTicketIfNotPermitToTicketTypeValidator
+    @Test
+    @Order(45)
+    void LimitAllInitialUsersOnAllTicketTypes() {
+        itHelper.limitAllInitialUsersOnAllTicketTypes();
+    }
+
+    @Test
+    @Order(50)
+    void accessDenied_AuthorTicketHasAccessToTicketType() {
+        var AuthorTicket = itHelper.getAuthorInnerGroup().get(AUTHOR_INNER_GROUP + 1);
+        var updateTicket = itHelper.getTicketFromUser(itHelper.getAccountOwner());
+        var updateTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(updateTicket, false);
+        given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(itHelper.getAccountOwner().getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(updateTicketDtoRequest)
+                .put(TICKET)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.FORBIDDEN.value())
+                .body("detail", equalTo(ACCESS_DENIED_BECAUSE_CURRENT_USER_HAS_NOT_PERMIT_TO_TICKET_TYPE));
+
+    }
+
+    @Test
+    @Order(55)
+    void AllowAllInitialUsersOnAllTicketTypes() {
+        itHelper.allowAllInitialUsersOnAllTicketTypes();
     }
 
     //AuthorCannotBeAUserWeighingLessThanTheWeightOfTheAuthorValidator
@@ -160,11 +192,9 @@ class TicketCreateIT {
     void logicalError_AuthorCannotBeAUserWeighingLessThanTheWeightOfTheAuthor() {
         var weightOfRoleAuthor = Roles.AUTHOR.getWeight();
         var AuthorTicket = itHelper.getObserverInnerGroup().get(OBSERVER_INNER_GROUP + 1);
-        var newTicket = Ticket.builder()
-                .author(AuthorTicket)
-                .subject(TICKET)
-                .build();
-        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
+        var updateTicket = itHelper.getTicketFromUser(itHelper.getAuthorOuterGroup().get(AUTHOR_OUTER_GROUP + 1));
+        updateTicket.setAuthor(AuthorTicket);
+        var updateTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(updateTicket, false);
         var apiError = given().
                 when()
                 .headers(
@@ -172,8 +202,8 @@ class TicketCreateIT {
                         "Bearer " + itHelper.getTokens().get(itHelper.getAccountOwner().getEmail())
                 )
                 .contentType(APPLICATION_JSON)
-                .body(newTicketDtoRequest)
-                .post(TICKET)
+                .body(updateTicketDtoRequest)
+                .put(TICKET)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.CONFLICT.value())
@@ -191,12 +221,10 @@ class TicketCreateIT {
     void logicalError_ExecutorCannotBeAUserWeighingLessThanTheWeightOfTheExecutor() {
         var weightOfRoleExecutor = Roles.EXECUTOR.getWeight();
         var executor = itHelper.getAuthorInnerGroup().get(AUTHOR_INNER_GROUP + 1);
-        var newTicket = Ticket.builder()
-                .author(itHelper.getAccountOwner())
-                .subject(TICKET)
-                .executors(List.of(executor))
-                .build();
-        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
+        var updateTicket = itHelper.getTicketFromUser(itHelper.getAccountOwner());
+        updateTicket.setAuthor(itHelper.getAccountOwner());
+        updateTicket.setExecutors(List.of(executor));
+        var updateTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(updateTicket, false);
         var apiError = given().
                 when()
                 .headers(
@@ -204,8 +232,8 @@ class TicketCreateIT {
                         "Bearer " + itHelper.getTokens().get(itHelper.getAccountOwner().getEmail())
                 )
                 .contentType(APPLICATION_JSON)
-                .body(newTicketDtoRequest)
-                .post(TICKET)
+                .body(updateTicketDtoRequest)
+                .put(TICKET)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.CONFLICT.value())
@@ -217,58 +245,15 @@ class TicketCreateIT {
         Assertions.assertEquals(expectedMessage, apiError.getErrors().get(WEIGHT_OF_ROLE_INTO_FIELD_EXECUTORS).get(0).getMessage());
     }
 
-    //CheckAuthorTicketHasAccessToTicketTypeValidator
-    @Test
-    @Order(45)
-    void LimitAllInitialUsersOnAllTicketTypes() {
-        itHelper.limitAllInitialUsersOnAllTicketTypes();
-    }
-
-    @Test
-    @Order(50)
-    void logicalError_AuthorTicketHasAccessToTicketType() {
-        var AuthorTicket = itHelper.getAuthorInnerGroup().get(AUTHOR_INNER_GROUP + 1);
-        var newTicket = Ticket.builder()
-                .author(AuthorTicket)
-                .subject(TICKET)
-                .build();
-        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
-        var apiError = given().
-                when()
-                .headers(
-                        "Authorization",
-                        "Bearer " + itHelper.getTokens().get(itHelper.getAccountOwner().getEmail())
-                )
-                .contentType(APPLICATION_JSON)
-                .body(newTicketDtoRequest)
-                .post(TICKET)
-                .then()
-                .log().body()
-                .statusCode(HttpStatus.CONFLICT.value())
-                .extract().response().as(ApiError.class);
-
-        Assertions.assertEquals(INVALID_TICKET_BECAUSE_AUTHOR_HAS_NOT_ACCESS_TO_TICKET_TYPE,
-                apiError.getErrors().get(INVALID_TICKET).get(0).getMessage());
-    }
-
-    @Test
-    @Order(55)
-    void AllowAllInitialUsersOnAllTicketTypes() {
-        itHelper.allowAllInitialUsersOnAllTicketTypes();
-    }
-
     //ExecutorFromOuterGroupCanBeIfHisGroupEqualsGroupOfTicketValidator
     @Test
     @Order(70)
     void logicalError_ExecutorFromOuterGroupCanBeIfHisGroupEqualsGroupOfTicket() {
         var executor = itHelper.getExecutorOuterGroup().get(EXECUTOR_OUTER_GROUP + 1);
         var author = itHelper.getAuthorOuterGroup().get(AUTHOR_OUTER_GROUP + 2);
-        var newTicket = Ticket.builder()
-                .author(author)
-                .subject(TICKET)
-                .executors(List.of(executor))
-                .build();
-        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
+        var updateTicket = itHelper.getTicketFromUser(author);
+        updateTicket.setExecutors(List.of(executor));
+        var updateTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(updateTicket, false);
         var apiError = given().
                 when()
                 .headers(
@@ -276,8 +261,8 @@ class TicketCreateIT {
                         "Bearer " + itHelper.getTokens().get(itHelper.getAccountOwner().getEmail())
                 )
                 .contentType(APPLICATION_JSON)
-                .body(newTicketDtoRequest)
-                .post(TICKET)
+                .body(updateTicketDtoRequest)
+                .put(TICKET)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.CONFLICT.value())
@@ -292,12 +277,9 @@ class TicketCreateIT {
     void logicalError_ObserverFromOuterGroupCanBeIfHisGroupEqualsGroupOfTicket() {
         var observer = itHelper.getObserverOuterGroup().get(OBSERVER_OUTER_GROUP + 1);
         var author = itHelper.getAuthorOuterGroup().get(AUTHOR_OUTER_GROUP + 2);
-        var newTicket = Ticket.builder()
-                .author(author)
-                .subject(TICKET)
-                .observers(List.of(observer))
-                .build();
-        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
+        var updateTicket = itHelper.getTicketFromUser(author);
+        updateTicket.setObservers(List.of(observer));
+        var updateTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(updateTicket, false);
         var apiError = given().
                 when()
                 .headers(
@@ -305,8 +287,8 @@ class TicketCreateIT {
                         "Bearer " + itHelper.getTokens().get(itHelper.getAccountOwner().getEmail())
                 )
                 .contentType(APPLICATION_JSON)
-                .body(newTicketDtoRequest)
-                .post(TICKET)
+                .body(updateTicketDtoRequest)
+                .put(TICKET)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.CONFLICT.value())
@@ -321,15 +303,13 @@ class TicketCreateIT {
     @Order(90)
     void logicalError_MustNotCreateTicketIfSubjectDescriptionFilesAreEmpty(String input) {
         var author = itHelper.getAuthorOuterGroup().get(AUTHOR_OUTER_GROUP + 2);
-        var newTicket = Ticket.builder()
-                .author(author)
-                .subject(input)
-                .subject(input)
-                .build();
+        var updateTicket = itHelper.getTicketFromUser(author);
+        updateTicket.setSubject(input);
+        updateTicket.setDescription(input);
         if (input !=null) {
-            newTicket.setFiles(List.of());
+            updateTicket.setFiles(List.of());
         }
-        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
+        var updateTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(updateTicket, false);
         var apiError = given().
                 when()
                 .headers(
@@ -337,8 +317,8 @@ class TicketCreateIT {
                         "Bearer " + itHelper.getTokens().get(itHelper.getAccountOwner().getEmail())
                 )
                 .contentType(APPLICATION_JSON)
-                .body(newTicketDtoRequest)
-                .post(TICKET)
+                .body(updateTicketDtoRequest)
+                .put(TICKET)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.CONFLICT.value())
@@ -349,16 +329,13 @@ class TicketCreateIT {
 
     //SettingGroupFromAuthorOfTicketBeforeCreateAndUpdateTicketBusinessHandler
     //SettingTicketPriorityBeforeCreateAndUpdateTicketBusinessHandler
-    //SettingTicketNumberBeforeCreateTicketBusinessHandler
+    //SettingTicketNumberBeforeCreateUpdateTicketBusinessHandler
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamAllUsersWithRoleAccountOwnerAdminExecutorAuthor")
     @Order(100)
-    void successCreate_CurrentUserByRoleAccountOwnerOrAdminOrExecutorOrAuthorSetGroupPriorityNumberCreatedAt(String userKey, User currentUser) {
-        var newTicket = Ticket.builder()
-                .author(currentUser)
-                .subject(TICKET)
-                .build();
-        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
+    void successUpdate_CurrentUserByRoleAccountOwnerOrAdminOrExecutorOrAuthorSetGroupPriorityNumberCreatedAt(String userKey, User currentUser) {
+        var updateTicket = itHelper.getTicketFromUser(currentUser);
+        var updateTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(updateTicket, false);
         var ticketDtoResponse = given().
                 when()
                 .headers(
@@ -366,45 +343,17 @@ class TicketCreateIT {
                         "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
                 )
                 .contentType(APPLICATION_JSON)
-                .body(newTicketDtoRequest)
-                .post(TICKET)
+                .body(updateTicketDtoRequest)
+                .put(TICKET)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.CREATED.value())
+                .statusCode(HttpStatus.OK.value())
                 .extract().response().as(TicketDtoResponse.class);
         Assertions.assertEquals(currentUser.getGroup().getId(), ticketDtoResponse.getGroup().getId());
         Assertions.assertEquals(Priority.MIDDLE.toString(), ticketDtoResponse.getPriority());
-        Assertions.assertTrue(ticketDtoResponse.getNumber() > 0);
-        Assertions.assertTrue(ticketDtoResponse.getCreatedAt() <= System.currentTimeMillis());
-    }
-
-    //SettingTicketPriorityBeforeCreateAndUpdateTicketBusinessHandler
-    @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamAllUsersWithRoleAccountOwnerAdminExecutorAuthor")
-    @Order(110)
-    void successCreate_CurrentUserByRoleAccountOwnerOrAdminOrExecutorOrAuthorAndPriorityNotNull(String userKey, User currentUser) {
-        var newTicket = Ticket.builder()
-                .author(currentUser)
-                .subject(TICKET)
-                .priority(Priority.HEIGHT.toString())
-                .build();
-        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
-        var ticketDtoResponse = given().
-                when()
-                .headers(
-                        "Authorization",
-                        "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
-                )
-                .contentType(APPLICATION_JSON)
-                .body(newTicketDtoRequest)
-                .post(TICKET)
-                .then()
-                .log().body()
-                .statusCode(HttpStatus.CREATED.value())
-                .extract().response().as(TicketDtoResponse.class);
-        Assertions.assertEquals(currentUser.getGroup().getId(), ticketDtoResponse.getGroup().getId());
-        Assertions.assertEquals(Priority.HEIGHT.toString(), ticketDtoResponse.getPriority());
-
+        Assertions.assertEquals(ticketDtoResponse.getNumber(), updateTicket.getNumber());
+        Assertions.assertEquals(ticketDtoResponse.getCreatedAt(), updateTicket.getCreatedAt());
+        itHelper.updateTicketAfterUpdate(ticketDtoResponse);
     }
 
     //SettingTicketExecutorsBeforeCreateAndUpdateTicketBusinessHandler
@@ -413,13 +362,9 @@ class TicketCreateIT {
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamAllUsersWithRoleAccountOwnerAdminExecutorAuthor")
     @Order(120)
-    void successCreate_ticketTypeExecutorsObserversFromTicketSetting(String userKey, User currentUser) {
-        var ticketSettings = itHelper.getTicketSettingForUser(currentUser);
-        var newTicket = Ticket.builder()
-                .author(currentUser)
-                .subject(TICKET)
-                .build();
-        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
+    void successUpdate_ticketTypeExecutorsObserversFromDateBase(String userKey, User currentUser) {
+        var updateTicket = itHelper.getTicketFromUser(currentUser);
+        var updateTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(updateTicket, false);
         var ticketDtoResponse = given().
                 when()
                 .headers(
@@ -427,16 +372,16 @@ class TicketCreateIT {
                         "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
                 )
                 .contentType(APPLICATION_JSON)
-                .body(newTicketDtoRequest)
-                .post(TICKET)
+                .body(updateTicketDtoRequest)
+                .put(TICKET)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.CREATED.value())
+                .statusCode(HttpStatus.OK.value())
                 .extract().response().as(TicketDtoResponse.class);
-        Assertions.assertEquals(ticketSettings.getTicketTypeForNew().getId(), ticketDtoResponse.getTicketType().getId());
-        Assertions.assertEquals(ticketSettings.getObservers().size(), ticketDtoResponse.getObservers().size());
-        Assertions.assertEquals(ticketSettings.getExecutors().size(), ticketDtoResponse.getExecutors().size());
-        var observersIdExpected = ticketSettings.getObservers().stream()
+        Assertions.assertEquals(updateTicket.getTicketType().getId(), ticketDtoResponse.getTicketType().getId());
+        Assertions.assertEquals(updateTicket.getObservers().size(), ticketDtoResponse.getObservers().size());
+        Assertions.assertEquals(updateTicket.getExecutors().size(), ticketDtoResponse.getExecutors().size());
+        var observersIdExpected = updateTicket.getObservers().stream()
                 .map(User::getId)
                 .collect(Collectors.toList());
         var observersIdActual = ticketDtoResponse.getObservers().stream()
@@ -445,7 +390,7 @@ class TicketCreateIT {
         assertThat(observersIdExpected)
                 .containsExactlyInAnyOrderElementsOf(observersIdActual);
 
-        var executorsIdExpected = ticketSettings.getExecutors().stream()
+        var executorsIdExpected = updateTicket.getExecutors().stream()
                 .map(User::getId)
                 .collect(Collectors.toList());
         var executorsIdActual = ticketDtoResponse.getExecutors().stream()
@@ -453,6 +398,7 @@ class TicketCreateIT {
                 .collect(Collectors.toList());
         assertThat(executorsIdExpected)
                 .containsExactlyInAnyOrderElementsOf(executorsIdActual);
+        itHelper.updateTicketAfterUpdate(ticketDtoResponse);
     }
 
     //SettingTicketExecutorsBeforeCreateAndUpdateTicketBusinessHandler
@@ -461,18 +407,14 @@ class TicketCreateIT {
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamAllUsersWithRoleAuthor")
     @Order(130)
-    void successCreate_ticketTypeExecutorsObserversFromTicketSettingWhenCurrentUserWithRoleAuthor(String userKey, User currentUser) {
-        var ticketSettings = itHelper.getTicketSettingForUser(currentUser);
+    void successUpdate_ticketTypeExecutorsObserversFromDataBaseWhenCurrentUserWithRoleAuthor(String userKey, User currentUser) {
         var executors = itHelper.getUsersByGroupAndRole(currentUser.getGroup(), null,
                 itHelper.getRoleTestHelper().getRoleByName(EXECUTOR), null);
         var observers = itHelper.getUsersByGroupAndRole(currentUser.getGroup(), null,
                 itHelper.getRoleTestHelper().getRoleByName(OBSERVER), null);
-        var newTicket = Ticket.builder()
-                .author(currentUser)
-                .subject(TICKET)
-                .ticketType(itHelper.getTicketTypes().get(TICKET_TYPE_WHICH_IS_NEVER_USED_INTO_INITIAL_TICKETS))
-                .build();
-        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
+        var updateTicket = itHelper.getTicketFromUser(currentUser);
+        var updateTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(updateTicket, false);
+        updateTicketDtoRequest.setTicketTypeId(itHelper.getTicketTypeWhichIsNeverUsedIntoInitialTickets().getId());
         var ticketDtoResponse = given().
                 when()
                 .headers(
@@ -480,16 +422,16 @@ class TicketCreateIT {
                         "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
                 )
                 .contentType(APPLICATION_JSON)
-                .body(newTicketDtoRequest)
-                .post(TICKET)
+                .body(updateTicketDtoRequest)
+                .put(TICKET)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.CREATED.value())
+                .statusCode(HttpStatus.OK.value())
                 .extract().response().as(TicketDtoResponse.class);
-        Assertions.assertEquals(ticketSettings.getTicketTypeForNew().getId(), ticketDtoResponse.getTicketType().getId());
-        Assertions.assertEquals(ticketSettings.getObservers().size(), ticketDtoResponse.getObservers().size());
-        Assertions.assertEquals(ticketSettings.getExecutors().size(), ticketDtoResponse.getExecutors().size());
-        var observersIdExpected = ticketSettings.getObservers().stream()
+        Assertions.assertEquals(updateTicket.getTicketType().getId(), ticketDtoResponse.getTicketType().getId());
+        Assertions.assertEquals(updateTicket.getObservers().size(), ticketDtoResponse.getObservers().size());
+        Assertions.assertEquals(updateTicket.getExecutors().size(), ticketDtoResponse.getExecutors().size());
+        var observersIdExpected = updateTicket.getObservers().stream()
                 .map(User::getId)
                 .collect(Collectors.toList());
         var observersIdActual = ticketDtoResponse.getObservers().stream()
@@ -498,7 +440,7 @@ class TicketCreateIT {
         assertThat(observersIdExpected)
                 .containsExactlyInAnyOrderElementsOf(observersIdActual);
 
-        var executorsIdExpected = ticketSettings.getExecutors().stream()
+        var executorsIdExpected = updateTicket.getExecutors().stream()
                 .map(User::getId)
                 .collect(Collectors.toList());
         var executorsIdActual = ticketDtoResponse.getExecutors().stream()
@@ -506,6 +448,7 @@ class TicketCreateIT {
                 .collect(Collectors.toList());
         assertThat(executorsIdExpected)
                 .containsExactlyInAnyOrderElementsOf(executorsIdActual);
+        itHelper.updateTicketAfterUpdate(ticketDtoResponse);
     }
 
     //SettingTicketExecutorsBeforeCreateAndUpdateTicketBusinessHandler
@@ -514,18 +457,14 @@ class TicketCreateIT {
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamUsersFromOuterGroupWithRoleAdminAndExecutorAndAuthor")
     @Order(140)
-    void successCreate_ticketTypeExecutorsObserversFromTicketSettingWhenCurrentUserFromOuterGroup(String userKey, User currentUser) {
-        var ticketSettings = itHelper.getTicketSettingForUser(currentUser);
+    void successUpdate_ticketTypeExecutorsObserversFromTicketSettingWhenCurrentUserFromOuterGroup(String userKey, User currentUser) {
         var executors = itHelper.getUsersByGroupAndRole(currentUser.getGroup(), null,
                 itHelper.getRoleTestHelper().getRoleByName(EXECUTOR), null);
         var observers = itHelper.getUsersByGroupAndRole(currentUser.getGroup(), null,
                 itHelper.getRoleTestHelper().getRoleByName(OBSERVER), null);
-        var newTicket = Ticket.builder()
-                .author(currentUser)
-                .subject(TICKET)
-                .ticketType(itHelper.getTicketTypeWhichIsNeverUsedIntoInitialTickets())
-                .build();
-        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
+        var updateTicket = itHelper.getTicketFromUser(currentUser);
+        var updateTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(updateTicket, false);
+        updateTicketDtoRequest.setTicketTypeId(itHelper.getTicketTypeWhichIsNeverUsedIntoInitialTickets().getId());
         var ticketDtoResponse = given().
                 when()
                 .headers(
@@ -533,16 +472,16 @@ class TicketCreateIT {
                         "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
                 )
                 .contentType(APPLICATION_JSON)
-                .body(newTicketDtoRequest)
-                .post(TICKET)
+                .body(updateTicketDtoRequest)
+                .put(TICKET)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.CREATED.value())
+                .statusCode(HttpStatus.OK.value())
                 .extract().response().as(TicketDtoResponse.class);
-        Assertions.assertEquals(ticketSettings.getTicketTypeForNew().getId(), ticketDtoResponse.getTicketType().getId());
-        Assertions.assertEquals(ticketSettings.getObservers().size(), ticketDtoResponse.getObservers().size());
-        Assertions.assertEquals(ticketSettings.getExecutors().size(), ticketDtoResponse.getExecutors().size());
-        var observersIdExpected = ticketSettings.getObservers().stream()
+        Assertions.assertEquals(updateTicket.getTicketType().getId(), ticketDtoResponse.getTicketType().getId());
+        Assertions.assertEquals(updateTicket.getObservers().size(), ticketDtoResponse.getObservers().size());
+        Assertions.assertEquals(updateTicket.getExecutors().size(), ticketDtoResponse.getExecutors().size());
+        var observersIdExpected = updateTicket.getObservers().stream()
                 .map(User::getId)
                 .collect(Collectors.toList());
         var observersIdActual = ticketDtoResponse.getObservers().stream()
@@ -551,7 +490,7 @@ class TicketCreateIT {
         assertThat(observersIdExpected)
                 .containsExactlyInAnyOrderElementsOf(observersIdActual);
 
-        var executorsIdExpected = ticketSettings.getExecutors().stream()
+        var executorsIdExpected = updateTicket.getExecutors().stream()
                 .map(User::getId)
                 .collect(Collectors.toList());
         var executorsIdActual = ticketDtoResponse.getExecutors().stream()
@@ -559,20 +498,18 @@ class TicketCreateIT {
                 .collect(Collectors.toList());
         assertThat(executorsIdExpected)
                 .containsExactlyInAnyOrderElementsOf(executorsIdActual);
+        itHelper.updateTicketAfterUpdate(ticketDtoResponse);
     }
 
     //SettingTicketStatusBeforeCreateAndUpdateTicketBusinessHandler
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamAllUsersWithRoleAccountOwnerAdminExecutor")
+    @MethodSource("getStreamAllUsersWithRoleAccountOwnerAdminExecutorAuthor")
     @Order(150)
-    void successCreate_ticketStatusToFinishWhenCurrentUserWithRoleAccountOwnerAdminExecutorAndIsFinishedTrue(String userKey, User currentUser) {
+    void successUpdate_ticketStatusToFinishWhenCurrentUserWithRoleAccountOwnerAdminExecutorAuthorAndIsFinishedTrue(String userKey, User currentUser) {
         var ticketSettings = itHelper.getTicketSettingForUser(currentUser);
-        var newTicket = Ticket.builder()
-                .author(currentUser)
-                .subject(TICKET)
-                .isFinished(true)
-                .build();
-        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
+        var updateTicket = itHelper.getTicketFromUser(currentUser);
+        var updateTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(updateTicket, false);
+        updateTicketDtoRequest.setIsFinished(true);
         var ticketDtoResponse = given().
                 when()
                 .headers(
@@ -580,58 +517,26 @@ class TicketCreateIT {
                         "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
                 )
                 .contentType(APPLICATION_JSON)
-                .body(newTicketDtoRequest)
-                .post(TICKET)
+                .body(updateTicketDtoRequest)
+                .put(TICKET)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.CREATED.value())
+                .statusCode(HttpStatus.OK.value())
                 .extract().response().as(TicketDtoResponse.class);
         Assertions.assertEquals(ticketSettings.getTicketStatusForClose().getId(), ticketDtoResponse.getTicketStatus().getId());
         Assertions.assertTrue(ticketDtoResponse.getIsFinished());
+        itHelper.updateTicketAfterUpdate(ticketDtoResponse);
     }
 
     //SettingTicketStatusBeforeCreateAndUpdateTicketBusinessHandler
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamAllUsersWithRoleAuthor")
-    @Order(160)
-    void successCreate_ticketStatusFromTicketSettingWhenCurrentUserWithRoleAuthorAndIsFinishedTrue(String userKey, User currentUser) {
-        var ticketSettings = itHelper.getTicketSettingForUser(currentUser);
-        var newTicket = Ticket.builder()
-                .author(currentUser)
-                .subject(TICKET)
-                .ticketStatus(ticketSettings.getTicketStatusForCancel())
-                .isFinished(true)
-                .build();
-        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
-        var ticketDtoResponse = given().
-                when()
-                .headers(
-                        "Authorization",
-                        "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
-                )
-                .contentType(APPLICATION_JSON)
-                .body(newTicketDtoRequest)
-                .post(TICKET)
-                .then()
-                .log().body()
-                .statusCode(HttpStatus.CREATED.value())
-                .extract().response().as(TicketDtoResponse.class);
-        Assertions.assertEquals(ticketSettings.getTicketStatusForNew().getId(), ticketDtoResponse.getTicketStatus().getId());
-        Assertions.assertFalse(ticketDtoResponse.getIsFinished());
-    }
-
-    //SettingTicketStatusBeforeCreateAndUpdateTicketBusinessHandler
-    @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamAllUsersWithRoleAccountOwnerAdminExecutor")
+    @MethodSource("getStreamAllUsersWithRoleAccountOwnerAdminExecutorAuthor")
     @Order(170)
-    void successCreate_ticketStatusFromRequestWhenCurrentUserWithRoleAccountOwnerAdminExecutor(String userKey, User currentUser) {
+    void successUpdate_ticketStatusFromRequestWhenCurrentUserWithRoleAccountOwnerAdminExecutorAuthor(String userKey, User currentUser) {
         var ticketSettings = itHelper.getTicketSettingForUser(currentUser);
-        var newTicket = Ticket.builder()
-                .author(currentUser)
-                .subject(TICKET)
-                .ticketStatus(ticketSettings.getTicketStatusForCancel())
-                .build();
-        var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
+        var updateTicket = itHelper.getTicketFromUser(currentUser);
+        var updateTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(updateTicket, false);
+        updateTicketDtoRequest.setTicketStatusId(ticketSettings.getTicketStatusForCancel().getId());
         var ticketDtoResponse = given().
                 when()
                 .headers(
@@ -639,13 +544,14 @@ class TicketCreateIT {
                         "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
                 )
                 .contentType(APPLICATION_JSON)
-                .body(newTicketDtoRequest)
-                .post(TICKET)
+                .body(updateTicketDtoRequest)
+                .put(TICKET)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.CREATED.value())
+                .statusCode(HttpStatus.OK.value())
                 .extract().response().as(TicketDtoResponse.class);
         Assertions.assertEquals(ticketSettings.getTicketStatusForCancel().getId(), ticketDtoResponse.getTicketStatus().getId());
+        itHelper.updateTicketAfterUpdate(ticketDtoResponse);
     }
 
     private static Stream<Arguments> getStreamAllUsersWithRoleAuthor() {

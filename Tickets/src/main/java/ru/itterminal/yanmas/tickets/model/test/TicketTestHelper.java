@@ -135,6 +135,7 @@ public class TicketTestHelper extends EntityTestHelperImpl<Ticket, TicketDtoRequ
     @Override
     @SuppressWarnings("DuplicatedCode")
     public TicketDtoRequest convertEntityToDtoRequest(Ticket entity, boolean isDtoForCreate) {
+
         List<UUID> observersIdList = new ArrayList<>();
         if (entity.getObservers() != null) {
             observersIdList = entity.getObservers()
@@ -164,7 +165,7 @@ public class TicketTestHelper extends EntityTestHelperImpl<Ticket, TicketDtoRequ
                 .outId(entity.getOutId())
                 .deleted(entity.getDeleted())
                 .version(entity.getVersion())
-                .displayName(entity.getDisplayName())
+                //.displayName(entity.getDisplayName())
                 .authorId(entity.getAuthor() == null
                                 ? null
                                 : entity.getAuthor().getId())
@@ -180,7 +181,7 @@ public class TicketTestHelper extends EntityTestHelperImpl<Ticket, TicketDtoRequ
                                     : entity.getTicketStatus().getId())
                 .observers(observersIdList)
                 .executors(executorsIdList)
-                .files(filesIdList)
+                .files(isDtoForCreate ? filesIdList : null)
                 .priority(entity.getPriority())
                 .build();
     }
