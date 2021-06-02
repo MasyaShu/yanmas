@@ -301,7 +301,7 @@ class TicketUpdateIT {
     @ParameterizedTest
     @NullAndEmptySource
     @Order(90)
-    void logicalError_MustNotCreateTicketIfSubjectDescriptionFilesAreEmpty(String input) {
+    void logicalError_MustNotUpdateTicketIfSubjectDescriptionFilesAreEmpty(String input) {
         var author = itHelper.getAuthorOuterGroup().get(AUTHOR_OUTER_GROUP + 2);
         var updateTicket = itHelper.getTicketFromUser(author);
         updateTicket.setSubject(input);
@@ -333,7 +333,7 @@ class TicketUpdateIT {
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamAllUsersWithRoleAccountOwnerAdminExecutorAuthor")
     @Order(100)
-    void successUpdate_CurrentUserByRoleAccountOwnerOrAdminOrExecutorOrAuthorSetGroupPriorityNumberCreatedAt(String userKey, User currentUser) {
+    void successUpdate_CurrentUserByRoleAccountOwnerOrAdminOrExecutorOrAuthor_checkFieldSettingGroupAndPriorityAndNumberAndCreatedAt(String userKey, User currentUser) {
         var updateTicket = itHelper.getTicketFromUser(currentUser);
         var updateTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(updateTicket, false);
         var ticketDtoResponse = given().
@@ -360,11 +360,14 @@ class TicketUpdateIT {
     //SettingTicketObserversBeforeCreateAndUpdateTicketBusinessHandler
     //SettingTicketTypeBeforeCreateAndUpdateTicketBusinessHandler
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamAllUsersWithRoleAccountOwnerAdminExecutorAuthor")
+    @MethodSource("getStreamUsersFromOuterGroupWithRoleAdminAndExecutorAndAuthor")
     @Order(120)
-    void successUpdate_ticketTypeExecutorsObserversFromDateBase(String userKey, User currentUser) {
+    void successUpdate_ticketTypeExecutorsObserversFromDateBaseIfCurrentUserFromOuterGroup(String userKey, User currentUser) {
         var updateTicket = itHelper.getTicketFromUser(currentUser);
         var updateTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(updateTicket, false);
+        updateTicketDtoRequest.setExecutors(null);
+        updateTicketDtoRequest.setObservers(null);
+        updateTicketDtoRequest.setTicketTypeId(itHelper.getTicketTypeWhichIsNeverUsedIntoInitialTickets().getId());
         var ticketDtoResponse = given().
                 when()
                 .headers(
@@ -408,12 +411,10 @@ class TicketUpdateIT {
     @MethodSource("getStreamAllUsersWithRoleAuthor")
     @Order(130)
     void successUpdate_ticketTypeExecutorsObserversFromDataBaseWhenCurrentUserWithRoleAuthor(String userKey, User currentUser) {
-        var executors = itHelper.getUsersByGroupAndRole(currentUser.getGroup(), null,
-                itHelper.getRoleTestHelper().getRoleByName(EXECUTOR), null);
-        var observers = itHelper.getUsersByGroupAndRole(currentUser.getGroup(), null,
-                itHelper.getRoleTestHelper().getRoleByName(OBSERVER), null);
         var updateTicket = itHelper.getTicketFromUser(currentUser);
         var updateTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(updateTicket, false);
+        updateTicketDtoRequest.setExecutors(null);
+        updateTicketDtoRequest.setObservers(null);
         updateTicketDtoRequest.setTicketTypeId(itHelper.getTicketTypeWhichIsNeverUsedIntoInitialTickets().getId());
         var ticketDtoResponse = given().
                 when()
@@ -455,16 +456,14 @@ class TicketUpdateIT {
     //SettingTicketObserversBeforeCreateAndUpdateTicketBusinessHandler
     //SettingTicketTypeBeforeCreateAndUpdateTicketBusinessHandler
     @ParameterizedTest(name = "{index} User: {0}")
-    @MethodSource("getStreamUsersFromOuterGroupWithRoleAdminAndExecutorAndAuthor")
+    @MethodSource("getStreamAllUsersWithRoleAccountOwnerAdminExecutorFromInnerGroup")
     @Order(140)
-    void successUpdate_ticketTypeExecutorsObserversFromTicketSettingWhenCurrentUserFromOuterGroup(String userKey, User currentUser) {
-        var executors = itHelper.getUsersByGroupAndRole(currentUser.getGroup(), null,
-                itHelper.getRoleTestHelper().getRoleByName(EXECUTOR), null);
-        var observers = itHelper.getUsersByGroupAndRole(currentUser.getGroup(), null,
-                itHelper.getRoleTestHelper().getRoleByName(OBSERVER), null);
+    void successUpdate_ticketTypeExecutorsObserversFromRequestWhenCurrentUserFromInnerGroupWithRoleAccountOwnerAdminExecutor(String userKey, User currentUser) {
         var updateTicket = itHelper.getTicketFromUser(currentUser);
         var updateTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(updateTicket, false);
         updateTicketDtoRequest.setTicketTypeId(itHelper.getTicketTypeWhichIsNeverUsedIntoInitialTickets().getId());
+        updateTicketDtoRequest.setExecutors(null);
+        updateTicketDtoRequest.setObservers(null);
         var ticketDtoResponse = given().
                 when()
                 .headers(
@@ -478,26 +477,9 @@ class TicketUpdateIT {
                 .log().body()
                 .statusCode(HttpStatus.OK.value())
                 .extract().response().as(TicketDtoResponse.class);
-        Assertions.assertEquals(updateTicket.getTicketType().getId(), ticketDtoResponse.getTicketType().getId());
-        Assertions.assertEquals(updateTicket.getObservers().size(), ticketDtoResponse.getObservers().size());
-        Assertions.assertEquals(updateTicket.getExecutors().size(), ticketDtoResponse.getExecutors().size());
-        var observersIdExpected = updateTicket.getObservers().stream()
-                .map(User::getId)
-                .collect(Collectors.toList());
-        var observersIdActual = ticketDtoResponse.getObservers().stream()
-                .map(BaseEntityDto::getId)
-                .collect(Collectors.toList());
-        assertThat(observersIdExpected)
-                .containsExactlyInAnyOrderElementsOf(observersIdActual);
-
-        var executorsIdExpected = updateTicket.getExecutors().stream()
-                .map(User::getId)
-                .collect(Collectors.toList());
-        var executorsIdActual = ticketDtoResponse.getExecutors().stream()
-                .map(BaseEntityDto::getId)
-                .collect(Collectors.toList());
-        assertThat(executorsIdExpected)
-                .containsExactlyInAnyOrderElementsOf(executorsIdActual);
+        Assertions.assertEquals(itHelper.getTicketTypeWhichIsNeverUsedIntoInitialTickets().getId(), ticketDtoResponse.getTicketType().getId());
+        Assertions.assertTrue(ticketDtoResponse.getObservers().isEmpty());
+        Assertions.assertTrue(ticketDtoResponse.getExecutors().isEmpty());
         itHelper.updateTicketAfterUpdate(ticketDtoResponse);
     }
 
@@ -505,7 +487,7 @@ class TicketUpdateIT {
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamAllUsersWithRoleAccountOwnerAdminExecutorAuthor")
     @Order(150)
-    void successUpdate_ticketStatusToFinishWhenCurrentUserWithRoleAccountOwnerAdminExecutorAuthorAndIsFinishedTrue(String userKey, User currentUser) {
+    void successUpdate_setTicketStatusForCloseWhenCurrentUserWithRoleAccountOwnerAdminExecutorAuthorPassedIsFinishedAsTrue(String userKey, User currentUser) {
         var ticketSettings = itHelper.getTicketSettingForUser(currentUser);
         var updateTicket = itHelper.getTicketFromUser(currentUser);
         var updateTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(updateTicket, false);
@@ -532,11 +514,10 @@ class TicketUpdateIT {
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamAllUsersWithRoleAccountOwnerAdminExecutorAuthor")
     @Order(170)
-    void successUpdate_ticketStatusFromRequestWhenCurrentUserWithRoleAccountOwnerAdminExecutorAuthor(String userKey, User currentUser) {
-        var ticketSettings = itHelper.getTicketSettingForUser(currentUser);
+    void successUpdate_setTicketStatusFromDataBaseWhenCurrentUserWithRoleAccountOwnerAdminExecutorAuthorPassedTicketStatusAsNull(String userKey, User currentUser) {
         var updateTicket = itHelper.getTicketFromUser(currentUser);
         var updateTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(updateTicket, false);
-        updateTicketDtoRequest.setTicketStatusId(ticketSettings.getTicketStatusForCancel().getId());
+        updateTicketDtoRequest.setTicketStatusId(null);
         var ticketDtoResponse = given().
                 when()
                 .headers(
@@ -550,7 +531,32 @@ class TicketUpdateIT {
                 .log().body()
                 .statusCode(HttpStatus.OK.value())
                 .extract().response().as(TicketDtoResponse.class);
-        Assertions.assertEquals(ticketSettings.getTicketStatusForCancel().getId(), ticketDtoResponse.getTicketStatus().getId());
+        Assertions.assertEquals(updateTicket.getTicketStatus().getId(), ticketDtoResponse.getTicketStatus().getId());
+        itHelper.updateTicketAfterUpdate(ticketDtoResponse);
+    }
+
+    //SettingTicketStatusBeforeCreateAndUpdateTicketBusinessHandler
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamAllUsersWithRoleAccountOwnerAdminExecutorAuthor")
+    @Order(180)
+    void successUpdate_setTicketStatusFromRequestWhenCurrentUserWithRoleAccountOwnerAdminExecutorAuthorPassedTicketStatus(String userKey, User currentUser) {
+        var updateTicket = itHelper.getTicketFromUser(currentUser);
+        var updateTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(updateTicket, false);
+        updateTicketDtoRequest.setTicketStatusId(itHelper.getTicketStatuses().get(IS_CANCELED_PREDEFINED).getId());
+        var ticketDtoResponse = given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(updateTicketDtoRequest)
+                .put(TICKET)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.OK.value())
+                .extract().response().as(TicketDtoResponse.class);
+        Assertions.assertEquals(itHelper.getTicketStatuses().get(IS_CANCELED_PREDEFINED).getId(), ticketDtoResponse.getTicketStatus().getId());
         itHelper.updateTicketAfterUpdate(ticketDtoResponse);
     }
 
@@ -573,6 +579,13 @@ class TicketUpdateIT {
                 List.of(EXECUTOR, ADMIN, ACCOUNT_OWNER)
         );
         return itHelper.getStreamUsers(roles, null);
+    }
+
+    private static Stream<Arguments> getStreamAllUsersWithRoleAccountOwnerAdminExecutorFromInnerGroup() {
+        var roles = itHelper.getRoleTestHelper().getRolesByNames(
+                List.of(EXECUTOR, ADMIN, ACCOUNT_OWNER)
+        );
+        return itHelper.getStreamUsers(roles, true);
     }
 
     private static Stream<Arguments> getStreamUsersWithRoleObserver() {
