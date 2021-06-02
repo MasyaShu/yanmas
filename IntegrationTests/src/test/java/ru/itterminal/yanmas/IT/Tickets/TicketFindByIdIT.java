@@ -19,7 +19,6 @@ import ru.itterminal.yanmas.commons.exception.error.ApiError;
 import ru.itterminal.yanmas.commons.model.dto.BaseEntityDto;
 import ru.itterminal.yanmas.security.jwt.JwtProvider;
 import ru.itterminal.yanmas.tickets.model.dto.TicketDtoResponse;
-import ru.itterminal.yanmas.tickets.model.test.TicketSettingTestHelper;
 
 import java.util.List;
 import java.util.UUID;
@@ -31,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static ru.itterminal.yanmas.IT.util.ITHelper.*;
 
-@SuppressWarnings({"unused"})
+@SuppressWarnings("unused")
 @DataJpaTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -40,15 +39,10 @@ import static ru.itterminal.yanmas.IT.util.ITHelper.*;
 @TestPropertySource(properties = {"jwt.token.secret=ksedtob", "jwt.token.expired=8640000", "jwt.token.prefix=Bearer"})
 class TicketFindByIdIT {
 
-    public static final String ACCOUNT_GROUP_AUTHOR_IS_OCCUPIED = "Account, Group, Author is occupied";
-    public static final String ACCOUNT_GROUP_AUTHOR = "Account, Group, Author";
-    public static final String ADMIN_INNER_GROUP_1 = "adminInnerGroup_1";
-
     @Autowired
     private UserRepository userRepository;
 
     private static final ITHelper itHelper = new ITHelper();
-    private final TicketSettingTestHelper ticketSettingTestHelper = new TicketSettingTestHelper();
 
     @BeforeAll
     void beforeAll() {

@@ -12,7 +12,7 @@ import ru.itterminal.yanmas.tickets.model.Ticket;
 
 import java.util.List;
 
-import static ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter.TypeComparisonForListOfBaseEntityFilter.CONTAINS_ALL_OF_LIST;
+import static ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter.TypeComparisonForListOfBaseEntityFilter.CONTAINS_ANY_IN_LIST;
 
 @Component
 @RequiredArgsConstructor
@@ -27,7 +27,7 @@ public class AddFilterForTicketByObserverIdIfCurrentUserHasRoleObserverSpec impl
         var nameOfRoleOfCurrentUser = currentUser.getRole().getName();
         if (nameOfRoleOfCurrentUser.equals(Roles.OBSERVER.toString())) {
             var filterByListOfObservers = ListOfBaseEntityFilter.builder()
-                    .typeComparison(CONTAINS_ALL_OF_LIST.toString())
+                    .typeComparison(CONTAINS_ANY_IN_LIST.toString())
                     .listOfIdEntities(List.of(currentUser.getId()))
                     .build();
             Specification<Ticket> additionConditionByObserversOfTicket =
