@@ -41,7 +41,6 @@ public class BaseEntityDto {
     @Size(max = 128, groups = {Update.class, Create.class})
     private String outId;
 
-    @Size(max = 256, groups = {Update.class, Create.class})
     @Null(groups = {Update.class, Create.class})
     private String displayName;
 

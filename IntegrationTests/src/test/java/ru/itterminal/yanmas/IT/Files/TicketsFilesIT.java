@@ -61,7 +61,7 @@ class TicketsFilesIT {
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     private final Map<User, byte[]> initialFilesData = new HashMap<>();
     private final TicketTestHelper ticketTestHelper = new TicketTestHelper();
-    private final Map<User, TicketDtoResponse> updatedTicket = new HashMap<>();
+    private final Map<User, TicketDtoResponse> createdTickets = new HashMap<>();
 
     byte[] biggestFileData = new byte[27000000];
 
@@ -309,7 +309,7 @@ class TicketsFilesIT {
                 currentUser.getAccount().getId()
         ).get();
         assertEquals(updatedFileAfterCreateTicket.getEntityId(), createdTicket.getId());
-        updatedTicket.put(currentUser, createdTicket);
+        createdTickets.put(currentUser, createdTicket);
     }
 
     @SuppressWarnings({"unused", "OptionalGetWithoutIsPresent"})
@@ -317,9 +317,10 @@ class TicketsFilesIT {
     @MethodSource("getStreamAllUsersWithRolesAccountOwnerAdminExecutorAuthor")
     @Order(100)
     void SuccessUpdateTicketWithFileAndAfterCheckThatFileHasNotChanged(String userKey, User currentUser) {
-        var ticketDtoResponseCreatedByCurrentUser = updatedTicket.get(currentUser);
+        var ticketDtoResponseCreatedByCurrentUser = createdTickets.get(currentUser);
+        var fileCreatedByCurrentUser = initialFiles.get(currentUser);
         var fileBeforeUpdateTicket = fileRepository.findByIdAndAccountId(
-                ticketDtoResponseCreatedByCurrentUser.getId(),
+                fileCreatedByCurrentUser.getId(),
                 currentUser.getAccount().getId()
         ).get();
         var ticketForUpdate = ticketRepository.findByIdAndAccountId(
@@ -339,7 +340,7 @@ class TicketsFilesIT {
                 .put(TICKET)
                 .then()
                 .log().body()
-                .statusCode(HttpStatus.CREATED.value())
+                .statusCode(HttpStatus.OK.value())
                 .extract().response().as(TicketDtoResponse.class);
         assertThat(ticketDtoResponseCreatedByCurrentUser).usingRecursiveComparison()
                 .ignoringFields("version", "subject").isEqualTo(updatedTicketDtoResponse);

@@ -1,5 +1,15 @@
 package ru.itterminal.yanmas.tickets.model.test;
 
+import static ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
+import static ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter.TypeComparisonForListOfBaseEntityFilter.CONTAINS_ALL_OF_LIST;
+import static ru.itterminal.yanmas.commons.model.filter.NumberFilter.TypeComparisonForNumberFilter.IS_EQUAL_TO;
+import static ru.itterminal.yanmas.commons.model.filter.StringFilter.TypeComparisonForStringFilter.TEXT_EQUALS;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import ru.itterminal.yanmas.aau.model.Account;
 import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.model.test.AccountTestHelper;
@@ -9,21 +19,15 @@ import ru.itterminal.yanmas.aau.model.test.UserTestHelper;
 import ru.itterminal.yanmas.commons.model.BaseEntity;
 import ru.itterminal.yanmas.commons.model.EntityTestHelperImpl;
 import ru.itterminal.yanmas.commons.model.dto.BaseEntityDto;
-import ru.itterminal.yanmas.commons.model.filter.*;
+import ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter;
+import ru.itterminal.yanmas.commons.model.filter.BooleanFilter;
+import ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter;
+import ru.itterminal.yanmas.commons.model.filter.NumberFilter;
+import ru.itterminal.yanmas.commons.model.filter.StringFilter;
 import ru.itterminal.yanmas.tickets.model.Ticket;
 import ru.itterminal.yanmas.tickets.model.dto.TicketDtoRequest;
 import ru.itterminal.yanmas.tickets.model.dto.TicketDtoResponse;
 import ru.itterminal.yanmas.tickets.model.dto.TicketFilterDto;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import static ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
-import static ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter.TypeComparisonForListOfBaseEntityFilter.CONTAINS_ALL_OF_LIST;
-import static ru.itterminal.yanmas.commons.model.filter.NumberFilter.TypeComparisonForNumberFilter.IS_EQUAL_TO;
-import static ru.itterminal.yanmas.commons.model.filter.StringFilter.TypeComparisonForStringFilter.TEXT_EQUALS;
 
 public class TicketTestHelper extends EntityTestHelperImpl<Ticket, TicketDtoRequest, TicketDtoResponse> {
 
@@ -172,23 +176,25 @@ public class TicketTestHelper extends EntityTestHelperImpl<Ticket, TicketDtoRequ
                 .outId(entity.getOutId())
                 .deleted(entity.getDeleted())
                 .version(entity.getVersion())
-                .displayName(entity.getDisplayName())
+                .displayName(null)
                 .authorId(entity.getAuthor() == null
-                                ? null
-                                : entity.getAuthor().getId())
+                                  ? null
+                                  : entity.getAuthor().getId())
                 .subject(entity.getSubject())
                 .description(entity.getDescription())
                 .deadline(entity.getDeadline())
                 .isFinished(entity.getIsFinished())
                 .ticketTypeId(entity.getTicketType() == null
-                                ? null
-                                : entity.getTicketType().getId())
+                                      ? null
+                                      : entity.getTicketType().getId())
                 .ticketStatusId(entity.getTicketStatus() == null
-                                    ? null
-                                    : entity.getTicketStatus().getId())
+                                        ? null
+                                        : entity.getTicketStatus().getId())
                 .observers(observersIdList)
                 .executors(executorsIdList)
-                .files(filesIdList)
+                .files(isDtoForCreate
+                               ? filesIdList
+                               : null)
                 .priority(entity.getPriority())
                 .build();
     }
@@ -196,66 +202,66 @@ public class TicketTestHelper extends EntityTestHelperImpl<Ticket, TicketDtoRequ
     public TicketFilterDto convertTicketDtoResponseToTicketFilterDto(TicketDtoResponse ticket) {
         var filterDto = TicketFilterDto.builder()
                 .author(BaseEntityFilter.builder()
-                        .typeComparison(EXIST_IN.toString())
-                        .listOfIdEntities(List.of(ticket.getAuthor().getId()))
-                        .build())
+                                .typeComparison(EXIST_IN.toString())
+                                .listOfIdEntities(List.of(ticket.getAuthor().getId()))
+                                .build())
                 .group(BaseEntityFilter.builder()
-                        .typeComparison(EXIST_IN.toString())
-                        .listOfIdEntities(List.of(ticket.getGroup().getId()))
-                        .build())
+                               .typeComparison(EXIST_IN.toString())
+                               .listOfIdEntities(List.of(ticket.getGroup().getId()))
+                               .build())
                 .number(NumberFilter.builder()
-                        .typeComparison(IS_EQUAL_TO.toString())
-                        .valueOne(ticket.getNumber())
-                        .build())
+                                .typeComparison(IS_EQUAL_TO.toString())
+                                .valueOne(ticket.getNumber())
+                                .build())
                 .createdAt(NumberFilter.builder()
-                        .typeComparison(IS_EQUAL_TO.toString())
-                        .valueOne(ticket.getCreatedAt())
-                        .build())
+                                   .typeComparison(IS_EQUAL_TO.toString())
+                                   .valueOne(ticket.getCreatedAt())
+                                   .build())
                 .isFinished(BooleanFilter.builder()
-                        .value(ticket.getIsFinished())
-                        .build())
+                                    .value(ticket.getIsFinished())
+                                    .build())
                 .ticketType(BaseEntityFilter.builder()
-                        .typeComparison(EXIST_IN.toString())
-                        .listOfIdEntities(List.of(ticket.getTicketType().getId()))
-                        .build())
+                                    .typeComparison(EXIST_IN.toString())
+                                    .listOfIdEntities(List.of(ticket.getTicketType().getId()))
+                                    .build())
                 .ticketStatus(BaseEntityFilter.builder()
-                        .typeComparison(EXIST_IN.toString())
-                        .listOfIdEntities(List.of(ticket.getTicketStatus().getId()))
-                        .build())
+                                      .typeComparison(EXIST_IN.toString())
+                                      .listOfIdEntities(List.of(ticket.getTicketStatus().getId()))
+                                      .build())
                 .deleted(BooleanFilter.builder()
-                        .value(ticket.getDeleted())
-                        .build())
+                                 .value(ticket.getDeleted())
+                                 .build())
                 .build();
 
         if (ticket.getOutId() != null && !ticket.getOutId().isEmpty()) {
             filterDto.setOutId(StringFilter.builder()
-                    .value(ticket.getOutId())
-                    .typeComparison(TEXT_EQUALS.toString())
-                    .build());
+                                       .value(ticket.getOutId())
+                                       .typeComparison(TEXT_EQUALS.toString())
+                                       .build());
         }
         if (ticket.getSubject() != null && !ticket.getSubject().isEmpty()) {
             filterDto.setSubject(StringFilter.builder()
-                    .value(ticket.getSubject())
-                    .typeComparison(TEXT_EQUALS.toString())
-                    .build());
+                                         .value(ticket.getSubject())
+                                         .typeComparison(TEXT_EQUALS.toString())
+                                         .build());
         }
         if (ticket.getDescription() != null && !ticket.getDescription().isEmpty()) {
             filterDto.setDescription(StringFilter.builder()
-                    .value(ticket.getDescription())
-                    .typeComparison(TEXT_EQUALS.toString())
-                    .build());
+                                             .value(ticket.getDescription())
+                                             .typeComparison(TEXT_EQUALS.toString())
+                                             .build());
         }
         if (ticket.getDeadline() != null) {
             filterDto.setDeadline(NumberFilter.builder()
-                    .typeComparison(IS_EQUAL_TO.toString())
-                    .valueOne(ticket.getDeadline())
-                    .build());
+                                          .typeComparison(IS_EQUAL_TO.toString())
+                                          .valueOne(ticket.getDeadline())
+                                          .build());
         }
         if (ticket.getTicketTemplate() != null) {
             filterDto.setTicketTemplate(BaseEntityFilter.builder()
-                    .typeComparison(EXIST_IN.toString())
-                    .listOfIdEntities(List.of(ticket.getTicketTemplate().getId()))
-                    .build());
+                                                .typeComparison(EXIST_IN.toString())
+                                                .listOfIdEntities(List.of(ticket.getTicketTemplate().getId()))
+                                                .build());
         }
 
         if (ticket.getObservers() != null && !ticket.getObservers().isEmpty()) {
