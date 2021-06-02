@@ -574,40 +574,40 @@ public class ITHelper {
     }
 
     public void allowAllInitialUsersOnAllTicketTypes() {
-            var request = SettingsAccessToTicketTypesDtoRequest.builder()
-                    .id(settingsAccessToTicketTypesForAllowAndLimitAccess.getId())
-                    .groupTicketTypesId(settingsAccessToTicketTypesForAllowAndLimitAccess.getGroupTicketTypes().getId())
-                    .version(settingsAccessToTicketTypesForAllowAndLimitAccess.getVersion())
-                    .deleted(true)
-                    .displayName(settingsAccessToTicketTypesForAllowAndLimitAccess.getDisplayName())
-                    .build();
-            var settingsAccessToTicketTypesDtoResponse = given().
-                    when()
-                    .headers(
-                            "Authorization",
-                            "Bearer " + tokens.get(accountOwner.getEmail())
-                    )
-                    .contentType(APPLICATION_JSON)
-                    .body(request)
-                    .put(SETTING_ACCESS_TO_TICKET_TYPES)
-                    .then()
-                    .log().body()
-                    .extract().response().as(SettingsAccessToTicketTypesDtoResponse.class);
+        var request = SettingsAccessToTicketTypesDtoRequest.builder()
+                .id(settingsAccessToTicketTypesForAllowAndLimitAccess.getId())
+                .groupTicketTypesId(settingsAccessToTicketTypesForAllowAndLimitAccess.getGroupTicketTypes().getId())
+                .version(settingsAccessToTicketTypesForAllowAndLimitAccess.getVersion())
+                .deleted(true)
+                .displayName(settingsAccessToTicketTypesForAllowAndLimitAccess.getDisplayName())
+                .build();
+        var settingsAccessToTicketTypesDtoResponse = given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + tokens.get(accountOwner.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(request)
+                .put(SETTING_ACCESS_TO_TICKET_TYPES)
+                .then()
+                .log().body()
+                .extract().response().as(SettingsAccessToTicketTypesDtoResponse.class);
         settingsAccessToTicketTypesForAllowAndLimitAccess.setVersion(settingsAccessToTicketTypesDtoResponse.getVersion());
         settingsAccessToTicketTypesForAllowAndLimitAccess.setDeleted(true);
     }
 
     public TicketSetting getTicketSettingForUser(User user) {
-       var listTicketSettings = ticketSettings.values().stream()
+        var listTicketSettings = ticketSettings.values().stream()
                 .filter(tt -> tt.getAuthor() != null && tt.getAuthor().equals(user))
                 .collect(Collectors.toList());
-       if (listTicketSettings.isEmpty()) {
-           listTicketSettings = ticketSettings.values().stream()
-                   .filter(tt -> tt.getGroup() != null &&
-                           tt.getAuthor() == null &&
-                           tt.getGroup().equals(user.getGroup()))
-                   .collect(Collectors.toList());
-       }
+        if (listTicketSettings.isEmpty()) {
+            listTicketSettings = ticketSettings.values().stream()
+                    .filter(tt -> tt.getGroup() != null &&
+                            tt.getAuthor() == null &&
+                            tt.getGroup().equals(user.getGroup()))
+                    .collect(Collectors.toList());
+        }
         if (listTicketSettings.isEmpty()) {
             listTicketSettings = ticketSettings.values().stream()
                     .filter(tt -> tt.getAccount() != null &&
@@ -1019,9 +1019,25 @@ public class ITHelper {
         return new ArrayList<>(getUser(roleTestHelper.getPredefinedValidEntityList(), null).values());
     }
 
-    public  List<User> getUsersByGroupAndRole(Group group, Group excludeGroup, Role role, Role excludeRole) {
+    public Ticket getTicketFromUser(User user) {
+        var ticketsUser = tickets.entrySet().stream()
+                .filter(entry -> user.getId().equals(entry.getValue().getAuthor().getId()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        var ticketDtoResponse = new ArrayList<>(ticketsUser.values()).get(0);
+        return modelMapper.map(ticketDtoResponse, Ticket.class);
+    }
+
+    public void updateTicketAfterUpdate(TicketDtoResponse ticketDtoResponse) {
+        for (Map.Entry<String, TicketDtoResponse> entry : tickets.entrySet()) {
+            if (entry.getValue().getId().equals(ticketDtoResponse.getId())) {
+                tickets.put(entry.getKey(), ticketDtoResponse);
+            }
+        }
+    }
+
+    public List<User> getUsersByGroupAndRole(Group group, Group excludeGroup, Role role, Role excludeRole) {
         var allUsers = getUser(roleTestHelper.getPredefinedValidEntityList(), null);
-        var filterUsers =  allUsers.entrySet().stream()
+        var filterUsers = allUsers.entrySet().stream()
                 .filter(entry -> group == null || group.equals(entry.getValue().getGroup()))
                 .filter(entry -> excludeGroup == null || !excludeGroup.equals(entry.getValue().getGroup()))
                 .filter(entry -> role == null || role.equals(entry.getValue().getRole()))

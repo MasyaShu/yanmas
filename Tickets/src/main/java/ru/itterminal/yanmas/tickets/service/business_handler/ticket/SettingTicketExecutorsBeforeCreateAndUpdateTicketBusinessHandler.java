@@ -36,7 +36,8 @@ public class SettingTicketExecutorsBeforeCreateAndUpdateTicketBusinessHandler im
         if (ticket.getExecutors() == null || !isCurrentUserFromInnerGroup
                 || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
             ticket.setExecutors(new ArrayList<>(ticketSetting.getExecutors()));
-        } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
+        } else if (ticket.getExecutors() != null &&
+                weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
             var listExecutorsId = ticket.getExecutors().stream()
                     .map(BaseEntity::getId)
                     .collect(Collectors.toList());
@@ -52,7 +53,8 @@ public class SettingTicketExecutorsBeforeCreateAndUpdateTicketBusinessHandler im
         var weightOfRoleOfCurrentUser = currentUser.getRole().getWeight();
         if (!isCurrentUserFromInnerGroup || weightOfRoleOfCurrentUser == Roles.AUTHOR.getWeight()) {
             ticket.setExecutors(ticketFromDatabase.getExecutors());
-        } else if (weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
+        } else if (ticket.getExecutors() != null &&
+                weightOfRoleOfCurrentUser >= Roles.EXECUTOR.getWeight()) {
             var listExecutorsId = ticket.getExecutors().stream()
                     .map(BaseEntity::getId)
                     .collect(Collectors.toList());
