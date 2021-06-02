@@ -1,5 +1,15 @@
 package ru.itterminal.yanmas.tickets.model.test;
 
+import static ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter.TypeComparisonForBaseEntityFilter.EXIST_IN;
+import static ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter.TypeComparisonForListOfBaseEntityFilter.CONTAINS_ALL_OF_LIST;
+import static ru.itterminal.yanmas.commons.model.filter.NumberFilter.TypeComparisonForNumberFilter.IS_EQUAL_TO;
+import static ru.itterminal.yanmas.commons.model.filter.StringFilter.TypeComparisonForStringFilter.TEXT_EQUALS;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import ru.itterminal.yanmas.aau.model.Account;
 import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.model.test.AccountTestHelper;
