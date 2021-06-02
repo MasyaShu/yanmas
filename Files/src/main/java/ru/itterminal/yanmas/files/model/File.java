@@ -56,6 +56,8 @@ public class File extends BaseEntity {
     @PrePersist
     protected void onCreate() {
         createdAt = System.currentTimeMillis();
+        setDeleted(false);
+        isUploaded = false;
     }
 
     @Override

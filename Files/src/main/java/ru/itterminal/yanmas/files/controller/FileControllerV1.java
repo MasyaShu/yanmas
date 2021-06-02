@@ -47,7 +47,6 @@ public class FileControllerV1 extends BaseControllerImpl<
     }
 
     @PostMapping("/{fileId}/data")
-    @ResponseStatus(value = HttpStatus.CREATED)
     public ResponseEntity<Boolean> putFileData(@PathVariable("fileId") UUID fileId,
                                                @RequestParam("file") MultipartFile file
     ) throws IOException {

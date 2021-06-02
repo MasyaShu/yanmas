@@ -111,6 +111,8 @@ public class ITHelper {
     public static final String TICKET_TEMPLATE = "ticket/template";
     public static final String TICKET_TYPE = "ticket/type";
     public static final String TICKET = "ticket";
+    public static final String FILE = "file";
+    public static final String FILE_DATA = "file/{fileId}/data";
     public static final String TICKET_TEMPLATE_BY_ID = "ticket/template/{id}";
     public static final String TICKET_BY_ID = "ticket/{id}";
     public static final String TICKET_SETTING = "ticket/setting-initial";
@@ -120,6 +122,7 @@ public class ITHelper {
     public static final String TICKET_SETTING_BY_AUTHOR = "ticket/setting-initial/by-author/{authorId}";
     public static final String AUTHOR_ID = "authorId";
     public static final String APPLICATION_JSON = "application/json";
+    public static final String MULTIPART = "multipart/byteranges";
     public static final String REQUEST_PASSWORD_RESET = "auth/request-password-reset";
     public static final String NOT_EXIST_EMAIL = "notExisEmail@gmail.com";
     public static final String NOT_FOUND_USER_BY_EMAIL = "Not found user by email: ";
