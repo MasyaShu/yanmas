@@ -166,11 +166,18 @@ create TABLE IF NOT EXISTS ticket_events
     ticket_id                uuid   NOT NULL,
     comment                  text,
     auto_comment             text,
-    is_comment_for_executors bool            DEFAULT 'false',
     created_at               bigint NOT NULL,
     created_by_id            uuid   NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (account_id) REFERENCES accounts (id)
+);
+
+create TABLE IF NOT EXISTS ticket_event_recipients
+(
+    ticket_event_id   uuid NOT NULL,
+    recipient_id uuid NOT NULL,
+    FOREIGN KEY (ticket_event_id) REFERENCES ticket_events (id),
+    FOREIGN KEY (recipient_id) REFERENCES users (id)
 );
 
 create TABLE IF NOT EXISTS group_ticket_types

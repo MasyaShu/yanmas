@@ -37,7 +37,6 @@ public class TicketEventTestHelper extends EntityTestHelperImpl<TicketEvent, Tic
                 .autoComment(fakerRU.lorem().paragraph())
                 .createdBy(createdBy)
                 .createdAt(System.currentTimeMillis())
-                .isCommentForExecutors(false)
                 .build();
         setRandomValidPropertiesOfBaseEntity(ticketEvent);
         return ticketEvent;

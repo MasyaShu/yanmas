@@ -35,9 +35,6 @@ public class TicketEvent extends BaseEntity {
     @Column(name = "auto_comment")
     private String autoComment;
 
-    @Column(name = "is_comment_for_executors")
-    private Boolean isCommentForExecutors;
-
     @Column(name = "created_at", nullable = false, updatable = false)
     private Long createdAt;
 
@@ -46,9 +43,17 @@ public class TicketEvent extends BaseEntity {
     private User createdBy;
 
     @SuppressWarnings("JpaDataSourceORMInspection")
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "entity_id")
     private List<File> files;
+
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "ticket_event_recipients",
+            joinColumns = @JoinColumn(name = "ticket_event_id"),
+            inverseJoinColumns = @JoinColumn(name = "recipient_id")
+    )
+    private List<User> recipients;
 
     @Override
     public void generateDisplayName() {
