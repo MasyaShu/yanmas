@@ -17,7 +17,6 @@ import ru.itterminal.yanmas.tickets.service.impl.TicketEventServiceImpl;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
-import java.util.UUID;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @Slf4j
@@ -39,11 +38,6 @@ public class TicketEventControllerV1 extends BaseControllerImpl<
     public ResponseEntity<TicketEventDtoResponse>
     create(@Validated(Create.class) @RequestBody TicketEventDtoRequest request) {
         return create(request, entityClazz, responseClazz);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<TicketEventDtoResponse> getById(@PathVariable UUID id) {
-        return getById(id, responseClazz);
     }
 
     @GetMapping()
