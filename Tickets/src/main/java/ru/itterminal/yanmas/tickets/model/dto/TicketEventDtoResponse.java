@@ -16,9 +16,11 @@ import java.util.UUID;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class TicketEventDtoResponse extends BaseEntityDto {
+    private Long createdAt;
+    private BaseEntityDto createdBy;
     private UUID ticketId;
     private String comment;
     private String autoComment;
-    private Boolean isCommentForExecutor;
     private List<UUID> files;
+    private List<BaseEntityDto> recipients;
 }
