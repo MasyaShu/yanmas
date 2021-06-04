@@ -13,16 +13,18 @@ import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.addVa
 
 @Component
 @RequiredArgsConstructor
-public class CheckIsEmptyFieldsTicketInEventValidator implements EntityValidator<TicketEvent> {
-    public static final String MUST_NOT_CREATE_EVENT_IF_FIELDS_TICKET_ARE_EMPTY =
-            "Mustn't create event if fields 'ticket' are empty";
+public class MustNotCreateTicketEventIfCommentAndAutoCommentAndFilesAreEmptyValidator implements EntityValidator<TicketEvent> {
+    public static final String MUST_NOT_CREATE_EVENT_IF_FIELDS_COMMENT_AUTO_COMMENT_AND_FILES_ARE_EMPTY =
+            "Mustn't create event if fields 'comment', 'autoComment' and 'files' are empty";
 
     @Override
     public void logicalValidationBeforeCreate(TicketEvent entity, Map<String, List<ValidationError>> errors) {
-        if (entity.getTicket() == null) {
+        if ((entity.getComment() == null || entity.getComment().isEmpty())
+                && (entity.getAutoComment() == null || entity.getAutoComment().isEmpty())
+                && (entity.getFiles() == null || entity.getFiles().isEmpty())) {
             addValidationErrorIntoErrors(
                     EMPTY_FIELDS,
-                    MUST_NOT_CREATE_EVENT_IF_FIELDS_TICKET_ARE_EMPTY,
+                    MUST_NOT_CREATE_EVENT_IF_FIELDS_COMMENT_AUTO_COMMENT_AND_FILES_ARE_EMPTY,
                     errors
             );
         }

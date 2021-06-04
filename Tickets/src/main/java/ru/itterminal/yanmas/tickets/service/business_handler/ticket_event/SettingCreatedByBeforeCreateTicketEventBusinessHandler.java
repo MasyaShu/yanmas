@@ -6,10 +6,11 @@ import ru.itterminal.yanmas.aau.service.business_handler.EntityBusinessHandler;
 import ru.itterminal.yanmas.tickets.model.TicketEvent;
 
 @Component
-public class TicketEventBusinessHandler implements EntityBusinessHandler<TicketEvent> {
+public class SettingCreatedByBeforeCreateTicketEventBusinessHandler implements EntityBusinessHandler<TicketEvent> {
 
     @Override
     public TicketEvent beforeCreate(TicketEvent entity, User currentUser) {
-        return  entity;
+        entity.setCreatedBy(currentUser);
+        return entity;
     }
 }

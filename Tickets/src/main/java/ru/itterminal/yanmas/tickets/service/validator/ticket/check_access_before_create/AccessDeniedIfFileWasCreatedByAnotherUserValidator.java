@@ -8,12 +8,14 @@ import ru.itterminal.yanmas.aau.service.validator.EntityValidator;
 import ru.itterminal.yanmas.files.model.File;
 import ru.itterminal.yanmas.tickets.model.Ticket;
 
+import static java.lang.String.format;
+
 @Component
 @RequiredArgsConstructor
 public class AccessDeniedIfFileWasCreatedByAnotherUserValidator implements EntityValidator<Ticket> {
     public static final String
             ACCESS_DENIED_BECAUSE_FILE_WAS_CREATED_BY_ANOTHER_USER_YOU_CANNOT_USE_IT_FOR_CREATE_THIS_TICKET =
-            "Access denied, because file was created by another user, you cannot use it for create this ticket";
+            "Access denied, because file %s was created by another user, you cannot use it for create this ticket";
 
     @Override
     public void checkAccessBeforeCreate(Ticket entity, User currentUser) {
@@ -21,7 +23,9 @@ public class AccessDeniedIfFileWasCreatedByAnotherUserValidator implements Entit
             for (File file : entity.getFiles()) {
                 if (!file.getAuthorId().equals(currentUser.getId())) {
                     throw new AccessDeniedException(
-                            ACCESS_DENIED_BECAUSE_FILE_WAS_CREATED_BY_ANOTHER_USER_YOU_CANNOT_USE_IT_FOR_CREATE_THIS_TICKET);
+                            format(ACCESS_DENIED_BECAUSE_FILE_WAS_CREATED_BY_ANOTHER_USER_YOU_CANNOT_USE_IT_FOR_CREATE_THIS_TICKET,
+                                    file.getFileName())
+                    );
                 }
             }
         }

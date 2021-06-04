@@ -55,8 +55,14 @@ public class TicketEvent extends BaseEntity {
     )
     private List<User> recipients;
 
+    @PrePersist
+    protected void onCreate() {
+        createdAt = System.currentTimeMillis();
+        setDeleted(false);
+    }
+
     @Override
     public void generateDisplayName() {
-        setDisplayName("Event created by " + createdBy.getName());
+        setDisplayName(null);
     }
 }

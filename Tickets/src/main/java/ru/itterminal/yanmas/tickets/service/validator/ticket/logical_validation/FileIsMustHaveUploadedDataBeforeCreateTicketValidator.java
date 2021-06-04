@@ -9,12 +9,12 @@ import ru.itterminal.yanmas.tickets.model.Ticket;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.String.format;
 import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.addValidationErrorIntoErrors;
 
 @Component
 public class FileIsMustHaveUploadedDataBeforeCreateTicketValidator implements EntityValidator<Ticket> {
-    public static final String FILE_IS_INVALID = "File is invalid";
-    public static final String FILE_IS_NOT_YET_UPLOADED = "File is not yet uploaded";
+    public static final String FILE_IS_NOT_YET_UPLOADED = "File %s is not yet uploaded";
 
     @Override
     public void logicalValidationBeforeCreate(Ticket entity, Map<String, List<ValidationError>> errors) {
@@ -23,7 +23,7 @@ public class FileIsMustHaveUploadedDataBeforeCreateTicketValidator implements En
                 if (Boolean.FALSE.equals(file.getIsUploaded())) {
                     addValidationErrorIntoErrors(
                             FILE_IS_INVALID,
-                            FILE_IS_NOT_YET_UPLOADED,
+                            format(FILE_IS_NOT_YET_UPLOADED, file.getFileName()),
                             errors
                     );
                 }

@@ -23,6 +23,7 @@ public interface EntityValidator<E extends BaseEntity> {
     String THIS_NAME = "This name";
     String EMPTY_TICKET = "Empty ticket";
     String EMPTY_FIELDS = "Empty fields";
+    String FILE_IS_INVALID = "File is invalid";
 
     default void logicalValidationBeforeCreate(E entity, Map<String, List<ValidationError>> errors) {}
 
