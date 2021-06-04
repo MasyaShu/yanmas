@@ -1,36 +1,8 @@
 package ru.itterminal.yanmas.IT.Files;
 
-import static io.restassured.RestAssured.given;
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static ru.itterminal.yanmas.IT.util.ITHelper.ACCOUNT_OWNER;
-import static ru.itterminal.yanmas.IT.util.ITHelper.ADMIN;
-import static ru.itterminal.yanmas.IT.util.ITHelper.APPLICATION_JSON;
-import static ru.itterminal.yanmas.IT.util.ITHelper.AUTHOR;
-import static ru.itterminal.yanmas.IT.util.ITHelper.EXECUTOR;
-import static ru.itterminal.yanmas.IT.util.ITHelper.FILE;
-import static ru.itterminal.yanmas.IT.util.ITHelper.FILE_DATA;
-import static ru.itterminal.yanmas.IT.util.ITHelper.MULTIPART;
-import static ru.itterminal.yanmas.IT.util.ITHelper.OBSERVER;
-import static ru.itterminal.yanmas.IT.util.ITHelper.TICKET;
-import static ru.itterminal.yanmas.tickets.service.validator.ticket.logical_validation.FileIsMustHaveUploadedDataBeforeCreateTicketValidator.FILE_IS_NOT_YET_UPLOADED;
-import static ru.itterminal.yanmas.tickets.service.validator.ticket.logical_validation.FileMustHaveEmptyLinkToEntityBeforeCreateTicketValidator.FILE_ALREADY_HAS_A_LINK_TO_ANOTHER_ENTITY;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.stream.Stream;
-
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestMethodOrder;
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -40,9 +12,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import ru.itterminal.yanmas.IT.util.ITHelper;
 import ru.itterminal.yanmas.IT.util.ITTestConfig;
 import ru.itterminal.yanmas.aau.model.User;
@@ -55,6 +24,24 @@ import ru.itterminal.yanmas.tickets.model.Ticket;
 import ru.itterminal.yanmas.tickets.model.dto.TicketDtoResponse;
 import ru.itterminal.yanmas.tickets.model.test.TicketTestHelper;
 import ru.itterminal.yanmas.tickets.repository.TicketRepository;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.stream.Stream;
+
+import static io.restassured.RestAssured.given;
+import static java.lang.String.format;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.*;
+import static ru.itterminal.yanmas.IT.util.ITHelper.*;
+import static ru.itterminal.yanmas.aau.service.validator.EntityValidator.FILE_IS_INVALID;
+import static ru.itterminal.yanmas.tickets.service.validator.ticket.check_access_before_create.AccessDeniedIfFileWasCreatedByAnotherUserValidator.ACCESS_DENIED_BECAUSE_FILE_WAS_CREATED_BY_ANOTHER_USER_YOU_CANNOT_USE_IT_FOR_CREATE_THIS_TICKET;
+import static ru.itterminal.yanmas.tickets.service.validator.ticket.logical_validation.FileIsMustHaveUploadedDataBeforeCreateTicketValidator.FILE_IS_NOT_YET_UPLOADED;
+import static ru.itterminal.yanmas.tickets.service.validator.ticket.logical_validation.FileMustHaveEmptyLinkToEntityBeforeCreateTicketValidator.FILE_ALREADY_HAS_A_LINK_TO_ANOTHER_ENTITY;
 
 @DataJpaTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -297,11 +284,11 @@ class TicketsFilesIT {
                 .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
-    @SuppressWarnings({"unused", "OptionalGetWithoutIsPresent"})
+    @SuppressWarnings({"unused"})
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamAllUsersWithRolesAdminExecutorAuthor")
     @Order(90)
-    void LogicalErrorBeforeCreateTicketWithFileBecauseFileWasCreatedUserWhichIsNotEqualCurrentUser(String userKey, User currentUser) {
+    void accessDeniedBeforeCreateTicketWithFileBecauseFileWasCreatedUserWhichIsNotEqualCurrentUser(String userKey, User currentUser) {
         var fileCreatedByAccountOwner = initialFiles.get(itHelper.getAccountOwner());
         var newTicket = Ticket.builder()
                 .author(currentUser)
@@ -309,7 +296,8 @@ class TicketsFilesIT {
                 .build();
         var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
         newTicketDtoRequest.setFiles(List.of(fileCreatedByAccountOwner.getId()));
-        var apiError = given().
+        var expectedMessage = format(ACCESS_DENIED_BECAUSE_FILE_WAS_CREATED_BY_ANOTHER_USER_YOU_CANNOT_USE_IT_FOR_CREATE_THIS_TICKET, fileCreatedByAccountOwner.getFileName());
+        given().
                 when()
                 .headers(
                         "Authorization",
@@ -320,9 +308,9 @@ class TicketsFilesIT {
                 .post(TICKET)
                 .then()
                 .log().body()
-                .body(containsString("Access denied, because file was created by another user, you cannot use it for create this ticket"))
-                .statusCode(HttpStatus.FORBIDDEN.value())
-                .extract().response().as(ApiError.class);
+                .body("detail", equalTo(expectedMessage))
+                .statusCode(HttpStatus.FORBIDDEN.value());
+
     }
 
     @SuppressWarnings({"unused", "OptionalGetWithoutIsPresent"})
@@ -397,7 +385,7 @@ class TicketsFilesIT {
         assertThat(fileBeforeUpdateTicket).usingRecursiveComparison().isEqualTo(fileAfterUpdateTicket);
     }
 
-    @SuppressWarnings({"unused", "OptionalGetWithoutIsPresent"})
+    @SuppressWarnings({"unused"})
     @ParameterizedTest(name = "{index} User: {0}")
     @MethodSource("getStreamAllUsersWithRolesAccountOwnerAdminExecutorAuthor")
     @Order(120)
@@ -420,9 +408,10 @@ class TicketsFilesIT {
                 .post(TICKET)
                 .then()
                 .log().body()
-                .body(containsString(FILE_ALREADY_HAS_A_LINK_TO_ANOTHER_ENTITY))
                 .statusCode(HttpStatus.CONFLICT.value())
                 .extract().response().as(ApiError.class);
+        var expectedMessage = format(FILE_ALREADY_HAS_A_LINK_TO_ANOTHER_ENTITY, fileCreatedByCurrentUser.getFileName());
+        Assertions.assertEquals(expectedMessage, apiError.getErrors().get(FILE_IS_INVALID).get(0).getMessage());
     }
 
     @Test
@@ -451,7 +440,7 @@ class TicketsFilesIT {
                 .build();
         var newTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(newTicket, true);
         newTicketDtoRequest.setFiles(List.of(createdFileDto.getId()));
-        given().
+        var apiError = given().
                 when()
                 .headers(
                         "Authorization",
@@ -462,8 +451,13 @@ class TicketsFilesIT {
                 .post(TICKET)
                 .then()
                 .log().body()
-                .body(containsString(FILE_IS_NOT_YET_UPLOADED))
-                .statusCode(HttpStatus.CONFLICT.value());
+                //.body(containsString(ExpectedMessage))
+                .statusCode(HttpStatus.CONFLICT.value())
+                .extract().response().as(ApiError.class);
+        var expectedMessage = format(FILE_IS_NOT_YET_UPLOADED, createdFileDto.getFileName());
+        Assertions.assertEquals(expectedMessage, apiError.getErrors().get(FILE_IS_INVALID).get(0).getMessage());
+
+
     }
 
     @SuppressWarnings("unused")
