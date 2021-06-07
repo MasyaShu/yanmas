@@ -45,7 +45,6 @@ public class TicketEventControllerV1 extends BaseControllerImpl<
     getByFilter(@Valid @RequestBody TicketEventFilterDto filter,
                 @RequestParam(defaultValue = PAGE_DEFAULT_VALUE) @PositiveOrZero int page,
                 @RequestParam(defaultValue = SIZE_DEFAULT_VALUE) @Positive int size) {
-        jwtUserBuilder.throwAccessDeniedExceptionIfCurrentUserFromOuterGroup();
         return getByFilter(filter, page, size, entityClazz, responseClazz);
     }
 }
