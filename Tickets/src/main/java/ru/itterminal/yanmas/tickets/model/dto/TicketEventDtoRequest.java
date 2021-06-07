@@ -23,4 +23,6 @@ public class TicketEventDtoRequest extends BaseEntityDto {
     private String comment;
 
     private List<UUID> files;
+
+    private List<UUID> recipients;
 }

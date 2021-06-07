@@ -16,6 +16,7 @@ import ru.itterminal.yanmas.aau.model.test.RoleTestHelper;
 import ru.itterminal.yanmas.aau.model.test.UserTestHelper;
 import ru.itterminal.yanmas.aau.repository.UserRepository;
 import ru.itterminal.yanmas.commons.model.BaseEntity;
+import ru.itterminal.yanmas.commons.model.dto.BaseEntityDto;
 import ru.itterminal.yanmas.tickets.model.*;
 import ru.itterminal.yanmas.tickets.model.dto.*;
 import ru.itterminal.yanmas.tickets.model.test.GroupTicketTypesTestHelper;
@@ -39,9 +40,11 @@ public class ITHelper {
     public static final String INITIAL_TICKET_CREATED_BY = "InitialTicketCreatedBy_";
     public static final String TICKET_TYPE_WHICH_IS_NEVER_USED_INTO_INITIAL_TICKETS = "TicketTypeWhichIsNeverUsedIntoInitialTickets";
     public static final String GROUP_OF_TICKET_TYPES_WHICH_IS_NEVER_USED_INTO_INITIAL_TICKETS = "groupOfTicketTypesWhichIsNeverUsedIntoInitialTickets";
+    public static final String TICKET_EVENT = "ticket/event";
     private Account account;
     private User accountOwner;
     private Map<String, TicketDtoResponse> tickets = new HashMap<>();
+    private Map<String, TicketEventDtoResponse> ticketEvents = new HashMap<>();
     private Map<String, TicketStatus> ticketStatuses = new HashMap<>();
     private Map<String, TicketType> ticketTypes = new HashMap<>();
     private Map<String, GroupTicketTypes> groupTicketTypes = new HashMap<>();
@@ -426,6 +429,63 @@ public class ITHelper {
         ticketTypeWhichIsNeverUsedIntoInitialTickets = createdNewTicketType;
     }
 
+    public void createInitialTicketEvents() {
+        var allUsers = getUser(allRoles, null);
+        for (Map.Entry<String, TicketDtoResponse> entry : tickets.entrySet()) {
+            var usersIdOfTicket = getAllUserOfTicket(entry.getValue());
+            for (Map.Entry<String, User> user : allUsers.entrySet()) {
+                if (usersIdOfTicket.contains(user.getValue().getId())) {
+                    var newTicketEventDtoRequest = TicketEventDtoRequest.builder()
+                            .comment(faker.lorem().paragraph())
+                            .ticketId(entry.getValue().getId())
+                            .build();
+                    var ticketEventDtoResponse = given().
+                            when()
+                            .headers(
+                                    "Authorization",
+                                    "Bearer " + tokens.get(user.getValue().getEmail())
+                            )
+                            .contentType(APPLICATION_JSON)
+                            .body(newTicketEventDtoRequest)
+                            .post(TICKET_EVENT)
+                            .then()
+                            .log().body()
+                            .extract().response().as(TicketEventDtoResponse.class);
+                    ticketEvents.put("initialTicketEventForTicket_" + entry.getKey() + "_By_" + user.getKey(), ticketEventDtoResponse);
+
+                    var newTicketEventDtoRequestForMyself = TicketEventDtoRequest.builder()
+                            .comment(faker.lorem().paragraph())
+                            .ticketId(entry.getValue().getId())
+                            .recipients(List.of(user.getValue().getId()))
+                            .build();
+                    var ticketEventDtoResponseForMyself = given().
+                            when()
+                            .headers(
+                                    "Authorization",
+                                    "Bearer " + tokens.get(user.getValue().getEmail())
+                            )
+                            .contentType(APPLICATION_JSON)
+                            .body(newTicketEventDtoRequestForMyself)
+                            .post(TICKET_EVENT)
+                            .then()
+                            .log().body()
+                            .extract().response().as(TicketEventDtoResponse.class);
+                    ticketEvents.put("initialTicketEventForTicket_" + entry.getKey() + "_By_" + user.getKey() + "_ForMyself", ticketEventDtoResponseForMyself);
+                }
+            }
+        }
+    }
+
+    public List<UUID> getAllUserOfTicket(TicketDtoResponse ticket) {
+        var usersIdOfTicket = new ArrayList<>(List.of(ticket.getAuthor().getId()));
+        for (BaseEntityDto observer : ticket.getObservers()) {
+            usersIdOfTicket.add(observer.getId());
+        }
+        for (BaseEntityDto executor : ticket.getExecutors()) {
+            usersIdOfTicket.add(executor.getId());
+        }
+        return usersIdOfTicket;
+    }
 
     public void createInitialTickets() {
         var allUsersWithoutObservers = getUser(allRolesWithoutObserver, null);
