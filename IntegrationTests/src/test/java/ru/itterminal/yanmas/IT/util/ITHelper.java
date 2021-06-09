@@ -41,6 +41,7 @@ public class ITHelper {
     public static final String TICKET_TYPE_WHICH_IS_NEVER_USED_INTO_INITIAL_TICKETS = "TicketTypeWhichIsNeverUsedIntoInitialTickets";
     public static final String GROUP_OF_TICKET_TYPES_WHICH_IS_NEVER_USED_INTO_INITIAL_TICKETS = "groupOfTicketTypesWhichIsNeverUsedIntoInitialTickets";
     public static final String TICKET_EVENT = "ticket/event";
+    public static final String EVENT = "/event";
     private Account account;
     private User accountOwner;
     private Map<String, TicketDtoResponse> tickets = new HashMap<>();
@@ -447,7 +448,8 @@ public class ITHelper {
                             )
                             .contentType(APPLICATION_JSON)
                             .body(newTicketEventDtoRequest)
-                            .post(TICKET_EVENT)
+                            .pathParam(ID, entry.getValue().getId())
+                            .post(TICKET_BY_ID + EVENT)
                             .then()
                             .log().body()
                             .extract().response().as(TicketEventDtoResponse.class);
@@ -466,7 +468,8 @@ public class ITHelper {
                             )
                             .contentType(APPLICATION_JSON)
                             .body(newTicketEventDtoRequestForMyself)
-                            .post(TICKET_EVENT)
+                            .pathParam(ID, entry.getValue().getId())
+                            .post(TICKET_BY_ID + EVENT)
                             .then()
                             .log().body()
                             .extract().response().as(TicketEventDtoResponse.class);
@@ -474,6 +477,43 @@ public class ITHelper {
                 }
             }
         }
+    }
+
+    public List<TicketEventDtoResponse> getAvailableTicketEventsFromTicketForUser(User user, TicketDtoResponse ticket) {
+        var expectedListEvent = new ArrayList<TicketEventDtoResponse>();
+        var usersIdOfTicket = getAllUserOfTicket(ticket);
+        var ticketEventsFromTicket = getAllTicketEventsOfTicket(ticket);
+        var currentUserIsContainsTicket = usersIdOfTicket.contains(user.getId());
+        var currentUserExecutorOrAdminOrAccountOwner = user.getRole().getWeight() >= Roles.EXECUTOR.getWeight();
+        var currentUserWithInnerGroup = user.getGroup().getIsInner();
+        for (TicketEventDtoResponse ticketEvent : ticketEventsFromTicket) {
+            var recipientsIsEmpty = ticketEvent.getRecipients() == null || ticketEvent.getRecipients().isEmpty();
+            if (recipientsIsEmpty) {
+                if ((currentUserExecutorOrAdminOrAccountOwner && currentUserWithInnerGroup)
+                        || (currentUserExecutorOrAdminOrAccountOwner && user.getGroup().getId().equals(ticket.getGroup().getId()))
+                        || currentUserIsContainsTicket) {
+                    expectedListEvent.add(ticketEvent);
+                }
+            }
+            if (ticketEvent.getRecipients() != null) {
+                for (BaseEntityDto recipient : ticketEvent.getRecipients()) {
+                    if (recipient.getId().equals(user.getId())) {
+                        expectedListEvent.add(ticketEvent);
+                    }
+                }
+            }
+        }
+        return expectedListEvent;
+    }
+
+    public List<TicketEventDtoResponse> getAllTicketEventsOfTicket(TicketDtoResponse ticket) {
+        var listTicketEvents = new ArrayList<TicketEventDtoResponse>();
+        for (TicketEventDtoResponse ticketEvent : ticketEvents.values()) {
+            if (ticket.getId().equals(ticketEvent.getTicketId())) {
+                listTicketEvents.add(ticketEvent);
+            }
+        }
+        return listTicketEvents;
     }
 
     public List<UUID> getAllUserOfTicket(TicketDtoResponse ticket) {
@@ -1046,6 +1086,44 @@ public class ITHelper {
         var allUsers = getUser(roles, isInnerGroup);
         return allUsers.entrySet().stream()
                 .map(entry -> Arguments.of(entry.getKey(), entry.getValue()));
+    }
+
+    public Stream<Arguments> getStreamUsersAndTickets(List<Role> roles, Boolean isInnerGroup, Boolean isUserInTicket, Boolean isOwnGroup) {
+        var allUsers = getUser(roles, isInnerGroup);
+        List<Arguments> argumentsList = new ArrayList<>();
+        for (Map.Entry<String, TicketDtoResponse> ticket : tickets.entrySet()) {
+            for (Map.Entry<String, User> user : allUsers.entrySet()) {
+                if (isUserInTicket == null) {
+                    if(isOwnGroup == null) {
+                        argumentsList.add(Arguments.of(user.getKey(), user.getValue(),
+                                ticket.getKey(), ticket.getValue()));
+                    }
+                    if(Boolean.TRUE.equals(isOwnGroup)
+                            && ticket.getValue().getGroup().getId().equals(user.getValue().getGroup().getId())) {
+                        argumentsList.add(Arguments.of(user.getKey(), user.getValue(),
+                                ticket.getKey(), ticket.getValue()));
+                    }
+                    if(Boolean.FALSE.equals(isOwnGroup)
+                            && !ticket.getValue().getGroup().getId().equals(user.getValue().getGroup().getId())) {
+                        argumentsList.add(Arguments.of(user.getKey(), user.getValue(),
+                                ticket.getKey(), ticket.getValue()));
+                    }
+                } else {
+                    var userFromTicket = getAllUserOfTicket(ticket.getValue());
+                    if (Boolean.TRUE.equals(isUserInTicket)
+                            && userFromTicket.contains(user.getValue().getId())) {
+                        argumentsList.add(Arguments.of(user.getKey(), user.getValue(),
+                                ticket.getKey(), ticket.getValue()));
+                    }
+                    if (Boolean.FALSE.equals(isUserInTicket)
+                            && !userFromTicket.contains(user.getValue().getId())) {
+                        argumentsList.add(Arguments.of(user.getKey(), user.getValue(),
+                                ticket.getKey(), ticket.getValue()));
+                    }
+                }
+            }
+        }
+        return argumentsList.stream();
     }
 
     public Stream<Arguments> getStreamAllUsersFromGroups(List<Group> groups) {

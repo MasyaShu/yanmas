@@ -21,11 +21,11 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class TicketEvent extends BaseEntity {
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ticket_id")
     private Ticket ticket;
 
@@ -38,7 +38,7 @@ public class TicketEvent extends BaseEntity {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Long createdAt;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_id")
     private User createdBy;
 

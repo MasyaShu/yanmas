@@ -3,11 +3,13 @@ package ru.itterminal.yanmas.tickets.model.dto;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import ru.itterminal.yanmas.commons.model.dto.BaseFilterDto;
-import ru.itterminal.yanmas.commons.model.filter.*;
+import ru.itterminal.yanmas.commons.model.filter.BaseEntityFilter;
+import ru.itterminal.yanmas.commons.model.filter.ListOfBaseEntityFilter;
+import ru.itterminal.yanmas.commons.model.filter.NumberFilter;
+import ru.itterminal.yanmas.commons.model.filter.StringFilter;
 import ru.itterminal.yanmas.commons.model.validator.filter.ValidateFilter;
 import ru.itterminal.yanmas.commons.model.validator.sortfields.ValidateSortFields;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Getter
@@ -28,7 +30,6 @@ public class TicketEventFilterDto  extends BaseFilterDto {
     private NumberFilter createdAt;
 
     @ValidateFilter
-    @NotNull
     private BaseEntityFilter ticket;
 
     @ValidateFilter

@@ -138,8 +138,8 @@ public class ListOfBaseEntityFilterSpecificationsFactory {
             (String field, List<UUID> values) {
         return (root, query, criteriaBuilder) -> {
             query.distinct(true);
-            var executors = root.joinList(field);
-            return executors.get(ID).in(values);
+            var objectListJoin = root.joinList(field);
+            return objectListJoin.get(ID).in(values);
         };
     }
 
@@ -167,10 +167,10 @@ public class ListOfBaseEntityFilterSpecificationsFactory {
             Subquery<Long> subQuery = query.subquery(Long.class);
             Root<E> subRoot = subQuery.from(entityClass);
 
-            var executors = subRoot.joinList(field);
+            var objectListJoin = subRoot.joinList(field);
 
-            Predicate ticketExecutorsInListOfExecutorsPredicate = executors.get(ID).in(values);
-            Predicate ticketsIdIsEqualsPredicate = criteriaBuilder.equal(root.get(ID), subRoot.get(ID));
+            var ticketExecutorsInListOfExecutorsPredicate = objectListJoin.get(ID).in(values);
+            var ticketsIdIsEqualsPredicate = criteriaBuilder.equal(root.get(ID), subRoot.get(ID));
 
             subQuery.select(criteriaBuilder.count(subRoot.get(ID)));
             subQuery.where(ticketExecutorsInListOfExecutorsPredicate, ticketsIdIsEqualsPredicate);

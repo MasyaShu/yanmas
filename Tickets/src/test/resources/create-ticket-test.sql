@@ -158,3 +158,14 @@ VALUES ('b927e5af-0db3-4f55-8da0-a31d0f6421d0', '0223e51a-4bb2-44ee-bc8e-1f047a2
 -- ticket number 102
        ('e39a9ecb-ff7c-4c7f-94e2-4b121faffe28', '0223e51a-4bb2-44ee-bc8e-1f047a2145e7'),
        ('e39a9ecb-ff7c-4c7f-94e2-4b121faffe28', 'd592facb-e6ee-4801-8310-9c7708eb6e6c');
+
+INSERT INTO ticket_events(id, out_id, deleted, version, account_id, ticket_id, comment, auto_comment, created_at, created_by_id)
+VALUES ('bfbfbf87-a338-49e1-b606-7ba8c51f43a9', null, false, '0', 'cdfa6483-0769-4628-ba32-efd338a716de',
+        'b927e5af-0db3-4f55-8da0-a31d0f6421d0', 'coment 1', null, 1639144829000, 'cdfa6483-0769-4628-ba32-efd338a716de'),
+       ('5b667a9d-d4b2-41e8-8fd7-6167bb2d8cb2', null, false, '0', 'cdfa6483-0769-4628-ba32-efd338a716de',
+        'b927e5af-0db3-4f55-8da0-a31d0f6421d0', 'coment 1', null, 1639144829001, 'cdfa6483-0769-4628-ba32-efd338a716de'),
+       ('4d5af0cc-afc3-42b5-a1f6-cda6fe7ba198', null, false, '0', 'cdfa6483-0769-4628-ba32-efd338a716de',
+        'b927e5af-0db3-4f55-8da0-a31d0f6421d0', 'coment 1', null, 1639144829002, 'cdfa6483-0769-4628-ba32-efd338a716de');
+
+INSERT INTO ticket_event_recipients (ticket_event_id, recipient_id)
+VALUES ('bfbfbf87-a338-49e1-b606-7ba8c51f43a9', 'cdfa6483-0769-4628-ba32-efd338a716de');
