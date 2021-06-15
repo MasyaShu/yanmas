@@ -18,8 +18,8 @@ import static ru.itterminal.yanmas.commons.util.CommonMethodsForValidation.addVa
 @RequiredArgsConstructor
 public class MustNotCreateTicketEventIfRecipientsAreNonTicketTicketEventValidator implements EntityValidator<TicketEvent> {
     public static final String TICKET_EVENT_IS_INVALID = "Ticket event is invalid";
-    public static final String RECIPIENT_MUST_IS_NOT_IN_THE_TICKET =
-            "Recipient %s must is not in the ticket";
+    public static final String RECIPIENT_NOT_FOUND_IN_THE_TICKET =
+            "Recipient %s not found in the ticket";
 
     @Override
     public void logicalValidationBeforeCreate(TicketEvent entity, Map<String, List<ValidationError>> errors) {
@@ -33,7 +33,7 @@ public class MustNotCreateTicketEventIfRecipientsAreNonTicketTicketEventValidato
                 if (!listUsersOfTicket.contains(user)) {
                     addValidationErrorIntoErrors(
                             TICKET_EVENT_IS_INVALID,
-                            format(RECIPIENT_MUST_IS_NOT_IN_THE_TICKET, user.getDisplayName()),
+                            format(RECIPIENT_NOT_FOUND_IN_THE_TICKET, user.getDisplayName()),
                             errors
                     );
                 }

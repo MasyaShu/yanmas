@@ -519,10 +519,14 @@ public class ITHelper {
     public List<UUID> getAllUserOfTicket(TicketDtoResponse ticket) {
         var usersIdOfTicket = new ArrayList<>(List.of(ticket.getAuthor().getId()));
         for (BaseEntityDto observer : ticket.getObservers()) {
-            usersIdOfTicket.add(observer.getId());
+            if(!usersIdOfTicket.contains(observer.getId())) {
+                usersIdOfTicket.add(observer.getId());
+            }
         }
         for (BaseEntityDto executor : ticket.getExecutors()) {
-            usersIdOfTicket.add(executor.getId());
+            if(!usersIdOfTicket.contains(executor.getId())) {
+                usersIdOfTicket.add(executor.getId());
+            }
         }
         return usersIdOfTicket;
     }

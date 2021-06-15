@@ -62,7 +62,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/v1/user/**",
             "/api/v1/ticket/**",
             "/api/v1/ticket/counter/**",
-            "/api/v1/ticket/**/event/**",
+            "/api/v1/ticket/*/event/**",
             "/api/v1/ticket/status/**",
             "/api/v1/ticket/type/**",
             "/api/v1/ticket/type/group/**"
@@ -98,7 +98,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     };
 
     static final String[] AUTH_WHITELIST_AUTHENTICATED_FOR_POST_HTTP_METHOD = {
-            "/api/v1/ticket/**/event/**"
+            "/api/v1/ticket/*/event/**"
     };
 
     static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_FOR_POST_HTTP_METHOD = {
