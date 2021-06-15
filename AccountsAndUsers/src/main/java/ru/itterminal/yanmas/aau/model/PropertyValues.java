@@ -1,7 +1,8 @@
-package ru.itterminal.yanmas.commons.model;
+package ru.itterminal.yanmas.aau.model;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import ru.itterminal.yanmas.commons.model.BaseEntity;
 
 import javax.persistence.*;
 import java.util.UUID;
@@ -16,6 +17,10 @@ import java.util.UUID;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class PropertyValues extends BaseEntity {
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
 
     @Column(name = "entity_id", nullable = false)
     private UUID entityId;
