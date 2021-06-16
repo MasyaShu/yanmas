@@ -121,7 +121,9 @@ public class TestSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(AUTH_WHITELIST_PERMIT_ALL).permitAll()
                 .antMatchers(AUTH_WHITELIST_ANONYMOUS_FOR_ANY_HTTP_METHODS).anonymous()
                 .antMatchers(AUTH_WHITELIST_AUTHENTICATED_FOR_ANY_HTTP_METHOD).authenticated()
+                // All users get method
                 .antMatchers(HttpMethod.GET, AUTH_WHITELIST_AUTHENTICATED_FOR_GET_HTTP_METHOD).authenticated()
+                // All users post method
                 .antMatchers(HttpMethod.POST, AUTH_WHITELIST_ANONYMOUS_FOR_POST_HTTP_METHOD).anonymous()
                 .antMatchers("/**").denyAll().and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);

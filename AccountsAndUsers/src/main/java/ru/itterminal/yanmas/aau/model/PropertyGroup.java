@@ -28,7 +28,7 @@ public class PropertyGroup extends BaseEntity {
     private Integer orderView;
 
     @Column
-    private Long description;
+    private String description;
 
     @PrePersist
     protected void onCreate() {

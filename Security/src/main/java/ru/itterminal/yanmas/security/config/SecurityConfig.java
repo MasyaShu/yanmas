@@ -64,7 +64,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/v1/ticket/counter/**",
             "/api/v1/ticket/status/**",
             "/api/v1/ticket/type/**",
-            "/api/v1/ticket/type/group/**"
+            "/api/v1/ticket/type/group/**",
+            "/api/v1/property-group"
     };
 
     static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_GET_HTTP_METHOD = {
@@ -103,7 +104,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/v1/ticket/status",
             "/api/v1/ticket/type",
             "/api/v1/ticket/type/group",
-            "/api/v1/ticket/type/setting-access"
+            "/api/v1/ticket/type/setting-access",
+            "/api/v1/property-group"
     };
 
     static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_FOR_PUT_HTTP_METHOD = {
@@ -122,7 +124,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/v1/ticket/status",
             "/api/v1/ticket/type",
             "/api/v1/ticket/type/group",
-            "/api/v1/ticket/type/setting-access"
+            "/api/v1/ticket/type/setting-access",
+            "/api/v1/ticket/type/property-group"
     };
 
     static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_POST_HTTP_METHOD = {
@@ -179,7 +182,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(AUTH_WHITELIST_PERMIT_ALL).permitAll()
                 .antMatchers(AUTH_WHITELIST_ANONYMOUS_FOR_ANY_HTTP_METHODS).anonymous()
                 .antMatchers(AUTH_WHITELIST_AUTHENTICATED_FOR_ANY_HTTP_METHOD).authenticated()
+                // All users get method
                 .antMatchers(HttpMethod.GET, AUTH_WHITELIST_AUTHENTICATED_FOR_GET_HTTP_METHOD).authenticated()
+                // All users post method
                 .antMatchers(HttpMethod.POST, AUTH_WHITELIST_ANONYMOUS_FOR_POST_HTTP_METHOD).anonymous()
                 .antMatchers("/**").denyAll().and()
                 .addFilterBefore(new JwtFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
@@ -194,12 +199,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     public static UrlBasedCorsConfigurationSource getCorsConfiguration() {
-        CorsConfiguration configuration = new CorsConfiguration();
+        var configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Collections.singletonList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT"));
         configuration.setAllowedHeaders(Collections.singletonList("*"));
         configuration.setAllowCredentials(true);
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        var source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
