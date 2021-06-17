@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import ru.itterminal.yanmas.aau.model.*;
+import ru.itterminal.yanmas.aau.model.dto.PropertyGroupDto;
 import ru.itterminal.yanmas.aau.model.test.AccountTestHelper;
 import ru.itterminal.yanmas.aau.model.test.GroupTestHelper;
 import ru.itterminal.yanmas.aau.model.test.RoleTestHelper;
@@ -40,6 +41,8 @@ public class ITHelper {
     public static final String INITIAL_TICKET_CREATED_BY = "InitialTicketCreatedBy_";
     public static final String TICKET_TYPE_WHICH_IS_NEVER_USED_INTO_INITIAL_TICKETS = "TicketTypeWhichIsNeverUsedIntoInitialTickets";
     public static final String GROUP_OF_TICKET_TYPES_WHICH_IS_NEVER_USED_INTO_INITIAL_TICKETS = "groupOfTicketTypesWhichIsNeverUsedIntoInitialTickets";
+    public static final String INITIAL_PROPERTY_GROUPS_1 = "InitialPropertyGroups_1";
+    public static final String INITIAL_PROPERTY_GROUPS_2 = "InitialPropertyGroups_2";
     public static final String TICKET_EVENT = "ticket/event";
     public static final String EVENT = "/event";
     private Account account;
@@ -48,6 +51,7 @@ public class ITHelper {
     private Map<String, TicketEventDtoResponse> ticketEvents = new HashMap<>();
     private Map<String, TicketStatus> ticketStatuses = new HashMap<>();
     private Map<String, TicketType> ticketTypes = new HashMap<>();
+    private Map<String, PropertyGroupDto> propertyGroup = new HashMap<>();
     private Map<String, GroupTicketTypes> groupTicketTypes = new HashMap<>();
     private Map<String, SettingsAccessToTicketTypes> settingsAccessToTicketTypes = new HashMap<>();
     private Map<String, Group> innerGroup = new HashMap<>();
@@ -114,6 +118,8 @@ public class ITHelper {
     public static final String INITIAL_SETTINGS_ACCESS_TO_TICKET_TYPES = "InitialSettingsAccessToTicketViaTicketTypes";
     public static final String TICKET_TEMPLATE = "ticket/template";
     public static final String TICKET_TYPE = "ticket/type";
+    public static final String PROPERTY_GROUP = "property-group";
+    public static final String PROPERTY_GROUP_BY_ID = "property-group/{id}";
     public static final String TICKET = "ticket";
     public static final String FILE = "file";
     public static final String FILE_DATA = "file/{fileId}/data";
@@ -388,6 +394,45 @@ public class ITHelper {
             ticketTemplates.put(TICKET_TEMPLATE_KEY + i, newTicketTemplate);
             i++;
         }
+    }
+
+    public void createInitialPropertyGroups() {
+        var initialPropertyGroupsDto_1 = PropertyGroupDto.builder()
+                .name(INITIAL_PROPERTY_GROUPS_1)
+                .description(faker.lorem().paragraph(2))
+                .orderView(10)
+                .build();
+        var createdPropertyGroup_1 = given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + tokens.get(accountOwner.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(initialPropertyGroupsDto_1)
+                .post(PROPERTY_GROUP)
+                .then()
+                .log().body()
+                .extract().response().as(PropertyGroupDto.class);
+        propertyGroup.put(INITIAL_PROPERTY_GROUPS_1, createdPropertyGroup_1);
+        var initialPropertyGroupsDto_2 = PropertyGroupDto.builder()
+                .name(INITIAL_PROPERTY_GROUPS_2)
+                .description(faker.lorem().paragraph(3))
+                .orderView(20)
+                .build();
+        var createdPropertyGroup_2 = given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + tokens.get(accountOwner.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(initialPropertyGroupsDto_2)
+                .post(PROPERTY_GROUP)
+                .then()
+                .log().body()
+                .extract().response().as(PropertyGroupDto.class);
+        propertyGroup.put(INITIAL_PROPERTY_GROUPS_2, createdPropertyGroup_2);
     }
 
     public void createInitialTicketType() {

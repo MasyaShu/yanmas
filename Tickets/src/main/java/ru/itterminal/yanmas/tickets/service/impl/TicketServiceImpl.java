@@ -38,7 +38,6 @@ public class TicketServiceImpl extends CrudServiceWithBusinessHandlerImpl<Ticket
     @SuppressWarnings("unused")
     @Transactional
     public Ticket reOpen(Ticket entity, User currentUser) {
-        logicalValidationBeforeUpdate(entity);
         var ticketSetting = ticketSettingService.getSettingOrPredefinedValuesForTicket(
                 currentUser,
                 entity.getAuthor()
