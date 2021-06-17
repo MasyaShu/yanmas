@@ -223,7 +223,7 @@ class TicketEventCreateIT {
 
     @Order(60)
     @Test
-    void finishTicket() {
+    void finishTicketBeforeReopenTest() {
         var updateTicket = itHelper.getTicketFromUser(itHelper.getAccountOwner());
         var updateTicketDtoRequest = ticketTestHelper.convertEntityToDtoRequest(updateTicket, false);
         updateTicketDtoRequest.setIsFinished(true);
@@ -243,7 +243,7 @@ class TicketEventCreateIT {
 
     @Order(70)
     @Test
-    void successReopenTicket() {
+    void successReopenTicketIfTicketIsFinishAndCurrentUserIsAuthorInTicket() {
         var ticket = itHelper.getTicketFromUser(itHelper.getAccountOwner());
         var ticketEventDtoRequest = TicketEventDtoRequest.builder()
                 .comment(itHelper.getFaker().lorem().paragraph())
