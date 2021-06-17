@@ -47,7 +47,7 @@ public class ITHelper {
     private Map<String, TicketDtoResponse> tickets = new HashMap<>();
     private Map<String, TicketStatus> ticketStatuses = new HashMap<>();
     private Map<String, TicketType> ticketTypes = new HashMap<>();
-    private Map<String, PropertyGroup> propertyGroup = new HashMap<>();
+    private Map<String, PropertyGroupDto> propertyGroup = new HashMap<>();
     private Map<String, GroupTicketTypes> groupTicketTypes = new HashMap<>();
     private Map<String, SettingsAccessToTicketTypes> settingsAccessToTicketTypes = new HashMap<>();
     private Map<String, Group> innerGroup = new HashMap<>();
@@ -115,6 +115,7 @@ public class ITHelper {
     public static final String TICKET_TEMPLATE = "ticket/template";
     public static final String TICKET_TYPE = "ticket/type";
     public static final String PROPERTY_GROUP = "property-group";
+    public static final String PROPERTY_GROUP_BY_ID = "property-group/{id}";
     public static final String TICKET = "ticket";
     public static final String FILE = "file";
     public static final String FILE_DATA = "file/{fileId}/data";
@@ -408,8 +409,7 @@ public class ITHelper {
                 .post(PROPERTY_GROUP)
                 .then()
                 .log().body()
-                .extract().response().as(PropertyGroup.class);
-        createdPropertyGroup_1.setAccount(account);
+                .extract().response().as(PropertyGroupDto.class);
         propertyGroup.put(INITIAL_PROPERTY_GROUPS_1, createdPropertyGroup_1);
         var initialPropertyGroupsDto_2 = PropertyGroupDto.builder()
                 .name(INITIAL_PROPERTY_GROUPS_2)
@@ -427,8 +427,7 @@ public class ITHelper {
                 .post(PROPERTY_GROUP)
                 .then()
                 .log().body()
-                .extract().response().as(PropertyGroup.class);
-        createdPropertyGroup_2.setAccount(account);
+                .extract().response().as(PropertyGroupDto.class);
         propertyGroup.put(INITIAL_PROPERTY_GROUPS_2, createdPropertyGroup_2);
     }
 

@@ -7,7 +7,7 @@ create TABLE IF NOT EXISTS property_groups
     id           uuid         NOT NULL,
     account_id   uuid         NOT NULL,
     name         varchar(256) NOT NULL,
-    order_view   int2         NOT NULL DEFAULT (0),
+    order_view   int2,
     description  text,
     PRIMARY KEY (id),
     FOREIGN KEY (account_id) REFERENCES accounts (id)
@@ -23,7 +23,7 @@ create TABLE IF NOT EXISTS properties
     name          varchar(256) NOT NULL,
     type_property varchar(7)   NOT NULL,
     type_entity   varchar(128) NOT NULL,
-    order_view    int2         NOT NULL DEFAULT (0),
+    order_view    int2,
     description   text,
     is_system     bool         NOT NULL DEFAULT 'false',
     PRIMARY KEY (id),

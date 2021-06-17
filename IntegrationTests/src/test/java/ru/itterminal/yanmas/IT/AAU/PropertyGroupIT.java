@@ -1,8 +1,38 @@
 package ru.itterminal.yanmas.IT.AAU;
 
-import io.restassured.RestAssured;
-import org.apache.tomcat.util.http.fileupload.MultipartStream;
-import org.junit.jupiter.api.*;
+import static io.restassured.RestAssured.given;
+import static io.restassured.path.json.JsonPath.from;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static ru.itterminal.yanmas.IT.util.ITHelper.ACCOUNT_OWNER;
+import static ru.itterminal.yanmas.IT.util.ITHelper.ADMIN;
+import static ru.itterminal.yanmas.IT.util.ITHelper.APPLICATION_JSON;
+import static ru.itterminal.yanmas.IT.util.ITHelper.AUTHOR;
+import static ru.itterminal.yanmas.IT.util.ITHelper.CONTENT;
+import static ru.itterminal.yanmas.IT.util.ITHelper.EMPTY_BODY;
+import static ru.itterminal.yanmas.IT.util.ITHelper.EXECUTOR;
+import static ru.itterminal.yanmas.IT.util.ITHelper.FILE;
+import static ru.itterminal.yanmas.IT.util.ITHelper.ID;
+import static ru.itterminal.yanmas.IT.util.ITHelper.IGNORE_FIELDS_OF_BASE_ENTITY_FOR_COMPARE;
+import static ru.itterminal.yanmas.IT.util.ITHelper.INITIAL_PROPERTY_GROUPS_1;
+import static ru.itterminal.yanmas.IT.util.ITHelper.OBSERVER;
+import static ru.itterminal.yanmas.IT.util.ITHelper.PROPERTY_GROUP;
+import static ru.itterminal.yanmas.IT.util.ITHelper.PROPERTY_GROUP_BY_ID;
+import static ru.itterminal.yanmas.commons.model.filter.NumberFilter.TypeComparisonForNumberFilter.IS_EQUAL_TO;
+import static ru.itterminal.yanmas.commons.model.filter.StringFilter.TypeComparisonForStringFilter.TEXT_EQUALS;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -12,24 +42,19 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+
+import io.restassured.RestAssured;
 import ru.itterminal.yanmas.IT.util.ITHelper;
 import ru.itterminal.yanmas.IT.util.ITTestConfig;
+import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.model.User;
+import ru.itterminal.yanmas.aau.model.dto.PropertyGroupDto;
+import ru.itterminal.yanmas.aau.model.dto.PropertyGroupFilterDto;
 import ru.itterminal.yanmas.aau.repository.UserRepository;
-import ru.itterminal.yanmas.commons.exception.error.ApiError;
-import ru.itterminal.yanmas.commons.model.dto.BaseEntityDto;
+import ru.itterminal.yanmas.commons.model.filter.NumberFilter;
+import ru.itterminal.yanmas.commons.model.filter.StringFilter;
+import ru.itterminal.yanmas.files.model.dto.FileDto;
 import ru.itterminal.yanmas.security.jwt.JwtProvider;
-import ru.itterminal.yanmas.tickets.model.dto.TicketDtoResponse;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static io.restassured.RestAssured.given;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static ru.itterminal.yanmas.IT.util.ITHelper.*;
 
 @SuppressWarnings("unused")
 @DataJpaTest
@@ -56,284 +81,237 @@ class PropertyGroupIT {
         itHelper.createInitialPropertyGroups();
     }
 
-
-    @Test
-    void test(){
-        assertTrue(true);
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamAllInitialUsers")
+    @Order(10)
+    void SuccessGetByFilterWhenFilterIsEmpty(String userKey, User currentUser) {
+        var response = given().
+                when().
+                headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(EMPTY_BODY)
+                .get(PROPERTY_GROUP)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.OK.value())
+                .extract().response().asString();
+        var actualPropertyGroupList = from(response).getList(CONTENT, PropertyGroupDto.class);
+        var expectedPropertyGroupList = new ArrayList<>(itHelper.getPropertyGroup().values());
+        assertEquals(expectedPropertyGroupList.size(), actualPropertyGroupList.size());
+        assertThat(expectedPropertyGroupList).containsAll(actualPropertyGroupList);
     }
 
-//    @ParameterizedTest(name = "{index} User: {0}")
-//    @MethodSource("getStreamAllInitialUsersExceptObservers")
-//    @Order(10)
-//    void SuccessWhenAuthorOfTicketEqualsCurrentUser(String userKey, User currentUser) {
-//        UUID idOfTicketWhichAuthorIdEqualsCurrentUserId = null;
-//        var initialTickets = itHelper.getTickets().values();
-//        for (TicketDtoResponse initialTicket : initialTickets) {
-//            if (initialTicket.getAuthor().getId().equals(currentUser.getId())) {
-//                idOfTicketWhichAuthorIdEqualsCurrentUserId = initialTicket.getId();
-//                break;
-//            }
-//        }
-//        var ticketDtoResponse = given().
-//                when().
-//                headers(
-//                        "Authorization",
-//                        "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
-//                )
-//                .contentType(APPLICATION_JSON)
-//                .pathParam(ID, idOfTicketWhichAuthorIdEqualsCurrentUserId)
-//                .get(TICKET_BY_ID)
-//                .then()
-//                .log().body()
-//                .statusCode(HttpStatus.OK.value())
-//                .extract().response().as(TicketDtoResponse.class);
-//        assertEquals(ticketDtoResponse.getAuthor().getId(), currentUser.getId());
-//    }
-//
-//    @ParameterizedTest(name = "{index} User: {0}")
-//    @MethodSource("getStreamInitialUsersWithRolesAdminAndExecutorFromOuterGroup")
-//    @Order(20)
-//    void AccessDeniedIfCurrentUserWithRoleAdminOrExecutorFromOuterGroupCanNotReadTicketIfTicketIsFromAnotherGroup(String userKey, User currentUser) {
-//        var initialTickets = itHelper.getTickets().values();
-//        for (TicketDtoResponse initialTicket : initialTickets) {
-//            var groupIdOfInitialTicket = initialTicket.getGroup().getId();
-//            var groupIdOfCurrentUser = currentUser.getGroup().getId();
-//            if (!groupIdOfInitialTicket.equals(groupIdOfCurrentUser)) {
-//                var apiError = given().
-//                        when().
-//                        headers(
-//                                "Authorization",
-//                                "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
-//                        )
-//                        .contentType(APPLICATION_JSON)
-//                        .pathParam(ID, initialTicket.getId())
-//                        .get(TICKET_BY_ID)
-//                        .then()
-//                        .log().body()
-//                        .statusCode(HttpStatus.FORBIDDEN.value())
-//                        .extract().response().as(ApiError.class);
-//                assertTrue(apiError.getDetail().startsWith("Current user with role"));
-//                assertTrue(apiError.getDetail().endsWith("from outer group can not read ticket if ticket is from another group"));
-//            }
-//        }
-//    }
-//
-//    @Test
-//    @Order(25)
-//    void LimitAllInitialUsersOnAllTicketTypes() { //NOSONAR
-//        itHelper.limitAllInitialUsersOnAllTicketTypes();
-//    }
-//
-//    @ParameterizedTest(name = "{index} User: {0}")
-//    @MethodSource("getStreamAllInitialUsersExceptObservers")
-//    @Order(30)
-//    void AccessDeniedCurrentUserIsAuthorOfTicketWhenLimitAllInitialUsersOnAllTicketTypes(String userKey, User currentUser) {
-//        UUID idOfTicketWhichAuthorIdEqualsCurrentUserId = null;
-//        var initialTickets = itHelper.getTickets().values();
-//        for (TicketDtoResponse initialTicket : initialTickets) {
-//            if (initialTicket.getAuthor().getId().equals(currentUser.getId())) {
-//                idOfTicketWhichAuthorIdEqualsCurrentUserId = initialTicket.getId();
-//                break;
-//            }
-//        }
-//        var apiError = given().
-//                when().
-//                headers(
-//                        "Authorization",
-//                        "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
-//                )
-//                .contentType(APPLICATION_JSON)
-//                .pathParam(ID, idOfTicketWhichAuthorIdEqualsCurrentUserId)
-//                .get(TICKET_BY_ID)
-//                .then()
-//                .log().body()
-//                .statusCode(HttpStatus.FORBIDDEN.value())
-//                .extract().response().as(ApiError.class);
-//        assertEquals("Access denied, because current user has not permit to ticket type", apiError.getDetail());
-//    }
-//
-//    @ParameterizedTest(name = "{index} User: {0}")
-//    @MethodSource("getStreamInitialUsersWithRoleObserverFromInnerGroup")
-//    @Order(40)
-//    void AccessDeniedCurrentUserIsObserverOfTicketWhenLimitAllInitialUsersOnAllTicketTypes(String userKey, User currentUser) {
-//        var initialTickets = itHelper.getTickets().values();
-//        for (TicketDtoResponse initialTicket : initialTickets) {
-//            var listOfObserversIdOfInitialTicket = initialTicket.getObservers().stream()
-//                    .map(BaseEntityDto::getId)
-//                    .collect(Collectors.toList());
-//            if (listOfObserversIdOfInitialTicket.contains(currentUser.getId())) {
-//                var apiError = given().
-//                        when().
-//                        headers(
-//                                "Authorization",
-//                                "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
-//                        )
-//                        .contentType(APPLICATION_JSON)
-//                        .pathParam(ID, initialTicket.getId())
-//                        .get(TICKET_BY_ID)
-//                        .then()
-//                        .log().body()
-//                        .statusCode(HttpStatus.FORBIDDEN.value())
-//                        .extract().response().as(ApiError.class);
-//                assertEquals("Access denied, because current user has not permit to ticket type", apiError.getDetail());
-//            }
-//        }
-//    }
-//
-//    @Test
-//    @Order(45)
-//    void AllowAllInitialUsersOnAllTicketTypes() { //NOSONAR
-//        itHelper.allowAllInitialUsersOnAllTicketTypes();
-//    }
-//
-//
-//    @ParameterizedTest(name = "{index} User: {0}")
-//    @MethodSource("getStreamInitialUsersWithRoleObserverFromInnerGroup")
-//    @Order(50)
-//    void SuccessWhenCurrentUserIsObserverOfTicket(String userKey, User currentUser) {
-//        var initialTickets = itHelper.getTickets().values();
-//        for (TicketDtoResponse initialTicket : initialTickets) {
-//            var listOfObserversIdOfInitialTicket = initialTicket.getObservers().stream()
-//                    .map(BaseEntityDto::getId)
-//                    .collect(Collectors.toList());
-//            if (listOfObserversIdOfInitialTicket.contains(currentUser.getId())) {
-//                var ticketDtoResponse = given().
-//                        when().
-//                        headers(
-//                                "Authorization",
-//                                "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
-//                        )
-//                        .contentType(APPLICATION_JSON)
-//                        .pathParam(ID, initialTicket.getId())
-//                        .get(TICKET_BY_ID)
-//                        .then()
-//                        .log().body()
-//                        .statusCode(HttpStatus.OK.value())
-//                        .extract().response().as(TicketDtoResponse.class);
-//                var listOfObserversIdOfTicketDtoResponse = ticketDtoResponse.getObservers().stream()
-//                        .map(BaseEntityDto::getId)
-//                        .collect(Collectors.toList());
-//                assertTrue(listOfObserversIdOfTicketDtoResponse.contains(currentUser.getId()));
-//            }
-//        }
-//    }
-//
-//    @ParameterizedTest(name = "{index} User: {0}")
-//    @MethodSource("getStreamInitialUsersWithRoleObserver")
-//    @Order(60)
-//    void AccessDeniedWhenCurrentUserWithRoleObserverAndHeIsNotObserverOfTicket(String userKey, User currentUser) {
-//        var initialTickets = itHelper.getTickets().values();
-//        for (TicketDtoResponse initialTicket : initialTickets) {
-//            var listOfObserversIdOfInitialTicket = initialTicket.getObservers().stream()
-//                    .map(BaseEntityDto::getId)
-//                    .collect(Collectors.toList());
-//            if (!listOfObserversIdOfInitialTicket.contains(currentUser.getId())) {
-//                var apiError = given().
-//                        when().
-//                        headers(
-//                                "Authorization",
-//                                "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
-//                        )
-//                        .contentType(APPLICATION_JSON)
-//                        .pathParam(ID, initialTicket.getId())
-//                        .get(TICKET_BY_ID)
-//                        .then()
-//                        .log().body()
-//                        .statusCode(HttpStatus.FORBIDDEN.value())
-//                        .extract().response().as(ApiError.class);
-//                assertEquals("Current user with role OBSERVER can not read ticket if ticket has not current user in observers", apiError.getDetail());
-//            }
-//        }
-//    }
-//
-//    @Test
-//    @Order(70)
-//    void UnauthorizedHttpStatusForAnonymousUser() {
-//        given().
-//                when()
-//                .pathParam(ID, UUID.randomUUID())
-//                .get(TICKET_BY_ID)
-//                .then()
-//                .log().body()
-//                .statusCode(HttpStatus.UNAUTHORIZED.value());
-//
-//    }
-//
-//    @ParameterizedTest(name = "{index} User: {0}")
-//    @MethodSource("getStreamAllInitialUsersWithRoleAuthor")
-//    @Order(80)
-//    void AccessDeniedWhenCurrentUserWithRoleAuthorCanNotReadTicketIfTicketHasNotCurrentUserAsAuthorAndHasNotInObservers(String userKey, User currentUser) {
-//        var initialTickets = itHelper.getTickets().values();
-//        for (TicketDtoResponse initialTicket : initialTickets) {
-//            var listOfObserversIdOfInitialTicket = initialTicket.getObservers().stream()
-//                    .map(BaseEntityDto::getId)
-//                    .collect(Collectors.toList());
-//            if (!listOfObserversIdOfInitialTicket.contains(currentUser.getId())
-//            && !initialTicket.getAuthor().getId().equals(currentUser.getId())) {
-//                var apiError = given().
-//                        when().
-//                        headers(
-//                                "Authorization",
-//                                "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
-//                        )
-//                        .contentType(APPLICATION_JSON)
-//                        .pathParam(ID, initialTicket.getId())
-//                        .get(TICKET_BY_ID)
-//                        .then()
-//                        .log().body()
-//                        .statusCode(HttpStatus.FORBIDDEN.value())
-//                        .extract().response().as(ApiError.class);
-//                assertEquals("Current user with role AUTHOR can not read ticket if ticket has not current user as a author and has not in observers", apiError.getDetail());
-//            }
-//        }
-//    }
-//
-//    private static Stream<Arguments> getStreamAllInitialUsersExceptObservers() {
-//        var roles = itHelper.getRoleTestHelper().getRolesByNames(
-//                List.of(
-//                        ACCOUNT_OWNER,
-//                        ADMIN,
-//                        EXECUTOR,
-//                        AUTHOR
-//                )
-//        );
-//        return itHelper.getStreamUsers(roles, null);
-//    }
-//
-//    private static Stream<Arguments> getStreamAllInitialUsersWithRoleAuthor() {
-//        var roles = itHelper.getRoleTestHelper().getRolesByNames(
-//                List.of(
-//                        AUTHOR
-//                )
-//        );
-//        return itHelper.getStreamUsers(roles, null);
-//    }
-//
-//    private static Stream<Arguments> getStreamInitialUsersWithRolesAdminAndExecutorFromOuterGroup() {
-//        var roles = itHelper.getRoleTestHelper().getRolesByNames(
-//                List.of(
-//                        ADMIN,
-//                        EXECUTOR
-//                )
-//        );
-//        return itHelper.getStreamUsers(roles, false);
-//    }
-//
-//    private static Stream<Arguments> getStreamInitialUsersWithRoleObserverFromInnerGroup() {
-//        var roles = itHelper.getRoleTestHelper().getRolesByNames(
-//                List.of(
-//                        OBSERVER
-//                )
-//        );
-//        return itHelper.getStreamUsers(roles, true);
-//    }
-//
-//    private static Stream<Arguments> getStreamInitialUsersWithRoleObserver() {
-//        var roles = itHelper.getRoleTestHelper().getRolesByNames(
-//                List.of(
-//                        OBSERVER
-//                )
-//        );
-//        return itHelper.getStreamUsers(roles, null);
-//    }
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamAllInitialUsers")
+    @Order(20)
+    void SuccessGetByFilterWhenFilterIsNotEmpty(String userKey, User currentUser) {
+        var expectedPropertyGroupDto = itHelper.getPropertyGroup().get(INITIAL_PROPERTY_GROUPS_1);
+        var filter = PropertyGroupFilterDto.builder()
+                .name(StringFilter.builder()
+                              .value(expectedPropertyGroupDto.getName())
+                              .typeComparison(TEXT_EQUALS.toString())
+                              .build())
+                .description(StringFilter.builder()
+                                     .value(expectedPropertyGroupDto.getDescription())
+                                     .typeComparison(TEXT_EQUALS.toString())
+                                     .build())
+                .orderView(NumberFilter.builder()
+                                   .valueOne(expectedPropertyGroupDto.getOrderView())
+                                   .typeComparison(IS_EQUAL_TO.toString())
+                                   .build())
+                .build();
+        var response = given().
+                when().
+                headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(filter)
+                .get(PROPERTY_GROUP)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.OK.value())
+                .extract().response().asString();
+        var actualPropertyGroupList = from(response).getList(CONTENT, PropertyGroupDto.class);
+        var expectedPropertyGroupList = List.of(expectedPropertyGroupDto);
+        assertEquals(expectedPropertyGroupList.size(), actualPropertyGroupList.size());
+        assertThat(expectedPropertyGroupList).containsAll(actualPropertyGroupList);
+    }
+
+    @Test
+    @Order(30)
+    void UnauthorizedHttpStatusForAnonymousUserGetByFilter() {
+        given().
+                when()
+                .body(EMPTY_BODY)
+                .get(PROPERTY_GROUP)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
+    }
+
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamAllInitialUsers")
+    @Order(40)
+    void SuccessGetByIdAllInitialPropertyGroups(String userKey, User currentUser) {
+        var initialPropertyGroups = new ArrayList<>(itHelper.getPropertyGroup().values());
+        for (PropertyGroupDto expectedPropertyGroup : initialPropertyGroups) {
+            var actualPropertyGroup = given().
+                    when().
+                    headers(
+                            "Authorization",
+                            "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
+                    )
+                    .contentType(APPLICATION_JSON)
+                    .pathParam(ID, expectedPropertyGroup.getId())
+                    .get(PROPERTY_GROUP_BY_ID)
+                    .then()
+                    .log().body()
+                    .statusCode(HttpStatus.OK.value())
+                    .extract().response().as(PropertyGroupDto.class);
+            assertEquals(expectedPropertyGroup, actualPropertyGroup);
+        }
+    }
+
+    @Test
+    @Order(50)
+    void UnauthorizedHttpStatusForAnonymousUserGetById() {
+        given().
+                when()
+                .body(EMPTY_BODY)
+                .pathParam(ID, UUID.randomUUID())
+                .get(PROPERTY_GROUP_BY_ID)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
+    }
+
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamInitialAccountOwnerAndAdminFromInnerGroup")
+    @Order(60)
+    void successCreate(String userKey, User currentUser) {
+        var expectedPropertyGroupDto = PropertyGroupDto.builder()
+                .name(itHelper.getFaker().name().name())
+                .description(itHelper.getFaker().lorem().sentence(4))
+                .build();
+        var actualPropertyGroupDto = given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(expectedPropertyGroupDto)
+                .post(PROPERTY_GROUP)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.CREATED.value())
+                .extract().response().as(PropertyGroupDto.class);
+        assertThat(actualPropertyGroupDto).usingRecursiveComparison().ignoringFields(IGNORE_FIELDS_OF_BASE_ENTITY_FOR_COMPARE).isEqualTo(expectedPropertyGroupDto);
+    }
+
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamAllInitialUsers")
+    @Order(70)
+    void AccessDeniedForCreateIfCurrentUserIsNotAccountOwnerOrAdminFromInnerGroup(String userKey, User currentUser) {
+        if (currentUser.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString()) ||
+                (currentUser.getRole().getName().equals(Roles.ADMIN.toString()) && currentUser.getGroup().getIsInner())) {
+            return;
+        }
+        var expectedPropertyGroupDto = PropertyGroupDto.builder()
+                .name(itHelper.getFaker().name().name())
+                .description(itHelper.getFaker().lorem().sentence(4))
+                .build();
+        var actualPropertyGroupDto = given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(expectedPropertyGroupDto)
+                .post(PROPERTY_GROUP)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.FORBIDDEN.value());
+    }
+
+    @Test
+    @Order(80)
+    void BadRequestBeforeCreateBecauseNameIsNull() {
+        var expectedPropertyGroupDto = new PropertyGroupDto();
+        given().
+                when().
+                headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(itHelper.getAccountOwner().getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(expectedPropertyGroupDto)
+                .post(PROPERTY_GROUP)
+                .then()
+                .log().body()
+                .body(containsString("must not be null"))
+                .statusCode(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
+    @Order(90)
+    void BadRequestBeforeCreateBecauseNameIsMoreThan256Chapters() {
+        var expectedPropertyGroupDto = PropertyGroupDto.builder()
+                .name(itHelper.getFaker().lorem().characters(300))
+                .build();
+        given().
+                when().
+                headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(itHelper.getAccountOwner().getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(expectedPropertyGroupDto)
+                .post(PROPERTY_GROUP)
+                .then()
+                .log().body()
+                .body(containsString("size must be between 1 and 256"))
+                .statusCode(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
+    @Order(100)
+    void UnauthorizedHttpStatusForAnonymousUserCreate() {
+        given().
+                when()
+                .body(EMPTY_BODY)
+                .post(PROPERTY_GROUP)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
+    }
+
+    private static Stream<Arguments> getStreamAllInitialUsers() {
+        var roles = itHelper.getRoleTestHelper().getRolesByNames(
+                List.of(
+                        ACCOUNT_OWNER,
+                        ADMIN,
+                        EXECUTOR,
+                        AUTHOR,
+                        OBSERVER
+                )
+        );
+        return itHelper.getStreamUsers(roles, null);
+    }
+
+    private static Stream<Arguments> getStreamInitialAccountOwnerAndAdminFromInnerGroup() {
+        var roles = itHelper.getRoleTestHelper().getRolesByNames(
+                List.of(
+                        ACCOUNT_OWNER,
+                        ADMIN
+                )
+        );
+        return itHelper.getStreamUsers(roles, true);
+    }
 }
