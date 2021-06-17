@@ -10,7 +10,7 @@ import ru.itterminal.yanmas.aau.service.validator.EntityValidator;
 @Component
 public class AccessDeniedIfCurrentUserFromOuterGroupBeforeUpdateValidator implements EntityValidator<PropertyGroup> {
     @Override
-    public void checkAccessBeforeCreate(User currentUser) {
+    public void checkAccessBeforeUpdate(User currentUser) {
         if (currentUser != null) {
             throwAccessDeniedExceptionIfCurrentUserFromOuterGroup(currentUser);
         }

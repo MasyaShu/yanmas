@@ -1,38 +1,7 @@
 package ru.itterminal.yanmas.IT.AAU;
 
-import static io.restassured.RestAssured.given;
-import static io.restassured.path.json.JsonPath.from;
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static ru.itterminal.yanmas.IT.util.ITHelper.ACCOUNT_OWNER;
-import static ru.itterminal.yanmas.IT.util.ITHelper.ADMIN;
-import static ru.itterminal.yanmas.IT.util.ITHelper.APPLICATION_JSON;
-import static ru.itterminal.yanmas.IT.util.ITHelper.AUTHOR;
-import static ru.itterminal.yanmas.IT.util.ITHelper.CONTENT;
-import static ru.itterminal.yanmas.IT.util.ITHelper.EMPTY_BODY;
-import static ru.itterminal.yanmas.IT.util.ITHelper.EXECUTOR;
-import static ru.itterminal.yanmas.IT.util.ITHelper.FILE;
-import static ru.itterminal.yanmas.IT.util.ITHelper.ID;
-import static ru.itterminal.yanmas.IT.util.ITHelper.IGNORE_FIELDS_OF_BASE_ENTITY_FOR_COMPARE;
-import static ru.itterminal.yanmas.IT.util.ITHelper.INITIAL_PROPERTY_GROUPS_1;
-import static ru.itterminal.yanmas.IT.util.ITHelper.OBSERVER;
-import static ru.itterminal.yanmas.IT.util.ITHelper.PROPERTY_GROUP;
-import static ru.itterminal.yanmas.IT.util.ITHelper.PROPERTY_GROUP_BY_ID;
-import static ru.itterminal.yanmas.commons.model.filter.NumberFilter.TypeComparisonForNumberFilter.IS_EQUAL_TO;
-import static ru.itterminal.yanmas.commons.model.filter.StringFilter.TypeComparisonForStringFilter.TEXT_EQUALS;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Stream;
-
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestMethodOrder;
+import io.restassured.RestAssured;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -42,10 +11,9 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-
-import io.restassured.RestAssured;
 import ru.itterminal.yanmas.IT.util.ITHelper;
 import ru.itterminal.yanmas.IT.util.ITTestConfig;
+import ru.itterminal.yanmas.aau.model.PropertyGroup;
 import ru.itterminal.yanmas.aau.model.Roles;
 import ru.itterminal.yanmas.aau.model.User;
 import ru.itterminal.yanmas.aau.model.dto.PropertyGroupDto;
@@ -53,8 +21,21 @@ import ru.itterminal.yanmas.aau.model.dto.PropertyGroupFilterDto;
 import ru.itterminal.yanmas.aau.repository.UserRepository;
 import ru.itterminal.yanmas.commons.model.filter.NumberFilter;
 import ru.itterminal.yanmas.commons.model.filter.StringFilter;
-import ru.itterminal.yanmas.files.model.dto.FileDto;
 import ru.itterminal.yanmas.security.jwt.JwtProvider;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Stream;
+
+import static io.restassured.RestAssured.given;
+import static io.restassured.path.json.JsonPath.from;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static ru.itterminal.yanmas.IT.util.ITHelper.*;
+import static ru.itterminal.yanmas.commons.model.filter.NumberFilter.TypeComparisonForNumberFilter.IS_EQUAL_TO;
+import static ru.itterminal.yanmas.commons.model.filter.StringFilter.TypeComparisonForStringFilter.TEXT_EQUALS;
 
 @SuppressWarnings("unused")
 @DataJpaTest
@@ -65,10 +46,12 @@ import ru.itterminal.yanmas.security.jwt.JwtProvider;
 @TestPropertySource(properties = {"jwt.token.secret=ksedtob", "jwt.token.expired=8640000", "jwt.token.prefix=Bearer"})
 class PropertyGroupIT {
 
+    public static final String NEW_NAME = "New name";
     @Autowired
     private UserRepository userRepository;
 
     private static final ITHelper itHelper = new ITHelper();
+    private PropertyGroupDto createdPropertyGroupDto;
 
     @BeforeAll
     void beforeAll() {
@@ -179,7 +162,7 @@ class PropertyGroupIT {
 
     @Test
     @Order(50)
-    void UnauthorizedHttpStatusForAnonymousUserGetById() {
+    void UnauthorizedHttpStatusForAnonymousUserGetById() { //NOSONAR
         given().
                 when()
                 .body(EMPTY_BODY)
@@ -211,6 +194,7 @@ class PropertyGroupIT {
                 .log().body()
                 .statusCode(HttpStatus.CREATED.value())
                 .extract().response().as(PropertyGroupDto.class);
+        createdPropertyGroupDto = actualPropertyGroupDto;
         assertThat(actualPropertyGroupDto).usingRecursiveComparison().ignoringFields(IGNORE_FIELDS_OF_BASE_ENTITY_FOR_COMPARE).isEqualTo(expectedPropertyGroupDto);
     }
 
@@ -287,6 +271,103 @@ class PropertyGroupIT {
                 when()
                 .body(EMPTY_BODY)
                 .post(PROPERTY_GROUP)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
+    }
+
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamInitialAccountOwnerAndAdminFromInnerGroup")
+    @Order(110)
+    void successUpdate(String userKey, User currentUser) {
+        createdPropertyGroupDto.setName(NEW_NAME);
+        createdPropertyGroupDto.setDisplayName(null);
+        var actualPropertyGroupDto = given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(createdPropertyGroupDto)
+                .put(PROPERTY_GROUP)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.OK.value())
+                .extract().response().as(PropertyGroupDto.class);
+        assertThat(actualPropertyGroupDto).usingRecursiveComparison().ignoringFields(IGNORE_FIELDS_OF_BASE_ENTITY_FOR_COMPARE).isEqualTo(createdPropertyGroupDto);
+        createdPropertyGroupDto.setVersion(actualPropertyGroupDto.getVersion());
+    }
+
+    @ParameterizedTest(name = "{index} User: {0}")
+    @MethodSource("getStreamAllInitialUsers")
+    @Order(120)
+    void AccessDeniedForUpdateIfCurrentUserIsNotAccountOwnerOrAdminFromInnerGroup(String userKey, User currentUser) {
+        if (currentUser.getRole().getName().equals(Roles.ACCOUNT_OWNER.toString()) ||
+                (currentUser.getRole().getName().equals(Roles.ADMIN.toString()) && currentUser.getGroup().getIsInner())) {
+            return;
+        }
+        var actualPropertyGroupDto = given().
+                when()
+                .headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(currentUser.getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(createdPropertyGroupDto)
+                .put(PROPERTY_GROUP)
+                .then()
+                .log().body()
+                .statusCode(HttpStatus.FORBIDDEN.value());
+    }
+
+    @Test
+    @Order(130)
+    void BadRequestBeforeUpdateBecauseNameIsNull() {
+        var expectedPropertyGroupDto = new PropertyGroupDto();
+        given().
+                when().
+                headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(itHelper.getAccountOwner().getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(expectedPropertyGroupDto)
+                .put(PROPERTY_GROUP)
+                .then()
+                .log().body()
+                .body(containsString("must not be null"))
+                .statusCode(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
+    @Order(140)
+    void BadRequestBeforeUpdateBecauseNameIsMoreThan256Chapters() {
+        var expectedPropertyGroupDto = PropertyGroupDto.builder()
+                .name(itHelper.getFaker().lorem().characters(300))
+                .build();
+        given().
+                when().
+                headers(
+                        "Authorization",
+                        "Bearer " + itHelper.getTokens().get(itHelper.getAccountOwner().getEmail())
+                )
+                .contentType(APPLICATION_JSON)
+                .body(expectedPropertyGroupDto)
+                .put(PROPERTY_GROUP)
+                .then()
+                .log().body()
+                .body(containsString("size must be between 1 and 256"))
+                .statusCode(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
+    @Order(150)
+    void UnauthorizedHttpStatusForAnonymousUserUpdate() {
+        given().
+                when()
+                .body(EMPTY_BODY)
+                .put(PROPERTY_GROUP)
                 .then()
                 .log().body()
                 .statusCode(HttpStatus.UNAUTHORIZED.value());

@@ -125,7 +125,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/v1/ticket/type",
             "/api/v1/ticket/type/group",
             "/api/v1/ticket/type/setting-access",
-            "/api/v1/ticket/type/property-group"
+            "/api/v1/property-group"
     };
 
     static final String[] AUTH_WHITELIST_ACCOUNT_OWNER_ADMIN_EXECUTOR_AUTHOR_FOR_POST_HTTP_METHOD = {
