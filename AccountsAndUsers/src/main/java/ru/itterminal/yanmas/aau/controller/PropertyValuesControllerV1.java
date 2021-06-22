@@ -8,7 +8,7 @@ import ru.itterminal.yanmas.aau.model.PropertyValues;
 import ru.itterminal.yanmas.aau.model.dto.GroupDto;
 import ru.itterminal.yanmas.aau.model.dto.PropertyValuesDtoRequest;
 import ru.itterminal.yanmas.aau.model.dto.PropertyValuesDtoResponse;
-import ru.itterminal.yanmas.aau.service.CrudServiceWithBusinessHandlerImpl;
+import ru.itterminal.yanmas.aau.service.impl.PropertyValuesServiceImpl;
 import ru.itterminal.yanmas.commons.model.dto.BaseFilterDto;
 import ru.itterminal.yanmas.commons.model.validator.scenario.Create;
 import ru.itterminal.yanmas.commons.model.validator.scenario.Update;
@@ -23,7 +23,7 @@ import java.util.UUID;
 public class PropertyValuesControllerV1
         extends BaseControllerImpl
         <PropertyValues,
-        CrudServiceWithBusinessHandlerImpl,
+        PropertyValuesServiceImpl,
         PropertyValuesDtoRequest,
         PropertyValuesDtoResponse,
         BaseFilterDto> {
