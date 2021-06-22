@@ -16,7 +16,7 @@ import ru.itterminal.yanmas.commons.model.validator.scenario.Update;
 import java.util.UUID;
 
 @SuppressWarnings({"unchecked", "rawtypes", "unused"})
-@RestController("GroupControllerV1")
+@RestController("PropertyValuesControllerV1")
 @Validated
 @RequestMapping("api/v1/{entityName}/{entityId}")
 @RequiredArgsConstructor
