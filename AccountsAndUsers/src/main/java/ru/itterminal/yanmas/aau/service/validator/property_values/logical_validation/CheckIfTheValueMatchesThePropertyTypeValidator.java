@@ -45,15 +45,14 @@ public class CheckIfTheValueMatchesThePropertyTypeValidator implements EntityVal
             }
         }
 
-        if (entity.getProperty().getTypeProperty().equals("boolean")) {
-            if (!entity.getValue().equalsIgnoreCase("true")
-                    && !entity.getValue().equalsIgnoreCase("false")) {
-                addValidationErrorIntoErrors(
-                        ERROR_VALUE,
-                        VALUE_IS_NOT_A_BOOLEAN,
-                        errors
-                );
-            }
+        if (entity.getProperty().getTypeProperty().equals("boolean")
+                && !entity.getValue().equalsIgnoreCase("true")
+                && !entity.getValue().equalsIgnoreCase("false")) {
+            addValidationErrorIntoErrors(
+                    ERROR_VALUE,
+                    VALUE_IS_NOT_A_BOOLEAN,
+                    errors
+            );
         }
 //TODO заменить на enum number and boolean
     }
