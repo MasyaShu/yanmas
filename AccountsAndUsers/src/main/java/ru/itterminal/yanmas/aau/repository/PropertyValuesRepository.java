@@ -20,7 +20,7 @@ public interface PropertyValuesRepository extends EntityRepositoryWithAccount<Pr
             "           FROM property_values\n" +
             "           WHERE property_values.entity_id = ?) AS values\n" +
             "        ON properties.id = values.property_id\n" +
-            "WHERE name_entity = ? AND account_id = ?",
+            "WHERE entity_name = ? AND account_id = ?",
             nativeQuery = true)
     Page<PropertyValues> findAllPropertiesWithValues(UUID entityId, String nameEntity, UUID accountId, Pageable pageable);
 }
