@@ -21,14 +21,18 @@ public class Property extends BaseEntity {
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "property_group_id", nullable = false)
+    private PropertyGroup propertyGroup;
+
     @Column(nullable = false, length = 256)
     private String name;
 
     @Column(name = "type_property", nullable = false, length = 256)
     private String typeProperty;
 
-    @Column(name = "type_entity", nullable = false, length = 256)
-    private String typeEntity;
+    @Column(name = "entity_name", nullable = false, length = 256)
+    private String entityName;
 
     @Column (name = "order_view")
     private Integer orderView;
