@@ -38,6 +38,7 @@ public class PropertyValuesControllerV1
            @Validated(Create.class) @RequestBody PropertyValuesDtoRequest request) {
         request.setPropertyId(propertyId);
         request.setEntityId(entityId);
+        request.setEntityName(entityName);
         return create(request, entityClazz, responseClazz);
     }
 
@@ -47,6 +48,7 @@ public class PropertyValuesControllerV1
            @Validated(Update.class) @RequestBody PropertyValuesDtoRequest request) {
         request.setPropertyId(propertyId);
         request.setEntityId(entityId);
+        request.setEntityName(entityName);
         return update(request, entityClazz, responseClazz);
     }
 
@@ -56,8 +58,8 @@ public class PropertyValuesControllerV1
              int page, int size) {
         var currentUser = getCurrentUser();
         var pageable = createPageable(size, page, null, null);
-        var foundEntities = service.findAllByEntityId
-                (entityId, pageable, currentUser);
+        var foundEntities = service.findAllPropertiesWithValues
+                (entityName, entityId, pageable, currentUser);
         var returnedEntities = mapPage(foundEntities, PropertyValuesDtoResponse.class, pageable);
         return new ResponseEntity<>(returnedEntities, HttpStatus.OK);
     }

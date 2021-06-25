@@ -13,13 +13,15 @@ import java.util.UUID;
 
 @Service
 public class PropertyValuesServiceImpl extends CrudServiceWithBusinessHandlerImpl<PropertyValues, PropertyValuesRepository> {
+
     @Transactional(readOnly = true)
-    public Page<PropertyValues> findAllByEntityId(UUID entityId, Pageable pageable, User currentUser) {
-        checkAccessBeforeRead(currentUser);
-        return repository.findAllByAccountIdAndEntityId
-                (currentUser.getAccount().getId(),
-                        entityId,
-                        pageable
-                );
+    public Page<PropertyValues> findAllPropertiesWithValues(String entityName, UUID entityId, Pageable pageable, User currentUser) {
+        reflectionHelper.checkAccessForReadEntityByIdAndNameClass(entityName, entityId, currentUser);
+        return repository.findAllPropertiesWithValues(
+                entityId,
+                entityName,
+                currentUser.getAccount().getId(),
+                pageable
+        );
     }
 }

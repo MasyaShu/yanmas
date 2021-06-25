@@ -1,7 +1,18 @@
 package ru.itterminal.yanmas.aau.util;
 
-import static java.lang.String.format;
-import static ru.itterminal.yanmas.aau.service.CrudServiceWithBusinessHandler.FIND_INVALID_MESSAGE;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
+import ru.itterminal.yanmas.aau.model.Account;
+import ru.itterminal.yanmas.aau.model.User;
+import ru.itterminal.yanmas.aau.service.CrudServiceWithBusinessHandlerImpl;
+import ru.itterminal.yanmas.commons.exception.EntityNotExistException;
+import ru.itterminal.yanmas.commons.model.BaseEntity;
+import ru.itterminal.yanmas.commons.repository.CustomizedParentEntityRepository;
+import ru.itterminal.yanmas.commons.repository.EntityRepositoryWithAccount;
+import ru.itterminal.yanmas.commons.service.crud.impl.CrudServiceImpl;
+import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -9,18 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.modelmapper.ModelMapper;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
-
-import lombok.RequiredArgsConstructor;
-import ru.itterminal.yanmas.aau.model.Account;
-import ru.itterminal.yanmas.aau.model.User;
-import ru.itterminal.yanmas.commons.exception.EntityNotExistException;
-import ru.itterminal.yanmas.commons.model.BaseEntity;
-import ru.itterminal.yanmas.commons.repository.CustomizedParentEntityRepository;
-import ru.itterminal.yanmas.commons.repository.EntityRepositoryWithAccount;
-import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
+import static java.lang.String.format;
+import static ru.itterminal.yanmas.aau.service.CrudServiceWithBusinessHandler.FIND_INVALID_MESSAGE;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 @Component
@@ -28,6 +29,7 @@ import ru.itterminal.yanmas.security.jwt.JwtUserBuilder;
 public class ReflectionHelper {
 
     public static final String REPOSITORY = "Repository";
+    public static final String SERVICE_IMPL = "ServiceImpl";
     private final ModelMapper modelMapper;
     private final JwtUserBuilder jwtUserBuilder;
     private final ApplicationContext appContext;
@@ -69,8 +71,7 @@ public class ReflectionHelper {
                 }
             }
             return returnedEntity;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e.getCause()); //NOSONAR
         }
     }
@@ -88,11 +89,9 @@ public class ReflectionHelper {
                     }
                 }
             }
-        }
-        catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             throw e;
-        }
-        catch (Throwable e) {
+        } catch (Throwable e) {
             throw new RuntimeException(e.getCause());
         }
     }
@@ -131,8 +130,7 @@ public class ReflectionHelper {
                         );
                     }
                     listOfEntitiesFromDatabase.add(entityFromDatabase);
-                }
-                catch (ClassCastException e) {
+                } catch (ClassCastException e) {
                     var repository = (CustomizedParentEntityRepository) appContext.getBean(nameOfEntityRepository);
                     var entityFromDatabase = repository.findById(entityFromList.getId()
                     ).orElseThrow(
@@ -175,8 +173,7 @@ public class ReflectionHelper {
                 );
             }
             fieldEntity.set(entity, entityFromDatabase);
-        }
-        catch (ClassCastException e) {
+        } catch (ClassCastException e) {
             var repository = (CustomizedParentEntityRepository) appContext.getBean(nameOfEntityRepository);
             var entityFromDatabase = repository.findById(nestedEntity.getId()).orElseThrow(
                     () -> new EntityNotExistException(
@@ -185,6 +182,21 @@ public class ReflectionHelper {
             );
             fieldEntity.set(entity, entityFromDatabase);
 
+        }
+    }
+
+    public void checkAccessForReadEntityByIdAndNameClass(String entityName, UUID entityId, User currentUser) {
+        var nameOfEntityService =
+                entityName.substring(0, 1).toLowerCase() + entityName.substring(1)
+                        + SERVICE_IMPL;
+        try {
+            var service = (CrudServiceWithBusinessHandlerImpl) appContext.getBean(nameOfEntityService);
+            if (currentUser != null) {
+                service.findByIdAndAccountId(entityId, currentUser);
+            }
+        } catch (ClassCastException e) {
+            var service = (CrudServiceImpl) appContext.getBean(nameOfEntityService);
+            service.findById(entityId);
         }
     }
 }

@@ -19,4 +19,6 @@ public class PropertyValuesDtoRequest extends BaseEntityDto {
     private UUID propertyId;
 
     private String value;
+
+    private String entityName;
 }

@@ -57,7 +57,6 @@ class TicketEventCreateIT {
     private static final ITHelper itHelper = new ITHelper();
     private final TicketTestHelper ticketTestHelper = new TicketTestHelper();
 
-
     private User userWithoutTicket;
 
     @BeforeAll
