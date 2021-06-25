@@ -1,7 +1,7 @@
 package ru.itterminal.yanmas.aau.model;
 
 @SuppressWarnings("unused")
-public enum TypeEntity {
+public enum EntityName {
     ACCOUNT,
     USER,
     GROUP,
