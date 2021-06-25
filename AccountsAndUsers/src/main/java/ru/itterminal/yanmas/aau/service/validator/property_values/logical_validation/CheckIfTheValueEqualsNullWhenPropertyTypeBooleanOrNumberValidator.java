@@ -1,6 +1,7 @@
 package ru.itterminal.yanmas.aau.service.validator.property_values.logical_validation;
 
 import ru.itterminal.yanmas.aau.model.PropertyValues;
+import ru.itterminal.yanmas.aau.model.TypeProperty;
 import ru.itterminal.yanmas.aau.service.validator.EntityValidator;
 import ru.itterminal.yanmas.commons.exception.error.ValidationError;
 
@@ -25,8 +26,8 @@ public class CheckIfTheValueEqualsNullWhenPropertyTypeBooleanOrNumberValidator i
     }
 
     private void checkIfTheValueMatchesThePropertyType(PropertyValues entity, Map<String, List<ValidationError>> errors) {
-        if ((entity.getProperty().getTypeProperty().equals("number")
-                || entity.getProperty().getTypeProperty().equals("boolean"))
+        if ((entity.getProperty().getTypeProperty().equals(TypeProperty.NUMBER.toString())
+                || entity.getProperty().getTypeProperty().equals(TypeProperty.BOOLEAN.toString()))
                 && entity.getValue() == null) {
             addValidationErrorIntoErrors(
                     ERROR_VALUE,
@@ -34,6 +35,5 @@ public class CheckIfTheValueEqualsNullWhenPropertyTypeBooleanOrNumberValidator i
                     errors
             );
         }
-//TODO заменить на enum number and boolean
     }
 }

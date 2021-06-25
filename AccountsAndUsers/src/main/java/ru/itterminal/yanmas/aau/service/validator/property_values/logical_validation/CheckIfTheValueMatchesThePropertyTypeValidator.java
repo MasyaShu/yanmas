@@ -1,6 +1,7 @@
 package ru.itterminal.yanmas.aau.service.validator.property_values.logical_validation;
 
 import ru.itterminal.yanmas.aau.model.PropertyValues;
+import ru.itterminal.yanmas.aau.model.TypeProperty;
 import ru.itterminal.yanmas.aau.service.validator.EntityValidator;
 import ru.itterminal.yanmas.commons.exception.error.ValidationError;
 
@@ -33,7 +34,7 @@ public class CheckIfTheValueMatchesThePropertyTypeValidator implements EntityVal
     }
 
     private void checkIfTheValueMatchesThePropertyType(PropertyValues entity, Map<String, List<ValidationError>> errors) {
-        if (entity.getProperty().getTypeProperty().equals("number")) {
+        if (entity.getProperty().getTypeProperty().equals(TypeProperty.NUMBER.toString())) {
             try {
                 Double.parseDouble(entity.getValue());
             } catch (NumberFormatException n) {
@@ -45,15 +46,14 @@ public class CheckIfTheValueMatchesThePropertyTypeValidator implements EntityVal
             }
         }
 
-        if (entity.getProperty().getTypeProperty().equals("boolean")
-                && (!entity.getValue().equalsIgnoreCase("true")
-                || !entity.getValue().equalsIgnoreCase("false"))) {
+        if (entity.getProperty().getTypeProperty().equals(TypeProperty.BOOLEAN.toString())
+                && !entity.getValue().equalsIgnoreCase("true")
+                && !entity.getValue().equalsIgnoreCase("false")) {
             addValidationErrorIntoErrors(
                     ERROR_VALUE,
                     VALUE_IS_NOT_A_BOOLEAN,
                     errors
             );
         }
-//TODO заменить на enum number and boolean
     }
 }

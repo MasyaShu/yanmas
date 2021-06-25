@@ -30,7 +30,7 @@ public class AccessDeniedIfCurrentUserNotAccessForEntityValidator implements Ent
 
     private void checkAccessCurrentUserForEntity(PropertyValues entity, User currentUser) {
         reflectionHelper.checkAccessForReadEntityByIdAndNameClass
-                (entity.getProperty().getTypeEntity(),
+                (entity.getProperty().getEntityName(),
                         entity.getEntityId(),
                         currentUser);
     }

@@ -8,6 +8,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import ru.itterminal.yanmas.aau.model.Property;
 import ru.itterminal.yanmas.aau.model.PropertyValues;
+import ru.itterminal.yanmas.aau.model.TypeProperty;
 
 import java.util.stream.Stream;
 
@@ -28,7 +29,7 @@ class CheckIfTheValueMatchesThePropertyTypeValidatorTest {
     void checkingAStringForBooleanType(String value) {
         var errors = createMapForLogicalErrors();
         var property = Property.builder()
-                .typeProperty("boolean")
+                .typeProperty(TypeProperty.BOOLEAN.toString())
                 .build();
         var propertyValue = PropertyValues.builder()
                 .property(property)
@@ -43,7 +44,7 @@ class CheckIfTheValueMatchesThePropertyTypeValidatorTest {
     void checkingAStringForNumberType(String value) {
         var errors = createMapForLogicalErrors();
         var property = Property.builder()
-                .typeProperty("number")
+                .typeProperty(TypeProperty.NUMBER.toString())
                 .build();
         var propertyValue = PropertyValues.builder()
                 .property(property)
@@ -58,7 +59,7 @@ class CheckIfTheValueMatchesThePropertyTypeValidatorTest {
     void errorCheckingAStringForNumberType_whenValueNullOrEmpty(String value) {
         var errors = createMapForLogicalErrors();
         var property = Property.builder()
-                .typeProperty("number")
+                .typeProperty(TypeProperty.NUMBER.toString())
                 .build();
         var propertyValue = PropertyValues.builder()
                 .property(property)
@@ -73,7 +74,7 @@ class CheckIfTheValueMatchesThePropertyTypeValidatorTest {
     void errorCheckingAStringForBooleanType_whenValueNullOrEmpty(String value) {
         var errors = createMapForLogicalErrors();
         var property = Property.builder()
-                .typeProperty("boolean")
+                .typeProperty(TypeProperty.BOOLEAN.toString())
                 .build();
         var propertyValue = PropertyValues.builder()
                 .property(property)
@@ -135,5 +136,4 @@ class CheckIfTheValueMatchesThePropertyTypeValidatorTest {
                 Arguments.of("")
         );
     }
-//TODO заменить на enum number and boolean
 }
