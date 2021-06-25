@@ -14,20 +14,22 @@ create TABLE IF NOT EXISTS property_groups
 );
 create TABLE IF NOT EXISTS properties
 (
-    out_id        varchar(128),
-    display_name  varchar(256)          DEFAULT (NULL),
-    deleted       bool         NOT NULL DEFAULT 'false',
-    version       int4         NOT NULL DEFAULT (0),
-    id            uuid         NOT NULL,
-    account_id    uuid         NOT NULL,
-    name          varchar(256) NOT NULL,
-    type_property varchar(7)   NOT NULL,
-    type_entity   varchar(128) NOT NULL,
-    order_view    int2,
-    description   text,
-    is_system     bool         NOT NULL DEFAULT 'false',
+    out_id            varchar(128),
+    display_name      varchar(256)          DEFAULT (NULL),
+    deleted           bool         NOT NULL DEFAULT 'false',
+    version           int4         NOT NULL DEFAULT (0),
+    id                uuid         NOT NULL,
+    account_id        uuid         NOT NULL,
+    property_group_id uuid         NOT NULL,
+    name              varchar(256) NOT NULL,
+    type_property     varchar(7)   NOT NULL,
+    entity_name       varchar(128) NOT NULL,
+    order_view        int2,
+    description       text,
+    is_system         bool         NOT NULL DEFAULT 'false',
     PRIMARY KEY (id),
-    FOREIGN KEY (account_id) REFERENCES accounts (id)
+    FOREIGN KEY (account_id) REFERENCES accounts (id),
+    FOREIGN KEY (property_group_id) REFERENCES property_groups (id)
 );
 create TABLE IF NOT EXISTS property_values
 (
