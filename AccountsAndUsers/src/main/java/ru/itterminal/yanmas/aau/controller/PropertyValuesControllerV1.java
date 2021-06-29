@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.itterminal.yanmas.aau.model.EntityName;
 import ru.itterminal.yanmas.aau.model.PropertyValues;
 import ru.itterminal.yanmas.aau.model.dto.PropertyValuesDtoRequest;
 import ru.itterminal.yanmas.aau.model.dto.PropertyValuesDtoResponse;
@@ -34,32 +35,32 @@ public class PropertyValuesControllerV1
 
     @PostMapping("/property/{propertyId}/value")
     public ResponseEntity<PropertyValuesDtoResponse>
-    create(@PathVariable String entityName, @PathVariable UUID entityId, @PathVariable UUID propertyId,
+    create(@PathVariable EntityName entityName, @PathVariable UUID entityId, @PathVariable UUID propertyId,
            @Validated(Create.class) @RequestBody PropertyValuesDtoRequest request) {
         request.setPropertyId(propertyId);
         request.setEntityId(entityId);
-        request.setEntityName(entityName);
+        request.setEntityName(entityName.toString());
         return create(request, entityClazz, responseClazz);
     }
 
     @PutMapping("/property/{propertyId}/value")
     public ResponseEntity<PropertyValuesDtoResponse>
-    update(@PathVariable String entityName, @PathVariable UUID entityId, @PathVariable UUID propertyId,
+    update(@PathVariable EntityName entityName, @PathVariable UUID entityId, @PathVariable UUID propertyId,
            @Validated(Update.class) @RequestBody PropertyValuesDtoRequest request) {
         request.setPropertyId(propertyId);
         request.setEntityId(entityId);
-        request.setEntityName(entityName);
+        request.setEntityName(entityName.toString());
         return update(request, entityClazz, responseClazz);
     }
 
     @GetMapping("/all-properties-with-values")
     public ResponseEntity<Page<PropertyValuesDtoResponse>> getAllPropertiesWithValues
-            (@PathVariable String entityName, @PathVariable UUID entityId,
+            (@PathVariable EntityName entityName, @PathVariable UUID entityId,
              int page, int size) {
         var currentUser = getCurrentUser();
         var pageable = createPageable(size, page, null, null);
         var foundEntities = service.findAllPropertiesWithValues
-                (entityName, entityId, pageable, currentUser);
+                (entityName.toString(), entityId, pageable, currentUser);
         var returnedEntities = mapPage(foundEntities, PropertyValuesDtoResponse.class, pageable);
         return new ResponseEntity<>(returnedEntities, HttpStatus.OK);
     }
